@@ -253,7 +253,7 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     render: function () {
-        let headerMountPoint = $("header")[0];
+        var headerMountPoint = $("header")[0];
 
 
         if (config.isLoggedIn) {
@@ -280,10 +280,10 @@ $.extend(UI.UPLOAD_PAGE, {
 
     getAllTeams: function () {
         if ( APP.USER.STORE.teams ) {
-            let data = {
+            var data = {
                 teams: APP.USER.STORE.teams
             };
-            let deferred = $.Deferred().resolve(data);
+            var deferred = $.Deferred().resolve(data);
             return deferred.promise();
         } else {
             return APP.USER.loadUserData();
@@ -292,7 +292,7 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     getSelectedTeam: function () {
-        let selectedTeamId;
+        var selectedTeamId;
         if (config.isLoggedIn) {
             selectedTeamId = $('.team-dd').val();
         }
@@ -482,7 +482,7 @@ APP.handleCreationStatus = function( id_project, password ){
             APP.postProjectCreation( data );
         }
     }).error( function( data, statusText, xhr ){
-    	let _data = $.parseJSON( data.responseText );
+    	var _data = $.parseJSON( data.responseText );
         APP.postProjectCreation( _data );
     });
 

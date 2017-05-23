@@ -382,6 +382,11 @@ abstract class viewController extends controller {
         return $is_revision_url;
     }
 
+    protected function render404() {
+        $this->makeTemplate('404.html');
+        $this->finalize();
+    }
+
     /**
      * Create an instance of skeleton PHPTAL template
      *
