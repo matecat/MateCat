@@ -97,13 +97,14 @@ let ManageActions = {
 
     },
 
-    changeJobPassword: function (project, job, password, oldPassword) {
+    changeJobPassword: function (project, job, password, oldPassword, translator) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_JOB_PASS,
             projectId: project.get('id'),
             jobId: job.get('id'),
             password: password,
-            oldPassword: oldPassword
+            oldPassword: oldPassword,
+            oldTranslator: translator
         });
     },
 
