@@ -8,6 +8,7 @@ class JobContainer extends React.Component {
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
         this.changePassword = this.changePassword.bind(this);
+        this.removeTranslator = this.removeTranslator.bind(this);
         this.downloadTranslation = this.downloadTranslation.bind(this);
     }
 
@@ -77,6 +78,7 @@ class JobContainer extends React.Component {
                     timer: 10000
                 };
                 let boxUndo = APP.addNotification(notification);
+                let translator = self.props.job.get('translator');
                 ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
                 setTimeout(function () {
                     $('.undo-password').off('click');
@@ -92,7 +94,46 @@ class JobContainer extends React.Component {
                                     timer: 7000
                                 };
                                 APP.addNotification(notification);
-                                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+                                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo, translator);
+                            });
+
+                    })
+                }, 500);
+
+            });
+    }
+
+    removeTranslator() {
+        let self = this;
+        this.oldPassword = this.props.job.get('password');
+        this.props.changeJobPasswordFn(this.props.job.toJS())
+            .done(function (data) {
+                let notification = {
+                    title: 'Job unassigned',
+                    text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+                    type: 'warning',
+                    position: 'tc',
+                    allowHtml: true,
+                    timer: 10000
+                };
+                let boxUndo = APP.addNotification(notification);
+                let translator = self.props.job.get('translator');
+                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+                setTimeout(function () {
+                    $('.undo-password').off('click');
+                    $('.undo-password').on('click', function () {
+                        APP.removeNotification(boxUndo);
+                        self.props.changeJobPasswordFn(self.props.job.toJS(), 1, self.oldPassword)
+                            .done(function (data) {
+                                notification = {
+                                    title: 'Change job password',
+                                    text: 'The previous password has been restored.',
+                                    type: 'warning',
+                                    position: 'tc',
+                                    timer: 7000
+                                };
+                                APP.addNotification(notification);
+                                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo, translator);
                             });
 
                     })
@@ -656,7 +697,7 @@ class JobContainer extends React.Component {
                             {outsourceDelivery}
                             {/*{outsourceDeliveryPrice}*/}
                             {this.props.job.get('translator') ? (
-                                <div className="item" onClick={this.changePassword}>
+                                <div className="item" onClick={this.removeTranslator}>
                                     <div className="ui cancel label"><i className="icon-cancel3"/></div>
                                 </div>
                             ) :('') }

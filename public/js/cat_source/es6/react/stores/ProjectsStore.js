@@ -65,7 +65,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     },
 
-    changeJobPass: function (projectId, jobId, password, oldPassword) {
+    changeJobPass: function (projectId, jobId, password, oldPassword, oldTranslator) {
         let projectOld = this.projects.find(function (prj) {
             return (prj.get('id') == projectId );
         });
@@ -79,7 +79,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
         // this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], null);
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], oldTranslator);
     },
 
     changeProjectName: function (project, newProject) {
@@ -185,7 +185,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_JOB_PASS:
-            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword);
+            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword, action.oldTranslator);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.NO_MORE_PROJECTS:

@@ -554,7 +554,7 @@ UI = {
 
             }
         };
-        var style = {width: '970px',maxWidth: '970px', top: '45%'};
+        var style = {width: '970px',maxWidth: '970px'};
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
     },
 
