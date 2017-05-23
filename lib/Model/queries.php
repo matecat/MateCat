@@ -2053,7 +2053,10 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
         }
     }
     try {
+
         $affectedRows = $db->update('projects', $data, $where);
+        Projects_ProjectDao::destroyCacheById( $pid );
+
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
