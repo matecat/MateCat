@@ -4,7 +4,6 @@ namespace Features ;
 
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
-use Log ;
 use FilesStorage ;
 use LQA\ChunkReviewDao;
 use LQA\ModelDao;
@@ -14,8 +13,9 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
-use Projects_MetadataDao;
-use ChunkOptionsModel;
+use Projects_ProjectStruct ;
+use Jobs_JobStruct ;
+
 
 class ReviewImproved extends BaseFeature {
 
@@ -219,6 +219,11 @@ class ReviewImproved extends BaseFeature {
          */
         $translation_model->attach( new SegmentTranslationObserver() );
         $translation_model->notify();
+    }
+
+    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
+        $dao = new ChunkReviewDao();
+        $dao->updatePassword( $job->id, $job->password, $new_password );
     }
 
     /**
