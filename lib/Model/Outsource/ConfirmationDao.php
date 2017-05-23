@@ -20,7 +20,8 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
     protected static $auto_increment_fields = array( 'id' );
     protected static $primary_keys          = array( 'id' );
 
-    protected static $_query_update_job_password = "UPDATE outsource_confirmation SET password = :new_password WHERE id_job = :id_job AND password = :old_password LIMIT 1";
+    protected static $_query_update_job_password    = "UPDATE outsource_confirmation SET password = :new_password WHERE id_job = :id_job AND password = :old_password LIMIT 1";
+    protected static $_query_get_by_job_id_password = "SELECT * FROM outsource_confirmation WHERE id_job = :id_job AND password = :password LIMIT 1";
 
     public function updatePassword( $jid, $old_password, $new_password ){
 
@@ -34,6 +35,37 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
 
         return $stmt->rowCount();
 
+    }
+
+    /**
+     * @param \Jobs_JobStruct $jobStruct
+     *
+     * @return \DataAccess_IDaoStruct|TranslatedConfirmationStruct
+     */
+    public function getConfirmation( \Jobs_JobStruct $jobStruct ){
+
+        $query = self::$_query_get_by_job_id_password;
+        $data = [ 'id_job' => $jobStruct->id, 'password' => $jobStruct->password ];
+
+        $stmt                     = $this->_getStatementForCache( $query );
+        $confirmationStruct     = new TranslatedConfirmationStruct();
+
+        return @$this->_fetchObject( $stmt,
+                $confirmationStruct,
+                $data
+        )[0];
+
+    }
+
+    public function destroyConfirmationCache( \Jobs_JobStruct $jobStruct ) {
+        $query = self::$_query_get_by_job_id_password;
+        $stmt  = $this->_getStatementForCache( $query );
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_job'   => $jobStruct->id,
+                        'password' => $jobStruct->password
+                )
+        );
     }
 
 }

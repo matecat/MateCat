@@ -65,12 +65,21 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     },
 
-    changeJobPass: function (project, job, password, oldPassword) {
-        let indexProject = this.projects.indexOf(project);
-        let indexJob = project.get('jobs').indexOf(job);
+    changeJobPass: function (projectId, jobId, password, oldPassword) {
+        let projectOld = this.projects.find(function (prj) {
+            return (prj.get('id') == projectId );
+        });
+        let indexProject = this.projects.indexOf(projectOld);
+
+        let jobOld = projectOld.get('jobs').find(function (j) {
+            return (j.get('id') == jobId && j.get('password') === oldPassword);
+        });
+
+        let indexJob = projectOld.get('jobs').indexOf(jobOld);
         
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
+        // this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], null);
     },
 
     changeProjectName: function (project, newProject) {
@@ -112,6 +121,18 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
             let indexJob = project.get('jobs').indexOf(job);
             this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'outsource'], Immutable.fromJS(outsource));
         }
+    },
+
+    assignTranslator: function (prId, jobId, jobPassword, translator) {
+        let project = this.projects.find(function (prj) {
+            return prj.get('id') == prId;
+        });
+        let indexProject = this.projects.indexOf(project);
+        let job = project.get('jobs').find(function (j) {
+            return j.get('id') == jobId && j.get('password') === jobPassword;
+        });
+        let indexJob = project.get('jobs').indexOf(job);
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], Immutable.fromJS(translator));
     },
 
     unwrapImmutableObject(object) {
@@ -164,7 +185,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_JOB_PASS:
-            ProjectsStore.changeJobPass(action.project, action.job, action.password, action.oldPassword);
+            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.NO_MORE_PROJECTS:
@@ -191,6 +212,17 @@ AppDispatcher.register(function(action) {
         case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
         case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
             ProjectsStore.emitChange(action.actionType, action.idProject);
+            break;
+        case ManageConstants.ASSIGN_TRANSLATOR:
+            ProjectsStore.assignTranslator(action.projectId, action.jobId, action.jobPassword, action.translator);
+            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
+            break;
+            // Move to Outsource Store
+        case ManageConstants.GET_OUTSOURCE_QUOTE:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.CLOSE_TRANSLATOR:
+            ProjectsStore.emitChange(action.actionType);
             break;
     }
 });

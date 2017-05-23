@@ -24,7 +24,7 @@ class CreationStatus {
         return [
                 'status'       => 200,
                 'message'      => 'Project created',
-                'id_project'   => $this->data->id_project,
+                'id_project'   => (int)$this->data->id_project,
                 'project_pass' => $this->data->ppassword,
                 'project_name' => $this->data->project_name,
                 'new_keys'     => $this->data->new_keys,

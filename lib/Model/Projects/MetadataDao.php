@@ -7,30 +7,40 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     const WORD_COUNT_RAW = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';
 
-    /**
-     * @param $id
-     *
-     * @return Projects_MetadataStruct[]
-     */
-  public static function getByProjectId( $id ) {
-      $dao = new Projects_MetadataDao(Database::obtain());
-      return $dao->allByProjectId( $id );
-  }
+    protected static $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
     /**
      * @param $id
      *
      * @return Projects_MetadataStruct[]
      */
+  public static function getByProjectId( $id ) {
+      $dao = new Projects_MetadataDao();
+      return $dao->setCacheTTL( 60 * 60 )->allByProjectId( $id );
+  }
+
+    /**
+     * @param $id
+     *
+     * @return null|Projects_MetadataStruct[]
+     */
   public function allByProjectId( $id ) {
+
       $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(
-          "SELECT * FROM project_metadata WHERE " .
-          " id_project = :id_project "
-      );
-      $stmt->execute( array( 'id_project' => $id ) );
-      $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_MetadataStruct');
-      return $stmt->fetchAll();
+      $stmt = $conn->prepare( self::$_query_get_metadata );
+
+      /**
+       * @var $metadata Projects_MetadataStruct[]
+       */
+      $metadata = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
+
+      return $metadata;
+
+  }
+
+  public function destroyMetadataCache( $id ){
+      $stmt = $this->_getStatementForCache( self::$_query_get_metadata );
+      return $this->_destroyObjectCache( $stmt, [ 'id_project' => $id ] );
   }
 
     /**
@@ -77,6 +87,8 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'value' => $value
       ) );
 
+      $this->destroyMetadataCache( $id_project );
+
       return $conn->lastInsertId();
 
   }
@@ -94,6 +106,8 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'key' => $key,
       ) );
 
+      $this->destroyMetadataCache( $id_project );
+
   }
     
     public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
@@ -103,7 +117,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     /**
      * Clean up the chunks options before the job merging
      *
-     * @param $jobs   Associative array with the Jobs
+     * @param $jobs array Associative array with the Jobs
      */
     public function cleanupChunksOptions( $jobs ) {
         foreach ( $jobs as $job ) {

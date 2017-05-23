@@ -1,6 +1,19 @@
 /*popup*/
 .popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999999;opacity:0.6;}
-.modal .popup{overflow:hidden;line-height:30px;border-radius: 7px;-webkit-box-shadow: 0 1px 20px #000;box-shadow: 0 1px 20px #000;min-width:500px;background:#fff;margin:-200px 0 0 -250px; padding:0 0px 20px 0px;position:fixed;left:46%;z-index:999999999999999999999999999;}
+.modal .popup{
+    overflow:hidden;
+    line-height:30px;
+    border-radius: 0 0 4px 4px;
+    -webkit-box-shadow: 0 1px 20px #000;
+    box-shadow: 0 1px 20px #000;
+    min-width:500px;
+    background:#fff;
+    margin:-200px 0 0 -250px;
+    padding:0 0px 20px 0px;
+    position:fixed;
+    left:46%;
+    z-index:999999999999999999999999999;
+}
 .popup p{font-size:18px}
 .popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
 .popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
@@ -77,6 +90,14 @@
     min-height: 100px;
 }
 
+/* SPLIT JOB POPUP */
+
+/*.modal .popup-confirm,*/
+/*.modal .popup-alert {*/
+    /*margin:-200px 0 0 -250px;*/
+    /*position:fixed;*/
+/*}*/
+
 
 
 .btn-ok, .btn-cancel {color:#fff;background:#09beec;border:1px solid #848689;font-weight:bold;text-decoration:none;padding:8px 18px;border-radius: 2px;border-radius: 2px;font-size:18px;
@@ -115,13 +136,15 @@ box-shadow: inset 0 0 1px 1px #888;
 /* outsource popup */
 
 .outsource.modal .popup {
-    width: 950px;
-    margin: -170px 0 0 -475px;
+    width: 100%;
+    margin: 0 !important;
     padding-bottom: 10px;
     box-sizing: content-box;
-    top: 35%;
+    top: 25%;
     left: 50%;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    position: static !important;
 }
 
 .outsource.modal .popup-box {
@@ -133,13 +156,12 @@ box-shadow: inset 0 0 1px 1px #888;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 .outsource.modal .out-email,
-.outsource.modal .out-date,
-.outsource.modal .out-link {
+.outsource.modal .out-date {
     padding: .7em .6em;
     display: inline-block;
     border: 1px solid #ccc;
     box-shadow: inset 0 1px 3px #ddd;
-    border-radius: 4px;
+    border-radius: 2px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -148,6 +170,64 @@ box-shadow: inset 0 0 1px 1px #888;
     color: #333;
     width: 70%;
     margin: 2%;
+}
+
+.outsource.modal .out-email:focus,
+.outsource.modal .out-date:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 2px;
+    outline: none;
+}
+
+select:focus {
+    border-color: #85B7D9 !important;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+select:active {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+.outsource.modal .out-link {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #777;
+    width: 70%;
+    margin: 2%;
+    background-color: #f1f1f1;
+}
+
+.outsource.modal .out-link.from-manage {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #333;
+    width: 95.4%;
+    margin: 2%;
+    background-color: #f1f1f1;
+    box-shadow: inset 0 1px 3px #ddd;
 }
 
 .outsource.modal .out-email,
@@ -373,6 +453,7 @@ body.showingOutsourceTo {
 .guaranteed_by p {
    font-size: 14px!important;
    line-height: 22px;
+    padding: 0;
 }
 
 .pricebox .outsourceto .guaranteed_by img {
@@ -554,7 +635,7 @@ span.revision_delivery {
 .translator_info a,
 .delivery a,
 .contact_box p a {
-    color:#0d8fb2;
+    color:#0d8fb2!important;
     text-decoration: underline;
     cursor: pointer;
 }
@@ -564,6 +645,7 @@ span.revision_delivery {
     text-decoration: none;
     cursor: pointer;
     font-weight: normal!important;
+    float: right;
 }
 
 .guaranteed_by a.more span {
@@ -823,6 +905,11 @@ span.subjects, span.experience, span.translated_words, span.score_number {
    display: block;
 }
 
+.tprice span.displaypriceperword .price_p_word {
+    font-size: 15px ;
+    font-weight: normal;
+}
+
 
 .addrevision {
     float: left;
@@ -847,9 +934,16 @@ span.zone2 {
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice, .pricebox delivery {line-height:30px;}
 
-.viewvendors h3 {
-    float: left;
-    margin: 2% 2.5% 2% 2%!important;
+.tprice.compress .delivery_container {
+    display: block;
+}
+
+.tprice .delivery_container {
+    display: none;
+}
+
+.compress .offer > .delivery_container {
+    display: none;
 }
 
 .showpricesloading {
@@ -1047,7 +1141,7 @@ cursor: pointer;
  .outsource.modal .popup  {
     zoom: 0.8;
     top: 2%;
-    margin: 0 0 0 -400px;   
+    /*margin: 0 0 0 -400px;   */
 }
 
 #forceDeliveryContainer  {
@@ -1307,7 +1401,7 @@ a.tooltip.gray span:after {
 
 a.btn-cancel.in-popup.cancelForceDelivery {
     margin-right: 40px !important;
-    height: 16px;
+    height: 15px;
 }
 
 a.btn-cancel.in-popup.cancelForceDelivery:hover {
@@ -1472,8 +1566,8 @@ a.btn-cancel.in-popup.cancelForceDelivery:hover {
 }
 
 
-td.datepickerSaturday:not(.datepickerDisabled) a, 
-td.datepickerSunday:not(.datepickerDisabled) a {
+#forceDeliveryContainer td.datepickerSaturday:not(.datepickerDisabled) a,
+#forceDeliveryContainer td.datepickerSunday:not(.datepickerDisabled) a {
        cursor: not-allowed!important;
     background-color: #E7E7E7!important;
     color: #C2C2C2!important;
@@ -1607,7 +1701,6 @@ td.datepickerSunday:not(.datepickerDisabled) a {
 }
 
 .modal.outsource .send-to-translator-btn.in-popup {
-    float: left;
     margin-left:30px
 }
 
@@ -1735,7 +1828,12 @@ div#open-translator {
     text-decoration: underline;
     font-weight: bold;
     cursor: pointer;
-    margin-right: 50px;
+    margin-right: 52px;
+    color: #0d8fb2;
+}
+
+div#open-translator:hover {
+    text-decoration: none;
 }
 
 .modal.outsource .send-to-translator {
@@ -1743,8 +1841,8 @@ div#open-translator {
     border-radius: 0px 0px 3px 3px;
     margin: 0 auto;
     overflow: hidden;
-    margin-top: -1px;
-    background: linear-gradient(to right, #fff, #fff 37%, #f8f8f8 37%, #fcfcfc 100%);
+    margin-top: -2px;
+    background: #f8f8f8;
 }
 
 .modal.outsource .outsource-divider {
@@ -1769,4 +1867,8 @@ div#open-translator {
 .modal.outsource .outsource-divider span {
     float: left;
     width: 30px;
+}
+
+span.title-source {
+    margin-left: 5px;
 }

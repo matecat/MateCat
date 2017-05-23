@@ -48,9 +48,10 @@ window.LoginModal = require('./modals/LoginModal').default;
 window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
 window.RegisterModal = require('./modals/RegisterModal').default;
 window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
+window.OutsourceModal = require('./modals/OutsourceModal').default;
+window.SplitJobModal = require('./modals/SplitJob').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
-window.ChangeTeamModal = require('./modals/ChangeProjectTeam').default;
 
 

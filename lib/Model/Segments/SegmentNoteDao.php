@@ -2,7 +2,7 @@
 
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
-    public static function bulkInsertFromProjectStrucutre( $notes ) {
+    public static function bulkInsertFromProjectStructure( $notes ) {
 
         Log::doLog( $notes ) ;
 

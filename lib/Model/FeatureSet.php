@@ -39,9 +39,11 @@ class FeatureSet {
 
     /**
      * Features are attached to project via project_metadata.
+     *
+     * @param Projects_ProjectStruct $project
      */
     public function loadForProject( Projects_ProjectStruct $project ) {
-        $this->loadFromString( $project->getMetadataValue(Projects_MetadataDao::FEATURES_KEY) ) ;
+        $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
     }
 
     /**

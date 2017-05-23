@@ -4,6 +4,7 @@
 .project
 nbproject/
 
+
 # Configuration files
 .num_processes
 inc/*.dat

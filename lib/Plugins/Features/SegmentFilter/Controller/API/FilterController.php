@@ -3,7 +3,7 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
-use API\V2\Validators\JobPasswordValidator;
+use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Exceptions\ValidationError;
 use Features\SegmentFilter\Model\SegmentFilterModel;
 
@@ -13,7 +13,7 @@ use Features\SegmentFilter\Model\FilterDefinition ;
 class FilterController extends \API\V2\KleinController {
 
     /**
-     * @var JobPasswordValidator
+     * @var ChunkPasswordValidator
      */
     protected $validator;
 
@@ -46,7 +46,7 @@ class FilterController extends \API\V2\KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new JobPasswordValidator( $this->request );
+        $this->validator = new ChunkPasswordValidator( $this->request );
     }
 
     /**

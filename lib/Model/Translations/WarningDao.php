@@ -4,6 +4,7 @@
 namespace Translations ;
 
 use Constants_TranslationStatus;
+use Jobs\WarningsCountStruct;
 use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
@@ -14,7 +15,7 @@ class WarningDao extends \DataAccess_AbstractDao {
     protected $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password
             FROM jobs
-              JOIN segment_translations st ON st.id_job = jobs.id
+              JOIN segment_translations st ON st.id_job = jobs.id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
           WHERE ( st.warning & :level ) = :level
             AND id = :id AND password = :password
             AND st.status != :status
@@ -44,10 +45,9 @@ class WarningDao extends \DataAccess_AbstractDao {
         $con = $this->con->getConnection();
 
         $stmt = $con->prepare( $sql );
-        $stmt->execute( $params );
-        $result = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        return $result;
+        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+
     }
 
     /**

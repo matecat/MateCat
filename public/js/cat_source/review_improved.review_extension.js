@@ -120,7 +120,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 type: 'DELETE'
             }).done( function( data ) {
                 var record = MateCat.db.segment_translation_issues
-                    .by('id', parsed.id_issue);
+                    .by('id', parseInt(parsed.id_issue));
                 MateCat.db.segment_translation_issues.remove( record );
                 root.ReviewImproved.reloadQualityReport();
             });

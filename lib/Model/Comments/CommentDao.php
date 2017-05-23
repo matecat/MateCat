@@ -1,5 +1,7 @@
 <?php
 
+use Comments\OpenThreadsStruct;
+
 class Comments_CommentDao extends DataAccess_AbstractDao {
 
     const TABLE       = "comments";
@@ -48,13 +50,10 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
  ";
 
         $con = $this->con->getConnection() ;
-
         $stmt = $con->prepare( $sql ) ;
-        $stmt->execute() ;
 
-        $result = $stmt->fetchAll() ;
+        return $this->_fetchObject( $stmt, new OpenThreadsStruct(), [] );
 
-        return $result ;
     }
 
     public function saveComment( $input ) {

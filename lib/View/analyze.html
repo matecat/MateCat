@@ -21,19 +21,21 @@
             daemon_warning: ${daemon_misconfiguration},
             support_mail: '${support_mail}',
             id_project: '${pid}',
-            password: '${project_password}'
+            password: '${project_password}',
+            outsource_service_login : '${outsource_service_login}'
         };
     </script>
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-dateFormat.min.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/forcedelivery.js"></script>
+
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/analyze.js?build=${build_number}"></script>
+    <!--<script type="text/javascript" src="${basepath}public/js/forcedelivery.js"></script>-->
+    <!--<script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>-->
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
@@ -316,10 +318,6 @@
 
     </div>
     <div class="cl"></div>
-</div>
-
-<div metal:use-macro="outsourceModal.html/outsource_modal">
-    <!-- Outsource Modal Popup goes here -->
 </div>
 
 

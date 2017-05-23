@@ -886,6 +886,16 @@
     ,
         {
             "localized":[{
+                "en":"Lingala"
+            }],
+            "isocode":"ln",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ln-LIN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Lithuanian"
             }],
             "isocode":"lt",
@@ -1123,9 +1133,9 @@
                 "en":"Nyanja"
             }],
             "isocode":"ny",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ny-NY"
+            "rfc3066code":"ny-NYA"
         }
     ,
         {

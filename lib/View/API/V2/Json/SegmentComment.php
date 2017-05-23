@@ -24,13 +24,13 @@ class SegmentComment {
         foreach ( $this->data as $record ) {
 
             $row   = array(
-                    'id'           => $record->id,
-                    'id_job'       => $record->id_job,
+                    'id'           => (int)$record->id,
+                    'id_job'       => (int)$record->id_job,
                     'id_segment'   => $record->id_segment,
                     'created_at'   => $this->formatDate( $record->create_date ),
                     'email'        => $record->email,
                     'full_name'    => $record->full_name,
-                    'uid'          => $record->uid,
+                    'uid'          => (int)$record->uid,
                     'resolved_at' =>  $this->formatDate( $record->resolve_date ),
                     'source_page'  => $record->source_page,
                     'message_type' => $record->message_type,

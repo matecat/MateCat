@@ -21,7 +21,7 @@ export default React.createClass({
     },
     getVersions : function( sid ) {
         var versions = MateCat.db.segment_versions.findObjects({
-            id_segment : '' + sid
+            id_segment : parseInt(sid)
         });
 
         var sorted = _.sortBy(versions, function(version) {
@@ -38,8 +38,8 @@ export default React.createClass({
         else {
             // query versions to find original target
             var root_version = MateCat.db.segment_versions.findObject({
-                id_segment : '' + segment.sid,
-                version_number : "0"
+                id_segment : parseInt(segment.sid),
+                version_number : 0
             });
 
             if (! root_version ) {

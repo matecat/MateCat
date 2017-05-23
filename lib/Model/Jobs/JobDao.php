@@ -2,6 +2,14 @@
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
+    const TABLE       = "jobs";
+    const STRUCT_TYPE = "Jobs_JobStruct";
+
+    protected static $auto_increment_fields = array( 'id' );
+    protected static $primary_keys          = array( 'id', 'password' );
+
+    protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
+
     /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
@@ -13,7 +21,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @see \Contribution\ContributionStruct
      *
      * @param Jobs_JobStruct $jobQuery
-     * @return Jobs_JobStruct[]
+     *
+     * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
     public function read( \Jobs_JobStruct $jobQuery ){
 
@@ -89,49 +98,31 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public static function getByProjectId( $id_project ) {
+    public static function getByProjectId( $id_project, $ttl = 0 ) {
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        // TODO: this query should return the minimal data
-        // required for the JobStruct class, to not be confused
-        // with the ChunkStruct class.
-        // Ideally it should return:
-        // - id_project
-        // - id
-        // - source
-        // - target
-        //
-        // about job_first_segment and job_last_segment it should return
-        // the whole segments interval.
-        // Extend this query considering that fields not defined in the
-        // JobStruct class will be ignored.
-        $stmt = $conn->prepare(
-                "SELECT * FROM ( " .
-                " SELECT * FROM jobs " .
-                " WHERE id_project = ? " .
-                " ORDER BY id DESC ) t GROUP BY id ; " );
+        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;" );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( $id_project ) );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_project ] );
 
-        return $stmt->fetchAll();
     }
 
     /**
      *
-     * Warning: This method returns one record on purpose. Job struct should be used to identify just
-     * the language pair.
-     * 
-     * @param $id_job
+     * @param int $id_job
      *
-     * @return Jobs_JobStruct
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
-    public static function getById( $id_job ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( $id_job ) );
+    public static function getById( $id_job, $ttl = 0 ) {
 
-        return $stmt->fetch();
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ? ORDER BY job_first_segment");
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job ] );
+
     }
 
     /**
@@ -173,7 +164,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt->execute();
 
-        $job = static::getById( $conn->lastInsertId() );
+        $job = static::getById( $conn->lastInsertId() )[0];
 
         $conn->commit();
 
@@ -193,6 +184,24 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute(array('email' => $user->email, 'id_project' => $project->id ) ) ;
 
         return $stmt->rowCount();
+    }
+
+    public function changePassword( Jobs_JobStruct $jStruct, $new_password ){
+
+        if( empty( $new_password ) ) throw new PDOException( "Invalid empty value: password." );
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_sql_update_password );
+        $stmt->execute( [
+                'id'           => $jStruct->id,
+                'new_password' => $new_password,
+                'old_password' => $jStruct->password
+        ] );
+
+        $jStruct->password = $new_password;
+
+        return $jStruct;
+
     }
 
 }

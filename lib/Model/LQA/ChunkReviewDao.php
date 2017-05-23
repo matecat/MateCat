@@ -141,7 +141,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $records = self::findChunkReviewsByChunkIds(array(
             array( $id_job, $password)
         ));
-        return $records[0];
+        return @$records[0];
     }
 
     /**
