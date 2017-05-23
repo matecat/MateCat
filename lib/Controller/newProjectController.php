@@ -298,6 +298,10 @@ class newProjectController extends viewController {
 
 
         $this->template->user_keys = $this->keyList;
+        $this->template->user_keys_obj = json_encode( array_map( function( $tmKeyStruct ){
+            return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
+        }, $this->keyList ) );
+
 
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
