@@ -265,7 +265,7 @@ class OutsourceModal extends React.Component {
 
             // job already outsourced
             if( this.chunk.outsourced == 1 ) {
-                renderOutsourcedQuote( chunk );
+                renderOutsourcedQuote( this.chunk );
                 return false;
             }
 
