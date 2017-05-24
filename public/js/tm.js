@@ -215,9 +215,7 @@
                 UI.disableTM(this);
             }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
-                UI.checkTMGrantsModifications(this);
-                if(APP.isCattool) UI.saveTMdata(false);
-                UI.checkTMKeysUpdateChecks();
+                UI.enableTM(this);
 
             }).on('click', '.mgmt-table-mt tr .enable-mt input', function() {
 
@@ -396,6 +394,14 @@
                 $(".loginpopup").show();
             });
 
+        },
+        enableTM: function (el) {
+            UI.checkTMGrantsModifications(el);
+            if(APP.isCattool) UI.saveTMdata(el);
+            UI.checkTMKeysUpdateChecks();
+        },
+        disableAllTM: function () {
+            $('#activetm tr.mine .activate input').trigger('click');
         },
         checkOpenTabFromParameters: function () {
             var keyParam = APP.getParameterByName("openTab");
@@ -599,7 +605,8 @@
             var tr = $(el).parents('tr.mine');
             var isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
             var deactivate = isActive && (!tr.find('.lookup input').is(':checked') && !tr.find(' td.update input').is(':checked'));
-            if(!tr.find('.activate input').is(':checked') || deactivate ) {
+
+            if( !tr.find('.activate input').is(':checked') || deactivate) {
                 if(isActive) {
                     if(!config.isLoggedIn) {
 

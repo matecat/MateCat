@@ -3,12 +3,12 @@ $(document).ready(function(){
 
     //set 
     if (!$('#source-lang option.custom').length) {
-    //					$('#source-lang').val('en-US').attr('selected',true);
-    $('#source-lang option.separator').remove();
+//					    $('#source-lang').val('en-US').attr('selected',true);
+        $('#source-lang option.separator').remove();
     }
     if (!$('#target-lang option.custom').length) {
-    //					$('#target-lang').val('fr-FR').attr('selected',true);
-    $('#target-lang option.separator').remove();
+        //					$('#target-lang').val('fr-FR').attr('selected',true);
+        $('#target-lang option.separator').remove();
     }
 
     if(!config.isLoggedIn) $('body').addClass('isAnonymous');

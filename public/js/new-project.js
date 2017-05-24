@@ -240,21 +240,23 @@ APP.checkForSpeechToText = function(){
 };
 
 UI.UPLOAD_PAGE = {};
+
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
         /**
          * LexiQA language Enable/Disable
          */
-        APP.checkForLexiQALangs();
-        APP.checkForTagProjectionLangs();
-        APP.checkForSpeechToText();
+        // APP.checkForLexiQALangs();
+        // APP.checkForTagProjectionLangs();
+        // APP.checkForSpeechToText();
         this.render();
         this.addEvents();
+        this.initDropdowns();
     },
 
     render: function () {
-        var headerMountPoint = $("header")[0];
 
+        var headerMountPoint = $("header")[0];
 
         if (config.isLoggedIn) {
             ReactDOM.render(React.createElement(Header, {
@@ -275,6 +277,30 @@ $.extend(UI.UPLOAD_PAGE, {
                 loggedUser: false,
                 showLinks: true
             }), headerMountPoint);
+        }
+    },
+
+    initDropdowns: function () {
+	    var self =  this;
+        $('#target-lang, #source-lang').dropdown();
+        $('#tmx-select').dropdown({
+            fullTextSearch: 'exact',
+            onChange: function(value, text, $selectedItem) {
+                self.selectTm(value);
+            }
+        });
+    },
+
+    selectTm: function (value) {
+	    if (value == 0) {
+	        return;
+        } else if (value == 1) {
+	        UI.openLanguageResourcesPanel('tm');
+        }
+        var tmElem = $('.mgmt-table-tm tr.mine[data-key=' + value +'] .activate input');
+        if (tmElem.size() > 0) {
+            UI.disableAllTM();
+            $(tmElem).trigger('click');
         }
     },
 
@@ -355,25 +381,25 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.doRequest({
                 data: APP.getCreateProjectParams(),
 
-			beforeSend: function (){
-				$('.error-message').hide();
-				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-			},
-			success: function(d){
+                beforeSend: function (){
+                    $('.error-message').hide();
+                    $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
+                },
+                success: function(d){
 
-				if( typeof d.errors != 'undefined' && d.errors.length ) {
-					//normal error management
-					$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
-					$('.uploadbtn').attr('value', 'Analyze');
-					$('body').removeClass('creating');
+                    if( typeof d.errors != 'undefined' && d.errors.length ) {
+                        //normal error management
+                        $('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+                        $('.uploadbtn').attr('value', 'Analyze');
+                        $('body').removeClass('creating');
 
-				} else {
-                    APP.handleCreationStatus( d.data.id_project, d.data.password  );
-				}
+                    } else {
+                        APP.handleCreationStatus( d.data.id_project, d.data.password  );
+                    }
 
-            }
+                }
+            });
         });
-    });
 
         $('.upload-table').on('click', 'a.skip_link', function(){
             var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
@@ -451,16 +477,6 @@ $.extend(UI.UPLOAD_PAGE, {
                 }
             }
         });
-
-        /*$("#private-tm-key").on('keyup', function(e) {
-         if($(this).val() == '') {
-         $('#create_private_tm_btn').removeClass('disabled');
-         $('#create_private_tm_btn').removeAttr('disabled');
-         } else {
-         $('#create_private_tm_btn').addClass('disabled');
-         $('#create_private_tm_btn').attr('disabled','disabled');
-         };
-         });*/
 
         $("input, select").change(function(e) {
             $('.error-message').hide();

@@ -11,3 +11,37 @@
 
 @import 'upload-page';
 
+
+.translate-box.target,
+.translate-box.source,
+.translate-box.tmx-select{
+    .dropdown {
+        height: 37px;
+        padding: 9px;
+        font-size: 18px;
+        margin: 0 0 5px 0;
+        font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
+        border-radius: 2px;
+        min-height: initial;
+    }
+    .dropdown.icon {
+        padding: 8px;
+        border: none;
+    }
+    input.search {
+        padding: inherit !important;
+        font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+}
+
+.translate-box.tmx-select {
+    .dropdown {
+        width: 257px;
+    }
+    .menu-tm {
+        max-height: none !important;
+        height: 360px;
+        overflow: hidden !important;
+    }
+}

@@ -126,7 +126,7 @@
 
     <div class="translate-box source">
         <h2>From</h2>
-        <select name="source-lang" id="source-lang">
+        <select name="source-lang" id="source-lang" class="ui search dropdown">
             <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
                 <option class="custom" tal:condition="language/selected" selected="selected"  tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
                 <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
@@ -177,48 +177,34 @@
          <a href="#" id="multiple-link">Multiple languages?</a>
     </div>
 
-    <div class="translate-box subject">
-        <h2>Subject</h2>
-        <select name="subject" id="subject">
-            <option value="general">General</option>
-            <option disabled="disabled" value="----">----</option>
-            <option value="accounting_finance">Accounting &amp; Finance</option>
-            <option value="aerospace_defence">Aerospace / Defence</option>
-            <option value="architecture">Architecture</option>
-            <option value="art">Art</option>
-            <option value="automotive">Automotive</option>
-            <option value="certificates_diplomas_licences_cv_etc">Certificates, diplomas, licences, cv's, etc</option>
-            <option value="chemical">Chemical</option>
-            <option value="civil_engineering_construction">Civil Engineering / Construction</option>
-            <option value="corporate_social_responsibility">Corporate Social Responsibility</option>
-            <option value="cosmetics">Cosmetics</option>
-            <option value="culinary">Culinary</option>
-            <option value="electronics_electrical_engineering">Electronics /  Electrical Engineering</option>
-            <option value="energy_power_generation_oil_gas">Energy / Power generation / Oil &amp; Gas</option>
-            <option value="environment">Environment</option>
-            <option value="fashion">Fashion</option>
-            <option value="games_viseogames_casino">Games / Video Games / Casino</option>
-            <option value="general_business_commerce">General Business / Commerce</option>
-            <option value="history_archaeology">History / Archaeology</option>
-            <option value="information_technology">Information Technology</option>
-            <option value="insurance">Insurance</option>
-            <option value="internet_e-commerce">Internet, e-commerce</option>
-            <option value="legal_documents_contracts">Legal documents / Contracts</option>
-            <option value="literary_translations">Literary Translations</option>
-            <option value="marketing_advertising_material_public_relations">Marketing &amp; Advertising material / Public Relations</option>
-            <option value="matematics_and_physics">Mathematics and Physics</option>
-            <option value="mechanical_manufacturing">Mechanical / Manufacturing</option>
-            <option value="media_journalism_publishing">Media / Journalism / Publishing</option>
-            <option value="medical_pharmaceutical">Medical / Pharmaceutical</option>
-            <option value="music">Music</option>
-            <option value="private_correspondence_letters">Private Correspondence, Letters</option>
-            <option value="religion">Religion</option>
-            <option value="science">Science</option>
-            <option value="shipping_sailing_maritime">Shipping / Sailing / Maritime</option>
-            <option value="social_science">Social Science</option>
-            <option value="telecommunications">Telecommunications</option>
-            <option value="travel_tourism">Travel &amp; Tourism</option>
-        </select>
+    <div class="translate-box tmx-select">
+        <h2>Translation Memory</h2>
+        <div class="ui fluid search selection dropdown" id="tmx-select">
+            <input type="hidden" name="tmx"/>
+            <i class="dropdown icon"></i>
+            <span class="text">Select TM</span>
+            <div class="menu menu-tm">
+                <div class="header">
+                    Add new TM
+                </div>
+                <div class="scrolling menu">
+                    <div class="item" data-value="0">No TM</div>
+                    <div class="item" data-value="1">Select more TM</div>
+                    <tal:block tal:repeat="key user_keys">
+                        <div class="item" tal:attributes="data-value key/key">${key/name}/${key/key}</div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
+
+        <!--<select name="tmx-select" id="tmx-select" class="ui search dropdown">-->
+            <!--<option value=" " selected="selected">Choose TMX</option>-->
+            <!--<option value="0">Create new TMX</option>-->
+            <!--<option value="1">Add more TMX</option>-->
+            <!--<tal:block tal:repeat="key user_keys">-->
+                <!--<option tal:attributes="value key/key">${key/name}</option>-->
+            <!--</tal:block>-->
+        <!--</select>-->
 
     </div>
 
