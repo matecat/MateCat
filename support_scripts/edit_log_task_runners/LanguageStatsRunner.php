@@ -2,7 +2,6 @@
 $root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
-require_once INIT::$MODEL_ROOT . '/queries.php';
 
 use TaskRunner\Commons\AbstractDaemon;
 
@@ -21,11 +20,11 @@ class LanguageStatsRunner extends AbstractDaemon {
     }
 
     function main( $args = null ) {
-        $db = Database::obtain();
+
         $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
 
         do {
-            $today     = date( "Y-m-d" );
+            $today = date( "Y-m-d" );
 
             $langsObj = Langs_Languages::getInstance();
 
@@ -33,13 +32,13 @@ class LanguageStatsRunner extends AbstractDaemon {
             $languages = $langsObj->getEnabledLanguages();
             $languages = Utils::array_column( $languages, 'code' );
 
-            $jobStatsDao = new Jobs_JobStatsDao( Database::obtain());
+            $jobStatsDao = new Jobs_JobStatsDao( Database::obtain() );
 
             foreach ( $languages as $source_language ) {
                 Log::doLog( "Current source_language: $source_language" );
                 echo "Current source_language: $source_language\n";
 
-                $languageStats = $jobStatsDao->readBySource($source_language);
+                $languageStats = $jobStatsDao->readBySource( $source_language );
 
                 $languageTuples = array();
 
@@ -49,8 +48,8 @@ class LanguageStatsRunner extends AbstractDaemon {
                         continue;
                     }
 
-                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" .$languageCoupleStat->fuzzy_band. ")") ;
-                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat->target ."(".$languageCoupleStat->fuzzy_band. ")\n";
+                    Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")" );
+                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")\n";
 
                     $langStatsStruct                            = new LanguageStats_LanguageStatsStruct();
                     $langStatsStruct->date                      = $today;
@@ -71,7 +70,7 @@ class LanguageStatsRunner extends AbstractDaemon {
                     echo "Found some stats. Saving in DB..\n";
 
                     $result = $lsDao->createList( $languageTuples );
-                    if(is_null( $result) ){
+                    if ( is_null( $result ) ) {
                         echo "ERROR: DAO failed to insert rows";
                     }
                 }
@@ -107,8 +106,8 @@ class LanguageStatsRunner extends AbstractDaemon {
     private static function isLanguageStatValid( $languageStat ) {
         return (
                 $languageStat->source != $languageStat->target &&
-                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat->source ) &&
-                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat->target )
+                preg_match( "#[a-z]{2,3}-[a-zA-Z-]{2,}#", $languageStat->source ) &&
+                preg_match( "#[a-z]{2,3}-[a-zA-Z-]{2,}#", $languageStat->target )
         );
     }
 }

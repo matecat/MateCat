@@ -1,4 +1,5 @@
 <?php
+use Jobs\PeeJobStatsStruct;
 
 /**
  * Created by PhpStorm.
@@ -10,11 +11,12 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
     const TABLE = "jobs_stats";
 
-    const STRUCT_TYPE = 'Jobs_JobStatsStruct';
+    const STRUCT_TYPE = 'PeeJobStatsStruct';
 
     /**
      * @param $source string
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readBySource( $source ){
         $con = $this->con->getConnection();
@@ -28,14 +30,12 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
                         sum( COALESCE ( js.avg_post_editing_effort, 0) ) / sum( coalesce( js.total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM jobs_stats js 
-                      WHERE
-                        js.completed = 1
-                        and js.source = :source
+                      WHERE js.source = :source
                       GROUP BY fuzzy_band, target"
         );
 
         $stmt->bindParam(':source', $source);
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new PeeJobStatsStruct() ) );
         $stmt->execute();
 
         $result = null;
@@ -48,7 +48,8 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
     /**
      * @param $fuzzy_band
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readByFuzzyBand ( $fuzzy_band ){
         $con = $this->con->getConnection();
@@ -86,7 +87,8 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
     /**
      * @param $source
      * @param $fuzzy_band
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readBySourceAndFuzzyBand( $source, $fuzzy_band ){
         $con = $this->con->getConnection();
@@ -124,9 +126,9 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param DataAccess_IDaoStruct|Jobs_JobStatsStruct $obj
+     * @param DataAccess_IDaoStruct|PeeJobStatsStruct $obj
      *
-     * @return Jobs_JobStatsStruct|null
+     * @return PeeJobStatsStruct|null
      */
     public function create( DataAccess_IDaoStruct $obj ) {
 

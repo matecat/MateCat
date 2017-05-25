@@ -6,6 +6,7 @@ Bootstrap::start();
 //require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
+use Jobs\PeeJobStatsStruct;
 use TaskRunner\Commons\AbstractDaemon;
 
 /**
@@ -90,9 +91,6 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                 for ( $j = 0; $this->RUNNING && ( $j < count( $jobs ) ); $j++ ) {
                     $job = $jobs[ $j ];
 
-                    //BEGIN TRANSACTION
-                    $db->begin();
-
                     $_jid                  = $job[ 'id' ];
                     $_password             = $job[ 'password' ];
                     $_job_first_segment    = $job[ 'job_first_segment' ];
@@ -104,21 +102,31 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                     Log::doLog( "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments" );
                     echo "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments\n";
 
-                    $job_stats = array(
-                        'ALL' => array(
-                            'raw_post_editing_effort' => 0,
-                            'raw_wc_job' => 0,
-                            'time_to_edit_job' => 0
-                        )
-                    );
+                    $job_stats = [
+                            'ALL' => [
+                                    'raw_post_editing_effort' => 0,
+                                    'raw_wc_job'              => 0,
+                                    'time_to_edit_job'        => 0
+                            ]
+                    ];
 
-                    $payable_rates_keys = array_keys(Analysis_PayableRates::$DEFAULT_PAYABLE_RATES);
-                    foreach( $payable_rates_keys as $fuzzy_band){
-                        $job_stats [ $fuzzy_band ] = array(
-                            'raw_post_editing_effort' => 0,
-                            'raw_wc_job' => 0,
-                            'time_to_edit_job' => 0
-                        );
+                    $payable_rates_keys = array_keys( Analysis_PayableRates::$DEFAULT_PAYABLE_RATES );
+                    foreach ( $payable_rates_keys as $fuzzy_band ) {
+
+                        if ( strpos( $fuzzy_band, 'MT' ) !== false ) {
+                            $job_stats [ $fuzzy_band . "_" . $_mt_engine_class_name ] = [
+                                    'raw_post_editing_effort' => 0,
+                                    'raw_wc_job'              => 0,
+                                    'time_to_edit_job'        => 0
+                            ];
+                        } else {
+                            $job_stats [ $fuzzy_band ] = [
+                                    'raw_post_editing_effort' => 0,
+                                    'raw_wc_job'              => 0,
+                                    'time_to_edit_job'        => 0
+                            ];
+                        }
+
                     }
 
                     //get a chunk of self::NR_OF_SEGS segments each time.
@@ -165,6 +173,9 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         usleep( 100 );
                     }
 
+                    //BEGIN TRANSACTION
+                    $db->begin();
+
                     $jobsStatsDao = new Jobs_JobStatsDao($db);
                     foreach ( $job_stats as $fuzzy_band => $job_stats_data ) {
                         $job_incremental_pee = $job_stats[ $fuzzy_band ][ 'raw_post_editing_effort' ];
@@ -174,15 +185,15 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         Log::doLog( "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
                         echo "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB\n";
 
-                        $jobStatsObj = new Jobs_JobStatsStruct();
-                        $jobStatsObj->id_job = $_jid;
-                        $jobStatsObj->password = $_password;
-                        $jobStatsObj->fuzzy_band = $fuzzy_band;
-                        $jobStatsObj->source = $_source;
-                        $jobStatsObj->target = $_target;
+                        $jobStatsObj                          = new PeeJobStatsStruct();
+                        $jobStatsObj->id_job                  = $_jid;
+                        $jobStatsObj->password                = $_password;
+                        $jobStatsObj->fuzzy_band              = $fuzzy_band;
+                        $jobStatsObj->source                  = $_source;
+                        $jobStatsObj->target                  = $_target;
                         $jobStatsObj->avg_post_editing_effort = $job_incremental_pee;
-                        $jobStatsObj->total_time_to_edit = $time_to_edit_job;
-                        $jobStatsObj->total_raw_wc = $raw_wc_job;
+                        $jobStatsObj->total_time_to_edit      = $time_to_edit_job;
+                        $jobStatsObj->total_raw_wc            = $raw_wc_job;
 
                         $jobsStatsDao->create( $jobStatsObj );
 
@@ -202,13 +213,15 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         continue;
                         //exit;
                     }
+
                     //COMMIT TRANSACTION
                     $db->commit();
+
                 }
             }
 
-            Log::doLog( "took " . ( time() - $start ) / 60 . " seconds" );
-            echo "took " . ( time() - $start ) / 60 . " seconds\n";
+            Log::doLog( "took " . ( time() - $start ) / 60 . " minutes" );
+            echo "took " . ( time() - $start ) / 60 . " minutes\n";
 
             Log::doLog( "Everything completed. I can die." );
             echo "Everything completed. I can die.\n";

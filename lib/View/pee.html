@@ -79,15 +79,12 @@
     <!--[if lt IE 9]>
 
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script src="${basepath}public/js/lib/jquery-1.11.0.min.js"></script>
+    <!--<script src="${basepath}public/js/lib/jquery.js"></script>-->
     <script src="${basepath}public/js/build/common.js"></script>
-    <!--<script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>-->
 
     <script src="${basepath}public/js/lib/jquery.tablesorter.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter.widgets.js"></script>
-
-    <!--<script src="http://mottie.github.io/tablesorter/js/jquery.tablesorter.js"></script>-->
-    <!--<script src="http://mottie.github.io/tablesorter/js/jquery.tablesorter.widgets.js"></script>-->
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
@@ -121,14 +118,20 @@
     <div class="cl"></div>
 </header>
 
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
-<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
+ <!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>-->
+<!--<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>-->
 
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]>
 <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
 <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+
+<script type="text/javascript">
+    var config = {
+        enable_outsource: 0,
+    };
+</script>
 
 <body>
 <div class="wrapper">

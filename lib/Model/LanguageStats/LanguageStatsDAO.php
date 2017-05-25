@@ -14,23 +14,42 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
 
     public function getLastDate(){
-        $arr_result = $this->con->fetch_array(  "select max(date) as date from " . self::TABLE );
 
-        //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
-            return $arr_result[0]['date'];
-        }
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( "select max( date ) as date from " . self::TABLE );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute();
+        return @$stmt->fetch()[ 'date' ];
 
-        return null;
+    }
+
+    public function getLanguageStats() {
+
+         $query = "
+          SELECT source, target, date, total_post_editing_effort, job_count, total_word_count, fuzzy_band
+                FROM " . self::TABLE . "
+                WHERE date = ( SELECT MAX( date ) FROM " . self::TABLE . " );
+";
+
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute();
+        return $stmt->fetchAll();
+
     }
 
     /**
-     * @param LanguageStats_LanguageStatsStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
      * @return LanguageStats_LanguageStatsStruct|null The inserted object on success, null otherwise
      * @throws Exception
      */
-    public function create( LanguageStats_LanguageStatsStruct $obj ) {
+    public function create( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj LanguageStats_LanguageStatsStruct
+         */
         $obj = $this->sanitize( $obj );
 
         $this->_validateNotNullFields( $obj );
@@ -66,11 +85,15 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param LanguageStats_LanguageStatsStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      * @return array
      * @throws Exception
      */
-    public function read( LanguageStats_LanguageStatsStruct $obj ) {
+    public function read( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj LanguageStats_LanguageStatsStruct
+         */
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -125,6 +148,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function createList( Array $obj_arr ) {
+
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
@@ -191,7 +215,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      *
      * @param LanguageStats_LanguageStatsStruct $input
      *
-     * @return LanguageStats_LanguageStatsStruct
+     * @return DataAccess_IDaoStruct|LanguageStats_LanguageStatsStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
@@ -206,52 +230,22 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function sanitizeArray( Array $input ) {
+    public static function sanitizeArray( $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
-    /**
-     * See in DataAccess_AbstractDao::validatePrimaryKey
-     * @see DataAccess_AbstractDao::_validatePrimaryKey
-     *
-     * @param LanguageStats_LanguageStatsStruct $obj
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function _validatePrimaryKey( LanguageStats_LanguageStatsStruct $obj ) {
-
-        /**
-         * @var $obj LanguageStats_LanguageStatsStruct
-         */
-        if ( is_null( $obj->date ) || empty( $obj->date ) ) {
-            throw new Exception( "Invalid date" );
-        }
-
-        if ( is_null( $obj->source ) || empty( $obj->source ) ) {
-            throw new Exception( "Invalid source" );
-        }
-
-        if ( is_null( $obj->target ) || empty( $obj->target ) ) {
-            throw new Exception( "Invalid target" );
-        }
-
-        if ( is_null( $obj->fuzzy_band ) || empty( $obj->fuzzy_band ) ) {
-            throw new Exception( "Invalid fuzzy band" );
-        }
-
-    }
 
     /**
      * See in DataAccess_AbstractDao::validateNotNullFields
      * @see DataAccess_AbstractDao::_validateNotNullFields
      *
-     * @param LanguageStats_LanguageStatsStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
-     * @return null
+     * @return void
      * @throws Exception
      */
-    protected function _validateNotNullFields( LanguageStats_LanguageStatsStruct $obj ) {
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+
         /**
          * @var $obj LanguageStats_LanguageStatsStruct
          */
@@ -272,17 +266,10 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             throw new Exception( "Total wordcount cannot be null" );
         }
 
-    }
+        if ( is_null( $obj->fuzzy_band ) ) {
+            throw new Exception( "Fuzzy band cannot be null" );
+        }
 
-    /**
-     * Builds an array with a result set according to the data structure it handles.
-     *
-     * @param $array_result array A result array obtained by a MySql query
-     *
-     * @return LanguageStats_LanguageStatsStruct[] An array containing LanguageStats_LanguageStatsStruct objects
-     */
-    protected function _buildResult( $array_result ) {
     }
-
 
 }

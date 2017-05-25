@@ -16,29 +16,30 @@ class peeViewController extends viewController {
 
     public function doAction() {
 
-        $languageStats = getLanguageStats();
-        include_once 'lib/Utils/Langs/Languages.php';
-        $instance= Langs_Languages::getInstance();
+        $languageStats = ( new LanguageStats_LanguageStatsDAO() )->getLanguageStats();
+        $languages_instance = Langs_Languages::getInstance();
 
-        if( !empty( $languageStats ) ){
-            $this->dataLangStats = array();
+        if ( !empty( $languageStats ) ) {
+            $this->dataLangStats = [];
         } else {
-            $this->dataLangStats[] = array(
+            $this->dataLangStats[] = [
                     "source"       => null,
                     "target"       => null,
                     "pee"          => 0,
+                    "fuzzy_band"   => null,
                     "totalwordPEE" => null
-            );
+            ];
         }
 
         foreach ( $languageStats as $k => $value ) {
-            $this->dataLangStats[] = array(
-                    "source"       => $instance->getLocalizedName($value[ 'source' ]),
-                    "target"       => $instance->getLocalizedName($value[ 'target' ]),
+            $this->dataLangStats[] = [
+                    "source"       => $languages_instance->getLocalizedName( $value[ 'source' ] ),
+                    "target"       => $languages_instance->getLocalizedName( $value[ 'target' ] ),
                     "pee"          => $value[ 'total_post_editing_effort' ],
-                    "totalwordPEE" => number_format($value[ 'total_word_count' ],0,",","."),
-                    "payable_rate" => Analysis_PayableRates::pee2payable($value[ 'total_post_editing_effort' ])
-            );
+                    "fuzzy_band"   => $value[ 'fuzzy_band' ],
+                    "totalwordPEE" => number_format( $value[ 'total_word_count' ], 0, ",", "." ),
+                    "payable_rate" => Analysis_PayableRates::pee2payable( $value[ 'total_post_editing_effort' ] )
+            ];
         }
 
     }

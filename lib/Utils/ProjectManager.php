@@ -560,7 +560,7 @@ class ProjectManager {
                         //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
                         //OR
                         //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
-                        throw new Exception( "Project too large.", 128 );
+                        throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL , 128 );
                     }
                 }
 
