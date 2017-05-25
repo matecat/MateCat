@@ -37,11 +37,58 @@
 
 .translate-box.tmx-select {
     .dropdown {
-        width: 257px;
+        width: 250px;
     }
     .menu-tm {
         max-height: none !important;
-        height: 360px;
+        max-height: 360px;
         overflow: hidden !important;
+    }
+    div#add-tmx-option:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+    div#add-tmx-option {
+        cursor: pointer;
+        color: #39699a;
+        font-size: 14px;
+        margin: 0;
+        padding: 15px;
+        .icon {
+            float: right;
+            font-size: 24px;
+            margin-top: -3px;
+            margin-right: -3px;
+            color: #39699a;
+        }
+    }
+    div.item {
+        width: 100%;
+        min-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 10px !important;
+        span.item-key-id {
+            color: #757575;
+            clear: both;
+        }
+        span {
+            line-height: 17px;
+        }
+        .no-descr {
+            font-style: italic ;
+        }
+    }
+    span.text {
+        margin-top: 0;
+        .item-key-id {
+            display: none;
+        }
+        .item-key-name {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 }

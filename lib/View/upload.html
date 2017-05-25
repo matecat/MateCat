@@ -184,14 +184,19 @@
             <i class="dropdown icon"></i>
             <span class="text">Select TM</span>
             <div class="menu menu-tm">
-                <div class="header">
+                <div class="header" id="add-tmx-option">
                     Add new TM
+                    <i class="icon-plus3 icon"></i>
                 </div>
                 <div class="scrolling menu">
                     <div class="item" data-value="0">No TM</div>
-                    <div class="item" data-value="1">Select more TM</div>
+                    <div class="item" data-value="1">Select multiple TM</div>
                     <tal:block tal:repeat="key user_keys">
-                        <div class="item" tal:attributes="data-value key/key">${key/name}/${key/key}</div>
+                        <div class="item" tal:attributes="data-value key/key">
+                            <span tal:condition="not:key/name" class="item-key-name no-descr">No Description</span>
+                            <span class="item-key-name">${key/name}</span>
+                            <span class="item-key-id">${key/key}</span>
+                        </div>
                     </tal:block>
                 </div>
             </div>

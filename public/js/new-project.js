@@ -285,16 +285,20 @@ $.extend(UI.UPLOAD_PAGE, {
 	    var self =  this;
         // $('#target-lang, #source-lang').dropdown();
         $('#tmx-select').dropdown({
+            selectOnKeydown: false,
             fullTextSearch: 'exact',
             onChange: function(value, text, $selectedItem) {
                 self.selectTm(value);
             }
         });
+
+        $('#add-tmx-option').on('click', function () {
+            UI.openLanguageResourcesPanel('tm');
+        });
     },
 
     selectTm: function (value) {
 	    if (UI.UPLOAD_PAGE.selectedTm === value) {
-
 	        return;
         } else if(value === '0' ) {
             UI.UPLOAD_PAGE.selectedTm = value;
