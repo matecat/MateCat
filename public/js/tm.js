@@ -462,8 +462,8 @@
             tab = tab || 'tm';
             elToClick = elToClick || null;
             $('body').addClass('side-popup');
-            $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
             $(".outer-tm").show();
+            $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
             setTimeout(function () {
                 $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
             }, 100);
@@ -632,7 +632,9 @@
             } else {
                 if(!isActive) {
                     UI.useTM(el);
-                    $("#inactivetm").trigger("update");
+                    setTimeout(function () {
+                        $("#inactivetm").trigger("update");
+                    },500);
                 }
             }
 

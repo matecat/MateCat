@@ -243,15 +243,16 @@ UI.UPLOAD_PAGE = {};
 
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
+        this.initDropdowns();
         /**
          * LexiQA language Enable/Disable
          */
-        // APP.checkForLexiQALangs();
-        // APP.checkForTagProjectionLangs();
-        // APP.checkForSpeechToText();
+        APP.checkForLexiQALangs();
+        APP.checkForTagProjectionLangs();
+        APP.checkForSpeechToText();
         this.render();
         this.addEvents();
-        this.initDropdowns();
+        $("#inactivetm").on("update", this.checkTmKeys);
     },
 
     render: function () {
@@ -282,7 +283,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
     initDropdowns: function () {
 	    var self =  this;
-        $('#target-lang, #source-lang').dropdown();
+        // $('#target-lang, #source-lang').dropdown();
         $('#tmx-select').dropdown({
             fullTextSearch: 'exact',
             onChange: function(value, text, $selectedItem) {
@@ -292,9 +293,15 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     selectTm: function (value) {
-	    if (value == 0) {
+	    if (UI.UPLOAD_PAGE.selectedTm === value) {
+
 	        return;
-        } else if (value == 1) {
+        } else if(value === '0' ) {
+            UI.UPLOAD_PAGE.selectedTm = value;
+            UI.disableAllTM();
+            return;
+
+        } else if (value === '1') {
 	        UI.openLanguageResourcesPanel('tm');
         }
         var tmElem = $('.mgmt-table-tm tr.mine[data-key=' + value +'] .activate input');
@@ -302,6 +309,22 @@ $.extend(UI.UPLOAD_PAGE, {
             UI.disableAllTM();
             $(tmElem).trigger('click');
         }
+        UI.UPLOAD_PAGE.selectedTm = value;
+    },
+
+    checkTmKeys: function () {
+	    var activeTm = $('#activetm .mine');
+	    if (activeTm.size() ===  0) {
+            $('#tmx-select').dropdown('set value', '0').dropdown('set selected', '0');
+        } else if (activeTm.size() >  1) {
+            UI.UPLOAD_PAGE.selectedTm = '1';
+            $('#tmx-select').dropdown('set value', '1').dropdown('set selected', '1');
+        } else if (activeTm.size() ===  1) {
+	        var value = activeTm.data('key');
+            UI.UPLOAD_PAGE.selectedTm = value;
+            $('#tmx-select').dropdown('set selected', value);
+        }
+        console.log("Change TM");
     },
 
     getAllTeams: function () {
