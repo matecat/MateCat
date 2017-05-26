@@ -1211,8 +1211,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media (min-width: 1300px) and (max-width: 1410px) {
-    .advanced-box .translate-box select,
-    .translate-box.tmx-select .ui.dropdown {
+    .advanced-box .translate-box select {
         width: 210px !important;
         .item-key-name {
             width: 160px;
@@ -1224,8 +1223,7 @@ button.ui-button::-moz-focus-inner {
     .wrapper-upload {
         width: 96% !important;
     }
-    .translate-box select, .mgmt-table-mt select,
-    .translate-box.tmx-select .ui.dropdown {
+    .translate-box select, .mgmt-table-mt select {
         width: 210px !important;
         .item-key-name {
             width: 160px;
@@ -1234,8 +1232,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media only screen and (max-width: 1380px) {
-    .translate-box select,
-    .translate-box.tmx-select .ui.dropdown{
+    .translate-box select{
         width: 210px;
         .item-key-name {
             width: 180px;
@@ -1255,8 +1252,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media only screen and (max-width: 1320px) {
-    .translate-box select,
-    .translate-box.tmx-select .ui.dropdown{
+    .translate-box select{
         width: 190px !important;
         .item-key-name {
             width: 150px;
