@@ -81,6 +81,7 @@
     }
     span.text {
         margin-top: 0;
+        pointer-events: none;
         .item-key-id {
             display: none;
         }
