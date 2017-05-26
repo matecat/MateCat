@@ -463,7 +463,7 @@
             elToClick = elToClick || null;
             $('body').addClass('side-popup');
             $(".outer-tm").show();
-            $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
+            $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
             setTimeout(function () {
                 $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
             }, 100);
@@ -1190,7 +1190,7 @@
 
 
         closeTMPanel: function () {
-            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
+            $( ".popup-tm").removeClass('open').animate({right: '-1100px' }, 400);
             $(".outer-tm").hide();
             $('body').removeClass('side-popup');
             $.cookie('tmpanel-open', 0, { path: '/' });

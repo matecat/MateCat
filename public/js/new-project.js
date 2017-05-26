@@ -46,7 +46,7 @@ APP.createTMKey = function () {
 };
 
 function closeMLPanel() {
-    $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
+    $( ".popup-languages.slide").removeClass('open').animate({right: '-1100px'}, 400);
     $(".popup-outer.lang-slide").hide();
     $('body').removeClass('side-popup');
 
@@ -459,7 +459,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
         $("#multiple-link").click(function(e) {
             e.preventDefault();
-            $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
+            $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
             var tlAr = $('#target-lang').val().split(',');
             $.each(tlAr, function() {
                 var ll = $('.popup-languages.slide .listlang li #' + this);

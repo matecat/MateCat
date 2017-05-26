@@ -287,7 +287,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'lib/jquery.js', //1.7.2
                     // basePath + 'lib/jquery.1.8.2.min.js',
-                    // basePath + 'lib/jquery-1.11.0.min.js',
+                    basePath + 'lib/jquery-1.11.0.min.js',
 
                      // basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
                     basePath + 'lib/jquery-ui-1.8.20.custom.min.js',
