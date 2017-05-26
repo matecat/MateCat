@@ -258,7 +258,7 @@ class Header extends React.Component {
 
                                 {teamsSelect}
 
-                                { (this.props.showLinks && !this.props.loggedUser) ? (
+                                { (this.props.showLinks ) ? (
                                         <ul id="menu-site">
                                             <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
                                             <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
@@ -266,7 +266,7 @@ class Header extends React.Component {
                                             <li><a href="https://www.matecat.com/about/">About</a></li>
                                             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
                                             <li><a href="https://www.matecat.com/support/">Support</a></li>
-                                            {/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
+                                            <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
                                         </ul>
 
                                     ) : ('')}
