@@ -411,13 +411,14 @@ CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `source` varchar(255) NOT NULL,
   `target` varchar(255) NOT NULL,
+  `fuzzy_band` varchar(20) NOT NULL,
   `total_word_count` float(255,0) DEFAULT NULL,
   `total_post_editing_effort` float(255,0) DEFAULT NULL,
   `total_time_to_edit` float(255,0) DEFAULT NULL,
   `job_count` int(255) DEFAULT NULL,
-  `pee_sigma` int(11) DEFAULT '0',
-  PRIMARY KEY (`date`,`source`,`target`),
+  PRIMARY KEY (`date`,`source`,`target`,`fuzzy_band`),
   KEY `source_idx` (`source`),
+  KEY `fuzzy_idx` (`fuzzy_band`),
   KEY `target_idx` (`target`),
   KEY `date_idx` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1082,7 +1083,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-23 17:19:47
+-- Dump completed on 2017-05-26 11:38:16
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1239,4 +1240,4 @@ INSERT INTO `phinxlog` VALUES (20170504163201,'2017-05-04 18:38:49','2017-05-04 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-23 17:19:47
+-- Dump completed on 2017-05-26 11:38:17
