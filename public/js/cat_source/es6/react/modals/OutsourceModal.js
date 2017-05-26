@@ -265,7 +265,7 @@ class OutsourceModal extends React.Component {
 
             // job already outsourced
             if( this.chunk.outsourced == 1 ) {
-                renderOutsourcedQuote( chunk );
+                renderOutsourcedQuote( this.chunk );
                 return false;
             }
 
@@ -480,10 +480,7 @@ class OutsourceModal extends React.Component {
                                         <strong>Guaranteed by</strong>
                                         <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
 
-                                            <p className="trustbox1">Translated uses the most qualified translator for your subject true
-                                                {/*(<strong>${subject | string:IT}</strong>)*/}
-                                                and keeps using the same translator for your next projects. <br />
-
+                                            <p className="trustbox1">Translated uses the most qualified translator for your subject true and keeps using the same translator for your next projects. <br />
                                                 {!this.state.showTranslatorInfo ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)
                                                     : (<a className="show_translator more hide" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)}
 
