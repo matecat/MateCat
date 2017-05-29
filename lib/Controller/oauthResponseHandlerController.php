@@ -57,10 +57,15 @@ class oauthResponseHandlerController extends viewController{
         $existingUser = $userDao->getByEmail( $this->user->email ) ;
 
         if ( $existingUser ) {
+            $welcome_new_user = !$existingUser->everSignedIn();
             $this->_updateExistingUser($existingUser) ;
 
         } else {
+            $welcome_new_user = true ;
             $this->_createNewUser();
+        }
+
+        if ( $welcome_new_user ) {
             $this->_welcomeNewUser();
         }
 
