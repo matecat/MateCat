@@ -49,13 +49,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return Projects_MetadataStruct[]
-     */
-    public function getMetadata() {
-        return Projects_MetadataDao::getByProjectId( $this->id );
-    }
-
-    /**
      * Proxy to set metadata for the current project
      *
      * @param $key
@@ -98,12 +91,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return null|Projects_MetadataStruct[]
      */
     public function getMetadata(){
-
         return $this->cachable( __function__, $this, function ( $project ) {
             $mDao = new Projects_MetadataDao();
             return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
         } );
-
     }
 
     /**

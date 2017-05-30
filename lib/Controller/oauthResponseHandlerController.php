@@ -1,4 +1,5 @@
 <?php
+use Email\WelcomeEmail;
 use Teams\TeamDao;
 
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
@@ -127,7 +128,7 @@ class oauthResponseHandlerController extends viewController{
     }
 
     protected function _welcomeNewUser() {
-        $email = new \Email\WelcomeEmail($this->user) ;
+        $email = new WelcomeEmail($this->user) ;
         $email->send() ;
         FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
     }

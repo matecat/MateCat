@@ -4,10 +4,8 @@
 namespace Features\Dqf\Worker ;
 
 use API\V2\Exceptions\AuthenticationError;
-use Features\Dqf;
-use Features\Dqf\Service\Client;
-use Features\Dqf\Service\Session;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Features\Dqf\Model\ProjectCreation;
+use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\QueueElement ;
 use TaskRunner\Exceptions\EndQueueException ;
@@ -31,8 +29,8 @@ class CreateProjectWorker extends AbstractWorker  {
         $this->_checkDatabaseConnection() ;
 
         try {
-            $struct = new Dqf\Service\Struct\ProjectCreationStruct( json_decode( $queueElement ) );
-            (new Dqf\Model\ProjectCreation( $struct ))->process();
+            $struct = new ProjectCreationStruct( json_decode( $queueElement->params, true ) );
+            (new ProjectCreation( $struct ))->process();
         }
         catch (AuthenticationError $e ) {
             throw new EndQueueException( $e->getMessage() ) ;

@@ -17,6 +17,7 @@ use Features\Dqf\Service\Session ;
 
 use Features\Dqf\Utils\UserMetadata;
 use Features\Dqf\Utils\ProjectMetadata ;
+use Projects_ProjectDao;
 use Projects_ProjectStruct ;
 use Features\Dqf\Service\Client ;
 
@@ -63,7 +64,7 @@ class ProjectCreation {
 
     public function __construct( ProjectCreationStruct $struct ) {
         $this->inputStruct = $struct  ;
-        $this->project = \Projects_ProjectDao::findById( $struct->id_project );
+        $this->project = Projects_ProjectDao::findById( $struct->id_project );
     }
 
     public function setLogger($logger) {
@@ -148,22 +149,6 @@ class ProjectCreation {
             $this->childProjects[ $chunk->getIdentifier() ] =
                     $childProject->createTranslationChild( $this->remoteFiles );
         }
-    }
-
-    public function submitChildProjects() {
-
-    }
-
-    public function submitChildProjectTargetLanguage() {
-
-    }
-
-    public function submitReviewSettings() {
-
-    }
-
-    protected function closeProjectCreation() {
-
     }
 
 }

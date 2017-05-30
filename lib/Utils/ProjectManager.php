@@ -1050,7 +1050,6 @@ class ProjectManager {
             $newJob->job_last_segment  = $this->min_max_segments_id[ 'job_last_segment' ];
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
-            $newJob->dqf_key           = $projectStructure[ 'dqf_key' ];
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 

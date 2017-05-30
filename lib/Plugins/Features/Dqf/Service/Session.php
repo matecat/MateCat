@@ -33,9 +33,8 @@ class Session {
 
         $request = $client->createResource('/login', 'post', [
                 'formData' => $struct->getParams(),
-                'headers' => $struct->getHeaders()
-                ]
-        );
+                'headers'  => $struct->getHeaders()
+        ] );
 
         $client->curl()->multiExec();
 

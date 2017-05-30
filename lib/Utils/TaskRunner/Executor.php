@@ -280,7 +280,8 @@ class Executor implements SplObserver {
 
             } catch ( Exception $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************\n************* " . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************"  );
+                $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() );
 
             }
 
@@ -399,6 +400,7 @@ class Executor implements SplObserver {
 // $argv[ 1 ] = '{"queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","max_executors":"1","redis_key":"p1_list","loggerName":"tm_analysis_P1.log"}';
 //$argv[ 1 ] = '{"queue_name":"activity_log","pid_set_name":"ch_pid_activity_log","max_executors":"1","redis_key":"activity_log_list","loggerName":"activity_log.log"}';
 //$argv[ 1 ] = '{"queue_name":"project_queue","pid_set_name":"ch_pid_project_queue","max_executors":"1","redis_key":"project_queue_list","loggerName":"project_queue.log"}';
+// $argv[ 1 ] = '{"queue_name":"dqf","pid_set_name":"ch_pid_dqf","max_executors":"1","redis_key":"dqf_list","loggerName":"dqf.log"}';
 
 /** @var array $argv */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();
