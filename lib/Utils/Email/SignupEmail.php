@@ -9,6 +9,7 @@
 namespace Email;
 
 
+use Routes;
 use Users\Signup;
 
 class SignupEmail extends AbstractEmail
@@ -19,7 +20,7 @@ class SignupEmail extends AbstractEmail
      */
     private $user ;
 
-    private $title = 'Confirm your registration with MateCat' ;
+    protected $title = 'Confirm your registration with MateCat' ;
 
     public function __construct( \Users_UserStruct $user ) {
 
@@ -40,8 +41,8 @@ class SignupEmail extends AbstractEmail
     protected function _getTemplateVariables() {
         return array(
             'user'           => $this->user->toArray(),
-            'activation_url' => \Routes::signupConfirmation( $this->user->confirmation_token ),
-            'signup_url'     => \Routes::appRoot()
+            'activation_url' => Routes::signupConfirmation( $this->user->confirmation_token ),
+            'signup_url'     => Routes::appRoot()
         );
     }
 
