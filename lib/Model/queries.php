@@ -202,7 +202,7 @@ function doReplaceAll( Array $queryParams ) {
             WHERE id_job = {$queryParams['job']}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 AND st.status != 'NEW'
-                AND locked != 1
+                -- AND locked != 1
                 AND translation REGEXP $SQL_CASE'{$Space_Left}{$regexpEscapedTrg}{$Space_Right}'
                 $where_status
                 ";
