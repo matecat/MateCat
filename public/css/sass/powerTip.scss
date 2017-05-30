@@ -3,7 +3,8 @@
 $primary-color: rgb(77, 77, 77);
 
 
-#matecatTip {
+#matecatTip
+{
   cursor: default;
   background-color: $primary-color;
   border-radius: 4px;
@@ -93,6 +94,23 @@ $primary-color: rgb(77, 77, 77);
 #matecatTip.se-alt:before {
   left: auto;
   right: 10px;
+}
+
+#matecatTip.lxq {
+  right: 512px !important;
+  left: auto !important;
+  top: 492px !important;
+}
+
+#matecatTip.lxq:before {
+  border-top: none;
+  border-bottom: 10px solid #333;
+  border-bottom: 10px solid #4d4d4d;
+  bottom: auto;
+  top: -10px;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  left: 50%;
 }
 
 /*****  Tips Tm options panel ************/

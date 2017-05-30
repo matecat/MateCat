@@ -51,8 +51,8 @@ UI = {
     },
     checkRTL: function () {
         if(!this.RTLCheckDone) {
-            sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
-            targetDirection = $('#target-lang option[value="' + $('#target-lang').val() + '"]').attr('data-direction');
+            sourceDirection = $('#source-lang').dropdown('get item').attr('data-direction');
+            targetDirection = $('#target-lang').dropdown('get item').attr('data-direction');
             if((sourceDirection == 'rtl') || (targetDirection == 'rtl')) {
                 //APP.alert("Support for RTL languages is in beta. <br />Before starting your translation, download the Preview from the Translate page and check the target file.");
                 this.RTLCheckDone = true;
@@ -62,7 +62,7 @@ UI = {
     checkMultilangRTL: function () {
         var direction = "ltr";
         $('.popup-languages li.on input').each(function(){
-            if($('#target-lang option[value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
+            if($('#target-lang div[data-value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
         });
         return direction;
     },
@@ -608,8 +608,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         data: {
             action: 'convertFile',
             file_name: fname,
-            source_lang: $( '#source-lang' ).val(),
-            target_lang: $( '#target-lang' ).val(),
+            source_lang: $( '#source-lang' ).dropdown('get value'),
+            target_lang: $( '#target-lang' ).dropdown('get value'),
             segmentation_rule: $( '#segm_rule' ).val()
         },
         type: 'POST',

@@ -36,19 +36,22 @@
     }
 }
 
-.translate-box.tmx-select {
+.translate-box.tmx-select,
+.translate-box.source,
+.translate-box.target {
     .dropdown {
         width: 250px;
     }
-    .menu-tm {
+    .menu-dropdown {
         max-height: none !important;
-        max-height: 360px;
         overflow: hidden !important;
     }
-    div#add-tmx-option:hover {
+    div#add-tmx-option:hover ,
+    div#add-multiple-lang:hover {
         background: rgba(0, 0, 0, 0.05);
     }
-    div#add-tmx-option {
+    div#add-tmx-option ,
+    div#add-multiple-lang {
         cursor: pointer;
         color: #39699a;
         font-size: 14px;
@@ -81,20 +84,35 @@
         }
     }
     span.text {
-        margin-top: 0;
+        margin-top: 0 !important;
         pointer-events: none;
-        line-height: 25px;
+        line-height: 28px;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
         .item-key-id {
-            display: none;
+            margin-top: 0px;
+            float: none;
         }
         .item-key-name {
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: initial;
+            margin-top: 0px;
+            margin-right: 5px;
+            float: none;
         }
     }
     .divider {
         margin: 0 !important;
+    }
+}
+
+.translate-box.tmx-select {
+    span.text {
+        color: #757575;
+    }
+    .item-key-name {
+        color: initial;
     }
 }

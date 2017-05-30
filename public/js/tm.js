@@ -1934,7 +1934,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 's',
+                placement : 'lxq',
                 popupId : "matecatTip",
                 mouseOnToPopup: true
 
@@ -1984,16 +1984,6 @@
             });
 
 
-        },
-
-        setLanguageTooltipTP: function () {
-            var gtTooltip = $(".tooltip-guess-tags").data("powertip");
-            $(".tagp .onoffswitch-container").data("powertip", gtTooltip);
-            $(".tagp .onoffswitch-container").powerTip({
-                placement : 's',
-                popupId : "matecatTip",
-                mouseOnToPopup: true
-            });
         },
 
         setLanguageTooltipLXQ: function () {

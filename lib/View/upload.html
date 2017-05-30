@@ -69,7 +69,9 @@
             lexiqa_languages: ${lexiqa_languages| string:[]},
             tag_projection_languages: ${tag_projection_languages},
             languages_array : ${languages_array},
-            private_keys: ${user_keys_obj | string: []}
+            private_keys: ${user_keys_obj | string: []},
+            currentTargetLang: '${currentTargetLang | string: []}',
+            currentSourceLang: '${currentSourceLang | string: []}'
         };
         /*]]>*/
     </script>
@@ -91,21 +93,7 @@
         <div class="ui massive text loader">Reloading</div>
     </div>
 </div>
-<header class="upload-page-header" style="height: 45px; background-color: #4d4d4d;">
-    <!--<div class="wrapper">-->
-        <!--<a href="${basepath}" class="logo"></a>-->
-        <!--<ul class="pull-right" id="menu-site">-->
-            <!--<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>-->
-            <!--<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>-->
-            <!--<li><a href="https://www.matecat.com/support-plans/">Plans</a></li>-->
-            <!--<li><a href="https://www.matecat.com/about/">About</a></li>-->
-            <!--<li><a href="https://www.matecat.com/faq/">FAQ</a></li>-->
-            <!--<li><a href="https://www.matecat.com/support/">Support</a></li>-->
-            <!--<li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>-->
-        <!--</ul>-->
-    <!--</div>-->
-    <!--<div class="cl"></div>-->
-</header>
+<header class="upload-page-header" style="height: 45px; background-color: #4d4d4d;"></header>
 
 
 <div class="wrapper-claim">
@@ -126,55 +114,80 @@
 
     <div class="translate-box source">
         <h2>From</h2>
-        <select name="source-lang" id="source-lang">
-            <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
-                <option class="custom" tal:condition="language/selected" selected="selected"  tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-                <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-            </tal:block>
-
-            <option class="separator" disabled="disabled">---</option>
-
-            <tal:block tal:repeat="language source_languages">
-                <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-            </tal:block>
-        </select>
+        <div class="ui fluid selection dropdown" id="source-lang">
+            <input type="hidden" name="source-lang"/>
+            <i class="dropdown icon"></i>
+            <span class="text">Select Source</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="sourceLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
+                        <div class="item custom" tal:condition="language/selected" data-selected="selected"  tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                    </tal:block>
+                    <div class="divider"></div>
+                    <tal:block tal:repeat="language source_languages">
+                        <div class="item" tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: language['code'] NE 'en-US'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
     </div>
 
     <a id="swaplang" title="Swap languages" href="#"><span>Swap languages</span></a>
 
     <div class="translate-box target">
         <h2>To</h2>
-        <select name="target-lang" id="target-lang">
-            <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
-                <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-                <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-            </tal:block>
-
-            <option class="separator" disabled="disabled">---</option>
-
-            <tal:block tal:repeat="language target_languages">
-                <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-            </tal:block>
-
-        </select>
-        <br/>
-         <a href="#" id="multiple-link">Multiple languages?</a>
+        <div class="ui fluid selection dropdown" id="target-lang">
+            <input type="hidden" name="target-lang"/>
+            <i class="dropdown icon"></i>
+            <span class="text">Select Target</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="targetLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="header" id="add-multiple-lang">
+                    Add Multiple Languages
+                    <i class="icon-plus3 icon"></i>
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
+                        <div class="item custom" tal:condition="language/selected" dat-selected="true" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                    </tal:block>
+                    <div class="divider"></div>
+                    <tal:block tal:repeat="language target_languages">
+                        <div class="item" tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
+        <a href="#" id="multiple-link">Multiple languages?</a>
     </div>
 
     <div class="translate-box tmx-select">
@@ -182,8 +195,12 @@
         <div class="ui fluid selection dropdown" id="tmx-select">
             <input type="hidden" name="tmx"/>
             <i class="dropdown icon"></i>
-            <span class="text">MyMemory</span>
-            <div class="menu menu-tm">
+            <span class="text">
+                <span class="item-key-name">MyMemory</span>
+                <span class="item-key-id">Public TM</span>
+            </span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
                 <div class="ui icon search input">
                     <i class="icon-search icon"/>
                     <input type="text" name="UserName" placeholder="Search" />
@@ -195,12 +212,15 @@
                 </div>
                 <div class="divider"></div>
                 <div class="scrolling menu">
-                    <div class="item" data-value="0">MyMemory</div>
+                    <div class="item" data-value="0">
+                        <span class="item-key-name">MyMemory</span>
+                        <span class="item-key-id">Public TM</span>
+                    </div>
                     <!--<div class="item" data-value="1">Select multiple TM</div>-->
                     <tal:block tal:repeat="key user_keys">
                         <div class="item" tal:attributes="data-value key/key">
                             <span tal:condition="not:key/name" class="item-key-name no-descr">No Description</span>
-                            <span class="item-key-name">${key/name}</span>
+                            <span tal:condition="key/name" class="item-key-name">${key/name}</span>
                             <span class="item-key-id">${key/key}</span>
                         </div>
                     </tal:block>
@@ -940,19 +960,9 @@
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 <script type="text/javascript">
+
     var developerKey = '${developerKey}';
     var clientId = '${clientId}';
-
-    if( !localStorage.getItem( 'currentTargetLang' ) ) {
-        APP.changeTargetLang('${currentTargetLang}');
-    }
-
-    if( !localStorage.getItem( 'currentSourceLang' ) ) {
-        APP.changeSourceLang('${currentSourceLang}');
-    }
-
-    APP.displayCurrentTargetLang();
-    APP.displayCurrentSourceLang();
 
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>

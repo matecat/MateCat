@@ -1223,7 +1223,7 @@ button.ui-button::-moz-focus-inner {
     .wrapper-upload {
         width: 96% !important;
     }
-    .translate-box select, .mgmt-table-mt select {
+    .mgmt-table-mt select {
         width: 210px !important;
         .item-key-name {
             width: 160px;
@@ -1232,12 +1232,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media only screen and (max-width: 1380px) {
-    .translate-box select{
-        width: 210px;
-        .item-key-name {
-            width: 180px;
-        }
-    }
+
     .translate-box input[type="text"] {
         width: 200px;
     }
@@ -1252,12 +1247,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media only screen and (max-width: 1320px) {
-    .translate-box select{
-        width: 190px !important;
-        .item-key-name {
-            width: 150px;
-        }
-    }
+
     .translate-box input[type="text"] {
         width: 180px !important;
     }
@@ -1274,7 +1264,7 @@ button.ui-button::-moz-focus-inner {
         width: 190px !important;
     }
 
-    .translate-box {
+    .translate-box:not(.settings) {
         margin: 20px 12px 0px 0px !important;
     }
 
@@ -1284,13 +1274,42 @@ button.ui-button::-moz-focus-inner {
     }
 
     #swaplang {
-        margin: 56px 12px 0 0px !important;
+        margin: 56px 12px 0 -4px !important;
     }
 }
 
 @media only screen and (max-width: 1200px) {
-    .translate-box.team {
-        clear: both;
+
+
+    #source-lang,
+    #target-lang {
+        width: 190px;
+        .text {
+            max-width: 145px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #add-multiple-lang {
+            font-size: 10px;
+            .icon {
+                font-size: 16px;
+                margin-top: 1px;
+            }
+        }
+    }
+
+    #project-name {
+        width: 160px;
+    }
+}
+
+@media only screen and (max-width: 1100px) {
+
+    .translate-box.settings {
+        .more-options {
+            margin-left: 2px !important;
+        }
     }
 }
 
@@ -1328,7 +1347,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box.settings {
-    margin-top: 49px !important;
+    margin-top: 49px;
 }
 
 .translate-box.qa-box {
@@ -2414,7 +2433,7 @@ footer {
     width: 15px;
     text-decoration: none;
     height: 18px;
-    margin: 51px 12px 0 10px;
+    margin: 56px 14px 0 9px;
     font-size: 20px;
     color: #ccc;
 }

@@ -340,7 +340,7 @@ class newProjectController extends viewController {
             }
         }
 
-        return Constants::DEFAULT_TARGET_LANG;
+        return Constants::DEFAULT_SOURCE_LANG;
     }
 
     private function evalTragetLangHistory() {

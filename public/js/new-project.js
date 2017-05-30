@@ -83,11 +83,11 @@ APP.changeSourceLang = function( lang ) {
 };
 
 APP.displayCurrentTargetLang = function() {
-    $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
+    $( '#target-lang' ).dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
 };
 
 APP.displayCurrentSourceLang = function() {
-    $( '#source-lang' ).val( localStorage.getItem( 'currentSourceLang' ) );
+    $( '#source-lang' ).dropdown('set selected', localStorage.getItem( 'currentSourceLang' ));
 };
 
 /**
@@ -99,8 +99,8 @@ APP.checkForLexiQALangs = function(){
 	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
     var notAcceptedLanguages = [];
-	var targetLanguages = $( '#target-lang' ).val().split(',');
-	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetLanguages = $( '#target-lang' ).dropdown('get value').split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).dropdown('get value') ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
                             if (acceptedLanguages.indexOf(n) === -1) {
                                 var elem = $.grep(config.languages_array, function(e){ return e.code == n; });
@@ -110,7 +110,7 @@ APP.checkForLexiQALangs = function(){
 						}).length > 0;
 
     if (!sourceAccepted) {
-        notAcceptedLanguages.push($( '#source-lang option:selected' ).text());
+        notAcceptedLanguages.push($('#source-lang').dropdown('get text'));
     }
 
 	LXQCheck.find('.onoffswitch').off("click");
@@ -141,16 +141,16 @@ APP.checkForTagProjectionLangs = function(){
 
 	var acceptedLanguages = config.tag_projection_languages;
 	var tpCheck = $('.options-box.tagp');
-    var sourceLanguageCode = $( '#source-lang' ).val();
-    var sourceLanguageText = $( '#source-lang option:selected' ).text();
+    var sourceLanguageCode = $( '#source-lang' ).dropdown('get value');
+    var sourceLanguageText = $( '#source-lang' ).dropdown('get text');
     var languageCombinations = [];
     var notSupportedCouples = [];
 
-    $( '#target-lang' ).val().split(',').forEach(function (value) {
+    $( '#target-lang' ).dropdown('get value').split(',').forEach(function (value) {
         var elem = {};
         elem.targetCode = value;
         elem.sourceCode = sourceLanguageCode;
-        elem.targetName = $( '#target-lang option[value="' + value + '"]' ).text();
+        elem.targetName = $($( '#target-lang div[data-value="' + value + '"]' )[0]).text();
         elem.sourceName = sourceLanguageText;
         languageCombinations.push(elem);
     });
@@ -177,7 +177,6 @@ APP.checkForTagProjectionLangs = function(){
     if ( arrayIntersection.length == 0) {
 		tpCheck.addClass('option-unavailable');
 		$('.options-box #tagp_check').prop( "disabled", disableTP );
-		UI.setLanguageTooltipTP();
 	}
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
@@ -187,8 +186,8 @@ APP.getCreateProjectParams = function() {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
 		project_name				: $('#project-name').val(),
-		source_language				: $('#source-lang').val(),
-		target_language				: $('#target-lang').val(),
+		source_language				: $('#source-lang').dropdown('get value'),
+		target_language				: $('#target-lang').dropdown('get value'),
 		// job_subject         		: $('#subject').val(),
 		job_subject         		: 'general',
 		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
@@ -223,7 +222,7 @@ APP.checkForSpeechToText = function(){
 	var disableS2T = !config.defaults.speech2text;
 	var speech2textCheck = $('.s2t-box');
 	speech2textCheck.removeClass('option-unavailable');
-	speech2textCheck.find('.onoffswitch').off('click')
+	speech2textCheck.find('.onoffswitch').off('click');
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
 		$('.options-box #s2t_check').prop( "disabled", disableS2T );
@@ -245,11 +244,18 @@ UI.UPLOAD_PAGE = {};
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
         this.initDropdowns();
+        this.checkLanguagesCookie();
         /**
          * LexiQA language Enable/Disable
          */
         APP.checkForLexiQALangs();
+        /**
+         * Guess Tags language Enable/Disable
+         */
         APP.checkForTagProjectionLangs();
+        /**
+         * SpeechToText language Enable/Disable
+         */
         APP.checkForSpeechToText();
         this.render();
         this.addEvents();
@@ -296,6 +302,28 @@ $.extend(UI.UPLOAD_PAGE, {
         $('#add-tmx-option').on('click', function () {
             UI.openLanguageResourcesPanel('tm');
         });
+
+
+        $('#target-lang, #source-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            // onChange: function(value, text, $selectedItem) {
+            //     self.selectTm(value);
+            // }
+        });
+    },
+
+    checkLanguagesCookie: function () {
+        if( !localStorage.getItem( 'currentTargetLang' ) || localStorage.getItem( 'currentTargetLang' ).indexOf(',') > -1) {
+            APP.changeTargetLang(config.currentSourceLang);
+        }
+
+        if( !localStorage.getItem( 'currentSourceLang' ) ) {
+            APP.changeSourceLang(config.currentTargetLang);
+        }
+
+        APP.displayCurrentTargetLang();
+        APP.displayCurrentSourceLang();
     },
 
     selectTm: function (value) {
@@ -363,7 +391,7 @@ $.extend(UI.UPLOAD_PAGE, {
         $("#source-lang").on('change', function(e){
             console.log('source language changed');
             UI.checkRTL();
-            APP.changeSourceLang( $(this).val() );
+            APP.changeSourceLang( $(this).dropdown('get value')  );
             if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
                 if (UI.conversionsAreToRestart()) {
                     APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
@@ -394,7 +422,7 @@ $.extend(UI.UPLOAD_PAGE, {
             if( UI.checkTMXLangFailure() ){
                 UI.delTMXLangFailure();
             }
-            APP.changeTargetLang( $(this).val() );
+            APP.changeTargetLang( $(this).dropdown('get value') );
 
         });
 
@@ -457,10 +485,10 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.checkForTagProjectionLangs();
         });
 
-        $("#multiple-link").click(function(e) {
+        $("#multiple-link, #add-multiple-lang").click(function(e) {
             e.preventDefault();
             $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
-            var tlAr = $('#target-lang').val().split(',');
+            var tlAr = $('#target-lang').dropdown('get value').split(',');
             $.each(tlAr, function() {
                 var ll = $('.popup-languages.slide .listlang li #' + this);
                 ll.parent().addClass('on');
@@ -623,8 +651,8 @@ APP.postProjectCreation = function ( d ) {
 
             if ( Object.keys( d.target_language ).length > 1 ) { //if multiple language selected show a job list
                 d.files = [];
-                d.trgLangHumanReadable = $( '#target-lang option:selected' ).text().split( ',' );
-                d.srcLangHumanReadable = $( '#source-lang option:selected' ).text();
+                d.trgLangHumanReadable = $( '#target-lang' ).dropdown('get text').split( ',' );
+                d.srcLangHumanReadable = $( '#source-lang').dropdown('get text');
 
                 $.each( d.target_language, function ( idx, val ) {
                     d.files.push( {href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring( 0, 2 ) + '-' + val.substring( 0, 2 ) + '/' + d.id_job[idx] + '-' + d.password[idx]} );
