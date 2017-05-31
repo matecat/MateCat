@@ -865,7 +865,7 @@ color:#333;}
     {
 	    overflow: hidden;
 	    line-height: 30px;
-	    border-radius: 7px;
+	    border-radius: 0 0 4px 4px;
 	    color: #000 !important;
 	    -webkit-box-shadow: 0 1px 20px #000;
 	    box-shadow: 0 1px 20px #000;
