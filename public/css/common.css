@@ -1390,14 +1390,6 @@ text-align: right;
 margin-left: 10px;
 }
 
-.modal p,
-.modal p
-{
-    padding: 0 20px;
-    margin: 0;
-    margin-top: 20px;
-}
-
 .popup .outer:hover
 {
 	background: url(../img/bg_login_button_hover.gif) 0 0 repeat;

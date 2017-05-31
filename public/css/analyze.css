@@ -942,3 +942,7 @@ top: 25%;
 .user-nolog.sing-in-header {
     margin-right: 10px;
 }
+
+.contact_box p {
+	line-height: 23px !important;
+}
