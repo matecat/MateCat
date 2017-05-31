@@ -30,7 +30,7 @@ class SplitJobModal extends React.Component {
 
     calculateSplitComputation(numSplit) {
         let numWords, array = [];
-        let total = Math.round(this.props.job.get('stats').get('TODO_FORMATTED'));
+        let total = Math.round(this.props.job.get('stats').get('TODO'));
         let wordsXjob = Math.floor(total / numSplit);
         let diff = total - (wordsXjob * numSplit);
         for (let i = 0; i < numSplit; i++) {
@@ -62,7 +62,7 @@ class SplitJobModal extends React.Component {
     checkSplitComputation() {
 
         let sum = this.state.wordsArray.reduce((a, b) => a + b, 0);
-        let diff = sum - Math.round(this.props.job.get('stats').get('TODO_FORMATTED'));
+        let diff = sum - Math.round(this.props.job.get('stats').get('TODO'));
         if ( diff != 0 ) {
             return {
                 difference: diff,
