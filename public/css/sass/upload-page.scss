@@ -1291,10 +1291,10 @@ button.ui-button::-moz-focus-inner {
             text-overflow: ellipsis;
         }
         #add-multiple-lang {
-            font-size: 10px;
+            font-size: 12px;
             .icon {
-                font-size: 16px;
-                margin-top: 1px;
+                font-size: 17px;
+                margin-top: -2px;
             }
         }
     }
@@ -1670,8 +1670,8 @@ body {
 
 .upload-input {
     width: 95%;
-    padding: 8px 5px 3px 5px;
-    font-size: 20px !important;
+    padding: 3px 5px 3px 9px;
+    font-size: 19px !important;
     -moz-border-radius: 2px;
     border-radius: 2px;
     border: 1px solid rgba(34, 36, 38, 0.15);
