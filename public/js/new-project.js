@@ -260,6 +260,7 @@ $.extend(UI.UPLOAD_PAGE, {
         this.render();
         this.addEvents();
         $("#inactivetm").on("update", this.checkTmKeys);
+        $("#inactivetm").on("deleteTm", this.deleteTMFromSelect);
     },
 
     render: function () {
@@ -345,19 +346,37 @@ $.extend(UI.UPLOAD_PAGE, {
         UI.UPLOAD_PAGE.selectedTm = value;
     },
 
-    checkTmKeys: function () {
+    checkTmKeys: function (event, desc, key) {
 	    var activeTm = $('#activetm .mine');
 	    if (activeTm.size() ===  0) {
             $('#tmx-select').dropdown('set value', '0').dropdown('set selected', '0');
         } else if (activeTm.size() >  1) {
             UI.UPLOAD_PAGE.selectedTm = '1';
+            $('#tmx-select').find('.item-key-name .multiple-tm-num').text(activeTm.size());
             $('#tmx-select').dropdown('set value', '1').dropdown('set selected', '1');
         } else if (activeTm.size() ===  1) {
 	        var value = activeTm.data('key');
             UI.UPLOAD_PAGE.selectedTm = value;
-            $('#tmx-select').dropdown('set selected', value);
+            var existingKey = ($('#tmx-select').find('div.item[data-value='+ value +']').size() > 0);
+            if (existingKey) {
+                $('#tmx-select').dropdown('set selected', value);
+            } else {
+                var html = '<div class="item"  data-value="' + key + '">' +
+                    '<span class="item-key-name">' +desc + '</span>' +
+                    '<span class="item-key-id">' + key + '</span>' +
+                    '</div>';
+                $('#tmx-select div.item').first().before(html);
+                setTimeout(function () {
+                    $('#tmx-select').dropdown('set selected', key);
+                });
+            }
         }
-        console.log("Change TM");
+    },
+
+    deleteTMFromSelect: function (event, key) {
+	    if ($('#tmx-select').find('div.item[data-value='+ key +']').size() > 0) {
+            $('#tmx-select').find('div.item[data-value='+ key +']').remove();
+        }
     },
 
     getAllTeams: function () {
@@ -485,7 +504,7 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.checkForTagProjectionLangs();
         });
 
-        $("#multiple-link, #add-multiple-lang").click(function(e) {
+        $("#add-multiple-lang").click(function(e) {
             e.preventDefault();
             $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
             var tlAr = $('#target-lang').dropdown('get value').split(',');

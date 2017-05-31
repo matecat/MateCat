@@ -187,7 +187,7 @@
                 </div>
             </div>
         </div>
-        <a href="#" id="multiple-link">Multiple languages?</a>
+        <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
     </div>
 
     <div class="translate-box tmx-select">
@@ -196,8 +196,7 @@
             <input type="hidden" name="tmx"/>
             <i class="dropdown icon"></i>
             <span class="text">
-                <span class="item-key-name">MyMemory</span>
-                <span class="item-key-id">Public TM</span>
+                <span class="item-key-name">MyMemory Public TM</span>
             </span>
             <div class="menu menu-dropdown">
                 <div class="divider"></div>
@@ -213,8 +212,10 @@
                 <div class="divider"></div>
                 <div class="scrolling menu">
                     <div class="item" data-value="0">
-                        <span class="item-key-name">MyMemory</span>
-                        <span class="item-key-id">Public TM</span>
+                        <span class="item-key-name">MyMemory Public TM</span>
+                    </div>
+                    <div class="item multiple-tm" data-value="1">
+                        <span class="item-key-name"><span class="multiple-tm-num"></span> Private TMs</span>
                     </div>
                     <!--<div class="item" data-value="1">Select multiple TM</div>-->
                     <tal:block tal:repeat="key user_keys">

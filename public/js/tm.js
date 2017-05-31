@@ -434,7 +434,7 @@
                 var keyParams = {
                     r: true,
                     w: true,
-                    desc: "",
+                    desc: "No Description",
                     TMKey: keyParam
                 };
                 this.appendNewTmKeyToPanel( keyParams );
@@ -454,6 +454,9 @@
             row.find('td.lookup input, td.activate input, td.update input').attr('checked', true);
             UI.useTM(trKey);
             UI.checkTMKeysUpdateChecks();
+            setTimeout(function () {
+                $("#inactivetm").trigger("update");
+            },500);
         },
         openLanguageResourcesPanel: function(tab, elToClick) {
             if ($(".popup-tm").hasClass('open') ) {
@@ -781,6 +784,9 @@
             $('#activetm').find('tr.new').before( newTr );
 
             UI.setTMsortable();
+            setTimeout(function () {
+                $("#inactivetm").trigger("update", [keyParams.desc, keyParams.TMKey]);
+            },500);
         },
 
         pulseTMadded: function (row) {
@@ -1380,6 +1386,10 @@
                 },
                 success: function(d) {
                     UI.hideAllBoxOnTables();
+                    setTimeout(function () {
+                        $("#inactivetm").trigger("deleteTm", [tr.find('.privatekey').text()]);
+                    },500);
+
                 }
             });
         },

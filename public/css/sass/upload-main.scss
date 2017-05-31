@@ -32,7 +32,7 @@
     input.search {
         padding: inherit !important;
         font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
-        font-size: 18px;
+        font-size: 16px;
     }
 }
 
@@ -115,4 +115,15 @@
     .item-key-name {
         color: initial;
     }
+    .text .multiple-tm {
+        display: block;
+    }
+    .menu .multiple-tm {
+        display: none;
+    }
+    .multiple-tm-num {
+        margin-top: 0 !important;
+        margin-right: 4px;
+    }
+
 }

@@ -1671,10 +1671,16 @@ body {
 .upload-input {
     width: 95%;
     padding: 8px 5px 3px 5px;
-    font-size: 22px !important;
+    font-size: 20px !important;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    border: 1px solid #ccc
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    height: 37px;
+}
+
+.upload-input:hover {
+    border-color: rgba(34, 36, 38, 0.35);
+    box-shadow: none;
 }
 
 #private-tm-key {
