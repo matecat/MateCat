@@ -101,8 +101,8 @@ module.exports = function(grunt) {
          * = Browseriry
          *
          * This is the new build process based on browserify
-         * to take advantage of transforms, plubins and import
-         * and require syntax to declare dependecies.
+         * to take advantage of transforms, plugins and import
+         * and require syntax to declare dependencies.
          * Use this for current / future development.
          *
          * All imports to be attached to window should be defined in
@@ -154,6 +154,44 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'qa-report-improved.js'
             },
+            manage: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset ] } ]
+                    ],
+                },
+                src: [
+                    buildPath + 'manage.js'
+                ],
+                dest: buildPath + 'manage.min.js'
+            },
+            app: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset ] } ]
+                    ],
+                },
+                src: [
+                    buildPath + 'app.js'
+                ],
+                dest: buildPath + 'app.min.js'
+            }
+        },
+
+        uglify: {
+            options: {
+                compress: true,
+                mangle: true,
+                sourceMap: true
+            },
+            manage: {
+                src: [
+                    basePath + 'manage.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'manage.min.js'
+            }
         },
 
 
@@ -182,7 +220,7 @@ module.exports = function(grunt) {
                         } );
 
                         return buildPath + '/app.' + s4() + '.source-map.js';
-                    },
+                    }
                 },
                 src: [
                     basePath + 'build/templates.js',
@@ -276,6 +314,22 @@ module.exports = function(grunt) {
                     basePath + 'login.js'
                 ],
                 dest: buildPath + 'common.js'
+            },
+            manage: {
+                src: [
+                    basePath + 'manage.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'manage.js'
+            },
+            analyze: {
+                src: [
+                    basePath + 'analyze.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'analyze.js'
             }
 
         },
@@ -450,6 +504,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -471,6 +526,10 @@ module.exports = function(grunt) {
         'concat:semantic',
         'concat:app',
         'concat:common',
+        'concat:manage',
+        // 'uglify:manage',
+        'concat:analyze',
+        // 'browserify:manage',
         'replace:version'
     ]);
 

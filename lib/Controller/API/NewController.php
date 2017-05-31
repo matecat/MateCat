@@ -69,6 +69,13 @@ class NewController extends ajaxController {
      * @var Users_UserStruct
      */
     private $current_user;
+
+    private $lexiqa = false;
+    private $speech2text = false;
+    private $tag_projection = false;
+
+    private $project_features = [];
+
     private $metadata = array();
 
     const MAX_NUM_KEYS = 5;
@@ -103,36 +110,40 @@ class NewController extends ajaxController {
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'source_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'target_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'        => array(
+        $filterArgs = [
+                'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'tms_engine'         => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'mt_engine'         => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'mt_engine'          => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'private_tm_key'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'subject'           => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'subject'            => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'segmentation_rule' => array(
+                ],
+                'segmentation_rule'  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'owner_email'       => array(
+                ],
+                'owner_email'        => [
                         'filter' => FILTER_VALIDATE_EMAIL
-                ),
-                'metadata' => array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'pretranslate_100' => array(
-                        'filter' => array( 'filter' => FILTER_VALIDATE_INT )
-                ),
-                'id_team' => array( 'filter' => FILTER_VALIDATE_INT )
-        );
+                ],
+                'metadata'           => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'pretranslate_100'   => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT ],
+                'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+        ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -182,8 +193,15 @@ class NewController extends ajaxController {
             }
         }
 
+        $this->setProjectFeatures( $__postInput );
+
         try {
-            $this->validateMetadataParam($__postInput['metadata']);
+
+            $this->lexiqa = $__postInput[ 'lexiqa' ];
+            $this->speech2text = $__postInput[ 'speech2text' ];
+            $this->tag_projection = $__postInput[ 'tag_projection' ];
+            $this->validateMetadataParam( $__postInput['metadata'] );
+
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = 'Error evaluating metadata param';
             Log::doLog( $ex->getMessage() );
@@ -248,6 +266,17 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = $e->getMessage();
             Log::doLog( "Error: " . $e->getCode() . " - " . $e->getMessage() );
             return -$e->getCode();
+        }
+
+    }
+
+    private function setProjectFeatures( $__postInput ){
+
+        //change project features
+        if( !empty( $__postInput[ 'project_completion' ] ) ){
+            $feature = new BasicFeatureStruct();
+            $feature->feature_code = 'project_completion';
+            $this->project_features[] = $feature;
         }
 
     }
@@ -570,6 +599,9 @@ class NewController extends ajaxController {
             $this->projectManager->setTeam( $this->team ) ;
         }
 
+        //set features override
+        $projectStructure[ 'project_features' ] = $this->project_features;
+
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
@@ -718,7 +750,26 @@ class NewController extends ajaxController {
             $assoc = TRUE;
             $json_string = html_entity_decode($json_string);
             $this->metadata = json_decode( $json_string, $assoc, $depth );
+            Log::doLog( "Passed parameter metadata as json string." );
         }
+
+        //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )
+        if ( !empty( $this->lexiqa ) ){
+            $this->metadata[ 'lexiqa' ] = $this->lexiqa;
+        }
+
+        if ( !empty( $this->speech2text ) ){
+            $this->metadata[ 'speech2text' ] = $this->speech2text;
+        }
+
+        if ( !empty( $this->tag_projection ) ){
+            $this->metadata[ 'tag_projection' ] = $this->tag_projection;
+        }
+
+        if ( !empty( $this->project_completion ) ){
+            $this->metadata[ 'project_completion' ] = $this->project_completion;
+        }
+
     }
 
     private static function parseTmKeyInput( $tmKeyString ) {

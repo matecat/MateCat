@@ -7,6 +7,8 @@ use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct ;
 use Chunks_ChunkCompletionEventDao ;
 
+use Jobs_JobStruct ;
+
 class ProjectCompletion extends BaseFeature {
 
     public function postAddSegmentTranslation( $params ) {
@@ -41,5 +43,13 @@ class ProjectCompletion extends BaseFeature {
             Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
         }
 
+    }
+
+    public function job_password_changed(Jobs_JobStruct $job, $old_password ) {
+        $dao = new Chunks_ChunkCompletionUpdateDao() ;
+        $dao->updatePassword( $job->id, $job->password, $old_password );
+
+        $dao = new Chunks_ChunkCompletionEventDao() ;
+        $dao->updatePassword( $job->id, $job->password, $old_password );
     }
 }

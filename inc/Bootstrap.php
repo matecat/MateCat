@@ -21,9 +21,9 @@ class Bootstrap {
 
     private function __construct() {
 
-        self::$CONFIG       = parse_ini_file( 'config.ini', true );
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
-        $OAUTH_CONFIG       = @parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
+        self::$CONFIG       = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
         register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
 
         $mv = parse_ini_file( 'version.ini' );
@@ -69,7 +69,7 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
-        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( 'task_manager_config.ini', true );
+        INIT::$TASK_RUNNER_CONFIG              = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
 
         try {
             Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );

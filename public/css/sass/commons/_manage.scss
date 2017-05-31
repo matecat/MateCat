@@ -49,7 +49,7 @@ body.manage {
             top: 11px;
             z-index: 2;
             left: -15px;
-            max-width: 505px;
+            max-width: 535px;
             min-width: 0px;
             line-height: 17px;
             background-color: #d8d8d8;
@@ -67,7 +67,7 @@ body.manage {
 
             .project-name {
                 font-size: 17px;
-                max-width: 314px;
+                max-width: 390px;
                 min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
@@ -78,7 +78,7 @@ body.manage {
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
-                margin-right: 10px;
+                margin-right: 3px;
                 margin-left: 15px;
                 display: inline-block;
                 vertical-align: text-bottom;
@@ -339,17 +339,20 @@ body.manage {
                 .job-body {
                     .chunks {
                         .chunk {
+                            transition: 0.3s ease;
                             background-color: #ffffff;
                             padding: 8px 15px;
                             .job-id {
                                 float: left;
-                                min-width: 72px;
+                                min-width: 65px;
                                 color: #969696;
                                 font-size: 13px;
+                                position: relative;
                                 line-height: 28px;
+                                top: 1px;
                             }
                             .source-target {
-                                min-width: 150px;
+                                min-width: 140px;
                                 float: left;
                                 margin-right: 10px;
                                 font-weight: bold;
@@ -357,8 +360,8 @@ body.manage {
                                 top: 1px;
                                 .source-box {
                                     float: left;
-                                    max-width: 70px;
-                                    min-width: 70px;
+                                    max-width: 60px;
+                                    min-width: 60px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -373,7 +376,7 @@ body.manage {
                                 }
                                 .target-box {
                                     float: left;
-                                    width: 70px;
+                                    width: 60px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -429,7 +432,7 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 0px 10px 0 !important;
+                                padding: 0 10px !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
@@ -442,65 +445,161 @@ body.manage {
                                 }
                             }
                             .outsource-job {
-                                text-align: center;
+                                //text-align: center;
                                 .translated-outsourced {
-                                    top: 6px;
+                                    top: 1px;
                                     bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
                                     position: relative;
-                                    img.outsource-logo {
-                                        width: 100px;
-                                        margin: -5px 10px 0 10px;
-                                        vertical-align: middle;
+                                    text-align: left;
+                                    .outsource-logo-box {
+                                        min-width: 150px;
+                                        display: inherit;
+                                        margin-left: 30px;
+                                        img.outsource-logo {
+                                            width: 100px;
+                                            margin: -5px 10px 0 0;
+                                            vertical-align: middle;
+                                        }
+                                    }
+                                    &.outsource {
+                                        margin-top: 6px;
                                     }
                                 }
-                                .job-price {
+                                .job-to-translator {
                                     display: inline-block;
-                                    margin-right: 8px;
+                                    margin-right: 0px;
+                                    margin-left: 30px;
+                                    vertical-align: text-bottom;
+                                    color: #969696;
+                                    width: 150px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    line-height: 20px;
+                                    margin-top: 5px;
+                                    @media only screen and (max-width: 1200px) {
+                                        max-width: 180px;
+                                    }
+                                }
+                                &:hover .job-to-translator{
+                                    width: inherit;
+                                }
+
+                                .job-delivery {
+                                    display: inline-block;
+                                    margin-right: 10px;
+                                    margin-left: 10px;
+                                    vertical-align: text-bottom;
+                                    line-height: 20px;
+                                    .outsource-day-text {
+                                        font-weight: 700;
+                                        display: inherit;
+                                        margin-right: 3px;
+                                    }
+                                    .outsource-month-text {
+                                        display: inherit;
+                                        font-weight: 700;
+                                        margin-right: 5px;
+                                    }
+                                    .outsource-time-text {
+                                        display: inherit;
+                                        font-weight: 700;
+                                    }
+                                    .outsource-gmt-text {
+                                        color: #969696;
+                                        display: inherit;
+                                        margin-left: 5px;
+                                    }
+                                    @media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }
+                                }
+                                &:hover .translator .job-delivery {
+                                    display: none;
+                                }
+                                &:hover .outsource .job-delivery {
+                                    display: inline-block;
+                                }
+                                .item {
+                                    margin-left: 10px;
+                                    display: none;
+                                    float: right;
+                                    cursor: pointer;
+                                    @media only screen and (max-width: 1200px) {
+                                        margin-left: 0px;
+                                    }
+                                    .ui.cancel{
+                                        padding: 4px;
+                                        background-color: #d6d6d6;
+                                        margin-top: 3px;
+                                        border-radius: 15px;
+                                        position: relative;
+                                        line-height: 0px;
+                                        right: 3px;
+                                        font-size: 15px;
+                                    }
+                                    &:hover .ui.cancel {
+                                        background-color: #cccccc !important;
+                                    }
+
+                                }
+                                &:hover .item {
+                                    display: inline-block;
+                                }
+                                /*.job-price {
+                                    display: inline-block;
+                                    margin-right: 10px;
                                     vertical-align: text-bottom;
                                     font-weight: 700;
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
-                                }
-                                .job-delivery {
-                                    display: inline-block;
-                                    margin-right: 10px;
-                                    vertical-align: text-bottom;
-                                    .outsource-date-text {
-                                        font-weight: 700;
-                                    }
-                                    .outsource-gmt-text {
-                                        color: #969696;
-                                    }
-                                    @media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }
-                                }
+                                }*/
                             }
                             .open-translate {
-                                font-family: Calibri;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
                                 padding: 6px 15px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
                                 border-radius: 2px;
                                 float: right;
+                            }
+                            .open-vendor {
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 7px;
+                                vertical-align: top;
+                                font-size: 16px;
+                                border: 1px solid #7eaf3e;
+                                border-radius: 2px;
+                                float: right;
+                                font-weight: bold;
+                                box-shadow: none !important;
+                                color: #7eaf3e !important;
+                                &:hover {
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                }
+                                &:active {
+                                    box-shadow: none !important;
+                                }
+                                &:focus {
+                                    box-shadow: none !important;
+                                }
                             }
                             .open-outsource {
-                                font-family: Calibri;
-                                padding: 6px 15px;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 22px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
                                 border-radius: 2px;
                                 float: right;
-                                //background-color: #7eaf3e;
                             }
                             .open-outsourced {
-                                font-family: Calibri;
-                                padding: 6px 11px;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 19px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -563,7 +662,9 @@ body.manage {
                                     animation: progress-active 1s ease infinite;
                                 }
                             }
-
+                            &.updated-job {
+                                background-color: #f9ffb5;
+                            }
                         }
                     }
                 }
@@ -627,7 +728,7 @@ body.manage {
             padding: 20px;
             a {
                 text-align: center;
-                font-family: Calibri;
+                font-family: Calibri, Arial, Helvetica, sans-serif;
                 padding: 16px 25px;
                 vertical-align: top;
                 font-size: 20px;
@@ -717,7 +818,7 @@ footer nav ul a:hover {
 
 @media only screen and (min-width: 1200px) {
     .ui.container {
-        width: 1130px;
+        width: 1140px;
         margin-left: auto !important;
         margin-right: auto !important;
         transition: 0.3s ease;
@@ -775,7 +876,6 @@ footer nav ul a:hover {
     }
 }
 
-
 .status-filter {
     display: inline-block;
     position: absolute;
@@ -786,4 +886,8 @@ footer nav ul a:hover {
     border-radius: 2px;
     color: #5d5d5d;
     font-weight: 100;
+}
+
+.ui.dropdown .scrolling.menu {
+    border-top:none;
 }

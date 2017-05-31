@@ -14,6 +14,7 @@ module.exports = keyMirror({
     NO_MORE_PROJECTS: null,
     CHANGE_PROJECT_NAME: null,
     HIDE_PROJECT: null,
+    ASSIGN_TRANSLATOR: null,
     //MODALS
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
@@ -39,6 +40,10 @@ module.exports = keyMirror({
     ENABLE_DOWNLOAD_BUTTON: null,
     DISABLE_DOWNLOAD_BUTTON: null,
 
-    UPDATE_JOB_OUTSOURCE: null
+    UPDATE_JOB_OUTSOURCE: null,
+
+    CLOSE_TRANSLATOR: null,
+    GET_OUTSOURCE_QUOTE: null
+
 
 });

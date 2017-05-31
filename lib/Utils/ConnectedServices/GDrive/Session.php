@@ -398,7 +398,7 @@ class Session {
 
         $fileTitle = $gdriveFile->getTitle();
 
-        $job = \Jobs_JobDao::getById( $id_job );
+        $job = \Jobs_JobDao::getById( $id_job )[0];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile();

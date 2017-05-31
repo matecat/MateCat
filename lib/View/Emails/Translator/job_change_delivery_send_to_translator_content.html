@@ -1,0 +1,15 @@
+<p>Hi <?= $user['_name'] ?>, </p>
+<p>
+    <?= $sender['first_name'] . " " . $sender['last_name'] ?> changed your delivery deadline.
+    <br /><br />
+    The new delivery date is: <b><?= $delivery_date ?></b>
+</p>
+
+<p>
+    For any question please contact your project manager: <a href="<?= $sender[ 'email' ] ?>"><?= $sender[ 'email' ] ?></a>
+</p>
+<br />
+<p>
+    Here's the link to your job: <br /><br /><a href="<?= $project_url ?>"><?= $project_url ?></a>.
+</p>
+<br />

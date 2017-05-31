@@ -38,6 +38,10 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
         return new Users_UserStruct();
     }
 
+    public function everSignedIn() {
+        return ! ( is_null( $this->email_confirmed_at ) && is_null( $this->oauth_access_token ) );
+    }
+
     public function fullName() {
         return trim($this->first_name . ' ' . $this->last_name);
     }

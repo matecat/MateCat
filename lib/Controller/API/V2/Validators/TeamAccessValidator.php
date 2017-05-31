@@ -26,10 +26,6 @@ class TeamAccessValidator extends Base {
 
     public function validate() {
 
-        if ( !$this->controller->getUser() ) {
-            throw new AuthorizationError('Not Authorized', 401);
-        }
-
         $this->team = ( new MembershipDao() )->findTeamByIdAndUser(
                 $this->request->id_team, $this->controller->getUser()
         );

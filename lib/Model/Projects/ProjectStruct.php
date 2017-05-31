@@ -22,7 +22,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
 
 
     /**
-     * @return bool  
+     * @return bool
      */
     public function analysisComplete() {
         return
@@ -40,18 +40,16 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return Projects_MetadataStruct[]
+     * Proxy to set metadata for the current project
+     *
+     * @param $key
+     * @param $value
+     *
+     * @return bool
      */
-    public function getMetadata() {
-        return Projects_MetadataDao::getByProjectId( $this->id );
-    }
-
-    /**
-     * Proxy to set metadata for the current project 
-     */
-    public function setMetadata($key, $value) {
+    public function setMetadata( $key, $value ) {
         $dao = new Projects_MetadataDao( Database::obtain() );
-        return $dao->set( $this->id, $key, $value);
+        return $dao->set( $this->id, $key, $value );
     }
 
     /**
@@ -78,6 +76,50 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         if ( array_key_exists($key, $meta) ) {
             return $meta[$key];
         }
+    }
+
+    /**
+     * @return null|Projects_MetadataStruct[]
+     */
+    public function getMetadata(){
+
+        return $this->cachable( __function__, $this, function ( $project ) {
+            $mDao = new Projects_MetadataDao();
+            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
+        } );
+
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getProjectFeatures(){
+
+        return $this->cachable( __function__, $this, function ( Projects_ProjectStruct $pStruct ) {
+
+            $allMetaData = $pStruct->getMetadata();
+
+            foreach( $allMetaData as $metadataStruct ){
+                if( $metadataStruct->key == Projects_MetadataDao::FEATURES_KEY ){
+                    return $metadataStruct->value;
+                }
+            }
+            return null;
+
+        } );
+
+    }
+
+
+    public function getRemoteFileServiceName(){
+
+        return $this->cachable( __function__, $this, function () {
+
+            $dao = new Projects_ProjectDao() ;
+            return @$dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[0] ;
+
+        } );
+
     }
 
     /**

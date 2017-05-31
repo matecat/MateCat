@@ -16,6 +16,20 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
+    public function updatePassword($id_job, $password, $old_password) {
+        $sql = "UPDATE qa_chunk_reviews SET password = :new_password
+               WHERE id_job = :id_job AND password = :password " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array(
+                'id_job'       => $id_job,
+                'password'     => $old_password,
+                'new_password' => $password
+        ));
+
+        return $stmt->rowCount();
+    }
     /**
      * @param $id_job
      * @return \LQA\ChunkReviewStruct[]
@@ -139,7 +153,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $records = self::findChunkReviewsByChunkIds(array(
             array( $id_job, $password)
         ));
-        return $records[0];
+        return @$records[0];
     }
 
     /**

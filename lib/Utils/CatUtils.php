@@ -920,6 +920,9 @@ class CatUtils {
      *
      * Minimum Password Length 12 Characters
      *
+     * @param int $length
+     *
+     * @return bool|string
      */
     public static function generate_password( $length = 12 ) {
 
@@ -1074,7 +1077,6 @@ class CatUtils {
         return $wStruct;
     }
 
-
     /**
      * Returns the string representing the overall quality for a job,
      * taking into account both old revision and new revision.
@@ -1082,22 +1084,18 @@ class CatUtils {
      * @param $job
      * @return string
      */
-    public static function getQualityOverallFromJobArray( $job ) {
-        $job = Utils::ensure_keys($job, array(
-            'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
-            'status_analysis', 'jid', 'jpassword', 'features'
-        ));
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
 
         $result = null ;
 
-        if ( in_array( Features::REVIEW_IMPROVED, FeatureSet::splitString( $job['features'] ) ) ) {
-            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job['jid'], $job['jpassword'] ) ;
-            $result = $review->is_pass ? 'excellent' : 'fail' ;
+        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
+            $result = @$review->is_pass ? 'excellent' : 'fail' ;
         }
         else {
-            $struct = CatUtils::getWStructFromJobArray( $job ) ;
+            $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
             $jobQA = new Revise_JobQA(
-                $job['jid'], $job['jpassword'], $struct->getTotal()
+                    $job->id, $job->password, $struct->getTotal()
             );
 
             $jobQA->retrieveJobErrorTotals();
@@ -1109,6 +1107,33 @@ class CatUtils {
         return $result ;
     }
 
+    /**
+     * @param Jobs_JobStruct $job
+     * @param                $analysis_status
+     *
+     * @return WordCount_Struct
+     */
+    public static function getWStructFromJobStruct( Jobs_JobStruct $job, $analysis_status ) {
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $job->id ) ;
+        $wStruct->setJobPassword( $job->password );
+        $wStruct->setNewWords($job->new_words );
+        $wStruct->setDraftWords($job->draft_words );
+        $wStruct->setTranslatedWords( $job->translated_words );
+        $wStruct->setApprovedWords( $job->approved_words );
+        $wStruct->setRejectedWords( $job->rejected_words );
+
+        // For projects created with No tm analysis enabled
+        if ($wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
+            $wCounter = new WordCount_Counter();
+            $wStruct = $wCounter->initializeJobWordCount( $job->id, $job->password );
+            Log::doLog("BackWard compatibility set Counter.");
+            return $wStruct;
+        }
+        return $wStruct;
+    }
 
     public static function getTMProps( $job_data ){
 

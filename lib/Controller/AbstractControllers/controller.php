@@ -119,7 +119,8 @@ abstract class controller {
 
         try {
             $userDao           = new Users_UserDao( Database::obtain() );
-            $this->logged_user = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[ 0 ]; // one hour cache
+            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[ 0 ]; // one hour cache
+            $this->logged_user = ( !empty( $loggedUser ) ? $loggedUser : $this->logged_user );
         } catch ( Exception $e ) {
             Log::doLog( 'User not logged.' );
         }

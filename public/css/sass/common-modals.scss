@@ -100,6 +100,25 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     color: red;
 }
 
+.validation-error.email-translator-error {
+    position: relative;
+    top: -25px;
+    left: 18px;
+    padding: 0px;
+    margin-bottom: 0px;
+    height: 0px;
+    display: none;
+}
+
+.coupon-container .validation-success {
+    color: green;
+    margin-top: 2px;
+}
+
+.coupon-container p {
+    line-height: 5px !important;
+}
+
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
@@ -1243,4 +1262,8 @@ div#matecat-modal p {
 
 a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     border: 1px solid #848689;
+}
+
+.dropdown > .menu {
+    z-index: 100000000;
 }

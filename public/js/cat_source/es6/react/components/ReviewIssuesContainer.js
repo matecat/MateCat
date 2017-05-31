@@ -1,7 +1,7 @@
 export default React.createClass({
     getIssuesFromDb : function( sid, versionNumber ) {
         return db.segment_translation_issues.findObjects({
-            'id_segment' : '' + sid,
+            'id_segment' : parseInt(sid),
             'translation_version' : '' + versionNumber
         });
     },

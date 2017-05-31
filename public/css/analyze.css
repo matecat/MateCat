@@ -158,6 +158,15 @@ span.complete {
 background: #ccc;
 }
 
+.popup-split .popup
+{
+	width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background:#fff;box-shadow: 0px 0px 25px #000;border-radius:7px;text-align:left;font-size:18px;border:1px solid #666;
+}
+
 .popup .splitbtn-cont {
     margin-left: 10px;
     margin-top: 10px;
@@ -363,15 +372,7 @@ tbody:nth-child(3) tr td:not(.empty) {
 
 .operation-btn:hover{opacity:1;}
 
-/* SPLIT JOB POPUP */
 
-.popup-split .popup {
-	width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;
-	left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-	background:#fff;box-shadow: 0px 0px 25px #000;border-radius:7px;text-align:left;font-size:18px;border:1px solid #666;
-}
 
 /* split box */
 
@@ -840,7 +841,7 @@ a:hover{text-decoration:none}
 .iepopup p{line-height:27px}
 
 
-footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
+footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999;}
 footer a {color:#fff;text-shadow:none;}
 footer a:hover{text-decoration:none}
 
@@ -888,6 +889,7 @@ footer a:hover{text-decoration:none}
 
 .outsource.modal .popup {
 top: 25%;
+	border-radius: 0px;
 }
 .chunks-container
 {

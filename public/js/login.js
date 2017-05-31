@@ -132,7 +132,7 @@ $.extend(APP, {
             case "signup":
                 if (!config.isLoggedIn) {
                     if (APP.lookupFlashServiceParam("signup_email")) {
-                        let userMail = APP.lookupFlashServiceParam("signup_email")[ 0 ].value;
+                        var userMail = APP.lookupFlashServiceParam("signup_email")[ 0 ].value;
                         modal$.trigger('openregister', [{userMail: userMail}]);
                     } else {
                         modal$.trigger('openregister');

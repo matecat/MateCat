@@ -1,4 +1,6 @@
 <?php
+use Exceptions\NotFoundError;
+
 /**
  * Created by PhpStorm.
  * User: domenico
@@ -37,20 +39,25 @@ class ChangeProjectPasswordController  extends ajaxController {
 
     public function doAction() {
 
+        $pDao = new Projects_ProjectDao();
+        try {
+            $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->id_project, $this->old_password );
+        } catch ( NotFoundError $e ) {
+            $this->api_output[ 'message' ] = 'Wrong id or pass';
+            Log::doLog( "ChangeProjectPasswordController error: " . $this->api_output[ 'message' ] );
 
-        $changePass = changePassword( 'prj', $this->id_project, $this->old_password, $this->new_password );
-
-        if( $changePass <= 0 ){
-            $this->api_output[ 'message' ]       = 'Wrong id or pass';
-            Log::doLog("ChangeProjectPasswordController error: " . $this->api_output['message'] );
             return -1; //FAIL
         }
+
+        $pDao->changePassword( $pStruct, $this->new_password );
+
+        $pStruct->getFeatures()->run('project_password_changed', $pStruct, $this->old_password );
 
         $this->api_output[ 'status' ]       = 'OK';
         $this->api_output[ 'id_project' ]   = $this->id_project;
         $this->api_output[ 'project_pass' ] = $this->new_password;
 
-        Log::doLog("ChangeProjectPasswordController result: " . $this->api_output['status'] );
+        Log::doLog( "ChangeProjectPasswordController result: " . $this->api_output[ 'status' ] );
 
     }
 

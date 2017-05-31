@@ -305,21 +305,6 @@ UI = {
         ManageActions.changeTeam(personalTeam);
     },
 
-    getGMTDate: function (date) {
-        var timezoneToShow = readCookie( "matecat_timezone" );
-        if ( timezoneToShow == "" ) {
-            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-        }
-        var dd = new Date( date.replace(/-/g, "/") );
-        var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
-        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
-        var selectedElement = $( "#changeTimezone" ).find( "option[value='" + timezoneToShow + "']");
-        return {
-            date: $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
-            gmt: selectedElement.text()
-        };
-    },
-
     //********** REQUESTS *********************//
 
     /**
@@ -424,15 +409,14 @@ UI = {
                 'or fix the error in MateCat:',
                 successText: "Continue",
                 successCallback: continueDownloadFunction,
-                cancelText: "Fix errors",
-                cancelCallback: openUrl
+                warningText: "Fix errors",
+                warningCallback: openUrl
 
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
         } else {
             continueDownloadFunction();
         }
-
 
     },
 
@@ -506,7 +490,7 @@ UI = {
     },
 
     removeUserFromTeam: function (team, userId) {
-        return $.ajax({
+        return $.ajax({id_team: team.id,
             type: "delete",
             url : "/api/v2/teams/"+ team.id +"/members/" + userId,
         });
@@ -560,62 +544,93 @@ UI = {
     },
 
     openOutsourceModal: function (project, job, url) {
-        UI.startOutSourceModal(project, job, url);
+        var props = {
+            project: project,
+            job: job,
+            url: url,
+            fromManage: true,
+            translatorOpen: true,
+            onCloseCallback: function () {
+
+            }
+        };
+        var style = {width: '970px',maxWidth: '970px'};
+        APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
     },
 
-    //***********************//
-
-
-    /**
-     * Get Project
-     * @param id
-     */
-    getProject: function(id) {
-        var d = {
-            action: 'getProjects',
-            project: id,
-            page:	UI.Search.currentPage
+    openSplitJobModal: function (job, project) {
+        var props = {
+            job: job,
+            project: project
         };
-        // Add filters ??
-        ar = $.extend(d,{});
+        var style = {width: '670px',maxWidth: '670px'};
+        APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
+    },
+
+    /****** Analyze *******/
+    checkSplitRequest: function (job, project, numsplit, arrayValues) {
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "check",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
+            },
+            success: function(d) {}
+        });
+    },
+
+    confirmSplitRequest: function(job, project, numsplit, arrayValues) {
 
         return APP.doRequest({
-            data: ar,
-            success: function(d){
-                data = $.parseJSON(d.data);
-            },
-            error: function(d){
-                window.location = '/';
+            data: {
+                action: "splitJob",
+                exec: "apply",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
             }
         });
     },
+    openMergeModal: function (project, job) {
+        var props = {
+            text: 'This will cause the merging of all chunks in only one job. ' +
+            'This operation cannot be canceled.',
+            successText: "Continue",
+            successCallback: function () {
+                UI.confirmMerge(project, job);
+                UI.reloadProjects();
+                APP.ModalWindow.onCloseModal();
+            },
+            cancelText: "Cancel",
+            cancelCallback: function () {
+                APP.ModalWindow.onCloseModal();
+            }
 
-    /**
-     * Mistero!
-     * @param pid
-     * @param psw
-     * @param jid
-     * @param jpsw
-     */
-    getOutsourceQuotes: function(pid, psw, jid, jpsw) {
-        $.ajax({
-            async: true,
-            type: "POST",
-            url : "/?action=outsourceTo",
-            data:
-                {
-                    action: 'outsourceTo',
-                    pid: pid,
-                    ppassword: psw,
-                    jobs:
-                        [{
-                            jid: jid,
-                            jpassword: jpsw
-                        }]
-                },
-            success : function ( data ) {}
-        });
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
     },
+    confirmMerge: function(project, job) {
+
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "merge",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id
+            }
+
+        });
+    }
+    /**********************/
 };
 
 
@@ -623,7 +638,4 @@ UI = {
 $(document).ready(function(){
     UI.init();
     UI.render();
-    if ( config.enable_outsource ) {
-        UI.outsourceInit();
-    }
 });

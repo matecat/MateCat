@@ -12,6 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Team;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\TeamAccessValidator;
 use InvalidArgumentException;
 use Teams\MembershipDao;
@@ -20,6 +21,10 @@ use API\V2\Json\Error;
 use Teams\TeamStruct;
 
 class TeamsController extends KleinController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
 
     protected function addValidatorAccess() {
         $this->appendValidator( new TeamAccessValidator( $this ) );
@@ -63,8 +68,6 @@ class TeamsController extends KleinController {
 
     public function update() {
 
-        $requestContent = $this->getPutParams();
-
         $this->addValidatorAccess();
         $this->validateRequest();
 
@@ -73,7 +76,7 @@ class TeamsController extends KleinController {
             $org     = new TeamStruct();
             $org->id = $this->request->id_team;
 
-            $org->name = $requestContent[ 'name' ];
+            $org->name = $this->params[ 'name' ];
             if ( empty( $org->name ) ) {
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
@@ -85,7 +88,7 @@ class TeamsController extends KleinController {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
 
-            $org->name = $requestContent[ 'name' ];
+            $org->name = $this->params[ 'name' ];
 
             $teamDao = new TeamDao();
 

@@ -60,7 +60,6 @@ class glossaryController extends ajaxController {
     public function doAction() {
 
         $this->job_info = getJobData( $this->id_job, $this->password );
-        $job = Jobs_JobDao::getById( $this->id_job );
 
         /**
          * For future reminder

@@ -13,6 +13,9 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
+use Projects_ProjectStruct ;
+use Jobs_JobStruct ;
+
 use Features\ProjectCompletion\Model\EventStruct ;
 
 use Features ;
@@ -242,6 +245,11 @@ class ReviewImproved extends BaseFeature {
                 $model->resetScore( $completion_event_id );
             }
         }
+    }
+
+    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
+        $dao = new ChunkReviewDao();
+        $dao->updatePassword( $job->id, $job->password, $new_password );
     }
 
     /**
