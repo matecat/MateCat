@@ -97,9 +97,7 @@
 
 
 <div class="wrapper-claim">
-    <h1 tal:condition="true:conversion_enabled">Join the Evolution</h1>
-
-    <h1 tal:condition="not:conversion_enabled">Join the Evolution</h1>
+    <h1>Join the Evolution</h1>
 
     <h2 class="payoff">The CAT tool that works for you</h2>
 </div>
@@ -191,7 +189,10 @@
     </div>
 
     <div class="translate-box tmx-select">
-        <h2>Translation Memory</h2>
+        <h2 data-position="top right" data-variation="tiny" data-tooltip="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.">TM and Glossary
+            <i class="icon-info icon" />
+        </h2>
+
         <div class="ui fluid selection dropdown" id="tmx-select">
             <input type="hidden" name="tmx"/>
             <i class="dropdown icon"></i>

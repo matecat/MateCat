@@ -861,7 +861,7 @@ color:#333;}
 		z-index: 10;
 	}
 
-    .popup
+    .popup:not(.ui)
     {
 	    overflow: hidden;
 	    line-height: 30px;
@@ -878,7 +878,7 @@ color:#333;}
 	    left: 50%;
 	    z-index: 999999999999999999999999999;
     }
-    .popup.popup-alert:hover
+    .popup:not(.ui).popup-alert:hover
     {
 	    background-color: #fff;
 }
@@ -1336,11 +1336,11 @@ text-align: right;
   border-top: 10px solid #fff;
 }
 
-.popup p
+.popup:not(.ui) p
 {
 	font-size: 18px;
     }
-    .popup h1, .popup-tm h1, .popup-languages.slide h1, .slide-panel h1
+    .popup:not(.ui) h1, .popup-tm h1, .popup-languages.slide h1, .slide-panel h1
     {
 	    overflow: visible;
 	    max-height: inherit;
@@ -1357,7 +1357,7 @@ text-align: right;
     	height: 30px;
     	padding: 10px 23px 7px 58px;
     }
-    .popup h2
+    .popup:not(.ui) h2
     {
 	    font-weight: normal;
 	    font-size: 24px;
@@ -1366,17 +1366,17 @@ text-align: right;
 	    margin: 20px 0 20px 0;
     }
 
-    .popup a.anonymous
+    .popup:not(.ui) a.anonymous
     {
 	    font-size: 12px;
     }
-    .popup a.anonymous:visited,
-    .popup a.anonymous:active 
+    .popup:not(.ui) a.anonymous:visited,
+    .popup:not(.ui) a.anonymous:active
     {
 	    color: black;
     }
 
-    .popup .outer {
+    .popup:not(.ui) .outer {
 	    background: url(../img/bg_login_button.gif) 0 0 repeat;
 	    border-radius: 6px;
 	    margin: 0 auto -10px auto;
@@ -1398,12 +1398,12 @@ margin-left: 10px;
     margin-top: 20px;
 }
 
-.popup .outer:hover
+.popup:not(.ui) .outer:hover
 {
 	background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
 }
 
-.popup .inner
+.popup:not(.ui) .inner
 {
 	width: 45px;
 	border-right: 1px solid #003366;
@@ -1411,7 +1411,7 @@ margin-left: 10px;
 	border-radius: 0 0 0 6px;
     }
 
-    .popup .login-button
+    .popup:not(.ui) .login-button
     {
 	    width: 330px;
 	    font-weight: normal;
@@ -1425,7 +1425,7 @@ margin-left: 10px;
 	    cursor: pointer;
     }
 
-    .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
+    .popup:not(.ui) .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
     {
 	    color:#fff;
         text-decoration: none;
@@ -1438,7 +1438,7 @@ margin-left: 10px;
 	    background-size: 22px;
     }
 
-    .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
+    .popup:not(.ui) .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
         color:red;
     }
 
@@ -1457,8 +1457,8 @@ margin-left: 10px;
     }
 
 
-.popup .btn-ok,
-.popup .btn-cancel
+.popup:not(.ui) .btn-ok,
+.popup:not(.ui) .btn-cancel
 {
     padding: 1px 18px;
     margin: 16px 0 16px 20px;
@@ -1468,8 +1468,8 @@ margin-left: 10px;
 
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
-    .popup .btn-ok,
-    .popup .btn-cancel,
+    .popup:not(.ui) .btn-ok,
+    .popup:not(.ui) .btn-cancel,
     .slide-panel .btn-ok,
     .slide-panel .btn-cancel,
     .uploadtm.disabled,
@@ -1531,11 +1531,11 @@ float: none!important;
 }
 
 
-.popup .btnsplit .btn-cancel {
+.popup:not(.ui) .btnsplit .btn-cancel {
     margin: 0;
 }
 
-    .popup .btn-cancel, .btn-grey, .slide-panel .btn-cancel, .btn-grey
+    .popup:not(.ui) .btn-cancel, .btn-grey, .slide-panel .btn-cancel, .btn-grey
     {
 	    color: #333;
 	    background: #f6f6f6;
@@ -1555,8 +1555,8 @@ float: none!important;
 
 .mgmt-panel-tm .btn-ok:hover,
 .mgmt-panel-gl .btn-ok:hover,
-.popup .btn-ok:hover, 
-.popup .btn-cancel:hover,
+.popup:not(.ui) .btn-ok:hover,
+.popup:not(.ui) .btn-cancel:hover,
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover
 {
@@ -1567,8 +1567,8 @@ float: none!important;
     }
 		.mgmt-panel-gl .btn-ok:active,
 	.mgmt-panel-tm .btn-ok:active,
-    .popup .btn-ok:active,
-    .popup .btn-cancel:active,
+    .popup:not(.ui) .btn-ok:active,
+    .popup:not(.ui) .btn-cancel:active,
      .slide-panel .btn-ok:active,
     .slide-panel .btn-cancel:active
     {
@@ -1578,8 +1578,8 @@ float: none!important;
     }
 	
 
-    .popup .btn-ok.right,
-    .popup .btn-cancel.right,
+    .popup:not(.ui) .btn-ok.right,
+    .popup:not(.ui) .btn-cancel.right,
     .popup-tm .btn-ok.right,
     .popup-tm .btn-cancel.right,
     .popup-languages.slide .btn-ok.right,

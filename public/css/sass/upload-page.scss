@@ -1343,7 +1343,9 @@ button.ui-button::-moz-focus-inner {
 
 .translate-box {
     float: left;
-    margin: 20px 17px 0px 0px
+    margin: 20px 17px 0px 0px;
+    position: relative;
+    display: block;
 }
 
 .translate-box.settings {

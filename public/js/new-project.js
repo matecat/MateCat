@@ -312,6 +312,8 @@ $.extend(UI.UPLOAD_PAGE, {
             //     self.selectTm(value);
             // }
         });
+
+        $('.tmx-select > h2').popup();
     },
 
     checkLanguagesCookie: function () {
