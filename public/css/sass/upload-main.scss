@@ -128,6 +128,12 @@
     .icon-info {
         font-size: 19px;
     }
-
+    h2 {
+        position: relative;
+        cursor: pointer;
+    }
+    .tm-tooltip {
+        text-align: left;
+    }
 
 }

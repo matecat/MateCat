@@ -455,7 +455,7 @@
             UI.useTM(trKey);
             UI.checkTMKeysUpdateChecks();
             setTimeout(function () {
-                $("#inactivetm").trigger("update");
+                $("#activetm").trigger("update");
             },500);
         },
         openLanguageResourcesPanel: function(tab, elToClick) {
@@ -630,13 +630,13 @@
                         return false;
                     }
                     UI.disableTM(el);
-                    $("#inactivetm").trigger("update");
+                    $("#activetm").trigger("update");
                 }
             } else {
                 if(!isActive) {
                     UI.useTM(el);
                     setTimeout(function () {
-                        $("#inactivetm").trigger("update");
+                        $("#activetm").trigger("update");
                     },500);
                 }
             }
@@ -785,7 +785,7 @@
 
             UI.setTMsortable();
             setTimeout(function () {
-                $("#inactivetm").trigger("update", [keyParams.desc, keyParams.TMKey]);
+                $("#activetm").trigger("update", [keyParams.desc, keyParams.TMKey]);
             },500);
         },
 
@@ -1387,7 +1387,7 @@
                 success: function(d) {
                     UI.hideAllBoxOnTables();
                     setTimeout(function () {
-                        $("#inactivetm").trigger("deleteTm", [tr.find('.privatekey').text()]);
+                        $("#activetm").trigger("deleteTm", [tr.find('.privatekey').text()]);
                     },500);
 
                 }

@@ -259,8 +259,8 @@ $.extend(UI.UPLOAD_PAGE, {
         APP.checkForSpeechToText();
         this.render();
         this.addEvents();
-        $("#inactivetm").on("update", this.checkTmKeys);
-        $("#inactivetm").on("deleteTm", this.deleteTMFromSelect);
+        $("#activetm").on("update", this.checkTmKeys);
+        $("#activetm").on("deleteTm", this.deleteTMFromSelect);
     },
 
     render: function () {
@@ -313,7 +313,10 @@ $.extend(UI.UPLOAD_PAGE, {
             // }
         });
 
-        $('.tmx-select > h2').popup();
+        $('.tmx-select  h2').popup({
+            html: "<div style='text-align: left'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            position: 'right center'
+        });
     },
 
     checkLanguagesCookie: function () {

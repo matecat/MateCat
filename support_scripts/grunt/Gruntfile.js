@@ -285,12 +285,12 @@ module.exports = function(grunt) {
 
             libs_upload: {
                 src: [
-                    basePath + 'lib/jquery.js', //1.7.2
+                    // basePath + 'lib/jquery.js', //1.7.2
                     // basePath + 'lib/jquery.1.8.2.min.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
 
-                     // basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
-                    basePath + 'lib/jquery-ui-1.8.20.custom.min.js',
+                    basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
+
                     basePath + 'lib/jquery.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.powertip.min.js',
