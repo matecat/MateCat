@@ -1249,7 +1249,7 @@ button.ui-button::-moz-focus-inner {
 @media only screen and (max-width: 1320px) {
 
     .translate-box input[type="text"] {
-        width: 180px !important;
+        width: 186px !important;
     }
     input#dqf_key {
         width: 126px !important;
@@ -1283,7 +1283,7 @@ button.ui-button::-moz-focus-inner {
 
     #source-lang,
     #target-lang {
-        width: 186px;
+        width: 186px !important;
         .text {
             max-width: 145px;
             white-space: nowrap;
@@ -1671,7 +1671,7 @@ body {
 }
 
 .upload-input {
-    width: 95%;
+    width: 230px;
     padding: 3px 5px 3px 9px;
     font-size: 19px !important;
     -moz-border-radius: 2px;

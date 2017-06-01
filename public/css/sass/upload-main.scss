@@ -12,6 +12,12 @@
 @import 'powerTip';
 
 @import 'upload-page';
+.translate-box {
+    h2 {
+        margin-left: 11px;
+    }
+}
+
 
 
 .translate-box.target,
@@ -41,7 +47,12 @@
 .translate-box.tmx-select,
 .translate-box.source,
 .translate-box.target {
-    .dropdown {
+
+    #source-lang,
+    #target-lang {
+        width: 230px ;
+    }
+    #tmx-select {
         width: 260px;
     }
     .menu-dropdown {
@@ -108,9 +119,7 @@
     .divider {
         margin: 0 !important;
     }
-    h2 {
-        margin-left: 11px;
-    }
+
 }
 
 .translate-box.tmx-select {
