@@ -23,13 +23,38 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     }
 
-    public function getLanguageStats() {
+    public function getLanguageStats( DateTime $filterDate = null ) {
+
+
+        if( !$filterDate ){
+            $filterDate = $this->setCacheTTL( 24 * 60 * 60 )->_fetch_array( "SELECT MAX( date ) as date FROM " . self::TABLE )[ 0 ][ 'date' ];
+        } else {
+            $filterDate = $filterDate->format( 'Y-m-d H:i:s' );
+        }
 
          $query = "
           SELECT source, target, date, total_post_editing_effort, job_count, total_word_count, fuzzy_band
                 FROM " . self::TABLE . "
-                WHERE date = ( SELECT MAX( date ) FROM " . self::TABLE . " );
-";
+                WHERE date = :filterDate
+                AND job_count > 50 
+                ;
+          ";
+
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute([
+                'filterDate' => $filterDate
+        ]);
+        return $stmt->fetchAll();
+
+    }
+
+    public function getSnapshotDates(){
+
+        $query = "
+                SELECT distinct DATE_FORMAT( date,'%Y-%m-%d' ) AS date_format , date
+                FROM " . self::TABLE;
 
         $con = $this->con->getConnection();
         $stmt = $con->prepare( $query );
@@ -164,7 +189,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         $values = array();
 
         //chunk array using MAX_INSERT_NUMBER
-        $objects = array_chunk( $obj_arr, self::MAX_INSERT_NUMBER );
+        $objects = array_chunk( $obj_arr, 20 );
 
         $allInsertPerformed = true;
         //create an insert query for each chunk

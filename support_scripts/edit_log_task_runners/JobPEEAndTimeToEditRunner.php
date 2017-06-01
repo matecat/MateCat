@@ -3,7 +3,6 @@
 $root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
-//require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
 use Jobs\PeeJobStatsStruct;
@@ -17,22 +16,23 @@ use TaskRunner\Commons\AbstractDaemon;
  */
 class JobPEEAndTimeToEditRunner extends AbstractDaemon
 {
-    const NR_OF_JOBS = 1000;
+    const NR_OF_JOBS = 100;
     const NR_OF_SEGS = 10000;
 
     private static $last_job_file_name = '';
+    private static $max_job_to_process_file_name = '';
 
     private static $queryMaxJob = "
                 SELECT min(id) AS min, max(id) AS max
                     FROM jobs
-                    WHERE completed = 1
+                    WHERE ( new_words + draft_words ) = 0
                     AND id > :id ";
 
     private static $queryFirst = "
                 SELECT jobs.id, password, job_first_segment, job_last_segment, source, target, class_load
                     FROM jobs
                     JOIN engines ON id_mt_engine = engines.id
-                    WHERE completed = 1
+                    WHERE ( new_words + draft_words ) = 0
                     AND jobs.id >= :min_id AND jobs.id <= :max_id ";
 
     private static $querySegments = "
@@ -52,14 +52,20 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
 
     public function __construct() {
         parent::__construct();
-        self::$last_job_file_name = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.lastjobprocessed_jpeer';
+        self::$last_job_file_name           = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.lastjobprocessed_jpeer';
+        self::$max_job_to_process_file_name = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.maxJobToProcess_jpeer';
         self::$sleepTime          = 60 * 60 * 24 * 30 * 1;
         Log::$fileName            = "evaluatePEE.log";
     }
 
     function main( $args = null ) {
+
+        $this->truncateOldRecords();
+
         $db               = Database::obtain();
+
         $lastProcessedJob = (int)file_get_contents( self::$last_job_file_name );
+        $maxJobToProcess  = @file_get_contents( self::$max_job_to_process_file_name );
 
         do {
 
@@ -69,13 +75,25 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                     'id' => (int)$lastProcessedJob
             ]);
             $minJobMaxJob = $stmt->fetch();
-            $maxJob       = (int)$minJobMaxJob[ 'max' ];
+
             $minJob       = (int)$minJobMaxJob[ 'min' ];
+            Log::doLog( "Parsing Jobs starting from $minJob." );
+            echo "Parsing Jobs starting from $minJob.\n";
+
+            if( $maxJobToProcess !== false && $minJob <= (int)$maxJobToProcess ){ // exclude old files if they exists
+                $maxJob       = (int)$maxJobToProcess;
+                Log::doLog( "Parsing Jobs until $maxJob reached." );
+                echo "Parsing Jobs until $maxJob reached.\n";
+                //review configs
+                sleep( 5 );
+            } else {
+                $maxJob       = (int)$minJobMaxJob[ 'max' ];
+            }
 
             $start = time();
 
             //get a chunk of self::NR_OF_JOBS each time.
-            for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
+            for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob <= $maxJob ); $firstJob += self::NR_OF_JOBS ) {
 
                 $stmt = $db->getConnection()->prepare( self::$queryFirst );
                 $stmt->setFetchMode( PDO::FETCH_ASSOC );
@@ -119,13 +137,13 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                                     'raw_wc_job'              => 0,
                                     'time_to_edit_job'        => 0
                             ];
-                        } else {
-                            $job_stats [ $fuzzy_band ] = [
-                                    'raw_post_editing_effort' => 0,
-                                    'raw_wc_job'              => 0,
-                                    'time_to_edit_job'        => 0
-                            ];
                         }
+
+                        $job_stats [ $fuzzy_band ] = [
+                                'raw_post_editing_effort' => 0,
+                                'raw_wc_job'              => 0,
+                                'time_to_edit_job'        => 0
+                        ];
 
                     }
 
@@ -155,17 +173,24 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                             $segment = new EditLog_EditLogSegmentStruct( $segment );
                             
                             if ( $segment->isValidForPeeTable() ) {
+
+                                $_PEE = $segment->getPEE();
+
                                 $job_stats[ 'ALL' ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ 'ALL' ][ 'time_to_edit_job' ] += $segment->time_to_edit;
-                                $job_stats[ 'ALL' ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
+                                $job_stats[ 'ALL' ][ 'raw_post_editing_effort' ] += $_PEE * $segment->raw_word_count;
 
                                 if( strpos( $segment->match_type, 'MT' ) !== false ){
-                                    $segment->match_type = $segment->match_type . "_" . $_mt_engine_class_name;
+                                    $_match_type = $segment->match_type . "_" . $_mt_engine_class_name;
+                                    $job_stats[ $_match_type ][ 'raw_wc_job' ] += $segment->raw_word_count;
+                                    $job_stats[ $_match_type ][ 'time_to_edit_job' ] += $segment->time_to_edit;
+                                    $job_stats[ $_match_type ][ 'raw_post_editing_effort' ] += $_PEE * $segment->raw_word_count;
                                 }
 
                                 $job_stats[ $segment->match_type ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ $segment->match_type ][ 'time_to_edit_job' ] += $segment->time_to_edit;
-                                $job_stats[ $segment->match_type ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
+                                $job_stats[ $segment->match_type ][ 'raw_post_editing_effort' ] += $_PEE * $segment->raw_word_count;
+
                             }
                         }
 
@@ -248,6 +273,26 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
     protected function _updateConfiguration() {
         // TODO: Implement _updateConfiguration() method.
     }
+
+    protected function truncateOldRecords(){
+
+        //Clean old Table Stat
+        $dropCredentials = @parse_ini_file( realpath( dirname( __FILE__ ) ) . '/.passwd.ini' );
+
+        $dropConnection = new PDO(
+                "mysql:host=" . INIT::$DB_SERVER . ";dbname=" . INIT::$DB_DATABASE,
+                $dropCredentials[ 'DB_USER' ],
+                $dropCredentials[ 'DB_PASS' ],
+                array(
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                ) );
+
+        $dropConnection->exec( "SET names utf8" );
+        $dropConnection->exec( "TRUNCATE TABLE jobs_stats" );
+
+    }
+
 }
 
 $jpe = JobPEEAndTimeToEditRunner::getInstance();

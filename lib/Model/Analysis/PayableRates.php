@@ -318,7 +318,7 @@ class Analysis_PayableRates {
 //        $payable = self::roundUpToAny( $payable, 5);
 
         if ( $payable < 75 ) {
-            $payable = 75;
+            $payable = 85;
         }
         if ( $payable > 95 ) {
             $payable = 95;

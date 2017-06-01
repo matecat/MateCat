@@ -24,7 +24,7 @@ class LanguageStatsRunner extends AbstractDaemon {
         $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
 
         do {
-            $today = date( "Y-m-d" );
+            $firstDayOfLastMonth = date( 'Y-m-d', strtotime( 'first day of last month' ) );
 
             $langsObj = Langs_Languages::getInstance();
 
@@ -40,42 +40,38 @@ class LanguageStatsRunner extends AbstractDaemon {
 
                 $languageStats = $jobStatsDao->readBySource( $source_language );
 
-                $languageTuples = array();
-
-                foreach ( $languageStats as $languageCoupleStat ) {
+                foreach ( $languageStats as $position => $languageCoupleStat ) {
 
                     if ( !self::isLanguageStatValid( $languageCoupleStat ) ) {
+                        unset( $languageStats[ $position ] );
                         continue;
                     }
 
                     Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")" );
                     echo "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")\n";
 
-                    $langStatsStruct                            = new LanguageStats_LanguageStatsStruct();
-                    $langStatsStruct->date                      = $today;
-                    $langStatsStruct->source                    = $languageCoupleStat->source;
-                    $langStatsStruct->target                    = $languageCoupleStat->target;
-                    $langStatsStruct->fuzzy_band                = $languageCoupleStat->fuzzy_band;
-                    $langStatsStruct->total_word_count          = round( $languageCoupleStat->total_raw_wc, 4 );
-                    $langStatsStruct->total_post_editing_effort = round( $languageCoupleStat->avg_post_editing_effort, 4 );
-                    $langStatsStruct->total_time_to_edit        = round( $languageCoupleStat->total_time_to_edit, 4 );
-                    $langStatsStruct->job_count                 = $languageCoupleStat->job_count;
+                    $languageCoupleStat->date                      = $firstDayOfLastMonth;
+                    $languageCoupleStat->total_word_count          = round( $languageCoupleStat->total_word_count, 4 );
+                    $languageCoupleStat->total_post_editing_effort = round( $languageCoupleStat->total_post_editing_effort, 4 );
+                    $languageCoupleStat->total_time_to_edit        = round( $languageCoupleStat->total_time_to_edit, 4 );
 
-                    $languageTuples[] = $langStatsStruct;
                 }
 
                 //if there is some data for this language couple, insert it
-                if ( count( $languageTuples ) > 0 ) {
+                if ( count( $languageStats ) > 0 ) {
+
                     Log::doLog( "Found some stats. Saving in DB.." );
                     echo "Found some stats. Saving in DB..\n";
 
-                    $result = $lsDao->createList( $languageTuples );
+                    $result = $lsDao->createList( $languageStats );
                     if ( is_null( $result ) ) {
                         echo "ERROR: DAO failed to insert rows";
                     }
+
                 }
 
                 usleep( 100 );
+
             }
 
             Log::doLog( "Everything completed. I can die." );

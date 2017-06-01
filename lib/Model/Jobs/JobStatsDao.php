@@ -26,7 +26,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
                         js.source,
                         js.target,
                         sum( js.total_time_to_edit ) as total_time_to_edit,
-                        sum( js.total_raw_wc ) as total_raw_wc,
+                        sum( js.total_raw_wc ) as total_word_count,
                         sum( COALESCE ( js.avg_post_editing_effort, 0) ) / sum( coalesce( js.total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM jobs_stats js 
@@ -35,7 +35,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
         );
 
         $stmt->bindParam(':source', $source);
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new PeeJobStatsStruct() ) );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new LanguageStats_LanguageStatsStruct() ) );
         $stmt->execute();
 
         $result = null;

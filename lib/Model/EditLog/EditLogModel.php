@@ -335,7 +335,6 @@ class EditLog_EditLogModel {
             $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
             $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
-
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
         $stats[ 'tm-words' ]        = 100 - $stats[ 'mt-words' ];
         $stats[ 'total-valid-tte' ] = round( $globalStats[ 'tot_tte' ] );

@@ -81,15 +81,10 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     /**
      * @return float|string
      */
-    public function getPeePerc() {
-        if ( is_null( $this->pe_effort_perc ) ) {
-            $this->pe_effort_perc = $this->getPEE();
-        }
+    public function getPEE() {
 
-        if ( $this->pe_effort_perc < 0 ) {
-            $this->pe_effort_perc = 0;
-        } else if ( $this->pe_effort_perc > 100 ) {
-            $this->pe_effort_perc = 100;
+        if ( is_null( $this->pe_effort_perc ) ) {
+            $this->pe_effort_perc = parent::getPEE();
         }
 
         return $this->pe_effort_perc;

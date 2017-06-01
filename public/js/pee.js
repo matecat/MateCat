@@ -144,39 +144,39 @@
                                     return n > 5000000;
                                 }
                             },
-                            5: {
+                            6: {
                                 "All": function (e, n, f, i, $r, c, data) {
                                     return true;
                                 },
                                 "100%_PUBLIC": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "50%-74%": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "75%-84%": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "85%-94%": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "95%-99%": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "ALL": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "INTERNAL": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "MT_MyMemory": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "NO_MATCH": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                                 "REPETITIONS": function (e, n, f, i, $r, c, data) {
-                                    return n == e;
+                                    return e == f;
                                 },
                             }
                         },
@@ -237,9 +237,12 @@
                     elem.totalwordPEE +
                     '</td> ' +
                     '<td id="col5">' +
-                    elem.payable_rate + '%' +
+                    elem.job_count +
                     '</td>' +
                     '<td id="col6">' +
+                    elem.payable_rate + '%' +
+                    '</td>' +
+                    '<td id="col7">' +
                     elem.fuzzy_band +
                     '</td></tr>';
 
@@ -251,5 +254,8 @@
 
     $(document).ready(function (el) {
         PEE.init();
+        $( 'div.selectContainer form select' ).on( 'change', function(){
+            $( '#filterDateForm' ).submit();
+        } );
     });
 })($);

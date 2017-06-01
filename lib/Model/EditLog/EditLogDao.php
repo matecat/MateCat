@@ -348,6 +348,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         join segments s on s.id = st.id_segment
         join jobs j on j.id = st.id_job
         where id_job = %d
+            AND show_in_cattool = 1
             and  password = '%s'
             and st.status not in( '%s', '%s' )
             and time_to_edit/raw_word_count between %d and %d";
