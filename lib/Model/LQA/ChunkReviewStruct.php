@@ -43,5 +43,9 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
         100), 2 );
     }
 
+    public function getUndoData() {
+        return json_decode( $this->undo_data, true ) ;
+    }
+
 
 }

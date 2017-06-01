@@ -115,8 +115,6 @@
           // TODO: remove the nested one, should be nested on the client.
           config.lqa_nested_categories = '${lqa_categories}';
           config.lqa_flat_categories = '${lqa_flat_categories}';
-
-
           /*]]>*/
 
         </script>
@@ -142,6 +140,7 @@
             /*<![CDATA[*/
             config.job_marked_complete = ${job_marked_complete|false};
             config.job_completion_current_phase = '${job_completion_current_phase}' ;
+            config.last_completion_event_id = ${job_completion_last_event_id|string: null};
             /*]]>*/
         </script>
 

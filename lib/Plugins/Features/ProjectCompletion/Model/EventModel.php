@@ -40,6 +40,10 @@ class EventModel {
         $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
     }
 
+    public function getChunkCompletionEventId() {
+        return $this->chunkCompletionEventId ;
+    }
+
     private function _checkStatusIsValid() {
         $dao = new Chunks_ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase( $this->chunk );

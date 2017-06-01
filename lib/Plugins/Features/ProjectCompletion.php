@@ -2,6 +2,8 @@
 
 namespace Features;
 
+use CompletionEventController;
+use Klein\Klein;
 use Utils ;
 use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct ;
@@ -52,4 +54,5 @@ class ProjectCompletion extends BaseFeature {
         $dao = new Chunks_ChunkCompletionEventDao() ;
         $dao->updatePassword( $job->id, $job->password, $old_password );
     }
+
 }

@@ -54,7 +54,10 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
         $model = new EventModel( $this->chunk, $eventStruct ) ;
         $model->save();
 
-        $this->result[ 'data' ] = $this->chunk->toArray() ;
+        $this->result[ 'data' ] = ['event' => [
+                'id' => (int) $model->getChunkCompletionEventId()
+            ]
+        ];
     }
 
     private function getUid() {

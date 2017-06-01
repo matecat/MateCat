@@ -14,6 +14,30 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         );
     }
 
+    public function deleteEvent( Chunks_ChunkCompletionEventStruct $event ) {
+        $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
+        $stmt = $this->con->getConnection()->prepare( $sql ) ;
+
+        $stmt->execute( ['id_event' => $event->id ] ) ;
+        return $stmt->rowCount();
+    }
+
+    public function getByIdAndChunk($id_event, Chunks_ChunkStruct $chunk) {
+        $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
+               AND id_job = :id_job AND password = :password " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Chunks_ChunkCompletionEventStruct');
+
+        $stmt->execute(array(
+            'id_event' => $id_event,
+            'password' => $chunk->password,
+            'id_job'   => $chunk->id
+        ));
+
+        return $stmt->fetch();
+    }
 
     public function updatePassword($id_job, $password, $old_password) {
         $sql = "UPDATE chunk_completion_events SET password = :new_password
@@ -95,7 +119,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      * @param $chunk chunk to examinate
      * @param $params list of params for query: is_review
      *
-     * @return true|false
+     * @return array
      *
      */
 
@@ -110,9 +134,9 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
          *
          */
         $sql = "
-          SELECT id_job, password, is_review, create_date FROM
+          SELECT id_event, id_job, password, is_review, create_date FROM
           ( 
-            SELECT events.uid, events.create_date, events.is_review, events.id_job, updates.password 
+            SELECT events.id AS id_event, events.uid, events.create_date, events.is_review, events.id_job, updates.password
             FROM chunk_completion_events events 
             LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job 
             AND  events.password = updates.password and events.is_review = updates.is_review 
