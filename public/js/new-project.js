@@ -313,9 +313,10 @@ $.extend(UI.UPLOAD_PAGE, {
             // }
         });
 
-        $('.tmx-select  h2').popup({
-            html: "<div style='text-align: left'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-            position: 'right center'
+        $('.tmx-select .icon').popup({
+            html: "<div style='text-align: left'>By using the MyMemory Collaborative TM you are making MateCat better. The sentences you translate may be used by other MateCat users to improve their translations.</br></br>" +
+            "For confidential projects, we suggest adding a private TM.</div>",
+            position: 'bottom center'
         });
     },
 
@@ -407,7 +408,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
 
 	addEvents: function () {
-        $( "a.more-options" ).on("click", function ( e ) {
+        $( ".more-options-cont" ).on("click", function ( e ) {
             e.preventDefault();
             APP.openOptionsPanel("tm")
         } );
@@ -469,7 +470,8 @@ $.extend(UI.UPLOAD_PAGE, {
 
                     if( typeof d.errors != 'undefined' && d.errors.length ) {
                         //normal error management
-                        $('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+                        $('.error-message').find('p').text(this.message);
+                        $('.error-message').show();
                         $('.uploadbtn').attr('value', 'Analyze');
                         $('body').removeClass('creating');
 
@@ -601,7 +603,7 @@ APP.postProjectCreation = function ( d ) {
 
     if ( typeof d.errors != 'undefined' && d.errors.length ) {
 
-        $( '.error-message' ).text( '' );
+        $( '.error-message' ).find('p').text( '' );
 
         $.each( d.errors, function () {
 
@@ -643,7 +645,8 @@ APP.postProjectCreation = function ( d ) {
             }
 
             //normal error management
-            $( '.error-message' ).append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+            $( '.error-message' ).find('p').text(this.message);
+            $( '.error-message' ).show();
 
         } );
 

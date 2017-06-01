@@ -189,9 +189,12 @@
     </div>
 
     <div class="translate-box tmx-select">
-        <h2>TM and Glossary
+
+        <div class="tm-info-title">
+            <h2>TM and Glossary</h2>
             <i class="icon-info icon" />
-        </h2>
+        </div>
+
 
         <div class="ui fluid selection dropdown" id="tmx-select">
             <input type="hidden" name="tmx"/>
@@ -233,7 +236,10 @@
     </div>
 
     <div class="translate-box settings">
-        <a href="#" class="more-options"><span>Settings</span></a>
+        <div class="more-options-cont">
+            <a href="#" class="more-options"></a>
+            <span>Settings</span>
+        </div>
         <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
     </div>
 
@@ -242,9 +248,15 @@
 
     <div class="cl"></div>
 
-    <p class="warning-message"> Ops we got an error... </p>
+    <div class="warning-message">
+        <i class="icon-warning2 icon"> </i>
+        <p>Oops we got an error...</p>
+    </div>
 
-    <p class="error-message"> Ops we got an error... </p>
+    <div class="error-message">
+        <i class="icon-error_outline icon"> </i>
+        <p>Oops we got an error... </p>
+    </div>
 
     <div class="cl"></div>
 

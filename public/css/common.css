@@ -3649,7 +3649,6 @@ a.resume-project:after,
 .mbc-warnings:before,
 /* mbc chat */
 .tab-switcher-al a:before,
-.error-message p:before,
 .text .alternatives:before,
 .autofillTag:before,
 input.downloadtr-button:before,
@@ -3843,10 +3842,6 @@ float: left;
 .notific:before {
     content: "\f058";
       font-size: 25px;
-}
-.error-message p:before {
-     content: "\f071";
-     margin-right: 10px;
 }
 
 .tab-switcher-al a:before,

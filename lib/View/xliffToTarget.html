@@ -522,7 +522,7 @@
 
             add: function ( e, data ) {
                 conversionFailed = {};
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         options = that.options,
                         files = data.files;
                 $( this ).fileupload( 'process', data ).done( function () {
@@ -550,7 +550,7 @@
 
             // Callback for the start of each file upload request:
             send: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( !data.isValidated ) {
                     if ( !data.isAdjusted ) {
                         that._adjustMaxNumberOfFiles( -data.files.length );
@@ -578,7 +578,7 @@
             },
             // Callback for successful uploads:
             done: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 if ( data.context ) {
 
@@ -629,7 +629,7 @@
             fail: function ( e, data ) {
                 conversionFailed = true;
                 conversionInfo = data.originalFiles[0];
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
@@ -717,13 +717,14 @@
             // Callback for global upload progress events:
             progressall: function ( e, data ) {
                 var $this = $( this ),
+                    upload = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         progress = parseInt( data.loaded / data.total * 100, 10 ),
                         globalProgressNode = $this.find( '.fileupload-progress' ),
                         extendedProgressNode = globalProgressNode
                                 .find( '.progress-extended' );
                 if ( extendedProgressNode.length ) {
                     extendedProgressNode.html(
-                            $this.data( 'fileupload' )._renderExtendedProgress( data )
+                        upload._renderExtendedProgress( data )
                     );
                 }
                 globalProgressNode
@@ -736,7 +737,7 @@
             },
             // Callback for uploads start, equivalent to the global ajaxStart event:
             start: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             that._trigger( 'started', e );
@@ -745,7 +746,7 @@
             },
             // Callback for uploads stop, equivalent to the global ajaxStop event:
             stop: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             $( this ).find( '.progress' )
@@ -759,7 +760,7 @@
             // Callback for file deletion:
             destroy: function ( e, data ) {
 
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( data.url ) {
                     $.ajax( data );
                     that._adjustMaxNumberOfFiles( 1 );

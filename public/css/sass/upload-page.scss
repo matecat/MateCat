@@ -1931,9 +1931,9 @@ span.gdrive-icon {
 
 .error-message,
 .warning-message {
-    background: #d65757 url(../../img/error-symbol.png) 10px center no-repeat;
+    background: #d65757;
     color: #fff;
-    padding: 10px 0 10px 3%;
+    padding: 10px 0 10px 16px;
     margin: 10px 0;
     float: left;
     font-weight: bold;
@@ -1942,15 +1942,21 @@ span.gdrive-icon {
     border-radius: 2px;
     border: 1px solid #c45f5f;
     display: none;
+    .icon {
+        float: left;
+        font-size: 25px;
+    }
+    p {
+        line-height: 25px;
+        font-size: 16px;
+        float: left;
+        margin-left: 12px;
+    }
 }
 
 .warning-message {
-    /*background: #FFFA8B !important;*/
     background: rgba(255, 250, 139, 0.38) !important;
     border-color: #6D6E71;
-    padding: 10px 0 10px 1%;
-    text-indent: 0;
-    width: 98.8%;
     color: #000;
 }
 
@@ -2049,21 +2055,27 @@ tr.ready .size span {
     padding: 4px 0px
 }
 
-.more-options {
-    float: right !important;
-    margin-left: 20px;
-    font-size: 16px;
-    margin-top: 8px !important;
+.more-options-cont {
+    margin-top: 7px;
+
+    .more-options {
+        float: left ;
+        margin-left: 20px;
+        font-size: 16px;
+        margin-top: 2px !important;
+    }
+    .more-options, span:hover {
+        text-decoration: none;
+        cursor: pointer;
+    }
+    span {
+        text-decoration: underline;
+        font-size: 16px;
+        float: left;
+        color: #39699a;
+    }
 }
 
-.more-options, .more-options span:hover {
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.more-options span {
-    text-decoration: underline;
-}
 
 @-moz-document url-prefix() {
 

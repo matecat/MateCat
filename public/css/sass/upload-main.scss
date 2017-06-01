@@ -1,5 +1,7 @@
 @import "vendor_mc/semantic/matecat_semantic";
 
+@import 'variables';
+
 @import "commons/filter-teams";
 @import "commons/icons";
 @import "commons/nav-bar";
@@ -106,6 +108,9 @@
     .divider {
         margin: 0 !important;
     }
+    h2 {
+        margin-left: 11px;
+    }
 }
 
 .translate-box.tmx-select {
@@ -127,13 +132,21 @@
     }
     .icon-info {
         font-size: 19px;
-    }
-    h2 {
-        position: relative;
+        margin-top: 5px;
+        margin-left: 5px;
         cursor: pointer;
     }
     .tm-tooltip {
         text-align: left;
+    }
+    .tm-info-icon {
+        float: left;   
+    }
+    .tm-info-title {
+        line-height: 19px;
+    }
+    h2 {
+        float: left;
     }
 
 }

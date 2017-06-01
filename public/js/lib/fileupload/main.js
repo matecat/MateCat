@@ -169,7 +169,8 @@ UI = {
 
     checkDQFKey: function () {
         setTimeout(function() {
-            $('.error-message').text('').hide();
+            $( '.error-message' ).find('p').text('');
+            $( '.error-message' ).hide();
 
             $('#dqf_key').removeClass('error valid').addClass('disabled').attr('disabled', 'disabled');
 
@@ -182,7 +183,9 @@ UI = {
                     console.log('d: ', d);
                     $('#dqf_key').removeClass('disabled').removeAttr('disabled');
                     if (d.errors.length) {
-                        $('.error-message').text(d.errors[0].message).show();
+
+                        $( '.error-message' ).find('p').text(d.errors[0].message);
+                        $( '.error-message' ).show();
                         $('#dqf_key').addClass('error');
                     } else {
                         $('#dqf_key').addClass('valid');
@@ -195,7 +198,8 @@ UI = {
                 },
                 error: function(d) {
                     $('#dqf_key').addClass('error').removeClass('disabled').removeAttr('disabled');
-                    $('.error-message').text(d.errors[0].message).show();
+                    $( '.error-message' ).find('p').text(d.errors[0].message);
+                    $( '.error-message' ).show();
                     disableAnalyze();
                 }
             });
@@ -368,7 +372,10 @@ $( function () {
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -393,7 +400,10 @@ $( function () {
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -422,7 +432,8 @@ $( function () {
         var maxnum = config.maxNumberFiles;
         if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
             console.log( '10 files loaded' );
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
+            $( '.wrapper-upload .error-message' ).show()
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -438,14 +449,22 @@ $( function () {
          *      fname: data.result[0].name,
          *
          **/
-        var fileSpecs = {
-            fname: data.result[0].name,
-            filesize: data.result[0].size,
-            filerow: data.context,
-            extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
-            error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
-            enforceConversion: data.result[0].convert
-        };
+        var fileSpecs;
+        if (data.result[0]) {
+
+            fileSpecs = {
+                fname: data.result[0].name,
+                filesize: data.result[0].size,
+                filerow: data.context,
+                extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
+                error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
+                enforceConversion: data.result[0].convert
+            };
+        } else {
+            fileSpecs = {
+                error: ( typeof data.result.errors !== 'undefined' ? data.result.errors[0] : false ),
+            };
+        }
 
         if ( !fileSpecs.enforceConversion ) {
             if ( checkAnalyzability( 'file upload completed' ) ) {
@@ -490,7 +509,8 @@ $( function () {
 
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
+            $( '.wrapper-upload .error-message' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
