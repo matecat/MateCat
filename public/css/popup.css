@@ -1,6 +1,6 @@
 /*popup*/
 .popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999999;opacity:0.6;}
-.modal .popup:not(.ui){
+.modal .popup{
     overflow:hidden;
     line-height:30px;
     border-radius: 0 0 4px 4px;
@@ -14,14 +14,14 @@
     left:46%;
     z-index:999999999999999999999999999;
 }
-.popup:not(.ui) p{font-size:18px}
-.popup:not(.ui) h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
-.popup:not(.ui) h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
+.popup p{font-size:18px}
+.popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
+.popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
 
-.popup:not(.ui) a.anonymous{font-size:12px;}
-.popup:not(.ui) a.anonymous:visited, .popup:not(.ui) a.anonymous:active {color:black;}
+.popup a.anonymous{font-size:12px;}
+.popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
 
-.popup:not(.ui) h1 {
+.popup h1 {
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
@@ -35,7 +35,7 @@
     font-family: "calibri", Arial, Helvetica, sans-serif;
 }
 
-.popup:not(.ui) .x-popup {
+.popup .x-popup {
     color: #fff;
     text-decoration: none;
     display: block;

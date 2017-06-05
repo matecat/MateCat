@@ -166,8 +166,10 @@
                     <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
                         <div class="item custom" tal:condition="language/selected" dat-selected="true" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
                         <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="divider"></div>
                     </tal:block>
-                    <div class="divider"></div>
+
+
                     <tal:block tal:repeat="language target_languages">
                         <div class="item" tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
                             ---
