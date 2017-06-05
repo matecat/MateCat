@@ -478,6 +478,10 @@ body.showingOutsourceTo {
     /*color: red;*/
 }
 
+.contact_box h3 {
+    font-size: 18px;
+}
+
 .contact_box p {
     float: left;
     margin-top: 3px!important;
