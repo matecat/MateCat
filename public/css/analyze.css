@@ -164,7 +164,12 @@ background: #ccc;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
-	background:#fff;box-shadow: 0px 0px 25px #000;border-radius:7px;text-align:left;font-size:18px;border:1px solid #666;
+	background:#fff;
+	box-shadow: 0px 0px 25px #000;
+	border-radius:0 0 4px 4px;
+	text-align:left;
+	font-size:18px;
+	border:none;
 }
 
 .popup .splitbtn-cont {
@@ -941,4 +946,8 @@ top: 25%;
 }
 .user-nolog.sing-in-header {
     margin-right: 10px;
+}
+
+.contact_box p {
+	line-height: 23px !important;
 }
