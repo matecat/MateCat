@@ -6,7 +6,7 @@
  * Time: 10:17
  */
 
-$klein->respond('GET', '/utils/pee', function() {
+$klein->respond('/utils/pee', function() {
     $reflect  = new ReflectionClass('peeViewController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->doAction();

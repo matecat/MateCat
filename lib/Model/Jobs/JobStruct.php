@@ -36,7 +36,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $status_owner;
     public $status_translator;
     public $status;
-    public $completed = true; //Column 'completed' cannot be null
+    public $completed = 0; //Column 'completed' cannot be null
     public $new_words;
     public $draft_words;
     public $translated_words;

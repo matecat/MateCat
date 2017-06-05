@@ -699,8 +699,10 @@ class CatUtils {
         $todo = $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
         if( $todo < 1 && $todo > 0 ){
             $job_stats[ 'TODO_FORMATTED' ] = 1;
+            $job_stats[ 'TODO' ] = 1;
         } else {
             $job_stats[ 'TODO_FORMATTED' ] = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+            $job_stats[ 'TODO' ] = (float)number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "" );
         }
 
         $t = 'approved';

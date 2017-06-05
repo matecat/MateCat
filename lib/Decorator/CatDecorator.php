@@ -1,5 +1,6 @@
 <?php
 
+use Jobs\JobStatsStruct;
 use LexiQA\LexiQADecorator;
 
 class CatDecorator {

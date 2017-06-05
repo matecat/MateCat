@@ -109,7 +109,8 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
      * @return float
      */
     public function getSecsPerWord() {
-        return round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+        $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+        return ( $val != INF ? $val : 0 );
     }
 
     /**
@@ -124,6 +125,10 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     }
 
     public function isValidForPeeTable(){
+
+        //Do not consider ice matches
+        if( $this->match_type == 'ICE' ) return false;
+
         $secsPerWord = $this->getSecsPerWord();
 
         return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT );
