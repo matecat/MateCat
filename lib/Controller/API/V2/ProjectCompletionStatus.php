@@ -7,6 +7,9 @@ use API\V2\Validators\ProjectValidator;
 
 class ProjectCompletionStatus extends KleinController {
 
+    /**
+     * @var ProjectValidator
+     */
     private $validator ;
 
     protected function validateRequest() {
