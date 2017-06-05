@@ -164,21 +164,7 @@ module.exports = function(grunt) {
             }
         },
 
-        uglify: {
-            options: {
-                compress: true,
-                mangle: true,
-                sourceMap: true
-            },
-            manage: {
-                src: [
-                    basePath + 'manage.js',
-                    basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
-                ],
-                dest: buildPath + 'manage.min.js'
-            }
-        },
+        //
 
 
         /**

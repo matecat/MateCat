@@ -15,6 +15,7 @@ inc/config.test.ini
 inc/config.development.ini
 inc/.globalmessage.ini
 inc/oauth-token-key.txt
+.passwd.ini
 
 # Ignore artifacts
 public/css/build/app.css

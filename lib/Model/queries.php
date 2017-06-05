@@ -202,7 +202,7 @@ function doReplaceAll( Array $queryParams ) {
             WHERE id_job = {$queryParams['job']}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 AND st.status != 'NEW'
-                AND locked != 1
+                -- AND locked != 1
                 AND translation REGEXP $SQL_CASE'{$Space_Left}{$regexpEscapedTrg}{$Space_Right}'
                 $where_status
                 ";
@@ -314,20 +314,6 @@ function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
 
     return $db->query_first( $query );
 }
-
-function getLanguageStats() {
-
-    $db = Database::obtain();
-
-    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count, pee_sigma
-from language_stats
-  where date=(select max(date) from language_stats)";
-
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
 
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
@@ -2053,7 +2039,10 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
         }
     }
     try {
+
         $affectedRows = $db->update('projects', $data, $where);
+        Projects_ProjectDao::destroyCacheById( $pid );
+
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;

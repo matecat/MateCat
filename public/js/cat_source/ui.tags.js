@@ -254,11 +254,11 @@ $.extend(UI, {
                 html = document.selection.createRange().htmlText;
             }
         }
-        draggedText = html;
+        var draggedText = html;
 
 
         draggedText = draggedText.replace( /^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2" );
-        dr2 = draggedText.replace( /(<br>)$/, '' );
+        var dr2 = draggedText.replace( /(<br>)$/, '' );
 
         area.html( area.html().replace( draggedText, dr2 ) );
         saveSelection();
@@ -273,8 +273,8 @@ $.extend(UI, {
             spel.after( rsb );
         }
 
-        phcode = $( '.rangySelectionBoundary' )[0].outerHTML;
-        $( '.rangySelectionBoundary' ).text( this.cursorPlaceholder );
+        var phcode = $( '.rangySelectionBoundary', area )[0].outerHTML;
+        $( '.rangySelectionBoundary', area ).text( this.cursorPlaceholder );
 
 
         //map with special simbols

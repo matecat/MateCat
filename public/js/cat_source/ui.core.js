@@ -629,7 +629,7 @@ UI = {
         var node = document.createElement("span");
         var br = document.createElement("br");
         node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-        // node.setAttribute('contenteditable', 'false');
+        node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
         this.unnestMarkers();
@@ -1551,48 +1551,6 @@ UI = {
 		});
 	},
 
-	spellCheck: function(ed) {
-		if (!UI.customSpellcheck)
-			return false;
-		var editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
-		if ($('#contextMenu').css('display') == 'block')
-			return true;
-
-		APP.doRequest({
-			data: {
-				action: 'getSpellcheck',
-				lang: config.target_rfc,
-				sentence: UI.editarea.text()
-			},
-			context: editarea,
-			error: function() {
-				UI.failedConnection(0, 'getSpellcheck');
-			},
-			success: function(data) {
-				ed = this;
-				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
-
-					var word = Object.keys(value)[0];
-					replacements = value[word].misses.join(",");
-
-//					var Position = [
-//						parseInt(value[word].offset),
-//						parseInt(value[word].offset) + parseInt(word.length)
-//					];
-
-//					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
-					//console.log(sentTextInPosition);
-
-					var re = new RegExp("(\\b" + word + "\\b)", "gi");
-					$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
-					// fix nested encapsulation
-					$(ed).html($(ed).html().replace(/(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-//
-//                    });
-				});
-			}
-		});
-	},
 	addWord: function(word) {
 		APP.doRequest({
 			data: {

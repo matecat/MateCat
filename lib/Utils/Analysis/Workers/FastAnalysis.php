@@ -274,7 +274,7 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         //TODO Remove when MyMemory FastAnalysis will be rewritten
-        if( count( $this->segments ) > 120000 ){
+        if( count( $this->segments ) > 100000 ){
             throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
         }
 

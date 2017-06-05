@@ -684,13 +684,13 @@ class setTranslationController extends ajaxController {
         $oldSegment               = clone $segment;
         $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
 
-        $oldPEE          = $segment->getPeePerc();
+        $oldPEE          = $segment->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
         $segment->translation    = $new_translation[ 'translation' ];
         $segment->pe_effort_perc = null;
 
-        $newPEE          = $segment->getPeePerc();
+        $newPEE          = $segment->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
 
         if ( $segment->isValidForEditLog() ) {

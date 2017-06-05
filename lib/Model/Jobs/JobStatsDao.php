@@ -1,4 +1,5 @@
 <?php
+use Jobs\PeeJobStatsStruct;
 
 /**
  * Created by PhpStorm.
@@ -10,11 +11,12 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
     const TABLE = "jobs_stats";
 
-    const STRUCT_TYPE = 'Jobs_JobStatsStruct';
+    const STRUCT_TYPE = 'PeeJobStatsStruct';
 
     /**
      * @param $source string
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readBySource( $source ){
         $con = $this->con->getConnection();
@@ -24,18 +26,16 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
                         js.source,
                         js.target,
                         sum( js.total_time_to_edit ) as total_time_to_edit,
-                        sum( js.total_raw_wc ) as total_raw_wc,
+                        sum( js.total_raw_wc ) as total_word_count,
                         sum( COALESCE ( js.avg_post_editing_effort, 0) ) / sum( coalesce( js.total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM jobs_stats js 
-                      WHERE
-                        js.completed = 1
-                        and js.source = :source
+                      WHERE js.source = :source
                       GROUP BY fuzzy_band, target"
         );
 
         $stmt->bindParam(':source', $source);
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new LanguageStats_LanguageStatsStruct() ) );
         $stmt->execute();
 
         $result = null;
@@ -48,7 +48,8 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
     /**
      * @param $fuzzy_band
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readByFuzzyBand ( $fuzzy_band ){
         $con = $this->con->getConnection();
@@ -86,7 +87,8 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
     /**
      * @param $source
      * @param $fuzzy_band
-     * @return Jobs_JobStatsStruct[]|null
+     *
+     * @return PeeJobStatsStruct[]|null
      */
     public function readBySourceAndFuzzyBand( $source, $fuzzy_band ){
         $con = $this->con->getConnection();
@@ -124,13 +126,16 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStatsStruct $obj
+     * @param DataAccess_IDaoStruct|PeeJobStatsStruct $obj
+     *
+     * @return PeeJobStatsStruct|null
      */
-    public function create( Jobs_JobStatsStruct $obj ) {
-        $query = "insert into jobs_stats 
+    public function create( DataAccess_IDaoStruct $obj ) {
+
+        $query = "INSERT INTO jobs_stats 
                        (id_job, password, fuzzy_band, source, target, total_time_to_edit, avg_post_editing_effort, total_raw_wc)
                   VALUES (:id_job, :password, :fuzzy_band, :source, :target, :total_time_to_edit, :avg_post_editing_effort, :total_raw_wc)
-                  on duplicate key update 
+                  ON DUPLICATE KEY UPDATE 
                        avg_post_editing_effort = VALUES (avg_post_editing_effort),
                        total_time_to_edit = VALUES (total_time_to_edit),
                        total_raw_wc       = VALUES (total_raw_wc)";
@@ -139,21 +144,21 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
         $stmt = $con->prepare( $query );
 
-        $stmt->bindParam(':id_job', $obj->id_job );
-        $stmt->bindParam(':password', $obj->password );
-        $stmt->bindParam(':fuzzy_band', $obj->fuzzy_band );
-        $stmt->bindParam(':source', $obj->source );
-        $stmt->bindParam(':target', $obj->target );
-        $stmt->bindParam(':total_time_to_edit', $obj->total_time_to_edit );
-        $stmt->bindParam(':avg_post_editing_effort', $obj->avg_post_editing_effort );
-        $stmt->bindParam(':total_raw_wc', $obj->total_raw_wc );
+        $stmt->bindParam( ':id_job', $obj->id_job );
+        $stmt->bindParam( ':password', $obj->password );
+        $stmt->bindParam( ':fuzzy_band', $obj->fuzzy_band );
+        $stmt->bindParam( ':source', $obj->source );
+        $stmt->bindParam( ':target', $obj->target );
+        $stmt->bindParam( ':total_time_to_edit', $obj->total_time_to_edit );
+        $stmt->bindParam( ':avg_post_editing_effort', $obj->avg_post_editing_effort );
+        $stmt->bindParam( ':total_raw_wc', $obj->total_raw_wc );
 
         $stmt->execute();
 
-        if($stmt->rowCount()){
+        if ( $stmt->rowCount() ) {
             return $obj;
         }
-        return null;
+
     }
 
     /**

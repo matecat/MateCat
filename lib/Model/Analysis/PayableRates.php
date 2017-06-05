@@ -1,12 +1,12 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 12/05/15
  * Time: 15.04
- * 
+ *
  */
-
 class Analysis_PayableRates {
 
     public static $DEFAULT_PAYABLE_RATES = array(
@@ -52,13 +52,13 @@ class Analysis_PayableRates {
                             'MT'          => 80
                     ),
                     "pt" => array(
-                            'NO_MATCH'    => 100,
-                            '50%-74%'     => 100,
+                            'NO_MATCH' => 100,
+                            '50%-74%'  => 100,
                         //'75%-99%'     => 60,
-                            '75%-84%'     => 60,
-                            '85%-94%'     => 60,
-                            '95%-99%'     => 60,
-                            '100%'        => 30,
+                            '75%-84%'  => 60,
+                            '85%-94%'  => 60,
+                            '95%-99%'  => 60,
+                            '100%'     => 30,
 
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
@@ -268,10 +268,11 @@ class Analysis_PayableRates {
      * NB: the map is supposed to be symmetric. If there is the need to make it asymmetric, please change this method
      * and the corresponding map.
      *
-     * @param $source string The first two chars of the source language name in RFC3066<br/>
+     * @param $source        string The first two chars of the source language name in RFC3066<br/>
      *                       Example: <i>en-US</i> --> <b>en</b>
-     * @param $target string The first two chars of the target language name in RFC3066<br/>
+     * @param $target        string The first two chars of the target language name in RFC3066<br/>
      *                       Example: <i>en-US</i> --> <b>en</b>
+     *
      * @return string
      */
     public static function getPayableRates( $source, $target ) {
@@ -293,11 +294,13 @@ class Analysis_PayableRates {
 
     /**
      * This function returns the dynamic payable rate given a post-editing effort
+     *
      * @param $pee float
+     *
      * @return float
      */
     public static function pee2payable( $pee ) {
-        $pee = floatval($pee);
+        $pee = floatval( $pee );
 
         if ( $pee < 0 ) {
             $pee = 0;
@@ -310,12 +313,12 @@ class Analysis_PayableRates {
         $x_coef   = 0.034;
         $constant = 0.1;
 
-        $payable = ($x_2_coef * ( pow( $pee, 2 ) ) + $x_coef * $pee + $constant);
-        $payable = round( 100 * $payable , 1);
+        $payable = ( $x_2_coef * ( pow( $pee, 2 ) ) + $x_coef * $pee + $constant );
+        $payable = round( 100 * $payable, 1 );
 //        $payable = self::roundUpToAny( $payable, 5);
 
         if ( $payable < 75 ) {
-            $payable = 75;
+            $payable = 85;
         }
         if ( $payable > 95 ) {
             $payable = 95;
@@ -324,8 +327,8 @@ class Analysis_PayableRates {
         return str_replace( ".", ",", $payable );
     }
 
-    private static function roundUpToAny($n,$x=5) {
-        return (round($n)%$x === 0) ? round($n) : round(($n+$x/2)/$x)*$x;
+    private static function roundUpToAny( $n, $x = 5 ) {
+        return ( round( $n ) % $x === 0 ) ? round( $n ) : round( ( $n + $x / 2 ) / $x ) * $x;
     }
 
 }
