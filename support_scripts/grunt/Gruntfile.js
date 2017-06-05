@@ -370,15 +370,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
+            },
+            cssAnalyze: {
+                files:  cssWatchManage,
+                tasks: ['sass:distAnalyze', 'replace'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
             }
-            // cssManage: {
-            //     files:  cssWatchManage,
-            //     tasks: ['sass:distManage', 'replace'],
-            //     options: {
-            //         interrupt: true,
-            //         livereload : true
-            //     }
-            // }
         },
         sass: {
             distCommon: {
@@ -420,6 +420,16 @@ module.exports = function(grunt) {
                     cssBase + 'sass/manage_main.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
+            },
+            distAnalyze: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/analyze_main.scss'
+                ],
+                dest: cssBase + 'build/analyze-build.css'
             },
             distSemantic: {
                 options : {
