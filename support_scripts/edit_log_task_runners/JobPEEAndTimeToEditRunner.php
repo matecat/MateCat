@@ -80,7 +80,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
             Log::doLog( "Parsing Jobs starting from $minJob." );
             echo "Parsing Jobs starting from $minJob.\n";
 
-            if( $maxJobToProcess !== false && $minJob <= (int)$maxJobToProcess ){ // exclude old files if they exists
+            if( $maxJobToProcess !== false && $minJob < (int)$maxJobToProcess ){ // exclude old files if they exists
                 $maxJob       = (int)$maxJobToProcess;
                 Log::doLog( "Parsing Jobs until $maxJob reached." );
                 echo "Parsing Jobs until $maxJob reached.\n";
