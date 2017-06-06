@@ -1,0 +1,22 @@
+[
+    {
+        "id": 5,
+        "name": "HT"
+    },
+    {
+        "id": 2,
+        "name": "MT+PE"
+    },
+    {
+        "id": 1,
+        "name": "MT+PE+Human"
+    },
+    {
+        "id": 3,
+        "name": "MT+PE+TM+Human"
+    },
+    {
+        "id": 4,
+        "name": "TM+Human"
+    }
+]

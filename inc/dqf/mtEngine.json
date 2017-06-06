@@ -1,0 +1,170 @@
+[
+    {
+        "id": 2,
+        "name": "Apertium"
+    },
+    {
+        "id": 3,
+        "name": "Apertium-Moses Hybrid"
+    },
+    {
+        "id": 4,
+        "name": "Asia Online"
+    },
+    {
+        "id": 5,
+        "name": "Bing Translator"
+    },
+    {
+        "id": 6,
+        "name": "Capita MT"
+    },
+    {
+        "id": 7,
+        "name": "Carabao MT"
+    },
+    {
+        "id": 8,
+        "name": "CCID Translation Platform"
+    },
+    {
+        "id": 9,
+        "name": "CrossLang"
+    },
+    {
+        "id": 10,
+        "name": "East Linden"
+    },
+    {
+        "id": 11,
+        "name": "Firma8"
+    },
+    {
+        "id": 12,
+        "name": "FreeT"
+    },
+    {
+        "id": 13,
+        "name": "Google Translate"
+    },
+    {
+        "id": 14,
+        "name": "Iconic"
+    },
+    {
+        "id": 15,
+        "name": "KantanMT"
+    },
+    {
+        "id": 16,
+        "name": "Kodensha"
+    },
+    {
+        "id": 17,
+        "name": "LDS Translator"
+    },
+    {
+        "id": 43,
+        "name": "LetsMT"
+    },
+    {
+        "id": 18,
+        "name": "Linguasys"
+    },
+    {
+        "id": 19,
+        "name": "Lucy Software"
+    },
+    {
+        "id": 20,
+        "name": "Microsoft Translator Hub"
+    },
+    {
+        "id": 21,
+        "name": "Moses"
+    },
+    {
+        "id": 22,
+        "name": "MyMemory"
+    },
+    {
+        "id": 23,
+        "name": "myMT"
+    },
+    {
+        "id": 24,
+        "name": "Opentrad"
+    },
+    {
+        "id": 40,
+        "name": "Other"
+    },
+    {
+        "id": 25,
+        "name": "PangeaMT"
+    },
+    {
+        "id": 26,
+        "name": "Pragma"
+    },
+    {
+        "id": 27,
+        "name": "PROMT"
+    },
+    {
+        "id": 28,
+        "name": "Reverso"
+    },
+    {
+        "id": 29,
+        "name": "Safaba"
+    },
+    {
+        "id": 30,
+        "name": "SDL BeGlobal"
+    },
+    {
+        "id": 42,
+        "name": "SDL Language Cloud"
+    },
+    {
+        "id": 41,
+        "name": "SmartMATE"
+    },
+    {
+        "id": 31,
+        "name": "Sovee"
+    },
+    {
+        "id": 32,
+        "name": "Systran"
+    },
+    {
+        "id": 33,
+        "name": "T-Text"
+    },
+    {
+        "id": 34,
+        "name": "Tauyou"
+    },
+    {
+        "id": 35,
+        "name": "Toshiba"
+    },
+    {
+        "id": 36,
+        "name": "TransSphere"
+    },
+    {
+        "id": 37,
+        "name": "Weblio"
+    },
+    {
+        "id": 38,
+        "name": "WebTrance"
+    },
+    {
+        "id": 39,
+        "name": "weMT"
+    }
+]
