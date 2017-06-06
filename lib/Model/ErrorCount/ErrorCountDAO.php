@@ -12,7 +12,11 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "ErrorCount_Struct";
 
-    public function read( ErrorCount_Struct $obj ) {
+    public function read( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj ErrorCount_Struct
+         */
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -45,18 +49,18 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $where_string );
 
-        $arr_result = $this->con->fetch_array( $query );
+        $arr_result = $this->_fetch_array( $query );
 
         return $this->_buildResult( $arr_result );
     }
 
     /**
-     * @param ErrorCount_Struct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
      * @return ErrorCount_Struct|null
      * @throws Exception
      */
-    public function update( ErrorCount_Struct $obj ) {
+    public function update( DataAccess_IDaoStruct $obj ) {
 
         /**
          * @var $obj ErrorCount_Struct
@@ -155,14 +159,17 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
     /**
      * @param ErrorCount_Struct $input
      *
-     * @return ErrorCount_Struct
+     * @return ErrorCount_Struct|DataAccess_IDaoStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
-    protected function _validatePrimaryKey( ErrorCount_Struct $obj ) {
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+        /**
+         * @var $obj ErrorCount_Struct
+         */
         $id   = $obj->getIdJob();
         $pass = $obj->getJobPassword();
 
