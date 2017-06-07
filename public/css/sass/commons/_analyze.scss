@@ -1,6 +1,6 @@
 // rewrite semantic CSS
 
-body.analyze {
+body.analyze{
     min-width: 1024px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
@@ -12,23 +12,9 @@ body.analyze {
     padding-top: 100px;
     padding-bottom: 160px;
 
-
     .project {
         margin-bottom: 30px !important;
         /*min-width: 960px;*/
-        .ui.ribbon.label {
-            position: absolute;
-            top: 11px;
-            z-index: 2;
-            left: -15px;
-            max-width: 535px;
-            min-width: 0px;
-            line-height: 17px;
-            background-color: #d8d8d8;
-            color: #000000;
-            height: 30px;
-            border-radius: 0px 2px 2px 0px;
-        }
         .project-header {
             background-color: #f3f3f3;
             padding-bottom: 10px !important;
@@ -36,248 +22,51 @@ body.analyze {
             margin-bottom: -23px;
             position: relative;
             height: 200px;
-            .project-name {
-                font-size: 17px;
-                max-width: 390px;
-                min-width: 30px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: inline-block;
-                vertical-align: text-bottom;
-            }
-            .project-id {
-                font-size: 14px;
-                font-weight: normal;
-                margin-right: 3px;
-                margin-left: 15px;
-                display: inline-block;
-                vertical-align: text-bottom;
-                min-width: 64px;
-                color: #5a5a5a;
-            }
-            .ui.form .field :disabled {
-                opacity: 1 !important;
-            }
-            .project-payable {
-                padding: 23px 0;
-                float: left;
-                a {
-                    text-decoration: underline;
-                    &:hover {
-                        text-decoration: none;
-                    }
+            .ui.ribbon.label {
+                position: absolute;
+                top: 11px;
+                z-index: 2;
+                left: -15px;
+                max-width: 535px;
+                min-width: 0px;
+                line-height: 17px;
+                background-color: #d8d8d8;
+                color: #000000;
+                height: 30px;
+                border-radius: 0px 2px 2px 0px;
+                .project-name {
+                    font-size: 17px;
+                    max-width: 390px;
+                    min-width: 30px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: inline-block;
+                    vertical-align: text-bottom;
+                }
+                .project-id {
+                    font-size: 14px;
+                    font-weight: normal;
+                    margin-right: 3px;
+                    margin-left: 15px;
+                    display: inline-block;
+                    vertical-align: text-bottom;
+                    min-width: 64px;
+                    color: #5a5a5a;
                 }
             }
-            .project-activity-icon {
-                padding: 2px 12px 0px !important;
-                font-family: Calibri, Arial, Helvetica, sans-serif;
+
+            .saving-count {
+                background-color: white;
                 position: relative;
-                top: 4px;
-
-                .ui.dropdown {
-                    text-align: center;
-                    border-radius: 30px;
-                    .scrolling.menu {
-                        max-height: 21.7em;
-                    }
-                    .ui.icon.input input {
-                        padding-right: 2.67142857em !important;
-                        box-shadow: inset 0 1px 3px #ddd;
-                    }
-                    &.project-menu.ui.button {
-                        box-shadow: none;
-                    }
-                    &.project-personal-assignee {
-                        margin-right: 8px;
-                        background-color: #e0e1e2 !important;
-                        vertical-align: top;
-                        border: 1px solid #bdbdbd;
-                        cursor: default;
-                        .text {
-                            border-radius: 15px;
-                            padding: 2px 14px 2px 3px;
-                            color: black;
-                            transition: 0.3s ease;
-                            .ui.circular.label {
-                                background-color: #cecece;
-                                color: #888888;
-                            }
-                        }
-                    }
-                    &.project-team {
-                        margin-right: 8px;
-                        background-color: #8c97b9;
-                        vertical-align: top;
-                        height: 30px;
-                        .text {
-                            max-width: 170px;
-                            min-width: 30px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            border-radius: 15px;
-                            padding: 5px 15px;
-                            color: #ffffff;
-                            transition: 0.3s ease;
-                        }
-                        .menu {
-                            z-index: 1;
-                            .divider {
-                                margin: 0;
-                            }
-                            .item {
-                                max-width: 200px;
-                                min-width: 170px;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            }
-                            .header {
-                                font-size: 14px;
-                                margin: 0px;
-                                padding: 15px;
-                                cursor: pointer;
-
-                                &:hover {
-                                    background-color: #f3f3f3;
-                                }
-                            }
-                        }
-                        &:hover .text {
-                            background-color: #838dad !important
-                        }
-                    }
-                    &.project-assignee {
-                        margin-right: 8px;
-                        /*background-color: #59467a !important;*/
-                        background-color: #ffffff !important;
-                        vertical-align: top;
-                        .text {
-                            border-radius: 15px;
-                            padding: 3px 15px 3px 3px;
-                            color: #000000;
-                            transition: 0.3s ease;
-                            img {
-                                max-height: 24px;
-                            }
-                            span {
-                                position: relative;
-                                top: 1px;
-                            }
-                        }
-                        .menu {
-                            z-index: 1;
-                            .divider {
-                                margin: 0;
-                            }
-                            .header {
-                                font-size: 14px;
-                                margin: 0px;
-                                padding: 15px;
-                                cursor: pointer;
-                                a {
-                                    color: #09beec;
-                                }
-                                i {
-                                    float: right;
-                                    font-size: 18px;
-                                    color: #09beec;
-                                }
-                                &:hover {
-                                    background-color: #f3f3f3;
-                                }
-                            }
-                        }
-                        .item .ui.cancel.label {
-                            display: none;
-                        }
-                        &:hover .text {
-                            background-color: #ffffff !important;
-                            padding-right: 5px;
-                            padding-right: 30px;
-                        }
-                        &.disabled {
-                            background-color: #f4f4f4!important;
-                            box-shadow: 0px 0px 1px #666!important;
-                            opacity: 1;
-                            &.text {
-                                color: #666!important;
-                            }
-                        }
-                    }
-
-                    &.project-not-assigned {
-                        border: 1px solid #868686;
-                        padding: 0px 15px 0px 3px;
-                        transition: 0.3s ease;
-                        color: rgba(0, 0, 0, 0.6);
-                        margin-right: 5px;
-                        vertical-align: top;
-                        i {
-                            transition: 0.3s ease;
-                        }
-                        &:hover {
-                            border: .1em solid deepskyblue;
-                            color: deepskyblue;
-                            .icon-user22 {
-                                color: deepskyblue;
-                            }
-                        }
-                        .not-assigned {
-                            line-height: 13px;
-                            margin-right: 0px;
-                            padding-left: 10px;
-                            background-color: transparent;
-                        }
-                        .menu {
-                            .header {
-                                font-size: 14px;
-                                margin: 0px;
-                                padding: 15px;
-                                cursor: pointer;
-                                a {
-                                    color: #09beec;
-                                }
-                                i {
-                                    float: right;
-                                    font-size: 18px;
-                                    color: #09beec;
-                                }
-                                &:hover {
-                                    background-color: #f3f3f3;
-                                }
-                            }
-                        }
-                        .ui.cancel.label {
-                            display: none;
-                        }
-                    }
-                    &.project-assignee {
-                        .ui.cancel.label {
-                            padding: 4px;
-                            background-color: #d6d6d6;
-                            margin: 0px;
-                            border-radius: 15px;
-                            position: absolute;
-                            bottom: 3px;
-                            line-height: 0px;
-                            right: 3px;
-                            visibility: hidden;
-                            i {
-                                font-size: 15px;
-                                color: #ffffff;
-                            }
-                            &:hover {
-                                background-color: #cccccc !important;
-                            }
-                        }
-
-                        &:hover .ui.cancel.label {
-                            visibility: visible;
-                            z-index: 2;
-                        }
-                    }
+                top: 10px;
+                margin-bottom: 15px;
+                padding: 15px;
+                border: 1px solid green;
+                border-radius: 0px;
+                .percent {
+                    vertical-align: middle;
+                    display: inline-block;
                 }
             }
         }
@@ -286,7 +75,6 @@ body.analyze {
             background-color: #f9f9f9;
 
             .jobs {
-
                 margin-top: 0px;
             }
             .job {
@@ -309,368 +97,406 @@ body.analyze {
                 }
                 .job-body {
                     .chunks {
-                        .chunk {
-                            transition: 0.3s ease;
-                            background-color: #ffffff;
-                            padding: 8px 15px;
-                            .job-id {
-                                float: left;
-                                min-width: 65px;
-                                color: #969696;
-                                font-size: 13px;
-                                position: relative;
-                                line-height: 28px;
-                                top: 1px;
-                            }
-                            .source-target {
-                                min-width: 140px;
-                                float: left;
-                                margin-right: 10px;
-                                font-weight: bold;
-                                position: relative;
-                                top: 1px;
-                                .source-box {
-                                    float: left;
-                                    //max-width: 60px;
-                                    //min-width: 60px;
-                                    //white-space: nowrap;
-                                    //overflow: hidden;
-                                    //text-overflow: ellipsis;
-                                    line-height: 30px;
+                        .chunk-container {
+                            .analysis {
+                                background-color: #e4e6e8;
+                                &.outsource-open {
+                                    margin-left: -35px;
+                                    margin-right: -35px;
                                 }
-                                .in-to {
-                                    float: left;
-                                    top: 4px;
-                                    color: #5a5a5a;
-                                    line-height: 28px;
+
+                                .head-chunk {
+                                    transition: 0.3s ease;
+                                    background-color: #ffffff;
+                                    padding: 8px 15px;
+                                    text-align: center;
                                     position: relative;
-                                }
-                                .target-box {
-                                    float: left;
-                                    //width: 60px;
-                                    //white-space: nowrap;
-                                    //overflow: hidden;
-                                    //text-overflow: ellipsis;
-                                    line-height: 30px;
-                                }
-                            }
-                            .progress-bar {
+                                    z-index: 4;
+                                    .source-target {
+                                        min-width: 140px;
+                                        float: left;
+                                        margin-right: 10px;
+                                        font-weight: bold;
+                                        position: relative;
+                                        top: 1px;
+                                        .source-box {
+                                            float: left;
+                                            //max-width: 60px;
+                                            //min-width: 60px;
+                                            //white-space: nowrap;
+                                            //overflow: hidden;
+                                            //text-overflow: ellipsis;
+                                            line-height: 30px;
+                                        }
+                                        .in-to {
+                                            float: left;
+                                            top: 4px;
+                                            color: #5a5a5a;
+                                            line-height: 28px;
+                                            position: relative;
+                                        }
+                                        .target-box {
+                                            float: left;
+                                            //width: 60px;
+                                            //white-space: nowrap;
+                                            //overflow: hidden;
+                                            //text-overflow: ellipsis;
+                                            line-height: 30px;
+                                        }
+                                    }
+                                    .job-not-payable {
+                                        display: inline-block;
+                                        padding: 0 0 0 10px !important;
+                                        float: left;
+                                        text-decoration: line-through;
+                                        line-height: 30px;
+                                        position: relative;
+                                        top: 1px;
+                                        color: #b2b2b2;
+                                    }
+                                    .job-payable {
+                                        padding: 0 10px !important;
+                                        float: left;
+                                        text-decoration: underline;
+                                        min-width: 105px;
+                                        line-height: 30px;
+                                        font-weight: 700;
+                                        position: relative;
+                                        top: 1px;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
 
-                            }
-                            .tm-job,
-                            .activity-icon-single{
-                                float: left;
-                                width: 30px;
-                                height: 30px;
-
-                            }
-                            .job-activity-icons {
-                                float: left;
-                                width: 30px;
-                                height: 30px;
-                                margin-left: 5px;
-                                .comments {
-
+                                    .split {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                        padding: 6px 22px;
+                                        vertical-align: top;
+                                        font-size: 16px;
+                                        border: 1px solid #797979;
+                                        border-radius: 2px;
+                                        float: right;
+                                    }
+                                    .merge {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                        padding: 6px 22px;
+                                        vertical-align: top;
+                                        font-size: 16px;
+                                        border: 1px solid #797979;
+                                        border-radius: 2px;
+                                        float: right;
+                                    }
                                 }
-                                .group-activity-icons {
-                                    .item {
-                                        margin: 0;
-                                        padding: 1px !important;
-                                        a {
-                                            padding: 0;
-                                            width: 100%;
-                                            border-radius: 0px;
-                                            font-size: 15px;
-                                            font-weight: normal;
-                                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                                            text-align: left;
-                                            margin: 0 15px 0 10px;
-                                            background: transparent !important;
-                                            box-shadow: none !important;
-                                            i {
-                                                margin-right: 10px;
+
+                                .chunks-title-table {
+                                    transition: 0.3s ease;
+                                    padding: 3px 15px;
+                                    text-align: center;
+                                    box-shadow: none !important;
+                                    .job-id {
+                                        float: left;
+                                        min-width: 65px;
+                                        color: #969696;
+                                        font-size: 13px;
+                                        position: relative;
+                                        line-height: 28px;
+                                        top: 1px;
+                                    }
+                                    .file-details {
+                                        float: left;
+                                        text-decoration: underline;
+                                        min-width: 85px;
+                                        line-height: 30px;
+                                        font-weight: 700;
+                                        position: relative;
+                                        top: 1px;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
+                                    .left-box {
+                                        height: 1%;
+                                        position: relative;
+                                        float: left;
+                                        width: 15%;
+                                    }
+                                    .single-analysis {
+                                        display: inline-block;
+                                        margin: 0 auto;
+                                        width: 75%;
+                                        position: relative;
+                                        float: left;
+                                        text-align: center;
+                                        font-size: 15px;
+                                        .single {
+                                            display: inline-block;
+                                            line-height: 16px;
+                                            width: 60px;
+                                            height: 56px;
+                                            background-color: #f3f3f3;
+                                            vertical-align: top;
+                                            span {
+                                                font-size: 13px;
+                                                font-weight: 700;
+                                            }
+                                            &.total {
+                                                line-height: 56px;
+                                            }
+                                            &.payable-words {
+                                                line-height: 56px;
+                                                background-color: greenyellow;
+                                            }
+                                            &.new {
+                                                line-height: 56px;
+                                                width: 45px;
+                                            }
+                                            &.repetition {
+                                                line-height: 56px;
+                                                width: 70px;
+                                            }
+                                            &.internal-machines {
+                                            }
+                                            &.p-50-74 {
+                                            }
+                                            &.p-75-84 {
+                                            }
+                                            &.p-85-94 {
+                                            }
+                                            &.p-95-99 {
+                                            }
+                                            &.tm-100 {
+                                                width: 50px;
+                                                padding-top: 10px;
+                                            }
+                                            &.tm-public {
+                                                width: 50px;
+                                            }
+                                            &.tm-contex {
+                                            }
+                                            &.machine-translation {
+                                                position: relative;
+                                                width: 70px;
+                                                padding-top: 10px;
                                             }
                                         }
                                     }
-                                }
-                            }
-                            .tm-job.job-activity-icons {
-                                a {
-                                    i {
-                                        vertical-align: inherit;
-                                    }
-                                }
-                            }
-
-                            .job-not-payable {
-                                display: inline-block;
-                                padding: 0 10px !important;
-                                float: left;
-                                text-decoration: underline;
-                                min-width: 105px;
-                                line-height: 30px;
-                                font-weight: 700;
-                                position: relative;
-                                top: 1px;
-                            }
-
-                            .job-payable {
-                                padding: 0 10px !important;
-                                float: left;
-                                text-decoration: line-through;
-                                min-width: 105px;
-                                line-height: 30px;
-                                font-weight: 700;
-                                position: relative;
-                                top: 1px;
-                                &:hover {
-                                    text-decoration: none;
-                                }
-                            }
-                            .outsource-job {
-                                //text-align: center;
-                                .translated-outsourced {
-                                    top: 1px;
-                                    bottom: 6px;
-                                    vertical-align: text-bottom;
-                                    display: inline-block;
-                                    position: relative;
-                                    text-align: left;
-                                    .outsource-logo-box {
-                                        min-width: 150px;
-                                        display: inherit;
-                                        margin-left: 30px;
-                                        img.outsource-logo {
-                                            width: 100px;
-                                            margin: -5px 10px 0 0;
-                                            vertical-align: middle;
+                                    .right-box {
+                                        width: 10%;
+                                        position: relative;
+                                        float: right;
+                                        .open-translate {
+                                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                                            padding: 6px 15px;
+                                            vertical-align: top;
+                                            font-size: 16px;
+                                            border: 1px solid #797979;
+                                            border-radius: 2px;
+                                            float: right;
+                                            margin-top: 5px;
                                         }
                                     }
-                                    &.outsource {
-                                        margin-top: 6px;
-                                    }
-                                }
-                                .job-to-translator {
-                                    display: inline-block;
-                                    margin-right: 0px;
-                                    margin-left: 30px;
-                                    vertical-align: text-bottom;
-                                    color: #969696;
-                                    width: 150px;
-                                    white-space: nowrap;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    line-height: 20px;
-                                    margin-top: 5px;
-                                    @media only screen and (max-width: 1200px) {
-                                        max-width: 180px;
-                                    }
-                                }
-                                &:hover .job-to-translator{
-                                    width: inherit;
                                 }
 
-                                .job-delivery {
-                                    display: inline-block;
-                                    margin-right: 10px;
-                                    margin-left: 10px;
-                                    vertical-align: text-bottom;
-                                    line-height: 20px;
-                                    .outsource-day-text {
-                                        font-weight: 700;
-                                        display: inherit;
-                                        margin-right: 3px;
-                                    }
-                                    .outsource-month-text {
-                                        display: inherit;
-                                        font-weight: 700;
-                                        margin-right: 5px;
-                                    }
-                                    .outsource-time-text {
-                                        display: inherit;
-                                        font-weight: 700;
-                                    }
-                                    .outsource-gmt-text {
+                                .chunks-pay-table {
+                                    transition: 0.3s ease;
+                                    padding: 3px 15px;
+                                    text-align: center;
+                                    box-shadow: none !important;
+                                    .job-id {
+                                        float: left;
+                                        min-width: 65px;
                                         color: #969696;
-                                        display: inherit;
-                                        margin-left: 5px;
-                                    }
-                                    @media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }
-                                }
-                                &:hover .translator .job-delivery {
-                                    display: none;
-                                }
-                                &:hover .outsource .job-delivery {
-                                    display: inline-block;
-                                }
-                                .item {
-                                    margin-left: 10px;
-                                    display: none;
-                                    float: right;
-                                    cursor: pointer;
-                                    @media only screen and (max-width: 1200px) {
-                                        margin-left: 0px;
-                                    }
-                                    .ui.cancel{
-                                        padding: 4px;
-                                        background-color: #d6d6d6;
-                                        margin-top: 3px;
-                                        border-radius: 15px;
+                                        font-size: 13px;
                                         position: relative;
-                                        line-height: 0px;
-                                        right: 3px;
+                                        line-height: 28px;
+                                        top: 1px;
+                                    }
+                                    .file-details {
+                                        float: left;
+                                        text-decoration: underline;
+                                        min-width: 85px;
+                                        line-height: 30px;
+                                        font-weight: 700;
+                                        position: relative;
+                                        top: 1px;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
+                                    .left-box {
+                                        position: relative;
+                                        float: left;
+                                        width: 15%;
+                                        height: 1%;
+                                    }
+                                    .single-analysis {
+                                        display: inline-block;
+                                        margin: 0 auto;
+                                        width: 75%;
+                                        position: relative;
+                                        float: left;
+                                        text-align: center;
                                         font-size: 15px;
+                                        .single {
+                                            display: inline-block;
+                                            line-height: 30px;
+                                            padding: 0 5px;
+                                            width: 60px;
+                                            &.total {
+                                            }
+                                            &.payable-words {
+                                                background-color: greenyellow;
+                                            }
+                                            &.new {
+                                                width: 45px;
+                                            }
+                                            &.repetition {
+                                                width: 70px;
+                                            }
+                                            &.internal-machines {
+                                            }
+                                            &.p-50-74 {
+                                            }
+                                            &.p-75-84 {
+                                            }
+                                            &.p-85-94 {
+                                            }
+                                            &.p-95-99 {
+                                            }
+                                            &.tm-100 {
+                                                width: 50px;
+                                            }
+                                            &.tm-public {
+                                                width: 50px;
+                                            }
+                                            &.tm-contex {
+                                            }
+                                            &.machine-translation {
+                                                position: relative;
+                                                width: 70px;
+                                            }
+                                        }
                                     }
-                                    &:hover .ui.cancel {
-                                        background-color: #cccccc !important;
-                                    }
-
-                                }
-                                &:hover .item {
-                                    display: inline-block;
-                                }
-                                /*.job-price {
-                                    display: inline-block;
-                                    margin-right: 10px;
-                                    vertical-align: text-bottom;
-                                    font-weight: 700;
-                                    @media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }
-                                }*/
-                            }
-                            .open-translate {
-                                font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 15px;
-                                vertical-align: top;
-                                font-size: 16px;
-                                border: 1px solid #797979;
-                                border-radius: 2px;
-                                float: right;
-                            }
-                            .open-vendor {
-                                font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 7px;
-                                vertical-align: top;
-                                font-size: 16px;
-                                border: 1px solid #7eaf3e;
-                                border-radius: 2px;
-                                float: right;
-                                font-weight: bold;
-                                box-shadow: none !important;
-                                color: #7eaf3e !important;
-                                &:hover {
-                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                }
-                                &:active {
-                                    box-shadow: none !important;
-                                }
-                                &:focus {
-                                    box-shadow: none !important;
-                                }
-                            }
-                            .open-outsource {
-                                font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 22px;
-                                vertical-align: top;
-                                font-size: 16px;
-                                border: 1px solid #797979;
-                                border-radius: 2px;
-                                float: right;
-                            }
-                            .open-outsourced {
-                                font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 19px;
-                                vertical-align: top;
-                                font-size: 16px;
-                                border: 1px solid #797979;
-                                border-radius: 2px;
-                                float: right;
-                                &:hover {
-                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                }
-                                &:focus {
-                                    box-shadow: none !important;
-                                }
-                                &:active {
-                                    box-shadow: none !important;
-                                }
-                            }
-                            .job-menu {
-                                i {
-                                    vertical-align: inherit;
-                                }
-                                &.ui.button {
-                                    background-color: transparent;
-                                    border-radius: 2px;
-                                    float: right;
-                                    .divider {
-                                        margin: 0;
-                                    }
-                                    .item {
-                                        padding: 10px 15px !important;
-                                    }
-                                    &:hover {
-                                        background-color: #ececec;
-                                    }
-                                    &:active {
-                                        background-color: #e2e2e2;
-                                    }
-                                    &:focus {
-                                        background-color: #e2e2e2;
+                                    .right-box {
+                                        width: 10%;
+                                        position: relative;
+                                        float: right;
+                                        .open-translate {
+                                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                                            padding: 6px 15px;
+                                            vertical-align: top;
+                                            font-size: 16px;
+                                            border: 1px solid #797979;
+                                            border-radius: 2px;
+                                            float: right;
+                                            margin-top: 5px;
+                                        }
                                     }
                                 }
-                            }
-
-                            .chunk-download-progress {
-                                height: 2px;
-                                background-color: #ffffff;
-                                position: absolute;
-                                bottom: 0px;
-                                width: 100%;
-                                left: 0;
-                                &:after {
-                                    content: '';
-                                    opacity: 1;
-                                    position: absolute;
-                                    top: 0;
-                                    left: 0;
-                                    right: 0;
-                                    bottom: 0;
-                                    background: #000000;
-                                    border-radius: .28571429rem;
-                                    -webkit-animation: progress-active 1s ease infinite;
-                                    animation: progress-active 1s ease infinite;
+                                .chunk {
+                                    transition: 0.3s ease;
+                                    background-color: #ffffff;
+                                    padding: 3px 15px;
+                                    text-align: center;
+                                    .job-id {
+                                        float: left;
+                                        min-width: 65px;
+                                        color: #969696;
+                                        font-size: 13px;
+                                        position: relative;
+                                        line-height: 28px;
+                                        top: 1px;
+                                    }
+                                    .file-details {
+                                        float: left;
+                                        text-decoration: underline;
+                                        min-width: 85px;
+                                        line-height: 30px;
+                                        font-weight: 700;
+                                        position: relative;
+                                        top: 1px;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
+                                    .left-box {
+                                        position: relative;
+                                        float: left;
+                                        width: 15%;
+                                    }
+                                    .single-analysis {
+                                        display: inline-block;
+                                        margin: 0 auto;
+                                        width: 75%;
+                                        position: relative;
+                                        float: left;
+                                        text-align: center;
+                                        font-size: 15px;
+                                        .single {
+                                            display: inline-block;
+                                            line-height: 42px;
+                                            padding: 0 5px;
+                                            width: 60px;
+                                            background-color: #f3f3f3;
+                                            &.total {
+                                            }
+                                            &.payable-words {
+                                                background-color: greenyellow;
+                                            }
+                                            &.new {
+                                                width: 45px;
+                                            }
+                                            &.repetition {
+                                                width: 70px;
+                                            }
+                                            &.internal-machines {
+                                            }
+                                            &.p-50-74 {
+                                            }
+                                            &.p-75-84 {
+                                            }
+                                            &.p-85-94 {
+                                            }
+                                            &.p-95-99 {
+                                            }
+                                            &.tm-100 {
+                                                width: 50px;
+                                            }
+                                            &.tm-public {
+                                                width: 50px;
+                                            }
+                                            &.tm-contex {
+                                            }
+                                            &.machine-translation {
+                                                position: relative;
+                                                width: 70px;
+                                            }
+                                        }
+                                    }
+                                    .right-box {
+                                        width: 10%;
+                                        position: relative;
+                                        float: right;
+                                        .open-translate {
+                                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                                            padding: 6px 15px;
+                                            vertical-align: top;
+                                            font-size: 16px;
+                                            border: 1px solid #797979;
+                                            border-radius: 2px;
+                                            float: right;
+                                            margin-top: 5px;
+                                        }
+                                    }
                                 }
-                            }
-                            &.updated-job {
-                                background-color: #f9ffb5;
                             }
                         }
                     }
+
                 }
             }
         }
 
-        .project-footer {
-            padding: 0 30px 5px !important;
-            text-align: right;
-            background-color: #f9f9f9;
-            .activity-log {
-                margin-top: -10px;
-                margin-right: -15px;
-                a {
-                    text-decoration: underline;
-                    color: #7d7d7d;
-                    font-size: 13px;
-                    &:hover {
-                        text-decoration: none;
-                    }
-                }
-            }
-        }
     }
 }
 
