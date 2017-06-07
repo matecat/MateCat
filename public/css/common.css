@@ -4613,6 +4613,9 @@ table.activitylog th .th-inner:after {
 }
 
 /*** Share Key Popup ***/
+.share-popup-container {
+    margin: 20px;
+}
 .share-popup-top {
     position: relative;
     width: 100%;
@@ -4686,13 +4689,13 @@ font-weight: bold;
     margin-top: 4px;
 }
 .share-popup-container-list {
-    width: 100%;
+    width: 91%;
     max-height: 300px;
     position: relative;
     float: left;
-    margin-top: 10px;
     border: 1px solid #d5d5d5;
     border-radius: 4px;
+    margin: 20px;
 }
 
 .share-popup-list {
