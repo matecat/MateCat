@@ -260,6 +260,7 @@ $.extend(UI.UPLOAD_PAGE, {
         this.render();
         this.addEvents();
         $("#activetm").on("update", this.checkTmKeys);
+        $("#activetm").on("removeTm", this.disableTmKeysFromSelect);
         $("#activetm").on("deleteTm", this.deleteTMFromSelect);
     },
 
@@ -295,8 +296,22 @@ $.extend(UI.UPLOAD_PAGE, {
         $('#tmx-select').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact',
-            onChange: function(value, text, $selectedItem) {
+            useLabels: false,
+            message: {
+                count         : '{count} selected',
+                noResults     : 'No TMs found.'
+            },
+            metadata : {
+                defaultText     : 'MyMemory Collaborative TM',
+                defaultValue    : 'MyMemory Collaborative TM',
+                placeholderText : 'MyMemory Collaborative TM',
+            },
+            onAdd: function(value, $selectedItem) {
                 self.selectTm(value);
+            },
+            onRemove: function (removedValue, removedText, $removedChoice) {
+                self.disableTm(removedValue);
+                setTimeout(self.checkMailDropDownValueSelected, 100);
             }
         });
 
@@ -335,38 +350,39 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     selectTm: function (value) {
-	    if (UI.UPLOAD_PAGE.selectedTm === value) {
-	        return;
-        } else if(value === '0' ) {
-            UI.UPLOAD_PAGE.selectedTm = value;
-            UI.disableAllTM();
-            return;
-
-        } else if (value === '1') {
-	        UI.openLanguageResourcesPanel('tm');
-        }
-        var tmElem = $('.mgmt-table-tm tr.mine[data-key=' + value +'] .activate input');
+        var tmElem = $('.mgmt-table-tm #inactivetm tr.mine[data-key=' + value +'] .activate input');
         if (tmElem.size() > 0) {
-            UI.disableAllTM();
             $(tmElem).trigger('click');
         }
-        UI.UPLOAD_PAGE.selectedTm = value;
+    },
+
+    disableTm: function (value) {
+        var tmElem = $('.mgmt-table-tm #activetm tr.mine[data-key=' + value +'] .activate input');
+        if (tmElem.size() > 0) {
+            $(tmElem).trigger('click');
+        }
+    },
+
+    checkMailDropDownValueSelected: function () {
+        var values = $('#tmx-select').dropdown('get value');
+        if (values.length === 0) {
+            $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+        }
     },
 
     checkTmKeys: function (event, desc, key) {
-	    var activeTm = $('#activetm .mine');
-	    if (activeTm.size() ===  0) {
-            $('#tmx-select').dropdown('set value', '0').dropdown('set selected', '0');
-        } else if (activeTm.size() >  1) {
-            UI.UPLOAD_PAGE.selectedTm = '1';
-            $('#tmx-select').find('.item-key-name .multiple-tm-num').text(activeTm.size());
-            $('#tmx-select').dropdown('set value', '1').dropdown('set selected', '1');
-        } else if (activeTm.size() ===  1) {
-	        var value = activeTm.data('key');
-            UI.UPLOAD_PAGE.selectedTm = value;
-            var existingKey = ($('#tmx-select').find('div.item[data-value='+ value +']').size() > 0);
-            if (existingKey) {
-                $('#tmx-select').dropdown('set selected', value);
+        var activeTm = $('#activetm .mine');
+        if (activeTm.size() ===  0) {
+            $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+            $('#tmx-select').dropdown('remove selected', key);
+        } else {
+            var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
+            if (existingKey.size() > 0) {
+                if (existingKey.hasClass('active')){
+                    return;
+                } else {
+                    $('#tmx-select').dropdown('set selected', key);
+                }
             } else {
                 var html = '<div class="item"  data-value="' + key + '">' +
                     '<span class="item-key-name">' +desc + '</span>' +
@@ -376,6 +392,15 @@ $.extend(UI.UPLOAD_PAGE, {
                 setTimeout(function () {
                     $('#tmx-select').dropdown('set selected', key);
                 });
+            }
+        }
+    },
+
+    disableTmKeysFromSelect: function (event, key) {
+        var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
+        if (existingKey.size() > 0) {
+            if (existingKey.hasClass('active')){
+                $('#tmx-select').dropdown('remove selected', key);
             }
         }
     },

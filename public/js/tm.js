@@ -455,7 +455,7 @@
             UI.useTM(trKey);
             UI.checkTMKeysUpdateChecks();
             setTimeout(function () {
-                $("#activetm").trigger("update");
+                $("#activetm").trigger("update", ['', keyParam]);
             },500);
         },
         openLanguageResourcesPanel: function(tab, elToClick) {
@@ -630,13 +630,13 @@
                         return false;
                     }
                     UI.disableTM(el);
-                    $("#activetm").trigger("update");
+                    $("#activetm").trigger("removeTm", [$(tr).find('.privatekey').text()]);
                 }
             } else {
                 if(!isActive) {
                     UI.useTM(el);
                     setTimeout(function () {
-                        $("#activetm").trigger("update");
+                        $("#activetm").trigger("update", ['', $(tr).find('.privatekey').text()]);
                     },500);
                 }
             }
