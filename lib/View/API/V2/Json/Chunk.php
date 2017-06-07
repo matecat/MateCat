@@ -45,7 +45,7 @@ class Chunk {
                     'quality_overall'  => $chunk->getQualityOverall(),
                     'errors_count'     => (int) $chunk->getErrorsCount()
             ],
-            'pee'                => $chunk->getPeeFromAggregationData()
+            'pee'                => $chunk->getPeeForTranslatedSegments()
         ];
     }
 

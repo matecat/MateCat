@@ -248,7 +248,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     }
 
-    public function getPeeFromAggregationData(){
+    public function getPeeForTranslatedSegments(){
         return round( $this->avg_post_editing_effort / ( new Segments_SegmentDao )->setCacheTTL( 60 * 30 )->getRawWCSumForTranslatedSegments( $this->id, $this->password )->translated_raw_wc, 2 );
     }
 
