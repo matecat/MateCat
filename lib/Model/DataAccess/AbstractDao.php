@@ -18,7 +18,7 @@ abstract class DataAccess_AbstractDao {
      * The cache connection object
      * @var Predis\Client
      */
-    protected $cache_con;
+    protected static $cache_con;
 
     /**
      * @var string This property will be overridden in the sub-classes.
@@ -209,14 +209,13 @@ abstract class DataAccess_AbstractDao {
      * @return $this
      */
     protected function _cacheSetConnection() {
-        if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
+        if ( !isset( self::$cache_con ) || empty( self::$cache_con ) ) {
 
-            require_once 'Predis/autoload.php';
             try {
-                $this->cache_con = new Predis\Client( INIT::$REDIS_SERVERS );
-                $this->cache_con->get( 1 );
+                self::$cache_con = ( new RedisHandler() )->getConnection();
+                self::$cache_con->get( 1 );
             } catch ( Exception $e ) {
-                $this->cache_con = null;
+                self::$cache_con = null;
                 Log::doLog( $e->getMessage() );
                 Log::doLog( "No Redis server(s) configured." );
             }
@@ -237,10 +236,10 @@ abstract class DataAccess_AbstractDao {
         $this->_cacheSetConnection();
 
         $_existingResult = null;
-        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
             $cacheQuery = md5( $query );
             Log::doLog( "Fetching from cache $cacheQuery - query: \"" . $query . "\"" );
-            $_existingResult = unserialize( $this->cache_con->get( $cacheQuery ) );
+            $_existingResult = unserialize( self::$cache_con->get( $cacheQuery ) );
         }
 
         return $_existingResult;
@@ -257,8 +256,8 @@ abstract class DataAccess_AbstractDao {
             return null;
         }
 
-        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            $this->cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
+        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
+            self::$cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
         }
     }
 
@@ -299,8 +298,8 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _destroyCache( $query ) {
         $this->_cacheSetConnection();
-        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( md5( $query ) );
+        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
+            return self::$cache_con->del( md5( $query ) );
         }
 
         return false;
@@ -356,8 +355,8 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ) {
         $this->_cacheSetConnection();
-        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
+        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
+            return self::$cache_con->del( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
         }
 
         return false;
