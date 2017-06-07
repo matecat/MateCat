@@ -44,7 +44,8 @@ class Chunk {
             'quality_summary'    => [
                     'quality_overall'  => $chunk->getQualityOverall(),
                     'errors_count'     => (int) $chunk->getErrorsCount()
-            ]
+            ],
+            'pee'                => $chunk->getPeeFromAggregationData()
         ];
     }
 

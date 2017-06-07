@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
 use Exceptions\NotFoundError;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
@@ -245,6 +246,10 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
         return $tm_keys;
 
+    }
+
+    public function getPeeFromAggregationData(){
+        return round( $this->avg_post_editing_effort / ( new Segments_SegmentDao )->setCacheTTL( 60 * 30 )->getRawWCSumForTranslatedSegments( $this->id, $this->password )->translated_raw_wc, 2 );
     }
 
     /**
