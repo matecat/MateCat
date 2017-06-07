@@ -67,7 +67,7 @@ Speech2Text.init  = function () {
                 Speech2Text.recognition.onerror = Speech2Text.onRecognitionError;
                 Speech2Text.recognition.onend = Speech2Text.onRecognitionEnd;
                 Speech2Text.recognition.onresult = Speech2Text.onRecognitionResult;
-                Speech2Text.recognition.lang = config.target_lang;
+                Speech2Text.recognition.lang = config.target_rfc;
             },
             enableMicrophone: function (segment) {
                 Speech2Text.microphone = segment.find('.micSpeech');
