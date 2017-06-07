@@ -292,19 +292,13 @@ $.extend(UI.UPLOAD_PAGE, {
 
     initDropdowns: function () {
 	    var self =  this;
-        // $('#target-lang, #source-lang').dropdown();
         $('#tmx-select').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact',
             useLabels: false,
             message: {
-                count         : '{count} selected',
+                count         : '{count} Private TMs',
                 noResults     : 'No TMs found.'
-            },
-            metadata : {
-                defaultText     : 'MyMemory Collaborative TM',
-                defaultValue    : 'MyMemory Collaborative TM',
-                placeholderText : 'MyMemory Collaborative TM',
             },
             onAdd: function(value, $selectedItem) {
                 self.selectTm(value);
@@ -323,9 +317,6 @@ $.extend(UI.UPLOAD_PAGE, {
         $('#target-lang, #source-lang').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact',
-            // onChange: function(value, text, $selectedItem) {
-            //     self.selectTm(value);
-            // }
         });
 
         $('.tmx-select .tm-info-title .icon').popup({
@@ -349,24 +340,37 @@ $.extend(UI.UPLOAD_PAGE, {
         APP.displayCurrentSourceLang();
     },
 
-    selectTm: function (value) {
+    selectTm: function (value, span) {
         var tmElem = $('.mgmt-table-tm #inactivetm tr.mine[data-key=' + value +'] .activate input');
         if (tmElem.size() > 0) {
             $(tmElem).trigger('click');
         }
+        setTimeout(function () {
+            UI.UPLOAD_PAGE.setTMName();
+        });
     },
 
-    disableTm: function (value) {
+    disableTm: function (value, span) {
         var tmElem = $('.mgmt-table-tm #activetm tr.mine[data-key=' + value +'] .activate input');
         if (tmElem.size() > 0) {
             $(tmElem).trigger('click');
         }
+        setTimeout(function () {
+            UI.UPLOAD_PAGE.setTMName();
+        });
     },
 
     checkMailDropDownValueSelected: function () {
         var values = $('#tmx-select').dropdown('get value');
         if (values.length === 0) {
             $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+        }
+    },
+
+    setTMName: function () {
+        if ($('#tmx-select').dropdown('get value').indexOf(',') === -1 && $('#tmx-select').dropdown('get value').length > 0) {
+            var html  = $('#tmx-select').find('div.item.active').html();
+            $('#tmx-select').dropdown('set text', html);
         }
     },
 

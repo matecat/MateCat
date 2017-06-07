@@ -74,7 +74,7 @@
             float: right;
             font-size: 24px;
             margin-top: -3px;
-            margin-right: -3px;
+            margin-right: 1px;
             color: #39699a;
         }
     }
@@ -129,6 +129,28 @@
         line-height: 28px !important;
         max-width: 237px !important;
         font-size: 16px !important;
+        i.icon-checkmark3.icon {
+            display: none;
+        }
+    }
+    .item {
+        i.icon-checkmark3.icon {
+            color: #757575;
+            font-size: 20px;
+            position: absolute;
+            right: 7px;
+            display: none;
+        }
+        &.active {
+            background-color: rgba(0, 0, 0, 0.03) !important;
+            i.icon-checkmark3.icon {
+                display: block;
+            }
+        }
+
+    }
+    .item-key-id {
+        color: #757575;
     }
     .item-key-name {
         color: initial;
