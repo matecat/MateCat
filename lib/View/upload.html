@@ -208,11 +208,14 @@
                 </div>
                 <div class="divider"></div>
                 <div class="header" id="add-tmx-option">
-                    Create private TM
+                    Create resource
                     <i class="icon-plus3 icon"></i>
                 </div>
                 <div class="divider"></div>
                 <div class="scrolling menu">
+                    <div class="item multiple-tm" data-value="1">
+                        <span class="item-key-name"><span class="multiple-tm-num"></span> Private TMs</span>
+                    </div>
                     <tal:block tal:repeat="key user_keys">
                         <div class="item" tal:attributes="data-value key/key">
                             <span tal:condition="not:key/name" class="item-key-name no-descr">No Description</span>
