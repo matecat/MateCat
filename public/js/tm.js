@@ -650,7 +650,8 @@
             var options = $.parseJSON(context);
             el = $('.mgmt-tm tr[data-key="' + options.key + '"] td.' + options.grant + ' input');
             UI.disableTM(el);
-            $("#inactivetm").trigger("update");
+            $("#activetm").trigger("deleteTm", [options.key]);
+
         },
 
         disableTM: function (el) {
