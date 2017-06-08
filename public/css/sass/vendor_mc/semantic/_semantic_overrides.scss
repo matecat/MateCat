@@ -361,5 +361,6 @@ a.ui.basic.blue.label:hover {
 /********************************************/
 
 .ui.popup {
-    overflow: inherit !important;
+    overflow: initial !important;
+    z-index: 20000000000000;
 }

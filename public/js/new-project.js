@@ -313,11 +313,16 @@ $.extend(UI.UPLOAD_PAGE, {
             UI.openLanguageResourcesPanel('tm');
         });
 
-
-        $('#target-lang, #source-lang').dropdown({
+        $('#target-lang').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact',
         });
+
+        $('#source-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+        });
+
 
         $('.tmx-select .tm-info-title .icon').popup({
             html: "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
@@ -447,43 +452,27 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.openOptionsPanel("tm")
         } );
 
-        $("#source-lang").on('change', function(e){
-            console.log('source language changed');
-            UI.checkRTL();
-            APP.changeSourceLang( $(this).dropdown('get value')  );
-            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
-                if (UI.conversionsAreToRestart()) {
-                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
-                }
-                if( UI.checkTMXLangFailure() ){
-                    UI.delTMXLangFailure();
-                }
-            }
-            else if ($('.template-gdrive').length) {
-                APP.confirm({
-                    msg: 'Source language has been changed.<br/>The files will be reimported.',
-                    callback: 'confirmGDriveRestartConversions'
-                });
-            } else {
-                return;
+        $('#target-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            onChange: function () {
+                APP.checkForLexiQALangs();
+                APP.checkForTagProjectionLangs();
+                UI.UPLOAD_PAGE.targetLanguageChangedCallback();
+
             }
         });
 
-        // APP.tryListGDriveFiles();
-
-        $("#target-lang").change(function(e) {
-
-            UI.checkRTL();
-            $('.popup-languages li.on').each(function(){
-                $(this).removeClass('on').find('input').removeAttr('checked');
-            });
-            $('.translate-box.target h2 .extra').remove();
-            if( UI.checkTMXLangFailure() ){
-                UI.delTMXLangFailure();
+        $('#source-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            onChange: function () {
+                APP.checkForLexiQALangs();
+                APP.checkForTagProjectionLangs();
+                UI.UPLOAD_PAGE.sourceLangChangedCallback();
             }
-            APP.changeTargetLang( $(this).dropdown('get value') );
-
         });
+
 
         $("input.uploadbtn").click(function(e) {
 
@@ -534,15 +523,6 @@ $.extend(UI.UPLOAD_PAGE, {
             if($('.upload-table td.error').length == 0){
                 $('.uploadbtn').removeAttr("disabled").removeClass("disabled").focus();
             }
-        });
-
-        $("#source-lang").on('change', function(){
-            APP.checkForLexiQALangs();
-            APP.checkForTagProjectionLangs();
-        });
-        $("#target-lang").on('change', function(){
-            APP.checkForLexiQALangs();
-            APP.checkForTagProjectionLangs();
         });
 
         $("#add-multiple-lang").click(function(e) {
@@ -600,6 +580,35 @@ $.extend(UI.UPLOAD_PAGE, {
         $("input").keyup(function(e) {
             $('.error-message').hide();
         });
+    },
+    sourceLangChangedCallback: function () {
+        APP.changeSourceLang( $('#source-lang').dropdown('get value')  );
+        if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+            if (UI.conversionsAreToRestart()) {
+                APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+            }
+            if( UI.checkTMXLangFailure() ){
+                UI.delTMXLangFailure();
+            }
+        }
+        else if ($('.template-gdrive').length) {
+            APP.confirm({
+                msg: 'Source language has been changed.<br/>The files will be reimported.',
+                callback: 'confirmGDriveRestartConversions'
+            });
+        } else {
+            return;
+        }
+    },
+    targetLanguageChangedCallback: function () {
+        $('.popup-languages li.on').each(function(){
+            $(this).removeClass('on').find('input').removeAttr('checked');
+        });
+        $('.translate-box.target h2 .extra').remove();
+        if( UI.checkTMXLangFailure() ){
+            UI.delTMXLangFailure();
+        }
+        APP.changeTargetLang( $('#target-lang').dropdown('get value') );
     }
 });
 APP.handleCreationStatus = function( id_project, password ){
