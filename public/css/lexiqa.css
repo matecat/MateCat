@@ -97,7 +97,7 @@
 }
 
 #powerTip .tooltip-error-ignore {
-    color: rgb(206, 199, 199);
+    color: #757575;
     text-decoration: none;
     cursor: pointer;
     border-radius: 0 4px 4px 0;
@@ -106,7 +106,7 @@
 }
 
 #powerTip .tooltip-error-ignore:hover {
-    color: #fff;
+    color: #525252;
 }
 .tooltip-error-container:not(:first-child) {
     border-top: 1px solid rgba(255, 255, 255, 0.36);

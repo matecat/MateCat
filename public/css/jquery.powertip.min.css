@@ -22,7 +22,7 @@
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg);
     z-index: 2;
-    box-shadow: -1px -1px 0px 0px #D4D4D5
+    box-shadow: -1px -1px 0px 0px #D4D4D5;
     top: -4px;
 }
 
