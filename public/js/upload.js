@@ -69,7 +69,6 @@ $(document).ready(function(){
 
             $('.translate-box.target h2 .extra').remove();
             $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
-            UI.checkRTL();
         }
     });
     $("#cancelMultilang").click(function(e){

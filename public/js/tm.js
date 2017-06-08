@@ -1799,7 +1799,6 @@
                     $('.share-popup-copy-link-button').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>");
                     $('.share-popup-copy-link-button').powerTip({
                         placement : 'n',
-                        popupId : "matecatTip",
                     });
                 });
 
@@ -1945,15 +1944,10 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 'lxq',
-                popupId : "matecatTip",
+                placement : 's',
                 mouseOnToPopup: true
 
             });
-            // $(".tooltip-lexiqa").popup({
-            //     html:lexiqaText,
-            //     position: 'bottom center'
-            // });
         },
 
         initTmxTooltips: function () {
@@ -1962,19 +1956,16 @@
                 $('tr:not(.ownergroup) .edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
                 $('.edit-desc').powerTip({
                     placement: 's',
-                    popupId: "matecatTip",
                 });
 
                 $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource.<br/>Share it from the dropdown menu.</div>");
                 $('.icon-owner-private').powerTip({
                     placement : 's',
-                    popupId : "matecatTip",
                 });
             } else {
                 $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>To retrieve resource information or share it <br/>you must be logged.<br/></div>");
                 $('.icon-owner-private').powerTip({
                     placement : 's',
-                    popupId : "matecatTip",
                 });
             }
 
@@ -1983,19 +1974,16 @@
             $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Public translation memory.</div>");
             $('.icon-owner-public').powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
 
             $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br/>Select Share resource from the dropdown menu to see owners.</div>");
             $('.icon-owner-shared').powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
             var mymemoryChecks = $('#activetm tr.mymemory .update div');
             mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Add a private resource to disable updating.</div>");
             mymemoryChecks.powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
 
 
@@ -2007,7 +1995,6 @@
             $(".qa-box .onoffswitch-container").data("powertip", lxTooltip);
             $(".qa-box .onoffswitch-container").powerTip({
                 placement : 's',
-                popupId : "matecatTip",
                 mouseOnToPopup: true
             });
         },

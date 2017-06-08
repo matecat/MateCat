@@ -49,16 +49,6 @@ UI = {
     disableAnalyze: function () {
         disableAnalyze();
     },
-    checkRTL: function () {
-        if(!this.RTLCheckDone) {
-            sourceDirection = $('#source-lang').dropdown('get item').attr('data-direction');
-            targetDirection = $('#target-lang').dropdown('get item').attr('data-direction');
-            if((sourceDirection == 'rtl') || (targetDirection == 'rtl')) {
-                //APP.alert("Support for RTL languages is in beta. <br />Before starting your translation, download the Preview from the Translate page and check the target file.");
-                this.RTLCheckDone = true;
-            }
-        }
-    },
     checkMultilangRTL: function () {
         var direction = "ltr";
         $('.popup-languages li.on input').each(function(){

@@ -1,15 +1,11 @@
-/* PowerTip Plugin */
 
-$primary-color: #FFFFFF;
-
-
-#matecatTip
-{
+#powerTip {
   cursor: default;
-  background-color: $primary-color;
-  color: #000000;
+  background-color: #fff;
+  border-radius: 6px;
+  color: #000;
   display: none;
-  padding: 10px;
+  padding: 8px !important;
   position: absolute;
   white-space: nowrap;
   z-index: 2147483647;
@@ -17,7 +13,8 @@ $primary-color: #FFFFFF;
   border-radius: 0.28571429rem;
   box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12), 0px 2px 10px 0px rgba(34, 36, 38, 0.15);
 }
-#matecatTip:before {
+
+#powerTip:before {
   position: absolute;
   content: '';
   width: 0.71428571em;
@@ -26,85 +23,53 @@ $primary-color: #FFFFFF;
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
   z-index: 2;
-  box-shadow: -1px -1px 0px 0px #bababc;
+  box-shadow: -1px -1px 0px 0px #D4D4D5;
   top: -4px;
 }
-#matecatTip.n:before, #matecatTip.s:before {
+
+#powerTip.n:before, #powerTip.s:before {
   left: 50%;
   margin-left: -5px;
   top: -5px;
 }
-#matecatTip.s:before {
-  border-top: 10px solid #333;
-  border-top: 10px solid $primary-color;
+
+#powerTip.s:before {
   bottom: -10px;
 }
-#matecatTip.w:before {
+#powerTip.w:before {
   left: -5px;
   transform: rotate(-45deg);
 }
-#matecatTip.n:before {
+#powerTip.n:before {
   bottom: -6px !important;
   top: initial;
   transform: rotate(225deg);
 
 }
-#matecatTip.e:before {
+#powerTip.e:before {
   right: -5px;
   transform: rotate(135deg);
 
 }
 
-#matecatTip.ne-alt:before, #matecatTip.se-alt:before ,
-#matecatTip.ne:before, #matecatTip.se:before {
+#powerTip.ne-alt:before, #powerTip.se-alt:before ,
+#powerTip.ne:before, #powerTip.se:before {
   left: 10px;
 }
-#matecatTip.nw-alt:before, #matecatTip.sw-alt:before ,
-#matecatTip.nw:before, #matecatTip.sw:before {
+#powerTip.nw-alt:before, #powerTip.sw-alt:before ,
+#powerTip.nw:before, #powerTip.sw:before {
   right: 10px;
 }
-#matecatTip.ne-alt:before, #matecatTip.nw-alt:before,
-#matecatTip.ne:before, #matecatTip.nw:before {
+#powerTip.ne-alt:before, #powerTip.nw-alt:before,
+#powerTip.ne:before, #powerTip.nw:before {
   bottom: -5px;
   transform: rotate(225deg);
+  top: initial;
 }
-#matecatTip.se-alt:before, #matecatTip.sw-alt:before ,
-#matecatTip.se:before, #matecatTip.sw:before {
+#powerTip.se-alt:before, #powerTip.sw-alt:before ,
+#powerTip.se:before, #powerTip.sw:before {
   top: -5px;
   transform: rotate(45deg);
-}
-
-#matecatTip.ne-alt:before {
-  left: auto;
-  right: 10px;
-}
-#matecatTip.sw-alt:before, #matecatTip.se-alt:before {
-  border-top: none;
-  bottom: auto;
-  top: -10px;
-}
-#matecatTip.se-alt:before {
-  left: auto;
-  right: 10px;
-}
-
-#matecatTip.lxq {
-  right: 512px !important;
-  left: auto !important;
-  top: 492px !important;
-}
-
-#matecatTip.lxq:before {
-  position: absolute;
-  content: '';
-  width: 0.71428571em;
-  height: 0.71428571em;
-  background: #FFFFFF;
-  -webkit-transform: rotate(45deg);
-  transform: rotate(45deg);
-  z-index: 2;
-  box-shadow: -1px -1px 0px 0px #bababc;
-  top: -4px;
 }
 
 /*****  Tips Tm options panel ************/
@@ -112,6 +77,7 @@ $primary-color: #FFFFFF;
   text-align: left;
   line-height: 18px;
   font-size: 15px;
+  padding: 10px;
 }
 
 .powerTip-options-tm ul {
