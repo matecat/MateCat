@@ -378,29 +378,6 @@ CREATE TABLE `jobs_stats` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `jobs_stats_bkp`
---
-
-DROP TABLE IF EXISTS `jobs_stats_bkp`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `jobs_stats_bkp` (
-  `id_job` int(11) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `fuzzy_band` varchar(20) NOT NULL,
-  `source` varchar(45) NOT NULL,
-  `target` varchar(45) NOT NULL,
-  `total_time_to_edit` bigint(20) NOT NULL DEFAULT '0',
-  `avg_post_editing_effort` float DEFAULT NULL,
-  `total_raw_wc` bigint(20) DEFAULT '1',
-  PRIMARY KEY (`id_job`,`password`,`fuzzy_band`),
-  KEY `fuzzybands__index` (`fuzzy_band`),
-  KEY `source` (`source`),
-  KEY `target` (`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `jobs_translators`
 --
 
@@ -431,30 +408,6 @@ DROP TABLE IF EXISTS `language_stats`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `language_stats` (
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `source` varchar(255) NOT NULL,
-  `target` varchar(255) NOT NULL,
-  `fuzzy_band` varchar(20) NOT NULL,
-  `total_word_count` float(255,0) DEFAULT NULL,
-  `total_post_editing_effort` float(255,0) DEFAULT NULL,
-  `total_time_to_edit` float(255,0) DEFAULT NULL,
-  `job_count` int(255) DEFAULT NULL,
-  PRIMARY KEY (`date`,`source`,`target`,`fuzzy_band`),
-  KEY `source_idx` (`source`),
-  KEY `fuzzy_idx` (`fuzzy_band`),
-  KEY `target_idx` (`target`),
-  KEY `date_idx` (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `language_stats_wrong_bkp`
---
-
-DROP TABLE IF EXISTS `language_stats_wrong_bkp`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `language_stats_wrong_bkp` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `source` varchar(255) NOT NULL,
   `target` varchar(255) NOT NULL,
@@ -1130,7 +1083,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-05 15:26:44
+-- Dump completed on 2017-06-08 16:27:00
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1289,4 +1242,4 @@ INSERT INTO `phinxlog` VALUES (20170504163201,'2017-05-04 18:38:49','2017-05-04 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-05 15:26:45
+-- Dump completed on 2017-06-08 16:27:01

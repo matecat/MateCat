@@ -1,7 +1,6 @@
 @import 'common-main';
 @import '../style';
 @import '../mbc-style';
-@import '../jquery.powertip.min';
 @import '../lxq-style';
 @import '../lexiqa';
 @import '../segment-notes';
@@ -18,4 +17,4 @@
 @import 'qa_check_glossary';
 @import 'qa_check_blacklist';
 
-@import 'powerTip';
+@import 'commons/tooltip';

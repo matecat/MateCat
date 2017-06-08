@@ -55,33 +55,36 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @return Chunks_ChunkStruct[]
+     * @param     $id_job
+     *
+     * @param int $ttl
+     *
+     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
      */
-    public static function getByJobID( $id_job ) {
+    public static function getByJobID( $id_job, $ttl = 0 ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM " .
+        $stmt = $conn->prepare(
+                "SELECT * FROM " .
                 "jobs WHERE id = ?
-                order by job_first_segment asc");
-
-        $stmt->execute(array( $id_job ));
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
-        return $stmt->fetchAll( ) ;
+                ORDER BY job_first_segment ASC"
+        );
+        $thisDao = new self();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Chunks_ChunkStruct(), [ $id_job ] );
     }
 
     /**
-     * @param $id_project
+     * @param     $id_project
      *
-     * @return Chunks_ChunkStruct[]
+     *
+     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
      */
     public function getByProjectID( $id_project ) {
+
         $conn = $this->con->getConnection();
         $stmt = $conn->prepare("SELECT * FROM " .
             "jobs WHERE id_project = ? ORDER BY job_first_segment ");
+        return $this->_fetchObject( $stmt, new Chunks_ChunkStruct(), [ $id_project ] );
 
-        $stmt->execute(array( $id_project ));
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
-        return $stmt->fetchAll( ) ;
     }
 
     /**

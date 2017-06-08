@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
+
 class Segments_SegmentDao extends DataAccess_AbstractDao {
 
 
@@ -98,6 +100,37 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
         return $stmt->fetch();
+    }
+
+    /**
+     * @param $id_job
+     *
+     * @return DataAccess_IDaoStruct|ShapelessConcreteStruct
+     */
+    public function getRawWCSumForTranslatedSegments( $id_job, $password ){
+
+        //we do not need to filter on show_in_cattool = 1 because in segment_translations table only these IDs can exists
+        $query = "SELECT SUM(raw_word_count) as translated_raw_wc FROM segments 
+                  WHERE id IN(
+                        SELECT id_segment 
+                        FROM segment_translations 
+                        JOIN jobs ON id_job = jobs.id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                        WHERE id_job = :id_job 
+                        AND password = :password
+                        AND segment_translations.status != :status_new 
+                        AND segment_translations.status != :status_draft
+                  )
+                 ";
+
+        $stmt = $this->con->getConnection()->prepare( $query );
+
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'     => $id_job,
+                'password'   => $password,
+                'status_new' => Constants_TranslationStatus::STATUS_NEW,
+                'status_draft' => Constants_TranslationStatus::STATUS_DRAFT,
+        ] )[0];
+
     }
 
 }

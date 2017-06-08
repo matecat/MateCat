@@ -14,12 +14,38 @@
     left:46%;
     z-index:999999999999999999999999999;
 }
-.popup p{font-size:18px}
-.popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
-.popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
 
-.popup a.anonymous{font-size:12px;}
-.popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
+.modal .popup p {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.popup h1 {
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    padding: 10px 10px 7px 58px;
+    border-bottom: 1px solid #000;
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
+}
+
+.popup h2 {
+    font-weight: normal;
+    font-size: 16px;
+    color: black;
+    display: block;
+    margin: 20px 0 20px 0;
+}
+
+.popup a.anonymous {
+    font-size: 12px;
+}
+
+.popup a.anonymous:visited, .popup a.anonymous:active {
+    color: black;
+}
 
 .popup h1 {
     overflow: visible;
