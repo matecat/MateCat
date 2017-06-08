@@ -391,6 +391,7 @@ $.extend(UI.UPLOAD_PAGE, {
                 var html = '<div class="item"  data-value="' + key + '">' +
                     '<span class="item-key-name">' +desc + '</span>' +
                     '<span class="item-key-id">' + key + '</span>' +
+                    '<i class="icon-checkmark2 icon"></i>' +
                     '</div>';
                 $('#tmx-select div.item').first().before(html);
                 setTimeout(function () {
@@ -412,6 +413,9 @@ $.extend(UI.UPLOAD_PAGE, {
     deleteTMFromSelect: function (event, key) {
 	    if ($('#tmx-select').find('div.item[data-value='+ key +']').size() > 0) {
             $('#tmx-select').find('div.item[data-value='+ key +']').remove();
+            if ( $('#tmx-select').dropdown('get value') == key) {
+                $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+            }
         }
     },
 
