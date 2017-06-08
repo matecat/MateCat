@@ -96,7 +96,7 @@
                 end_job_marker          : segment.sid == config.last_job_segment ,
                 decoded_text            : decoded_source,
                 editarea_classes_string : editarea_classes.join(' '),
-                lang                    : config.target_lang.toLowerCase(),
+                lang                    : config.target_rfc.toLowerCase(),
                 tagLockCustomizable     : ( segment.segment.match( /\&lt;.*?\&gt;/gi ) ? $('#tpl-taglock-customize').html() : null ),
                 tagModesEnabled         : UI.tagModesEnabled,
                 decoded_translation     : decoded_translation  ,
