@@ -15,7 +15,6 @@ class catController extends viewController {
     private $cid = "";
     private $jid = "";
     private $password = "";
-    private $source = "";
     private $create_date = "";
 
     private $start_time = 0.00;
@@ -427,7 +426,6 @@ class catController extends viewController {
         if( $this->job_cancelled || $this->job_archived ) {
 
             $this->template->pid                 = null;
-            $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
@@ -444,7 +442,6 @@ class catController extends viewController {
 
         } else {
             $this->template->pid                 = $this->pid;
-            $this->template->target              = $this->target;
             $this->template->source_code         = $this->source_code;
             $this->template->target_code         = $this->target_code;
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
@@ -461,7 +458,6 @@ class catController extends viewController {
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->project->name;
-        $this->template->source      = $this->source;
 
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->job->id_mt_engine ;
