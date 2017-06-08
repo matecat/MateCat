@@ -218,9 +218,9 @@ UI = {
         if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
         APP.createTMKey();
-        var textToDisplay = '<span>A Private TM Key has been generated for the TMX you uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
+        var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         if (extension && extension === "g") {
-            textToDisplay = '<span>A Private TM Key has been generated for the Glossary uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
+            textToDisplay = '<span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         }
 
 
