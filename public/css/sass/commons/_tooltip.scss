@@ -1,0 +1,125 @@
+/* PowerTip Plugin */
+
+$primary-color: #FFFFFF;
+
+
+#matecatTip
+{
+  cursor: default;
+  background-color: $primary-color;
+  color: #000000;
+  display: none;
+  padding: 10px;
+  position: absolute;
+  white-space: nowrap;
+  z-index: 2147483647;
+  border: 1px solid #D4D4D5;
+  border-radius: 0.28571429rem;
+  box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12), 0px 2px 10px 0px rgba(34, 36, 38, 0.15);
+}
+#matecatTip:before {
+  position: absolute;
+  content: '';
+  width: 0.71428571em;
+  height: 0.71428571em;
+  background: #FFFFFF;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: -1px -1px 0px 0px #bababc;
+  top: -4px;
+}
+#matecatTip.n:before, #matecatTip.s:before {
+  left: 50%;
+  margin-left: -5px;
+  top: -5px;
+}
+#matecatTip.s:before {
+  border-top: 10px solid #333;
+  border-top: 10px solid $primary-color;
+  bottom: -10px;
+}
+#matecatTip.w:before {
+  left: -5px;
+  transform: rotate(-45deg);
+}
+#matecatTip.n:before {
+  bottom: -6px !important;
+  top: initial;
+  transform: rotate(225deg);
+
+}
+#matecatTip.e:before {
+  right: -5px;
+  transform: rotate(135deg);
+
+}
+
+#matecatTip.ne-alt:before, #matecatTip.se-alt:before ,
+#matecatTip.ne:before, #matecatTip.se:before {
+  left: 10px;
+}
+#matecatTip.nw-alt:before, #matecatTip.sw-alt:before ,
+#matecatTip.nw:before, #matecatTip.sw:before {
+  right: 10px;
+}
+#matecatTip.ne-alt:before, #matecatTip.nw-alt:before,
+#matecatTip.ne:before, #matecatTip.nw:before {
+  bottom: -5px;
+  transform: rotate(225deg);
+}
+#matecatTip.se-alt:before, #matecatTip.sw-alt:before ,
+#matecatTip.se:before, #matecatTip.sw:before {
+  top: -5px;
+  transform: rotate(45deg);
+}
+
+#matecatTip.ne-alt:before {
+  left: auto;
+  right: 10px;
+}
+#matecatTip.sw-alt:before, #matecatTip.se-alt:before {
+  border-top: none;
+  bottom: auto;
+  top: -10px;
+}
+#matecatTip.se-alt:before {
+  left: auto;
+  right: 10px;
+}
+
+#matecatTip.lxq {
+  right: 512px !important;
+  left: auto !important;
+  top: 492px !important;
+}
+
+#matecatTip.lxq:before {
+  position: absolute;
+  content: '';
+  width: 0.71428571em;
+  height: 0.71428571em;
+  background: #FFFFFF;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: -1px -1px 0px 0px #bababc;
+  top: -4px;
+}
+
+/*****  Tips Tm options panel ************/
+.powerTip-options-tm {
+  text-align: left;
+  line-height: 18px;
+  font-size: 15px;
+}
+
+.powerTip-options-tm ul {
+  list-style-type: initial !important;
+  margin: 8px 15px 4px 27px !important;
+}
+
+.powerTip-options-tm-title {
+  font-size: 17px;
+  margin-bottom: 5px;
+}

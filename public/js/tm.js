@@ -1949,6 +1949,10 @@
                 mouseOnToPopup: true
 
             });
+            // $(".tooltip-lexiqa").popup({
+            //     html:lexiqaText,
+            //     position: 'bottom center'
+            // });
         },
 
         initTmxTooltips: function () {
