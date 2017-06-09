@@ -14,13 +14,12 @@ body.analyze{
 
     .project {
         margin-bottom: 30px !important;
-        /*min-width: 960px;*/
+        background-color: #dddddd;
         .project-header {
             background-color: #f3f3f3;
             padding-bottom: 10px !important;
             border-bottom: 1px solid #ccc;
-            margin-bottom: -23px;
-            position: relative;
+
             .left-analysis {
                 padding: 20px 25px 0px 30px;
                 .h1 {
@@ -133,7 +132,7 @@ body.analyze{
 
 
         .project-body {
-            background-color: #f9f9f9;
+            margin-top: 2rem;
 
             .jobs {
                 margin-top: 0px;
@@ -159,6 +158,7 @@ body.analyze{
                 .job-body {
                     .chunks {
                         .chunk-container {
+                            
                             .analysis {
                                 background-color: #e4e6e8;
                                 &.outsource-open {
