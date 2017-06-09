@@ -1944,7 +1944,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 's',
+                placement : 'n',
                 mouseOnToPopup: true
 
             });
