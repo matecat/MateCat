@@ -25,7 +25,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
     private static $queryMaxJob = "
                 SELECT min(id) AS min, max(id) AS max
                     FROM jobs
-                    WHERE ( new_words + draft_words ) = 0
+                    WHERE ( new_words + draft_words ) < 10
                     AND id > :id ";
 
     private static $queryFirst = "

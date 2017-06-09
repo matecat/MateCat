@@ -49,25 +49,38 @@ class peeViewController extends viewController {
             $this->dataLangStats = [];
         } else {
             $this->dataLangStats[] = [
-                    "source"       => null,
-                    "target"       => null,
-                    "pee"          => 0,
-                    "fuzzy_band"   => null,
-                    "totalwordPEE" => null,
-                    "job_count"    => null
+                    "source"           => null,
+                    "target"           => null,
+                    "pee"              => 0,
+                    "fuzzy_band"       => null,
+                    "totalwordPEE"     => null,
+                    "current_payable"  => null,
+                    "payable_rate"     => null,
+                    "saving_diff"      => null,
+                    "job_count"        => null
             ];
         }
 
         foreach ( $languageStats as $k => $value ) {
+
+            $proposal_pee                   = Analysis_PayableRates::proposalPee( Analysis_PayableRates::pee2payable( $value[ 'total_post_editing_effort' ] ) );
+            $fuzzy = ( stripos( $value[ 'fuzzy_band' ], 'MT' ) !== false ? 'MT' : $value[ 'fuzzy_band' ] );
             $this->dataLangStats[] = [
-                    "source"       => $languages_instance->getLocalizedName( $value[ 'source' ] ),
-                    "target"       => $languages_instance->getLocalizedName( $value[ 'target' ] ),
-                    "pee"          => $value[ 'total_post_editing_effort' ],
-                    "fuzzy_band"   => $value[ 'fuzzy_band' ],
-                    "totalwordPEE" => number_format( $value[ 'total_word_count' ], 0, ",", "." ),
-                    "payable_rate" => Analysis_PayableRates::pee2payable( $value[ 'total_post_editing_effort' ] ),
-                    "job_count"    => $value[ 'job_count' ]
+                    "source"           => $languages_instance->getLocalizedName( $value[ 'source' ] ),
+                    "target"           => $languages_instance->getLocalizedName( $value[ 'target' ] ),
+                    "pee"              => $value[ 'total_post_editing_effort' ],
+                    "fuzzy_band"       => $value[ 'fuzzy_band' ],
+                    "totalwordPEE"     => number_format( $value[ 'total_word_count' ], 0, ",", "." ),
+                    "current_payable"  => Analysis_PayableRates::getPayableRates( $value[ 'source' ], $value[ 'target' ] )[ $fuzzy ],
+                    "payable_rate"     => $proposal_pee,
+                    "saving_diff"      => Analysis_PayableRates::wordsSavingDiff(
+                            Analysis_PayableRates::getPayableRates( $value[ 'source' ], $value[ 'target' ] )[ $fuzzy ],
+                            $proposal_pee,
+                            $value[ 'total_word_count' ]
+                    ),
+                    "job_count"        => $value[ 'job_count' ]
             ];
+
         }
 
     }
