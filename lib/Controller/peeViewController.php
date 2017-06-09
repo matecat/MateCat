@@ -18,9 +18,13 @@ class peeViewController extends viewController {
      */
     protected $filterDate = null;
 
+    private $lang_handler;
+
     public function __construct() {
         parent::__construct();
         parent::makeTemplate( "pee.html" );
+
+        $this->lang_handler    = Langs_Languages::getInstance();
 
         $filterArgs = [
                 'date'      => [
@@ -87,6 +91,10 @@ class peeViewController extends viewController {
 
     public function setTemplateVars() {
         $this->template->dataLangStats = json_encode( $this->dataLangStats );
+
+        $this->template->languages_array = $this->lang_handler->getEnabledLanguages( 'en' )  ;
+        $this->template->languages_json = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+
         $selectedDate = ( $this->filterDate ? $this->filterDate->format( 'Y-m-d H:i:s' ) : null );
         foreach( $this->snapshots as &$date ){
             $date[ 'selected' ] = false;

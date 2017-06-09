@@ -4,7 +4,9 @@
     PEE = {
         init: function () {
             this.tableGenerate();
+            this.initFilters();
             this.initTable();
+            this.initGraph();
 
             //        $("input[data-column='0']").attr("placeholder", "All");
             //        $("input[data-column='1']").attr("placeholder", "All");
@@ -17,6 +19,140 @@
 
             $("#tablePEE").data('tablesorter').sortList = [ [0, 0], [1, 0] ];
             $("#tablePEE").trigger('update');
+        },
+        initFilters: function () {
+            $('#source-lang, #target-lang, #fuzzy-select').dropdown({
+                selectOnKeydown: false,
+                fullTextSearch: 'exact'
+            });
+
+            $('.ui.accordion').accordion();
+
+            $.fn.form.settings.rules.evaluateInterval = function(value) {
+                var d1 = new Date(value);
+                var endDate = $('.ui.form').form('get values', ['end_date']);
+                var d2 = new Date(endDate.end_date);
+                return d1.getTime() < d2.getTime();
+            };
+            $.fn.form.settings.rules.evaluateInterval2 = function(value) {
+                var startDate = $('.ui.form').form('get values', ['start_date']);
+                var d1 = new Date(startDate.start_date);
+                var d2 = new Date(value);
+                return d1.getTime() < d2.getTime();
+            };
+
+            $('.ui.form')
+                .form({
+                    fields: {
+                        source: {
+                            identifier: 'source_lang',
+                            rules: [
+                                {
+                                    type   : 'minCount[1]',
+                                    prompt : 'Please select at least one source language'
+                                }
+                            ]
+                        },
+                        target: {
+                            identifier: 'target_lang',
+                            rules: [
+                                {
+                                    type   : 'minCount[1]',
+                                    prompt : 'Please select at least one target language'
+                                }
+                            ]
+                        },
+                        startDate: {
+                            identifier: 'start_date',
+                            rules: [
+                                {
+                                    type: 'evaluateInterval',
+                                    prompt: 'Select a correct time interval'
+                                }
+                            ]
+                        },
+                        endDate: {
+                            identifier: 'end_date',
+                            rules: [
+                                {
+                                    type: 'evaluateInterval2',
+                                    prompt: 'Select a correct time interval'
+                                }
+                            ]
+                        }
+                    }
+                })
+            ;
+
+            $('#create-button').on('click', PEE.createGraph);
+        },
+        createGraph: function () {
+            var $form = $('.ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
+                'start_date', 'end_date']);
+            $form.form('validate form');
+            if (!$form.hasClass('error')) {
+                console.log(fields);
+                PEE.requestDataGraph(fields).done(function (data) {
+
+                });
+            }
+        },
+        initGraph: function () {
+            google.charts.load('current', {packages: ['line']});
+            google.charts.setOnLoadCallback(PEE.drawChart);
+
+
+        },
+        requestDataGraph: function (fields) {
+            var data = {
+                sources: fields.source_lang,
+                targets: fields.target_lang,
+                month_interval: [fields.start_date, fields.end_date],
+                fuzzy_band: fields.fuzzy_band
+            };
+            return $.ajax({
+                data: data,
+                type: "POST",
+                url : "/api/app/utils/pee/graph"
+            });
+        },
+        drawChart: function() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Months');
+            data.addColumn('number', 'Italian - English');
+            data.addColumn('number', 'Italian - French');
+            data.addColumn('number', 'Italian - German');
+
+            data.addRows([
+                ['2016-01',  37.8, 80.8, 41.8],
+                ['2016-02',  30.9, 69.5, 32.4],
+                ['2016-03',  25.4,   57, 25.7],
+                ['2016-04',  11.7, 18.8, 10.5],
+                ['2016-05',  11.9, 17.6, 10.4],
+                ['2016-06',   8.8, 13.6,  7.7],
+                ['2016-07',   7.6, 12.3,  9.6],
+                ['2016-08',  12.3, 29.2, 10.6],
+                ['2016-09',  16.9, 42.9, 14.8],
+                ['2016-10', 12.8, 30.9, 11.6],
+                ['2016-11',  5.3,  7.9,  4.7],
+                ['2016-12',  6.6,  8.4,  5.2],
+                ['2017-01',  4.8,  6.3,  3.6],
+                ['2017-02',  4.2,  6.2,  3.4]
+            ]);
+
+
+            var options = {
+                chart: {
+                    title: 'Andamento PEE',
+                    subtitle: 'Sottotitolo'
+                },
+                width: '60%',
+                height: 500
+            };
+
+            var chart = new google.charts.Line(document.getElementById('myChart'));
+
+            chart.draw(data, google.charts.Line.convertOptions(options));
         },
         initTable: function() {
             $('#tablePEE')

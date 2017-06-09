@@ -1,94 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>PEE</title>
+    <link rel="stylesheet" href="${basepath}public/css/build/semantic.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="${basepath}public/css/libs/theme.bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/legacy-misc.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
-    <style>
-        header {
-            border-bottom: 1px solid #5C5C5C;
-            background-color: #4D4D4D;
-            padding: 0px 0 2px 0;
-            margin-bottom: 20px;
-            height: 45px;
-        }
-        #tablePEE {
-            width: 92%;
-            margin: 0 auto;
-            margin-bottom: 50px;
-        }
-        h1{
-            margin-bottom: 30px;
-            margin-top: 60px;
-            font-size: 40px;
-        }
-        h2{
-            margin-bottom: 30px;
-        }
-        .pee.progressbar {
-            height: 20px;
-            position: relative;
-            width: 80%;
-            float: right;
-        }
-        .pee .progress {
-            background: url(https://www.matecat.com/public/img/progressbar.gif);
-            display: block;
-            height: 20px;
-        }
-        .labelpee {
-            position: relative;
-            float: left;
-            width: 4%;
-            text-shadow: 0px 0px 2px #fff;
-            text-align: left;
-        }
-
-        .tablestats.revision td, .tablestats.revision th {
-            padding: 15px 20px;
-        }
-        .tablesorter-filter-row input {
-            width: 100%;
-        }
-        tr.tablesorter-headerRow th {
-            padding: 15px 0 !important;
-        }
-        th.tablesorter-headerUnSorted {
-            background: #efefef url(https://www.matecat.com/public/img/bg.gif) right center no-repeat !important;
-        }
-        .tablesorter-filter-row {
-            background: #f4f4f4;
-        }
-
-        select {
-            width: 100%;
-            height: 23px;
-            background: #fff;
-        }
-
-        div.selectContainer {
-            width: 6%;
-            float: right;
-            margin: 30px 0;
-        }
-
-        .notfound {
-            width: 100%;
-            margin: 20px auto;
-            font-size: 26px;
-            font-style: italic;
-            color: #999;
-        }
-    </style>
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
 
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
     <script src="${basepath}public/js/lib/jquery-1.11.0.min.js"></script>
-    <!--<script src="${basepath}public/js/lib/jquery.js"></script>-->
+    <script src="${basepath}public/js/lib/jquery-ui.js"></script>
     <script src="${basepath}public/js/build/common.js"></script>
+    <script src="${basepath}public/js/build/semantic.js"></script>
 
     <script src="${basepath}public/js/lib/jquery.tablesorter.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter.widgets.js"></script>
@@ -96,7 +23,14 @@
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
-    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
+    <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
+    <!--[if gte IE 8]>
+    <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
+    <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
+    <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+    <script src="${basepath}public/js/pee.js"></script>
+
+
 
 </head>
 
@@ -106,7 +40,7 @@
 <body tal:condition="php:supportedBrowser EQ -2">
 <div metal:use-macro="unsupported_browser.html/indexie"/>
 </body>
-<body tal:condition="php:supportedBrowser EQ 1" class="started">
+<body tal:condition="php:supportedBrowser EQ 1" class="started pee-page">
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
@@ -115,34 +49,95 @@
     <div class="cl"></div>
 </header>
 
-<script src="${basepath}public/js/lib/jquery-ui.js"></script>
-
-<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
-<!--[if gte IE 8]>
-<script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
-<script src="${basepath}public/js/lib/jquery.cookie.js"></script>
-<script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
-<script src="${basepath}public/js/pee.js"></script>
-
 <script type="text/javascript">
+    /*<![CDATA[*/
     var config = {
         enable_outsource: 0,
+        languages_array : ${languages_json}
     };
+    var langStats = ${dataLangStats};
+    /*]]>*/
 </script>
 
 <body>
+
 <div class="wrapper">
 
-    <h1 >Post-editing effort and payable
-        rates</h1>
+    <h1 >Post-editing effort and payable rates</h1>
     <h2 >Payable rates applied for machine translation post-editing per language pairs </h2>
 
-    <script type="text/javascript">
-        /*<![CDATA[*/
-        var langStats = ${dataLangStats};
-        /*]]>*/
-    </script>
-
+    <div class="filter-chart-container">
+        <div class="ui styled accordion">
+            <div class="active title">
+                <i class="dropdown icon"></i>
+                Filters
+            </div>
+            <div class="active content">
+                <div class="ui equal width form">
+                    <div class="fields">
+                        <div class="field">
+                            <label>Source</label>
+                            <select class="ui fluid search dropdown" multiple="" id="source-lang" name="source_lang">
+                                <option value="">Source Languages</option>
+                                <tal:block tal:define="language php:array()" tal:repeat="language languages_array">
+                                    <option tal:attributes="value language/code" tal:content="language/name"></option>
+                                </tal:block>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="field">
+                            <label>Target</label>
+                            <select class="ui fluid search dropdown" multiple="" id="target-lang" name="target_lang">
+                                <option value="">Target Languages</option>
+                                <tal:block tal:define="language php:array()" tal:repeat="language languages_array">
+                                    <option tal:attributes="value language/code" tal:content="language/name"></option>
+                                </tal:block>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="field">
+                            <label>Fuzzy Band</label>
+                            <select class="ui fluid search dropdown" multiple="" id="fuzzy-select" name="fuzzy_band">
+                                <option value="MT" >MT</option>
+                                <option value="100%" >100%</option>
+                                <option value="75%" >75%</option>
+                                <option value="50%" >50%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="field">
+                            <label>From</label>
+                            <select class="ui search dropdown" id="from-date" name="start_date">
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>To</label>
+                            <select class="ui search dropdown" id="to-date" name="end_date">
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ui primary button" id="create-button">Crea Grafico</div>
+                    <div class="ui reset button">Reset</div>
+                    <div class="ui error message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chart-container">
+        <div id="myChart">
+            <div class="ui segment">
+                <div class="ui active inverted dimmer">
+                    <div class="ui text loader">Loading</div>
+                </div>
+                <p></p>
+            </div>
+        </div>
+    </div>
     <div class="selectContainer">
         <form id="filterDateForm" action="/utils/pee" method="post" >
             <select name="date" id="date" >
@@ -152,27 +147,27 @@
         </form>
     </div>
 
+    <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter"
+           data-filter="true">
+        <thead>
+        <tr>
+            <th>SOURCE</th>
+            <th>TARGET</th>
+            <th>PEE</th>
+            <th>WORDS</th>
+            <th>JOBS</th>
+            <th>PAYABLE</th>
+            <th>PROPOSAL PAYABLE</th>
+            <th>SAVING WORDS</th>
+            <th>FUZZY BAND</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+
+    </table>
+
 </div>
-
-<table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter"
-       data-filter="true">
-    <thead>
-    <tr>
-        <th>SOURCE</th>
-        <th>TARGET</th>
-        <th>PEE</th>
-        <th>WORDS</th>
-        <th>JOBS</th>
-        <th>PAYABLE</th>
-        <th>PROPOSAL PAYABLE</th>
-        <th>SAVING WORDS</th>
-        <th>FUZZY BAND</th>
-    </tr>
-    </thead>
-    <tbody>
-    </tbody>
-
-</table>
 
 </body>
 
@@ -197,8 +192,10 @@
 <div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
 <div id="uploadCallback"></div>
 
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
-<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
+<!--<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>-->
 <div metal:use-macro="common.html/footer_includes" />
 
 </body>
