@@ -144,7 +144,7 @@
                                     return n > 5000000;
                                 }
                             },
-                            6: {
+                            8: {
                                 "All": function (e, n, f, i, $r, c, data) {
                                     return true;
                                 },
@@ -240,9 +240,15 @@
                     elem.job_count +
                     '</td>' +
                     '<td id="col6">' +
-                    elem.payable_rate + '%' +
+                    elem.current_payable + '%' +
                     '</td>' +
                     '<td id="col7">' +
+                    elem.payable_rate + '%' +
+                    '</td>' +
+                    '<td id="col8">' +
+                    elem.saving_diff +
+                    '</td>' +
+                    '<td id="col9">' +
                     elem.fuzzy_band +
                     '</td></tr>';
 

@@ -25,6 +25,7 @@ class LanguageStatsRunner extends AbstractDaemon {
 
         do {
             $firstDayOfLastMonth = date( 'Y-m-d', strtotime( 'first day of last month' ) );
+//            $firstDayOfLastMonth = '2016-03-01';
 
             $langsObj = Langs_Languages::getInstance();
 

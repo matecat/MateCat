@@ -9,7 +9,7 @@
  */
 class Analysis_PayableRates {
 
-    public static $DEFAULT_PAYABLE_RATES = array(
+    public static $DEFAULT_PAYABLE_RATES = [
             'NO_MATCH'    => 100,
             '50%-74%'     => 100,
         //            '75%-99%'     => 60,
@@ -21,11 +21,11 @@ class Analysis_PayableRates {
             'REPETITIONS' => 30,
             'INTERNAL'    => 60,
             'MT'          => 85
-    );
+    ];
 
-    private static $langPair2MTpayableRates = array(
-            "en" => array(
-                    "it" => array(
+    private static $langPair2MTpayableRates = [
+            "en" => [
+                    "it" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -37,8 +37,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
-                    ),
-                    "fr" => array(
+                    ],
+                    "fr" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -50,8 +50,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
-                    ),
-                    "pt" => array(
+                    ],
+                    "pt" => [
                             'NO_MATCH' => 100,
                             '50%-74%'  => 100,
                         //'75%-99%'     => 60,
@@ -64,8 +64,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
-                    ),
-                    "es" => array(
+                    ],
+                    "es" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -77,8 +77,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
-                    ),
-                    "nl" => array(
+                    ],
+                    "nl" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -90,8 +90,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
-                    ),
-                    "pl" => array(
+                    ],
+                    "pl" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -103,8 +103,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "uk" => array(
+                    ],
+                    "uk" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -116,8 +116,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "hi" => array(
+                    ],
+                    "hi" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -129,8 +129,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "fi" => array(
+                    ],
+                    "fi" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -142,8 +142,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "tr" => array(
+                    ],
+                    "tr" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -155,8 +155,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "ru" => array(
+                    ],
+                    "ru" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -168,8 +168,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "zh" => array(
+                    ],
+                    "zh" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -181,8 +181,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "ar" => array(
+                    ],
+                    "ar" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -194,8 +194,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "ko" => array(
+                    ],
+                    "ko" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -207,8 +207,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "lt" => array(
+                    ],
+                    "lt" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -220,8 +220,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "ja" => array(
+                    ],
+                    "ja" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -233,8 +233,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "he" => array(
+                    ],
+                    "he" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -246,8 +246,8 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    ),
-                    "sr" => array(
+                    ],
+                    "sr" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                         //'75%-99%'     => 60,
@@ -259,9 +259,9 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
-                    )
-            )
-    );
+                    ]
+            ]
+    ];
 
     /**
      * Get the payable rate for a given langpair.
@@ -273,7 +273,7 @@ class Analysis_PayableRates {
      * @param $target        string The first two chars of the target language name in RFC3066<br/>
      *                       Example: <i>en-US</i> --> <b>en</b>
      *
-     * @return string
+     * @return array
      */
     public static function getPayableRates( $source, $target ) {
 
@@ -301,30 +301,16 @@ class Analysis_PayableRates {
      */
     public static function pee2payable( $pee ) {
         $pee = floatval( $pee );
+        // payable = ( aX^2 + bX + c ) * 100
+        return round( ( -0.00032 * ( pow( $pee, 2 ) ) + 0.034 * $pee + 0.1 ) * 100, 1 );
+    }
 
-        if ( $pee < 0 ) {
-            $pee = 0;
-        }
-        if ( $pee > 100 ) {
-            $pee = 100;
-        }
+    public static function proposalPee( $payable ){
+        return min( 95, max( 75, $payable ) );
+    }
 
-        $x_2_coef = -0.00032;
-        $x_coef   = 0.034;
-        $constant = 0.1;
-
-        $payable = ( $x_2_coef * ( pow( $pee, 2 ) ) + $x_coef * $pee + $constant );
-        $payable = round( 100 * $payable, 1 );
-//        $payable = self::roundUpToAny( $payable, 5);
-
-        if ( $payable < 75 ) {
-            $payable = 85;
-        }
-        if ( $payable > 95 ) {
-            $payable = 95;
-        }
-
-        return str_replace( ".", ",", $payable );
+    public static function wordsSavingDiff( $actual_payable, $proposal_payable, $word_count ){
+        return round( ( $actual_payable - $proposal_payable ) * $word_count );
     }
 
     private static function roundUpToAny( $n, $x = 5 ) {
