@@ -2651,7 +2651,10 @@ class ProjectManager {
         else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;
-            $identicalSourceAndTargetIsTranslated = $this->features->filter('filterIdenticalSourceAndTargetIsTranslated', $identicalSourceAndTargetIsTranslated );
+            $identicalSourceAndTargetIsTranslated = $this->features->filter(
+                    'filterIdenticalSourceAndTargetIsTranslated',
+                    $identicalSourceAndTargetIsTranslated, $this->projectStructure
+            );
 
             return $identicalSourceAndTargetIsTranslated ;
         }
