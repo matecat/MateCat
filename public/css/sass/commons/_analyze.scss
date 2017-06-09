@@ -21,38 +21,98 @@ body.analyze{
             border-bottom: 1px solid #ccc;
             margin-bottom: -23px;
             position: relative;
-            height: 200px;
-            .ui.ribbon.label {
-                position: absolute;
-                top: 11px;
-                z-index: 2;
-                left: -15px;
-                max-width: 535px;
-                min-width: 0px;
-                line-height: 17px;
-                background-color: #d8d8d8;
-                color: #000000;
-                height: 30px;
-                border-radius: 0px 2px 2px 0px;
-                .project-name {
-                    font-size: 17px;
-                    max-width: 390px;
-                    min-width: 30px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: inline-block;
-                    vertical-align: text-bottom;
+            .left-analysis {
+                padding: 20px 25px 0px 30px;
+                .h1 {
+                    font-size: 38px;
+                    font-weight: 100;
+                    color: grey;
+                    margin-bottom: 0px;
                 }
-                .project-id {
-                    font-size: 14px;
-                    font-weight: normal;
-                    margin-right: 3px;
-                    margin-left: 15px;
-                    display: inline-block;
-                    vertical-align: text-bottom;
-                    min-width: 64px;
-                    color: #5a5a5a;
+                .ui.ribbon.label {
+                    position: relative;
+                    top: 0px;
+                    z-index: 2;
+                    left: -45px;
+                    max-width: 535px;
+                    min-width: 340px;
+                    background-color: #d8d8d8;
+                    color: #000000;
+                    border-radius: 0px 2px 2px 0px;
+                    .project-id {
+                        font-size: 14px;
+                        font-weight: 700;
+                        margin-right: 3px;
+                        margin-left: 15px;
+                        display: inline-block;
+                        color: #5a5a5a;
+                        vertical-align: top;
+                        position: relative;
+                        top: 3px;
+                    }
+                    .project-name {
+                        font-size: 20px;
+                        display: inline-block;
+                        vertical-align: text-bottom;
+                    }
+                }
+                .project-create {
+                    top: 10px;
+                    position: relative;
+                }
+                .analysis-create {
+                    margin-top: 45px;
+                    .search-tm-matches {
+                        h5 {
+                            display: inline-block;
+                            margin-bottom: 0;
+                        }
+                        .initial-segments {
+                            display: inline-block;
+                        }
+                        .total-segments {
+                            display: inline-block;
+                        }
+                        .progress-bar {
+                            width: 100%;
+                        }
+                    }
+                }
+
+            }
+
+            .word-count {
+                .word-percent {
+                    background-color: #f3f3f3;
+                    padding: 20px 15px 10px;
+                    border: 1px solid #7eaf3e;
+                    .percent {
+                        font-size: 56px;
+                        font-weight: 700;
+                        display: inline-block;
+                        vertical-align: -webkit-baseline-middle;
+                        margin-right: 10px;
+                    }
+                }
+                .word-raw, .matecat-raw {
+                    background-color: #f3f3f3;
+                    padding: 5px;
+                    border: 1px solid #7eaf3e;
+                    text-align: center;
+                    h3, h4 {
+                        margin: 0;
+                    }
+                }
+                .word-raw {
+
+                }
+                .overlay {
+                    background-color: rgba(243, 243, 243, 0.7);
+                    border: 1px solid #a7c3a7;
+                    margin-top: -54px;
+                    z-index: 10;
+                    position: relative;
+                    height: 100%;
                 }
             }
 
@@ -70,6 +130,7 @@ body.analyze{
                 }
             }
         }
+
 
         .project-body {
             background-color: #f9f9f9;
@@ -193,6 +254,7 @@ body.analyze{
                                     padding: 3px 15px;
                                     text-align: center;
                                     box-shadow: none !important;
+                                    background-color: #f3f3f3;
                                     .job-id {
                                         float: left;
                                         min-width: 65px;
@@ -235,20 +297,23 @@ body.analyze{
                                             height: 56px;
                                             background-color: #f3f3f3;
                                             vertical-align: top;
+                                            padding: 5px;
                                             span {
                                                 font-size: 13px;
                                                 font-weight: 700;
                                             }
                                             &.total {
                                                 line-height: 56px;
+                                                width: 70px;
                                             }
                                             &.payable-words {
+                                                width: 60px;
                                                 line-height: 56px;
-                                                background-color: greenyellow;
+                                                background-color: rgba(126, 175, 62, 0.3);
                                             }
                                             &.new {
                                                 line-height: 56px;
-                                                width: 45px;
+                                                width: 40px;
                                             }
                                             &.repetition {
                                                 line-height: 56px;
@@ -265,7 +330,7 @@ body.analyze{
                                             &.p-95-99 {
                                             }
                                             &.tm-100 {
-                                                width: 50px;
+                                                width: 40px;
                                                 padding-top: 10px;
                                             }
                                             &.tm-public {
@@ -342,13 +407,16 @@ body.analyze{
                                             line-height: 30px;
                                             padding: 0 5px;
                                             width: 60px;
+                                            background-color: #ffffff;
                                             &.total {
+                                                width: 70px;
                                             }
                                             &.payable-words {
-                                                background-color: greenyellow;
+                                                width: 60px;
+
                                             }
                                             &.new {
-                                                width: 45px;
+                                                width: 40px;
                                             }
                                             &.repetition {
                                                 width: 70px;
@@ -364,7 +432,7 @@ body.analyze{
                                             &.p-95-99 {
                                             }
                                             &.tm-100 {
-                                                width: 50px;
+                                                width: 40px;
                                             }
                                             &.tm-public {
                                                 width: 50px;
@@ -437,14 +505,16 @@ body.analyze{
                                             line-height: 42px;
                                             padding: 0 5px;
                                             width: 60px;
-                                            background-color: #f3f3f3;
+                                            /*background-color: #f3f3f3;*/
                                             &.total {
+                                                width: 70px;
                                             }
                                             &.payable-words {
-                                                background-color: greenyellow;
+                                                width: 60px;
+                                                background-color: rgba(126, 175, 62, 0.3);
                                             }
                                             &.new {
-                                                width: 45px;
+                                                width: 40px;
                                             }
                                             &.repetition {
                                                 width: 70px;
@@ -460,7 +530,7 @@ body.analyze{
                                             &.p-95-99 {
                                             }
                                             &.tm-100 {
-                                                width: 50px;
+                                                width: 40px;
                                             }
                                             &.tm-public {
                                                 width: 50px;

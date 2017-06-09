@@ -9,32 +9,75 @@
 </head>
 <body class="analyze">
 <header>
-    <section data-reactroot="" class="nav-mc-bar ui grid"><nav class="sixteen wide column navigation"><div class="ui grid"><div class="three wide column"><a href="/" class="logo"></a></div><div class="ten wide column"><section class="row sub-head"><div class="ui grid"><div class="eight wide column"><div class="ui right labeled fluid input search-state-filters"><input type="text" class="search-projects" placeholder="Search by project name"><div class="ui top left pointing dropdown" title="Status Filter" tabindex="0"><i class="icon-filter icon"></i><div class="text">Active</div><div class="menu" tabindex="-1"><div class="item active selected" data-value="active">Active</div><div class="item" data-value="archived">Archived</div><div class="item" data-value="cancelled">Cancelled</div></div></div></div></div><div class="eight wide column pad-right-0"></div></div></section></div><div class="user-teams three wide right floated right aligned column"><img class="ui mini circular image ui-user-top-image" src="https://lh6.googleusercontent.com/-p4T8KbRPUuE/AAAAAAAAAAI/AAAAAAAAA30/m-b3-A3_f7Q/photo.jpg?sz=80" title="Personal settings" alt="Profile picture"><div class="ui top right pointing dropdown select-org " tabindex="0"><input type="hidden" name="team" class="team-dd" value="13751"><i class="dropdown icon"></i><span class="text">Personal</span><div class="menu" tabindex="-1"><div class="header"><!-- react-text: 30 -->Create New Team<!-- /react-text --><a class="team-filter button show"><i class="icon-plus3 icon"></i></a></div><div class="divider"></div><div class="scrolling menu"><div class="item active selected" data-value="13751" data-text="Personal"><!-- react-text: 36 -->Personal<!-- /react-text --><!-- react-text: 37 --><!-- /react-text --></div><div class="item" data-value="32768" data-text="My First Organization"><!-- react-text: 39 -->My First Organization<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div><div class="item" data-value="34838" data-text="Team design"><!-- react-text: 43 -->Team design<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div><div class="item" data-value="32775" data-text="Translated"><!-- react-text: 47 -->Translated<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div></div></div></div><!-- react-text: 23 --><!-- /react-text --></div></div></nav></section></header>
+    <section data-reactroot="" class="nav-mc-bar ui grid"><nav class="sixteen wide column navigation"><div class="ui grid"><div class="three wide column"><a href="/" class="logo"></a></div><div class="ten wide column"><section class="row sub-head"><div class="ui grid"><div class="eight wide column"></div><div class="eight wide column pad-right-0"></div></div></section></div><div class="user-teams three wide right floated right aligned column"><img class="ui mini circular image ui-user-top-image" src="https://lh6.googleusercontent.com/-p4T8KbRPUuE/AAAAAAAAAAI/AAAAAAAAA30/m-b3-A3_f7Q/photo.jpg?sz=80" title="Personal settings" alt="Profile picture"><div class="ui top right pointing dropdown select-org " tabindex="0"><input type="hidden" name="team" class="team-dd" value="13751"><i class="dropdown icon"></i><span class="text">Personal</span><div class="menu" tabindex="-1"><div class="header"><!-- react-text: 30 -->Create New Team<!-- /react-text --><a class="team-filter button show"><i class="icon-plus3 icon"></i></a></div><div class="divider"></div><div class="scrolling menu"><div class="item active selected" data-value="13751" data-text="Personal"><!-- react-text: 36 -->Personal<!-- /react-text --><!-- react-text: 37 --><!-- /react-text --></div><div class="item" data-value="32768" data-text="My First Organization"><!-- react-text: 39 -->My First Organization<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div><div class="item" data-value="34838" data-text="Team design"><!-- react-text: 43 -->Team design<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div><div class="item" data-value="32775" data-text="Translated"><!-- react-text: 47 -->Translated<!-- /react-text --><a class="team-filter button show right"><i class="icon-settings icon"></i></a></div></div></div></div><!-- react-text: 23 --><!-- /react-text --></div></div></nav></section></header>
     <div class="project-list">
         <div class="ui container">
             <div class="project ui column grid shadow-1">
                 <div class="sixteen wide column">
 
                     <div class="project-header ui grid">
-                        <div class="eight wide column">
-                            <div class="ui stackable grid">
+                        <div class="left-analysis nine wide column">
+                            <h1>Volume Analysis</h1>
+                            <div class="ui ribbon label">
+                                <div class="project-id" title="Project id">(58)</div>
+                                <div class="project-name" title="Project name">MATECAT_PROJ[...]01706081253</div>
+                            </div>
+                            <div class="project-create">Created on Fri, March 03 2017</div>
+                            <div class="analysis-create">
+                                <div class="search-tm-matches">
+                                    <h5>Searching for TM Matches</h5>
+                                    <div class="initial-segments">(71 of </div>
+                                    <div class="total-segments">2393)</div>
+                                    <div class="progress-bar">
+                                        <div class="progr">
+                                            <div class="meter">
+                                                <a class="warning-bar translate-tooltip"  data-html="Rejected 0%" style="width: 0%;"></a>
+                                                <a class="approved-bar translate-tooltip"  data-html="Approved 100%" style="width: 60%;"></a>
+                                                <a class="translated-bar translate-tooltip" data-html="Translated 0%" style="width: 0%;"></a>
+                                                <a class="draft-bar translate-tooltip" data-html="Draft 0%" style="width: 0%;"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="seven wide right floated column">
+                            <div class="word-count ui grid">
                                 <div class="sixteen wide column">
-                                    <div class="ui ribbon label">
-                                        <div class="project-id" title="Project id">(58)</div>
-                                        <div class="project-name" title="Project name">UX_Value</div>
+                                    <div class="word-percent ">
+                                        <h2 class="ui header">
+                                            <div class="percent">30%</div>
+                                            <div class="content">
+                                                Saving on word count
+                                                <div class="sub header">27 work minutes at 3.000 w/day
+                                                </div>
+                                            </div>
+                                        </h2>
+                                        <p>MateCat gives you more matches than any other CAT tool thanks to a mix of public and private translation memories, and machine translation.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="sixteen wide column pad-top-0">
+                                    <div class="raw-matecat ui grid">
+                                        <div class="eight wide column pad-right-7">
+                                            <div class="word-raw">
+                                                <h3>6’233.332</h3>
+                                                <h4>Raw words</h4>
+                                            </div>
+                                            <div class="overlay"></div>
+                                        </div>
+                                        <div class="eight wide column pad-left-7">
+                                            <div class="matecat-raw ">
+                                                <h3>6’233.332</h3>
+                                                <h4>Raw words</h4>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="eight wide right floated column pad-top-8">
-                            <div class="ui mobile reversed stackable grid right aligned">
-                                <div class="sixteen wide right floated column">
-                                    <div class="project-word-count">
-                                       <div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     <div class="project-body ui grid">
@@ -92,8 +135,8 @@
 
                                                     </div>
                                                     <div class="single-analysis">
-                                                        <div class="single total"></div>
-                                                        <div class="single payable-words">Pay > </div>
+                                                        <div class="single total">Pay</div>
+                                                        <div class="single payable-words"> > </div>
                                                         <div class="single new">100%</div>
                                                         <div class="single repetition">30%</div>
                                                         <div class="single internal-matches">60%</div>
@@ -120,15 +163,15 @@
                                                     </div>
                                                     <div class="single-analysis">
                                                         <div class="single total">5'434,234</div>
-                                                        <div class="single payable-words">3'235,234</div>
-                                                        <div class="single new">65456</div>
+                                                        <div class="single payable-words">235,234</div>
+                                                        <div class="single new">456</div>
                                                         <div class="single repetition">256,342</div>
                                                         <div class="single internal-matches">356</div>
                                                         <div class="single p-50-74">5,0403</div>
                                                         <div class="single p-75-84">7,942</div>
                                                         <div class="single p-65-94">6,942</div>
                                                         <div class="single p-95-99">3,942</div>
-                                                        <div class="single tm-100">6,245</div>
+                                                        <div class="single tm-100">645</div>
                                                         <div class="single tm-public">8,435</div>
                                                         <div class="single tm-context">4,524</div>
                                                         <div class="single machine-translation">6'754,648</div>
@@ -149,15 +192,15 @@
                                                     </div>
                                                     <div class="single-analysis">
                                                         <div class="single total">5'434,234</div>
-                                                        <div class="single payable-words">3'235,234</div>
-                                                        <div class="single new">65456</div>
+                                                        <div class="single payable-words">235,234</div>
+                                                        <div class="single new">654</div>
                                                         <div class="single repetition">256,342</div>
                                                         <div class="single internal-matches">356</div>
                                                         <div class="single p-50-74">5,0403</div>
                                                         <div class="single p-75-84">7,942</div>
                                                         <div class="single p-65-94">6,942</div>
                                                         <div class="single p-95-99">3,942</div>
-                                                        <div class="single tm-100">6,245</div>
+                                                        <div class="single tm-100">245</div>
                                                         <div class="single tm-public">8,435</div>
                                                         <div class="single tm-context">4,524</div>
                                                         <div class="single machine-translation">6'754,648</div>
@@ -178,15 +221,15 @@
                                                     </div>
                                                     <div class="single-analysis">
                                                         <div class="single total">5'434,234</div>
-                                                        <div class="single payable-words">3'235,234</div>
-                                                        <div class="single new">65456</div>
+                                                        <div class="single payable-words">235,234</div>
+                                                        <div class="single new">656</div>
                                                         <div class="single repetition">256,342</div>
                                                         <div class="single internal-matches">356</div>
                                                         <div class="single p-50-74">5,0403</div>
                                                         <div class="single p-75-84">7,942</div>
                                                         <div class="single p-65-94">6,942</div>
                                                         <div class="single p-95-99">3,942</div>
-                                                        <div class="single tm-100">6,245</div>
+                                                        <div class="single tm-100">625</div>
                                                         <div class="single tm-public">8,435</div>
                                                         <div class="single tm-context">4,524</div>
                                                         <div class="single machine-translation">6'754,648</div>
