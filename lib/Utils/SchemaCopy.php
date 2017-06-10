@@ -64,11 +64,19 @@ class SchemaCopy {
     foreach($this->getTables() as $k => $v) {
       $table_name = $v[ 0 ] ;
       $st = $conn->query( "SHOW CREATE TABLE $table_name ");
-      array_push($result, $st->fetchAll());
+
+      array_push($result, static::removePartitionInfo( $st->fetch()['Create Table'])  );
     }
 
     return $result;
   }
+
+    /**
+     * Partition info slow down database reset during test runs.
+     */
+    static function removePartitionInfo( $string ) {
+        return preg_replace('/\/\*(.+)\*\//s', '', $string );
+    }
 
   function truncateAllTables() {
       $conn = $this->getDbConn($this->config);
