@@ -720,6 +720,10 @@ blockquote {
     height: 500px
 }
 
+.chart-container text {
+    font-size: 12px;
+}
+
 .filter-chart-container {
     width: 1000px;
     margin: 0 auto;

@@ -2,6 +2,66 @@
 
 (function ($) {
     PEE = {
+        chartOptions: {
+            chart: {
+                title: 'Andamento PEE'
+            },
+            tooltip: {isHtml: true},
+            width: '100%',
+            height: 500,
+            pointSize: 0,
+            hAxis: {
+                title: 'Months'
+            },
+            vAxis: {
+                title: 'PEE'
+            }
+        },
+
+        annotations: [
+            {
+                id: 1,
+                name: "Neural",
+                date: "2017-04",
+                text: "Introduzione Neural</br> 6 Aprile 2017",
+                langsPairs: [
+                    {l1: "ar-SA",  l2: "en-GB"},
+                    {l1: "zh-CN",  l2: "en-GB"},
+                    {l1: "en-GB",  l2: "fr-FR"},
+                    {l1: "en-GB",  l2: "de-DE"},
+                    {l1: "en-GB",  l2: "hi-IN"},
+                    {l1: "en-GB",  l2: "ja-JP"},
+                    {l1: "en-GB",  l2: "ko-KR"},
+                    {l1: "en-GB",  l2: "pl-PL"},
+                    {l1: "en-GB",  l2: "pt-PT"},
+                    {l1: "en-GB",  l2: "ru-RU"},
+                    {l1: "en-GB",  l2: "es-ES"},
+                    {l1: "en-GB",  l2: "th-TH"},
+                    {l1: "en-GB",  l2: "tr-TR"},
+                    {l1: "en-GB",  l2: "vi-VN"}
+                ]
+            },
+            {
+                id: 2,
+                name: "Neural",
+                date: "2017-04",
+                text: "Introduzione Neural</br> 16 Aprile 2017",
+                langsPairs: [
+                    {l1: "en-gb",  l2: "it-IT"},
+                ]
+            },
+            {
+                id: 3,
+                name: "Guess Tags",
+                date: "2016-02",
+                text: "Introduzione Guess Tags</br> 6 Maggio 2016",
+                langsPairs: [
+                    {l1: "en-GB",  l2: "es-ES"},
+                    {l1: "en-GB",  l2: "de-DE"}
+                ]
+            }
+        ],
+
         init: function () {
             this.tableGenerate();
             this.initFilters();
@@ -92,18 +152,20 @@
             $form.form('validate form');
             if (!$form.hasClass('error')) {
                 console.log(fields);
-                // PEE.requestDataGraph(fields).done(function (data) {
-                //     PEE.createDataForGraph(data);
-                // });
-                var data = PEE.requestDataGraph(fields);
-                PEE.createDataForGraph(data);
-
+                PEE.requestDataGraph(fields).done(function (data) {
+                    PEE.createDataForGraph(data);
+                });
             }
+
+            // var data = PEE.requestDataGraph(fields);
+            // PEE.createDataForGraph(data);
         },
         initGraph: function () {
-            // google.charts.load('current', {packages: ['line']});
             google.charts.load('current', {'packages':['corechart']});
-            google.charts.setOnLoadCallback(PEE.drawChart);
+            // google.charts.load('current', {'packages':['line']});
+
+            google.charts.setOnLoadCallback(PEE.drawDefaultChart);
+
 
 
         },
@@ -114,122 +176,170 @@
                 month_interval: [fields.start_date, fields.end_date],
                 fuzzy_band: fields.fuzzy_band
             };
-            // return $.ajax({
-            //     data: data,
-            //     type: "POST",
-            //     url : "/api/app/utils/pee/graph"
-            // });
-            var data = [
-                {
-                    "month": "2017-01",
-                    "langs" : [
-                        {"source":"English","target":"French", "pee": { "100%": 70, "100%_PUBLIC": 80, "MT_MyMemory": 90 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"German", "pee": { "100%": 83, "100%_PUBLIC": 66, "MT_MyMemory": 69 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"Italian", "pee": { "100%": 83, "100%_PUBLIC": 66, "MT_MyMemory": 69 },"totalwordPEE":"1.086","job_count":"689"} ,
-                    ]
-                }, //2017-01
-                {
-                    "month": "2017-02",
-                    "langs" :[
-                        {"source":"English","target":"French", "pee": { "100%": 56, "100%_PUBLIC": 76, "MT_MyMemory": 89 }, "totalwordPEE":"1.086", "job_count":"689"} ,
-                        {"source":"English US","target":"German", "pee": { "100%": 78, "100%_PUBLIC": 88, "MT_MyMemory":59 }, "totalwordPEE":"1.086", "job_count":"689"} ,
-                        {"source":"English US","target":"Italian", "pee": { "100%": 78, "100%_PUBLIC": 88, "MT_MyMemory":59 }, "totalwordPEE":"1.086", "job_count":"689"} ,
-                    ] //
-                },
-                {
-                    "month": "2017-03",
-                    "langs" :[
-                        {"source":"English","target":"French", "pee": { "100%": 68, "100%_PUBLIC": 58, "MT_MyMemory": 89 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"German", "pee": { "100%": 8, "100%_PUBLIC": 8, "MT_MyMemory": 9 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"Italian", "pee": { "100%": 8, "100%_PUBLIC": 8, "MT_MyMemory": 9 },"totalwordPEE":"1.086","job_count":"689"} ,
-                    ] //
-                },
-                {
-                    "month": "2017-04",
-                    "langs" :[
-                        {"source":"English","target":"French", "pee": { "100%": 58, "100%_PUBLIC": 78, "MT_MyMemory": 89 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"German", "pee": { "100%": 78, "100%_PUBLIC": 58, "MT_MyMemory": 79 },"totalwordPEE":"1.086","job_count":"689"} ,
-                        {"source":"English US","target":"Italian", "pee": { "100%": 78, "100%_PUBLIC": 58, "MT_MyMemory": 79 },"totalwordPEE":"1.086","job_count":"689"} ,
-                    ] //
-                }
-            ];
-            return data
+            return $.ajax({
+                data: data,
+                type: "POST",
+                url : "/api/app/utils/pee/graph"
+            });
+            // var data = [
+            //     {
+            //         "2017-01": [80, 90, 66, 69, 66, 69],
+            //         "keys": [
+            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
+            //             ["en-GB", "fr-FR", "MT_MyMemory"],
+            //             ["en-GB", "es-ES", "100%_PUBLIC"],
+            //             ["en-GB", "es-ES", "MT_MyMemory"],
+            //             ["en-GB", "it-IT", "100%_PUBLIC"],
+            //             ["en-GB", "it-IT", "MT_MyMemory"],
+            //         ]
+            //     }, //2017-01
+            //     {
+            //         "2017-02": [76, 89, 67, 69, 87, 49],
+            //         "keys": [
+            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
+            //             ["en-GB", "fr-FR", "MT_MyMemory"],
+            //             ["en-GB", "es-ES", "100%_PUBLIC"],
+            //             ["en-GB", "es-ES", "MT_MyMemory"],
+            //             ["en-GB", "it-IT", "100%_PUBLIC"],
+            //             ["en-GB", "it-IT", "MT_MyMemory"],
+            //         ]
+            //     },
+            //     {
+            //         "2017-03": [96, 69, 78, 89, 88, 56],
+            //         "keys": [
+            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
+            //             ["en-GB", "fr-FR", "MT_MyMemory"],
+            //             ["en-GB", "de-DE", "100%_PUBLIC"],
+            //             ["en-GB", "de-DE", "MT_MyMemory"],
+            //             ["en-GB", "it-IT", "100%_PUBLIC"],
+            //             ["en-GB", "it-IT", "MT_MyMemory"],
+            //         ]
+            //     },
+            //     {
+            //         "2017-04": [86, 79, 56, 45, 89, 23],
+            //         "keys": [
+            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
+            //             ["en-GB", "fr-FR", "MT_MyMemory"],
+            //             ["en-GB", "es-ES", "100%_PUBLIC"],
+            //             ["en-GB", "es-ES", "MT_MyMemory"],
+            //             ["en-GB", "it-IT", "100%_PUBLIC"],
+            //             ["en-GB", "it-IT", "MT_MyMemory"],
+            //         ]
+            //     }
+            // ];
+            // return data
         },
         createDataForGraph: function (data) {
             var columns = [];
-            var rows = {};
-            var languages_array = [];
-            data[0].langs.forEach(function (langs) {
-                for (var property in langs.pee) {
-                    if (langs.pee.hasOwnProperty(property)) {
-                        var column = langs.source + " - " + langs.target + " " + property;
-                        columns.push(column);
-                    }
-                }
-
+            var rows = [];
+            var findLangName = function (code) {
+                  return config.languages_array.find(function (element) {
+                      return element.code === code;
+                  }).name;
+            };
+            var findAnnotations = function (l1, l2, date) {
+                return annotation = PEE.annotations.find(function (elem) {
+                    return elem.date === date && (function (l1, l2, elem) {
+                            return !!elem.langsPairs.find(function (item) {
+                                return (item.l1 === l1 && item.l2 === l2) ||
+                                    (item.l1 === l2 && item.l2 === l1)
+                            });
+                        })(l1, l2, elem);
+                });
+            };
+            data[0].keys.forEach(function (langs) {
+                var column = findLangName(langs[0]) + "-" + findLangName(langs[1]) + " " + langs[2];
+                columns.push(column)
             });
-            console.log(columns);
-            // data.forEach(function (item) {
-            //     row[item.month] = [];
-            //     item.langs.forEach(function (langs) {
-            //         row[item.month].push(item.month);
-            //         for (var property in langs.pee) {
-            //             if (langs.pee.hasOwnProperty(property)) {
-            //                 var column = langs.source + " - " + langs.target + " " + property;
-            //                 columns.push(column);
-            //             }
-            //         }
-            //     });
-            // });
+            data.forEach(function (item) {
+                var row = [];
+                var properties = Object.keys(item);
+                row.push(properties[0]);
+                item[properties[0]].forEach(function (v, index) {
+                    row.push(v);
+                    var annotation = findAnnotations(item.keys[index][0], item.keys[index][1], properties[0]);
+                    if (annotation) {
+                        row.push(annotation.name);
+                        row.push(annotation.text);
+                    } else {
+                        row.push(null);
+                        row.push(null);
+                    }
+
+                });
+                // row = row.concat(item[properties[0]]);
+                rows.push(row);
+            });
+
+            PEE.drawChart(columns, rows);
         },
-        drawChart: function() {
+        drawDefaultChart: function() {
+            var fields = {
+                source_lang: ["en-GB"],
+                target_lang: ["it-IT", "fr-FR"],
+                start_date: "2016-01",
+                end_date: "2017-05",
+            };
+            // var data = PEE.requestDataGraph(fields);
+            // PEE.createDataForGraph(data);
+
+            PEE.requestDataGraph(fields).done(function (data) {
+                PEE.createDataForGraph(data);
+            });
+
+
+            // var data = new google.visualization.DataTable();
+            // data.addColumn('string', 'Months');
+            // data.addColumn('number', 'Italian - English');
+            // data.addColumn({type: 'string', role: 'annotation'});
+            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+            // data.addColumn('number', 'Italian - French');
+            // data.addColumn({type: 'string', role: 'annotation'});
+            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+            // data.addColumn('number', 'Italian-German');
+            // data.addColumn({type: 'string', role: 'annotation'});
+            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+            //
+            //
+            // data.addRows([
+            //     ['2016-01',  37.8, null, null,  80.8,null, null, 41.8, null, null],
+            //     ['2016-02',  30.9, null, null,  69.5,null, null, 32.4, null, null],
+            //     ['2016-03',  25.4, null, null,    57,null, null, 25.7, null, null],
+            //     ['2016-04',  11.7, "Neural", "Introduzione Neural</br> 6 Aprile 2016",  18.8, "Neural", "Introduzione Neural</br> 6 Aprile 2016", 10.5,"Neural", "Introduzione Neural</br> 6 Aprile 2016",],
+            //     ['2016-05',  11.9, null, null,  17.6,null , null, 10.4, null, null],
+            //     ['2016-06',   8.8, null, null,  13.6,null , null,  7.7, null, null],
+            //     ['2016-07',   7.6, null, null,  12.3,null , null,  9.6, null, null],
+            //     ['2016-08',  12.3, null, null,  29.2,null , null, 10.6, null, null],
+            //     ['2016-09',  16.9, null, null,  42.9,null , null, 14.8, null, null],
+            //     ['2016-10',  12.8, null, null,  30.9,null , null, 11.6, null, null],
+            //     ['2016-11',   5.3, null, null,   7.9,null , null,  4.7, null, null],
+            //     ['2016-12',   6.6, null, null,   8.4,null , null,  5.2, null, null],
+            //     ['2017-01',   4.8, null, null,   6.3,null , null,  3.6, null, null],
+            //     ['2017-02',   4.2, null, null,   6.2,null , null,  3.4, null, null]
+            // ]);
+            //
+            //
+            // var chart = new google.visualization.LineChart(document.getElementById('myChart'));
+            // // var chart = new google.charts.Line(document.getElementById('myChart'));
+            //
+            // chart.draw(data, PEE.chartOptions);
+        },
+        drawChart: function(columns, rows) {
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Months');
-            data.addColumn('number', 'Italian - English');
-            data.addColumn({type: 'string', role: 'annotation'});
-            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
-            data.addColumn('number', 'Italian - French');
-            data.addColumn({type: 'string', role: 'annotation'});
-            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
-            data.addColumn('number', 'Italian - German');
-            data.addColumn({type: 'string', role: 'annotation'});
-            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+            columns.forEach(function (column) {
+                data.addColumn('number', column);
+                data.addColumn({type: 'string', role: 'annotation'});
+                data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+            });
 
-
-            data.addRows([
-                ['2016-01',  37.8, "", "",  80.8,"", "", 41.8, "", ""],
-                ['2016-02',  30.9, "", "",  69.5,"", "", 32.4, "", ""],
-                ['2016-03',  25.4, "", "",    57,"", "", 25.7, "", ""],
-                ['2016-04',  11.7, "Neural", "Introduzione Neural</br> 6 Aprile 2016",  18.8, "Neural", "Introduzione Neural</br> 6 Aprile 2016", 10.5,"Neural", "Introduzione Neural</br> 6 Aprile 2016",],
-                ['2016-05',  11.9, "", "",  17.6,"" , "", 10.4, "", ""],
-                ['2016-06',   8.8, "", "",  13.6,"" , "",  7.7, "", ""],
-                ['2016-07',   7.6, "", "",  12.3,"" , "",  9.6, "", ""],
-                ['2016-08',  12.3, "", "",  29.2,"" , "", 10.6, "", ""],
-                ['2016-09',  16.9, "", "",  42.9,"" , "", 14.8, "", ""],
-                ['2016-10',  12.8, "", "",  30.9,"" , "", 11.6, "", ""],
-                ['2016-11',   5.3, "", "",   7.9,"" , "",  4.7, "", ""],
-                ['2016-12',   6.6, "", "",   8.4,"" , "",  5.2, "", ""],
-                ['2017-01',   4.8, "", "",   6.3,"" , "",  3.6, "", ""],
-                ['2017-02',   4.2, "", "",   6.2,"" , "",  3.4, "", ""]
-            ]);
-
-
-            var options = {
-                chart: {
-                    title: 'Andamento PEE',
-                    subtitle: 'Sottotitolo'
-                },
-                tooltip: {isHtml: true},
-                width: '100%',
-                height: 500,
-                pointSize: 5,
-            };
+            data.addRows(rows);
 
             // var chart = new google.charts.Line(document.getElementById('myChart'));
             var chart = new google.visualization.LineChart(document.getElementById('myChart'));
 
-            // chart.draw(data, google.charts.Line.convertOptions(options));
-            chart.draw(data, options);
+            // chart.draw(data, google.charts.Line.convertOptions(PEE.chartOptions));
+            chart.draw(data, PEE.chartOptions);
         },
         initTable: function() {
             $('#tablePEE')
