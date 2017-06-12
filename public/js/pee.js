@@ -92,9 +92,12 @@
             $form.form('validate form');
             if (!$form.hasClass('error')) {
                 console.log(fields);
-                PEE.requestDataGraph(fields).done(function (data) {
+                // PEE.requestDataGraph(fields).done(function (data) {
+                //     PEE.createDataForGraph(data);
+                // });
+                var data = PEE.requestDataGraph(fields);
+                PEE.createDataForGraph(data);
 
-                });
             }
         },
         initGraph: function () {
@@ -110,11 +113,73 @@
                 month_interval: [fields.start_date, fields.end_date],
                 fuzzy_band: fields.fuzzy_band
             };
-            return $.ajax({
-                data: data,
-                type: "POST",
-                url : "/api/app/utils/pee/graph"
+            // return $.ajax({
+            //     data: data,
+            //     type: "POST",
+            //     url : "/api/app/utils/pee/graph"
+            // });
+            var data = [
+                {
+                    "month": "2017-01",
+                    "langs" : [
+                        {"source":"English","target":"French", "pee": { "100%": 70, "100%_PUBLIC": 80, "MT_MyMemory": 90 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"German", "pee": { "100%": 83, "100%_PUBLIC": 66, "MT_MyMemory": 69 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"Italian", "pee": { "100%": 83, "100%_PUBLIC": 66, "MT_MyMemory": 69 },"totalwordPEE":"1.086","job_count":"689"} ,
+                    ]
+                }, //2017-01
+                {
+                    "month": "2017-02",
+                    "langs" :[
+                        {"source":"English","target":"French", "pee": { "100%": 56, "100%_PUBLIC": 76, "MT_MyMemory": 89 }, "totalwordPEE":"1.086", "job_count":"689"} ,
+                        {"source":"English US","target":"German", "pee": { "100%": 78, "100%_PUBLIC": 88, "MT_MyMemory":59 }, "totalwordPEE":"1.086", "job_count":"689"} ,
+                        {"source":"English US","target":"Italian", "pee": { "100%": 78, "100%_PUBLIC": 88, "MT_MyMemory":59 }, "totalwordPEE":"1.086", "job_count":"689"} ,
+                    ] //
+                },
+                {
+                    "month": "2017-03",
+                    "langs" :[
+                        {"source":"English","target":"French", "pee": { "100%": 68, "100%_PUBLIC": 58, "MT_MyMemory": 89 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"German", "pee": { "100%": 8, "100%_PUBLIC": 8, "MT_MyMemory": 9 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"Italian", "pee": { "100%": 8, "100%_PUBLIC": 8, "MT_MyMemory": 9 },"totalwordPEE":"1.086","job_count":"689"} ,
+                    ] //
+                },
+                {
+                    "month": "2017-04",
+                    "langs" :[
+                        {"source":"English","target":"French", "pee": { "100%": 58, "100%_PUBLIC": 78, "MT_MyMemory": 89 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"German", "pee": { "100%": 78, "100%_PUBLIC": 58, "MT_MyMemory": 79 },"totalwordPEE":"1.086","job_count":"689"} ,
+                        {"source":"English US","target":"Italian", "pee": { "100%": 78, "100%_PUBLIC": 58, "MT_MyMemory": 79 },"totalwordPEE":"1.086","job_count":"689"} ,
+                    ] //
+                }
+            ];
+            return data
+        },
+        createDataForGraph: function (data) {
+            var columns = [];
+            var rows = {};
+            var languages_array = [];
+            data[0].langs.forEach(function (langs) {
+                for (var property in langs.pee) {
+                    if (langs.pee.hasOwnProperty(property)) {
+                        var column = langs.source + " - " + langs.target + " " + property;
+                        columns.push(column);
+                    }
+                }
+
             });
+            console.log(columns);
+            // data.forEach(function (item) {
+            //     row[item.month] = [];
+            //     item.langs.forEach(function (langs) {
+            //         row[item.month].push(item.month);
+            //         for (var property in langs.pee) {
+            //             if (langs.pee.hasOwnProperty(property)) {
+            //                 var column = langs.source + " - " + langs.target + " " + property;
+            //                 columns.push(column);
+            //             }
+            //         }
+            //     });
+            // });
         },
         drawChart: function() {
             var data = new google.visualization.DataTable();
