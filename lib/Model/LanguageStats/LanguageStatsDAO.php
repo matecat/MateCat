@@ -1,4 +1,5 @@
 <?php
+use DataAccess\ShapelessConcreteStruct;
 
 /**
  * Created by PhpStorm.
@@ -61,6 +62,44 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute();
         return $stmt->fetchAll();
+
+    }
+
+    public function getGraphData( ShapelessConcreteStruct $filters ){
+
+        $query = "
+                  SELECT source, target, fuzzy_band, total_post_editing_effort, DATE_FORMAT( date, '%Y-%m' ) as date
+                  FROM " . self::TABLE . "
+                  WHERE 
+                    date BETWEEN ? AND ?
+                  AND
+                    source IN( " . str_repeat( '?,', count( $filters->sources ) - 1) . '?' . " )
+                  AND 
+                    target IN( " . str_repeat( '?,', count( $filters->targets ) - 1) . '?' . " )
+                  AND 
+                    fuzzy_band IN( " . str_repeat( '?,', count( $filters->fuzzy_band ) - 1) . '?' . " )
+                  ORDER BY 5 ASC
+                  ;";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        $values = array_merge(
+                [
+                    $filters->date_start,
+                    $filters->date_end
+                ],
+                $filters->sources,
+                $filters->targets,
+                $filters->fuzzy_band
+        );
+
+        /**
+         * @var $resultSet ShapelessConcreteStruct[]
+         */
+        $resultSet = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
+
+        return $resultSet;
 
     }
 
