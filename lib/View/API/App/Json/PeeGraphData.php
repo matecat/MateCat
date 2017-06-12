@@ -33,15 +33,13 @@ class PeeGraphData {
                 'lines'    => []
         ];
 
-        $dateStore = [] ;
-
         foreach( $this->data as $set ){
 
-            if( !isset( $dateStore[ $set->date ] ) ){
-                $dateStore[ $set->date ] = [];
+            if( !isset( $returnValue['dataSet'][ $set->date ] ) ){
+                $returnValue['dataSet'][ $set->date ][ $set->date ] = [];
             }
 
-            $dateStore[ $set->date ][] = (int)$set->total_post_editing_effort;
+            $returnValue['dataSet'][ $set->date ][ $set->date ][] = (int)$set->total_post_editing_effort;
 
             if( array_search( [ $set->source, $set->target, $set->fuzzy_band ], $returnValue[ 'lines' ] ) === false ){
                 $returnValue[ 'lines' ][] = [ $set->source, $set->target, $set->fuzzy_band ];
@@ -49,11 +47,7 @@ class PeeGraphData {
 
         }
 
-        $count = 0;
-        foreach( $dateStore as $key =>$value ) {
-            $returnValue['dataSet'][$count++] = [ $key => $value ] ;
-        }
-
+        $returnValue['dataSet'] = array_values( $returnValue['dataSet'] );
 
         return $returnValue;
 
