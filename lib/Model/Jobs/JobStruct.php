@@ -1,6 +1,5 @@
 <?php
 
-use DataAccess\ShapelessConcreteStruct;
 use Exceptions\NotFoundError;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
