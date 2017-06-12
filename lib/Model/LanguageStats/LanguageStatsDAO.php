@@ -91,7 +91,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 ],
                 $filters->sources,
                 $filters->targets,
-                $filters->fuzzy_band
+                ( is_array( $filters->fuzzy_band ) ? $filters->fuzzy_band : [] )
         );
 
         /**
