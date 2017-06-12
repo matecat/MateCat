@@ -101,7 +101,8 @@
             }
         },
         initGraph: function () {
-            google.charts.load('current', {packages: ['line']});
+            // google.charts.load('current', {packages: ['line']});
+            google.charts.load('current', {'packages':['corechart']});
             google.charts.setOnLoadCallback(PEE.drawChart);
 
 
@@ -185,24 +186,31 @@
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Months');
             data.addColumn('number', 'Italian - English');
+            data.addColumn({type: 'string', role: 'annotation'});
+            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
             data.addColumn('number', 'Italian - French');
+            data.addColumn({type: 'string', role: 'annotation'});
+            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
             data.addColumn('number', 'Italian - German');
+            data.addColumn({type: 'string', role: 'annotation'});
+            data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+
 
             data.addRows([
-                ['2016-01',  37.8, 80.8, 41.8],
-                ['2016-02',  30.9, 69.5, 32.4],
-                ['2016-03',  25.4,   57, 25.7],
-                ['2016-04',  11.7, 18.8, 10.5],
-                ['2016-05',  11.9, 17.6, 10.4],
-                ['2016-06',   8.8, 13.6,  7.7],
-                ['2016-07',   7.6, 12.3,  9.6],
-                ['2016-08',  12.3, 29.2, 10.6],
-                ['2016-09',  16.9, 42.9, 14.8],
-                ['2016-10', 12.8, 30.9, 11.6],
-                ['2016-11',  5.3,  7.9,  4.7],
-                ['2016-12',  6.6,  8.4,  5.2],
-                ['2017-01',  4.8,  6.3,  3.6],
-                ['2017-02',  4.2,  6.2,  3.4]
+                ['2016-01',  37.8, "", "",  80.8,"", "", 41.8, "", ""],
+                ['2016-02',  30.9, "", "",  69.5,"", "", 32.4, "", ""],
+                ['2016-03',  25.4, "", "",    57,"", "", 25.7, "", ""],
+                ['2016-04',  11.7, "Neural", "Introduzione Neural</br> 6 Aprile 2016",  18.8, "Neural", "Introduzione Neural</br> 6 Aprile 2016", 10.5,"Neural", "Introduzione Neural</br> 6 Aprile 2016",],
+                ['2016-05',  11.9, "", "",  17.6,"" , "", 10.4, "", ""],
+                ['2016-06',   8.8, "", "",  13.6,"" , "",  7.7, "", ""],
+                ['2016-07',   7.6, "", "",  12.3,"" , "",  9.6, "", ""],
+                ['2016-08',  12.3, "", "",  29.2,"" , "", 10.6, "", ""],
+                ['2016-09',  16.9, "", "",  42.9,"" , "", 14.8, "", ""],
+                ['2016-10',  12.8, "", "",  30.9,"" , "", 11.6, "", ""],
+                ['2016-11',   5.3, "", "",   7.9,"" , "",  4.7, "", ""],
+                ['2016-12',   6.6, "", "",   8.4,"" , "",  5.2, "", ""],
+                ['2017-01',   4.8, "", "",   6.3,"" , "",  3.6, "", ""],
+                ['2017-02',   4.2, "", "",   6.2,"" , "",  3.4, "", ""]
             ]);
 
 
@@ -211,13 +219,17 @@
                     title: 'Andamento PEE',
                     subtitle: 'Sottotitolo'
                 },
-                width: '60%',
-                height: 500
+                tooltip: {isHtml: true},
+                width: '100%',
+                height: 500,
+                pointSize: 5,
             };
 
-            var chart = new google.charts.Line(document.getElementById('myChart'));
+            // var chart = new google.charts.Line(document.getElementById('myChart'));
+            var chart = new google.visualization.LineChart(document.getElementById('myChart'));
 
-            chart.draw(data, google.charts.Line.convertOptions(options));
+            // chart.draw(data, google.charts.Line.convertOptions(options));
+            chart.draw(data, options);
         },
         initTable: function() {
             $('#tablePEE')
