@@ -247,17 +247,17 @@
                         })(l1, l2, elem);
                 });
             };
-            data[0].keys.forEach(function (langs) {
+            data.lines.forEach(function (langs) {
                 var column = findLangName(langs[0]) + "-" + findLangName(langs[1]) + " " + langs[2];
                 columns.push(column)
             });
-            data.forEach(function (item) {
+            data.dataSet.forEach(function (item) {
                 var row = [];
                 var properties = Object.keys(item);
                 row.push(properties[0]);
                 item[properties[0]].forEach(function (v, index) {
                     row.push(v);
-                    var annotation = findAnnotations(item.keys[index][0], item.keys[index][1], properties[0]);
+                    var annotation = findAnnotations(data.lines[index][0], data.lines[index][1], properties[0]);
                     if (annotation) {
                         row.push(annotation.name);
                         row.push(annotation.text);
