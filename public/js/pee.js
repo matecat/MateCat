@@ -151,6 +151,7 @@
             $form.form('validate form');
             if (!$form.hasClass('error')) {
                 console.log(fields);
+                PEE.addGraphFilterToUrl(fields);
                 PEE.requestDataGraph(fields).done(function (data) {
                     PEE.createDataForGraph(data);
                 });
@@ -222,12 +223,15 @@
             PEE.drawChart(columns, rows);
         },
         drawDefaultChart: function() {
-            var fields = {
-                source_lang: ["en-GB"],
-                target_lang: ["it-IT", "fr-FR"],
-                start_date: "2016-01",
-                end_date: "2017-05",
-            };
+            var fields = PEE.checkQueryStringFilterForGraph();
+            if (!fields) {
+                fields = {
+                    source_lang: ["en-GB"],
+                    target_lang: ["it-IT", "fr-FR"],
+                    start_date: "2016-01",
+                    end_date: "2017-05",
+                };
+            }
 
             PEE.requestDataGraph(fields).done(function (data) {
                 PEE.createDataForGraph(data);
@@ -248,18 +252,6 @@
             var chart = new google.visualization.LineChart(document.getElementById('myChart'));
 
             chart.draw(data, PEE.chartOptions);
-        },
-        updateQueryStringParameter: function( key, value) {
-            value = encodeURI(value);
-            var uri = document.location.href;
-            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-            if (uri.match(re)) {
-                return uri.replace(re, '$1' + key + "=" + value + '$2');
-            }
-            else {
-                return uri + separator + key + "=" + value;
-            }
         },
         initTable: function() {
             $('#tablePEE')
@@ -518,6 +510,82 @@
                 }
             }
         },
+        addGraphFilterToUrl: function (fields) {
+            if (history.pushState) {
+                var newurl;
+                newurl = PEE.removeParam('gs');
+                newurl =PEE.removeParam('gt', newurl);
+                newurl =PEE.removeParam('gf', newurl);
+                newurl =PEE.removeParam('gfrom', newurl);
+                newurl =PEE.removeParam('gend', newurl);
+                if (fields.source_lang) {
+                    newurl = PEE.updateQueryStringParameter('gfilter', 1);
+                    newurl = PEE.updateQueryStringParameter('gs', fields.source_lang.toString(), newurl);
+                }
+                if (fields.target_lang) {
+                    newurl = PEE.updateQueryStringParameter('gt', fields.target_lang.toString(), newurl);
+                }
+                if (fields.fuzzy_band) {
+                    newurl = PEE.updateQueryStringParameter('gf', fields.fuzzy_band.toString(), newurl);
+                }
+                if (fields.start_date) {
+                    newurl = PEE.updateQueryStringParameter('gfrom', fields.start_date, newurl);
+                }
+                if (fields.end_date) {
+                    newurl = PEE.updateQueryStringParameter('gend', fields.end_date, newurl);
+                }
+                window.history.pushState({path:newurl},'',newurl);
+            }
+        },
+        checkQueryStringFilterForGraph: function () {
+            var gFilters = APP.getParameterByName("gfilter");
+            var fields;
+            if (gFilters) {
+                fields = {};
+                fields.source_lang = APP.getParameterByName("gs").split(",");
+                fields.target_lang = APP.getParameterByName("gt").split(",");
+                fields.start_date = APP.getParameterByName("gfrom");
+                fields.end_date = APP.getParameterByName("gend");
+                if (APP.getParameterByName("gf")) {
+                    fields.fuzzy_band = APP.getParameterByName("gf").split(",");
+                }
+            }
+            return fields;
+        },
+        updateQueryStringParameter: function( key, value, uri) {
+            value = encodeURI(value);
+            if (!uri) {
+                uri = document.location.href;
+            }
+            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            }
+            else {
+                return uri + separator + key + "=" + value;
+            }
+        },
+        removeParam: function(key, sourceURl) {
+            if (!sourceURl) {
+                sourceURL = document.location.href;
+            }
+            var rtn = sourceURL.split("?")[0],
+                param,
+                params_arr = [],
+                queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+            if (queryString !== "") {
+                params_arr = queryString.split("&");
+                for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+                    param = params_arr[i].split("=")[0];
+                    if (param === key) {
+                        params_arr.splice(i, 1);
+                    }
+                }
+                rtn = rtn + "?" + params_arr.join("&");
+            }
+            return rtn;
+        }
     };
 
 
