@@ -64,7 +64,11 @@
         ],
 
         init: function () {
-            this.tableGenerate();
+            var data = {
+                langStats:  langStats
+            };
+            this.tableGenerate(data);
+
             this.initFilters();
             this.initTable();
             this.initGraph();
@@ -81,7 +85,7 @@
             $("#tablePEE").trigger('update');
         },
         initFilters: function () {
-            $('#source-lang, #target-lang, #fuzzy-select').dropdown({
+            $('#source-lang, #target-lang, #fuzzy-select, #date-select').dropdown({
                 selectOnKeydown: false,
                 fullTextSearch: 'exact'
             });
@@ -145,6 +149,14 @@
             ;
 
             $('#create-button').on('click', PEE.createGraph);
+
+            $( '#date-select' ).on( 'change', function(){
+                var value  = $(this).dropdown('get value')[0];
+                PEE.requestDataTable(value).done(function (data) {
+                    PEE.tableGenerate(data)
+                });
+            } );
+
         },
         createGraph: function () {
             var $form = $('.ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
@@ -178,6 +190,16 @@
                 data: data,
                 type: "POST",
                 url : "/api/app/utils/pee/graph"
+            });
+        },
+        requestDataTable: function (data) {
+            var data = {
+                date: data,
+            };
+            return $.ajax({
+                data: data,
+                type: "POST",
+                url : "/api/app/utils/pee/table"
             });
         },
         createDataForGraph: function (data) {
@@ -460,8 +482,8 @@
                 });
 
         },
-        tableGenerate : function () {
-            var data = langStats;
+        tableGenerate : function (data) {
+            var data = data.langStats;
             var i = 0;
             var html = '';
             $.each(data, function (i,elem) {
@@ -498,7 +520,8 @@
                     '</td></tr>';
 
             });
-            $('#tablePEE tbody').append(html);
+            $('#tablePEE tbody').html(html);
+            $(".tablesorter").trigger("update");
 
         },
         checkQueryStringFilter: function () {
@@ -593,8 +616,5 @@
 
     $(document).ready(function (el) {
         PEE.init();
-        $( 'div.selectContainer form select' ).on( 'change', function(){
-            //$( '#filterDateForm' ).submit();
-        } );
     });
 })($);
