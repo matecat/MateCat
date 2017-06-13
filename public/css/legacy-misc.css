@@ -712,12 +712,19 @@ blockquote {
 .chart-container {
     width: 1200px;
     margin: 0 auto;
-    height: 500px;
+    /*height: 500px;*/
     margin-bottom: 40px;
+    text-align: center;
 }
 
 .chart-container .ui.segment {
-    height: 500px
+    /*height: 500px;*/
+    border: none;
+    box-shadow: none;
+}
+
+.chart-container span {
+    font-size: 18px;
 }
 
 .chart-container text {

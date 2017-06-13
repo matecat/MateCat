@@ -163,16 +163,16 @@
 
             google.charts.setOnLoadCallback(PEE.drawDefaultChart);
 
-
-
         },
         requestDataGraph: function (fields) {
             var data = {
                 sources: fields.source_lang,
                 targets: fields.target_lang,
                 month_interval: [fields.start_date, fields.end_date],
-                fuzzy_band: fields.fuzzy_band
             };
+            if (fields.fuzzy_band) {
+                data.fuzzy_band = fields.fuzzy_band
+            }
             return $.ajax({
                 data: data,
                 type: "POST",
@@ -250,6 +250,7 @@
             data.addRows(rows);
 
             var chart = new google.visualization.LineChart(document.getElementById('myChart'));
+            // google.visualization.errors.addError(document.getElementById('myChart-error'), 'error');
 
             chart.draw(data, PEE.chartOptions);
         },
