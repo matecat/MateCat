@@ -67,7 +67,6 @@
             this.initFilters();
             this.initTable();
             this.initGraph();
-
             //        $("input[data-column='0']").attr("placeholder", "All");
             //        $("input[data-column='1']").attr("placeholder", "All");
             //        $("select[data-column='2']").val("All");
@@ -250,10 +249,23 @@
 
             chart.draw(data, PEE.chartOptions);
         },
+        updateQueryStringParameter: function( key, value) {
+            value = encodeURI(value);
+            var uri = document.location.href;
+            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            }
+            else {
+                return uri + separator + key + "=" + value;
+            }
+        },
         initTable: function() {
             $('#tablePEE')
                 .bind('filterInit', function () {
                     // check that storage ulility is loadedBul
+                    PEE.checkQueryStringFilter.call(this);
                     if ($.tablesorter.storage) {
                         // get saved filters
                         var f = $.tablesorter.storage(this, 'tablesorter-filters') || [];
@@ -267,7 +279,10 @@
                             return $(this).val() || '';
                         }).get();
                         $.tablesorter.storage(this, 'tablesorter-filters', f);
-
+                        if (history.pushState) {
+                            var newurl = PEE.updateQueryStringParameter('filters', f.toString());
+                            window.history.pushState({path:newurl},'',newurl);
+                        }
                     }
 
                     var rowTotal = $('#tablePEE tr').length - 2;
@@ -280,6 +295,9 @@
                     else if ($('#no-results-row').length > 0) {
                         $('#no-results-row').remove();
                     }
+                })
+                .bind('sortEnd', function () {
+                    PEE.checkQueryStringFilter.call(this);
                 })
                 .tablesorter({
                     // *** APPEARANCE ***
@@ -487,7 +505,19 @@
 
             });
             $('#tablePEE tbody').append(html);
-        }
+
+        },
+        checkQueryStringFilter: function () {
+            var keyParam = APP.getParameterByName("filters");
+            if (keyParam) {
+                var filters = keyParam.split(',');
+                //Check if present and enable it
+                console.log(keyParam);
+                if ($.tablesorter.storage) {
+                    $.tablesorter.storage(this, 'tablesorter-filters', filters);
+                }
+            }
+        },
     };
 
 
