@@ -148,12 +148,17 @@
         </div>
     </div>
     <div class="selectContainer">
-        <form id="filterDateForm" >
-            <select name="date" id="date" >
-                <option value="${lastMonth}" >Last month</option>
-                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
-            </select>
-        </form>
+        <div class="ui equal width form">
+            <div class="fields">
+                <div class="field">
+                    <label>Select Month</label>
+                    <select name="date" id="date-select" class="ui fluid search dropdown">
+                        <option value="${lastMonth}" selected="selected">Last month</option>
+                        <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
     <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter"
