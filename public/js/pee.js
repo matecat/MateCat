@@ -157,12 +157,9 @@
                 });
             }
 
-            // var data = PEE.requestDataGraph(fields);
-            // PEE.createDataForGraph(data);
         },
         initGraph: function () {
             google.charts.load('current', {'packages':['corechart']});
-            // google.charts.load('current', {'packages':['line']});
 
             google.charts.setOnLoadCallback(PEE.drawDefaultChart);
 
@@ -181,53 +178,6 @@
                 type: "POST",
                 url : "/api/app/utils/pee/graph"
             });
-            // var data = [
-            //     {
-            //         "2017-01": [80, 90, 66, 69, 66, 69],
-            //         "keys": [
-            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
-            //             ["en-GB", "fr-FR", "MT_MyMemory"],
-            //             ["en-GB", "es-ES", "100%_PUBLIC"],
-            //             ["en-GB", "es-ES", "MT_MyMemory"],
-            //             ["en-GB", "it-IT", "100%_PUBLIC"],
-            //             ["en-GB", "it-IT", "MT_MyMemory"],
-            //         ]
-            //     }, //2017-01
-            //     {
-            //         "2017-02": [76, 89, 67, 69, 87, 49],
-            //         "keys": [
-            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
-            //             ["en-GB", "fr-FR", "MT_MyMemory"],
-            //             ["en-GB", "es-ES", "100%_PUBLIC"],
-            //             ["en-GB", "es-ES", "MT_MyMemory"],
-            //             ["en-GB", "it-IT", "100%_PUBLIC"],
-            //             ["en-GB", "it-IT", "MT_MyMemory"],
-            //         ]
-            //     },
-            //     {
-            //         "2017-03": [96, 69, 78, 89, 88, 56],
-            //         "keys": [
-            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
-            //             ["en-GB", "fr-FR", "MT_MyMemory"],
-            //             ["en-GB", "de-DE", "100%_PUBLIC"],
-            //             ["en-GB", "de-DE", "MT_MyMemory"],
-            //             ["en-GB", "it-IT", "100%_PUBLIC"],
-            //             ["en-GB", "it-IT", "MT_MyMemory"],
-            //         ]
-            //     },
-            //     {
-            //         "2017-04": [86, 79, 56, 45, 89, 23],
-            //         "keys": [
-            //             ["en-GB", "fr-FR", "100%_PUBLIC"],
-            //             ["en-GB", "fr-FR", "MT_MyMemory"],
-            //             ["en-GB", "es-ES", "100%_PUBLIC"],
-            //             ["en-GB", "es-ES", "MT_MyMemory"],
-            //             ["en-GB", "it-IT", "100%_PUBLIC"],
-            //             ["en-GB", "it-IT", "MT_MyMemory"],
-            //         ]
-            //     }
-            // ];
-            // return data
         },
         createDataForGraph: function (data) {
             var columns = [];
@@ -267,7 +217,6 @@
                     }
 
                 });
-                // row = row.concat(item[properties[0]]);
                 rows.push(row);
             });
 
@@ -280,49 +229,11 @@
                 start_date: "2016-01",
                 end_date: "2017-05",
             };
-            // var data = PEE.requestDataGraph(fields);
-            // PEE.createDataForGraph(data);
 
             PEE.requestDataGraph(fields).done(function (data) {
                 PEE.createDataForGraph(data);
             });
 
-
-            // var data = new google.visualization.DataTable();
-            // data.addColumn('string', 'Months');
-            // data.addColumn('number', 'Italian - English');
-            // data.addColumn({type: 'string', role: 'annotation'});
-            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
-            // data.addColumn('number', 'Italian - French');
-            // data.addColumn({type: 'string', role: 'annotation'});
-            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
-            // data.addColumn('number', 'Italian-German');
-            // data.addColumn({type: 'string', role: 'annotation'});
-            // data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
-            //
-            //
-            // data.addRows([
-            //     ['2016-01',  37.8, null, null,  80.8,null, null, 41.8, null, null],
-            //     ['2016-02',  30.9, null, null,  69.5,null, null, 32.4, null, null],
-            //     ['2016-03',  25.4, null, null,    57,null, null, 25.7, null, null],
-            //     ['2016-04',  11.7, "Neural", "Introduzione Neural</br> 6 Aprile 2016",  18.8, "Neural", "Introduzione Neural</br> 6 Aprile 2016", 10.5,"Neural", "Introduzione Neural</br> 6 Aprile 2016",],
-            //     ['2016-05',  11.9, null, null,  17.6,null , null, 10.4, null, null],
-            //     ['2016-06',   8.8, null, null,  13.6,null , null,  7.7, null, null],
-            //     ['2016-07',   7.6, null, null,  12.3,null , null,  9.6, null, null],
-            //     ['2016-08',  12.3, null, null,  29.2,null , null, 10.6, null, null],
-            //     ['2016-09',  16.9, null, null,  42.9,null , null, 14.8, null, null],
-            //     ['2016-10',  12.8, null, null,  30.9,null , null, 11.6, null, null],
-            //     ['2016-11',   5.3, null, null,   7.9,null , null,  4.7, null, null],
-            //     ['2016-12',   6.6, null, null,   8.4,null , null,  5.2, null, null],
-            //     ['2017-01',   4.8, null, null,   6.3,null , null,  3.6, null, null],
-            //     ['2017-02',   4.2, null, null,   6.2,null , null,  3.4, null, null]
-            // ]);
-            //
-            //
-            // var chart = new google.visualization.LineChart(document.getElementById('myChart'));
-            // // var chart = new google.charts.Line(document.getElementById('myChart'));
-            //
-            // chart.draw(data, PEE.chartOptions);
         },
         drawChart: function(columns, rows) {
             var data = new google.visualization.DataTable();
@@ -335,10 +246,8 @@
 
             data.addRows(rows);
 
-            // var chart = new google.charts.Line(document.getElementById('myChart'));
             var chart = new google.visualization.LineChart(document.getElementById('myChart'));
 
-            // chart.draw(data, google.charts.Line.convertOptions(PEE.chartOptions));
             chart.draw(data, PEE.chartOptions);
         },
         initTable: function() {
@@ -544,6 +453,7 @@
             var i = 0;
             var html = '';
             $.each(data, function (i,elem) {
+                var savingColor = (elem.saving_diff > 0) ? '#f3afaf' : '#bdeab5';
                 html += '<tr><td id="col1">' +
                     elem.source +
                     '</td>' +
@@ -568,7 +478,7 @@
                     '<td id="col7">' +
                     elem.payable_rate + '%' +
                     '</td>' +
-                    '<td id="col8">' +
+                    '<td id="col8" style="background-color: '+ savingColor +'">' +
                     elem.saving_diff +
                     '</td>' +
                     '<td id="col9">' +
