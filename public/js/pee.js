@@ -94,18 +94,18 @@
 
             $.fn.form.settings.rules.evaluateInterval = function(value) {
                 var d1 = new Date(value);
-                var endDate = $('.ui.form').form('get values', ['end_date']);
+                var endDate = $('.filter-chart-container .ui.form').form('get values', ['end_date']);
                 var d2 = new Date(endDate.end_date);
                 return d1.getTime() < d2.getTime();
             };
             $.fn.form.settings.rules.evaluateInterval2 = function(value) {
-                var startDate = $('.ui.form').form('get values', ['start_date']);
+                var startDate = $('.filter-chart-container .ui.form').form('get values', ['start_date']);
                 var d1 = new Date(startDate.start_date);
                 var d2 = new Date(value);
                 return d1.getTime() < d2.getTime();
             };
 
-            $('.ui.form')
+            $('.filter-chart-container .ui.form')
                 .form({
                     fields: {
                         source: {
@@ -159,7 +159,7 @@
 
         },
         createGraph: function () {
-            var $form = $('.ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
+            var $form = $('.filter-chart-container .ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
                 'start_date', 'end_date']);
             $form.form('validate form');
             if (!$form.hasClass('error')) {
