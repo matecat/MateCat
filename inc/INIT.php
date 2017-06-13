@@ -266,7 +266,6 @@ class INIT {
 
     public static $SKIP_SQL_CACHE = false ;
 
-
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];

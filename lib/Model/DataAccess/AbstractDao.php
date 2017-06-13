@@ -267,7 +267,9 @@ abstract class DataAccess_AbstractDao {
      * @return $this
      */
     public function setCacheTTL( $cacheSecondsTTL ) {
-        $this->cacheTTL = $cacheSecondsTTL;
+        if ( !INIT::$SKIP_SQL_CACHE ) {
+            $this->cacheTTL = $cacheSecondsTTL;
+        }
 
         return $this;
     }
