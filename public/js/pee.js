@@ -49,17 +49,18 @@
                 langsPairs: [
                     {l1: "en-GB",  l2: "it-IT"},
                 ]
-            },
-            {
-                id: 3,
-                name: "Guess Tags",
-                date: "2016-02",
-                text: "Introduzione Guess Tags</br> 6 Maggio 2016",
-                langsPairs: [
-                    {l1: "en-GB",  l2: "es-ES"},
-                    {l1: "en-GB",  l2: "de-DE"}
-                ]
             }
+            // ,
+            // {
+            //     id: 3,
+            //     name: "Guess Tags",
+            //     date: "2016-02",
+            //     text: "Introduzione Guess Tags</br> 6 Maggio 2016",
+            //     langsPairs: [
+            //         {l1: "en-GB",  l2: "es-ES"},
+            //         {l1: "en-GB",  l2: "de-DE"}
+            //     ]
+            // }
         ],
 
         init: function () {
