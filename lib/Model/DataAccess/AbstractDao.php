@@ -1,4 +1,5 @@
 <?php
+use Database;
 
 /**
  * Created by PhpStorm.
@@ -386,7 +387,11 @@ abstract class DataAccess_AbstractDao {
      * @internal param array $options of options for the SQL statement
      *
      */
-    protected static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
+    public static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
+
+        if ( is_null( static::TABLE ) ) {
+            throw new Exception('TABLE constant is not defined');
+        }
 
         $first  = array();
         $second = array();
@@ -405,12 +410,12 @@ abstract class DataAccess_AbstractDao {
                     unset( $mask[ array_search( $key, $mask ) ] );
                     continue;
                 }
-                $first[]  = $key;
-                $second[] = ":$key";
+                $first[]  = "`$key`" ;
+                $second[] = ":$key" ;
             }
         }
 
-        $sql = "INSERT $sql_ignore INTO " . static::TABLE . "(" .
+        $sql = "INSERT $sql_ignore INTO " . static::TABLE . " (" .
                 implode( ', ', $first ) . ") VALUES (" .
                 implode( ', ', $second ) . ") $sql_on_duplicate_update ;";
 
@@ -552,12 +557,13 @@ abstract class DataAccess_AbstractDao {
         $mask = array_diff( $mask, static::$auto_increment_fields );
 
         $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
-        $conn = \Database::obtain()->getConnection();
+
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        \Log::doLog( "insert SQL :", $sql );
-        \Log::doLog( "insert data :", $data );
+        Log::getLogger()->debug( "insert SQL: " . $sql );
+        Log::getLogger()->debug( "insert data:", $data );
 
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_fields ) ) {
@@ -573,6 +579,13 @@ abstract class DataAccess_AbstractDao {
 
             return false;
         }
+    }
+
+    public static function insertStructWithAutoIncrements( $struct, $options = [] ) {
+        $auto_increment_fields = static::$auto_increment_fields ;
+        static::$auto_increment_fields = [] ;
+        self::insertStruct( $struct, $options ) ;
+        static::$auto_increment_fields =  $auto_increment_fields ;
     }
 
     /**
