@@ -1,4 +1,8 @@
 <?php
+use Exceptions\ValidationError;
+use Features\BaseFeature;
+use Features\Dqf;
+use Features\IBaseFeature;
 use Teams\TeamStruct;
 
 /**
@@ -86,24 +90,23 @@ class FeatureSet {
      * FIXME: this is not a real filter since the input params are not passed
      * modified in cascade to the next function in the queue.
      * @throws Exceptions_RecordNotFound
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
      * @internal param $id_customer
      */
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
 
-        foreach( $this->features as $feature ) {
-            $name = "Features\\" . $feature->toClassName() ;
-            if ( class_exists( $name ) ) {
-                $obj = new $name( $feature );
+        foreach( $this->sortFeatures()->features as $feature ) {
+            $obj = self::getObj( $feature );
 
+            if ( !is_null( $obj ) ) {
                 if ( method_exists( $obj, $method ) ) {
                     array_shift( $args );
                     array_unshift( $args, $filterable );
 
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
-                    } catch ( \Exceptions\ValidationError $e ) {
+                    } catch ( ValidationError $e ) {
                         throw $e ;
                     } catch ( Exceptions_RecordNotFound $e ) {
                         throw $e ;
@@ -117,13 +120,24 @@ class FeatureSet {
         return $filterable ;
     }
 
+    public static function getObj( $feature ) {
+        /* @var $feature BasicFeatureStruct */
+        $name = "Features\\" . $feature->toClassName() ;
+
+        if ( class_exists( $name ) ) {
+            return new $name( $feature );
+        } else {
+            return null ;
+        }
+    }
+
     /**
      * @param $method
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
 
-        foreach ( $this->features as $feature ) {
+        foreach ( $this->sortFeatures()->features as $feature ) {
             $this->runOnFeature($method, $feature, $args);
         }
     }
@@ -142,7 +156,7 @@ class FeatureSet {
      *
      */
     public function appendDecorators($name, viewController $controller, PHPTAL $template) {
-        foreach( $this->features as $feature ) {
+        foreach( $this->sortFeatures()->features as $feature ) {
 
             $baseClass = "Features\\" . $feature->toClassName()  ;
 
@@ -157,6 +171,26 @@ class FeatureSet {
                 $obj->decorate();
             }
         }
+    }
+
+
+    /**
+     * This function ensures that whenever DQF is present, dependent features always come before.
+     * TODO: conver into something abstract.
+     */
+    public function sortFeatures() {
+        if ( in_array( Dqf::FEATURE_CODE, $this->getCodes() )  ) {
+           usort( $this->features, function( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
+               if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
+                   return 0 ;
+               }
+               else {
+                   return 1 ;
+               }
+           });
+        }
+
+        return $this ;
     }
 
     /**
