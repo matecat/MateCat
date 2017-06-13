@@ -1,7 +1,8 @@
 <?php
 
 use Features\Dqf\Service\Struct\ProjectCreationStruct ;
-use Features\Dqf\Model\ProjectCreation;
+
+use Features\Dqf\Model\ProjectCreation ;
 
 class ProjectCreationTest extends PHPUnit_Framework_TestCase  {
 
@@ -9,17 +10,12 @@ class ProjectCreationTest extends PHPUnit_Framework_TestCase  {
         TestHelper::resetDb();
     }
 
-    public function testProjectIsCreated() {
+    public function testProjectCreationDoesNotBreak() {
+
         $pid = TestHelper::$FIXTURES->getFixtures()['projects']['dqf_project_1']['id'] ;
         $project = Projects_ProjectDao::findById( $pid );
 
-        $this->assertEquals( $this->test_data->user->email, $project->id_customer ) ;
-
-        $this->assertEquals(0, count( array_diff(
-                array(Features::DQF, Features::PROJECT_COMPLETION,
-                        Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS),
-                $project->getFeatures()->getCodes()
-            ) ) ) ;
+        $this->assertEquals( 'fabrizio@translated.net', $project->id_customer ) ;
 
         // Simulate the initial process of this project
         $files = $project->getChunks()[0]->getFiles() ;
@@ -35,6 +31,6 @@ class ProjectCreationTest extends PHPUnit_Framework_TestCase  {
 
         $model = new ProjectCreation( $struct );
         $model->process() ;
-
     }
+
 }
