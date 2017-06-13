@@ -63,9 +63,8 @@ UI = {
         });
 
         this.getAllTeams().done(function (data) {
-
             self.teams = data.teams;
-            ManageActions.renderTeams(self.teams);
+            TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);

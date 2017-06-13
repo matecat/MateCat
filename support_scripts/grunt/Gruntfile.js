@@ -340,6 +340,14 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'analyze.js'
             },
+            analyze_new: {
+                src: [
+                    basePath + 'analyze_new.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'analyze_new.js'
+            },
             upload: {
                 src: [
                     basePath + 'gdrive.upload.js',
@@ -555,6 +563,7 @@ module.exports = function(grunt) {
         'concat:common',
         'concat:manage',
         'concat:analyze',
+        'concat:analyze_new',
         'concat:upload',
         'browserify:libs',
         'browserify:components',

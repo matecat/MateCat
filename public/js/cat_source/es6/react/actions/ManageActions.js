@@ -1,5 +1,6 @@
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 let ManageConstants = require('../constants/ManageConstants');
+let TeamConstants = require('../constants/TeamConstants');
 
 
 let ManageActions = {
@@ -22,7 +23,7 @@ let ManageActions = {
         });
         if (teams) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.RENDER_TEAMS,
+                actionType: TeamConstants.RENDER_TEAMS,
                 teams: teams,
             });
         }
@@ -354,13 +355,7 @@ let ManageActions = {
 
     /********* teams *********/
 
-    renderTeams: function (teams, defaultTeam) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_TEAMS,
-            teams: teams,
-            defaultTeam: defaultTeam
-        });
-    },
+
 
     createTeam: function (teamName, members) {
         let team;
@@ -415,7 +410,7 @@ let ManageActions = {
     getAllTeams: function () {
         UI.getAllTeams(true).done(function (data) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.RENDER_TEAMS,
+                actionType: TeamConstants.RENDER_TEAMS,
                 teams: data.teams,
             });
         });
@@ -472,7 +467,7 @@ let ManageActions = {
                 if ( UI.selectedTeam.id === team.get('id')) {
                     UI.getAllTeams(true).done(function (data) {
                         AppDispatcher.dispatch({
-                            actionType: ManageConstants.RENDER_TEAMS,
+                            actionType: TeamConstants.RENDER_TEAMS,
                             teams: data.teams,
                         });
                         self.changeTeam(data.teams[0]);

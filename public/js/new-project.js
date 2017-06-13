@@ -276,7 +276,7 @@ $.extend(UI.UPLOAD_PAGE, {
             }), headerMountPoint);
             this.getAllTeams().done(function (data) {
                 self.teams = data.teams;
-                ManageActions.renderTeams(self.teams);
+                TeamsActions.renderTeams(self.teams);
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
                 ManageActions.selectTeam(self.selectedTeam);
             });

@@ -5,6 +5,7 @@
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 let EventEmitter = require('events').EventEmitter;
 let ManageConstants = require('../constants/ManageConstants');
+let TeamConstants = require('../constants/TeamConstants');
 let assign = require('object-assign');
 let Immutable = require('immutable');
 
@@ -68,7 +69,7 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function(action) {
     switch(action.actionType) {
-        case ManageConstants.RENDER_TEAMS:
+        case TeamConstants.RENDER_TEAMS:
             TeamsStore.updateAll(action.teams);
             TeamsStore.emitChange(action.actionType, TeamsStore.teams);
             break;
@@ -96,11 +97,11 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.REMOVE_TEAM:
             TeamsStore.removeTeam(action.team);
-            TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.ADD_TEAM:
             TeamsStore.addTeam(action.team);
-            TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams);
             break;
         // Move this actions
         case ManageConstants.OPEN_CREATE_TEAM_MODAL:

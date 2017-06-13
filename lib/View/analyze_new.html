@@ -6,9 +6,8 @@
     <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
 
-    <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
-    <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
+    <!--<link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>-->
+    <link href="${basepath}public/css/build/analyze-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -26,19 +25,12 @@
         };
     </script>
 
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-dateFormat.min.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
-
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/build/analyze.js?build=${build_number}"></script>
-    <!--<script type="text/javascript" src="${basepath}public/js/forcedelivery.js"></script>-->
-    <!--<script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>-->
-
-    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/analyze_new.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
 
@@ -47,348 +39,649 @@
 </head>
 
 
-<body>
+<body class="analyze">
 
 <header>
-    <div class="wrapper">
-        <a href="${basepath}" class="logo"></a>
-        <div metal:use-macro="common.html/login_includes" />
-    </div>
 </header>
 
-<div class="wrapper-container">
-    <div class="wrapper">
-        <h1 id="pid" title="" data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password">
-            <span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
+<div class="project-list">
+    <div class="ui container">
+        <div class="project ui grid shadow-1">
+            <div class="sixteen wide column">
 
-        <ul id="standard-equivalent-words" class="cost-table">
+                <div class="project-header ui grid">
+                    <div class="left-analysis nine wide column">
+                        <h1>Volume Analysis</h1>
+                        <div class="ui ribbon label">
+                            <div class="project-id" title="Project id">(58)</div>
+                            <div class="project-name" title="Project name">MATECAT_PROJ[...]01706081253</div>
+                        </div>
+                        <div class="project-create">Created on Fri, March 03 2017</div>
+                        <div class="analysis-create">
+                            <div class="search-tm-matches">
+                                <h5>Searching for TM Matches</h5>
+                                <div class="initial-segments">(71 of </div>
+                                <div class="total-segments">2393)</div>
+                                <div class="progress-bar">
+                                    <div class="progr">
+                                        <div class="meter">
+                                            <a class="warning-bar translate-tooltip"  data-html="Rejected 0%" style="width: 0%;"></a>
+                                            <a class="approved-bar translate-tooltip"  data-html="Approved 100%" style="width: 60%;"></a>
+                                            <a class="translated-bar translate-tooltip" data-html="Translated 0%" style="width: 0%;"></a>
+                                            <a class="draft-bar translate-tooltip" data-html="Draft 0%" style="width: 0%;"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span>
-                <br/>
-                Standard weighted*
-                <span tal:condition="not:isCJK">words</span>
-                <span tal:condition="true:isCJK">characters</span>
-                <br/>
-                <span class="days">
-                        <strong>
-                            <span class="workDays" tal:content="standard_wc_time">11,5</span> work
-                            <span class="unit" tal:content="standard_wc_unit">days</span>
-                        </strong> at
-                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
-                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
-                    </span>
-            </li>
+                    <div class="seven wide right floated column">
+                        <div class="word-count ui grid">
+                            <div class="sixteen wide column">
+                                <div class="word-percent ">
+                                    <h2 class="ui header">
+                                        <div class="percent">30%</div>
+                                        <div class="content">
+                                            Saving on word count
+                                            <div class="sub header">27 work minutes at 3.000 w/day
+                                            </div>
+                                        </div>
+                                    </h2>
+                                    <p>MateCat gives you more matches than any other CAT tool thanks to a mix of public and private translation memories, and machine translation.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="sixteen wide column pad-top-0">
+                                <div class="raw-matecat ui grid">
+                                    <div class="eight wide column pad-right-7">
+                                        <div class="word-raw">
+                                            <h3>6’233.332</h3>
+                                            <h4>Raw words</h4>
+                                        </div>
+                                        <div class="overlay"></div>
+                                    </div>
+                                    <div class="eight wide column pad-left-7">
+                                        <div class="matecat-raw ">
+                                            <h3>6’233.332</h3>
+                                            <h4>Raw words</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        </ul>
+                </div>
 
-        <ul id="matecat-equivalent-words" class="cost-table costbig">
+                <div class="project-body ui grid">
+                    <div class="jobs sixteen wide column">
+                        <!--<div class="job ui grid">
+                            <div class="job-body sixteen wide column">
 
-            <li class="box payable">
-                <p class="promo-text">
-                    <span>16</span>%<br/>less
-                </p>
-                <span class="word-number loading" tal:content="tm_analysis_wc_print"></span>
-                <br/>
-                MateCat weighted
-                <span tal:condition="not:isCJK">words</span>
-                <span tal:condition="true:isCJK">characters</span>
-                <br/>
-                <span class="days">
-                        <strong>
-                            <span class="workDays" tal:content="fast_wc_time">9,5</span> work
-                            <span class="unit" tal:content="fast_wc_unit">days</span>
-                        </strong> at
-                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
-                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
-                    </span>
-            </li>
+                                <div class="ui grid chunks">
+                                    <div class="chunk-container sixteen wide column">
+                                        <div class="ui grid analysis">
+                                            <div class="head-chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="source-target">
+                                                    <div class="source-box">English</div>
+                                                    <div class="in-to">
+                                                        <i class="icon-chevron-right icon"></i>
+                                                    </div>
+                                                    <div class="target-box">Haitian Creole French</div>
+                                                </div>
+                                                <div class="job-not-payable">
+                                                    <span id="raw-words">7'845,783</span>
+                                                </div>
+                                                <div class="job-payable">
+                                                    <a href="#">
+                                                        <span id="words">5'485,384</span> words
+                                                    </a>
+                                                </div>
+                                                <div class="merge ui button"><i class="icon-compress icon"></i> Merge</div>
+                                                &lt;!&ndash;<div class="split ui button"><i class="icon-expand icon"></i> Split</div>&ndash;&gt;
+                                            </div>
 
-        </ul>
+                                            <div class="chunks-title-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
 
-        <ul id="raw-words" class="cost-table">
-            <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span>
-                <br/>
-                Raw
-                <span tal:condition="not:isCJK">words</span>
-                <span tal:condition="true:isCJK">characters</span>
-                <br/>
-                <span class="days">
-                        <strong>
-                            <span class="workDays" tal:content="raw_wc_time">11,5</span> work
-                            <span class="unit" tal:content="raw_wc_unit">days</span>
-                        </strong> at
-                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
-                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
-                    </span>
-            </li>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Total</div>
+                                                    <div class="single payable-words">Payable</div>
+                                                    <div class="single new">New</div>
+                                                    <div class="single repetition">Repetition</div>
+                                                    <div class="single internal-matches">Internal Matches <span>(75/99)%</span></div>
+                                                    <div class="single p-50-74">TM Partial <span>(50/74)%</span></div>
+                                                    <div class="single p-75-84">TM Partial <span>(75/84)%</span></div>
+                                                    <div class="single p-65-94">TM Partial <span>(85/94)%</span></div>
+                                                    <div class="single p-95-99">TM Partial <span>(95/99)%</span></div>
+                                                    <div class="single tm-100">TM <span>100%</span></div>
+                                                    <div class="single tm-public">Public TM 100%</div>
+                                                    <div class="single tm-context">TM 100% in context</div>
+                                                    <div class="single machine-translation">Machine Translation</div>
+                                                </div>
 
-        </ul>
-        <div class="cl"></div>
+                                            </div>
 
-        <p class="short-message">MateCat lets you re-use repeated content better. <br />It leverages MyMemory, Professional Machine Translation and internal fuzzy matches
-            to make you save money and have a faster turnaround. <a href="https://www.matecat.com/support/introducing-matecat/matecat-calculates-payable-words/" target="_blank"> Find out more.</a>
-            <br/><span class="sub-short-message">(*Weighted words is how the industry counts words after discounting repetitions
-                and matches against a desktop translation memory, like any other CAT tool would.)</span>
-        </p>
+                                            <div class="chunks-pay-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Pay</div>
+                                                    <div class="single payable-words"> > </div>
+                                                    <div class="single new">100%</div>
+                                                    <div class="single repetition">30%</div>
+                                                    <div class="single internal-matches">60%</div>
+                                                    <div class="single p-50-74">100%</div>
+                                                    <div class="single p-75-84">60%</div>
+                                                    <div class="single p-65-94">60%</div>
+                                                    <div class="single p-95-99">60%</div>
+                                                    <div class="single tm-100">30%</div>
+                                                    <div class="single tm-public">30%</div>
+                                                    <div class="single tm-context">0%</div>
+                                                    <div class="single machine-translation">80%</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">654</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">245</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">656</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">625</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>-->
+
+                        <div class="job ui grid">
+                            <div class="job-body sixteen wide column">
+
+                                <div class="ui grid chunks">
+                                    <div class="chunk-container sixteen wide column">
+                                        <div class="ui grid analysis">
+                                            <div class="head-chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="source-target">
+                                                    <div class="source-box">English</div>
+                                                    <div class="in-to">
+                                                        <i class="icon-chevron-right icon"></i>
+                                                    </div>
+                                                    <div class="target-box">Haitian Creole French</div>
+                                                </div>
+                                                <div class="job-not-payable">
+                                                    <span id="raw-words">7'845,783</span>
+                                                </div>
+                                                <div class="job-payable">
+                                                    <a href="#">
+                                                        <span id="words">5'485,384</span> words
+                                                    </a>
+                                                </div>
+                                                <div class="merge ui button"><i class="icon-compress icon"></i> Merge</div>
+                                                <!--<div class="split ui button"><i class="icon-expand icon"></i> Split</div>-->
+                                            </div>
+
+                                            <div class="chunks-title-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Total</div>
+                                                    <div class="single payable-words">Payable</div>
+                                                    <div class="single new">New</div>
+                                                    <div class="single repetition">Repetition</div>
+                                                    <div class="single internal-matches">Internal Matches <span>(75/99)%</span></div>
+                                                    <div class="single p-50-74">TM Partial <span>(50/74)%</span></div>
+                                                    <div class="single p-75-84">TM Partial <span>(75/84)%</span></div>
+                                                    <div class="single p-65-94">TM Partial <span>(85/94)%</span></div>
+                                                    <div class="single p-95-99">TM Partial <span>(95/99)%</span></div>
+                                                    <div class="single tm-100">TM <span>100%</span></div>
+                                                    <div class="single tm-public">Public TM 100%</div>
+                                                    <div class="single tm-context">TM 100% in context</div>
+                                                    <div class="single machine-translation">Machine Translation</div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="chunks-pay-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Pay</div>
+                                                    <div class="single payable-words"> > </div>
+                                                    <div class="single new">100%</div>
+                                                    <div class="single repetition">30%</div>
+                                                    <div class="single internal-matches">60%</div>
+                                                    <div class="single p-50-74">100%</div>
+                                                    <div class="single p-75-84">60%</div>
+                                                    <div class="single p-65-94">60%</div>
+                                                    <div class="single p-95-99">60%</div>
+                                                    <div class="single tm-100">30%</div>
+                                                    <div class="single tm-public">30%</div>
+                                                    <div class="single tm-context">0%</div>
+                                                    <div class="single machine-translation">80%</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">654</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">245</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">656</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">625</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="job ui grid">
+                            <div class="job-body sixteen wide column">
+
+                                <div class="ui grid chunks">
+                                    <div class="chunk-container sixteen wide column">
+                                        <div class="ui grid analysis">
+                                            <div class="head-chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="source-target">
+                                                    <div class="source-box">English</div>
+                                                    <div class="in-to">
+                                                        <i class="icon-chevron-right icon"></i>
+                                                    </div>
+                                                    <div class="target-box">Haitian Creole French</div>
+                                                </div>
+                                                <div class="job-not-payable">
+                                                    <span id="raw-words">7'845,783</span>
+                                                </div>
+                                                <div class="job-payable">
+                                                    <a href="#">
+                                                        <span id="words">5'485,384</span> words
+                                                    </a>
+                                                </div>
+                                                <div class="merge ui button"><i class="icon-compress icon"></i> Merge</div>
+                                                <!--<div class="split ui button"><i class="icon-expand icon"></i> Split</div>-->
+                                            </div>
+
+                                            <div class="chunks-title-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Total</div>
+                                                    <div class="single payable-words">Payable</div>
+                                                    <div class="single new">New</div>
+                                                    <div class="single repetition">Repetition</div>
+                                                    <div class="single internal-matches">Internal Matches <span>(75/99)%</span></div>
+                                                    <div class="single p-50-74">TM Partial <span>(50/74)%</span></div>
+                                                    <div class="single p-75-84">TM Partial <span>(75/84)%</span></div>
+                                                    <div class="single p-65-94">TM Partial <span>(85/94)%</span></div>
+                                                    <div class="single p-95-99">TM Partial <span>(95/99)%</span></div>
+                                                    <div class="single tm-100">TM <span>100%</span></div>
+                                                    <div class="single tm-public">Public TM 100%</div>
+                                                    <div class="single tm-context">TM 100% in context</div>
+                                                    <div class="single machine-translation">Machine Translation</div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="chunks-pay-table sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">Pay</div>
+                                                    <div class="single payable-words"> > </div>
+                                                    <div class="single new">100%</div>
+                                                    <div class="single repetition">30%</div>
+                                                    <div class="single internal-matches">60%</div>
+                                                    <div class="single p-50-74">100%</div>
+                                                    <div class="single p-75-84">60%</div>
+                                                    <div class="single p-65-94">60%</div>
+                                                    <div class="single p-95-99">60%</div>
+                                                    <div class="single tm-100">30%</div>
+                                                    <div class="single tm-public">30%</div>
+                                                    <div class="single tm-context">0%</div>
+                                                    <div class="single machine-translation">80%</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk-detail sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <i class="icon-make-group icon"></i>
+                                                    <div class="file-title-details">
+                                                        Job Title detail
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk-detail sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <i class="icon-make-group icon"></i>
+                                                    <div class="file-title-details">
+                                                        Job Title detail
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="chunk sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <div class="job-id">(780777-1)</div>
+                                                    <div class="file-details">
+                                                        <a href="#">
+                                                            File <span class="details">details</span>
+                                                        </a>
+                                                        (<span class="f-details-number">1</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                                <div class="right-box">
+                                                    <div class="open-translate ui primary button open">Translate</div>
+                                                </div>
+                                            </div>
+                                            <div class="chunk-detail sixteen wide column shadow-1 pad-right-10">
+                                                <div class="left-box">
+                                                    <i class="icon-make-group icon"></i>
+                                                    <div class="file-title-details">
+                                                        Job Title detail
+                                                        (<span class="f-details-number">2</span>)
+                                                    </div>
+                                                </div>
+                                                <div class="single-analysis">
+                                                    <div class="single total">5'434,234</div>
+                                                    <div class="single payable-words">235,234</div>
+                                                    <div class="single new">456</div>
+                                                    <div class="single repetition">256,342</div>
+                                                    <div class="single internal-matches">356</div>
+                                                    <div class="single p-50-74">5,0403</div>
+                                                    <div class="single p-75-84">7,942</div>
+                                                    <div class="single p-65-94">6,942</div>
+                                                    <div class="single p-95-99">3,942</div>
+                                                    <div class="single tm-100">645</div>
+                                                    <div class="single tm-public">8,435</div>
+                                                    <div class="single tm-context">4,524</div>
+                                                    <div class="single machine-translation">6'754,648</div>
+                                                </div>
+                                            </div>
 
 
-        <br/>
-        <br/>
+                                        </div>
+                                    </div>
 
+                                </div>
 
-
-        <br/>
-
-
-        <br/>
-
-        <div class="cl"></div>
-    </div>
-    <div class="loadingbar open start">
-
-        <div class="wrapper" id="shortloading">
-            <p class="label">Fast word counting...</p>
-
-        </div>
-
-        <div class="cl"></div>
-
-        <div class="wrapper" id="longloading">
-            <p>Searching for TM matches
-                <span class="detailss">(<span id="analyzedSegmentsReport">0</span> of <span id="totalSegmentsReport">0</span> segments)...</span>
-            </p>
-
-            <div class="meter">
-                <a href="#" class="approved-bar" title="Analyzing 0.0%"></a>
-                <a href="#" id="close">close</a>
-            </div>
-
-        </div>
-    </div>
-
-</div>
-
-<div class="body">
-    <div class="wrapper">
-        <tal:block tal:define="id_for_job php:array()" tal:repeat="id_for_job jobs">
-
-            <div tal:attributes="data-jid string:${repeat/id_for_job/key}; class string:jobcontainer ${id_for_job/splitted}">
-                <div tal:define="splitted id_for_job/splitted">
-
-                    <h3>
-                        <span class="source_lang" tal:content="id_for_job/source">English</span> &gt; <span class="target_lang" tal:content="id_for_job/target">Italian</span>
-                    </h3>
-
-                    <div class="splitbtn-cont pull-right">
-                        <span class="splitmsg">Splitted in 2 parts</span>
-                        <span class="label left">Split in</span>
-                        <select name="" class="splitselect">
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
-                            <option value="15">15</option>tal:content="standard_analysis_wc_print"
-                            <option value="16">16</option>
-                            <option value="17">17</option>
-                            <option value="18">18</option>
-                            <option value="19">19</option>
-                            <option value="20">20</option>
-                            <option value="21">21</option>
-                            <option value="22">22</option>
-                            <option value="23">23</option>
-                            <option value="24">24</option>
-                            <option value="25">25</option>
-                            <option value="26">26</option>
-                            <option value="27">27</option>
-                            <option value="28">28</option>
-                            <option value="29">29</option>
-                            <option value="30">30</option>
-                            <option value="31">31</option>
-                            <option value="32">32</option>
-                            <option value="33">33</option>
-                            <option value="34">34</option>
-                            <option value="35">35</option>
-                            <option value="36">36</option>
-                            <option value="37">37</option>
-                            <option value="38">38</option>
-                            <option value="39">39</option>
-                            <option value="40">40</option>
-                            <option value="41">41</option>
-                            <option value="42">42</option>
-                            <option value="43">43</option>
-                            <option value="44">44</option>
-                            <option value="45">45</option>
-                            <option value="46">46</option>
-                            <option value="47">47</option>
-                            <option value="48">48</option>
-                            <option value="49">49</option>
-                            <option value="50">50</option>
-                        </select>
-                        <span class="label left">Jobs</span>
-
-                        <a href="#" class="dosplit splitbtn disabled" title="You cannot split a job with 1 or 0 payable words.">Split</a>
+                            </div>
+                        </div>
 
                     </div>
-                    <div class="nosplit"><a href="#" class="domerge mergebtn">Merge all</a></div>
-                    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
+                </div>
 
-
-                    <div metal:use-macro="analyze_partials.html/tablestats"/>
-
+                <div class="project-footer ui grid">
 
                 </div>
             </div>
-
-        </tal:block>
-
-
+        </div>
     </div>
-    <div class="cl"></div>
 </div>
 
-
-<div class="modal popup-split" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>Split <span class="jid" data-jid="">Job</span><span class="chunks" style="display: none;">x</span></h1>
-        <div class="splitbtn-cont">
-            <h2 class="popup-split-project-title"> Job Lang </h2>
-            <h3><span class="popup-split-job-id"></span><span class="popup-split-job-title"> Job Lang </span></h3>
-            <span class="label left">Split in</span>
-            <select name="popup-splitselect" class="splitselect left">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-                <option value="22">22</option>
-                <option value="23">23</option>
-                <option value="24">24</option>
-                <option value="25">25</option>
-                <option value="26">26</option>
-                <option value="27">27</option>
-                <option value="28">28</option>
-                <option value="29">29</option>
-                <option value="30">30</option>
-                <option value="31">31</option>
-                <option value="32">32</option>
-                <option value="33">33</option>
-                <option value="34">34</option>
-                <option value="35">35</option>
-                <option value="36">36</option>
-                <option value="37">37</option>
-                <option value="38">38</option>
-                <option value="39">39</option>
-                <option value="40">40</option>
-                <option value="41">41</option>
-                <option value="42">42</option>
-                <option value="43">43</option>
-                <option value="44">44</option>
-                <option value="45">45</option>
-                <option value="46">46</option>
-                <option value="47">47</option>
-                <option value="48">48</option>
-                <option value="49">49</option>
-                <option value="50">50</option>
-            </select>
-            <span class="label left">Jobs</span>
-        </div>
-        <div class="popup-box split-box3">
-            <ul class="jobs">
-                <li>
-                    <div><h4>Part 1</h4></div>
-
-                    <div class="job-details">
-                        <div class="job-perc"><p><span class="aprox">Approx. words:</span><span class="correct none">Words:</span>
-                        </p>
-                            <!-- A: la classe Aprox scompare se viene effettuato il calcolo -->
-                            <input type="text" class="input-small" value="50.000"/>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div><h4>Part 2</h4></div>
-                    <div class="job-details">
-                        <div class="job-perc"><p><span class="aprox">Approx. words:</span><span class="correct none">Words:</span>
-                        </p>
-                            <!-- A: la classe Aprox scompare se viene effettuato il calcolo -->
-                            <input type="text" class="input-small" value="50.000"/>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-            <div class="total">
-                <p class="wordsum">Total words: <span class="total-w">x</span></p>
-
-                <p class="error-count current">Current count: <span class="curr-w">x</span></p>
-
-                <p class="error-count"><span class="txt">Difference</span>: <span class="diff-w">x</span></p>
-                <!-- A:  il p error appare solo se i valori inseriti negli input dei singoli split job non restituiscono la somma totale -->
-            </div>
-            <div class="error-message none">
-                <p>Cannot split in # chunks, do this</p>
-            </div>
-            <div class="cl"></div>
-            <div class="btnsplit">
-
-                <a id="exec-split" class="uploadbtn loader">
-                    <span class="uploadloader"></span>
-                    <span class="text">Check</span>
-                </a>
-                <a id="exec-split-confirm" class="splitbtn done none">
-                    <span class="text">Confirm</span>
-                </a>
-                <span class="btn fileinput-button btn-cancel right">
-                    <span>Cancel</span>
-                </span>
-            </div>
-        </div>
-        <!-- END DIV SPLIT BOX -->
-    </div>
-    <!-- END DIV POPUP-SPLIT INTERNO -->
-</div>
 <!-- END DIV POPUP-SPLIT -->
 
 <div class="notifications-wrapper"></div>
-<footer>
-    <div class="wrapper">
-
-        <nav>
-            <ul>
-                <li><a class="link-manage-page" >Manage</a></li>
-                <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
-            </ul>
-
-        </nav>
-
-    </div>
-</footer>
+<!--<footer>-->
+    <!--<div class="wrapper">-->
+        <!--<nav>-->
+            <!--<ul>-->
+                <!--<li>-->
+                    <!--<a href="https://www.matecat.com/support/" target="_blank">Support</a>-->
+                <!--</li>-->
+            <!--</ul>-->
+            <!--&lt;!&ndash;<div metal:use-macro="common.html/login_includes" />&ndash;&gt;-->
+        <!--</nav>-->
+    <!--</div>-->
+<!--</footer>-->
 
 <script>
     $(".deliverychange").click(function() {

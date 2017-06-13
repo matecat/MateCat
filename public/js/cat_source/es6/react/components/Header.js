@@ -1,5 +1,6 @@
 
 var SubHeader = require("./SubHeader").default;
+var TeamConstants = require('../constants/TeamConstants');
 
 class Header extends React.Component {
     constructor (props) {
@@ -17,14 +18,14 @@ class Header extends React.Component {
 
     componentDidMount () {
 
-        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup.bind(this));
     }
 
     componentWillUnmount() {
-        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.removeListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup);
