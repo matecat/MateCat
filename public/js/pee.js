@@ -47,7 +47,7 @@
                 date: "2017-04",
                 text: "Introduzione Neural</br> 16 Aprile 2017",
                 langsPairs: [
-                    {l1: "en-gb",  l2: "it-IT"},
+                    {l1: "en-GB",  l2: "it-IT"},
                 ]
             },
             {
@@ -191,8 +191,8 @@
                 return annotation = PEE.annotations.find(function (elem) {
                     return elem.date === date && (function (l1, l2, elem) {
                             return !!elem.langsPairs.find(function (item) {
-                                return (item.l1 === l1 && item.l2 === l2) ||
-                                    (item.l1 === l2 && item.l2 === l1)
+                                return (item.l1.substring(0, 3) === l1.substring(0, 3) && item.l2.substring(0, 3) === l2.substring(0, 3)) ||
+                                    (item.l1.substring(0, 3) === l2.substring(0, 3) && item.l2.substring(0, 3) === l1.substring(0, 3))
                             });
                         })(l1, l2, elem);
                 });
