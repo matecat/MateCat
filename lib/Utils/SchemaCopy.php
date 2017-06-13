@@ -82,6 +82,7 @@ class SchemaCopy {
       $conn = $this->getDbConn($this->config);
       foreach($this->getTables() as $k => $v) {
           $table_name = $v[ 0 ] ;
+          // $conn->query( "TRUNCATE TABLE $table_name ");
           $conn->query( "DELETE FROM $table_name "); // DELETE seems to be faster than truncate
           $conn->query( "ALTER TABLE $table_name AUTO_INCREMENT = 1");
       }

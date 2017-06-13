@@ -2,10 +2,15 @@
 
 namespace Features;
 
+use BasicFeatureStruct;
+use Features;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
+use FeatureSet;
 use Monolog\Logger;
 
 use Features\Dqf\Utils\ProjectMetadata ;
+use Users_UserDao;
+use Utils;
 use WorkerClient;
 use AMQHandler ;
 
@@ -13,27 +18,24 @@ class Dqf extends BaseFeature {
 
     const FEATURE_CODE = 'dqf' ;
 
+    public static $dependencies = [
+            Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS
+    ] ;
+
     /**
      * @var Logger
      */
     protected static $logger ;
 
-    public function getDependencies() {
-        return array();
-    }
-
     /**
      * These are the dependencies we need to make to be enabled when we detedct DQF is to be
      * activated for a given project. These will fill the project metadata table.
      *
+     *
      * @return array
      */
     public function getProjectDependencies() {
-        return array(
-                \Features::PROJECT_COMPLETION,
-                \Features::REVIEW_IMPROVED,
-                \Features::TRANSLATION_VERSIONS
-        );
+        return self::$dependencies ;
     }
 
     /**
@@ -41,7 +43,7 @@ class Dqf extends BaseFeature {
      */
     public static function staticLogger() {
         if ( is_null( self::$logger ) ) {
-            $feature = new \BasicFeatureStruct(['feature_code' => self::FEATURE_CODE ]);
+            $feature = new BasicFeatureStruct(['feature_code' => self::FEATURE_CODE ]);
             self::$logger = ( new Dqf($feature) )->getLogger();
         }
         return self::$logger ;
@@ -64,7 +66,7 @@ class Dqf extends BaseFeature {
      * @return array
      */
     public function createProjectAssignInputMetadata( $metadata, $options ) {
-        $options = \Utils::ensure_keys( $options, array('input'));
+        $options = Utils::ensure_keys( $options, array('input'));
 
         $metadata = array_intersect_key( $options['input'], array_flip( ProjectMetadata::$keys ) ) ;
         $metadata = array_filter( $metadata ); // <-- remove all `empty` array elements
@@ -113,15 +115,18 @@ class Dqf extends BaseFeature {
             $projectStructure['result']['errors'][] = $user_error  ;
         }
 
-        $user = ( new \Users_UserDao() )->setCacheTTL(3600)->getByEmail( $projectStructure['id_customer'] ) ;
+        $user = ( new Users_UserDao() )->setCacheTTL(3600)->getByEmail( $projectStructure['id_customer'] ) ;
 
         if ( !$user ) {
             $projectStructure['result']['errors'][] = $user_error  ;
         }
 
-        // TODO: make this iterate thorugh instances of its dependencies, calling validateProjectCreation
-        ReviewImproved::loadAndValidateModelFromJsonFile( $projectStructure ) ;
+        // At this point we are sure ReviewImproved::loadAndValidateModelFromJsonFile was called already
+        // @see FeatureSet::getSortedFeatures
 
+        if ( $projectStructure['features']['review_improved']['__meta']['qa_model'] ) {
+
+        }
     }
 
 

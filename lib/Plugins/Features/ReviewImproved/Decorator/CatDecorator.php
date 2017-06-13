@@ -54,8 +54,9 @@ class CatDecorator extends \AbstractDecorator {
     private function getCategoriesAsJson(ModelStruct $model) {
         $categories = $model->getCategories();
         $out = array();
+
         foreach($categories as $category) {
-            $out[] = $category->asArray();
+            $out[] = $category->toArray();
         }
 
         return json_encode( $out );

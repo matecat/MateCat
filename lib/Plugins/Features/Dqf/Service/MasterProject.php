@@ -4,11 +4,10 @@
 
 namespace Features\Dqf\Service;
 
+use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct ;
-use API\V2\Exceptions\AuthenticationError ;
-use Features\Dqf\Service\Struct\LoginResponseStruct ;
-
+use Log;
 
 class MasterProject {
 
@@ -16,7 +15,7 @@ class MasterProject {
     protected $params;
     protected $request;
 
-    public function __construct( Session $session) {
+    public function __construct( Session $session ) {
         $this->session = $session ;
     }
 
@@ -37,10 +36,10 @@ class MasterProject {
 
         $content = json_decode( $client->curl()->getSingleContent( $request ), true );
 
-        \Log::doLog( var_export( $content, true ) ) ;
+        Log::doLog( var_export( $content, true ) ) ;
 
         if ( $client->curl()->hasError( $request ) ) {
-            throw new \Exception('Error during project creation' ) ;
+            throw new Exception('Error during project creation' ) ;
         }
 
         return new CreateProjectResponseStruct( $content );

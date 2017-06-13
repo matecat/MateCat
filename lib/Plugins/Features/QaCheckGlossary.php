@@ -15,10 +15,6 @@ class QaCheckGlossary extends BaseFeature {
 
     const GLOSSARY_SCOPE = 'glossary';
 
-    public function getDependencies()
-    {
-    }
-
     public function postTMSegmentAnalyzed( $params ) {
         $tm_data = $params['tm_data'];
 

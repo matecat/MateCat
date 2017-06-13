@@ -3,11 +3,14 @@
 namespace Features ;
 
 use Contribution\ContributionStruct;
+use Database;
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
 use FilesStorage ;
+use Log;
 use LQA\ChunkReviewDao;
 use LQA\ModelDao;
+use Projects_ProjectDao;
 use Translations_SegmentTranslationStruct;
 use ZipArchive ;
 use Chunks_ChunkDao  ;
@@ -28,6 +31,9 @@ class ReviewImproved extends BaseFeature {
 
     private $feature_options ;
 
+    public function getProjectDependencies() {
+        return array();
+    }
 
     /**
      * In ReviewImproved, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
@@ -143,7 +149,7 @@ class ReviewImproved extends BaseFeature {
      * If not, then try to find the qa_model from the project structure.
      */
     public function postProjectCreate($projectStructure) {
-        \Log::doLog( $this->feature );
+        Log::doLog( $this->feature );
 
         $this->feature_options = $this->feature->getOptions() ;
 
@@ -312,11 +318,11 @@ class ReviewImproved extends BaseFeature {
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json );
 
-        $project = \Projects_ProjectDao::findById(
+        $project = Projects_ProjectDao::findById(
             $projectStructure['id_project']
         );
 
-        $dao = new \Projects_ProjectDao( \Database::obtain() );
+        $dao = new Projects_ProjectDao( Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $model_record->id );
     }
 
@@ -330,9 +336,9 @@ class ReviewImproved extends BaseFeature {
      * creation.
      */
     private function setQaModelFromFeatureOptions($projectStructure) {
-        $project = \Projects_ProjectDao::findById( $projectStructure['id_project'] );
+        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] );
 
-        $dao = new \Projects_ProjectDao( \Database::obtain() );
+        $dao = new Projects_ProjectDao( Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $this->feature_options['id_qa_model'] );
 
     }
@@ -348,15 +354,15 @@ class ReviewImproved extends BaseFeature {
     public static function loadAndValidateModelFromJsonFile( $projectStructure ) {
         // detect if the project created was a zip file, in which case try to detect 
         // id_qa_model from json file. 
-        // otherwise assign the default model 
-        
-        $qa_model = FALSE; 
+        // otherwise assign the default model
+
+        $qa_model = false;
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
 
-        \Log::doLog( $zip_file ); 
+        Log::doLog( $zip_file );
 
-        if ( $zip_file !== FALSE ) {
+        if ( $zip_file !== false ) {
             $zip = new ZipArchive();
             $zip->open( $zip_file );
             $qa_model = $zip->getFromName( '__meta/qa_model.json');
@@ -364,13 +370,13 @@ class ReviewImproved extends BaseFeature {
 
         // File is not a zip OR model was not found in zip
 
-        \Log::doLog( $qa_model ); 
+        Log::doLog( "QA model is : " . var_export( $qa_model, true ) ) ;
 
-        if ( $qa_model === FALSE ) {
+        if ( $qa_model === false ) {
             $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
         }
 
-        $decoded_model = json_decode( $qa_model, TRUE ) ;
+        $decoded_model = json_decode( $qa_model, true ) ;
 
         if ( $decoded_model === null ) {
             $projectStructure['result']['errors'][ ] = array(
@@ -379,13 +385,10 @@ class ReviewImproved extends BaseFeature {
             );
         }
 
-        // TODO: implement other validations
-
-
         /**
          * Append the qa model to the project structure for later use.
          */
-        if ( ! array_key_exists('features', $projectStructure ) ) {
+        if ( ! array_key_exists( 'features', $projectStructure ) ) {
             $projectStructure['features'] = array();
         }
 

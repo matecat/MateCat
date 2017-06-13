@@ -1,8 +1,8 @@
 <?php
 
 class Projects_MetadataDao extends DataAccess_AbstractDao {
-
     const FEATURES_KEY = 'features' ;
+    const TABLE = 'project_metadata' ;
 
     const WORD_COUNT_RAW = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';

@@ -8,6 +8,7 @@ use Exceptions\NotFoundError;
 use Features\Dqf\Service\ChildProject;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\MasterProjectFiles;
+use Features\Dqf\Service\MasterProjectReviewSettings;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\MasterProjectSegmentsBatch;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
@@ -15,11 +16,13 @@ use Features\Dqf\Service\Struct\ProjectRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
 use Features\Dqf\Service\Session ;
 
+
+use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
 use Features\Dqf\Utils\UserMetadata;
 use Features\Dqf\Utils\ProjectMetadata ;
+use Files_FileDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct ;
-use Features\Dqf\Service\Client ;
 
 class ProjectCreation {
 
@@ -62,9 +65,17 @@ class ProjectCreation {
      */
     protected $childProjects ;
 
+    /**
+     * @var ReviewSettingsResponseStruct ;
+     */
+    protected $reviewSettings ;
+
     public function __construct( ProjectCreationStruct $struct ) {
         $this->inputStruct = $struct  ;
         $this->project = Projects_ProjectDao::findById( $struct->id_project );
+
+        // find  back the qa_model file from json?
+        // no the quality model must be found trom
     }
 
     public function setLogger($logger) {
@@ -89,6 +100,7 @@ class ProjectCreation {
         $this->_submitProjectFiles();
         $this->_submitSourceSegments();
         $this->_submitChildProjects();
+        $this->_submitReviewSettings();
     }
 
     protected function _createProject() {
@@ -107,7 +119,7 @@ class ProjectCreation {
     }
 
     protected function _submitProjectFiles() {
-        $files = \Files_FileDao::getByProjectId($this->project->id) ;
+        $files = Files_FileDao::getByProjectId($this->project->id) ;
         $filesSubmit = new MasterProjectFiles( $this->session, $this->remoteProject ) ;
 
         foreach( $files as $file ) {
@@ -120,6 +132,15 @@ class ProjectCreation {
         $this->remoteFiles = $filesSubmit->getRemoteFiles();
     }
 
+    protected function _submitReviewSettings() {
+        $dqfQaModel = new DqfQualityModel( $this->project ) ;
+        $request = new MasterProjectReviewSettings( $this->session, $this->remoteProject );
+
+        $struct = $dqfQaModel->getReviewSettings() ;
+
+        $this->reviewSettings = $request->create( $struct );
+    }
+
     protected function _getCredentials() {
         $user = ( new \Users_UserDao() )->getByEmail( $this->project->id_customer );
 
@@ -127,7 +148,7 @@ class ProjectCreation {
             throw new NotFoundError("User not found") ;
         }
 
-        return UserMetadata::extractCredentials( $user->getMetadataAsKeyValue() );
+        return UserMetadata::extractCredentials(  $user->getMetadataAsKeyValue() );
     }
 
     protected function _initSession() {

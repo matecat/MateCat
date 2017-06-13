@@ -111,7 +111,7 @@ class Client {
             $curlopts[ CURLOPT_POSTFIELDS ]      = json_encode( $params['json'] );
         }
         elseif ( isset( $params['formData'] ) ) {
-            $curlopts[ CURLOPT_POSTFIELDS ] = $params['formData'] ;
+            $curlopts[ CURLOPT_POSTFIELDS ] = http_build_query( $params['formData'] );
         }
 
         $curlopts[ CURLOPT_HTTPHEADER ] = self::headers( $params['headers'] ) ;

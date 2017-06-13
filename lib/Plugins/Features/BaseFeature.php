@@ -1,13 +1,15 @@
 <?php
 
 namespace Features ;
+use BasicFeatureStruct;
+use INIT;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 
 use ReflectionClass ;
 
-abstract class BaseFeature {
+abstract class BaseFeature  {
 
     protected $feature;
 
@@ -23,9 +25,9 @@ abstract class BaseFeature {
      * The ideal solution would be to use a ProjectStruct for both persisted and
      * unpersisted scenarios, so to work with the same input structure every time.
      *
-     * @param \BasicFeatureStruct $feature
+     * @param BasicFeatureStruct $feature
      */
-    public function __construct( \BasicFeatureStruct $feature ) {
+    public function __construct( BasicFeatureStruct $feature ) {
         $this->feature = $feature ;
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
     }
@@ -40,7 +42,7 @@ abstract class BaseFeature {
     }
 
     private function logFilePath() {
-       return \INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+       return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
@@ -57,16 +59,4 @@ abstract class BaseFeature {
         return static::getClassPath() . '/View' ;
     }
 
-    /**
-     * These are the other features this feature relies on application wide.
-     * @return array
-     */
-    abstract function getDependencies() ;
-
-
-    /**
-     * These are the features this feature relies on when it is active for a given project.
-     * @return array
-     */
-    // abstract function getProjectDependencies() ;
 }

@@ -2,7 +2,16 @@
 
 namespace LQA;
 
-class ModelDao extends \DataAccess_AbstractDao {
+use DataAccess_AbstractDao;
+use Database;
+use INIT;
+use Log;
+
+class ModelDao extends DataAccess_AbstractDao {
+    const TABLE = "qa_models";
+
+    protected static $auto_increment_fields = ['id'];
+
     protected function _buildResult( $array_result ) { }
 
     /**
@@ -11,7 +20,7 @@ class ModelDao extends \DataAccess_AbstractDao {
      */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_models WHERE id = :id LIMIT 1" ;
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(array('id' => $id));
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ModelStruct' );
@@ -36,12 +45,13 @@ class ModelDao extends \DataAccess_AbstractDao {
         ) );
         $struct->ensureValid();
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->attributes(
             array('label', 'pass_type', 'pass_options')
         ));
+
         $lastId = $conn->lastInsertId();
 
         $record = self::findById( $lastId );
@@ -73,9 +83,16 @@ class ModelDao extends \DataAccess_AbstractDao {
             $record['severities'] = $default_severities ;
         }
 
+        $options = null ;
+
+        if ( INIT::$DQF_ENABLED )  { // TODO: find a better way to avoid this dependency
+            $options = json_encode( ['dqf_id' => $record['dqf_id'] ] ) ;
+        }
+
         $category = CategoryDao::createRecord(array(
                 'id_model'   => $model_id,
                 'label'      => $record['label'],
+                'options'    => $options,
                 'id_parent'  => $parent_id,
                 'severities' => json_encode( $record['severities'] )
         ));

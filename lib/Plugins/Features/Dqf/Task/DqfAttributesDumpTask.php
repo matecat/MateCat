@@ -21,16 +21,16 @@ class DqfAttributesDumpTask extends Command {
     public function execute( InputInterface $input, OutputInterface $output ) {
 
         $map = [
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/catTool', 'path'  =>  'catTool.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/contentType', 'path'  =>  'contentType.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/errorCategory', 'path'  =>  'errorCategory.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/industry', 'path'  =>  'industry.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/language', 'path'  =>  'language.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/mtEngine', 'path'  =>  'mtEngine.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/process', 'path'  =>  'process.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/qualitylevel', 'path'  =>  'qualitylevel.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/segmentOrigin', 'path'  =>  'segmentOrigin.json' ],
-                [ 'url'   =>  'http://dqf-api.ta-us.net/v3/severity', 'path'  =>  'severity.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/catTool',       'path' => 'catTool.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/contentType',   'path' => 'contentType.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/errorCategory', 'path' => 'errorCategory.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/industry',      'path' => 'industry.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/language',      'path' => 'language.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/mtEngine',      'path' => 'mtEngine.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/process',       'path' => 'process.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/qualitylevel',  'path' => 'qualitylevel.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/segmentOrigin', 'path' => 'segmentOrigin.json' ],
+                [ 'url' => 'http://dqf-api.ta-us.net/v3/severity',      'path' => 'severity.json' ],
         ];
 
         $output->writeln("Dumping data" ) ;

@@ -3,7 +3,8 @@
 use DataAccess\ShapelessConcreteStruct;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
-
+    const TABLE = 'segments' ;
+    protected static $auto_increment_fields = ['id'];
 
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->con->getConnection();

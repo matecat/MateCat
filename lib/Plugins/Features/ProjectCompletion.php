@@ -54,7 +54,4 @@ class ProjectCompletion extends BaseFeature {
         $dao = new Chunks_ChunkCompletionEventDao() ;
         $dao->updatePassword( $job->id, $job->password, $old_password );
     }
-
-    public function getDependencies() {
-    }
 }

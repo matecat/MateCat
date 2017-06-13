@@ -15,7 +15,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $fast_analysis_wc ;
     public $standard_analysis_wc ;
     public $remote_ip_address ;
-    public $instance_number ;
+    public $instance_id ;
     public $pretranslate_100 ;
     public $id_qa_model ;
     public $id_assignee ;
