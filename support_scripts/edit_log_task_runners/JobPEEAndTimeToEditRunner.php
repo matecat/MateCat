@@ -32,7 +32,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                 SELECT jobs.id, password, job_first_segment, job_last_segment, source, target, class_load
                     FROM jobs
                     JOIN engines ON id_mt_engine = engines.id
-                    WHERE ( new_words + draft_words ) = 0
+                    WHERE ( new_words + draft_words ) < 10
                     AND jobs.id >= :min_id AND jobs.id <= :max_id ";
 
     private static $querySegments = "
