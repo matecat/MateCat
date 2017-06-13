@@ -55,7 +55,7 @@ class PeeGraph extends KleinController {
                 'date_end'   => $end->format( 'Y-m-d' ),
                 'sources'    => $params[ 'sources' ],
                 'targets'    => $params[ 'targets' ],
-                'fuzzy_band' => array_merge( [ 'MT_MyMemory', '100%' ], ( is_array( $params[ 'fuzzy_band' ] ) ? $params[ 'fuzzy_band' ] : []  ) )
+                'fuzzy_band' => array_merge( [ 'MT_MyMemory' ], ( is_array( $params[ 'fuzzy_band' ] ) ? $params[ 'fuzzy_band' ] : []  ) )
         ]);
 
         $stats = $lDao->getGraphData( $query );
