@@ -1009,7 +1009,4 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 
 $(document).ready(function() {
 	UI.init();
-	// if ( config.enable_outsource ) {
-	// 	UI.outsourceInit();
-	// }
 });

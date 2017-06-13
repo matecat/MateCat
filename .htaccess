@@ -30,6 +30,9 @@ RewriteRule ^(revise)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.p
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
 
+RewriteRule ^(analyze-new)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=newAnalyze&pid=$3&password=$4 [L]
+RewriteRule ^(jobanalysis-new)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=newAnalyze&pid=$2&jid=$3&password=$4 [L]
+
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 
 RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]

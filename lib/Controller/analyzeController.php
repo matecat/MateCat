@@ -53,6 +53,10 @@ class analyzeController extends viewController {
      */
     private $project_not_found = false;
 
+    protected $analyze_html = "analyze.html";
+    protected $job_analysis_html = "jobAnalysis.html" ;
+
+
     public function __construct() {
 
         parent::sessionStart();
@@ -79,13 +83,13 @@ class analyzeController extends viewController {
             // we are looking for a chunk
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->jid, $pass);
 
-            parent::makeTemplate( "jobAnalysis.html" );
+            parent::makeTemplate( $this->job_analysis_html  );
             $this->jpassword = $pass;
             $this->ppassword = null;
         } else {
             $this->project_not_found = $this->project->password != $pass;
 
-            parent::makeTemplate( "analyze.html" );
+            parent::makeTemplate( $this->analyze_html  );
             $this->jid       = null;
             $this->jpassword = null;
             $this->ppassword = $pass;
@@ -98,6 +102,7 @@ class analyzeController extends viewController {
         }
 
     }
+
 
     public function doAction() {
         $this->features->run('beginDoAction', 'analyzeController', array(
