@@ -118,13 +118,13 @@
                         <div class="field">
                             <label>From</label>
                             <select class="ui search dropdown" id="from-date" name="start_date">
-                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
                             </select>
                         </div>
                         <div class="field">
                             <label>To</label>
                             <select class="ui search dropdown" id="to-date" name="end_date">
-                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
                             </select>
                         </div>
                     </div>
@@ -148,10 +148,10 @@
         </div>
     </div>
     <div class="selectContainer">
-        <form id="filterDateForm" action="/utils/pee" method="post" >
+        <form id="filterDateForm" >
             <select name="date" id="date" >
                 <option value="${lastMonth}" >Last month</option>
-                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
             </select>
         </form>
     </div>

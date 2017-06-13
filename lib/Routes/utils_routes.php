@@ -35,4 +35,5 @@ route( '/api/app/teams/members/invite/[:jwt]',                                  
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
 
-route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeGraph', 'getPeePlots' ) ;
+route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeData', 'getPeePlots' ) ;
+route( '/api/app/utils/pee/table',                                                  'POST', '\API\App\PeeData', 'getPeeTableData' ) ;

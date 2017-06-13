@@ -43,11 +43,10 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         $con = $this->con->getConnection();
         $stmt = $con->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute([
+
+        return $this->_fetchObject( $stmt, new LanguageStats_LanguageStatsStruct(), [
                 'filterDate' => $filterDate
-        ]);
-        return $stmt->fetchAll();
+        ] );
 
     }
 

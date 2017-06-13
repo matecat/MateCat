@@ -9,15 +9,18 @@
 
 namespace API\App;
 
+use Analysis_PayableRates;
+use API\App\Json\PeeTableData;
 use API\V2\KleinController;
 use DataAccess\ShapelessConcreteStruct;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use Langs_Languages;
 use LanguageStats_LanguageStatsDAO;
 use API\App\Json\PeeGraphData;
 
-class PeeGraph extends KleinController {
+class PeeData extends KleinController {
 
     public function getPeePlots(){
 
@@ -71,6 +74,24 @@ class PeeGraph extends KleinController {
         } catch ( Exception $e ){
             throw new InvalidArgumentException( "Bad Request.", 400 );
         }
+    }
+
+    public function getPeeTableData(){
+
+        $params = filter_var_array(
+                $this->params,[
+                'date'      => [
+                        'filter'  => FILTER_CALLBACK,
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH,
+                        'options' => [ $this, 'parseDateTime' ]
+                ],
+        ] );
+
+        $languageStats = ( new LanguageStats_LanguageStatsDAO() )->getLanguageStats( $params[ 'date' ] );
+
+        $format = new PeeTableData( $languageStats );
+        $this->response->json( $format->render() );
+
     }
 
 }

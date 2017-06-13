@@ -594,7 +594,7 @@
     $(document).ready(function (el) {
         PEE.init();
         $( 'div.selectContainer form select' ).on( 'change', function(){
-            $( '#filterDateForm' ).submit();
+            //$( '#filterDateForm' ).submit();
         } );
     });
 })($);
