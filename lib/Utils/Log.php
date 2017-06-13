@@ -41,58 +41,42 @@ class Log {
 
     protected static function _writeTo( $stringData ) {
 
+        // TODO: move this check into Bootstrap
         if ( !file_exists( INIT::$LOG_REPOSITORY ) || !is_dir( INIT::$LOG_REPOSITORY ) ) {
             mkdir( INIT::$LOG_REPOSITORY );
-        }
-
-        if ( !empty( self::$fileName ) ) {
-            self::$fileNamePath = LOG_REPOSITORY . "/" . self::$fileName;
-        } else {
-            self::$fileNamePath = LOG_REPOSITORY . "/" . LOG_FILENAME;
         }
 
         if ( self::$useMonolog ) {
 
             try {
 
-//                if ( empty( self::$logger ) ) {
-//
-////                    $matecatRedisHandler = new \RedisHandler();
-//
-//                    // Init a RedisHandler with a LogstashFormatter.
-//                    // The parameters may differ depending on your configuration of Redis.
-//                    // Important: The parameter 'logs' must be equal to the key you defined
-//                    // in your logstash configuration.
-////                    $redisHandler      = new RedisHandler( $matecatRedisHandler->getConnection(), 'phplogs' );
-////                    $logStashFormatter = new LogstashFormatter( 'MateCat', gethostname() );
-////                    $redisHandler->setFormatter( $logStashFormatter );
-//
-//                    //Log on file
-//                    $fileHandler   = new StreamHandler( self::$fileNamePath );
-//                    $fileFormatter = new LineFormatter( null, null, true, true );
-//                    $fileHandler->setFormatter( $fileFormatter );
-//
-//                    // Create a Logger instance with the RedisHandler
-////                    self::$logger = new Logger( 'MateCat', array( $redisHandler, $fileHandler ) );
-//                    self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
-//
-//                }
-
-                $fileHandler   = new StreamHandler( self::$fileNamePath );
-                $fileFormatter = new LineFormatter( null, null, true, true );
-                $fileHandler->setFormatter( $fileFormatter );
-                self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
-
+                self::initMonolog() ;
                 self::$logger->debug( rtrim( $stringData ) );
 
             } catch ( Exception $e ) {
-                file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
+                file_put_contents( self::getFileNamePath(), $stringData, FILE_APPEND );
             }
 
         } else {
-            file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
+            file_put_contents( self::getFileNamePath(), $stringData, FILE_APPEND );
         }
 
+    }
+
+    protected static function initMonolog() {
+        $fileHandler   = new StreamHandler( self::getFileNamePath() );
+        $fileFormatter = new LineFormatter( null, null, true, true );
+        $fileHandler->setFormatter( $fileFormatter );
+        self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
+    }
+
+    protected static function getFileNamePath() {
+        if ( !empty( self::$fileName ) ) {
+            $name = LOG_REPOSITORY . "/" . self::$fileName;
+        } else {
+            $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
+        }
+        return $name ;
     }
 
     protected static function _getHeader() {
@@ -141,6 +125,18 @@ class Log {
 
         self::_writeTo( $string );
 
+    }
+
+    public static function getLogger() {
+        if ( !self::$useMonolog ) {
+            throw new Exception('Logger is not set. Is monolog available?');
+        }
+
+        if ( !isset( self::$logger ) ) {
+            self::initMonolog() ;
+        }
+
+        return self::$logger ;
     }
 
     /**
