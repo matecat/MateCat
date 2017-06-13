@@ -29,8 +29,7 @@ job1:
   approved_words: 407.00
   rejected_words: 147.00
   subject: general
-  payable_rates:
-    | {"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":80}
+  payable_rates: '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":80}'
   revision_stats_typing_min: 0
   revision_stats_translations_min: 0
   revision_stats_terminology_min: 0
