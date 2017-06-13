@@ -13,11 +13,10 @@ body.analyze{
     padding-bottom: 160px;
 
     .project {
-        margin-bottom: 30px !important;
-        background-color: #dddddd;
+        background-color: #cbcbcb;
         .project-header {
             background-color: #f3f3f3;
-            padding-bottom: 10px !important;
+            //padding-bottom: 10px !important;
             border-bottom: 1px solid #ccc;
 
             .left-analysis {
@@ -83,7 +82,7 @@ body.analyze{
             .word-count {
                 .word-percent {
                     background-color: #f3f3f3;
-                    padding: 20px 15px 10px;
+                    padding: 20px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
                     .percent {
                         font-size: 56px;
@@ -132,28 +131,29 @@ body.analyze{
 
 
         .project-body {
-            margin-top: 2rem;
+            margin-top: 0;
 
             .jobs {
-                margin-top: 0px;
+                /*margin-top: 0px;*/
             }
             .job {
                 padding: 0 15px;
-                margin-bottom: 15px;
+                margin-top: 35px;
+                margin-bottom: 20px;
                 .job-header {
                     background-color: #ffffff !important;
                     padding: 0 0 !important;
 
-                    .split-merge {
-                        padding: 10px 15px;
-                        .merge {
-                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                            padding: 5px 17px;
-                            border: 1px solid #797979;
-                            font-size: 16px;
-                            transition: 0.3s ease !important;
-                        }
-                    }
+                    //.split-merge {
+                    //    padding: 10px 15px;
+                    //    .merge {
+                    //        font-family: Calibri, Arial, Helvetica, sans-serif;
+                    //        padding: 5px 17px;
+                    //        border: 1px solid #797979;
+                    //        font-size: 16px;
+                    //        transition: 0.3s ease !important;
+                    //    }
+                    //}
                 }
                 .job-body {
                     .chunks {
@@ -229,333 +229,16 @@ body.analyze{
                                         }
                                     }
 
-                                    .split {
+                                    .split, .merge {
                                         font-family: Calibri, Arial, Helvetica, sans-serif;
-                                        padding: 6px 22px;
+                                        padding: 5px 10px;
                                         vertical-align: top;
                                         font-size: 16px;
                                         border: 1px solid #797979;
                                         border-radius: 2px;
                                         float: right;
-                                    }
-                                    .merge {
-                                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                                        padding: 6px 22px;
-                                        vertical-align: top;
-                                        font-size: 16px;
-                                        border: 1px solid #797979;
-                                        border-radius: 2px;
-                                        float: right;
-                                    }
-                                }
-
-                                .chunks-title-table {
-                                    transition: 0.3s ease;
-                                    padding: 3px 15px;
-                                    text-align: center;
-                                    box-shadow: none !important;
-                                    background-color: #f3f3f3;
-                                    .job-id {
-                                        float: left;
-                                        min-width: 65px;
-                                        color: #969696;
-                                        font-size: 13px;
-                                        position: relative;
-                                        line-height: 28px;
-                                        top: 1px;
-                                    }
-                                    .file-details {
-                                        float: left;
-                                        text-decoration: underline;
-                                        min-width: 85px;
-                                        line-height: 30px;
-                                        font-weight: 700;
-                                        position: relative;
-                                        top: 1px;
                                         &:hover {
                                             text-decoration: none;
-                                        }
-                                    }
-                                    .left-box {
-                                        height: 1%;
-                                        position: relative;
-                                        float: left;
-                                        width: 15%;
-                                    }
-                                    .single-analysis {
-                                        display: inline-block;
-                                        margin: 0 auto;
-                                        width: 75%;
-                                        position: relative;
-                                        float: left;
-                                        text-align: center;
-                                        font-size: 15px;
-                                        .single {
-                                            display: inline-block;
-                                            line-height: 16px;
-                                            width: 60px;
-                                            height: 56px;
-                                            background-color: #f3f3f3;
-                                            vertical-align: top;
-                                            padding: 5px;
-                                            span {
-                                                font-size: 13px;
-                                                font-weight: 700;
-                                            }
-                                            &.total {
-                                                line-height: 56px;
-                                                width: 70px;
-                                            }
-                                            &.payable-words {
-                                                width: 60px;
-                                                line-height: 56px;
-                                                background-color: rgba(126, 175, 62, 0.3);
-                                            }
-                                            &.new {
-                                                line-height: 56px;
-                                                width: 40px;
-                                            }
-                                            &.repetition {
-                                                line-height: 56px;
-                                                width: 70px;
-                                            }
-                                            &.internal-machines {
-                                            }
-                                            &.p-50-74 {
-                                            }
-                                            &.p-75-84 {
-                                            }
-                                            &.p-85-94 {
-                                            }
-                                            &.p-95-99 {
-                                            }
-                                            &.tm-100 {
-                                                width: 40px;
-                                                padding-top: 10px;
-                                            }
-                                            &.tm-public {
-                                                width: 50px;
-                                            }
-                                            &.tm-contex {
-                                            }
-                                            &.machine-translation {
-                                                position: relative;
-                                                width: 70px;
-                                                padding-top: 10px;
-                                            }
-                                        }
-                                    }
-                                    .right-box {
-                                        width: 10%;
-                                        position: relative;
-                                        float: right;
-                                        .open-translate {
-                                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                                            padding: 6px 15px;
-                                            vertical-align: top;
-                                            font-size: 16px;
-                                            border: 1px solid #797979;
-                                            border-radius: 2px;
-                                            float: right;
-                                            margin-top: 5px;
-                                        }
-                                    }
-                                }
-
-                                .chunks-pay-table {
-                                    transition: 0.3s ease;
-                                    padding: 3px 15px;
-                                    text-align: center;
-                                    box-shadow: none !important;
-                                    .job-id {
-                                        float: left;
-                                        min-width: 65px;
-                                        color: #969696;
-                                        font-size: 13px;
-                                        position: relative;
-                                        line-height: 28px;
-                                        top: 1px;
-                                    }
-                                    .file-details {
-                                        float: left;
-                                        text-decoration: underline;
-                                        min-width: 85px;
-                                        line-height: 30px;
-                                        font-weight: 700;
-                                        position: relative;
-                                        top: 1px;
-                                        &:hover {
-                                            text-decoration: none;
-                                        }
-                                    }
-                                    .left-box {
-                                        position: relative;
-                                        float: left;
-                                        width: 15%;
-                                        height: 1%;
-                                    }
-                                    .single-analysis {
-                                        display: inline-block;
-                                        margin: 0 auto;
-                                        width: 75%;
-                                        position: relative;
-                                        float: left;
-                                        text-align: center;
-                                        font-size: 15px;
-                                        .single {
-                                            display: inline-block;
-                                            line-height: 30px;
-                                            padding: 0 5px;
-                                            width: 60px;
-                                            background-color: #ffffff;
-                                            &.total {
-                                                width: 70px;
-                                            }
-                                            &.payable-words {
-                                                width: 60px;
-
-                                            }
-                                            &.new {
-                                                width: 40px;
-                                            }
-                                            &.repetition {
-                                                width: 70px;
-                                            }
-                                            &.internal-machines {
-                                            }
-                                            &.p-50-74 {
-                                            }
-                                            &.p-75-84 {
-                                            }
-                                            &.p-85-94 {
-                                            }
-                                            &.p-95-99 {
-                                            }
-                                            &.tm-100 {
-                                                width: 40px;
-                                            }
-                                            &.tm-public {
-                                                width: 50px;
-                                            }
-                                            &.tm-contex {
-                                            }
-                                            &.machine-translation {
-                                                position: relative;
-                                                width: 70px;
-                                            }
-                                        }
-                                    }
-                                    .right-box {
-                                        width: 10%;
-                                        position: relative;
-                                        float: right;
-                                        .open-translate {
-                                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                                            padding: 6px 15px;
-                                            vertical-align: top;
-                                            font-size: 16px;
-                                            border: 1px solid #797979;
-                                            border-radius: 2px;
-                                            float: right;
-                                            margin-top: 5px;
-                                        }
-                                    }
-                                }
-                                .chunk {
-                                    transition: 0.3s ease;
-                                    background-color: #ffffff;
-                                    padding: 3px 15px;
-                                    text-align: center;
-                                    .job-id {
-                                        float: left;
-                                        min-width: 65px;
-                                        color: #969696;
-                                        font-size: 13px;
-                                        position: relative;
-                                        line-height: 28px;
-                                        top: 1px;
-                                    }
-                                    .file-details {
-                                        float: left;
-                                        text-decoration: underline;
-                                        min-width: 85px;
-                                        line-height: 30px;
-                                        font-weight: 700;
-                                        position: relative;
-                                        top: 1px;
-                                        &:hover {
-                                            text-decoration: none;
-                                        }
-                                    }
-                                    .left-box {
-                                        position: relative;
-                                        float: left;
-                                        width: 15%;
-                                    }
-                                    .single-analysis {
-                                        display: inline-block;
-                                        margin: 0 auto;
-                                        width: 75%;
-                                        position: relative;
-                                        float: left;
-                                        text-align: center;
-                                        font-size: 15px;
-                                        .single {
-                                            display: inline-block;
-                                            line-height: 42px;
-                                            padding: 0 5px;
-                                            width: 60px;
-                                            /*background-color: #f3f3f3;*/
-                                            &.total {
-                                                width: 70px;
-                                            }
-                                            &.payable-words {
-                                                width: 60px;
-                                                background-color: rgba(126, 175, 62, 0.3);
-                                            }
-                                            &.new {
-                                                width: 40px;
-                                            }
-                                            &.repetition {
-                                                width: 70px;
-                                            }
-                                            &.internal-machines {
-                                            }
-                                            &.p-50-74 {
-                                            }
-                                            &.p-75-84 {
-                                            }
-                                            &.p-85-94 {
-                                            }
-                                            &.p-95-99 {
-                                            }
-                                            &.tm-100 {
-                                                width: 40px;
-                                            }
-                                            &.tm-public {
-                                                width: 50px;
-                                            }
-                                            &.tm-contex {
-                                            }
-                                            &.machine-translation {
-                                                position: relative;
-                                                width: 70px;
-                                            }
-                                        }
-                                    }
-                                    .right-box {
-                                        width: 10%;
-                                        position: relative;
-                                        float: right;
-                                        .open-translate {
-                                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                                            padding: 6px 15px;
-                                            vertical-align: top;
-                                            font-size: 16px;
-                                            border: 1px solid #797979;
-                                            border-radius: 2px;
-                                            float: right;
-                                            margin-top: 5px;
                                         }
                                     }
                                 }
@@ -567,6 +250,397 @@ body.analyze{
             }
         }
 
+    }
+}
+
+.analysis {
+    .chunks-title-table, .chunks-pay-table, .chunk, .chunk-detail {
+        .left-box {
+            height: 1%;
+            position: relative;
+            float: left;
+            text-align: left;
+            width: 15%;
+        }
+        .single-analysis {
+            display: inline-block;
+            margin: 0 auto;
+            width: 75%;
+            position: relative;
+            float: left;
+            text-align: center;
+            font-size: 15px;
+            line-height: 35px;
+            .single {
+                display: inline-block;
+                width: 60px;
+                //background-color: pink;
+                span {
+                    font-size: 13px;
+                    font-weight: 700;
+                    vertical-align: top;
+                }
+                &.total {
+                    width: 70px;
+                }
+                &.payable-words {
+                }
+                &.new {
+                    width: 40px;
+                }
+                &.repetition {
+                    width: 70px;
+                }
+                &.internal-matches {
+                }
+                &.p-50-74 {
+                }
+                &.p-75-84 {
+                }
+                &.p-85-94 {
+                }
+                &.p-95-99 {
+                }
+                &.tm-100 {
+                    width: 40px;
+                }
+                &.tm-public {
+                    width: 50px;
+                }
+                &.tm-context {
+                    width: 55px;
+                }
+                &.machine-translation {
+                    position: relative;
+                    width: 70px;
+                }
+            }
+        }
+        .right-box {
+            width: 10%;
+            position: relative;
+            float: right;
+            .open-translate {
+                font-family: Calibri, Arial, Helvetica, sans-serif;
+                padding: 6px 15px;
+                vertical-align: top;
+                font-size: 16px;
+                border: 1px solid #797979;
+                border-radius: 2px;
+                float: right;
+                margin-top: 3px;
+            }
+        }
+
+        @media only screen and (max-width: 1199px) and (min-width: 992px) {
+            .left-box {
+                width: 12%;
+                .job-id {
+                    min-width: 65px;
+                }
+                .file-details {
+                    text-decoration: underline;
+                    min-width: 45px;
+                    line-height: 30px;
+                    font-weight: 700;
+                    position: relative;
+                    top: 1px;
+                    .details {
+                        display: none;
+                    }
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
+            .single-analysis {
+                display: inline-block;
+                margin: 0 auto;
+                width: 78%;
+                position: relative;
+                float: left;
+                text-align: center;
+                font-size: 14px;
+                line-height: 35px;
+                .single {
+                    display: inline-block;
+                    //line-height: 42px;
+                    padding: 0;
+                    width: 55px;
+                    //background-color: yellow;
+                    span {
+                        font-size: 12px;
+                        font-weight: 700;
+                    }
+                    &.total {
+                    }
+                    &.payable-words {
+                        width: 50px;
+                    }
+                    &.new {
+                        width: 40px;
+                    }
+                    &.repetition {
+                        width: 65px;
+                    }
+                    &.internal-matches {
+                        width: 55px;
+                    }
+                    &.p-50-74 {
+                    }
+                    &.p-75-84 {
+                    }
+                    &.p-85-94 {
+                    }
+                    &.p-95-99 {
+                    }
+                    &.tm-100 {
+                        width: 35px;
+                    }
+                    &.tm-public {
+                        width: 45px;
+                    }
+                    &.tm-context {
+                        width: 45px;
+                    }
+                    &.machine-translation {
+                        position: relative;
+                        width: 70px;
+                    }
+                }
+            }
+        }
+
+        @media only screen and (max-width: 991px) and (min-width: 768px) {
+            .left-box {
+                width: 12%;
+                .job-id {
+                    min-width: 65px;
+                }
+                .file-details {
+                    text-decoration: underline;
+                    min-width: 45px;
+                    line-height: 30px;
+                    font-weight: 700;
+                    position: relative;
+                    top: 1px;
+                    .details {
+                        display: none;
+                    }
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
+            .single-analysis {
+                display: inline-block;
+                margin: 0 auto;
+                width: 78%;
+                position: relative;
+                float: left;
+                text-align: center;
+                font-size: 14px;
+                line-height: 35px;
+                .single {
+                    display: inline-block;
+                    //line-height: 42px;
+                    padding: 0;
+                    width: 55px;
+                    //background-color: yellow;
+                    span {
+                        font-size: 12px;
+                        font-weight: 700;
+                    }
+                    &.total {
+                    }
+                    &.payable-words {
+                        width: 50px;
+                    }
+                    &.new {
+                        width: 40px;
+                    }
+                    &.repetition {
+                        width: 65px;
+                    }
+                    &.internal-matches {
+                        width: 55px;
+                    }
+                    &.p-50-74 {
+                    }
+                    &.p-75-84 {
+                    }
+                    &.p-85-94 {
+                    }
+                    &.p-95-99 {
+                    }
+                    &.tm-100 {
+                        width: 35px;
+                    }
+                    &.tm-public {
+                        width: 45px;
+                    }
+                    &.tm-context {
+                        width: 45px;
+                    }
+                    &.machine-translation {
+                        position: relative;
+                        width: 70px;
+                    }
+                }
+            }
+        }
+
+        @media only screen and (max-width: 767px) {
+            .left-box {
+                width: 12%;
+                .job-id {
+                    min-width: 65px;
+                }
+                .file-details {
+                    text-decoration: underline;
+                    min-width: 45px;
+                    line-height: 30px;
+                    font-weight: 700;
+                    position: relative;
+                    top: 1px;
+                    .details {
+                        display: none;
+                    }
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
+            .single-analysis {
+                display: inline-block;
+                margin: 0 auto;
+                width: 78%;
+                position: relative;
+                float: left;
+                text-align: center;
+                font-size: 14px;
+                line-height: 35px;
+                .single {
+                    display: inline-block;
+                    //line-height: 42px;
+                    padding: 0;
+                    width: 55px;
+                    //background-color: yellow;
+                    span {
+                        font-size: 12px;
+                        font-weight: 700;
+                    }
+                    &.total {
+                    }
+                    &.payable-words {
+                        width: 50px;
+                    }
+                    &.new {
+                        width: 40px;
+                    }
+                    &.repetition {
+                        width: 65px;
+                    }
+                    &.internal-matches {
+                        width: 55px;
+                    }
+                    &.p-50-74 {
+                    }
+                    &.p-75-84 {
+                    }
+                    &.p-85-94 {
+                    }
+                    &.p-95-99 {
+                    }
+                    &.tm-100 {
+                        width: 35px;
+                    }
+                    &.tm-public {
+                        width: 45px;
+                    }
+                    &.tm-context {
+                        width: 45px;
+                    }
+                    &.machine-translation {
+                        position: relative;
+                        width: 70px;
+                    }
+                }
+            }
+        }
+
+    }
+
+
+    .chunks-title-table {
+        box-shadow: none !important;
+        padding-bottom: 0px !important;
+        .single-analysis {
+            .single {
+                line-height: 25px;
+                border-bottom: 1px solid gray;
+                -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+                -moz-box-sizing: border-box;    /* Firefox, Gecko */
+                box-sizing: border-box;         /* Opera/IE 8+ */
+            }
+        }
+    }
+
+    .chunks-pay-table {
+        box-shadow: none !important;
+        padding-top: 0px !important;
+        padding-bottom: 3px !important;
+    }
+
+    .chunk, .chunk-detail {
+        transition: 0.3s ease;
+        background-color: #ffffff;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        text-align: center;
+    }
+
+    .chunk {
+        z-index: 2;
+        .job-id {
+            display: inline-block;
+            min-width: 65px;
+            color: #969696;
+            font-size: 13px;
+            position: relative;
+            line-height: 28px;
+            top: 1px;
+            text-align: left;
+
+        }
+        .file-details {
+            display: inline-block;
+            text-decoration: underline;
+            min-width: 85px;
+            line-height: 30px;
+            font-weight: 700;
+            position: relative;
+            top: 1px;
+            &:hover {
+                text-decoration: none;
+            }
+        }
+        .payable-words {
+            background-color: #cef8ce;
+        }
+    }
+
+    .chunk-detail {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+        background-color: #e4e6e8;
+        z-index: 0;
+        .left-box {
+            padding-top: 8px;
+            .file-title-details {
+                display: inline-block;
+            }
+        }
     }
 }
 
@@ -595,6 +669,7 @@ body.analyze{
         margin-right: auto !important;
         transition: 0.3s ease;
     }
+
 }
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
@@ -606,26 +681,20 @@ body.analyze{
     }
     .project-list {
         padding-top: 50px;
-        .job-to-translator {
-            margin-right: 5px;
-            margin-left: 15px;
-            min-width: 0px;
-            max-width: 210px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+
     }
+
 }
 
 @media only screen and (max-width: 767px) {
     .ui.container {
         margin-left: 1em !important;
         margin-right: 1em !important;
-        min-width: 961px;
+        min-width: 991px;
         transition: 0.3s ease;
     }
     .project-list {
         padding-top: 50px;
+
     }
 }
