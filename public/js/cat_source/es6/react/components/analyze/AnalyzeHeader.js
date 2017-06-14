@@ -37,10 +37,7 @@ class AnalyzeHeader extends React.Component {
                                 <div className="progress-bar">
                                     <div className="progr">
                                         <div className="meter">
-                                            <a className="warning-bar translate-tooltip"  data-html="Rejected 0%" style="width: 0%;"/>
-                                            <a className="approved-bar translate-tooltip"  data-html="Approved 100%" style="width: 60%;"/>
-                                            <a className="translated-bar translate-tooltip" data-html="Translated 0%" style="width: 0%;"/>
-                                            <a className="draft-bar translate-tooltip" data-html="Draft 0%" style="width: 0%;"/>
+                                            <a className="approved-bar translate-tooltip"  data-html="Approved 100%" style={{width: "60%"}}/>
                                         </div>
                                     </div>
                                 </div>

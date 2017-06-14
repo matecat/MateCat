@@ -254,6 +254,14 @@ body.analyze{
 }
 
 .analysis {
+    .job-table-header {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        .chunk-analyze-container {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    }
     .chunks-title-table, .chunks-pay-table, .chunk, .chunk-detail {
         .left-box {
             height: 1%;
@@ -274,6 +282,8 @@ body.analyze{
             .single {
                 display: inline-block;
                 width: 60px;
+                margin-left: 2px;
+                margin-right: 2px;
                 //background-color: pink;
                 span {
                     font-size: 13px;

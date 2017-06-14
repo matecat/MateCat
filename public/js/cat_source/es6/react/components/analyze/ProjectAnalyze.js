@@ -1,5 +1,6 @@
 
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
+let JobAnalyze = require('./JobAnalyze').default;
 
 class ProjectAnalyze extends React.Component {
 
@@ -23,7 +24,10 @@ class ProjectAnalyze extends React.Component {
     }
 
     render() {
-        return <div ></div>;
+        return <div className="jobs sixteen wide column">
+            <JobAnalyze/>
+            <JobAnalyze/>
+        </div>;
 
 
     }
