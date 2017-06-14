@@ -49,21 +49,26 @@
                 langsPairs: [
                     {l1: "en-GB",  l2: "it-IT"},
                 ]
-            },
-            {
-                id: 3,
-                name: "Guess Tags",
-                date: "2016-02",
-                text: "Introduzione Guess Tags</br> 6 Maggio 2016",
-                langsPairs: [
-                    {l1: "en-GB",  l2: "es-ES"},
-                    {l1: "en-GB",  l2: "de-DE"}
-                ]
             }
+            // ,
+            // {
+            //     id: 3,
+            //     name: "Guess Tags",
+            //     date: "2016-02",
+            //     text: "Introduzione Guess Tags</br> 6 Maggio 2016",
+            //     langsPairs: [
+            //         {l1: "en-GB",  l2: "es-ES"},
+            //         {l1: "en-GB",  l2: "de-DE"}
+            //     ]
+            // }
         ],
 
         init: function () {
-            this.tableGenerate();
+            var data = {
+                langStats:  langStats
+            };
+            this.tableGenerate(data);
+
             this.initFilters();
             this.initTable();
             this.initGraph();
@@ -80,7 +85,7 @@
             $("#tablePEE").trigger('update');
         },
         initFilters: function () {
-            $('#source-lang, #target-lang, #fuzzy-select').dropdown({
+            $('#source-lang, #target-lang, #fuzzy-select, #date-select').dropdown({
                 selectOnKeydown: false,
                 fullTextSearch: 'exact'
             });
@@ -89,18 +94,18 @@
 
             $.fn.form.settings.rules.evaluateInterval = function(value) {
                 var d1 = new Date(value);
-                var endDate = $('.ui.form').form('get values', ['end_date']);
+                var endDate = $('.filter-chart-container .ui.form').form('get values', ['end_date']);
                 var d2 = new Date(endDate.end_date);
                 return d1.getTime() < d2.getTime();
             };
             $.fn.form.settings.rules.evaluateInterval2 = function(value) {
-                var startDate = $('.ui.form').form('get values', ['start_date']);
+                var startDate = $('.filter-chart-container .ui.form').form('get values', ['start_date']);
                 var d1 = new Date(startDate.start_date);
                 var d2 = new Date(value);
                 return d1.getTime() < d2.getTime();
             };
 
-            $('.ui.form')
+            $('.filter-chart-container .ui.form')
                 .form({
                     fields: {
                         source: {
@@ -144,9 +149,17 @@
             ;
 
             $('#create-button').on('click', PEE.createGraph);
+
+            $( '#date-select' ).on( 'change', function(){
+                var value  = $(this).dropdown('get value')[0];
+                PEE.requestDataTable(value).done(function (data) {
+                    PEE.tableGenerate(data)
+                });
+            } );
+
         },
         createGraph: function () {
-            var $form = $('.ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
+            var $form = $('.filter-chart-container .ui.form'), fields = $form.form('get values', ['source_lang', 'target_lang', 'fuzzy_band',
                 'start_date', 'end_date']);
             $form.form('validate form');
             if (!$form.hasClass('error')) {
@@ -177,6 +190,16 @@
                 data: data,
                 type: "POST",
                 url : "/api/app/utils/pee/graph"
+            });
+        },
+        requestDataTable: function (data) {
+            var data = {
+                date: data,
+            };
+            return $.ajax({
+                data: data,
+                type: "POST",
+                url : "/api/app/utils/pee/table"
             });
         },
         createDataForGraph: function (data) {
@@ -459,8 +482,8 @@
                 });
 
         },
-        tableGenerate : function () {
-            var data = langStats;
+        tableGenerate : function (data) {
+            var data = data.langStats;
             var i = 0;
             var html = '';
             $.each(data, function (i,elem) {
@@ -497,7 +520,8 @@
                     '</td></tr>';
 
             });
-            $('#tablePEE tbody').append(html);
+            $('#tablePEE tbody').html(html);
+            $(".tablesorter").trigger("update");
 
         },
         checkQueryStringFilter: function () {
@@ -592,8 +616,5 @@
 
     $(document).ready(function (el) {
         PEE.init();
-        $( 'div.selectContainer form select' ).on( 'change', function(){
-            $( '#filterDateForm' ).submit();
-        } );
     });
 })($);

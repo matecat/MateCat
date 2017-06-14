@@ -658,6 +658,7 @@ blockquote {
     position: relative;
     width: 80%;
     float: right;
+    padding-left: 20px;
 }
 .pee .progress {
     background: url(https://www.matecat.com/public/img/progressbar.gif);
@@ -674,6 +675,8 @@ blockquote {
 
 .pee-page .tablestats.revision td, .tablestats.revision th {
     padding: 15px 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 .pee-page .tablesorter-filter-row input {
     width: 100%;
@@ -696,10 +699,15 @@ blockquote {
 }
 
 .pee-page div.selectContainer {
-    width: 6%;
-    float: left;
-    margin: 30px 80px;
+    width: 92%;
+    margin: 0 auto;
 }
+
+.pee-page div.selectContainer .dropdown {
+    width: 200px !important;
+}
+
+
 
 .pee-page .notfound {
     width: 100%;

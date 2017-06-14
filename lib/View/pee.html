@@ -102,6 +102,7 @@
                             <select class="ui fluid search dropdown" multiple="" id="fuzzy-select" name="fuzzy_band">
                                 <option value="MT" >MT</option>
                                 <option value="100%_PUBLIC" >100%_PUBLIC</option>
+                                <option value="100%">100%</option>
                                 <option value="95%-99%" >95%-99%</option>
                                 <option value="85%-94%" >85%-94%</option>
                                 <option value="75%-84%" >75%-84%</option>
@@ -117,13 +118,13 @@
                         <div class="field">
                             <label>From</label>
                             <select class="ui search dropdown" id="from-date" name="start_date">
-                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
                             </select>
                         </div>
                         <div class="field">
                             <label>To</label>
                             <select class="ui search dropdown" id="to-date" name="end_date">
-                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
+                                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
                             </select>
                         </div>
                     </div>
@@ -147,12 +148,17 @@
         </div>
     </div>
     <div class="selectContainer">
-        <form id="filterDateForm" action="/utils/pee" method="post" >
-            <select name="date" id="date" >
-                <option value="${lastMonth}" >Last month</option>
-                <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date; selected date/selected" />
-            </select>
-        </form>
+        <div class="ui equal width form">
+            <div class="fields">
+                <div class="field">
+                    <label>Select Month</label>
+                    <select name="date" id="date-select" class="ui fluid search dropdown">
+                        <option value="${lastMonth}" selected="selected">Last month</option>
+                        <option tal:repeat="date snapshots" tal:content="date/date_format" tal:attributes="value date/date;" />
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
     <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter"

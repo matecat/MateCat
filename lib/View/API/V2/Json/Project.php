@@ -54,7 +54,7 @@ class Project {
                  * @var $jobJSON Job
                  */
                 $jobJSONs[]    = $jobJSON->renderItem( $job );
-                $jobStatuses[] = $job->status;
+                $jobStatuses[] = $job->status_owner;
             }
 
         }

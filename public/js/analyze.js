@@ -103,13 +103,17 @@ UI = {
 
         this.setFocusEvent();
 
-		this.pollData();
+        this.pollData().done(function (d) {
+            if( d.data.summary.STATUS == 'DONE' || d.data.summary.STATUS == 'NOT_TO_ANALYZE'){
+                UI.getProjectInfo()
+            }
+        });
 
         this.checkQueryParams();
 
         this.setTeamHeader();
 
-        this.getProjectInfo();
+        // this.getProjectInfo();
 	},
 
 	getProjectInfo: function () {
@@ -424,7 +428,7 @@ UI = {
 			};
 		}
 
-		APP.doRequest({
+		return APP.doRequest({
 			data: data,
 			success: function ( d ) {
 				if ( d.data) {
@@ -772,7 +776,11 @@ UI = {
                         }
 
                         setTimeout( function () {
-                            UI.pollData();
+                            UI.pollData().done(function (d) {
+                                if( d.data.summary.STATUS == 'DONE' || d.data.summary.STATUS == 'NOT_TO_ANALYZE'){
+                                    UI.getProjectInfo()
+                                }
+                            });
                         }, UI.pollingTime );
 
                     }
