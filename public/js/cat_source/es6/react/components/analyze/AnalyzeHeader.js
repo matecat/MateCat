@@ -25,14 +25,14 @@ class AnalyzeHeader extends React.Component {
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
-                            <div className="project-id" title="Project id">(58)</div>
-                            <div className="project-name" title="Project name">MATECAT_PROJ[...]01706081253</div>
+                            <div className="project-id" title="Project id">(58) </div>
+                            <div className="project-name" title="Project name"> MATECAT_PROJ[...]01706081253</div>
                         </div>
                         <div className="project-create">Created on Fri, March 03 2017</div>
                         <div className="analysis-create">
                             <div className="search-tm-matches">
-                                <h5>Searching for TM Matches</h5>
-                                <div className="initial-segments">(71 of </div>
+                                <h5>Searching for TM Matches </h5>
+                                <div className="initial-segments"> (71 of </div>
                                 <div className="total-segments">2393)</div>
                                 <div className="progress-bar">
                                     <div className="progr">
