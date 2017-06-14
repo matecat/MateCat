@@ -57,3 +57,6 @@ window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
 
+window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
+
+

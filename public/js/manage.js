@@ -6,8 +6,6 @@ UI = {
         this.Search.filter = {};
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
         this.openJobSettings = this.openJobSettings.bind(this);
-        this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
-        this.changeJobPassword = this.changeJobPassword.bind(this);
         this.changeTeam = this.changeTeam.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
@@ -62,14 +60,14 @@ UI = {
             $(this).data("prevType", e.type);
         });
 
-        this.getAllTeams().done(function (data) {
+        API.TEAM.getAllTeams().done(function (data) {
             self.teams = data.teams;
             TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
                 self.checkPopupInfoTeams();
-                self.getProjects(self.selectedTeam).done(function(response){
+                API.PROJECTS.getProjects(self.selectedTeam).done(function(response){
                     self.renderProjects(response.data);
                 });
             });
@@ -80,7 +78,7 @@ UI = {
     reloadProjects: function () {
         var self = this;
         if ( UI.Search.currentPage === 1) {
-            this.getProjects(self.selectedTeam).done(function (response) {
+            API.PROJECTS.getProjects(self.selectedTeam).done(function (response) {
                 var projects = response.data;
                 ManageActions.updateProjects(projects);
             });
@@ -93,7 +91,7 @@ UI = {
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(self.selectedTeam, i));
+                requests.push(API.PROJECTS.getProjects(self.selectedTeam, i));
             }
             $.when.apply(this, requests).done(function() {
                 var results = requests.length > 1 ? arguments : [arguments];
@@ -103,7 +101,7 @@ UI = {
                 ManageActions.updateProjects(total_projects);
             });
         }
-        this.getAllTeams(true).done(function (data) {
+        API.TEAM.getAllTeams(true).done(function (data) {
             self.teams = data.teams;
             ManageActions.updateTeams(self.teams);
         });
@@ -115,8 +113,8 @@ UI = {
         if ( !this.ProjectsContainer ) {
             var mountPoint = $("#manage-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                getLastActivity: this.getLastProjectActivityLogAction,
-                changeJobPasswordFn: this.changeJobPassword,
+                getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
+                changeJobPasswordFn: API.JOB.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation
             }), mountPoint);
         }
@@ -126,7 +124,7 @@ UI = {
 
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.getProjects(this.selectedTeam).done(function (response) {
+        API.PROJECTS.getProjects(this.selectedTeam).done(function (response) {
             var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -163,54 +161,7 @@ UI = {
         }, 2000);
     },
 
-    /**
-     *
-     * @param type Job or Project: obj, prj
-     * @param object
-     * @param status
-     * @param only_if
-     */
-     changeJobsOrProjectStatus: function(type,object,status,only_if) {
-        // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
 
-        if(typeof only_if == 'undefined') only_if = 0;
-
-        var id = object.id;
-        var password = object.password;
-
-        var data = {
-            action:		"changeJobsStatus",
-            new_status: status,
-            res: 		type,            //Project or Job:
-            id:			id,             // Job or Project Id
-            password:   password,          // Job or Project Password
-            page:		UI.Search.currentPage,        //The pagination ??
-            only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
-            undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
-        };
-
-        // Filters
-        data = $.extend(data,UI.Search.filter);
-
-        return APP.doRequest({
-            data: data,
-            success: function(d){},
-            error: function(d){}
-        });
-    },
-
-    getAllTeams: function (force) {
-        if ( APP.USER.STORE.teams && !force) {
-            var data = {
-                teams: APP.USER.STORE.teams
-            };
-            var deferred = $.Deferred().resolve(data);
-            return deferred.promise();
-        } else {
-            return APP.USER.loadUserData();
-        }
-
-    },
 
     changeTeam: function (team) {
 
@@ -221,14 +172,14 @@ UI = {
         UI.Search.currentPage = 1;
         APP.setTeamInStorage(team.id);
         return this.getTeamStructure(team).then(function () {
-                return self.getProjects(self.selectedTeam);
+                return API.PROJECTS.getProjects(self.selectedTeam);
             }
         );
     },
 
     getTeamStructure: function (team) {
         var self = this;
-        return this.getTeamMembers(team.id).then(function (data) {
+        return API.TEAM.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
         });
@@ -257,7 +208,7 @@ UI = {
         if (!_.isEmpty(this.Search.filter)) {
             UI.Search.currentPage = 1;
         }
-        return this.getProjects(this.selectedTeam);
+        return API.PROJECTS.getProjects(this.selectedTeam);
     },
 
     scrollDebounceFn: function() {
@@ -302,75 +253,6 @@ UI = {
             return team.type == 'personal';
         });
         ManageActions.changeTeam(personalTeam);
-    },
-
-    //********** REQUESTS *********************//
-
-    /**
-     * Retrieve Projects. Passing filters is possible to retrieve projects
-     */
-    getProjects: function(team, page) {
-        var pageNumber = (page) ? page : UI.Search.currentPage;
-        var data = {};
-        // if (team.type == 'personal') {
-        //     this.Search.filter.id_assignee = APP.USER.STORE.user.uid;
-        //     data = {
-        //         action: 'getProjects',
-        //         page:	pageNumber,
-        //         filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        //     };
-        // } else {
-            data = {
-                action: 'getProjects',
-                id_team: team.id,
-                page:	pageNumber,
-                filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-            };
-        // }
-
-        // Filters
-        data = $.extend(data,UI.Search.filter);
-
-        return APP.doRequest({
-            data: data,
-            success: function(d){
-
-                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401   ) { //Not Logged or not in the team
-                    window.location.reload();
-                } else if( typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 404){
-                    UI.selectPersonalTeam();
-                    // UI.reloadProjects();
-                } else if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/';
-                }
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
-    },
-
-    createTeam: function (teamName, members) {
-        var data = {
-            type: 'general',
-            name: teamName,
-            members: members
-        };
-        return $.ajax({
-            async: true,
-            data: data,
-            type: "POST",
-            url : "/api/v2/teams"
-        });
-
-    },
-
-    getTeamMembers: function (teamId) {
-        return $.ajax({
-            async: true,
-            type: "get",
-            url : "/api/v2/teams/" + teamId + "/members"
-        });
     },
 
     downloadTranslation: function(project, job, urlWarnings) {
@@ -419,106 +301,6 @@ UI = {
 
     },
 
-
-
-    getLastProjectActivityLogAction: function (id, pass) {
-        return $.ajax({
-            async: true,
-            type: "get",
-            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
-        });
-    },
-
-    changeProjectName: function (idOrg, idProject, newName) {
-        var data = {
-            name: newName
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
-        });
-    },
-
-    changeProjectAssignee: function (idOrg, idProject, newUserId) {
-        //Pass null to unassign a Project
-        var idAssignee = (newUserId == '-1') ? null : newUserId;
-        var data = {
-            id_assignee: idAssignee
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "put",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
-        });
-    },
-
-    /**
-     * Change the password for the job
-     * @param job
-     * @param undo
-     * @param old_pass
-     */
-    changeJobPassword: function(job, undo, old_pass) {
-        var id = job.id;
-        var password = job.password;
-
-        return APP.doRequest({
-            data: {
-                action:		    "changePassword",
-                res: 		    'obj',
-                id: 		    id,
-                password: 	    password,
-                old_password: 	old_pass,
-                undo:           undo
-            },
-            success: function(d){}
-        });
-    },
-
-    addUserToTeam: function (team, userEmail) {
-        var email = (typeof userEmail === "string") ? [userEmail] : userEmail;
-        var data = {
-            members: email
-        };
-        return $.ajax({
-            data: data,
-            type: "post",
-            url : "/api/v2/teams/"+ team.id +"/members",
-        });
-    },
-
-    removeUserFromTeam: function (team, userId) {
-        return $.ajax({id_team: team.id,
-            type: "delete",
-            url : "/api/v2/teams/"+ team.id +"/members/" + userId,
-        });
-    },
-
-    changeTeamName: function (team, newName) {
-        var data = {
-            name: newName
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + team.id,
-        });
-    },
-
-    changeProjectTeam: function (newTeamId, project) {
-        var data = {
-            id_team: newTeamId
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + project.id_team + "/projects/" + project.id
-        });
-    },
-
-    //*******************************//
-
     //********* Modals **************//
 
     openCreateTeamModal: function () {
@@ -565,46 +347,13 @@ UI = {
         var style = {width: '670px',maxWidth: '670px'};
         APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
     },
-
-    /****** Analyze *******/
-    checkSplitRequest: function (job, project, numsplit, arrayValues) {
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "check",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id,
-                job_pass: job.password,
-                num_split: numsplit,
-                split_values: arrayValues
-            },
-            success: function(d) {}
-        });
-    },
-
-    confirmSplitRequest: function(job, project, numsplit, arrayValues) {
-
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "apply",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id,
-                job_pass: job.password,
-                num_split: numsplit,
-                split_values: arrayValues
-            }
-        });
-    },
     openMergeModal: function (project, job) {
         var props = {
             text: 'This will cause the merging of all chunks in only one job. ' +
             'This operation cannot be canceled.',
             successText: "Continue",
             successCallback: function () {
-                UI.confirmMerge(project, job);
+                API.JOB.confirmMerge(project, job);
                 UI.reloadProjects();
                 APP.ModalWindow.onCloseModal();
             },
@@ -616,20 +365,6 @@ UI = {
         };
         APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
     },
-    confirmMerge: function(project, job) {
-
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "merge",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id
-            }
-
-        });
-    }
-    /**********************/
 };
 
 

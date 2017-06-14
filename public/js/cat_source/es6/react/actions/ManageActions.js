@@ -71,7 +71,7 @@ let ManageActions = {
     },
 
     updateStatusProject: function (project, status) {
-        UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(function () {
+        API.PROJECTS.changeJobsOrProjectStatus('prj', project.toJS(), status).done(function () {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.HIDE_PROJECT,
                 project: project
@@ -86,7 +86,7 @@ let ManageActions = {
     },
 
     changeJobStatus: function (project, job, status) {
-        UI.changeJobsOrProjectStatus('job', job.toJS(), status).done(
+        API.PROJECTS.changeJobsOrProjectStatus('job', job.toJS(), status).done(
             function () {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.REMOVE_JOB,
@@ -155,7 +155,7 @@ let ManageActions = {
         } else {
             uid = user.get("uid")
         }
-        UI.changeProjectAssignee(team.get("id"), project.get("id"), uid).done(
+        API.PROJECTS.changeProjectAssignee(team.get("id"), project.get("id"), uid).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
@@ -187,7 +187,7 @@ let ManageActions = {
                     };
                     let boxUndo = APP.addNotification(notification);
                 }
-                UI.getTeamMembers(team.get("id")).done(function (data) {
+                API.TEAM.getTeamMembers(team.get("id")).done(function (data) {
                     team = team.set('members', data.members);
                     team = team.set('pending_invitations', data.pending_invitations);
                     AppDispatcher.dispatch({
@@ -206,7 +206,7 @@ let ManageActions = {
     },
 
     changeProjectName: function (team, project, newName) {
-        UI.changeProjectName(team.get("id"), project.get("id"), newName).done(
+        API.PROJECTS.changeProjectName(team.get("id"), project.get("id"), newName).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_NAME,
@@ -219,14 +219,14 @@ let ManageActions = {
     },
 
     changeProjectTeam: function (teamId, project) {
-        UI.changeProjectTeam(teamId, project.toJS()).done(function () {
+        API.PROJECTS.changeProjectTeam(teamId, project.toJS()).done(function () {
             var team =  TeamsStore.teams.find(function (team) {
                 return team.get('id') == teamId
             });
             team = team.toJS();
             if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
 
-                UI.getTeamMembers(teamId).then(function (data) {
+                API.TEAM.getTeamMembers(teamId).then(function (data) {
                     team.members = data.members;
                     team.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
@@ -263,7 +263,7 @@ let ManageActions = {
                     timer: 3000
                 };
                 let boxUndo = APP.addNotification(notification);
-                UI.getTeamMembers(UI.selectedTeam.id).then(function (data) {
+                API.TEAM.getTeamMembers(UI.selectedTeam.id).then(function (data) {
                     UI.selectedTeam.members = data.members;
                     UI.selectedTeam.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
@@ -326,7 +326,7 @@ let ManageActions = {
     },
 
     openModifyTeamModal: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
+        API.TEAM.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -338,7 +338,7 @@ let ManageActions = {
     },
 
     openAddTeamMemberModal: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
+        API.TEAM.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -360,7 +360,7 @@ let ManageActions = {
     createTeam: function (teamName, members) {
         let team;
         let self = this;
-        UI.createTeam(teamName, members).then(function (response) {
+        API.TEAM.createTeam(teamName, members).then(function (response) {
             UI.teams.push(response.team);
             team = response.team;
             AppDispatcher.dispatch({
@@ -390,7 +390,7 @@ let ManageActions = {
     },
 
     updateTeam: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
+        API.TEAM.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -408,7 +408,7 @@ let ManageActions = {
     },
 
     getAllTeams: function () {
-        UI.getAllTeams(true).done(function (data) {
+        API.TEAM.getAllTeams(true).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: TeamConstants.RENDER_TEAMS,
                 teams: data.teams,
@@ -449,7 +449,7 @@ let ManageActions = {
     },
 
     addUserToTeam: function (team, userEmail) {
-        UI.addUserToTeam(team.toJS(), userEmail).done(function (data) {
+        API.TEAM.addUserToTeam(team.toJS(), userEmail).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_TEAM_MEMBERS,
                 team: team,
@@ -462,10 +462,10 @@ let ManageActions = {
     removeUserFromTeam: function (team, user) {
         var self = this;
         var userId = user.get('uid');
-        UI.removeUserFromTeam(team.toJS(), userId).done(function (data) {
+        API.TEAM.removeUserFromTeam(team.toJS(), userId).done(function (data) {
             if (userId === APP.USER.STORE.user.uid ) {
                 if ( UI.selectedTeam.id === team.get('id')) {
-                    UI.getAllTeams(true).done(function (data) {
+                    API.TEAM.getAllTeams(true).done(function (data) {
                         AppDispatcher.dispatch({
                             actionType: TeamConstants.RENDER_TEAMS,
                             teams: data.teams,
@@ -497,7 +497,7 @@ let ManageActions = {
     },
 
     changeTeamName: function(team, newName) {
-        UI.changeTeamName(team, newName).done(function (data) {
+        API.TEAM.changeTeamName(team, newName).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_TEAM_NAME,
                 oldTeam: team,

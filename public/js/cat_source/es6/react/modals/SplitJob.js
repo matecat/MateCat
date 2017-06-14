@@ -81,7 +81,7 @@ class SplitJobModal extends React.Component {
         this.setState({
             showLoader: true
         });
-        UI.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
+        API.JOB.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
             .done(function (d) {
                 let arrayChunks = [];
                 if (d.data && d.data.chunks) {
@@ -126,7 +126,7 @@ class SplitJobModal extends React.Component {
             return item > 0;
         });
 
-        UI.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), array.length, array)
+        API.JOB.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), array.length, array)
             .done(function (d) {
                 if (d.data && d.data.chunks) {
                     UI.reloadProjects();

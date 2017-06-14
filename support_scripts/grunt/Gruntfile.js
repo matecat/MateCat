@@ -328,7 +328,8 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'manage.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
             },
@@ -336,7 +337,8 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'analyze.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze.js'
             },
@@ -344,7 +346,8 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'analyze_new.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze_new.js'
             },
@@ -354,7 +357,8 @@ module.exports = function(grunt) {
                     basePath + 'gdrive.picker.js',
                     basePath + 'upload.js',
                     basePath + 'new-project.js',
-                    basePath + 'tm.js'
+                    basePath + 'tm.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'upload.js'
             }
