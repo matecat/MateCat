@@ -30,7 +30,10 @@ class SplitJobModal extends React.Component {
 
     calculateSplitComputation(numSplit) {
         let numWords, array = [];
-        let total = Math.round(this.props.job.get('stats').get('TODO_FORMATTED'));
+        let total = Math.round(this.props.job.get('stats').get('TODO'));
+        if (total === 0 ) {
+            total = Math.round(this.props.job.get('stats').get('TOTAL'));
+        }
         let wordsXjob = Math.floor(total / numSplit);
         let diff = total - (wordsXjob * numSplit);
         for (let i = 0; i < numSplit; i++) {
@@ -42,10 +45,6 @@ class SplitJobModal extends React.Component {
             array.push(numWords);
         }
         return array;
-    }
-
-    changeWordsCount() {
-
     }
 
     changeInputWordsCount(indexChanged , e) {
@@ -62,7 +61,12 @@ class SplitJobModal extends React.Component {
     checkSplitComputation() {
 
         let sum = this.state.wordsArray.reduce((a, b) => a + b, 0);
-        let diff = sum - Math.round(this.props.job.get('stats').get('TODO_FORMATTED'));
+        let diff = 0;
+        if ( Math.round(this.props.job.get('stats').get('TODO')) !== 0) {
+            diff = sum - Math.round(this.props.job.get('stats').get('TODO'));
+        } else {
+            diff = sum - Math.round(this.props.job.get('stats').get('TOTAL'));
+        }
         if ( diff != 0 ) {
             return {
                 difference: diff,
@@ -155,7 +159,7 @@ class SplitJobModal extends React.Component {
 
                                 <span className="correct none">Words:</span>
                             </p>
-                                <input type="text" className={"input-small " + emptyClass} value={value} onBlur={this.changeWordsCount.bind(this)}
+                                <input type="text" className={"input-small " + emptyClass} value={value}
                                 onChange={this.changeInputWordsCount.bind(this, i)}/>
                             </div>
                         </div>
@@ -171,10 +175,10 @@ class SplitJobModal extends React.Component {
         let showSplitDiffError =  !!(checkSplit);
         let errorLabel =  (checkSplit && checkSplit.difference < 0) ? 'Words remaining' : 'Words exceeding';
         let errorSplitDisableClass = (checkSplit) ? "disabled" : "";
-
+        let totalWords = (this.props.job.get('stats').get('TODO') > 0 ) ? this.props.job.get('stats').get('TODO_FORMATTED') : this.props.job.get('stats').get('TOTAL_FORMATTED')
 
         return <div className="modal popup-split">
-            <div className="popup">
+            <div className="popup" id="split-modal-cont">
                 <div className="splitbtn-cont">
                     <h3><span className="popup-split-job-id">({this.props.job.get('id')}) </span>
                         <span className="popup-split-job-title">{this.props.job.get('sourceTxt') + " > " + this.props.job.get('targetTxt')}</span>
@@ -239,7 +243,7 @@ class SplitJobModal extends React.Component {
                         {splitParts}
                     </ul>
                     <div className="total">
-                        <p className="wordsum">Total words: <span className="total-w">{this.props.job.get('stats').get('TODO_FORMATTED')}</span></p>
+                        <p className="wordsum">Total words: <span className="total-w">{totalWords}</span></p>
                         {showSplitDiffError ? (<p className="error-count current">Current count: <span className="curr-w">{APP.addCommas(checkSplit.sum)}</span></p>)
                             : ('')}
 

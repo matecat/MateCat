@@ -31,7 +31,7 @@ if ( true )
                 var LXQContainer = $('.options-box.qa-box');
                 var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
                 if (acceptedLanguagesLXQ.indexOf(config.source_rfc) === -1 ) {
-                    notAcceptedLanguages.push($('#source-lang option:selected').text());
+                    notAcceptedLanguages.push($('#source-lang').dropdown('get text').text());
                 }
                 if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
                     notAcceptedLanguages.push(_.find(config.languages_array, function (e) {
@@ -66,7 +66,6 @@ if ( true )
                     tpContainer.find('.option-notsupported-languages').html(label);
                 }
                 tpContainer.addClass('option-unavailable');
-                UI.setLanguageTooltipTP();
             }
             //Check Speech To Text
             if (!('webkitSpeechRecognition' in window)) {

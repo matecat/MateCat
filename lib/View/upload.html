@@ -26,38 +26,25 @@
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
-    <!-- jQuery UI styles -->
 
     <link rel="stylesheet" href="${basepath}public/css/build/upload-build.css?build=${build_number}"/>
-    <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
     <tal:block  tal:repeat="css_url css_resources">
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.powertip.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
-
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.colorbox-min.js?build=${build_number}"></script>
-
-    <script type="text/javascript" src="${basepath}public/js/build/semantic.js?build=${build_number}"></script>
-
+    <script type="text/javascript" src="${basepath}public/js/build/libs_upload.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/gdrive.upload.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/gdrive.picker.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/upload.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/upload.js"></script>
     <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script type="text/javascript" >
         /*<![CDATA[*/
@@ -80,7 +67,10 @@
             },
             lexiqa_languages: ${lexiqa_languages| string:[]},
             tag_projection_languages: ${tag_projection_languages},
-            languages_array : ${languages_array}
+            languages_array : ${languages_array},
+            private_keys: ${user_keys_obj | string: []},
+            currentTargetLang: '${currentTargetLang | string: []}',
+            currentSourceLang: '${currentSourceLang | string: []}'
         };
         /*]]>*/
     </script>
@@ -102,27 +92,11 @@
         <div class="ui massive text loader">Reloading</div>
     </div>
 </div>
-<header class="upload-page-header" style="height: 45px; background-color: #4d4d4d;">
-    <!--<div class="wrapper">-->
-        <!--<a href="${basepath}" class="logo"></a>-->
-        <!--<ul class="pull-right" id="menu-site">-->
-            <!--<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>-->
-            <!--<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>-->
-            <!--<li><a href="https://www.matecat.com/support-plans/">Plans</a></li>-->
-            <!--<li><a href="https://www.matecat.com/about/">About</a></li>-->
-            <!--<li><a href="https://www.matecat.com/faq/">FAQ</a></li>-->
-            <!--<li><a href="https://www.matecat.com/support/">Support</a></li>-->
-            <!--<li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>-->
-        <!--</ul>-->
-    <!--</div>-->
-    <!--<div class="cl"></div>-->
-</header>
+<header class="upload-page-header" style="height: 45px; background-color: #4d4d4d;"></header>
 
 
 <div class="wrapper-claim">
-    <h1 tal:condition="true:conversion_enabled">Join the Evolution</h1>
-
-    <h1 tal:condition="not:conversion_enabled">Join the Evolution</h1>
+    <h1>Join the Evolution</h1>
 
     <h2 class="payoff">The CAT tool that works for you</h2>
 </div>
@@ -137,114 +111,130 @@
 
     <div class="translate-box source">
         <h2>From</h2>
-        <select name="source-lang" id="source-lang">
-            <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
-                <option class="custom" tal:condition="language/selected" selected="selected"  tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-                <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-            </tal:block>
-
-            <option class="separator" disabled="disabled">---</option>
-
-            <tal:block tal:repeat="language source_languages">
-                <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-            </tal:block>
-        </select>
+        <div class="ui fluid selection dropdown" id="source-lang">
+            <i class="dropdown icon"></i>
+            <span class="text">Select Source</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="sourceLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
+                        <div class="item custom" tal:condition="language/selected" data-selected="selected"  tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                    </tal:block>
+                    <div class="divider"></div>
+                    <tal:block tal:repeat="language source_languages">
+                        <div class="item" tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: language['code'] NE 'en-US'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
     </div>
 
     <a id="swaplang" title="Swap languages" href="#"><span>Swap languages</span></a>
 
     <div class="translate-box target">
         <h2>To</h2>
-        <select name="target-lang" id="target-lang">
-            <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
-                <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-                <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
-            </tal:block>
+        <div class="ui fluid selection dropdown" id="target-lang">
+            <i class="dropdown icon"></i>
+            <span class="text">Select Target</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="targetLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="header" id="add-multiple-lang">
+                    Multiple Languages
+                    <i class="icon-plus3 icon"></i>
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
+                        <div class="item custom" tal:condition="language/selected" dat-selected="true" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                    </tal:block>
 
-            <option class="separator" disabled="disabled">---</option>
+                    <div tal:condition="php: !empty( targetLangHistory )" class="divider"></div>
 
-            <tal:block tal:repeat="language target_languages">
-                <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-                <option tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
-                    ---
-                </option>
-            </tal:block>
-
-        </select>
-        <br/>
-         <a href="#" id="multiple-link">Multiple languages?</a>
+                    <tal:block tal:repeat="language target_languages">
+                        <div class="item" tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                        <div class="item" tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
+                            ---
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
+        <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
     </div>
 
-    <div class="translate-box subject">
-        <h2>Subject</h2>
-        <select name="subject" id="subject">
-            <option value="general">General</option>
-            <option disabled="disabled" value="----">----</option>
-            <option value="accounting_finance">Accounting &amp; Finance</option>
-            <option value="aerospace_defence">Aerospace / Defence</option>
-            <option value="architecture">Architecture</option>
-            <option value="art">Art</option>
-            <option value="automotive">Automotive</option>
-            <option value="certificates_diplomas_licences_cv_etc">Certificates, diplomas, licences, cv's, etc</option>
-            <option value="chemical">Chemical</option>
-            <option value="civil_engineering_construction">Civil Engineering / Construction</option>
-            <option value="corporate_social_responsibility">Corporate Social Responsibility</option>
-            <option value="cosmetics">Cosmetics</option>
-            <option value="culinary">Culinary</option>
-            <option value="electronics_electrical_engineering">Electronics /  Electrical Engineering</option>
-            <option value="energy_power_generation_oil_gas">Energy / Power generation / Oil &amp; Gas</option>
-            <option value="environment">Environment</option>
-            <option value="fashion">Fashion</option>
-            <option value="games_viseogames_casino">Games / Video Games / Casino</option>
-            <option value="general_business_commerce">General Business / Commerce</option>
-            <option value="history_archaeology">History / Archaeology</option>
-            <option value="information_technology">Information Technology</option>
-            <option value="insurance">Insurance</option>
-            <option value="internet_e-commerce">Internet, e-commerce</option>
-            <option value="legal_documents_contracts">Legal documents / Contracts</option>
-            <option value="literary_translations">Literary Translations</option>
-            <option value="marketing_advertising_material_public_relations">Marketing &amp; Advertising material / Public Relations</option>
-            <option value="matematics_and_physics">Mathematics and Physics</option>
-            <option value="mechanical_manufacturing">Mechanical / Manufacturing</option>
-            <option value="media_journalism_publishing">Media / Journalism / Publishing</option>
-            <option value="medical_pharmaceutical">Medical / Pharmaceutical</option>
-            <option value="music">Music</option>
-            <option value="private_correspondence_letters">Private Correspondence, Letters</option>
-            <option value="religion">Religion</option>
-            <option value="science">Science</option>
-            <option value="shipping_sailing_maritime">Shipping / Sailing / Maritime</option>
-            <option value="social_science">Social Science</option>
-            <option value="telecommunications">Telecommunications</option>
-            <option value="travel_tourism">Travel &amp; Tourism</option>
-        </select>
+    <div class="translate-box tmx-select">
+
+        <div class="tm-info-title">
+            <h2>TM and Glossary</h2>
+            <i class="icon-info icon" />
+        </div>
+
+
+        <div class="ui fluid multiple search selection dropdown" id="tmx-select">
+            <i class="dropdown icon"></i>
+            <span class="text">
+                <span class="item-key-name">MyMemory Collaborative TM</span>
+            </span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="UserName" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="header" id="add-tmx-option">
+                    Create resource
+                    <i class="icon-plus3 icon"></i>
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <div class="item multiple-tm" data-value="1">
+                        <span class="item-key-name"><span class="multiple-tm-num"></span> Private TMs</span>
+                    </div>
+                    <tal:block tal:repeat="key user_keys">
+                        <div class="item" tal:attributes="data-value key/key">
+                            <span tal:condition="not:key/name" class="item-key-name no-descr">No Description</span>
+                            <span tal:condition="key/name" class="item-key-name">${key/name}</span>
+                            <span class="item-key-id">${key/key}</span>
+                            <i class="icon-checkmark2 icon"></i>
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
 
     </div>
-
-    <!--<div class="translate-box organization" tal:condition="php: !empty(teams) && count(teams) > 1" >-->
-        <!--<h2>Organization</h2>-->
-        <!--<select name="organization" id="organization">-->
-            <!--<option tal:repeat="team teams"-->
-                    <!--tal:attributes="value team/id; selected php: repeat.team.index == 0 "-->
-                    <!--tal:content="team/name"></option>-->
-        <!--</select>-->
-    <!--</div>-->
-
 
     <div class="translate-box settings">
-        <a href="#" class="more-options"><span>Settings</span></a>
+        <div class="more-options-cont">
+            <a href="#" class="more-options"></a>
+            <span>Settings</span>
+        </div>
         <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
     </div>
 
@@ -253,9 +243,15 @@
 
     <div class="cl"></div>
 
-    <p class="warning-message"> Ops we got an error... </p>
+    <div class="warning-message">
+        <i class="icon-warning2 icon"> </i>
+        <p>Oops we got an error...</p>
+    </div>
 
-    <p class="error-message"> Ops we got an error... </p>
+    <div class="error-message">
+        <i class="icon-error_outline icon"> </i>
+        <p>Oops we got an error... </p>
+    </div>
 
     <div class="cl"></div>
 
@@ -793,34 +789,34 @@
 </script>
 
 <!-- The Templates plugin is included to render the upload/download listings -->
-<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>-->
 
 <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>-->
 
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>-->
 
 <!-- jQuery Image Gallery -->
-<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>-->
 
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>-->
 <!-- The basic File Upload plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>-->
 <!-- The File Upload file processing plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>-->
 <!-- The File Upload user interface plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>-->
 <!-- The File Upload jQuery UI plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>-->
 <!-- The localization script -->
-<script src="${basepath}public/js/lib/fileupload/locale.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/locale.js"></script>-->
 <!-- The main application script -->
-<script src="${basepath}public/js/lib/fileupload/main.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/main.js"></script>-->
 
-<script src="${basepath}public/js/new-project.js"></script>
-<script src="${basepath}public/js/tm.js"></script>
+<!--<script src="${basepath}public/js/new-project.js"></script>-->
+<!--<script src="${basepath}public/js/tm.js"></script>-->
 
 
 <div class="modal supported-formats" data-type="view">
@@ -973,19 +969,9 @@
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 <script type="text/javascript">
+
     var developerKey = '${developerKey}';
     var clientId = '${clientId}';
-
-    if( !localStorage.getItem( 'currentTargetLang' ) ) {
-        APP.changeTargetLang('${currentTargetLang}');
-    }
-
-    if( !localStorage.getItem( 'currentSourceLang' ) ) {
-        APP.changeSourceLang('${currentSourceLang}');
-    }
-
-    APP.displayCurrentTargetLang();
-    APP.displayCurrentSourceLang();
 
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>

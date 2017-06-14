@@ -1,49 +1,47 @@
 <?php
 
+use API\App\Json\PeeTableData;
+
 class peeViewController extends viewController {
 
     /**
      * Data field filled to display in the template
      * @var array
      */
-    protected $dataLangStats = array();
+    protected $dataLangStats = [];
+
+    /**
+     * @var array
+     */
+    protected $snapshots = [];
+
+    private $lang_handler;
 
     public function __construct() {
         parent::__construct();
         parent::makeTemplate( "pee.html" );
 
+        $this->lang_handler    = Langs_Languages::getInstance();
+
     }
 
     public function doAction() {
 
-        $languageStats = getLanguageStats();
-        include_once 'lib/Utils/Langs/Languages.php';
-        $instance= Langs_Languages::getInstance();
+        $languageStats = ( new LanguageStats_LanguageStatsDAO() )->getLanguageStats( null );
+        $this->snapshots = ( new LanguageStats_LanguageStatsDAO() )->getSnapshotDates();
 
-        if( !empty( $languageStats ) ){
-            $this->dataLangStats = array();
-        } else {
-            $this->dataLangStats[] = array(
-                    "source"       => null,
-                    "target"       => null,
-                    "pee"          => 0,
-                    "totalwordPEE" => null
-            );
-        }
-
-        foreach ( $languageStats as $k => $value ) {
-            $this->dataLangStats[] = array(
-                    "source"       => $instance->getLocalizedName($value[ 'source' ]),
-                    "target"       => $instance->getLocalizedName($value[ 'target' ]),
-                    "pee"          => $value[ 'total_post_editing_effort' ],
-                    "totalwordPEE" => number_format($value[ 'total_word_count' ],0,",","."),
-                    "payable_rate" => Analysis_PayableRates::pee2payable($value[ 'total_post_editing_effort' ])
-            );
-        }
+        $format = new PeeTableData( $languageStats );
+        $this->dataLangStats = $format->render()[ 'langStats' ];
 
     }
 
     public function setTemplateVars() {
         $this->template->dataLangStats = json_encode( $this->dataLangStats );
+
+        $this->template->languages_array = $this->lang_handler->getEnabledLanguages( 'en' )  ;
+        $this->template->languages_json = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+
+        $this->template->snapshots = $this->snapshots;
+        $this->template->lastMonth = end( $this->snapshots )[ 'date' ];
     }
 }

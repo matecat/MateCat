@@ -2,6 +2,7 @@
 
 namespace Features ;
 
+use Contribution\ContributionStruct;
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
 use FilesStorage ;
@@ -26,6 +27,30 @@ use Features\ReviewImproved\Model\QualityReportModel ;
 class ReviewImproved extends BaseFeature {
 
     private $feature_options ;
+
+
+    /**
+     * In ReviewImproved, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
+     * revision status changes.
+     *
+     * This param must be reset to default value `true` when contribution is evaluted, otherwise the
+     * TM won't receive UPDATE when a segment is updated.
+     *
+     * XXX: not sure this was the best way to solve this problem.
+     *
+     * @param ContributionStruct     $contributionStruct
+     * @param Projects_ProjectStruct $project
+     *
+     * @return ContributionStruct
+     */
+    public function filterContributionStructOnSetTranslation( ContributionStruct $contributionStruct, Projects_ProjectStruct $project ) {
+
+        if ( $contributionStruct->fromRevision ) {
+            $contributionStruct->propagationRequest = true ;
+        }
+
+        return $contributionStruct ;
+    }
 
     /**
      * filter_review_password

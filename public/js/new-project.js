@@ -46,7 +46,7 @@ APP.createTMKey = function () {
 };
 
 function closeMLPanel() {
-    $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
+    $( ".popup-languages.slide").removeClass('open').animate({right: '-1100px'}, 400);
     $(".popup-outer.lang-slide").hide();
     $('body').removeClass('side-popup');
 
@@ -83,11 +83,11 @@ APP.changeSourceLang = function( lang ) {
 };
 
 APP.displayCurrentTargetLang = function() {
-    $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
+    $( '#target-lang' ).dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
 };
 
 APP.displayCurrentSourceLang = function() {
-    $( '#source-lang' ).val( localStorage.getItem( 'currentSourceLang' ) );
+    $( '#source-lang' ).dropdown('set selected', localStorage.getItem( 'currentSourceLang' ));
 };
 
 /**
@@ -99,8 +99,8 @@ APP.checkForLexiQALangs = function(){
 	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
     var notAcceptedLanguages = [];
-	var targetLanguages = $( '#target-lang' ).val().split(',');
-	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetLanguages = $( '#target-lang' ).dropdown('get value').split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).dropdown('get value') ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
                             if (acceptedLanguages.indexOf(n) === -1) {
                                 var elem = $.grep(config.languages_array, function(e){ return e.code == n; });
@@ -110,7 +110,7 @@ APP.checkForLexiQALangs = function(){
 						}).length > 0;
 
     if (!sourceAccepted) {
-        notAcceptedLanguages.push($( '#source-lang option:selected' ).text());
+        notAcceptedLanguages.push($('#source-lang').dropdown('get text'));
     }
 
 	LXQCheck.find('.onoffswitch').off("click");
@@ -141,16 +141,16 @@ APP.checkForTagProjectionLangs = function(){
 
 	var acceptedLanguages = config.tag_projection_languages;
 	var tpCheck = $('.options-box.tagp');
-    var sourceLanguageCode = $( '#source-lang' ).val();
-    var sourceLanguageText = $( '#source-lang option:selected' ).text();
+    var sourceLanguageCode = $( '#source-lang' ).dropdown('get value');
+    var sourceLanguageText = $( '#source-lang' ).dropdown('get text');
     var languageCombinations = [];
     var notSupportedCouples = [];
 
-    $( '#target-lang' ).val().split(',').forEach(function (value) {
+    $( '#target-lang' ).dropdown('get value').split(',').forEach(function (value) {
         var elem = {};
         elem.targetCode = value;
         elem.sourceCode = sourceLanguageCode;
-        elem.targetName = $( '#target-lang option[value="' + value + '"]' ).text();
+        elem.targetName = $($( '#target-lang div[data-value="' + value + '"]' )[0]).text();
         elem.sourceName = sourceLanguageText;
         languageCombinations.push(elem);
     });
@@ -177,7 +177,6 @@ APP.checkForTagProjectionLangs = function(){
     if ( arrayIntersection.length == 0) {
 		tpCheck.addClass('option-unavailable');
 		$('.options-box #tagp_check').prop( "disabled", disableTP );
-		UI.setLanguageTooltipTP();
 	}
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
@@ -187,9 +186,10 @@ APP.getCreateProjectParams = function() {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
 		project_name				: $('#project-name').val(),
-		source_language				: $('#source-lang').val(),
-		target_language				: $('#target-lang').val(),
-		job_subject         		: $('#subject').val(),
+		source_language				: $('#source-lang').dropdown('get value'),
+		target_language				: $('#target-lang').dropdown('get value'),
+		// job_subject         		: $('#subject').val(),
+		job_subject         		: 'general',
 		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 		mt_engine					: $('.mgmt-mt .activemt').data("id"),
 		private_keys_list			: UI.extractTMdataFromTable(),
@@ -222,7 +222,7 @@ APP.checkForSpeechToText = function(){
 	var disableS2T = !config.defaults.speech2text;
 	var speech2textCheck = $('.s2t-box');
 	speech2textCheck.removeClass('option-unavailable');
-	speech2textCheck.find('.onoffswitch').off('click')
+	speech2textCheck.find('.onoffswitch').off('click');
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
 		$('.options-box #s2t_check').prop( "disabled", disableS2T );
@@ -240,21 +240,33 @@ APP.checkForSpeechToText = function(){
 };
 
 UI.UPLOAD_PAGE = {};
+
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
+        this.initDropdowns();
+        this.checkLanguagesCookie();
         /**
          * LexiQA language Enable/Disable
          */
         APP.checkForLexiQALangs();
+        /**
+         * Guess Tags language Enable/Disable
+         */
         APP.checkForTagProjectionLangs();
+        /**
+         * SpeechToText language Enable/Disable
+         */
         APP.checkForSpeechToText();
         this.render();
         this.addEvents();
+        $("#activetm").on("update", this.checkTmKeys);
+        $("#activetm").on("removeTm", this.disableTmKeysFromSelect);
+        $("#activetm").on("deleteTm", this.deleteTMFromSelect);
     },
 
     render: function () {
-        var headerMountPoint = $("header")[0];
 
+        var headerMountPoint = $("header")[0];
 
         if (config.isLoggedIn) {
             ReactDOM.render(React.createElement(Header, {
@@ -275,6 +287,140 @@ $.extend(UI.UPLOAD_PAGE, {
                 loggedUser: false,
                 showLinks: true
             }), headerMountPoint);
+        }
+    },
+
+    initDropdowns: function () {
+	    var self =  this;
+        $('#tmx-select').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            useLabels: false,
+            message: {
+                count         : '{count} Private TMs',
+                noResults     : 'No TMs found.'
+            },
+            onAdd: function(value, $selectedItem) {
+                self.selectTm(value);
+            },
+            onRemove: function (removedValue, removedText, $removedChoice) {
+                self.disableTm(removedValue);
+                setTimeout(self.checkMailDropDownValueSelected, 100);
+            }
+        });
+
+        $('#add-tmx-option').on('click', function () {
+            UI.openLanguageResourcesPanel('tm');
+        });
+
+        $('#target-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+        });
+
+        $('#source-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+        });
+
+
+        $('.tmx-select .tm-info-title .icon').popup({
+            html: "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
+            "and helping fellow MateCat users improve their translations.</br></br>" +
+            "For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>",
+            position: 'bottom center'
+        });
+    },
+
+    checkLanguagesCookie: function () {
+        if( !localStorage.getItem( 'currentTargetLang' ) || localStorage.getItem( 'currentTargetLang' ).indexOf(',') > -1) {
+            APP.changeTargetLang(config.currentSourceLang);
+        }
+
+        if( !localStorage.getItem( 'currentSourceLang' ) ) {
+            APP.changeSourceLang(config.currentTargetLang);
+        }
+
+        APP.displayCurrentTargetLang();
+        APP.displayCurrentSourceLang();
+    },
+
+    selectTm: function (value, span) {
+        var tmElem = $('.mgmt-table-tm #inactivetm tr.mine[data-key=' + value +'] .activate input');
+        if (tmElem.size() > 0) {
+            $(tmElem).trigger('click');
+        }
+        setTimeout(function () {
+            UI.UPLOAD_PAGE.setTMName();
+        });
+    },
+
+    disableTm: function (value, span) {
+        var tmElem = $('.mgmt-table-tm #activetm tr.mine[data-key=' + value +'] .activate input');
+        if (tmElem.size() > 0) {
+            $(tmElem).trigger('click');
+        }
+        setTimeout(function () {
+            UI.UPLOAD_PAGE.setTMName();
+        });
+    },
+
+    checkMailDropDownValueSelected: function () {
+        var values = $('#tmx-select').dropdown('get value');
+        if (values.length === 0) {
+            $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+        }
+    },
+
+    setTMName: function () {
+        if ($('#tmx-select').dropdown('get value').indexOf(',') === -1 && $('#tmx-select').dropdown('get value').length > 0) {
+            var html  = $('#tmx-select').find('div.item.active').html();
+            $('#tmx-select').dropdown('set text', html);
+        }
+    },
+
+    checkTmKeys: function (event, desc, key) {
+        var activeTm = $('#activetm .mine');
+        if (activeTm.size() ===  0) {
+            $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+            $('#tmx-select').dropdown('remove selected', key);
+        } else {
+            var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
+            if (existingKey.size() > 0) {
+                if (existingKey.hasClass('active')){
+                    return;
+                } else {
+                    $('#tmx-select').dropdown('set selected', key);
+                }
+            } else {
+                var html = '<div class="item"  data-value="' + key + '">' +
+                    '<span class="item-key-name">' +desc + '</span>' +
+                    '<span class="item-key-id">' + key + '</span>' +
+                    '<i class="icon-checkmark2 icon"></i>' +
+                    '</div>';
+                $('#tmx-select div.item').first().before(html);
+                setTimeout(function () {
+                    $('#tmx-select').dropdown('set selected', key);
+                });
+            }
+        }
+    },
+
+    disableTmKeysFromSelect: function (event, key) {
+        var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
+        if (existingKey.size() > 0) {
+            if (existingKey.hasClass('active')){
+                $('#tmx-select').dropdown('remove selected', key);
+            }
+        }
+    },
+
+    deleteTMFromSelect: function (event, key) {
+	    if ($('#tmx-select').find('div.item[data-value='+ key +']').size() > 0) {
+            $('#tmx-select').find('div.item[data-value='+ key +']').remove();
+            if ( $('#tmx-select').dropdown('get value') == key) {
+                $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
+            }
         }
     },
 
@@ -301,48 +447,32 @@ $.extend(UI.UPLOAD_PAGE, {
 
 
 	addEvents: function () {
-        $( "a.more-options" ).on("click", function ( e ) {
+        $( ".more-options-cont" ).on("click", function ( e ) {
             e.preventDefault();
             APP.openOptionsPanel("tm")
         } );
 
-        $("#source-lang").on('change', function(e){
-            console.log('source language changed');
-            UI.checkRTL();
-            APP.changeSourceLang( $(this).val() );
-            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
-                if (UI.conversionsAreToRestart()) {
-                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
-                }
-                if( UI.checkTMXLangFailure() ){
-                    UI.delTMXLangFailure();
-                }
-            }
-            else if ($('.template-gdrive').length) {
-                APP.confirm({
-                    msg: 'Source language has been changed.<br/>The files will be reimported.',
-                    callback: 'confirmGDriveRestartConversions'
-                });
-            } else {
-                return;
+        $('#target-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            onChange: function () {
+                APP.checkForLexiQALangs();
+                APP.checkForTagProjectionLangs();
+                UI.UPLOAD_PAGE.targetLanguageChangedCallback();
+
             }
         });
 
-        // APP.tryListGDriveFiles();
-
-        $("#target-lang").change(function(e) {
-
-            UI.checkRTL();
-            $('.popup-languages li.on').each(function(){
-                $(this).removeClass('on').find('input').removeAttr('checked');
-            });
-            $('.translate-box.target h2 .extra').remove();
-            if( UI.checkTMXLangFailure() ){
-                UI.delTMXLangFailure();
+        $('#source-lang').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            onChange: function () {
+                APP.checkForLexiQALangs();
+                APP.checkForTagProjectionLangs();
+                UI.UPLOAD_PAGE.sourceLangChangedCallback();
             }
-            APP.changeTargetLang( $(this).val() );
-
         });
+
 
         $("input.uploadbtn").click(function(e) {
 
@@ -355,25 +485,26 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.doRequest({
                 data: APP.getCreateProjectParams(),
 
-			beforeSend: function (){
-				$('.error-message').hide();
-				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-			},
-			success: function(d){
+                beforeSend: function (){
+                    $('.error-message').hide();
+                    $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
+                },
+                success: function(d){
 
-				if( typeof d.errors != 'undefined' && d.errors.length ) {
-					//normal error management
-					$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
-					$('.uploadbtn').attr('value', 'Analyze');
-					$('body').removeClass('creating');
+                    if( typeof d.errors != 'undefined' && d.errors.length ) {
+                        //normal error management
+                        $('.error-message').find('p').text(this.message);
+                        $('.error-message').show();
+                        $('.uploadbtn').attr('value', 'Analyze');
+                        $('body').removeClass('creating');
 
-				} else {
-                    APP.handleCreationStatus( d.data.id_project, d.data.password  );
-				}
+                    } else {
+                        APP.handleCreationStatus( d.data.id_project, d.data.password  );
+                    }
 
-            }
+                }
+            });
         });
-    });
 
         $('.upload-table').on('click', 'a.skip_link', function(){
             var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
@@ -394,19 +525,10 @@ $.extend(UI.UPLOAD_PAGE, {
             }
         });
 
-        $("#source-lang").on('change', function(){
-            APP.checkForLexiQALangs();
-            APP.checkForTagProjectionLangs();
-        });
-        $("#target-lang").on('change', function(){
-            APP.checkForLexiQALangs();
-            APP.checkForTagProjectionLangs();
-        });
-
-        $("#multiple-link").click(function(e) {
+        $("#add-multiple-lang").click(function(e) {
             e.preventDefault();
-            $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
-            var tlAr = $('#target-lang').val().split(',');
+            $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
+            var tlAr = $('#target-lang').dropdown('get value').split(',');
             $.each(tlAr, function() {
                 var ll = $('.popup-languages.slide .listlang li #' + this);
                 ll.parent().addClass('on');
@@ -452,22 +574,41 @@ $.extend(UI.UPLOAD_PAGE, {
             }
         });
 
-        /*$("#private-tm-key").on('keyup', function(e) {
-         if($(this).val() == '') {
-         $('#create_private_tm_btn').removeClass('disabled');
-         $('#create_private_tm_btn').removeAttr('disabled');
-         } else {
-         $('#create_private_tm_btn').addClass('disabled');
-         $('#create_private_tm_btn').attr('disabled','disabled');
-         };
-         });*/
-
         $("input, select").change(function(e) {
             $('.error-message').hide();
         });
         $("input").keyup(function(e) {
             $('.error-message').hide();
         });
+    },
+    sourceLangChangedCallback: function () {
+        APP.changeSourceLang( $('#source-lang').dropdown('get value')  );
+        if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+            if (UI.conversionsAreToRestart()) {
+                APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+            }
+            if( UI.checkTMXLangFailure() ){
+                UI.delTMXLangFailure();
+            }
+        }
+        else if ($('.template-gdrive').length) {
+            APP.confirm({
+                msg: 'Source language has been changed.<br/>The files will be reimported.',
+                callback: 'confirmGDriveRestartConversions'
+            });
+        } else {
+            return;
+        }
+    },
+    targetLanguageChangedCallback: function () {
+        $('.popup-languages li.on').each(function(){
+            $(this).removeClass('on').find('input').removeAttr('checked');
+        });
+        $('.translate-box.target h2 .extra').remove();
+        if( UI.checkTMXLangFailure() ){
+            UI.delTMXLangFailure();
+        }
+        APP.changeTargetLang( $('#target-lang').dropdown('get value') );
     }
 });
 APP.handleCreationStatus = function( id_project, password ){
@@ -505,7 +646,7 @@ APP.postProjectCreation = function ( d ) {
 
     if ( typeof d.errors != 'undefined' && d.errors.length ) {
 
-        $( '.error-message' ).text( '' );
+        $( '.error-message' ).find('p').text( '' );
 
         $.each( d.errors, function () {
 
@@ -547,7 +688,8 @@ APP.postProjectCreation = function ( d ) {
             }
 
             //normal error management
-            $( '.error-message' ).append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+            $( '.error-message' ).find('p').text(this.message);
+            $( '.error-message' ).show();
 
         } );
 
@@ -579,8 +721,8 @@ APP.postProjectCreation = function ( d ) {
 
             if ( Object.keys( d.target_language ).length > 1 ) { //if multiple language selected show a job list
                 d.files = [];
-                d.trgLangHumanReadable = $( '#target-lang option:selected' ).text().split( ',' );
-                d.srcLangHumanReadable = $( '#source-lang option:selected' ).text();
+                d.trgLangHumanReadable = $( '#target-lang' ).dropdown('get text').split( ',' );
+                d.srcLangHumanReadable = $( '#source-lang').dropdown('get text');
 
                 $.each( d.target_language, function ( idx, val ) {
                     d.files.push( {href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring( 0, 2 ) + '-' + val.substring( 0, 2 ) + '/' + d.id_job[idx] + '-' + d.password[idx]} );

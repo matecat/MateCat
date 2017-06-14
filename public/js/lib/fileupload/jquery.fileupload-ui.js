@@ -86,7 +86,7 @@
             // widget (via file input selection, drag & drop or add API call).
             // See the basic file upload widget for more information:
             add: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         options = that.options,
                         files = data.files;
                 $( this ).fileupload( 'process', data ).done( function () {
@@ -129,7 +129,7 @@
             },
             // Callback for the start of each file upload request:
             send: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( !data.isValidated ) {
                     if ( !data.isAdjusted ) {
                         that._adjustMaxNumberOfFiles( -data.files.length );
@@ -157,7 +157,7 @@
             },
             // Callback for successful uploads:
             done: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 if ( data.context ) {
                     data.context.each( function ( index ) {
@@ -195,7 +195,7 @@
             },
             // Callback for failed (abort or error) uploads:
             fail: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
@@ -262,9 +262,10 @@
                         globalProgressNode = $this.find( '.fileupload-progress' ),
                         extendedProgressNode = globalProgressNode
                                 .find( '.progress-extended' );
+                var fileupload = $this.data( 'fileupload' ) || $this.data('blueimpJUIFileupload');
                 if ( extendedProgressNode.length ) {
                     extendedProgressNode.html(
-                            $this.data( 'fileupload' )._renderExtendedProgress( data )
+                        fileupload._renderExtendedProgress( data )
                     );
                 }
                 globalProgressNode
@@ -277,7 +278,7 @@
             },
             // Callback for uploads start, equivalent to the global ajaxStart event:
             start: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             that._trigger( 'started', e );
@@ -286,7 +287,7 @@
             },
             // Callback for uploads stop, equivalent to the global ajaxStop event:
             stop: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             $( this ).find( '.progress' )
@@ -300,7 +301,7 @@
             // Callback for file deletion:
             destroy: function ( e, data ) {
 
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( data.url ) {
                     $.ajax( data );
                     that._adjustMaxNumberOfFiles( 1 );

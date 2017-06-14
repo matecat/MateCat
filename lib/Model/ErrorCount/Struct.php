@@ -6,7 +6,7 @@
  * Date: 28/01/15
  * Time: 14.44
  */
-class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class ErrorCount_Struct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     /**
      * @var int
@@ -271,15 +271,5 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
 
         return $this;
     }
-
-
-
-//    private function __checkResult( $res ) {
-//        if ( $res < 0 ) {
-//            Log::doLog( __METHOD__ . "-> Bad call: result is less than zero." );
-//            throw new BadMethodCallException( "Bad call: result is less than zero." );
-//        }
-//    }
-
 
 }

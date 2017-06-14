@@ -395,8 +395,8 @@ $.extend(UI, {
 			APP.doRequest({
 				data: {
 					action: 'deleteContribution',
-					source_lang: config.source_lang,
-					target_lang: config.target_lang,
+					source_lang: config.source_rfc,
+					target_lang: config.target_rfc,
 					id_job: config.id_job,
 					password: config.password,
 					seg: source,

@@ -215,9 +215,7 @@
                 UI.disableTM(this);
             }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
-                UI.checkTMGrantsModifications(this);
-                if(APP.isCattool) UI.saveTMdata(false);
-                UI.checkTMKeysUpdateChecks();
+                UI.enableTM(this);
 
             }).on('click', '.mgmt-table-mt tr .enable-mt input', function() {
 
@@ -397,6 +395,14 @@
             });
 
         },
+        enableTM: function (el) {
+            UI.checkTMGrantsModifications(el);
+            if(APP.isCattool) UI.saveTMdata(el);
+            UI.checkTMKeysUpdateChecks();
+        },
+        disableAllTM: function () {
+            $('#activetm tr.mine .activate input').trigger('click');
+        },
         checkOpenTabFromParameters: function () {
             var keyParam = APP.getParameterByName("openTab");
             if (keyParam) {
@@ -428,7 +434,7 @@
                 var keyParams = {
                     r: true,
                     w: true,
-                    desc: "",
+                    desc: "No Description",
                     TMKey: keyParam
                 };
                 this.appendNewTmKeyToPanel( keyParams );
@@ -448,6 +454,9 @@
             row.find('td.lookup input, td.activate input, td.update input').attr('checked', true);
             UI.useTM(trKey);
             UI.checkTMKeysUpdateChecks();
+            setTimeout(function () {
+                $("#activetm").trigger("update", ['', keyParam]);
+            },500);
         },
         openLanguageResourcesPanel: function(tab, elToClick) {
             if ($(".popup-tm").hasClass('open') ) {
@@ -456,8 +465,8 @@
             tab = tab || 'tm';
             elToClick = elToClick || null;
             $('body').addClass('side-popup');
-            $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
             $(".outer-tm").show();
+            $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
             setTimeout(function () {
                 $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
             }, 100);
@@ -599,7 +608,8 @@
             var tr = $(el).parents('tr.mine');
             var isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
             var deactivate = isActive && (!tr.find('.lookup input').is(':checked') && !tr.find(' td.update input').is(':checked'));
-            if(!tr.find('.activate input').is(':checked') || deactivate ) {
+
+            if( !tr.find('.activate input').is(':checked') || deactivate) {
                 if(isActive) {
                     if(!config.isLoggedIn) {
 
@@ -620,12 +630,14 @@
                         return false;
                     }
                     UI.disableTM(el);
-                    $("#inactivetm").trigger("update");
+                    $("#activetm").trigger("removeTm", [$(tr).find('.privatekey').text()]);
                 }
             } else {
                 if(!isActive) {
                     UI.useTM(el);
-                    $("#inactivetm").trigger("update");
+                    setTimeout(function () {
+                        $("#activetm").trigger("update", ['', $(tr).find('.privatekey').text()]);
+                    },500);
                 }
             }
 
@@ -638,7 +650,8 @@
             var options = $.parseJSON(context);
             el = $('.mgmt-tm tr[data-key="' + options.key + '"] td.' + options.grant + ' input');
             UI.disableTM(el);
-            $("#inactivetm").trigger("update");
+            $("#activetm").trigger("deleteTm", [options.key]);
+
         },
 
         disableTM: function (el) {
@@ -772,6 +785,9 @@
             $('#activetm').find('tr.new').before( newTr );
 
             UI.setTMsortable();
+            setTimeout(function () {
+                $("#activetm").trigger("update", [keyParams.desc, keyParams.TMKey]);
+            },500);
         },
 
         pulseTMadded: function (row) {
@@ -1181,7 +1197,7 @@
 
 
         closeTMPanel: function () {
-            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
+            $( ".popup-tm").removeClass('open').animate({right: '-1100px' }, 400);
             $(".outer-tm").hide();
             $('body').removeClass('side-popup');
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -1371,6 +1387,10 @@
                 },
                 success: function(d) {
                     UI.hideAllBoxOnTables();
+                    setTimeout(function () {
+                        $("#activetm").trigger("deleteTm", [tr.find('.privatekey').text()]);
+                    },500);
+
                 }
             });
         },
@@ -1779,7 +1799,6 @@
                     $('.share-popup-copy-link-button').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>");
                     $('.share-popup-copy-link-button').powerTip({
                         placement : 'n',
-                        popupId : "matecatTip",
                     });
                 });
 
@@ -1925,8 +1944,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 's',
-                popupId : "matecatTip",
+                placement : 'n',
                 mouseOnToPopup: true
 
             });
@@ -1938,19 +1956,16 @@
                 $('tr:not(.ownergroup) .edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
                 $('.edit-desc').powerTip({
                     placement: 's',
-                    popupId: "matecatTip",
                 });
 
                 $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource.<br/>Share it from the dropdown menu.</div>");
                 $('.icon-owner-private').powerTip({
                     placement : 's',
-                    popupId : "matecatTip",
                 });
             } else {
                 $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>To retrieve resource information or share it <br/>you must be logged.<br/></div>");
                 $('.icon-owner-private').powerTip({
                     placement : 's',
-                    popupId : "matecatTip",
                 });
             }
 
@@ -1959,32 +1974,19 @@
             $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Public translation memory.</div>");
             $('.icon-owner-public').powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
 
             $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br/>Select Share resource from the dropdown menu to see owners.</div>");
             $('.icon-owner-shared').powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
             var mymemoryChecks = $('#activetm tr.mymemory .update div');
             mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Add a private resource to disable updating.</div>");
             mymemoryChecks.powerTip({
                 placement : 's',
-                popupId : "matecatTip",
             });
 
 
-        },
-
-        setLanguageTooltipTP: function () {
-            var gtTooltip = $(".tooltip-guess-tags").data("powertip");
-            $(".tagp .onoffswitch-container").data("powertip", gtTooltip);
-            $(".tagp .onoffswitch-container").powerTip({
-                placement : 's',
-                popupId : "matecatTip",
-                mouseOnToPopup: true
-            });
         },
 
         setLanguageTooltipLXQ: function () {
@@ -1993,7 +1995,6 @@
             $(".qa-box .onoffswitch-container").data("powertip", lxTooltip);
             $(".qa-box .onoffswitch-container").powerTip({
                 placement : 's',
-                popupId : "matecatTip",
                 mouseOnToPopup: true
             });
         },

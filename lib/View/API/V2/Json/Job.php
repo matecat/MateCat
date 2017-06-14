@@ -62,10 +62,11 @@ class Job {
                 'create_date'           => $jStruct->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $jStruct->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
+                'pee'                   => $jStruct->getPeeForTranslatedSegments(),
                 'private_tm_key'        => json_encode( $jStruct->getOwnerKeys() ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                 => CatUtils::getFastStatsForJob( $jobStats ),
+                'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
         ];

@@ -3255,7 +3255,7 @@ UI = {
         }
         var tab = 'opt';
         $('body').addClass('side-popup');
-        $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
+        $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         // $.cookie('tmpanel-open', 1, { path: '/' });

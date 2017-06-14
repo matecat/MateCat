@@ -699,8 +699,10 @@ class CatUtils {
         $todo = $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
         if( $todo < 1 && $todo > 0 ){
             $job_stats[ 'TODO_FORMATTED' ] = 1;
+            $job_stats[ 'TODO' ] = 1;
         } else {
             $job_stats[ 'TODO_FORMATTED' ] = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+            $job_stats[ 'TODO' ] = (float)number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "" );
         }
 
         $t = 'approved';
@@ -760,7 +762,7 @@ class CatUtils {
      *
      * @return array
      */
-    public static function getFastStatsForJob( WordCount_Struct $wCount ){
+    public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ){
 
         $job_stats = array();
         $job_stats[ 'id' ]         = $wCount->getIdJob();
@@ -779,6 +781,11 @@ class CatUtils {
         $total = $wCount->getTotal();
         $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
         $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
+
+        if( !$performanceEstimation ){
+            return $job_stats;
+        }
+
         return self::_performanceEstimationTime($job_stats);
 
     }

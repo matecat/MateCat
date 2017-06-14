@@ -1,5 +1,5 @@
 /*!
- * # Semantic UI 2.2.7 - Item
+ * # Semantic UI 2.2.10 - Item
  * http://github.com/semantic-org/semantic-ui/
  *
  *
@@ -177,7 +177,7 @@
   font-weight: bold;
   font-size: 1.28571429em;
   margin-top: -0.21425em;
-  line-height: 1.2857em;
+  line-height: 1.28571429em;
 }
 .ui.cards > .card > .content > .meta + .description,
 .ui.cards > .card > .content > .header + .description,
@@ -759,7 +759,7 @@ a.ui.card:hover,
     margin-left: 0em;
     margin-right: 0em;
   }
-  .ui.two.doubling.cards .card {
+  .ui.two.doubling.cards > .card {
     width: 100%;
     margin-left: 0em;
     margin-right: 0em;
@@ -768,7 +768,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.three.doubling.cards .card {
+  .ui.three.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -777,7 +777,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.four.doubling.cards .card {
+  .ui.four.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -786,7 +786,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.five.doubling.cards .card {
+  .ui.five.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -795,7 +795,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.six.doubling.cards .card {
+  .ui.six.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -804,7 +804,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.seven.doubling.cards .card {
+  .ui.seven.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -813,7 +813,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.eight.doubling.cards .card {
+  .ui.eight.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -822,7 +822,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.nine.doubling.cards .card {
+  .ui.nine.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -831,7 +831,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.ten.doubling.cards .card {
+  .ui.ten.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -844,7 +844,7 @@ a.ui.card:hover,
     margin-left: 0em;
     margin-right: 0em;
   }
-  .ui.two.doubling.cards .card {
+  .ui.two.doubling.cards > .card {
     width: 100%;
     margin-left: 0em;
     margin-right: 0em;
@@ -853,7 +853,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.three.doubling.cards .card {
+  .ui.three.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -862,7 +862,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.four.doubling.cards .card {
+  .ui.four.doubling.cards > .card {
     width: calc( 50%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -871,7 +871,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.five.doubling.cards .card {
+  .ui.five.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -880,7 +880,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.six.doubling.cards .card {
+  .ui.six.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -889,7 +889,7 @@ a.ui.card:hover,
     margin-left: -1em;
     margin-right: -1em;
   }
-  .ui.eight.doubling.cards .card {
+  .ui.eight.doubling.cards > .card {
     width: calc( 33.33333333%  -  2em );
     margin-left: 1em;
     margin-right: 1em;
@@ -898,7 +898,7 @@ a.ui.card:hover,
     margin-left: -0.75em;
     margin-right: -0.75em;
   }
-  .ui.eight.doubling.cards .card {
+  .ui.eight.doubling.cards > .card {
     width: calc( 25%  -  1.5em );
     margin-left: 0.75em;
     margin-right: 0.75em;
@@ -907,7 +907,7 @@ a.ui.card:hover,
     margin-left: -0.75em;
     margin-right: -0.75em;
   }
-  .ui.nine.doubling.cards .card {
+  .ui.nine.doubling.cards > .card {
     width: calc( 25%  -  1.5em );
     margin-left: 0.75em;
     margin-right: 0.75em;
@@ -916,7 +916,7 @@ a.ui.card:hover,
     margin-left: -0.75em;
     margin-right: -0.75em;
   }
-  .ui.ten.doubling.cards .card {
+  .ui.ten.doubling.cards > .card {
     width: calc( 20%  -  1.5em );
     margin-left: 0.75em;
     margin-right: 0.75em;

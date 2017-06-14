@@ -865,7 +865,7 @@ color:#333;}
     {
 	    overflow: hidden;
 	    line-height: 30px;
-	    border-radius: 7px;
+	    border-radius: 0 0 4px 4px;
 	    color: #000 !important;
 	    -webkit-box-shadow: 0 1px 20px #000;
 	    box-shadow: 0 1px 20px #000;
@@ -901,7 +901,7 @@ color:#333;}
     position: fixed;
     z-index: 10000000000000;
     top: 0;
-    right: 0;
+    right: -1100px;
     background: #fff;
     box-shadow: -2px 5px 7px #7B7B7B;
 }
@@ -937,6 +937,7 @@ color:#333;}
     font-size: 30px;
     text-align: left;
     margin-bottom: 15px;
+    margin-top: 0px;
 }
 
 
@@ -1371,7 +1372,7 @@ text-align: right;
 	    font-size: 12px;
     }
     .popup a.anonymous:visited,
-    .popup a.anonymous:active 
+    .popup a.anonymous:active
     {
 	    color: black;
     }
@@ -1388,14 +1389,6 @@ text-align: right;
     /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
 /*float: left;*/
 margin-left: 10px;
-}
-
-.modal p,
-.modal p
-{
-    padding: 0 20px;
-    margin: 0;
-    margin-top: 20px;
 }
 
 .popup .outer:hover
@@ -1555,7 +1548,7 @@ float: none!important;
 
 .mgmt-panel-tm .btn-ok:hover,
 .mgmt-panel-gl .btn-ok:hover,
-.popup .btn-ok:hover, 
+.popup .btn-ok:hover,
 .popup .btn-cancel:hover,
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover
@@ -3649,7 +3642,6 @@ a.resume-project:after,
 .mbc-warnings:before,
 /* mbc chat */
 .tab-switcher-al a:before,
-.error-message p:before,
 .text .alternatives:before,
 .autofillTag:before,
 input.downloadtr-button:before,
@@ -3843,10 +3835,6 @@ float: left;
 .notific:before {
     content: "\f058";
       font-size: 25px;
-}
-.error-message p:before {
-     content: "\f071";
-     margin-right: 10px;
 }
 
 .tab-switcher-al a:before,
@@ -4621,6 +4609,9 @@ table.activitylog th .th-inner:after {
 }
 
 /*** Share Key Popup ***/
+.share-popup-container {
+    margin: 20px;
+}
 .share-popup-top {
     position: relative;
     width: 100%;
@@ -4694,13 +4685,13 @@ font-weight: bold;
     margin-top: 4px;
 }
 .share-popup-container-list {
-    width: 100%;
+    width: 91%;
     max-height: 300px;
     position: relative;
     float: left;
-    margin-top: 10px;
     border: 1px solid #d5d5d5;
     border-radius: 4px;
+    margin: 20px;
 }
 
 .share-popup-list {

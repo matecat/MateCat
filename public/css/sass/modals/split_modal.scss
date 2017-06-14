@@ -1,7 +1,7 @@
 /*Split modal*/
 .popup-split {
     box-sizing: content-box;
-    .popup {
+    .popup#split-modal-cont {
         margin: 0 auto;
         position: relative;
         padding: 0px 0 0px 0;
@@ -9,7 +9,7 @@
         top: 0%;
         background: #fff;
         box-shadow: 0px 0px 25px #000;
-        border-radius: 7px;
+        border-radius: 0 0 4px 4px;
         text-align: left;
         font-size: 18px;
         border: 1px solid #666;

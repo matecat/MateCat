@@ -41,7 +41,7 @@ class editlogDownloadController extends downloadController {
                 "Suggestion1-source", "Suggestion1-translation", "Suggestion1-match", "Suggestion1-origin",
                 "Suggestion2-source", "Suggestion2-translation", "Suggestion2-match", "Suggestion2-origin",
                 "Suggestion3-source", "Suggestion3-translation", "Suggestion3-match", "Suggestion3-origin",
-                "Choosen-Suggestion","Statistically relevant"
+                "Chosen-Suggestion","Statistically relevant"
         );
 
         $csvHandler->fputcsv( $csv_fields );

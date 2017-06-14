@@ -91,7 +91,7 @@ APP.tryListGDriveFiles = function() {
 };
 
 APP.restartGDriveConversions = function () {
-    var sourceLang = $("#source-lang").val();
+    var sourceLang = $("#source-lang").dropdown('get value');
     
     $.getJSON('/gdrive/change/' + sourceLang, function(response){
         if(response.success) {

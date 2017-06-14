@@ -9,6 +9,7 @@ $.extend(UI, {
         // add/remove revision service to current job
         $( "input[name='revision']" ).click(function() {
             $(this).parent().toggleClass('noopacity');
+            ManageActions.outsourceCloseTranslatorInfo();
             var fullTranslateUrl = $(".onyourown a.uploadbtn:not(.showprices)").attr("href");
             if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
                 $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );

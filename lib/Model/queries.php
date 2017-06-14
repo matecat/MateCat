@@ -315,20 +315,6 @@ function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
     return $db->query_first( $query );
 }
 
-function getLanguageStats() {
-
-    $db = Database::obtain();
-
-    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count, pee_sigma
-from language_stats
-  where date=(select max(date) from language_stats)";
-
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
     $db      = Database::obtain();
