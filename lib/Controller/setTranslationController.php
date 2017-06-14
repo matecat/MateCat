@@ -855,6 +855,9 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
         $contributionStruct->propagationRequest   = $this->propagate;
 
+        $contributionStruct = $this->feature_set->filter(
+                'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
+
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
