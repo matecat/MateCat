@@ -1636,9 +1636,9 @@
                 "en":"Tigrinya"
             }],
             "isocode":"ti",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ti-TI"
+            "rfc3066code":"ti-TIR"
         }
     ,
         {
