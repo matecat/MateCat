@@ -20,13 +20,17 @@ class AnalyzeHeader extends React.Component {
         return true;
     }
 
+    getDate() {
+        var date = this.props.project.
+    }
+
     render() {
         return <div className="project-header ui grid">
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
-                            <div className="project-id" title="Project id">(58) </div>
-                            <div className="project-name" title="Project name"> MATECAT_PROJ[...]01706081253</div>
+                            <div className="project-id" title="Project id"> ({this.props.project.id}) </div>
+                            <div className="project-name" title="Project name"> {this.props.project.name} </div>
                         </div>
                         <div className="project-create">Created on Fri, March 03 2017</div>
                         <div className="analysis-create">

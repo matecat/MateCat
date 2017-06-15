@@ -7,34 +7,30 @@ API.PROJECTS = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function(team, page) {
-        var pageNumber = (page) ? page : UI.Search.currentPage;
+    getProjects: function(team, searchFilter, page) {
+        var pageNumber = (page) ? page : searchFilter.currentPage;
         var data = {
-            action: 'getProjects',
             id_team: team.id,
             page:	pageNumber,
-            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+            filter: (!$.isEmptyObject(searchFilter.filter)) ? 1 : 0,
         };
 
         // Filters
-        data = $.extend(data,UI.Search.filter);
+        data = $.extend(data,searchFilter.filter);
 
-        return APP.doRequest({
+        return $.ajax({
             data: data,
-            success: function(d){
+            type: "POST",
+            url : "/?action=getProjects"
+        });
 
-                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401   ) { //Not Logged or not in the team
-                    window.location.reload();
-                } else if( typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 404){
-                    UI.selectPersonalTeam();
-                    // UI.reloadProjects();
-                } else if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/';
-                }
-            },
-            error: function(d){
-                window.location = '/';
-            }
+    },
+    getProject: function(id) {
+
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/projects/" + id +"/" + config.password
         });
     },
     /**
@@ -53,7 +49,6 @@ API.PROJECTS = {
         var password = object.password;
 
         var data = {
-            action:		"changeJobsStatus",
             new_status: status,
             res: 		type,            //Project or Job:
             id:			id,             // Job or Project Id
@@ -66,10 +61,10 @@ API.PROJECTS = {
         // Filters
         data = $.extend(data,UI.Search.filter);
 
-        return APP.doRequest({
+        return $.ajax({
             data: data,
-            success: function(d){},
-            error: function(d){}
+            type: "POST",
+            url : "/?action=changeJobsStatus"
         });
     },
 
@@ -114,6 +109,19 @@ API.PROJECTS = {
             url : "/api/v2/teams/" + project.id_team + "/projects/" + project.id
         });
     },
+    getVolumeAnalysis: function () {
+        var pid = config.id_project;
+        var ppassword = config.password ;
+        var data = {
+            pid: pid,
+            ppassword: ppassword
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=getVolumeAnalysis"
+        });
+    }
 
 
 };

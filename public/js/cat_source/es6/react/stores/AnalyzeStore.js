@@ -12,14 +12,18 @@ EventEmitter.prototype.setMaxListeners(0);
 
 let AnalyzeStore = assign({}, EventEmitter.prototype, {
 
-    updateAll: function (teams) {
+    volumeAnalysis: null,
+
+    project: null,
+
+    updateAll: function (volumeAnalysis, project) {
+        this.volumeAnalysis = Immutable.fromJS(volumeAnalysis);
+        this.project = Immutable.fromJS(project);
 
     },
-
-
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
-    },
+    }
 
 });
 

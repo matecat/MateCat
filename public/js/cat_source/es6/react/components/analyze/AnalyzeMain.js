@@ -27,7 +27,7 @@ class AnalyzeMain extends React.Component {
                 <div className="project ui grid shadow-1">
                     <div className="sixteen wide column">
                         <div className="analyze-header">
-                            <AnalyzeHeader/>
+                            <AnalyzeHeader data={this.props.volumeAnalysis.summary} project={this.props.project}/>
                         </div>
 
                         <div className="project-body ui grid">

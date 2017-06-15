@@ -67,8 +67,16 @@ UI = {
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
                 self.checkPopupInfoTeams();
-                API.PROJECTS.getProjects(self.selectedTeam).done(function(response){
-                    self.renderProjects(response.data);
+                API.PROJECTS.getProjects(self.selectedTeam, UI.Search).done(function(response){
+                    if (typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 401   ) { //Not Logged or not in the team
+                        window.location.reload();
+                    } else if( typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 404){
+                        UI.selectPersonalTeam();
+                    } else if( typeof response.errors != 'undefined' && response.errors.length ){
+                        window.location = '/';
+                    } else {
+                        self.renderProjects(response.data);
+                    }
                 });
             });
         });
@@ -78,9 +86,17 @@ UI = {
     reloadProjects: function () {
         var self = this;
         if ( UI.Search.currentPage === 1) {
-            API.PROJECTS.getProjects(self.selectedTeam).done(function (response) {
-                var projects = response.data;
-                ManageActions.updateProjects(projects);
+            API.PROJECTS.getProjects(self.selectedTeam, UI.Search).done(function (response) {
+                if (typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 401   ) { //Not Logged or not in the team
+                    window.location.reload();
+                } else if( typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 404){
+                    UI.selectPersonalTeam();
+                } else if( typeof response.errors != 'undefined' && response.errors.length ){
+                    window.location = '/';
+                } else {
+                    var projects = response.data;
+                    ManageActions.updateProjects(projects);
+                }
             });
         } else {
             // ManageActions.showReloadSpinner();
@@ -91,7 +107,7 @@ UI = {
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(API.PROJECTS.getProjects(self.selectedTeam, i));
+                requests.push(API.PROJECTS.getProjects(self.selectedTeam, UI.Search, i));
             }
             $.when.apply(this, requests).done(function() {
                 var results = requests.length > 1 ? arguments : [arguments];
@@ -124,7 +140,7 @@ UI = {
 
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        API.PROJECTS.getProjects(this.selectedTeam).done(function (response) {
+        API.PROJECTS.getProjects(this.selectedTeam, UI.Search).done(function (response) {
             var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -172,7 +188,7 @@ UI = {
         UI.Search.currentPage = 1;
         APP.setTeamInStorage(team.id);
         return this.getTeamStructure(team).then(function () {
-                return API.PROJECTS.getProjects(self.selectedTeam);
+                return API.PROJECTS.getProjects(self.selectedTeam, UI.Search);
             }
         );
     },
@@ -208,7 +224,7 @@ UI = {
         if (!_.isEmpty(this.Search.filter)) {
             UI.Search.currentPage = 1;
         }
-        return API.PROJECTS.getProjects(this.selectedTeam);
+        return API.PROJECTS.getProjects(this.selectedTeam, UI.Search);
     },
 
     scrollDebounceFn: function() {
