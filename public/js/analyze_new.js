@@ -15,6 +15,9 @@ UI = {
             showModals: false
         }), headerMountPoint);
 
+        var analyzeMountPoint = $("#analyze-container")[0];
+        ReactDOM.render(React.createElement(AnalyzeMain), analyzeMountPoint);
+
         API.TEAM.getAllTeams().done(function (data) {
             self.teams = data.teams;
             TeamsActions.renderTeams(self.teams);
@@ -33,14 +36,11 @@ UI = {
                 UI.currentOutsourceProject = response.project;
                 self.renderAnalysisPage();
             });
+            self.pollData(response);
         });
     },
     renderAnalysisPage: function () {
-        var analyzeMountPoint = $("#analyze-container")[0];
-        ReactDOM.render(React.createElement(AnalyzeMain, {
-            volumeAnalysis : UI.volumeAnalysis,
-            project: UI.currentOutsourceProject
-        }), analyzeMountPoint);
+        AnalyzeActions.renderAnalysis(UI.volumeAnalysis, UI.currentOutsourceProject);
     },
     pollData: function (response) {
         if( response.data.summary.STATUS !== 'DONE' && response.data.summary.STATUS !== 'NOT_TO_ANALYZE') {
@@ -50,7 +50,7 @@ UI = {
 
             setTimeout( function () {
                 API.PROJECTS.getVolumeAnalysis().done(function (response) {
-                    UI.volumeAnalysis = volumeAnalysisData.data;
+                    UI.volumeAnalysis = response.data;
                     AnalyzeActions.updateVolumeAnalysis(UI.volumeAnalysis);
                     if( response.data.summary.STATUS === 'DONE' || response.data.summary.STATUS === 'NOT_TO_ANALYZE'){
                         API.PROJECTS.getProject(config.id_project).done(function (response) {
@@ -89,7 +89,21 @@ UI = {
     },
     parseVolumeAnalysisData: function (volumeAnalysisData) {
         UI.volumeAnalysis = volumeAnalysisData.data;
-    }
+    },
+    downloadAnalysisReport: function () {
+        var pid = config.id_project ;
+        var ppassword = config.password ;
+
+        var form =  '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
+            '				<input type=hidden name="action" value="downloadAnalysisReport">' +
+            '				<input type=hidden name="id_project" value="' + pid + '">' +
+            '				<input type=hidden name="password" value="' + ppassword + '">' +
+            '				<input type=hidden name="download_type" value="XTRF">' +
+            '			</form>';
+        $('body').append(form);
+        $('#downloadAnalysisReportForm').submit();
+
+    },
 };
 $(document).ready(function() {
     UI.init();

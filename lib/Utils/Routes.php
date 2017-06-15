@@ -142,7 +142,7 @@ class Routes {
 
         $project_name = Utils::friendly_slug( $params[ 'project_name' ] );
 
-        return $host . "/analyze/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
+        return $host . "/analyze-new/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
     }
 
     public static function manage( ) {

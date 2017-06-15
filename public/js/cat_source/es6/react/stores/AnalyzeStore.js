@@ -1,5 +1,5 @@
 /*
- * Projects Store
+ * Analyze Store
  */
 
 let AppDispatcher = require('../dispatcher/AppDispatcher');
@@ -21,6 +21,14 @@ let AnalyzeStore = assign({}, EventEmitter.prototype, {
         this.project = Immutable.fromJS(project);
 
     },
+    updateAnalysis: function (volumeAnalysis) {
+        this.volumeAnalysis = Immutable.fromJS(volumeAnalysis);
+
+    },
+    updateProject: function (project) {
+        this.project = Immutable.fromJS(project);
+
+    },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     }
@@ -31,7 +39,18 @@ let AnalyzeStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function(action) {
     switch(action.actionType) {
-
+        case AnalyzeConstants.RENDER_ANALYSIS:
+            AnalyzeStore.updateAll(action.volumeAnalysis, action.project);
+            AnalyzeStore.emitChange(AnalyzeConstants.RENDER_ANALYSIS, AnalyzeStore.volumeAnalysis, AnalyzeStore.project);
+            break;
+        case AnalyzeConstants.UPDATE_PROJECT:
+            AnalyzeStore.updateProject(action.project);
+            AnalyzeStore.emitChange(AnalyzeConstants.UPDATE_PROJECT, AnalyzeStore.project);
+            break;
+        case AnalyzeConstants.UPDATE_ANALYSIS:
+            AnalyzeStore.updateAnalysis(action.volumeAnalysis);
+            AnalyzeStore.emitChange(AnalyzeConstants.UPDATE_ANALYSIS, AnalyzeStore.volumeAnalysis);
+            break;
     }
 });
 module.exports = AnalyzeStore;

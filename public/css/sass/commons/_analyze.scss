@@ -65,12 +65,6 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                         }
-                        .initial-segments {
-                            display: inline-block;
-                        }
-                        .total-segments {
-                            display: inline-block;
-                        }
                         .progress-bar {
                             width: 100%;
                         }
@@ -111,6 +105,9 @@ body.analyze{
                     z-index: 10;
                     position: relative;
                     height: 100%;
+                }
+                .updated-count {
+                    background-color: #f9ffb5;
                 }
             }
 
