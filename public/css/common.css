@@ -3343,6 +3343,7 @@ font-weight: normal !important;
 .extsrt {background: url(../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
 .extpo {background: url(../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
 .extg {background: url(../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
+.exts {background: url(../img/matecat_file_icons_ts.png) 6px -0px no-repeat !important;} /* .ts */
 .extgsli {background: url(../img/matecat_file_icons.png) 6px -1033px no-repeat !important;} /* Google Slides */
 .extgdoc {background: url(../img/matecat_file_icons.png) 6px -1070px no-repeat !important;} /* Google Document */
 .extgsheet {background: url(../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
@@ -3439,6 +3440,7 @@ only screen and (in-resolution: 2dppx) {
     .extsrt {background: url(../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
     .extpo {background: url(../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
     .extg {background: url(../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
+    .exts {background: url(../img/matecat_file_icons_ts2x.png) 6px 0px no-repeat !important;} /* .ts */
     .extgsli {background: url(../img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;} /* Google Slides */
     .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
     .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
@@ -3448,8 +3450,6 @@ only screen and (in-resolution: 2dppx) {
 .fileinput-button {
 	background: #09beec;
 }
-
-
 
 }
 
