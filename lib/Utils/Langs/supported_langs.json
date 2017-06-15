@@ -1430,7 +1430,7 @@
             }],
             "isocode":"so",
             "enabled":true,
-            "rtl":false,
+            "rtl":true,
             "rfc3066code":"so-SO"
         }
     ,
@@ -1534,7 +1534,7 @@
                 "en":"Syriac (Aramaic)"
             }],
             "isocode":"syc",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"syc-TR"
         }
@@ -1565,7 +1565,7 @@
                 "en":"Tamashek (Tuareg)"
             }],
             "isocode":"tmh",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"tmh-DZ"
         }
