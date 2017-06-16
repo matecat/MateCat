@@ -8,7 +8,18 @@ class ProjectAnalyze extends React.Component {
         super(props);
     }
 
-
+    getJobs() {
+        var self = this;
+        let idArray = [];
+        return this.props.project.get('jobs').map(function (job, i) {
+            if (idArray.indexOf(job.get('id')) < 0 ) {
+                let jobVolumeAnalysisChunk =self.props.volumeAnalysis.get(job.get('id').toString()).get('chunks');
+                let jobVolumeAnalysisTotal =self.props.volumeAnalysis.get(job.get('id').toString()).get('totals');
+                idArray.push(job.get('id'));
+                return <JobAnalyze key={job.get('password')} chunks={jobVolumeAnalysisChunk} total={jobVolumeAnalysisTotal} project={self.props.project} idJob={job.get('id')}/>
+            }
+        });
+    }
 
     componentDidUpdate() {
     }
@@ -25,8 +36,7 @@ class ProjectAnalyze extends React.Component {
 
     render() {
         return <div className="jobs sixteen wide column">
-            <JobAnalyze/>
-            <JobAnalyze/>
+            {this.getJobs()}
         </div>;
 
 

@@ -9,6 +9,10 @@ class ChunkAnalyze extends React.Component {
         super(props);
     }
 
+    getFiles() {
+        return
+    }
+
     componentDidUpdate() {
     }
 
@@ -26,8 +30,7 @@ class ChunkAnalyze extends React.Component {
 
         return <div className="ui grid chunk-analyze-container">
             <ChunkAnalyzeHeader/>
-            <ChunkAnalyzeFile/>
-            <ChunkAnalyzeFile/>
+
 
         </div>;
 

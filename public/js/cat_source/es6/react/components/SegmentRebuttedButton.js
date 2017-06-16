@@ -1,37 +1,38 @@
 
-var button = React.createClass({
 
-    getInitialState: function() {
+class SegmentRebuttedButton extends React.Component{
+
+    getInitialState() {
         return {
             disabled: false,
         };
-    },
+    }
 
-    handleClick : function() {
+    handleClick() {
         window.ReviewImproved.clickOnRebutted(this.props.sid);
-    },
+    }
 
-    componentDidMount: function() {
-    },
+    componentDidMount() {
+    }
 
-    componentWillUnmount: function() {
-    },
+    componentWillUnmount() {
+    }
 
-    render: function() {
+    render() {
         var cmd = ((UI.isMac) ? 'CMD' : 'CTRL');
 
         return <li>
             <a className="button button-rebutted status-rebutted"
-                onClick={this.handleClick}
-                href="javascript:;"
-                disabled={!this.state.disabled} >
+               onClick={this.handleClick}
+               href="javascript:;"
+               disabled={!this.state.disabled} >
                 Rebutted
             </a>
             <p>{window.UI.shortcutLeader}+ENTER</p>
-          </li>
-          ;
+        </li>
+            ;
 
     }
-});
+}
 
-export default button ;
+export default SegmentRebuttedButton ;
