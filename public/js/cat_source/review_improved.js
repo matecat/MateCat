@@ -67,7 +67,7 @@ if ( ReviewImproved.enabled() )
             node.contents('.rangySelectionBoundary').remove();
             node[0].normalize();
 
-            var contents = node.contents() ; 
+            var contents = node.contents() ;
             range.setStart( contents[ issue.start_node ], issue.start_offset );
             range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
@@ -206,7 +206,11 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var segment = UI.Segment.find( sid );
         // TODO: refactor this, the click to activate a
         // segment is not a good way to handle.
-        segment.el.find('.errorTaggingArea').click();
+        if (segment && segment.el) {
+          //dofoteinakis: the first time going into the review page (i.e. from igognito window)
+          //this is undefined.
+          segment.el.find('.errorTaggingArea').click();
+        }
     });
 
     $.extend(ReviewImproved, {
@@ -214,7 +218,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, sid);
             var segment = UI.Segment.find( sid );
-            
+
             var deferreds = _.map( data_array, function( data ) {
                 return $.post( path, data )
                 .done(function( data ) {
