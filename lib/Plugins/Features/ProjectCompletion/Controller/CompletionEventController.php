@@ -17,7 +17,6 @@ use Chunks_ChunkCompletionEventStruct;
 use Database;
 use Exception;
 use Exceptions_RecordNotFound;
-use Features\ProjectCompletion\Model\UndoModel;
 use LQA\ChunkReviewDao;
 use Utils;
 
