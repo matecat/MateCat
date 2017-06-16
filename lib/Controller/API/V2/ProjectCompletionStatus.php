@@ -2,6 +2,7 @@
 
 namespace API\V2 ;
 
+use API\V2\Validators\ProjectPasswordValidator;
 use Features ;
 use API\V2\Validators\ProjectValidator;
 
@@ -13,15 +14,21 @@ class ProjectCompletionStatus extends KleinController {
     private $validator ;
 
     protected function validateRequest() {
-        $this->validator = new ProjectValidator(
-            $this->api_record,
-            $this->request->id_project
-        );
-        $this->validator->setFeature( 'project_completion' );
+
+        if ( $this->request->paramsNamed()['password'] ) {
+            $this->validator = new ProjectPasswordValidator( $this ) ;
+        }
+        else {
+            $this->validator = new ProjectValidator(
+                    $this->api_record,
+                    $this->request->id_project
+            );
+            $this->validator->setFeature( 'project_completion' );
+        }
 
         $valid = $this->validator->validate();
 
-        if (! $valid ) {
+        if (! $valid) {
             $this->response->code(404);
             $this->response->json(
                 array('error' => 'This project does not exist')
@@ -43,10 +50,11 @@ class ProjectCompletionStatus extends KleinController {
         }
 
         return array(
-                'id'       => $chunk->id,
+                'id'       =>  $chunk->id,
                 'password' => $chunk->password,
                 'completed' => $is_completed,
-                'completed_at' => $completed_at
+                'completed_at' => $completed_at,
+                'event_id' => $record['id_event']
         );
     }
 
