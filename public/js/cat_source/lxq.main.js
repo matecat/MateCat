@@ -115,9 +115,11 @@ LXQ.init  = function () {
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
       console.log('[LEXIQA] got setTranslation:success');
-        var segment = data.segment;
-        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
-        LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
+      if (LXQ.lexiqaData.lexiqaProjectStatus !== 'loaded')
+        return;
+      var segment = data.segment;
+      var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
+      LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
     });
     $( window ).on( 'files:appended', function ( e , data) {
       globalReceived = false ;
@@ -1319,7 +1321,7 @@ LXQ.init  = function () {
 
 
         doLexiQA: function ( segment, translation, id_segment, isSegmentCompleted, callback ) {
-            if ( !LXQ.enabled() ) {
+            if ( !LXQ.enabled() || LXQ.lexiqaData.lexiqaProjectStatus !== 'loaded') {
                 if ( callback !== undefined && typeof callback === 'function' ) {
                     callback();
                 }
