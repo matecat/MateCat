@@ -74,7 +74,7 @@ class AnalyzeMain extends React.Component {
         </div>;
         return <div className="ui container">
             {this.state.volumeAnalysis ? (
-                <div className="project ui grid shadow-1">
+                <div className="project ui grid">
                     <div className="sixteen wide column">
                         <div className="analyze-header">
                             <AnalyzeHeader data={this.state.volumeAnalysis.get('summary')} project={this.state.project}/>

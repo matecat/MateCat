@@ -60,11 +60,11 @@ class JobAnalyzeHeader extends React.Component {
                         <div className="target-box">{this.props.jobInfo.target}</div>
                     </div>
                     <div className="job-not-payable">
-                        <span id="raw-words">{parseInt(this.total)}</span>
+                        <span id="raw-words">{parseInt(this.total)}</span> Total words
                     </div>
                     <div className="job-payable">
                         <a href="#">
-                            <span id="words">{parseInt(this.payable)}</span> words
+                            <span id="words">{parseInt(this.payable)}</span> Payable words
                         </a>
                     </div>
             {(this.props.jobInfo.splitted === "splitted") ? (
