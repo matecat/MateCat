@@ -3925,6 +3925,7 @@ float: left;
     content: "Clear Archive";
     font-size: 12px;
     font-weight: bold;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 .more.minus:before {
