@@ -58,6 +58,7 @@ body.analyze{
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
+                        top: 1px;
                     }
                 }
                 .project-create {
@@ -659,10 +660,11 @@ body.analyze{
             top: 1px;
         }
         .payable-words {
-            background-color: #cef8ce;
+            background-color: #c4df9b;
+            font-weight: 700;
         }
         .payable-words.updated-count {
-            background-color: rgba(53, 185, 69, 0.72);
+            background-color: #7cc576;
         }
         .updated-count {
             background-color: #f9ffb5;
@@ -674,6 +676,7 @@ body.analyze{
         padding-bottom: 2px !important;
         background-color: #e4e6e8;
         z-index: 0;
+        transition: 0.3s ease;
         .left-box {
             padding-top: 8px;
             i {
