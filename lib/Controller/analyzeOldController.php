@@ -85,7 +85,7 @@ class analyzeOldController extends viewController {
 
             parent::makeTemplate( $this->job_analysis_html  );
             $this->jpassword = $pass;
-            $this->ppassword = null;
+            $this->ppassword = $this->project->password;
         } else {
             $this->project_not_found = $this->project->password != $pass;
 
@@ -151,7 +151,8 @@ class analyzeOldController extends viewController {
         if ( empty( $this->jid ) ) {
             $this->template->project_password = $this->ppassword;
         } else {
-            $this->template->project_password = $this->jpassword;
+            $this->template->project_password = $this->ppassword;
+            $this->template->job_password =     $this->jpassword;
             $this->template->jid              = $this->jid;
         }
 

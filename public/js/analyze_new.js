@@ -36,14 +36,25 @@ UI = {
     },
     getProjectVolumeAnalysisData: function () {
         var self = this;
-        API.PROJECTS.getVolumeAnalysis().done(function (response) {
-            self.parseVolumeAnalysisData(response);
-            API.PROJECTS.getProject(config.id_project).done(function (response) {
-                UI.currentOutsourceProject = response.project;
-                self.renderAnalysisPage();
+        if (config.jobAnalysis) {
+            API.PROJECTS.getJobVolumeAnalysis().done(function (response) {
+                self.parseVolumeAnalysisData(response);
+                API.PROJECTS.getProject(config.id_project).done(function (response) {
+                    UI.currentOutsourceProject = response.project;
+                    self.renderAnalysisPage();
+                });
+                self.pollData(response);
             });
-            self.pollData(response);
-        });
+        } else {
+            API.PROJECTS.getVolumeAnalysis().done(function (response) {
+                self.parseVolumeAnalysisData(response);
+                API.PROJECTS.getProject(config.id_project).done(function (response) {
+                    UI.currentOutsourceProject = response.project;
+                    self.renderAnalysisPage();
+                });
+                self.pollData(response);
+            });
+        }
     },
     renderAnalysisPage: function () {
         AnalyzeActions.renderAnalysis(UI.volumeAnalysis, UI.currentOutsourceProject);

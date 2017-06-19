@@ -121,6 +121,19 @@ API.PROJECTS = {
             type: "POST",
             url : "/?action=getVolumeAnalysis"
         });
+    },
+    getJobVolumeAnalysis: function () {
+        var pid = config.id_project;
+        var jpassword = config.jpassword ;
+        var data = {
+            pid: pid,
+            jpassword: jpassword
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=getVolumeAnalysis"
+        });
     }
 
 
