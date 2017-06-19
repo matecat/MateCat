@@ -60,6 +60,10 @@ class QualityReportController extends \BaseKleinViewController  {
      */
     private function getModel() {
         $this->model = new QualityReportModel( $this->findChunk() );
+
+        if ( $this->request->version ) {
+            $this->model->setVersionNumber( $this->request->version);
+        }
         return $this->model ;
     }
 
@@ -68,7 +72,7 @@ class QualityReportController extends \BaseKleinViewController  {
         return isset( $param['download'] );
     }
     /**
-     * @return \Chunks_ChunkDao
+     * @return \Chunks_ChunkStruct
      * @throws \Exceptions_RecordNotFound
      */
     private function findChunk() {
