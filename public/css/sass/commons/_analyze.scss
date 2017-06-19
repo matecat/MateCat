@@ -115,6 +115,7 @@ body.analyze{
                     padding: 5px;
                     border: 1px solid #7eaf3e;
                     text-align: center;
+                    transition: 0.4s ease;
                     h3, h4 {
                         margin: 0;
                     }
@@ -192,26 +193,17 @@ body.analyze{
                                         top: 1px;
                                         .source-box {
                                             float: left;
-                                            //max-width: 60px;
-                                            //min-width: 60px;
-                                            //white-space: nowrap;
-                                            //overflow: hidden;
-                                            //text-overflow: ellipsis;
                                             line-height: 30px;
                                         }
                                         .in-to {
                                             float: left;
-                                            top: 4px;
+                                            top: 3px;
                                             color: #5a5a5a;
                                             line-height: 28px;
                                             position: relative;
                                         }
                                         .target-box {
                                             float: left;
-                                            //width: 60px;
-                                            //white-space: nowrap;
-                                            //overflow: hidden;
-                                            //text-overflow: ellipsis;
                                             line-height: 30px;
                                         }
                                     }
@@ -662,12 +654,15 @@ body.analyze{
         .payable-words {
             background-color: #c4df9b;
             font-weight: 700;
+            transition: 0.3s ease;
         }
         .payable-words.updated-count {
             background-color: #7cc576;
+            transition: 0.3s ease;
         }
         .updated-count {
             background-color: #f9ffb5;
+            transition: 0.4s ease;
         }
     }
 
