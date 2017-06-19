@@ -11,16 +11,16 @@ class JobAnalyze extends React.Component {
     }
 
     getChunks() {
-        // chunks
-        // totals
-        // idJob
-        // project
-        var self = this;
-        var index = 0;
+        let self = this;
+        let index = this.props.chunks.size + 1;
         return this.props.chunks.map(function (chunk, i) {
-            index++;
-            return <ChunkAnalyze chunk={chunk} total={self.props.total.get(i)} index={index}/>
-        });
+            index--;
+            return <ChunkAnalyze key={i}
+                                 chunk={chunk}
+                                 total={self.props.total.get(i)}
+                                 index={index}
+                                 chunkInfo={self.props.jobInfo.chunks[i]}/>
+        }).reverse();
 
     }
 
@@ -44,8 +44,11 @@ class JobAnalyze extends React.Component {
                         <div className="ui grid chunks">
                             <div className="chunk-container sixteen wide column">
                                 <div className="ui grid analysis">
-                                    <JobAnalyzeHeader/>
-                                    <JobTableHeader/>
+                                    <JobAnalyzeHeader job={this.props.job}
+                                                      totals={this.props.total}
+                                                      project={this.props.project}
+                                                      jobInfo={this.props.jobInfo}/>
+                                    <JobTableHeader rates={this.props.jobInfo.rates}/>
                                     {this.getChunks()}
                                 </div>
                             </div>

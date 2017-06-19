@@ -16,7 +16,13 @@ class ProjectAnalyze extends React.Component {
                 let jobVolumeAnalysisChunk =self.props.volumeAnalysis.get(job.get('id').toString()).get('chunks');
                 let jobVolumeAnalysisTotal =self.props.volumeAnalysis.get(job.get('id').toString()).get('totals');
                 idArray.push(job.get('id'));
-                return <JobAnalyze key={job.get('password')} chunks={jobVolumeAnalysisChunk} total={jobVolumeAnalysisTotal} project={self.props.project} idJob={job.get('id')}/>
+                return <JobAnalyze key={job.get('password')}
+                                   chunks={jobVolumeAnalysisChunk}
+                                   total={jobVolumeAnalysisTotal}
+                                   project={self.props.project}
+                                   job={job}
+                                   idJob={job.get('id')}
+                                   jobInfo={self.props.jobsInfo[job.get('id')]}/>
             }
         });
     }

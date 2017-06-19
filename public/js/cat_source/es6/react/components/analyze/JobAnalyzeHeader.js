@@ -7,10 +7,24 @@ class JobAnalyzeHeader extends React.Component {
         super(props);
     }
 
+    calculateWords() {
+        this.total = 0;
+        this.payable = 0;
+        let self = this;
+        this.props.totals.forEach(function (chunk, i) {
+            self.payable = self.payable + chunk.get('TOTAL_PAYABLE').get(0);
+        });
+
+        _.each(this.props.jobInfo.chunks, function (chunk, i) {
+            self.total = self.total + chunk.total_raw_word_count
+        });
+    }
+
     componentDidUpdate() {
     }
 
     componentDidMount() {
+        console.log("ciao");
     }
 
     componentWillUnmount() {
@@ -21,24 +35,30 @@ class JobAnalyzeHeader extends React.Component {
     }
 
     render() {
+        this.calculateWords();
         return <div className="head-chunk sixteen wide column shadow-1 pad-right-10">
                     <div className="source-target">
-                        <div className="source-box">English</div>
+                        <div className="source-box">{this.props.job.get('sourceTxt')}</div>
                         <div className="in-to">
                             <i className="icon-chevron-right icon"></i>
                         </div>
-                        <div className="target-box">Haitian Creole French</div>
+                        <div className="target-box">{this.props.job.get('targetTxt')}</div>
                     </div>
                     <div className="job-not-payable">
-                        <span id="raw-words">7'845,783</span>
+                        <span id="raw-words">{parseInt(this.total)}</span>
                     </div>
                     <div className="job-payable">
                         <a href="#">
-                            <span id="words">5'485,384</span> words
+                            <span id="words">{parseInt(this.payable)}</span> words
                         </a>
                     </div>
-                    <div className="merge ui button"><i className="icon-compress icon"></i> Merge</div>
-                    {/*<!--<div className="split ui button"><i className="icon-expand icon"></i> Split</div>-->*/}
+            {(this.props.jobInfo.splitted === "splitted") ? (
+                <div className="merge ui button"><i className="icon-compress icon"/> Merge</div>
+            ) : (
+                <div className="split ui button"><i className="icon-expand icon"/> Split</div>
+            )}
+
+
                 </div>;
 
     }

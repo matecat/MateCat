@@ -136,6 +136,7 @@ class analyzeController extends viewController {
         }
 
         $this->template->jobs                       = $this->model->jobs;
+        $this->template->json_jobs                  = json_encode($this->model->jobs);
         $this->template->fast_analysis_wc           = $this->model->fast_analysis_wc;
         $this->template->fast_analysis_wc_print     = $this->model->fast_analysis_wc_print;
         $this->template->tm_analysis_wc             = $this->model->tm_analysis_wc;

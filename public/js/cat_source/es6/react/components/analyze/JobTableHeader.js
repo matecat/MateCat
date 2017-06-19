@@ -21,6 +21,7 @@ class JobTableHeader extends React.Component {
     }
 
     render() {
+        let rates = this.props.rates;
         return <div className="ui grid job-table-header">
             <div className="chunks-title-table sixteen wide column shadow-1 pad-right-10">
                 <div className="left-box">
@@ -51,17 +52,17 @@ class JobTableHeader extends React.Component {
                 <div className="single-analysis">
                     <div className="single total">Pay</div>
                     <div className="single payable-words"> > </div>
-                    <div className="single new">100%</div>
-                    <div className="single repetition">30%</div>
-                    <div className="single internal-matches">60%</div>
-                    <div className="single p-50-74">100%</div>
-                    <div className="single p-75-84">60%</div>
-                    <div className="single p-65-94">60%</div>
-                    <div className="single p-95-99">60%</div>
-                    <div className="single tm-100">30%</div>
-                    <div className="single tm-public">30%</div>
+                    <div className="single new">{rates.NO_MATCH}%</div>
+                    <div className="single repetition">{rates.REPETITIONS}%</div>
+                    <div className="single internal-matches">{rates.INTERNAL}%</div>
+                    <div className="single p-50-74">{rates['50%-74%']}%</div>
+                    <div className="single p-75-84">{rates['75%-84%']}%</div>
+                    <div className="single p-65-94">{rates['85%-94%']}%</div>
+                    <div className="single p-95-99">{rates['95%-99%']}%</div>
+                    <div className="single tm-100">{rates['100%']}%</div>
+                    <div className="single tm-public">{rates['100%_PUBLIC']}%</div>
                     <div className="single tm-context">0%</div>
-                    <div className="single machine-translation">80%</div>
+                    <div className="single machine-translation">{rates.MT}%</div>
                 </div>
             </div>
         </div>;

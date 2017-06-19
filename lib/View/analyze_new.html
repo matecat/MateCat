@@ -10,6 +10,7 @@
     <link href="${basepath}public/css/build/analyze-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
+        /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
             status: '${project_status}',
@@ -21,8 +22,10 @@
             support_mail: '${support_mail}',
             id_project: '${pid}',
             password: '${project_password}',
-            outsource_service_login : '${outsource_service_login}'
+            outsource_service_login : '${outsource_service_login}',
+            jobs: ${json_jobs}
         };
+        /*]]>*/
     </script>
 
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>

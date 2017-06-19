@@ -16,7 +16,9 @@ UI = {
         }), headerMountPoint);
 
         var analyzeMountPoint = $("#analyze-container")[0];
-        ReactDOM.render(React.createElement(AnalyzeMain), analyzeMountPoint);
+        ReactDOM.render(React.createElement(AnalyzeMain, {
+            jobsInfo: config.jobs
+        }), analyzeMountPoint);
 
         API.TEAM.getAllTeams().done(function (data) {
             self.teams = data.teams;

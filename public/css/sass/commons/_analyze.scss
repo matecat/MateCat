@@ -253,10 +253,12 @@ body.analyze{
 .analysis {
     .job-table-header {
         margin-top: 0px !important;
-        .chunk-analyze-container {
-            margin-top: 0;
-            margin-bottom: 0;
-        }
+
+    }
+    .chunk-analyze-container {
+        margin-top: 0;
+        margin-bottom: 0;
+        width: 103%;
     }
     .chunks-title-table, .chunks-pay-table, .chunk, .chunk-detail {
         .left-box {
@@ -633,6 +635,12 @@ body.analyze{
         }
         .payable-words {
             background-color: #cef8ce;
+        }
+        .payable-words.updated-count {
+            background-color: rgba(53, 185, 69, 0.72);
+        }
+        .updated-count {
+            background-color: #f9ffb5;
         }
     }
 
