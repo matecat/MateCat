@@ -312,18 +312,6 @@ let ManageActions = {
 
     /********* Modals *********/
 
-    openCreateTeamModal: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
-        });
-    },
-
-    openChangeTeamModal: function (project) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-            project: project
-        });
-    },
 
     openModifyTeamModal: function (team) {
         API.TEAM.getTeamMembers(team.id).then(function (data) {
@@ -349,13 +337,7 @@ let ManageActions = {
         });
     },
 
-    openOutsourceModal: function (project, job, url) {
-        UI.openOutsourceModal(project.toJS(), job.toJS(), url);
-    },
-
     /********* teams *********/
-
-
 
     createTeam: function (teamName, members) {
         let team;
@@ -553,15 +535,6 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
         });
-    },
-
-    // Analyze Actions
-    openSplitModal: function (job, project) {
-        UI.openSplitJobModal(job, project);
-    },
-
-    openMergeModal: function (project, job) {
-        UI.openMergeModal(project.toJS(), job.toJS());
     }
 
 };

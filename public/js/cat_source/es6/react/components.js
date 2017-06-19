@@ -34,6 +34,7 @@ window.TeamConstants = require('./constants/TeamConstants');
 window.ManageActions = require('./actions/ManageActions');
 window.AnalyzeActions = require('./actions/AnalyzeActions');
 window.TeamsActions = require('./actions/TeamsActions');
+window.ModalsActions = require('./actions/ModalsActions');
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;

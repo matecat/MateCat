@@ -7,6 +7,7 @@ UI = {
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeTeam = this.changeTeam.bind(this);
+        this.reloadProjects = this.reloadProjects.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
         this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail;
@@ -320,67 +321,16 @@ UI = {
     //********* Modals **************//
 
     openCreateTeamModal: function () {
-        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create New Team");
+        ModalsActions.openCreateTeamModal()
     },
 
     openModifyTeamModal: function (team, hideChangeName) {
-        var props = {
-            team: team,
-            hideChangeName: hideChangeName
-        };
-        APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
+        ModalsActions.openModifyTeamModal(team, hideChangeName);
     },
 
     openChangeTeamModal: function (teams, project) {
-        var props = {
-            teams: teams,
-            project: project,
-            selectedTeam: this.selectedTeam.id
-        };
-        APP.ModalWindow.showModalComponent(ChangeTeamModal, props, "Move project");
-    },
-
-    openOutsourceModal: function (project, job, url) {
-        var props = {
-            project: project,
-            job: job,
-            url: url,
-            fromManage: true,
-            translatorOpen: true,
-            onCloseCallback: function () {
-
-            }
-        };
-        var style = {width: '970px',maxWidth: '970px'};
-        APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
-    },
-
-    openSplitJobModal: function (job, project) {
-        var props = {
-            job: job,
-            project: project
-        };
-        var style = {width: '670px',maxWidth: '670px'};
-        APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
-    },
-    openMergeModal: function (project, job) {
-        var props = {
-            text: 'This will cause the merging of all chunks in only one job. ' +
-            'This operation cannot be canceled.',
-            successText: "Continue",
-            successCallback: function () {
-                API.JOB.confirmMerge(project, job);
-                UI.reloadProjects();
-                APP.ModalWindow.onCloseModal();
-            },
-            cancelText: "Cancel",
-            cancelCallback: function () {
-                APP.ModalWindow.onCloseModal();
-            }
-
-        };
-        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
-    },
+        ModalsActions.openChangeTeamModal(teams, project,  this.selectedTeam.id);
+    }
 };
 
 

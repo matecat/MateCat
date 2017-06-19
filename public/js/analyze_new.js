@@ -4,7 +4,7 @@ UI = {
     init: function () {
         this.pollingTime = 1000;
         this.segmentsThreshold = 50000;
-
+        this.reloadAnalysis = this.reloadAnalysis.bind(this);
         UI.render();
     },
     render: function () {
@@ -29,6 +29,10 @@ UI = {
 
         this.getProjectVolumeAnalysisData();
 
+    },
+    reloadAnalysis: function () {
+        window.location.reload();
+        // UI.getProjectVolumeAnalysisData()
     },
     getProjectVolumeAnalysisData: function () {
         var self = this;

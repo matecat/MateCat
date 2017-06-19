@@ -20,7 +20,6 @@ class ProjectAnalyze extends React.Component {
                                    chunks={jobVolumeAnalysisChunk}
                                    total={jobVolumeAnalysisTotal}
                                    project={self.props.project}
-                                   job={job}
                                    idJob={job.get('id')}
                                    jobInfo={self.props.jobsInfo[job.get('id')]}/>
             }

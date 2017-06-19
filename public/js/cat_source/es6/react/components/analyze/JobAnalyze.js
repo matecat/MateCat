@@ -12,15 +12,23 @@ class JobAnalyze extends React.Component {
 
     getChunks() {
         let self = this;
-        let index = this.props.chunks.size + 1;
-        return this.props.chunks.map(function (chunk, i) {
-            index--;
-            return <ChunkAnalyze key={i}
-                                 chunk={chunk}
-                                 total={self.props.total.get(i)}
-                                 index={index}
-                                 chunkInfo={self.props.jobInfo.chunks[i]}/>
-        }).reverse();
+        if (this.props.chunks) {
+            let index = this.props.chunks.size + 1;
+            return this.props.chunks.map(function (files, i) {
+                index--;
+                let job = self.props.project.get('jobs').find(function (jobElem) {
+                    return jobElem.get('password') === i
+                });
+                return <ChunkAnalyze key={i}
+                                     files={files}
+                                     job={job}
+                                     project={self.props.project}
+                                     total={self.props.total.get(i)}
+                                     index={index}
+                                     chunkInfo={self.props.jobInfo.chunks[i]}/>
+            }).reverse().toList().toJS();
+        }
+        return '';
 
     }
 
@@ -44,8 +52,7 @@ class JobAnalyze extends React.Component {
                         <div className="ui grid chunks">
                             <div className="chunk-container sixteen wide column">
                                 <div className="ui grid analysis">
-                                    <JobAnalyzeHeader job={this.props.job}
-                                                      totals={this.props.total}
+                                    <JobAnalyzeHeader totals={this.props.total}
                                                       project={this.props.project}
                                                       jobInfo={this.props.jobInfo}/>
                                     <JobTableHeader rates={this.props.jobInfo.rates}/>

@@ -639,9 +639,7 @@ body.analyze{
         .payable-words.updated-count {
             background-color: rgba(53, 185, 69, 0.72);
         }
-        .updated-count {
-            background-color: #f9ffb5;
-        }
+
     }
 
     .chunk-detail {
@@ -655,6 +653,9 @@ body.analyze{
                 display: inline-block;
             }
         }
+    }
+    .updated-count {
+        background-color: #f9ffb5;
     }
 }
 

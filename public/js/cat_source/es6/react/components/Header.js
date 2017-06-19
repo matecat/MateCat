@@ -108,7 +108,7 @@ class Header extends React.Component {
     }
 
     openCreateTeams () {
-        ManageActions.openCreateTeamModal();
+        ModalsActions.openCreateTeamModal();
     }
 
     openModifyTeam (event, team) {

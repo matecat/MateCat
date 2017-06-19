@@ -129,7 +129,7 @@ class SplitJobModal extends React.Component {
         API.JOB.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), array.length, array)
             .done(function (d) {
                 if (d.data && d.data.chunks) {
-                    UI.reloadProjects();
+                    self.props.callback();
                     APP.ModalWindow.onCloseModal();
                 }
                 if ((typeof d.errors != 'undefined') && (d.errors.length) ) {

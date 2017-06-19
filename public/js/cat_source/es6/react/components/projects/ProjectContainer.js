@@ -135,7 +135,7 @@ class ProjectContainer extends React.Component {
     }
 
     openChangeTeamModal() {
-        ManageActions.openChangeTeamModal(this.props.project)
+        ModalsActions.openChangeTeamModal(this.props.project)
     }
 
     changeProjectName(event) {
