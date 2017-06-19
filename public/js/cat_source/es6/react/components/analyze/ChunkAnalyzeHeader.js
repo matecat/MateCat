@@ -48,8 +48,8 @@ class ChunkAnalyzeHeader extends React.Component {
                         <a href="#">
                             File <span className="details">details </span>
                         </a>
-                        (<span className="f-details-number">{_.size(this.props.jobInfo.files)}</span>)
                     </div>
+                    <div className="f-details-number">({_.size(this.props.jobInfo.files)})</div>
                 </div>
                 <div className="single-analysis">
                     <div className="single total">{this.props.jobInfo.total_raw_word_count_print}</div>

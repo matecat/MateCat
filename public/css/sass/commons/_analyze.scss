@@ -32,26 +32,32 @@ body.analyze{
                     top: 0px;
                     z-index: 2;
                     left: -45px;
-                    max-width: 535px;
+                    max-width: 110%;
                     min-width: 340px;
                     background-color: #d8d8d8;
                     color: #000000;
                     border-radius: 0px 2px 2px 0px;
+                    padding-right: 10px;
+                    .project-id, .project-name {
+                        display: inline-block;
+                        vertical-align: text-bottom;
+                        position: relative;
+                    }
                     .project-id {
                         font-size: 14px;
                         font-weight: 700;
-                        margin-right: 3px;
+                        margin-right: 5px;
                         margin-left: 15px;
-                        display: inline-block;
                         color: #5a5a5a;
-                        vertical-align: top;
-                        position: relative;
-                        top: 3px;
+                        top: -2px;
                     }
                     .project-name {
                         font-size: 20px;
-                        display: inline-block;
-                        vertical-align: text-bottom;
+                        max-width: 90%;
+                        min-width: 30px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
                 }
                 .project-create {
@@ -65,8 +71,25 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                         }
+                        .complete {
+                            display: inline-block;
+                            margin-left: 5px;
+                            .number {
+                                font-weight: 700;
+                            }
+                        }
                         .progress-bar {
                             width: 100%;
+                        }
+                        .downloadAnalysisReport {
+                            color: #4183C4;
+                            text-decoration: underline;
+                            font-weight: 700;
+                            margin-left: 5px;
+                            cursor: pointer;
+                            &:hover {
+                                text-decoration: none;
+                            }
                         }
                     }
                 }
@@ -140,17 +163,6 @@ body.analyze{
                 .job-header {
                     background-color: #ffffff !important;
                     padding: 0 0 !important;
-
-                    //.split-merge {
-                    //    padding: 10px 15px;
-                    //    .merge {
-                    //        font-family: Calibri, Arial, Helvetica, sans-serif;
-                    //        padding: 5px 17px;
-                    //        border: 1px solid #797979;
-                    //        font-size: 16px;
-                    //        transition: 0.3s ease !important;
-                    //    }
-                    //}
                 }
                 .job-body {
                     .chunks {
@@ -206,11 +218,13 @@ body.analyze{
                                         display: inline-block;
                                         padding: 0 0 0 10px !important;
                                         float: left;
-                                        text-decoration: line-through;
                                         line-height: 30px;
                                         position: relative;
                                         top: 1px;
                                         color: #b2b2b2;
+                                        #raw-words {
+                                            text-decoration: line-through;
+                                        }
                                     }
                                     .job-payable {
                                         padding: 0 10px !important;
@@ -237,6 +251,9 @@ body.analyze{
                                         &:hover {
                                             text-decoration: none;
                                         }
+                                    }
+                                    .split {
+                                        padding: 5px 18px;
                                     }
                                 }
                             }
@@ -348,7 +365,7 @@ body.analyze{
                 }
                 .file-details {
                     text-decoration: underline;
-                    min-width: 45px;
+                    min-width: 25px;
                     line-height: 30px;
                     font-weight: 700;
                     position: relative;
@@ -359,6 +376,9 @@ body.analyze{
                     &:hover {
                         text-decoration: none;
                     }
+                }
+                .f-details-number {
+                    display: inline-block;
                 }
             }
             .single-analysis {
@@ -624,7 +644,7 @@ body.analyze{
         .file-details {
             display: inline-block;
             text-decoration: underline;
-            min-width: 85px;
+            min-width: 65px;
             line-height: 30px;
             font-weight: 700;
             position: relative;
@@ -632,6 +652,11 @@ body.analyze{
             &:hover {
                 text-decoration: none;
             }
+        }
+        .f-details-number {
+            display: inline-block;
+            position: relative;
+            top: 1px;
         }
         .payable-words {
             background-color: #cef8ce;
@@ -651,8 +676,17 @@ body.analyze{
         z-index: 0;
         .left-box {
             padding-top: 8px;
+            i {
+                position: relative;
+                top: -6px;
+            }
             .file-title-details {
                 display: inline-block;
+                max-width: 82%;
+                min-width: 30px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
     }

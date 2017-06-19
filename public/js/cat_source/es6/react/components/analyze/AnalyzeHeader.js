@@ -17,7 +17,7 @@ class AnalyzeHeader extends React.Component {
         let html = <div className="analysis-create">
             <div className="search-tm-matches">
                 <div className="ui active inline loader"/>
-                <span className="complete">Fast word counting...</span>
+                <div className="complete">Fast word counting...</div>
             </div>
         </div>;
         let status = this.props.data.get('STATUS');
@@ -25,7 +25,7 @@ class AnalyzeHeader extends React.Component {
         if( status === 'DONE' ) {
              html = <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <span className="complete">Analysis complete</span>
+                    <h5 className="complete">Analysis complete:</h5>
                     <a className="downloadAnalysisReport" onClick={this.downloadAnalysisReport.bind(this)}>Download Analysis Report</a>
                 </div>
             </div>;
@@ -239,7 +239,7 @@ class AnalyzeHeader extends React.Component {
     render() {
         let analysisStateHtml = this.getAnalysisStateHtml();
         let wordsCountHtml = this.getWordscount();
-        return <div className="project-header ui grid">
+        return <div className="project-header ui grid shadow-1">
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
