@@ -78,8 +78,8 @@ class Analysis_AnalysisModel {
     }
 
     /**
-     * This method is basically copied from the analyzeController in
-     * MateCat default. A future refactoring of analyzeController should
+     * This method is basically copied from the analyzeOldController in
+     * MateCat default. A future refactoring of analyzeOldController should
      * make use of this model if possible.
      */
     public function loadData() {
