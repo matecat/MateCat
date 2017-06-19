@@ -264,10 +264,11 @@ body.analyze{
 .analysis {
     .job-table-header {
         margin-top: 0px !important;
+        margin-bottom: 0;
 
     }
     .chunk-analyze-container {
-        margin-top: 0;
+        margin-top: 0 !important;
         margin-bottom: 0;
         width: 103%;
     }

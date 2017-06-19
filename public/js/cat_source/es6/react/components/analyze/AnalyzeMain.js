@@ -83,7 +83,8 @@ class AnalyzeMain extends React.Component {
                         <div className="project-body ui grid">
                             <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}
                                             project={this.state.project}
-                                            jobsInfo={this.props.jobsInfo}/>
+                                            jobsInfo={this.props.jobsInfo}
+                                            status={this.state.volumeAnalysis.get('summary').get('STATUS')}/>
                         </div>
                     </div>
                 </div>

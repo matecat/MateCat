@@ -21,7 +21,8 @@ class ProjectAnalyze extends React.Component {
                                    total={jobVolumeAnalysisTotal}
                                    project={self.props.project}
                                    idJob={job.get('id')}
-                                   jobInfo={self.props.jobsInfo[job.get('id')]}/>
+                                   jobInfo={self.props.jobsInfo[job.get('id')]}
+                                   status={self.props.status}/>
             }
         });
     }

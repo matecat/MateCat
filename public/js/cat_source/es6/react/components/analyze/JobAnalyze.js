@@ -54,7 +54,8 @@ class JobAnalyze extends React.Component {
                                 <div className="ui grid analysis">
                                     <JobAnalyzeHeader totals={this.props.total}
                                                       project={this.props.project}
-                                                      jobInfo={this.props.jobInfo}/>
+                                                      jobInfo={this.props.jobInfo}
+                                                      status={this.props.status}/>
                                     <JobTableHeader rates={this.props.jobInfo.rates}/>
                                     {this.getChunks()}
                                 </div>
