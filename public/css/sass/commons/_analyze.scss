@@ -270,6 +270,11 @@ body.analyze{
         margin-top: 0 !important;
         margin-bottom: 0;
         width: 103%;
+        span {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+            width: 100%;
+        }
     }
     .chunks-title-table, .chunks-pay-table, .chunk, .chunk-detail {
         .left-box {
@@ -354,6 +359,7 @@ body.analyze{
         @media only screen and (max-width: 1199px) and (min-width: 992px) {
             .left-box {
                 width: 12%;
+                padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
                 }
@@ -436,6 +442,7 @@ body.analyze{
         @media only screen and (max-width: 991px) and (min-width: 768px) {
             .left-box {
                 width: 12%;
+                padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
                 }
@@ -515,6 +522,7 @@ body.analyze{
         @media only screen and (max-width: 767px) {
             .left-box {
                 width: 12%;
+                padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
                 }
@@ -669,13 +677,13 @@ body.analyze{
     }
 
     .chunk-detail {
-        padding-top: 2px !important;
-        padding-bottom: 2px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
         background-color: #e4e6e8;
         z-index: 0;
-        transition: 0.3s ease;
         .left-box {
             padding-top: 8px;
+            padding-left: 1rem;
             i {
                 position: relative;
                 top: -6px;
@@ -750,3 +758,35 @@ body.analyze{
 
     }
 }
+
+// Transitions
+.chunk-detail {
+    width: 100%;
+    height: 35px;
+    position: relative;
+    overflow: hidden;
+    &.transition-enter {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    &.transition-enter.transition-enter-active {
+        height: 35px;
+        -webkit-transition: height .3s ease;
+    }
+
+    &.transition-leave.transition-leave-active {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+        -webkit-transition: height .3s ease;
+    }
+}
+
+
+//.chunk-analyze-container span {
+//    padding-left: 0px !important;
+//    padding-right: 0px !important;
+//    width: 100%;
+//}

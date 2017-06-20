@@ -2,6 +2,7 @@
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let ChunkAnalyzeHeader = require('./ChunkAnalyzeHeader').default;
 let ChunkAnalyzeFile = require('./ChunkAnalyzeFile').default;
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 class ChunkAnalyze extends React.Component {
 
@@ -15,11 +16,12 @@ class ChunkAnalyze extends React.Component {
     getFiles() {
         let self = this;
         return this.props.files.map(function (file, i) {
-            return <ChunkAnalyzeFile file={file} fileInfo={self.props.chunkInfo.files[i]}/>
+            return <ChunkAnalyzeFile key={i} file={file} fileInfo={self.props.chunkInfo.files[i]}/>
         });
     }
 
-    showFiles() {
+    showFiles(e) {
+        e.preventDefault();
         this.setState({
             showFiles: !this.state.showFiles
         });
@@ -55,9 +57,16 @@ class ChunkAnalyze extends React.Component {
                                 openOutsourceModalFn={this.openOutsourceModal.bind(this)}
                                 jobInfo={this.props.chunkInfo}
                                 showFiles={this.showFiles.bind(this)}/>
-            {this.state.showFiles ? (
-                this.getFiles()
-            ) : ('')}
+
+                <CSSTransitionGroup
+                    transitionName="transition"
+                    transitionEnterTimeout={500}
+                    transitionLeaveTimeout={500}
+                >
+                    {this.state.showFiles ? (this.getFiles()): (null)}
+                </CSSTransitionGroup>
+
+
 
         </div>;
     }

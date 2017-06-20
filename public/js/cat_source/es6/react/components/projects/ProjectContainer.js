@@ -1,7 +1,4 @@
-/**
- * React Component for the editarea.
 
- */
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let ManageConstants = require('../../constants/ManageConstants');
 let Job = require('./JobContainer').default;
