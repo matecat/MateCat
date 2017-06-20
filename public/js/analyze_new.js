@@ -11,6 +11,7 @@ UI = {
         var self = this;
         var headerMountPoint = $("header")[0];
         ReactDOM.render(React.createElement(Header,{
+            loggedUser: config.isLoggedIn,
             showSubHeader: false,
             showModals: false,
             changeTeam: false
