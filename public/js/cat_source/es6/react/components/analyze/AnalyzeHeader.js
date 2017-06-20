@@ -130,7 +130,7 @@ class AnalyzeHeader extends React.Component {
 
     getWordscount() {
         let status = this.props.data.get('STATUS');
-        let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '';
+        let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '0';
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
             weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
@@ -145,7 +145,7 @@ class AnalyzeHeader extends React.Component {
                 weightedWords = this.props.data.get('TOTAL_RAW_WC');
             }
         }
-        let saving_perc = parseInt((raw_words - weightedWords)/raw_words * 100) + "%";
+        let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : 0%;
         if (saving_perc !== this.saving_perc_value) {
             this.updatedSavingWords = true;
         }
