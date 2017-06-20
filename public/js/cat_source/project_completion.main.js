@@ -167,7 +167,8 @@ if ( ProjectCompletion.enabled() ) {
     var showTranslateWarningMessage = function() {
 
         var message = "This job is currently under review. Segments are in read-only mode." ;
-        if ( config.last_completion_event_id ) {
+
+        if ( config.chunk_completion_undoable && config.last_completion_event_id ) {
             message = message + " To undo this action <a href=\"javascript:void(0);\" id=\"showTranslateWarningMessageUndoLink\" >click here</a>.";
         }
 

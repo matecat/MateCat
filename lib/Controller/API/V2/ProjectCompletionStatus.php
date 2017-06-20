@@ -5,6 +5,7 @@ namespace API\V2 ;
 use API\V2\Validators\ProjectPasswordValidator;
 use Features ;
 use API\V2\Validators\ProjectValidator;
+use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 
 class ProjectCompletionStatus extends KleinController {
 
@@ -36,62 +37,13 @@ class ProjectCompletionStatus extends KleinController {
         }
     }
 
-    private function dataForChunkStatus ( \Chunks_ChunkStruct $chunk, $is_review ) {
-        $record = \Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
-                'is_review' => $is_review
-        ) );
-
-        if ( $record != false ) {
-            $is_completed = true;
-            $completed_at = \Utils::api_timestamp( $record['create_date'] );
-        } else {
-            $is_completed = false;
-            $completed_at = null;
-        }
-
-        return array(
-                'id'       =>  $chunk->id,
-                'password' => $chunk->password,
-                'completed' => $is_completed,
-                'completed_at' => $completed_at,
-                'event_id' => $record['id_event']
-        );
-    }
-
     public function status() {
-        $chunks = $this->validator->getProject()->getChunks();
-
-        $response = array();
-        $response['revise'] = array();
-        $response['translate'] = array();
-
-        $response['id'] = $this->validator->getProject()->id ;
-
-        $any_uncomplete = false;
-
-        foreach( $chunks as $chunk ) {
-            $translate = $this->dataForChunkStatus($chunk, false); ;
-            $revise = $this->dataForChunkStatus($chunk, true);
-
-            $revise['password'] = Features::filter(
-                    'filter_job_password_to_review_password',
-                    $this->validator->getProject()->id_customer,
-                    $chunk->password,
-                    $chunk->id
-            );
-
-            $response['translate'][] = $translate ;
-            $response['revise'][] = $revise ;
-
-            if (! ( $revise['completed'] && $translate['completed'] ) ) $any_uncomplete = true;
-        }
-
-        $response['completed'] = !$any_uncomplete ;
+        // TODO: wrap everything inside a JSON formatter class
+        $model = new ProjectCompletionStatusModel( $this->validator->getProject() ) ;
 
         $this->response->json( array(
-            'project_status' => $response
+            'project_status' => $model->getStatus()
         ) ) ;
-
-
     }
+
 }

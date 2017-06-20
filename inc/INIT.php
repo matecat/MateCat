@@ -261,6 +261,9 @@ class INIT {
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
 
+    public static $SKIP_SQL_CACHE = false ;
+
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];

@@ -17,6 +17,8 @@ use Chunks_ChunkCompletionEventStruct;
 use Database;
 use Exception;
 use Exceptions_RecordNotFound;
+use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
+use FeatureSet;
 use LQA\ChunkReviewDao;
 use Utils;
 
@@ -36,6 +38,37 @@ class CompletionEventController extends BaseKleinViewController {
         // TODO: The following code does not really belong here. It's relted to ReviewImproved
         // and should be properly decoupled.
 
+        $project = $this->validator->getChunk()->getProject() ;
+        $undoable = true ;
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadForProject( $project );
+
+        $undoable = $featureSet->filter('filterIsChunkCompletionUndoable', $undoable, $project,
+                $this->validator->getChunk() );
+
+        if ( $undoable ) {
+            $this->__evalDelete() ;
+            $this->response->code( 200 ) ;
+            $this->response->send();
+        } else {
+            $this->response->code( 400 );
+        }
+    }
+
+    protected function afterConstruct() {
+        $this->validator = new ChunkPasswordValidator( $this->request );
+        $this->validator->validate() ;
+
+        $this->event = ( new Chunks_ChunkCompletionEventDao() )
+                ->getByIdAndChunk( $this->request->id_event, $this->validator->getChunk() );
+
+        if ( !$this->event ) {
+            throw new Exceptions_RecordNotFound() ;
+        }
+    }
+
+    private function __evalDelete() {
         $review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
                 $this->request->id_job, $this->request->password
         ) ;
@@ -58,21 +91,6 @@ class CompletionEventController extends BaseKleinViewController {
         ] ] );
         ( new Chunks_ChunkCompletionEventDao())->deleteEvent( $this->event ) ;
         Database::obtain()->commit();
-
-        $this->response->code( 200 ) ;
-        $this->response->send();
-    }
-
-    protected function afterConstruct() {
-        $this->validator = new ChunkPasswordValidator( $this->request );
-        $this->validator->validate() ;
-
-        $this->event = ( new Chunks_ChunkCompletionEventDao() )
-                ->getByIdAndChunk( $this->request->id_event, $this->validator->getChunk() );
-
-        if ( !$this->event ) {
-            throw new Exceptions_RecordNotFound() ;
-        }
     }
 
     private function __validateUndoData( $undo_data ) {
