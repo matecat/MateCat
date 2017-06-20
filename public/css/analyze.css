@@ -110,10 +110,10 @@ a:hover{text-decoration:none}
     /*text-decoration: underline;*/
     /*cursor: pointer;*/
 /*}*/
-.analysisNotPerformed {
-	margin-top: -8px !important;
-    text-decoration: underline;
-}
+/*.analysisNotPerformed {*/
+	/*margin-top: -8px !important;*/
+    /*text-decoration: underline;*/
+/*}*/
 span.complete {
     margin-right: 30px !important;
 }

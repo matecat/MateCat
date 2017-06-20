@@ -62,9 +62,7 @@ class ChunkAnalyzeHeader extends React.Component {
                 <div className="left-box">
                     <div className="job-id">({id})</div>
                     <div className="file-details" onClick={this.props.showFiles}>
-                        <a href="#">
-                            File <span className="details">details </span>
-                        </a>
+                        File <span className="details">details </span>
                     </div>
                     <div className="f-details-number">({_.size(this.props.jobInfo.files)})</div>
                 </div>

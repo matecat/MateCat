@@ -92,8 +92,8 @@ class AnalyzeHeader extends React.Component {
         }  else if( status === 'NOT_TO_ANALYZE' ){
             html = <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <span className="complete">This job is too big.</span>
-                    <span className="analysisNotPerformed">The analysis was not performed.</span>
+                    <div className="complete">This job is too big.</div>
+                    <div className="analysisNotPerformed">The analysis was not performed.</div>
                 </div>
             </div>
 
@@ -182,7 +182,7 @@ class AnalyzeHeader extends React.Component {
                                 </div>
                             </div>
                         </h2>
-                        <p>MateCat gives you more matches than any other CAT tool thanks to a mix of public and private translation memories, and machine translation.
+                        <p>MateCat gives you more matches than any other <b>CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
                         </p>
                     </div>
                 </div>
