@@ -12,7 +12,8 @@ UI = {
         var headerMountPoint = $("header")[0];
         ReactDOM.render(React.createElement(Header,{
             showSubHeader: false,
-            showModals: false
+            showModals: false,
+            changeTeam: false
         }), headerMountPoint);
 
         var analyzeMountPoint = $("#analyze-container")[0];

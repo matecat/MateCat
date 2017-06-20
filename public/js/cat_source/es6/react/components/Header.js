@@ -37,7 +37,7 @@ class Header extends React.Component {
 
     initDropdown() {
         let self = this;
-        if (this.state.teams.size > 0){
+        if (this.state.teams.size > 0 && !_.isUndefined(this.dropdownTeams)){
             if (this.state.teams.size == 1) {
                 this.dropdownTeams.classList.add("only-one-team");
             } else {
@@ -167,7 +167,7 @@ class Header extends React.Component {
         let dropdownIcon = (this.state.teams.size > 1)? <i className="dropdown icon"/> : '';
         let dontShowCursorClass = (this.state.teams.size == 1)? 'disable-dropdown-team' : '';
         let personalTeam='';
-        if (this.state.teams.size > 0) {
+        if (this.state.teams.size > 0 && this.props.changeTeam) {
             let items = this.state.teams.map(function(team, i) {
                 let iconModal = '';
                 if (team.get('type') == 'personal') {
@@ -222,6 +222,11 @@ class Header extends React.Component {
                     </div>
                 </div>
             </div>;
+        } else if (this.state.teams.size > 0 && self.state.selectedTeamId) {
+            let team = this.state.teams.find(function (team) {
+                return team.get('id') === self.state.selectedTeamId;
+            });
+            return <div className="organization-name">{team.get("name")}</div>;
         }
         return result;
     }
@@ -283,7 +288,8 @@ Header.defaultProps = {
     showSubHeader: true,
     showModals: true,
     showLinks: false,
-    loggedUser: true
+    loggedUser: true,
+    changeTeam: true
 };
 
 export default Header ;

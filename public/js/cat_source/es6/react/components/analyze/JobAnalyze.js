@@ -19,13 +19,15 @@ class JobAnalyze extends React.Component {
                 let job = self.props.project.get('jobs').find(function (jobElem) {
                     return jobElem.get('password') === i
                 });
-                return <ChunkAnalyze key={i}
-                                     files={files}
-                                     job={job}
-                                     project={self.props.project}
-                                     total={self.props.total.get(i)}
-                                     index={index}
-                                     chunkInfo={self.props.jobInfo.chunks[i]}/>
+                if (!_.isUndefined(self.props.jobInfo.chunks[job.get('password')])) {
+                    return <ChunkAnalyze key={i}
+                                         files={files}
+                                         job={job}
+                                         project={self.props.project}
+                                         total={self.props.total.get(i)}
+                                         index={index}
+                                         chunkInfo={self.props.jobInfo.chunks[i]}/>
+                }
             }).toList().toJS();
         }
         return '';
