@@ -26,7 +26,8 @@ class JobAnalyze extends React.Component {
                                          project={self.props.project}
                                          total={self.props.total.get(i)}
                                          index={index}
-                                         chunkInfo={self.props.jobInfo.chunks[i]}/>
+                                         chunkInfo={self.props.jobInfo.chunks[i]}
+                                         chunksSize={_.size(self.props.jobInfo.chunks)}   />
                 }
             }).toList().toJS();
         }

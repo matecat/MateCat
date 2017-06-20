@@ -274,11 +274,10 @@ body.analyze{
         margin-top: 0 !important;
         margin-bottom: 0;
         width: 103%;
-        span {
-            padding-left: 0px !important;
-            padding-right: 0px !important;
-            width: 100%;
+        .ui.grid {
+            margin-top: 0;
         }
+
     }
     .chunks-title-table, .chunks-pay-table, .chunk, .chunk-detail {
         .left-box {
@@ -688,7 +687,6 @@ body.analyze{
         z-index: 0;
         .left-box {
             padding-top: 8px;
-            padding-left: 1rem;
             i {
                 position: relative;
                 top: -6px;

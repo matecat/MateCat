@@ -16,7 +16,10 @@ class ChunkAnalyze extends React.Component {
     getFiles() {
         let self = this;
         return this.props.files.map(function (file, i) {
-            return <ChunkAnalyzeFile key={i} file={file} fileInfo={self.props.chunkInfo.files[i]}/>
+            return <ChunkAnalyzeFile key={i}
+                                     file={file}
+                                     fileInfo={self.props.chunkInfo.files[i]}
+                                     />
         });
     }
 
@@ -56,9 +59,10 @@ class ChunkAnalyze extends React.Component {
                                 total={this.props.total}
                                 openOutsourceModalFn={this.openOutsourceModal.bind(this)}
                                 jobInfo={this.props.chunkInfo}
-                                showFiles={this.showFiles.bind(this)}/>
+                                showFiles={this.showFiles.bind(this)}
+                                chunksSize={this.props.chunksSize}/>
 
-                <CSSTransitionGroup
+                <CSSTransitionGroup component="div" className="ui grid"
                     transitionName="transition"
                     transitionEnterTimeout={500}
                     transitionLeaveTimeout={500}
