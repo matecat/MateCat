@@ -824,6 +824,12 @@ footer nav {
     text-align: right;
 }
 
+footer .link-manage-page {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
 footer nav, footer nav a {
     font-size: 14px;
     color: #ffffff !important;
