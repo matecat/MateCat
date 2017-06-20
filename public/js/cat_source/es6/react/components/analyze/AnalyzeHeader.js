@@ -97,7 +97,7 @@ class AnalyzeHeader extends React.Component {
                 </div>
             </div>
 
-        } else if (STATUS === 'EMPTY'){
+        } else if (status === 'EMPTY'){
             let error = '';
             if ( config.support_mail.indexOf( '@' ) === -1 ) {
                 error = config.support_mail;
