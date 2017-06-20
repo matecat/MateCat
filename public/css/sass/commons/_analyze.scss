@@ -786,8 +786,53 @@ body.analyze{
 }
 
 
-//.chunk-analyze-container span {
-//    padding-left: 0px !important;
-//    padding-right: 0px !important;
-//    width: 100%;
-//}
+.analyze footer {
+    background: #6d6e71;
+    height: 27px;
+    text-align: right;
+    border-top: 1px solid #333;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1001;
+}
+
+.analyze footer .wrapper {
+    margin: 0px auto 0 auto;
+    padding: 3px 0 0 0;
+    width: 92%;
+    font-size: 14px;
+    position: relative;
+    text-align: right;
+}
+
+
+
+footer ul {
+    margin: -5px 0 0 0;
+    padding: 4px;
+    float: left;
+    list-style: none;
+}
+
+footer nav {
+    background: none;
+    float: right;
+    display: block;
+    line-height: 19px;
+    box-shadow: none;
+    text-align: right;
+}
+
+footer nav, footer nav a {
+    font-size: 14px;
+    color: #ffffff !important;
+    text-decoration: underline;
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+
