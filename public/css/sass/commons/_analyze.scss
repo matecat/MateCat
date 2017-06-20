@@ -74,7 +74,7 @@ body.analyze{
                         }
                         .complete {
                             display: inline-block;
-                            margin-left: 5px;
+
                             .number {
                                 font-weight: 700;
                             }
@@ -201,6 +201,9 @@ body.analyze{
                                             color: #5a5a5a;
                                             line-height: 28px;
                                             position: relative;
+                                            i {
+                                                margin-right: 0;
+                                            }
                                         }
                                         .target-box {
                                             float: left;
