@@ -101,16 +101,9 @@ class AnalyzeHeader extends React.Component {
 
             html =  <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <h5>Searching for TM Matches </h5>
-                    <div className="initial-segments"> (71 of </div>
-                    <div className="total-segments">2393)</div>
-                    <div className="progress-bar">
-                        <div className="progr">
-                            <div className="meter">
-                                <a className="approved-bar translate-tooltip"  data-html="Approved 100%" style={{width: "60%"}}/>
-                            </div>
-                        </div>
-                    </div>
+                    <span className="complete">Ops.. we got an error. No text to translate in the file {this.props.data.get('NAME')}</span>
+                    <span className="analysisNotPerformed">Contact <a href={"mailto:" + config.support_mail}> {config.support_mail}</a></span>
+
                 </div>
             </div>;
         }
@@ -137,7 +130,7 @@ class AnalyzeHeader extends React.Component {
 
     getWordscount() {
         let status = this.props.data.get('STATUS');
-        let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '';
+        let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '0';
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
             weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
@@ -152,7 +145,7 @@ class AnalyzeHeader extends React.Component {
                 weightedWords = this.props.data.get('TOTAL_RAW_WC');
             }
         }
-        let saving_perc = parseInt((raw_words - weightedWords)/raw_words * 100) + "%";
+        let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : '0%';
         if (saving_perc !== this.saving_perc_value) {
             this.updatedSavingWords = true;
         }
