@@ -102,6 +102,8 @@ class AnalyzeHeader extends React.Component {
             html =  <div className="analysis-create">
                 <div className="search-tm-matches">
                     <span className="complete">Ops.. we got an error. No text to translate in the file {this.props.data.get('NAME')}</span>
+                    <span className="analysisNotPerformed">Contact <a href={"mailto:" + config.support_mail}> {config.support_mail}</a></span>
+
                 </div>
             </div>;
         }
