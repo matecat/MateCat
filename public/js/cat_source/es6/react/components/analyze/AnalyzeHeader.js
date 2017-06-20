@@ -145,7 +145,7 @@ class AnalyzeHeader extends React.Component {
                 weightedWords = this.props.data.get('TOTAL_RAW_WC');
             }
         }
-        let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : 0%;
+        let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : '0%';
         if (saving_perc !== this.saving_perc_value) {
             this.updatedSavingWords = true;
         }
