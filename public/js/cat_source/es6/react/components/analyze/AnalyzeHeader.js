@@ -97,15 +97,31 @@ class AnalyzeHeader extends React.Component {
                 </div>
             </div>
 
-        } else {
-
+        } else if (STATUS === 'EMPTY'){
+            let error = '';
+            if ( config.support_mail.indexOf( '@' ) === -1 ) {
+                error = config.support_mail;
+            } else {
+                error = '<a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+            }
             html =  <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <span className="complete">Ops.. we got an error. No text to translate in the file {this.props.data.get('NAME')}</span>
-                    <span className="analysisNotPerformed">Contact <a href={"mailto:" + config.support_mail}> {config.support_mail}</a></span>
+                    <span className="complete">Ops.. we got an error. No text to translate in the file {this.props.data.get('NAME')}.</span><br/>
+                    <span className="analysisNotPerformed">Contact {error}</span>
 
                 </div>
             </div>;
+        } else {
+            if ( config.support_mail.indexOf( '@' ) === -1 ) {
+                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+            } else {
+                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+            }
+            html = <div className="analysis-create">
+                <div className="search-tm-matches">
+                    <span className="complete">{analyzerNotRunningErrorString}</span>
+                </div>
+            </div>
         }
         return html;
     }
