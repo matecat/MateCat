@@ -92,8 +92,8 @@ class AnalyzeHeader extends React.Component {
         }  else if( status === 'NOT_TO_ANALYZE' ){
             html = <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <span className="complete">This job is too big.</span>
-                    <span className="analysisNotPerformed">The analysis was not performed.</span>
+                    <div className="complete">This job is too big.</div>
+                    <div className="analysisNotPerformed">The analysis was not performed.</div>
                 </div>
             </div>
 

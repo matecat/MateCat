@@ -88,9 +88,15 @@ body.analyze{
                             font-weight: 700;
                             margin-left: 5px;
                             cursor: pointer;
+                            display: inline-block;
                             &:hover {
                                 text-decoration: none;
                             }
+                        }
+                        .analysisNotPerformed {
+                            margin-top: -8px !important;
+                            text-decoration: underline;
+                            display: inline-block;
                         }
                     }
                 }
