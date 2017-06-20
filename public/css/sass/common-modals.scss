@@ -839,6 +839,7 @@ div#matecat-modal p {
     margin-left: 0;
     margin-top: 5px;
     margin-bottom: 0;
+    box-sizing: content-box;
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {

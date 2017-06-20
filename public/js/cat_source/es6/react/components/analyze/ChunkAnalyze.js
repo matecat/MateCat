@@ -58,7 +58,7 @@ class ChunkAnalyze extends React.Component {
                                 jobInfo={this.props.chunkInfo}
                                 showFiles={this.showFiles.bind(this)}/>
 
-                <CSSTransitionGroup
+                <CSSTransitionGroup component="div" className="ui grid"
                     transitionName="transition"
                     transitionEnterTimeout={500}
                     transitionLeaveTimeout={500}
