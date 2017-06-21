@@ -64,16 +64,14 @@ class JobAnalyzeHeader extends React.Component {
                         <span id="raw-words">{parseInt(this.total)}</span> Total words
                     </div>
                     <div className="job-payable">
-                        <a href="#">
-                            <span id="words">{parseInt(this.payable)}</span> Payable words
-                        </a>
+                        <span id="words">{parseInt(this.payable)}</span> Payable words
                     </div>
             {(this.props.jobInfo.splitted === "splitted") ? (
-                <div className={"merge ui button "  + buttonsClass}
+                <div className={"merge ui blue basic button "  + buttonsClass}
                     onClick={this.openMergeModal.bind(this)} >
                     <i className="icon-compress icon"/> Merge</div>
             ) : (
-                <div className={"split ui button "  + buttonsClass}
+                <div className={"split ui blue basic button "  + buttonsClass}
                      onClick={this.openSplitModal.bind(this)}>
                     <i className="icon-expand icon"/> Split</div>
             )}
