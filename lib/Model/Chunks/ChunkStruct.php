@@ -40,6 +40,11 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         return CatUtils::getQualityOverallFromJobStruct( $this ) ;
     }
 
+    public function getQualityInfo(){
+        $qClass = CatUtils::getQualityInfoFromJobStruct( $this );
+        return ( isset( $qClass[ 'equivalent_class' ] ) ? $qClass[ 'equivalent_class' ] : null );
+    }
+
     public function getErrorsCount() {
         $dao = new \Translations\WarningDao() ;
         return $dao->getErrorsByChunk( $this );
