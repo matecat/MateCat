@@ -41,8 +41,6 @@ class CatDecorator extends AbstractDecorator {
         else {
             $this->varsForUncomplete();
         }
-
-        $this->template->chunk_completion_undoable = true ;
     }
 
     private function varsForUncomplete() {
