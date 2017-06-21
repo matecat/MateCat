@@ -109,11 +109,17 @@ body.analyze{
                     padding: 20px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
                     .percent {
-                        font-size: 56px;
+                        font-size: 40px;
                         font-weight: 700;
                         display: inline-block;
                         vertical-align: -webkit-baseline-middle;
                         margin-right: 10px;
+                    }
+                    .content {
+                        font-size: 20px;
+                        .sub.header {
+                            font-size: 12px;
+                        }
                     }
                 }
                 .word-raw, .matecat-raw {
@@ -125,14 +131,17 @@ body.analyze{
                     h3, h4 {
                         margin: 0;
                     }
+                    h3 {
+                        font-size: 28px
+                    }
                 }
                 .word-raw {
 
                 }
                 .overlay {
-                    background-color: rgba(243, 243, 243, 0.7);
+                    background-color: rgba(243, 243, 243, 0.6);
                     border: 1px solid #a7c3a7;
-                    margin-top: -54px;
+                    margin-top: -67px;
                     z-index: 10;
                     position: relative;
                     height: 100%;
@@ -223,7 +232,7 @@ body.analyze{
                                         line-height: 30px;
                                         position: relative;
                                         top: 1px;
-                                        color: #b2b2b2;
+                                        color: #969696;
                                         #raw-words {
                                             text-decoration: line-through;
                                         }
@@ -231,32 +240,39 @@ body.analyze{
                                     .job-payable {
                                         padding: 0 10px !important;
                                         float: left;
-                                        text-decoration: underline;
                                         min-width: 105px;
                                         line-height: 30px;
                                         font-weight: 700;
                                         position: relative;
                                         top: 1px;
-                                        &:hover {
-                                            text-decoration: none;
-                                        }
+                                        color: #4183C4;
                                     }
 
                                     .split, .merge {
                                         font-family: Calibri, Arial, Helvetica, sans-serif;
-                                        padding: 5px 10px;
+                                        padding: 5px 11px;
                                         vertical-align: top;
                                         font-size: 16px;
-                                        border: 1px solid #797979;
+                                        border: 1px solid #09beec;
                                         border-radius: 2px;
                                         float: right;
+                                        box-shadow: none !important;
                                         &:hover {
                                             text-decoration: none;
                                             box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                            border: 1px solid #09beec;
+                                        }
+                                        &:focus {
+                                            box-shadow: none !important;
+                                            background-color: grey;
+                                        }
+                                        &:active {
+                                            box-shadow: none !important;
+                                            background-color: grey;
                                         }
                                     }
                                     .split {
-                                        padding: 5px 18px;
+                                        padding: 5px 20px;
                                     }
                                 }
                             }
@@ -616,12 +632,14 @@ body.analyze{
         box-shadow: none !important;
         padding-bottom: 0px !important;
         .single-analysis {
+            line-height: 25px;
             .single {
-                line-height: 25px;
+                line-height: 18px;
                 border-bottom: 1px solid gray;
                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                 -moz-box-sizing: border-box;    /* Firefox, Gecko */
                 box-sizing: border-box;         /* Opera/IE 8+ */
+                padding-bottom: 3px;
             }
         }
     }
@@ -644,24 +662,25 @@ body.analyze{
         z-index: 2;
         .job-id {
             display: inline-block;
-            min-width: 65px;
-            color: #969696;
-            font-size: 13px;
+            min-width: 70px;
+            color: #0a0a0a;
+            font-size: 14px;
             position: relative;
-            line-height: 28px;
+            line-height: 35px;
             top: 1px;
             text-align: left;
+            font-weight: 700;
 
         }
         .file-details {
             display: inline-block;
             text-decoration: underline;
-            min-width: 65px;
+            min-width: 62px;
             line-height: 30px;
-            font-weight: 700;
             position: relative;
             top: 1px;
             cursor: pointer;
+            color: #969696;
             &:hover {
                 text-decoration: none;
             }
@@ -670,6 +689,7 @@ body.analyze{
             display: inline-block;
             position: relative;
             top: 1px;
+            color: #969696;
         }
         .payable-words {
             background-color: #c4df9b;
