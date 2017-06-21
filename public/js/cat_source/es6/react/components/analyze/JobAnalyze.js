@@ -35,6 +35,14 @@ class JobAnalyze extends React.Component {
 
     }
 
+    thereIsChunkOutsourced() {
+        let self = this;
+        let outsourceChunk = this.props.project.get('jobs').find(function (item) {
+            return !!(item.get('outsource')) && item.get('id') === self.props.idJob;
+        });
+        return !_.isUndefined(outsourceChunk)
+    }
+
     componentDidUpdate() {
     }
 
@@ -49,6 +57,7 @@ class JobAnalyze extends React.Component {
     }
 
     render() {
+        let outsourcedChunk = this.thereIsChunkOutsourced();
         return <div className="job ui grid">
                     <div className="job-body sixteen wide column">
 
@@ -58,7 +67,8 @@ class JobAnalyze extends React.Component {
                                     <JobAnalyzeHeader totals={this.props.total}
                                                       project={this.props.project}
                                                       jobInfo={this.props.jobInfo}
-                                                      status={this.props.status}/>
+                                                      status={this.props.status}
+                                                      outsourcedChunks={outsourcedChunk} />
                                     <JobTableHeader rates={this.props.jobInfo.rates}/>
                                     {this.getChunks()}
                                 </div>

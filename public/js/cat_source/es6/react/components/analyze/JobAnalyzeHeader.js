@@ -51,7 +51,7 @@ class JobAnalyzeHeader extends React.Component {
 
     render() {
         this.calculateWords();
-        let buttonsClass = (this.props.status !== "DONE") ? 'disabled' : '';
+        let buttonsClass = (this.props.status !== "DONE" || this.props.outsourcedChunks) ? 'disabled' : '';
         return <div className="head-chunk sixteen wide column shadow-1 pad-right-10">
                     <div className="source-target">
                         <div className="source-box">{this.props.jobInfo.source}</div>
