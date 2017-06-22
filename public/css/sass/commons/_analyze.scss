@@ -316,30 +316,30 @@ body.analyze{
             width: 75%;
             position: relative;
             float: left;
-            text-align: center;
+            text-align: right;
             font-size: 15px;
             line-height: 35px;
             .single {
                 display: inline-block;
-                width: 60px;
-                margin-left: 2px;
-                margin-right: 2px;
-                //background-color: pink;
+                width: 8.5%;
+                margin-left: 0px;
+                margin-right: -1px;
+                padding: 4px 6px 0px 2px;
                 span {
                     font-size: 13px;
                     font-weight: 700;
                     vertical-align: top;
                 }
                 &.total {
-                    width: 70px;
+                    width: 8.5%;
                 }
                 &.payable-words {
                 }
                 &.new {
-                    width: 40px;
+                    width: 5.5%;
                 }
                 &.repetition {
-                    width: 70px;
+                    width: 9%;
                 }
                 &.internal-matches {
                 }
@@ -352,17 +352,17 @@ body.analyze{
                 &.p-95-99 {
                 }
                 &.tm-100 {
-                    width: 40px;
+                    width: 5%;
                 }
                 &.tm-public {
-                    width: 50px;
+                    width: 6%;
                 }
                 &.tm-context {
-                    width: 55px;
+                    width: 7%;
                 }
                 &.machine-translation {
                     position: relative;
-                    width: 70px;
+                    width: 9%;
                 }
             }
         }
@@ -370,6 +370,7 @@ body.analyze{
             width: 10%;
             position: relative;
             float: right;
+            top: 2px;
             .open-translate {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 padding: 6px 15px;
@@ -630,16 +631,20 @@ body.analyze{
 
     .chunks-title-table {
         box-shadow: none !important;
+        padding-top: 0px !important;
         padding-bottom: 0px !important;
         .single-analysis {
             line-height: 25px;
             .single {
                 line-height: 18px;
-                border-bottom: 1px solid gray;
-                -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-                -moz-box-sizing: border-box;    /* Firefox, Gecko */
-                box-sizing: border-box;         /* Opera/IE 8+ */
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
                 padding-bottom: 3px;
+                height: 60px;
+                vertical-align: text-top;
+                border: 1px solid #bbbbbb;
+                background-color: #dcdcdc;
             }
         }
     }
@@ -648,13 +653,19 @@ body.analyze{
         box-shadow: none !important;
         padding-top: 0px !important;
         padding-bottom: 3px !important;
+        top: -1px;
+        .single-analysis {
+            .single {
+                border: 1px solid #bbbbbb;
+            }
+        }
     }
 
     .chunk, .chunk-detail {
         transition: 0.3s ease;
         background-color: #ffffff;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
         text-align: center;
     }
 
@@ -691,20 +702,28 @@ body.analyze{
             top: 1px;
             color: #969696;
         }
-        .payable-words {
-            background-color: #c4df9b;
-            font-weight: 700;
-            transition: 0.3s ease;
-        }
-        .payable-words.updated-count {
-            background-color: #7cc576;
-            transition: 0.3s ease;
+        .single-analysis {
+            .single {
+                border-right: 1px solid #bbbbbb;
+                border-left: 1px solid #bbbbbb;
+            }
+            .payable-words {
+                background-color: #c4df9b;
+                font-weight: 700;
+                transition: 0.3s ease;
+            }
+            .payable-words.updated-count {
+                background-color: #7cc576;
+                transition: 0.3s ease;
+            }
+
+            .updated-count {
+                background-color: #f9ffb5;
+                transition: 0.4s ease;
+            }
         }
 
-        .updated-count {
-            background-color: #f9ffb5;
-            transition: 0.4s ease;
-        }
+
     }
 
     .chunk-detail {
