@@ -67,6 +67,14 @@ class ProjectContainer extends React.Component {
 
     }
 
+    thereIsChunkOutsourced(idJob) {
+        let self = this;
+        let outsourceChunk = this.props.project.get('jobs').find(function (item) {
+            return !!(item.get('outsource')) && item.get('id') === idJob;
+        });
+        return !_.isUndefined(outsourceChunk)
+    }
+
     removeProject() {
         ManageActions.updateStatusProject(this.props.project, 'cancelled');
     }
@@ -268,6 +276,8 @@ class ProjectContainer extends React.Component {
             //Create the Jobs boxes and, if visibles, the jobs body
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
                 let lastAction = self.getLastJobAction(job.get('id'));
+                let isChunkOutsourced =  self.thereIsChunkOutsourced(job.get('id'));
+
                 let item = <Job key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
@@ -278,6 +288,7 @@ class ProjectContainer extends React.Component {
                                 downloadTranslationFn={self.props.downloadTranslationFn}
                                 isChunk={isChunk}
                                 lastAction={lastAction}
+                                isChunkOutsourced={isChunkOutsourced}
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
@@ -540,10 +551,5 @@ class ProjectContainer extends React.Component {
     }
 }
 
-ProjectContainer.propTypes = {
-};
-
-ProjectContainer.defaultProps = {
-};
 
 export default ProjectContainer ;

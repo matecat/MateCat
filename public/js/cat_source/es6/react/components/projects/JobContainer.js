@@ -217,7 +217,7 @@ class JobContainer extends React.Component {
 
         let downloadButton = this.getDownloadLabel();
         let splitButton;
-        if (!this.props.job.get('outsource')) {
+        if (!this.props.isChunkOutsourced) {
              splitButton = (!this.props.isChunk) ?
                 <a className="item" target="_blank" onClick={this.openSplitModal.bind(this)}><i className="icon-expand icon"/> Split</a> :
                 <a className="item" target="_blank" onClick={this.openMergeModal.bind(this)}><i className="icon-compress icon"/> Merge</a>;

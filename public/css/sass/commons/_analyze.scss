@@ -845,11 +845,27 @@ body.analyze{
 
 
 footer ul {
-    margin: -5px 0 0 0;
-    padding: 4px;
+    margin: 1px 0 0 0;
+    padding: 0;
     float: left;
     list-style: none;
 }
+
+footer li {
+    margin: 0 0px 0 0;
+    padding: 5px 5px;
+    float: left;
+    height: 18px;
+    padding-top: 0px;
+    border-right: 1px solid #fff;
+    margin-top: 0px;
+    margin-left: 4px;
+}
+
+footer .wrapper nav ul li:last-child {
+    border-right: none;
+}
+
 
 footer nav {
     background: none;
