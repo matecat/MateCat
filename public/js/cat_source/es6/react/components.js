@@ -31,12 +31,17 @@ window.NotificationBox = require('./components/notificationsComponent/Notificati
 
 window.ManageConstants = require('./constants/ManageConstants');
 window.TeamConstants = require('./constants/TeamConstants');
+
 window.ManageActions = require('./actions/ManageActions');
 window.AnalyzeActions = require('./actions/AnalyzeActions');
 window.TeamsActions = require('./actions/TeamsActions');
 window.ModalsActions = require('./actions/ModalsActions');
+window.OutsourceActions = require('./actions/OutsourceActions');
+
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
+window.OutsourceStore = require('./stores/OutsourceStore');
+
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 
 window.Header = require("./components/Header").default;

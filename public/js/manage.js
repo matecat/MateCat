@@ -66,7 +66,7 @@ UI = {
             TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
-                ManageActions.selectTeam(self.selectedTeam);
+                TeamsActions.selectTeam(self.selectedTeam);
                 self.checkPopupInfoTeams();
                 API.PROJECTS.getProjects(self.selectedTeam, UI.Search).done(function(response){
                     if (typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 401   ) { //Not Logged or not in the team
@@ -120,7 +120,7 @@ UI = {
         }
         API.TEAM.getAllTeams(true).done(function (data) {
             self.teams = data.teams;
-            ManageActions.updateTeams(self.teams);
+            TeamsActions.updateTeams(self.teams);
         });
 
     },

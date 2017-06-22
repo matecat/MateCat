@@ -19,15 +19,15 @@ class Header extends React.Component {
     componentDidMount () {
 
         TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup.bind(this));
     }
 
     componentWillUnmount() {
         TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.removeListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup);
     }
 
@@ -101,7 +101,7 @@ class Header extends React.Component {
                 window.scrollTo(0, 0);
                 ManageActions.changeTeam(selectedTeam.toJS());
             } else {
-                ManageActions.changeTeamFromUploadPage(selectedTeam.toJS());
+                TeamsActions.changeTeamFromUploadPage(selectedTeam.toJS());
             }
         }
 
