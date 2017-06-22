@@ -48,7 +48,7 @@ $.extend(UI, {
             updateTimezonesDescriptions( timezoneTo );
         });
 
-		$(".outsource.modal").on('click', '.continuebtn', function(e) {
+		$(".outsource.modal .continuebtn").on('click', function(e) {
 			e.preventDefault();
 
             if( $( this ).hasClass( 'disabled' ) ) {
