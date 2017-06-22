@@ -175,14 +175,14 @@ class AnalyzeHeader extends React.Component {
                 <div className="sixteen wide column">
                     <div className="word-percent " ref={(container) => this.containerSavingWords = container}>
                         <h2 className="ui header">
-                            <div className="percent">{saving_perc}</div>
+                            <div className="percent">-{saving_perc}</div>
                             <div className="content">
-                                Saving on word count
+                                On word count
                                 <div className="sub header">{this.props.data.get('PAYABLE_WC_TIME')} work {this.props.data.get('PAYABLE_WC_UNIT')} at 3.000 w/day
                                 </div>
                             </div>
                         </h2>
-                        <p>MateCat gives you more matches than any other <b>CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
+                        <p><b>MateCat</b> gives you more matches than any other <b>CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
                         </p>
                     </div>
                 </div>
