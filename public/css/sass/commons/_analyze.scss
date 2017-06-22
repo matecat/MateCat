@@ -633,6 +633,8 @@ body.analyze{
         box-shadow: none !important;
         padding-top: 0px !important;
         padding-bottom: 0px !important;
+        background: gainsboro;
+        border-bottom: 1px solid #bbb;
         .single-analysis {
             line-height: 25px;
             .single {
@@ -645,6 +647,8 @@ body.analyze{
                 vertical-align: text-top;
                 border: 1px solid #bbbbbb;
                 background-color: #dcdcdc;
+                border-bottom: none;
+                border-top: none;
             }
         }
     }
@@ -657,6 +661,7 @@ body.analyze{
         .single-analysis {
             .single {
                 border: 1px solid #bbbbbb;
+                border-bottom: none;
             }
         }
     }
@@ -704,8 +709,8 @@ body.analyze{
         }
         .single-analysis {
             .single {
-                border-right: 1px solid #bbbbbb;
-                border-left: 1px solid #bbbbbb;
+                border-right: 1px solid #e4e6e8;
+                border-left: 1px solid #e4e6e8;
             }
             .payable-words {
                 background-color: #c4df9b;
