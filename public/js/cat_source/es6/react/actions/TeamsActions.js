@@ -62,6 +62,18 @@ let TeamsActions = {
         });
     },
 
+    changeTeamFromUploadPage: function (team) {
+        $('.reloading-upload-page').show();
+        APP.setTeamInStorage(team.id);
+        AppDispatcher.dispatch({
+            actionType: TeamConstants.CHOOSE_TEAM,
+            teamId: team.id
+        });
+        setTimeout(function () {
+            $('.reloading-upload-page').hide();
+        }, 1000)
+    },
+
 };
 
 module.exports = TeamsActions;

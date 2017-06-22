@@ -101,7 +101,7 @@ class Header extends React.Component {
                 window.scrollTo(0, 0);
                 ManageActions.changeTeam(selectedTeam.toJS());
             } else {
-                ManageActions.changeTeamFromUploadPage(selectedTeam.toJS());
+                TeamsActions.changeTeamFromUploadPage(selectedTeam.toJS());
             }
         }
 

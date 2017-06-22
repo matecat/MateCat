@@ -36,10 +36,5 @@ module.exports = keyMirror({
     ENABLE_DOWNLOAD_BUTTON: null,
     DISABLE_DOWNLOAD_BUTTON: null,
 
-    UPDATE_JOB_OUTSOURCE: null,
-
-    CLOSE_TRANSLATOR: null,
-    GET_OUTSOURCE_QUOTE: null
-
-
+    UPDATE_JOB_OUTSOURCE: null
 });

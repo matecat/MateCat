@@ -309,9 +309,25 @@ let ManageActions = {
         }
     },
 
+    enableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    disableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    setPopupTeamsCookie: function () {
+        UI.setPopupTeamsCookie();
+    },
 
     /********* Modals *********/
-
 
     openModifyTeamModal: function (team) {
         API.TEAM.getTeamMembers(team.id).then(function (data) {
@@ -337,8 +353,19 @@ let ManageActions = {
         });
     },
 
-    /********* teams *********/
+    openPopupTeams: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
+        });
+    },
 
+    /********* Teams: actions from modals *********/
+
+    /**
+     * Called from manage modal
+     * @param teamName
+     * @param members
+     */
     createTeam: function (teamName, members) {
         let team;
         let self = this;
@@ -442,55 +469,6 @@ let ManageActions = {
                 oldTeam: team,
                 team: data.team[0],
             });
-        });
-    },
-
-    changeTeamFromUploadPage: function (team) {
-        $('.reloading-upload-page').show();
-        APP.setTeamInStorage(team.id);
-        AppDispatcher.dispatch({
-            actionType: TeamConstants.CHOOSE_TEAM,
-            teamId: team.id
-        });
-        setTimeout(function () {
-            $('.reloading-upload-page').hide();
-        }, 1000)
-    },
-
-    enableDownloadButton: function (id) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
-            idProject: id
-        });
-    },
-
-    disableDownloadButton: function (id) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
-            idProject: id
-        });
-    },
-
-    openPopupTeams: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
-        });
-    },
-
-    setPopupTeamsCookie: function () {
-        UI.setPopupTeamsCookie();
-    },
-
-    // Move To Outsource Actions
-    outsourceCloseTranslatorInfo: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CLOSE_TRANSLATOR,
-        });
-    },
-
-    getOutsourceQuote: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
         });
     }
 
