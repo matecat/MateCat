@@ -59,7 +59,7 @@ class JobAnalyze extends React.Component {
     render() {
         let outsourcedChunk = this.thereIsChunkOutsourced();
         return <div className="job ui grid">
-                    <div className="job-body sixteen wide column">
+                    <div className="job-body sixteen wide column shadow-1">
 
                         <div className="ui grid chunks">
                             <div className="chunk-container sixteen wide column">
