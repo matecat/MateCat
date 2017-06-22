@@ -316,14 +316,17 @@ body.analyze{
             width: 75%;
             position: relative;
             float: left;
-            text-align: center;
+            text-align: right;
             font-size: 15px;
             line-height: 35px;
+            //background-color: #f7f7e4;
             .single {
                 display: inline-block;
-                width: 60px;
-                margin-left: 2px;
-                margin-right: 2px;
+                width: 8.5%;
+                margin-left: 0px;
+                margin-right: -1px;
+                border: 2px solid #ffffff;
+                padding: 0 4px 0 4px;
                 //background-color: pink;
                 span {
                     font-size: 13px;
@@ -331,15 +334,15 @@ body.analyze{
                     vertical-align: top;
                 }
                 &.total {
-                    width: 70px;
+                    width: 9%;
                 }
                 &.payable-words {
                 }
                 &.new {
-                    width: 40px;
+                    width: 5.5%;
                 }
                 &.repetition {
-                    width: 70px;
+                    width: 9%;
                 }
                 &.internal-matches {
                 }
@@ -352,17 +355,17 @@ body.analyze{
                 &.p-95-99 {
                 }
                 &.tm-100 {
-                    width: 40px;
+                    width: 5%;
                 }
                 &.tm-public {
-                    width: 50px;
+                    width: 6%;
                 }
                 &.tm-context {
-                    width: 55px;
+                    width: 6.5%;
                 }
                 &.machine-translation {
                     position: relative;
-                    width: 70px;
+                    width: 9%;
                 }
             }
         }
@@ -635,11 +638,12 @@ body.analyze{
             line-height: 25px;
             .single {
                 line-height: 18px;
-                border-bottom: 1px solid gray;
-                -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-                -moz-box-sizing: border-box;    /* Firefox, Gecko */
-                box-sizing: border-box;         /* Opera/IE 8+ */
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
                 padding-bottom: 3px;
+                height: 60px;
+                vertical-align: text-top;
             }
         }
     }
@@ -648,6 +652,7 @@ body.analyze{
         box-shadow: none !important;
         padding-top: 0px !important;
         padding-bottom: 3px !important;
+        top: -1px;
     }
 
     .chunk, .chunk-detail {
