@@ -75,31 +75,31 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.UPDATE_TEAM_NAME:
             let updatedName = TeamsStore.updateTeamName(action.team);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, updatedName);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, updatedName);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.UPDATE_TEAM_MEMBERS:
             let org = TeamsStore.updateTeamMembers(action.team, action.members, action.pending_invitations);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, org);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, org);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
-        case ManageConstants.UPDATE_TEAM:
+        case TeamConstants.UPDATE_TEAM:
             let updated = TeamsStore.updateTeam(action.team);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, updated);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, updated);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
-        case ManageConstants.UPDATE_TEAMS:
+        case TeamConstants.UPDATE_TEAMS:
             TeamsStore.updateAll(action.teams);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
-        case ManageConstants.CHOOSE_TEAM:
+        case TeamConstants.CHOOSE_TEAM:
             TeamsStore.emitChange(action.actionType, action.teamId);
             break;
         case ManageConstants.REMOVE_TEAM:
             TeamsStore.removeTeam(action.team);
             TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams);
             break;
-        case ManageConstants.ADD_TEAM:
+        case TeamConstants.ADD_TEAM:
             TeamsStore.addTeam(action.team);
             TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams);
             break;

@@ -376,7 +376,7 @@ class ProjectContainer extends React.Component {
                if (self.projectTeam && self.projectTeam.get('members')) {
                    result = this.createUserDropDown(self.projectTeam.get('members'));
                } else {
-                   ManageActions.getAllTeams();
+                   TeamsActions.getAllTeams();
                }
            }
        } else if (this.props.team.get('members')) {

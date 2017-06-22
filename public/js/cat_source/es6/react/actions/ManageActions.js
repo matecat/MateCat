@@ -191,7 +191,7 @@ let ManageActions = {
                     team = team.set('members', data.members);
                     team = team.set('pending_invitations', data.pending_invitations);
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: team.toJS()
                     });
                 });
@@ -230,7 +230,7 @@ let ManageActions = {
                     team.members = data.members;
                     team.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: team
                     });
                     setTimeout(function () {
@@ -267,7 +267,7 @@ let ManageActions = {
                     UI.selectedTeam.members = data.members;
                     UI.selectedTeam.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: UI.selectedTeam
                     });
                     setTimeout(function () {
@@ -342,21 +342,16 @@ let ManageActions = {
     createTeam: function (teamName, members) {
         let team;
         let self = this;
-        API.TEAM.createTeam(teamName, members).then(function (response) {
+        TeamsActions.createTeam(teamName, members).then(function (response) {
             UI.teams.push(response.team);
-            team = response.team;
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.ADD_TEAM,
-                team: team
-            });
             self.showReloadSpinner();
-            UI.changeTeam(team).then(function (response) {
+            UI.changeTeam(response.team).then(function (response) {
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.UPDATE_TEAM,
+                    actionType: TeamConstants.UPDATE_TEAM,
                     team: UI.selectedTeam
                 });
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.CHOOSE_TEAM,
+                    actionType: TeamConstants.CHOOSE_TEAM,
                     teamId: UI.selectedTeam.id
                 });
                 AppDispatcher.dispatch({
@@ -371,53 +366,15 @@ let ManageActions = {
         });
     },
 
-    updateTeam: function (team) {
-        API.TEAM.getTeamMembers(team.id).then(function (data) {
-            team.members = data.members;
-            team.pending_invitations = data.pending_invitations;
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_TEAM,
-                team: team
-            });
-        });
-    },
-
-    updateTeams: function (teams) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAMS,
-            teams: teams
-        });
-    },
-
-    getAllTeams: function () {
-        API.TEAM.getAllTeams(true).done(function (data) {
-            AppDispatcher.dispatch({
-                actionType: TeamConstants.RENDER_TEAMS,
-                teams: data.teams,
-            });
-        });
-    },
-
-    selectTeam: function (team) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAM,
-            team: team
-        });
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHOOSE_TEAM,
-            teamId: team.id
-        });
-    },
-
     changeTeam: function (team) {
         this.showReloadSpinner();
         UI.changeTeam(team).then(function (response) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_TEAM,
+                actionType: TeamConstants.UPDATE_TEAM,
                 team: UI.selectedTeam
             });
             AppDispatcher.dispatch({
-                actionType: ManageConstants.CHOOSE_TEAM,
+                actionType: TeamConstants.CHOOSE_TEAM,
                 teamId: UI.selectedTeam.id
             });
             AppDispatcher.dispatch({
@@ -492,7 +449,7 @@ let ManageActions = {
         $('.reloading-upload-page').show();
         APP.setTeamInStorage(team.id);
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CHOOSE_TEAM,
+            actionType: TeamConstants.CHOOSE_TEAM,
             teamId: team.id
         });
         setTimeout(function () {

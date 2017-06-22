@@ -26,7 +26,7 @@ UI = {
             self.teams = data.teams;
             TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
-            ManageActions.selectTeam(self.selectedTeam);
+            TeamsActions.selectTeam(self.selectedTeam);
         });
 
         this.getProjectVolumeAnalysisData();
