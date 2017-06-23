@@ -1,9 +1,14 @@
+let OutsourceModal = require('../../modals/OutsourceModal').default;
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+
+
 class JobContainer extends React.Component {
 
     constructor (props) {
         super(props);
         this.state = {
-            showDownloadProgress: false
+            showDownloadProgress: false,
+            openOutsource: false
         };
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
@@ -444,11 +449,15 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal() {
-        if (this.props.job.get('outsource') && this.props.job.get('outsource').get('quote_review_link')) {
-            window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
-        } else {
-            ModalsActions.openOutsourceModal(this.props.project.toJS(), this.props.job.toJS(), this.getTranslateUrl(), true, false);
-        }
+        // if (this.props.job.get('outsource') && this.props.job.get('outsource').get('quote_review_link')) {
+        //     window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
+        // } else {
+        //     ModalsActions.openOutsourceModal(this.props.project.toJS(), this.props.job.toJS(), this.getTranslateUrl(), true, false);
+        // }
+
+        this.setState({
+            openOutsource: !this.state.openOutsource
+        });
     }
 
     getOutsourceButton() {
@@ -468,12 +477,13 @@ class JobContainer extends React.Component {
                     Outsource
                 </a>;
             }
-        } else if (this.props.job.get('translator')) {
-            label = <a className="open-vendor ui basic green button"
-                       onClick={this.openOutsourceModal.bind(this)}>
-                Change vendor
-            </a>;
         }
+        // else if (this.props.job.get('translator')) {
+        //     label = <a className="open-vendor ui basic green button"
+        //                onClick={this.openOutsourceModal.bind(this)}>
+        //         Change vendor
+        //     </a>;
+        // }
         return label;
     }
 
@@ -490,6 +500,10 @@ class JobContainer extends React.Component {
             outsourceJobLabel = <div className="job-to-translator" data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
                                     {email}
                                 </div>;
+        } else {
+            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny">
+                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this)}>Assign job to translator</a>
+            </div>;
         }
         return outsourceJobLabel;
     }
@@ -587,7 +601,8 @@ class JobContainer extends React.Component {
         }
         return (!nextProps.job.equals(this.props.job) ||
         nextProps.lastAction !== this.props.lastAction ||
-        nextState.showDownloadProgress !== this.state.showDownloadProgress)
+        nextState.showDownloadProgress !== this.state.showDownloadProgress ||
+        nextState.openOutsource !== this.state.openOutsource)
     }
 
     componentDidUpdate() {
@@ -644,72 +659,115 @@ class JobContainer extends React.Component {
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="chunk sixteen wide column shadow-1 pad-right-10" ref={(container) => this.container = container}>
-
-                    <div className="job-id" title="Job Id">
-                        {"(" + idJobLabel + ")"}
-                    </div>
-                    <div className="source-target languages-tooltip"
-                         ref={(tooltip) => this.languageTooltip = tooltip}
-                         data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
-                        <div className="source-box">
-                            {this.props.job.get('sourceTxt')}
+        return <div className="sixteen wide column chunk-container">
+                <div className="ui grid" ref={(container) => this.container = container}>
+                    <div className="chunk wide column shadow-1 pad-right-10">
+                        <div className="job-id" title="Job Id">
+                            {"(" + idJobLabel + ")"}
                         </div>
-                        <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                        <div className="target-box">
-                            {this.props.job.get('targetTxt')}
-                        </div>
-                    </div>
-                    <div className="progress-bar">
-                        <div className="progr">
-                            <div className="meter">
-                                <a className="warning-bar translate-tooltip" data-variation="tiny" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
-                                   ref={(tooltip) => this.rejectedTooltip = tooltip}/>
-                                <a className="approved-bar translate-tooltip" data-variation="tiny" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
-                                   ref={(tooltip) => this.approvedTooltip = tooltip}/>
-                                <a className="translated-bar translate-tooltip" data-variation="tiny" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
-                                   ref={(tooltip) => this.translatedTooltip = tooltip}/>
-                                <a className="draft-bar translate-tooltip" data-variation="tiny" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
-                                   ref={(tooltip) => this.draftTooltip = tooltip}/>
+                        <div className="source-target languages-tooltip"
+                             ref={(tooltip) => this.languageTooltip = tooltip}
+                             data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
+                            <div className="source-box">
+                                {this.props.job.get('sourceTxt')}
+                            </div>
+                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                            <div className="target-box">
+                                {this.props.job.get('targetTxt')}
                             </div>
                         </div>
-                    </div>
-                    <div className="job-payable">
-                        <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                    </div>
-                    <div className="tm-job">
-                        {tmIcon}
-                    </div>
-                    {warningIcons}
-                    <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
-                            ref={(dropdown) => this.dropdown = dropdown}>
-                        <i className="icon-more_vert icon"/>
-                        {jobMenu}
-                    </div>
-                    <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
-                        Open
-
-                    </a>
-                        {outsourceButton}
-                    <div className="outsource-job">
-                        <div className={"translated-outsourced " + outsourceClass}>
-                            {outsourceJobLabel}
-                            {outsourceDelivery}
-                            {/*{outsourceDeliveryPrice}*/}
-                            {this.props.job.get('translator') ? (
-                                <div className="item" onClick={this.removeTranslator}>
-                                    <div className="ui cancel label"><i className="icon-cancel3"/></div>
+                        <div className="progress-bar">
+                            <div className="progr">
+                                <div className="meter">
+                                    <a className="warning-bar translate-tooltip" data-variation="tiny" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
+                                       ref={(tooltip) => this.rejectedTooltip = tooltip}/>
+                                    <a className="approved-bar translate-tooltip" data-variation="tiny" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
+                                       ref={(tooltip) => this.approvedTooltip = tooltip}/>
+                                    <a className="translated-bar translate-tooltip" data-variation="tiny" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
+                                       ref={(tooltip) => this.translatedTooltip = tooltip}/>
+                                    <a className="draft-bar translate-tooltip" data-variation="tiny" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
+                                       ref={(tooltip) => this.draftTooltip = tooltip}/>
                                 </div>
-                            ) :('') }
-
-
+                            </div>
                         </div>
+                        <div className="job-payable">
+                            <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                        </div>
+                        <div className="tm-job">
+                            {tmIcon}
+                        </div>
+                        {warningIcons}
+                        <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
+                                ref={(dropdown) => this.dropdown = dropdown}>
+                            <i className="icon-more_vert icon"/>
+                            {jobMenu}
+                        </div>
+                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
+                            Open
+
+                        </a>
+                            {outsourceButton}
+                        <div className="outsource-job">
+                            <div className={"translated-outsourced " + outsourceClass}>
+                                {outsourceJobLabel}
+                                {outsourceDelivery}
+                                {/*{outsourceDeliveryPrice}*/}
+                                {this.props.job.get('translator') ? (
+                                    <div className="item" onClick={this.removeTranslator}>
+                                        <div className="ui cancel label"><i className="icon-cancel3"/></div>
+                                    </div>
+                                ) :('') }
+
+
+                            </div>
+                        </div>
+
+
+                    { this.state.showDownloadProgress ? (
+                        <div className="chunk-download-progress"/>
+                    ):('')}
                     </div>
+            </div>
+            {this.state.openOutsource ? (
+                <div className="chunk ui grid outsource-container">
+                    <div className="sixteen wide column shadow-1 pad-right-10 outsource-header">
+                        <div className="job-id" title="Job Id">
+                            {"(" + idJobLabel + ")"}
+                        </div>
+                        <div className="source-target languages-tooltip"
+                             ref={(tooltip) => this.languageTooltip = tooltip}
+                             data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
+                            <div className="source-box">
+                                {this.props.job.get('sourceTxt')}
+                            </div>
+                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                            <div className="target-box">
+                                {this.props.job.get('targetTxt')}
+                            </div>
+                        </div>
+                        <div className="job-payable">
+                            <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                        </div>
 
-
-                { this.state.showDownloadProgress ? (
-                    <div className="chunk-download-progress"/>
-                ):('')}
+                        <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
+                             ref={(dropdown) => this.dropdown = dropdown}>
+                            <i className="icon-more_vert icon"/>
+                            {jobMenu}
+                        </div>
+                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
+                            Open
+                        </a>
+                    </div>
+                    <div className="sixteen wide column shadow-1 pad-right-10">
+                        <OutsourceModal project={this.props.project.toJS()}
+                                        job={this.props.job.toJS()}
+                                        url={this.getTranslateUrl()}
+                                        fromManage={true}
+                                        translatorOpen={false}
+                                        showTranslatorBox={true}/>
+                    </div>
+                </div>
+            ) : ('')}
 
         </div>
     }
