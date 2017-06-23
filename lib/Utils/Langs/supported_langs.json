@@ -369,6 +369,16 @@
     ,
         {
             "localized":[{
+                "en":"Dari"
+            }],
+            "isocode":"fa",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"fa-PRS"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Dutch"
             }],
             "isocode":"nl",
