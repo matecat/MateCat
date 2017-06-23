@@ -728,7 +728,13 @@ class JobContainer extends React.Component {
                     ):('')}
                     </div>
             </div>
+            <CSSTransitionGroup component="div" className="ui grid"
+                                transitionName="transitionOutsource"
+                                transitionEnterTimeout={500}
+                                transitionLeaveTimeout={300}
+            >
             {this.state.openOutsource ? (
+
                 <div className="chunk ui grid outsource-container">
                     <div className="sixteen wide column shadow-1 pad-right-10 outsource-header">
                         <div className="job-id" title="Job Id">
@@ -767,8 +773,9 @@ class JobContainer extends React.Component {
                                         showTranslatorBox={true}/>
                     </div>
                 </div>
-            ) : ('')}
 
+            ) : (null)}
+            </CSSTransitionGroup>
         </div>
     }
 }
