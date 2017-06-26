@@ -68,7 +68,7 @@ body.analyze{
                     position: relative;
                 }
                 .analysis-create {
-                    margin-top: 45px;
+                    margin-top: 35px;
                     .search-tm-matches {
                         .loader {
                             margin-right: 5px;
@@ -83,9 +83,6 @@ body.analyze{
                             .number {
                                 font-weight: 700;
                             }
-                        }
-                        .progress-bar {
-                            width: 100%;
                         }
                         .downloadAnalysisReport {
                             color: #4183C4;
@@ -172,13 +169,20 @@ body.analyze{
                     display: inline-block;
                 }
             }
+            .progress {
+                padding: 0 15px;
+                top: -5px;
+                .progress-bar {
+                    width: 100%;
+                }
+            }
         }
 
 
         .project-top {
             padding: 30px 15px 15px;
             background-color: #f3f3f3;
-            margin: 13px -1rem 0;
+            margin: 0px -1rem 0;
             .compare-table{
                 background-color: gainsboro;
                 .header-compare-table, .jobs-compare-table {
