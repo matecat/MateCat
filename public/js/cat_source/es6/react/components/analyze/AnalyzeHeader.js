@@ -146,30 +146,30 @@ class AnalyzeHeader extends React.Component {
 
     getWordscount() {
         let status = this.props.data.get('STATUS');
-        let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '0';
+        // let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '0';
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
-            weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
+            // weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
             weightedWords = this.props.data.get('TOTAL_RAW_WC');
         } else {
             if ( status === 'DONE' || this.props.data.get('TOTAL_PAYABLE') > 0 ) {
-                weightedWords_text = this.props.data.get('TOTAL_PAYABLE_PRINT');
+                // weightedWords_text = this.props.data.get('TOTAL_PAYABLE_PRINT');
                 weightedWords = this.props.data.get('TOTAL_PAYABLE');
             }
             if( status === 'NOT_TO_ANALYZE' ) {
-                weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
+                // weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
                 weightedWords = this.props.data.get('TOTAL_RAW_WC');
             }
         }
         let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : '0%';
-        if (saving_perc !== this.saving_perc_value) {
-            this.updatedSavingWords = true;
-        }
-        this.saving_perc_value = saving_perc;
-
-        if (weightedWords !== this.weightedWords) {
-            this.updatedWeightedWords = true;
-        }
+        // if (saving_perc !== this.saving_perc_value) {
+        //     this.updatedSavingWords = true;
+        // }
+        // this.saving_perc_value = saving_perc;
+        //
+        // if (weightedWords !== this.weightedWords) {
+        //     this.updatedWeightedWords = true;
+        // }
         this.weightedWords = weightedWords;
         return <div className="word-count ui grid">
                 <div className="sixteen wide column">
@@ -219,20 +219,20 @@ class AnalyzeHeader extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-        if (this.updatedSavingWords) {
-            this.containerSavingWords.classList.add('updated-count');
-            this.updatedSavingWords = false;
-            setTimeout(function () {
-                self.containerSavingWords.classList.remove('updated-count');
-            }, 400)
-        }
-        if (this.updatedWeightedWords) {
-            this.containerWeightedWords.classList.add('updated-count');
-            this.updatedSavingWords = false;
-            setTimeout(function () {
-                self.containerWeightedWords.classList.remove('updated-count');
-            }, 400)
-        }
+        // if (this.updatedSavingWords) {
+        //     this.containerSavingWords.classList.add('updated-count');
+        //     this.updatedSavingWords = false;
+        //     setTimeout(function () {
+        //         self.containerSavingWords.classList.remove('updated-count');
+        //     }, 400)
+        // }
+        // if (this.updatedWeightedWords) {
+        //     this.containerWeightedWords.classList.add('updated-count');
+        //     this.updatedSavingWords = false;
+        //     setTimeout(function () {
+        //         self.containerWeightedWords.classList.remove('updated-count');
+        //     }, 400)
+        // }
     }
 
     componentDidMount() {
