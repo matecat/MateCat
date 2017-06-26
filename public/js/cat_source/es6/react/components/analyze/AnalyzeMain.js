@@ -85,8 +85,7 @@ class AnalyzeMain extends React.Component {
                             <div className="compare-table sixteen wide column shadow-1">
                                 <div className="header-compare-table ui grid">
                                     <div className="title-job">
-                                        <h5>Job</h5>
-                                        <p>Job ID + Combo language</p>
+
                                     </div>
                                     <div className="titles-compare">
                                         <div className="title-total-words">
