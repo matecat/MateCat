@@ -9,7 +9,7 @@ body.analyze{
 }
 
 .project-list {
-    padding-top: 100px;
+    padding-top: 62px;
     padding-bottom: 160px;
     .header-box-header {
         position: absolute;
@@ -119,8 +119,9 @@ body.analyze{
             .word-count {
                 .word-percent {
                     background-color: #f2f4f1;
-                    padding: 20px 15px 10px 20px;
+                    padding: 25px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
+                    height: 145px;
                     .percent {
                         font-size: 40px;
                         font-weight: 700;
@@ -180,6 +181,174 @@ body.analyze{
         }
 
 
+        .project-top {
+            padding: 30px 15px 15px;
+            background-color: #f3f3f3;
+            margin: 13px -1rem 0;
+            .compare-table{
+                background-color: gainsboro;
+                .header-compare-table, .jobs-compare-table {
+                    h5 {
+                        margin-bottom: 0px;
+                        font-weight: 100;
+                    }
+                    p {
+                        font-size: 12px;
+                    }
+                }
+                .header-compare-table {
+                    padding-top: 15px;
+                    padding-bottom: 15px;
+                }
+                .title-job {
+                    display: inline-block;
+                    width: 33%;
+                    line-height: 50px;
+                    text-align: left;
+                }
+                .titles-compare {
+                    display: inline-block;
+                    width: 45%;
+                    text-align: center;
+                    padding-left: 0;
+                    padding-right: 0;
+                }
+                .title-total-words, .title-standard-words, .title-matecat-words {
+                    display: inline-block;
+                    width: 33.333%;
+                    border-right: 1px solid gainsboro;
+                    border-left: 1px solid gainsboro;
+                    margin-left: -1px;
+                    line-height: 50px;
+                }
+                .title-matecat-words {
+                    h5 {
+                        font-weight: 700;
+                    }
+                }
+                &.jobs {
+                    background-color: #f3f3f3;
+                    .job {
+                        margin-bottom: 15px;
+                        .chunks {
+                            .chunk {
+                                background-color: #ffffff;
+                                .ttw, .tsw, .tmw {
+                                    text-align: right;
+                                    padding-right: 15px;
+                                }
+                                .tmw {
+                                    font-weight: 700;
+                                    color: #43ba4a;
+                                    //background: #c4df9b;
+                                    //border-bottom: 1px solid #a0b4a4;
+                                }
+                            }
+                        }
+                    }
+                }
+                .activity-icons {
+                    width: 22%;
+                    display: inline-block;
+                    text-align: right;
+                    padding-top: 11px;
+                    .split, .merge {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 5px 11px;
+                        vertical-align: top;
+                        font-size: 16px;
+                        border: 1px solid #09beec;
+                        border-radius: 2px;
+                        box-shadow: none !important;
+                        background-color: #ffffff;
+                        &:hover {
+                            text-decoration: none;
+                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                            border: 1px solid #09beec;
+                        }
+                        &:focus {
+                            box-shadow: none !important;
+                            background-color: #f2f2f2 !important;
+                        }
+                        &:active {
+                            box-shadow: none !important;
+                            background-color: #f2f2f2 !important;
+                        }
+                    }
+                    .split {
+                        padding: 5px 20px;
+                    }
+                    .merge {
+                        margin: -1px 0 0;
+                    }
+                    .open-translate {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 6px 15px;
+                        vertical-align: top;
+                        font-size: 16px;
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                        margin: 0px;
+                    }
+                }
+            }
+            .analyze-report {
+                text-align: center;
+                width: 100%;
+                position: relative;
+                top: 30px;
+                .rounded {
+                    width: 30px;
+                    height: 30px;
+                    text-align: center;
+                    margin: 0 auto;
+                    line-height: 36px;
+                    padding: 0 0 0 5px;
+                    border-radius: 20px;
+                    background: white;
+                }
+            }
+        }
+        .job-id {
+            display: inline-block;
+            min-width: 70px;
+            color: #0a0a0a;
+            font-size: 14px;
+            position: relative;
+            line-height: 35px;
+            top: 1px;
+            text-align: left;
+            font-weight: 700;
+
+        }
+        .source-target {
+            min-width: 140px;
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: bold;
+            position: relative;
+            top: 1px;
+            .source-box {
+                line-height: 30px;
+                display: inline-block;
+            }
+            .in-to {
+                display: inline-block;
+                top: 3px;
+                color: #5a5a5a;
+                line-height: 28px;
+                position: relative;
+                i {
+                    margin-right: 0;
+                }
+            }
+            .target-box {
+                display: inline-block;
+                line-height: 30px;
+            }
+        }
+
+
         .project-body {
             margin-top: 0;
 
@@ -198,7 +367,7 @@ body.analyze{
                     background-color: #f6f6f6;
                     .chunks {
                         .chunk-container {
-                            
+
                             .analysis {
                                 &.outsource-open {
                                     margin-left: -35px;
@@ -212,40 +381,14 @@ body.analyze{
                                     text-align: center;
                                     position: relative;
                                     z-index: 4;
-                                    .source-target {
-                                        min-width: 140px;
-                                        float: left;
-                                        margin-right: 10px;
-                                        font-weight: bold;
-                                        position: relative;
-                                        top: 1px;
-                                        font-size: 18px;
-                                        .source-box {
-                                            float: left;
-                                            line-height: 30px;
-                                        }
-                                        .in-to {
-                                            float: left;
-                                            top: 3px;
-                                            color: #5a5a5a;
-                                            line-height: 28px;
-                                            position: relative;
-                                            i {
-                                                margin-right: 0;
-                                            }
-                                        }
-                                        .target-box {
-                                            float: left;
-                                            line-height: 30px;
-                                        }
-                                    }
+                                    text-align: left;
                                     .job-not-payable {
                                         display: inline-block;
                                         padding: 0 0 0 10px !important;
-                                        float: left;
                                         line-height: 30px;
                                         position: relative;
                                         top: 1px;
+                                        display: inline-block;
                                         color: #969696;
                                         #raw-words {
                                             text-decoration: line-through;
@@ -253,40 +396,13 @@ body.analyze{
                                     }
                                     .job-payable {
                                         padding: 0 10px !important;
-                                        float: left;
                                         min-width: 105px;
                                         line-height: 30px;
                                         font-weight: 700;
                                         position: relative;
                                         top: 1px;
                                         color: #4183C4;
-                                    }
-
-                                    .split, .merge {
-                                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                                        padding: 5px 11px;
-                                        vertical-align: top;
-                                        font-size: 16px;
-                                        border: 1px solid #09beec;
-                                        border-radius: 2px;
-                                        float: right;
-                                        box-shadow: none !important;
-                                        &:hover {
-                                            text-decoration: none;
-                                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                            border: 1px solid #09beec;
-                                        }
-                                        &:focus {
-                                            box-shadow: none !important;
-                                            background-color: grey;
-                                        }
-                                        &:active {
-                                            box-shadow: none !important;
-                                            background-color: grey;
-                                        }
-                                    }
-                                    .split {
-                                        padding: 5px 20px;
+                                        display: inline-block;
                                     }
                                 }
                             }
@@ -327,7 +443,7 @@ body.analyze{
         .single-analysis {
             display: inline-block;
             margin: 0 auto;
-            width: 75%;
+            width: 85%;
             position: relative;
             float: left;
             text-align: right;
@@ -377,6 +493,7 @@ body.analyze{
                 &.machine-translation {
                     position: relative;
                     width: 9%;
+                    border-right: none;
                 }
             }
         }
@@ -385,21 +502,11 @@ body.analyze{
             position: relative;
             float: right;
             top: 2px;
-            .open-translate {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 15px;
-                vertical-align: top;
-                font-size: 16px;
-                border: 1px solid #797979;
-                border-radius: 2px;
-                float: right;
-                margin-top: 3px;
-            }
         }
 
         @media only screen and (max-width: 1199px) and (min-width: 992px) {
             .left-box {
-                width: 12%;
+               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -426,7 +533,6 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
                 position: relative;
                 float: left;
                 text-align: center;
@@ -434,10 +540,7 @@ body.analyze{
                 line-height: 35px;
                 .single {
                     display: inline-block;
-
                     padding: 0;
-                    width: 55px;
-
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -448,7 +551,7 @@ body.analyze{
 
         @media only screen and (max-width: 991px) and (min-width: 768px) {
             .left-box {
-                width: 12%;
+                /*width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -471,7 +574,6 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
                 position: relative;
                 float: left;
                 text-align: center;
@@ -481,7 +583,7 @@ body.analyze{
                     display: inline-block;
 
                     padding: 0;
-                    width: 55px;
+
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -492,7 +594,7 @@ body.analyze{
 
         @media only screen and (max-width: 767px) {
             .left-box {
-                width: 12%;
+               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -515,7 +617,7 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
+
                 position: relative;
                 float: left;
                 text-align: center;
@@ -523,10 +625,7 @@ body.analyze{
                 line-height: 35px;
                 .single {
                     display: inline-block;
-                    //line-height: 42px;
                     padding: 0;
-                    width: 55px;
-                    //background-color: yellow;
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -556,6 +655,8 @@ body.analyze{
                 border: 1px solid #bbbbbb;
                 border-bottom: none;
                 border-top: none;
+                text-align: center;
+                padding-right: 6px;
             }
         }
     }
@@ -569,6 +670,8 @@ body.analyze{
             .single {
                 border: 1px solid #bbbbbb;
                 border-bottom: none;
+                text-align: right;
+                padding-right: 6px;
             }
         }
     }
@@ -583,18 +686,6 @@ body.analyze{
 
     .chunk {
         z-index: 2;
-        .job-id {
-            display: inline-block;
-            min-width: 75px;
-            color: #0a0a0a;
-            font-size: 15px;
-            position: relative;
-            line-height: 35px;
-            top: 1px;
-            text-align: left;
-            font-weight: 700;
-
-        }
         .file-details {
             display: inline-block;
             text-decoration: underline;
@@ -618,6 +709,8 @@ body.analyze{
             .single {
                 border-right: 1px solid #e4e6e8;
                 border-left: 1px solid #e4e6e8;
+                text-align: right;
+                padding-right: 6px;
             }
             .payable-words {
                 background-color: #c4df9b;

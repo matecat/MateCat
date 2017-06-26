@@ -182,11 +182,11 @@ class AnalyzeHeader extends React.Component {
                                 </div>
                             </div>
                         </h2>
-                        <p><b>MateCat</b> gives you more matches than any other <b>CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
+                        <p>MateCat gives you <b>more matches than any other CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
                         </p>
                     </div>
                 </div>
-                <div className="sixteen wide column pad-top-0">
+                {/*<div className="sixteen wide column pad-top-0">
                     <div className="raw-matecat ui grid">
                         <div className="eight wide column pad-right-7">
                             <div className="word-raw">
@@ -202,7 +202,7 @@ class AnalyzeHeader extends React.Component {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>*/}
             </div>
 
 
