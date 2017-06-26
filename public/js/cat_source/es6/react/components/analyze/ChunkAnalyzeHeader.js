@@ -120,10 +120,10 @@ class ChunkAnalyzeHeader extends React.Component {
                         {total.get('MT').get(1)}</div>
 
                 </div>
-                <div className="right-box">
+                {/*<div className="right-box">
                     <div className="open-translate ui primary button open"
                     onClick={this.props.openOutsourceModalFn}>Translate</div>
-                </div>
+                </div>*/}
 
             </div>;
 

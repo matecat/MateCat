@@ -175,18 +175,18 @@ class AnalyzeHeader extends React.Component {
                 <div className="sixteen wide column">
                     <div className="word-percent " ref={(container) => this.containerSavingWords = container}>
                         <h2 className="ui header">
-                            <div className="percent">-{saving_perc}</div>
+                            <div className="percent">{saving_perc}</div>
                             <div className="content">
-                                On word count
+                                Saving on word count
                                 <div className="sub header">{this.props.data.get('PAYABLE_WC_TIME')} work {this.props.data.get('PAYABLE_WC_UNIT')} at 3.000 w/day
                                 </div>
                             </div>
                         </h2>
-                        <p><b>MateCat</b> gives you more matches than any other <b>CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
+                        <p>MateCat gives you <b>more matches than any other CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
                         </p>
                     </div>
                 </div>
-                <div className="sixteen wide column pad-top-0">
+                {/*<div className="sixteen wide column pad-top-0">
                     <div className="raw-matecat ui grid">
                         <div className="eight wide column pad-right-7">
                             <div className="word-raw">
@@ -202,7 +202,7 @@ class AnalyzeHeader extends React.Component {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>*/}
             </div>
 
 
@@ -248,7 +248,7 @@ class AnalyzeHeader extends React.Component {
     render() {
         let analysisStateHtml = this.getAnalysisStateHtml();
         let wordsCountHtml = this.getWordscount();
-        return <div className="project-header ui grid shadow-1">
+        return <div className="project-header ui grid">
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
