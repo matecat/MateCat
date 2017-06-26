@@ -69,6 +69,7 @@ body.analyze{
                 }
                 .analysis-create {
                     margin-top: 35px;
+                    font-size: 16px;
                     .search-tm-matches {
                         .loader {
                             margin-right: 5px;
@@ -79,7 +80,7 @@ body.analyze{
                         }
                         .complete {
                             display: inline-block;
-
+                            font-style: 16px;
                             .number {
                                 font-weight: 700;
                             }
@@ -109,10 +110,10 @@ body.analyze{
                 .word-percent {
                     position: relative;
                     background-color: #f2f4f1;
-                    padding: 25px 15px 10px 20px;
+                    padding: 25px 15px 20px 20px;
                     border: 1px solid #7eaf3e;
-                    height: 145px;
                     top: 27px;
+                    font-size: 16px;
                     .percent {
                         font-size: 40px;
                         font-weight: 700;
@@ -203,6 +204,7 @@ body.analyze{
                     width: 33%;
                     line-height: 50px;
                     text-align: left;
+                    font-size: 17px;
                 }
                 .titles-compare {
                     display: inline-block;
@@ -210,6 +212,7 @@ body.analyze{
                     text-align: center;
                     padding-left: 0;
                     padding-right: 0;
+                    font-size: 16px;
                 }
                 .title-total-words, .title-standard-words, .title-matecat-words {
                     display: inline-block;
@@ -231,6 +234,10 @@ body.analyze{
                         .chunks {
                             .chunk {
                                 background-color: #ffffff;
+                                transition: 0.3s ease;
+                                &:hover {
+                                    background-color: #eaebef;
+                                }
                                 .ttw, .tsw, .tmw {
                                     text-align: right;
                                     padding-right: 15px;
@@ -238,6 +245,7 @@ body.analyze{
                                 .tmw {
                                     font-weight: 700;
                                     color: #43ba4a;
+                                    font-size: 18px;
                                     //background: #c4df9b;
                                     //border-bottom: 1px solid #a0b4a4;
                                 }
@@ -254,11 +262,13 @@ body.analyze{
                         font-family: Calibri, Arial, Helvetica, sans-serif;
                         padding: 5px 11px;
                         vertical-align: top;
-                        font-size: 16px;
+                        font-size: 19px;
                         border: 1px solid #09beec;
                         border-radius: 2px;
                         box-shadow: none !important;
                         background-color: #ffffff;
+                        font-weight: 700;
+                        margin-top: -3px;
                         &:hover {
                             text-decoration: none;
                             box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -277,16 +287,16 @@ body.analyze{
                         padding: 5px 20px;
                     }
                     .merge {
-                        margin: -1px 0 0;
+                        margin: -3px 0 0;
                     }
                     .open-translate {
                         font-family: Calibri, Arial, Helvetica, sans-serif;
                         padding: 6px 15px;
                         vertical-align: top;
-                        font-size: 16px;
+                        font-size: 20px;
                         border: 1px solid #797979;
                         border-radius: 2px;
-                        margin: 0px;
+                        margin: -3px 0px 0px 0px;
                     }
                 }
             }
@@ -693,6 +703,10 @@ body.analyze{
 
     .chunk {
         z-index: 2;
+        transition: 0.3s ease;
+        &:hover {
+            background-color: #eaebef;
+        }
         .file-details {
             display: inline-block;
             text-decoration: underline;
