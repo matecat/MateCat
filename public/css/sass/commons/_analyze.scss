@@ -315,6 +315,11 @@ body.analyze{
                     line-height: 0px;
                     border-radius: 17px;
                     background: white;
+                    cursor: pointer;
+                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                    &:hover {
+                        box-shadow: none !important;
+                    }
                     i {
                         font-size: 30px;
                         margin: 0px;
