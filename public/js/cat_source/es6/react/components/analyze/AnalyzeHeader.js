@@ -162,15 +162,16 @@ class AnalyzeHeader extends React.Component {
             }
         }
         let saving_perc = (raw_words > 0 ) ? parseInt((raw_words - weightedWords)/raw_words * 100) + "%" : '0%';
-        // if (saving_perc !== this.saving_perc_value) {
-        //     this.updatedSavingWords = true;
-        // }
-        // this.saving_perc_value = saving_perc;
+        if (saving_perc !== this.saving_perc_value) {
+            this.updatedSavingWords = true;
+        }
+        this.saving_perc_value = saving_perc;
         //
         // if (weightedWords !== this.weightedWords) {
         //     this.updatedWeightedWords = true;
         // }
-        this.weightedWords = weightedWords;
+        // this.weightedWords = weightedWords;
+
         return <div className="word-count ui grid">
                 <div className="sixteen wide column">
                     <div className="word-percent " ref={(container) => this.containerSavingWords = container}>
@@ -219,13 +220,13 @@ class AnalyzeHeader extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-        // if (this.updatedSavingWords) {
-        //     this.containerSavingWords.classList.add('updated-count');
-        //     this.updatedSavingWords = false;
-        //     setTimeout(function () {
-        //         self.containerSavingWords.classList.remove('updated-count');
-        //     }, 400)
-        // }
+        if (this.updatedSavingWords) {
+            this.containerSavingWords.classList.add('updated-count');
+            this.updatedSavingWords = false;
+            setTimeout(function () {
+                self.containerSavingWords.classList.remove('updated-count');
+            }, 400)
+        }
         // if (this.updatedWeightedWords) {
         //     this.containerWeightedWords.classList.add('updated-count');
         //     this.updatedSavingWords = false;

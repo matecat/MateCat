@@ -67,8 +67,7 @@ class JobAnalyze extends React.Component {
                                     <JobAnalyzeHeader totals={this.props.total}
                                                       project={this.props.project}
                                                       jobInfo={this.props.jobInfo}
-                                                      status={this.props.status}
-                                                      outsourcedChunks={outsourcedChunk} />
+                                                      status={this.props.status}/>
                                     <JobTableHeader rates={this.props.jobInfo.rates}/>
                                     {this.getChunks()}
                                 </div>
