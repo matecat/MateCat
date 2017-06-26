@@ -216,8 +216,8 @@ class AnalyzeMain extends React.Component {
                             </div>
                             <div className="analyze-report">
                                 <h3>Analyze report</h3>
-                                <div className="rounded shadow-1">
-                                    <i className="icon-chevron-right icon"></i>
+                                <div className="rounded">
+                                    <i className="icon-sort-down icon"></i>
                                 </div>
                             </div>
                         </div>
