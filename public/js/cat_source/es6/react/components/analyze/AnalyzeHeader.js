@@ -1,4 +1,4 @@
-
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 
 class AnalyzeHeader extends React.Component {
@@ -14,6 +14,8 @@ class AnalyzeHeader extends React.Component {
 
 
     getAnalysisStateHtml() {
+        this.showProgressBar = false;
+
         let html = <div className="analysis-create">
             <div className="search-tm-matches">
                 <div className="ui active inline loader"/>
@@ -68,8 +70,8 @@ class AnalyzeHeader extends React.Component {
 
                 this.lastProgressSegments = this.props.data.get('SEGMENTS_ANALYZED');
                 this.noProgressTail = 0;
-
-                // html =  this.getProgressBar();
+                this.showProgressBar = true;
+                html =  this.getProgressBarText();
 
             } else {
 
@@ -126,22 +128,29 @@ class AnalyzeHeader extends React.Component {
         return html;
     }
 
-    getProgressBar() {
-        let width = ((this.props.data.get('SEGMENTS_ANALYZED') / this.props.data.get('TOTAL_SEGMENTS')) * 100) + '%';
+    getProgressBarText() {
         return  <div className="analysis-create">
                     <div className="search-tm-matches">
                         <h5>Searching for TM Matches </h5>
                         <span className="initial-segments"> ({this.props.data.get('SEGMENTS_ANALYZED_PRINT')} of </span>
                         <span className="total-segments"> {" " + this.props.data.get('TOTAL_SEGMENTS_PRINT')})</span>
-                        {/*<div className="progress-bar">
-                            <div className="progr">
-                                <div className="meter">
-                                    <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
-                                </div>
-                            </div>
-                        </div>*/}
                     </div>
                 </div>;
+    }
+
+    getProgressBar() {
+        if (this.showProgressBar) {
+            let width = ((this.props.data.get('SEGMENTS_ANALYZED') / this.props.data.get('TOTAL_SEGMENTS')) * 100) + '%';
+            return <div className="progress-bar">
+                    <div className="progr">
+                        <div className="meter">
+                            <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
+                        </div>
+                    </div>
+                </div>;
+        }
+        return null
+
     }
 
     getWordscount() {
@@ -263,15 +272,15 @@ class AnalyzeHeader extends React.Component {
                     <div className="seven wide right floated column">
                         {wordsCountHtml}
                     </div>
-                    <div className="progress sixteen wide column">
-                        <div className="progress-bar">
-                            <div className="progr">
-                                <div className="meter">
-                                    <a className="approved-bar translate-tooltip"  data-html={'Approved 50%'}  style={{width: '50px'}}/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <CSSTransitionGroup component="div" className="progress sixteen wide column"
+                                        transitionName="transition"
+                                        transitionEnterTimeout={500}
+                                        transitionLeaveTimeout={500}
+                    >
+                        {this.getProgressBar()}
+                    </CSSTransitionGroup>
+
+
             </div>;
 
 

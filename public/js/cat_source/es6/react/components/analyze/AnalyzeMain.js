@@ -4,6 +4,8 @@ let AnalyzeHeader = require('./AnalyzeHeader').default;
 let AnalyzeChunksResume = require('./AnalyzeChunksResume').default;
 let ProjectAnalyze = require('./ProjectAnalyze').default;
 let AnalyzeStore = require('../../stores/AnalyzeStore');
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+
 
 
 class AnalyzeMain extends React.Component {
@@ -12,7 +14,8 @@ class AnalyzeMain extends React.Component {
         super(props);
         this.state = {
             volumeAnalysis: null,
-            project: null
+            project: null,
+            showAnalysis: true
         };
         this.updateAll = this.updateAll.bind(this);
         this.updateAnalysis = this.updateAnalysis.bind(this);
@@ -38,6 +41,12 @@ class AnalyzeMain extends React.Component {
         });
     }
 
+    openAnalysisReport() {
+        this.setState({
+            showAnalysis: !this.state.showAnalysis
+        });
+    }
+
     componentDidUpdate() {
     }
 
@@ -55,7 +64,8 @@ class AnalyzeMain extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         return ( !nextState.project.equals(this.state.project) ||
-        !nextState.volumeAnalysis.equals(this.state.volumeAnalysis) )
+        !nextState.volumeAnalysis.equals(this.state.volumeAnalysis) ||
+        nextState.showAnalysis !== this.state.showAnalysis)
     }
 
     render() {
@@ -86,15 +96,22 @@ class AnalyzeMain extends React.Component {
                                              jobsInfo={this.props.jobsInfo}
                                              project={this.state.project}
                                              status={this.state.volumeAnalysis.get('summary').get('STATUS')}
+                                             openAnalysisReport={this.openAnalysisReport.bind(this)}
 
                         />
+                        <CSSTransitionGroup component="div" className="project-body ui grid"
+                                            transitionName="transition"
+                                            transitionEnterTimeout={1500}
+                                            transitionLeaveTimeout={100}
+                        >
+                        {this.state.showAnalysis ? (
+                                <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}
+                                                project={this.state.project}
+                                                jobsInfo={this.props.jobsInfo}
+                                                status={this.state.volumeAnalysis.get('summary').get('STATUS')}/>
+                        ) :(null)}
+                        </CSSTransitionGroup>
 
-                        <div className="project-body ui grid">
-                            <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}
-                                            project={this.state.project}
-                                            jobsInfo={this.props.jobsInfo}
-                                            status={this.state.volumeAnalysis.get('summary').get('STATUS')}/>
-                        </div>
                     </div>
                 </div>
             ) : (spinner)}

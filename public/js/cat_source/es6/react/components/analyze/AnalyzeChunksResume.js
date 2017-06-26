@@ -1,3 +1,4 @@
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 class AnalyzeChunksResume extends React.Component {
 
@@ -110,7 +111,7 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                <div className="job-id">{self.props.jobsInfo[indexJob].jid}-1</div>
+                                <div className="job-id">{self.props.jobsInfo[indexJob].jid}</div>
                                 <div className="source-target">
                                     <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -140,6 +141,10 @@ class AnalyzeChunksResume extends React.Component {
                 </div>
             }
         }).toList().toJS();
+    }
+
+    openAnalysisReport() {
+        this.props.openAnalysisReport();
     }
 
     componentDidUpdate() {
@@ -187,8 +192,9 @@ class AnalyzeChunksResume extends React.Component {
             </div>
             <div className="analyze-report">
                 <h3>Analyze report</h3>
-                <div className="rounded shadow-1">
-                    <i className="icon-chevron-right icon"></i>
+                <div className="rounded"
+                onClick={this.openAnalysisReport.bind(this)}>
+                    <i className="icon-sort-down icon"/>
                 </div>
             </div>
         </div>;

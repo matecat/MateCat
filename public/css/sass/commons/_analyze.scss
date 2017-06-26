@@ -779,6 +779,8 @@ body.analyze{
     }
 }
 
+
+
 @media only screen and (min-width: 1200px) {
     .ui.container {
         width: 1140px;
@@ -856,6 +858,49 @@ body.analyze{
         padding-top:0px !important;
         padding-bottom: 0px !important;
         -webkit-transition: height .3s ease;
+    }
+}
+.progress-bar {
+    height: 20px;
+    position: relative;
+    overflow: hidden;
+    &.transition-enter {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    &.transition-enter.transition-enter-active {
+        height: 20px;
+        -webkit-transition: height .3s ease;
+    }
+
+    &.transition-leave.transition-leave-active {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+        -webkit-transition: height .3s ease;
+    }
+}
+
+.project-body {
+    .jobs {
+        position: relative;
+        overflow-y: hidden;
+        max-height: 5000px;
+        &.transition-enter {
+            max-height: 0px;
+        }
+
+        &.transition-enter.transition-enter-active {
+            max-height: 5000px;
+            -webkit-transition: max-height 1s ease;
+        }
+
+        &.transition-leave.transition-leave-active {
+            max-height: 0;
+            -webkit-transition: max-height 1s ease;
+        }
     }
 }
 
