@@ -69,7 +69,7 @@ class AnalyzeHeader extends React.Component {
                 this.lastProgressSegments = this.props.data.get('SEGMENTS_ANALYZED');
                 this.noProgressTail = 0;
 
-                html =  this.getProgressBar();
+                // html =  this.getProgressBar();
 
             } else {
 
@@ -133,13 +133,13 @@ class AnalyzeHeader extends React.Component {
                         <h5>Searching for TM Matches </h5>
                         <span className="initial-segments"> ({this.props.data.get('SEGMENTS_ANALYZED_PRINT')} of </span>
                         <span className="total-segments"> {" " + this.props.data.get('TOTAL_SEGMENTS_PRINT')})</span>
-                        <div className="progress-bar">
+                        {/*<div className="progress-bar">
                             <div className="progr">
                                 <div className="meter">
                                     <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
                                 </div>
                             </div>
-                        </div>
+                        </div>*/}
                     </div>
                 </div>;
     }
@@ -262,6 +262,15 @@ class AnalyzeHeader extends React.Component {
 
                     <div className="seven wide right floated column">
                         {wordsCountHtml}
+                    </div>
+                    <div className="progress sixteen wide column">
+                        <div className="progress-bar">
+                            <div className="progr">
+                                <div className="meter">
+                                    <a className="approved-bar translate-tooltip"  data-html={'Approved 50%'}  style={{width: '50px'}}/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
             </div>;
 
