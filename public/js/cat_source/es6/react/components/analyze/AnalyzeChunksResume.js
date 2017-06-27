@@ -237,10 +237,10 @@ class AnalyzeChunksResume extends React.Component {
                 {this.getResumeJobs()}
 
             </div>
-            <div className="analyze-report">
+            <div className="analyze-report"
+                 onClick={this.openAnalysisReport.bind(this)}>
                 <h3>Analysis report</h3>
-                <div className="rounded"
-                onClick={this.openAnalysisReport.bind(this)}>
+                <div className="rounded">
                     <i className="icon-sort-down icon"/>
                 </div>
             </div>
