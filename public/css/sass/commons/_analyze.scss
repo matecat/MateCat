@@ -235,6 +235,17 @@ body.analyze{
                             .chunk {
                                 background-color: #ffffff;
                                 transition: 0.3s ease;
+                                .job-details {
+                                    display: inline-block;
+                                    text-decoration: underline;
+                                    min-width: 62px;
+                                    line-height: 30px;
+                                    position: relative;
+                                    top: 1px;
+                                    cursor: pointer;
+                                    color: #969696;
+                                    font-size: 16px;
+                                }
                                 &:hover {
                                     background-color: #eaebef;
                                 }
@@ -368,10 +379,6 @@ body.analyze{
         .project-body {
             margin-top: 0;
             background-color: #cdcdcd;
-
-            .jobs {
-                /*margin-top: 0px;*/
-            }
             .job {
                 padding: 0 15px;
                 margin-top: 35px;
@@ -386,6 +393,13 @@ body.analyze{
                         .chunk-container {
 
                             .analysis {
+                                &.show-details {
+                                    .head-chunk, .job-table-header > div,
+                                    .chunk-analyze-container > div {
+                                        background-color: #eaebef !important;
+
+                                    }
+                                }
                                 &.outsource-open {
                                     margin-left: -35px;
                                     margin-right: -35px;
@@ -887,19 +901,25 @@ body.analyze{
     .jobs {
         position: relative;
         overflow-y: hidden;
-        max-height: 5000px;
+        max-height: 3000px;
+        opacity: 1;
         &.transition-enter {
             max-height: 0px;
+            opacity: 0;
         }
 
         &.transition-enter.transition-enter-active {
-            max-height: 5000px;
-            -webkit-transition: max-height 1s ease;
+            max-height: 3000px;
+            opacity: 1;
+            -webkit-transition: max-height .5s ease, opacity 1s ease;
         }
 
         &.transition-leave.transition-leave-active {
             max-height: 0;
-            -webkit-transition: max-height 1s ease;
+            padding-top: 0;
+            padding-bottom: 0;
+            opacity: 0;
+            -webkit-transition: max-height .5s ease, padding 1s ease, opacity 1s ease;
         }
     }
 }

@@ -20,6 +20,7 @@ class AnalyzeMain extends React.Component {
         this.updateAll = this.updateAll.bind(this);
         this.updateAnalysis = this.updateAnalysis.bind(this);
         this.updateProject = this.updateProject.bind(this);
+        this.showDetails = this.showDetails.bind(this);
     }
 
     updateAll(volumeAnalysis, project) {
@@ -47,19 +48,27 @@ class AnalyzeMain extends React.Component {
         });
     }
 
-    componentDidUpdate() {
+    showDetails() {
+        this.setState({
+            showAnalysis: true
+        });
     }
+
+    componentDidUpdate() {}
 
     componentDidMount() {
         AnalyzeStore.addListener(AnalyzeConstants.RENDER_ANALYSIS, this.updateAll);
         AnalyzeStore.addListener(AnalyzeConstants.UPDATE_ANALYSIS, this.updateAnalysis);
         AnalyzeStore.addListener(AnalyzeConstants.UPDATE_PROJECT, this.updateProject);
+        AnalyzeStore.addListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails);
+
     }
 
     componentWillUnmount() {
         AnalyzeStore.removeListener(AnalyzeConstants.RENDER_ANALYSIS, this.updateAll);
         AnalyzeStore.removeListener(AnalyzeConstants.UPDATE_ANALYSIS, this.updateAnalysis);
         AnalyzeStore.removeListener(AnalyzeConstants.UPDATE_PROJECT, this.updateProject);
+        AnalyzeStore.removeListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -102,7 +111,7 @@ class AnalyzeMain extends React.Component {
                         <CSSTransitionGroup component="div" className="project-body ui grid"
                                             transitionName="transition"
                                             transitionEnterTimeout={1500}
-                                            transitionLeaveTimeout={100}
+                                            transitionLeaveTimeout={1500}
                         >
                         {this.state.showAnalysis ? (
                                 <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}

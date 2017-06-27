@@ -51,6 +51,9 @@ AppDispatcher.register(function(action) {
             AnalyzeStore.updateAnalysis(action.volumeAnalysis);
             AnalyzeStore.emitChange(AnalyzeConstants.UPDATE_ANALYSIS, AnalyzeStore.volumeAnalysis);
             break;
+        case AnalyzeConstants.SHOW_DETAILS:
+            AnalyzeStore.emitChange(AnalyzeConstants.SHOW_DETAILS, action.idJob);
+            break;
     }
 });
 module.exports = AnalyzeStore;

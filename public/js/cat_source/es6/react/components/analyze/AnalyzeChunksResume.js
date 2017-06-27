@@ -1,9 +1,17 @@
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+let AnalyzeConstants = require('../../constants/AnalyzeConstants');
+let AnalyzeActions = require('../../actions/AnalyzeActions');
+
+
 
 class AnalyzeChunksResume extends React.Component {
 
     constructor(props) {
         super(props);
+    }
+
+    showDetails(idJob) {
+        AnalyzeActions.showDetails(idJob)
     }
 
     openSplitModal(id) {
@@ -83,6 +91,10 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
+                                <div className="job-details"
+                                    onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                    <span className="details">Show details </span>
+                                </div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words">
@@ -116,6 +128,11 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
+                                </div>
+                                <div className="job-details">
+                                    <span className="details"
+                                          onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                        Show details </span>
                                 </div>
                             </div>
                             <div className="titles-compare">
@@ -191,7 +208,7 @@ class AnalyzeChunksResume extends React.Component {
 
             </div>
             <div className="analyze-report">
-                <h3>Analyze report</h3>
+                <h3>Analysis report</h3>
                 <div className="rounded"
                 onClick={this.openAnalysisReport.bind(this)}>
                     <i className="icon-sort-down icon"/>

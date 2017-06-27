@@ -22,6 +22,13 @@ let AnalyzeActions = {
             actionType: AnalyzeConstants.UPDATE_PROJECT,
             project: project
         });
+    },
+
+    showDetails: function (idJob) {
+        AppDispatcher.dispatch({
+            actionType: AnalyzeConstants.SHOW_DETAILS,
+            idJob: idJob
+        });
     }
 };
 
