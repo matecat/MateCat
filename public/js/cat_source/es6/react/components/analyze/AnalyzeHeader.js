@@ -197,23 +197,6 @@ class AnalyzeHeader extends React.Component {
                         </p>
                     </div>
                 </div>
-                {/*<div className="sixteen wide column pad-top-0">
-                    <div className="raw-matecat ui grid">
-                        <div className="eight wide column pad-right-7">
-                            <div className="word-raw">
-                                <h3>{raw_words_text}</h3>
-                                <h4>Raw words</h4>
-                            </div>
-                            <div className="overlay"/>
-                        </div>
-                        <div className="eight wide column pad-left-7">
-                            <div className="matecat-raw " ref={(container) => this.containerWeightedWords = container}>
-                                <h3>{weightedWords_text}</h3>
-                                <h4>MateCat weighted words</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>*/}
             </div>
 
 
@@ -253,7 +236,7 @@ class AnalyzeHeader extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return true;
+        return ( !nextProps.data.equals(this.props.data))
     }
 
     render() {
