@@ -186,6 +186,10 @@ body.analyze{
             margin: 0px -1rem 0;
             .compare-table{
                 background-color: gainsboro;
+                .updated-count {
+                    background-color: #f9ffb5;
+                    transition: 0.4s ease;
+                }
                 .header-compare-table, .jobs-compare-table {
                     h5 {
                         margin-bottom: 0px;

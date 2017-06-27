@@ -77,6 +77,7 @@ class AnalyzeHeader extends React.Component {
 
                 this.noProgressTail++;
                 if ( this.noProgressTail > 9 ) {
+                    let analyzerNotRunningErrorString = '';
                     if ( config.support_mail.indexOf( '@' ) === -1 ) {
                         analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
                     } else {

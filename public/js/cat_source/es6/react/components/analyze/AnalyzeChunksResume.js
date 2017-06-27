@@ -8,6 +8,9 @@ class AnalyzeChunksResume extends React.Component {
 
     constructor(props) {
         super(props);
+        this.payableValues = [];
+        this.payableValuesChenged = [];
+        this.containers = {};
     }
 
     showDetails(idJob) {
@@ -48,6 +51,12 @@ class AnalyzeChunksResume extends React.Component {
         ModalsActions.openOutsourceModal(this.props.project.toJS(), job.toJS(), this.getTranslateUrl(job, index), false, false, false);
     }
 
+    checkPayableChanged(idJob, payable) {
+        if (this.payableValues[idJob] && payable !== this.payableValues[idJob]) {
+            this.payableValuesChenged[idJob] = true;
+        }
+        this.payableValues[idJob] = payable;
+    }
 
     getResumeJobs() {
         var self = this;
@@ -60,6 +69,9 @@ class AnalyzeChunksResume extends React.Component {
                 let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
                     let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
                     index++;
+
+                    self.checkPayableChanged(self.props.jobsInfo[indexJob].jid, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
+
                     return <div key={indexChunk} className="chunk ui grid shadow-1">
                                 <div className="title-job">
                                     <div className="job-id">{chunk.jid}-{index}</div>
@@ -71,7 +83,8 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="title-standard-words tsw">
                                         <div>xxx</div>
                                     </div>
-                                    <div className="title-matecat-words tmw">
+                                    <div className="title-matecat-words tmw"
+                                         ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                         <div>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                     </div>
                                 </div>
@@ -119,6 +132,10 @@ class AnalyzeChunksResume extends React.Component {
                 let totals = jobAnalysis.get('totals').get(0);
                 let obj = self.props.jobsInfo[indexJob].chunks;
                 let total_standard = obj[Object.keys(obj)[0]].total_raw_word_count_print;
+
+                self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
+                    jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
+
                 return <div key={indexJob} className="job ui grid">
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
@@ -142,7 +159,8 @@ class AnalyzeChunksResume extends React.Component {
                                 <div className="title-standard-words tsw">
                                     <div>xxx</div>
                                 </div>
-                                <div className="title-matecat-words tmw">
+                                <div className="title-matecat-words tmw"
+                                     ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                     <div>{jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
                             </div>
@@ -165,6 +183,18 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     componentDidUpdate() {
+        let self = this;
+        let changedData = _.pick(this.payableValuesChenged, function (item, i, array) {
+            return item === true;
+        });
+        if (_.size(changedData) > 0) {
+            _.each(changedData, function (item, i) {
+                self.containers[i].classList.add('updated-count');
+                setTimeout(function () {
+                    self.containers[i].classList.remove('updated-count');
+                }, 400)
+            })
+        }
     }
 
     componentDidMount() {
