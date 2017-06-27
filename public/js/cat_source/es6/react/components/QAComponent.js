@@ -331,7 +331,7 @@ class QAComponent extends React.Component {
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
                         <a className="lexiqa-popup-icon lexiqa-report-icon icon-file" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
-                        href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
+                        href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job +'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                 </ul>;
             }
@@ -368,4 +368,3 @@ class QAComponent extends React.Component {
 }
 
 export default QAComponent ;
-
