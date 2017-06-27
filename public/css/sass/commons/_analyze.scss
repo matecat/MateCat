@@ -14,6 +14,27 @@ body.analyze{
 
 
     .project {
+        .scroll {
+            opacity: 0.3;
+            background-color: #09beec;
+            width: 40px;
+            height: 40px;
+            position: fixed;
+            bottom: 35px;
+            left: 75px;
+            border-radius: 5px;
+            border: none;
+
+            &:hover {
+                opacity: 1;
+            }
+            i {
+                margin-left: -7px;
+                font-size: 22px;
+                margin-top: 9px;
+            }
+        }
+
         .project-header {
             background: #f3f3f3;
             .left-analysis {
@@ -399,6 +420,8 @@ body.analyze{
                         .chunk-container {
 
                             .analysis {
+                                padding-top: 60px;
+                                margin-top: -74px;
                                 &.show-details {
                                     .head-chunk, .job-table-header > div,
                                     .chunk-analyze-container > div {
