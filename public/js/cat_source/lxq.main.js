@@ -1137,38 +1137,6 @@ LXQ.init  = function () {
                 return null;
 
         }
-        var notCheckedSegments; //store the unchecked segments at startup
-        var doQAallSegments = function () {
-            var segments = $('#outer').find('section');
-            var notChecked = [];
-            $.each(segments,function (keys,segment) {
-                var segId = UI.getSegmentId(segment);
-                if (LXQ.lexiqaData.segments.indexOf(segId) < 0) {
-                    // console.log('segment not in lexiqaDB: '+segId);
-                    notChecked.push(segId);
-                }
-            });
-            notCheckedSegments = notChecked;
-            checkNextUncheckedSegment();
-        }
-
-        var checkNextUncheckedSegment = function (previousSegment) {
-            if (previousSegment!==undefined && previousSegment!== null )
-                reloadPowertip(previousSegment);
-            if (!(notCheckedSegments.length >0))
-                return;
-            var segment = notCheckedSegments.pop();
-            if (segment === undefined)
-                return;
-            var seg =  UI.getSegmentById(segment);
-            if (UI.getSegmentTarget(seg).length > 0) {
-                // console.log('Requesting QA for: '+segment);
-                LXQ.doLexiQA(seg, UI.getSegmentTarget(seg),segment, true, checkNextUncheckedSegment);
-            }
-            else {
-                checkNextUncheckedSegment();
-            }
-        }
         var getFristSegmentWithWarning = function () {
              if (LXQ.lexiqaData.hasOwnProperty('segments') && LXQ.lexiqaData.segments.length > 0) {
                 return LXQ.lexiqaData.segments[0];
@@ -1247,39 +1215,6 @@ LXQ.init  = function () {
 
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
             $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job +'&type='+(config.isReview?'revise':'translate'));
-
-            // $('#lexiqa-prev-seg').on('click', function (e) {
-            //     e.preventDefault();
-            //     var segid = getPreviousSegmentWithWarning();
-            //     if (UI.segmentIsLoaded(segid) === true)
-            //         UI.gotoSegment(segid);
-            //     else {
-            //         config.last_opened_segment = segid;
-            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
-            //         window.location.hash = segid;
-            //         $('#outer').empty();
-            //         UI.render({
-            //             firstLoad: false
-            //         });
-            //     }
-            // });
-            // $('#lexiqa-next-seg').on('click', function (e) {
-            //     e.preventDefault();
-            //     //UI.gotoSegment(getNextSegmentWithWarning());
-            //     var segid = getNextSegmentWithWarning();
-            //     if (UI.segmentIsLoaded(segid) === true)
-            //         UI.gotoSegment(segid);
-            //     else {
-            //         //UI.reloadWarning();
-            //         config.last_opened_segment = segid;
-            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
-            //         window.location.hash = segid;
-            //         $('#outer').empty();
-            //         UI.render({
-            //             firstLoad: false
-            //         });
-            //     }
-            // });
         };
         // Interfaces
         $.extend(LXQ, {
@@ -1295,7 +1230,6 @@ LXQ.init  = function () {
             reloadPowertip : reloadPowertip,
             ignoreError: ignoreError,
             redoHighlighting:redoHighlighting,
-            doQAallSegments: doQAallSegments,
             getNextSegmentWithWarning: getNextSegmentWithWarning,
             getPreviousSegmentWithWarning:getPreviousSegmentWithWarning,
             initPopup: initPopup,
@@ -1321,7 +1255,7 @@ LXQ.init  = function () {
 
 
         doLexiQA: function ( segment, translation, id_segment, isSegmentCompleted, callback ) {
-            if ( !LXQ.enabled() || LXQ.lexiqaData.lexiqaProjectStatus !== 'loaded') {
+            if ( !LXQ.enabled()) {
                 if ( callback !== undefined && typeof callback === 'function' ) {
                     callback();
                 }
@@ -1656,11 +1590,6 @@ LXQ.init  = function () {
                         results.qaurl = "#";
                     }
 
-                    // if ( LXQ.enabled() ) {
-                    //     LXQ.doQAallSegments();
-                    //     //LXQ.refreshElements();
-                    // }
-                    //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);
                     LXQ.lexiqaData.lexiqaFetching = false;
                     if (callback) callback();
                 }
