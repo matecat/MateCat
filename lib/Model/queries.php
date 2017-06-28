@@ -1625,6 +1625,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
+			   SUM(st.standard_word_count) AS file_st_word_count,
 			   COUNT(s.id) AS total_segments,
 
 			   p.fast_analysis_wc,
