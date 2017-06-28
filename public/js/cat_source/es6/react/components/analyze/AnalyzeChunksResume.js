@@ -11,6 +11,9 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValues = [];
         this.payableValuesChenged = [];
         this.containers = {};
+        this.state = {
+            openDetails: false
+        }
     }
 
     showDetails(idJob) {
@@ -178,6 +181,9 @@ class AnalyzeChunksResume extends React.Component {
 
     openAnalysisReport() {
         this.props.openAnalysisReport();
+        this.setState({
+            openDetails: !this.state.openDetails
+        });
     }
 
     componentDidUpdate() {
@@ -203,11 +209,13 @@ class AnalyzeChunksResume extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         return ( !nextProps.jobsAnalysis.equals(this.props.jobsAnalysis) ||
-        nextProps.status !== this.props.status)
+            nextProps.status !== this.props.status ||
+            nextState.openDetails !== this.state.openDetails)
     }
 
     render() {
-
+        let showHideText = (this.state.openDetails) ? "Hide Analysis report" : "Show Analysis report";
+        let iconClass = (this.state.openDetails) ? "open" : "";
         return <div className="project-top ui grid">
             <div className="compare-table sixteen wide column shadow-1">
                 <div className="header-compare-table ui grid">
@@ -238,9 +246,9 @@ class AnalyzeChunksResume extends React.Component {
             </div>
             <div className="analyze-report"
                  onClick={this.openAnalysisReport.bind(this)}>
-                <h3>Show Analysis report</h3>
+                <h3>{showHideText}</h3>
                 <div className="rounded">
-                    <i className="icon-sort-down icon"/>
+                    <i className= {"icon-sort-down icon " + iconClass }/>
                 </div>
             </div>
         </div>;
