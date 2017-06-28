@@ -136,6 +136,7 @@ body.analyze{
                     border: 1px solid #7eaf3e;
                     top: 27px;
                     font-size: 16px;
+                    margin-bottom: 25px;
                     .percent {
                         font-size: 40px;
                         font-weight: 700;
@@ -343,8 +344,14 @@ body.analyze{
                         margin: -3px 0px 0px 0px;
                     }
                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                        .split, .merge {
+                        .merge {
+                             padding: 5px 10px;
+                        }
+                        .split {
                             padding: 5px 10px;
+                            i {
+                                margin: 0;
+                            }
                         }
 
                         .open-translate {
@@ -419,6 +426,9 @@ body.analyze{
                 position: relative;
                 i {
                     margin-right: 0;
+                    font-size: 12px;
+                    top: -2px;
+                    position: relative;
                 }
             }
             .target-box {
@@ -624,8 +634,6 @@ body.analyze{
                 font-size: 14px;
                 line-height: 35px;
                 .single {
-                    display: inline-block;
-                    padding: 0;
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -665,10 +673,6 @@ body.analyze{
                 font-size: 14px;
                 line-height: 35px;
                 .single {
-                    display: inline-block;
-
-                    padding: 0;
-
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -709,8 +713,6 @@ body.analyze{
                 font-size: 14px;
                 line-height: 35px;
                 .single {
-                    display: inline-block;
-                    padding: 0;
                     span {
                         font-size: 12px;
                         font-weight: 700;
