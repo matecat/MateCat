@@ -104,6 +104,22 @@ class OCRCheck {
             "Zulu"
     );
 
+    private $notSupportedOrRTL = [
+            'ar-SA'  => 'Arabic',
+            'dv-DV'  => 'Maldivian',
+            'fa-IR'  => 'Persian',
+            'ha-HAU' => 'Hausa',
+            'he-IL'  => 'Hebrew',
+            'jv-ID'  => 'Javanese',
+            'kr-KAU' => 'Kanuri',
+            'ku-CKB' => 'Kurdish Sorani',
+            'ps-PK'  => 'Pashto',
+            'so-SO'  => 'Somali',
+            'syc-TR' => 'Syriac (Aramaic)',
+            'tmh-DZ' => 'Tamashek (Tuareg)',
+            'yi-YD'  => 'Yiddish'
+    ];
+
     /**
      * @var string
      */
@@ -123,10 +139,10 @@ class OCRCheck {
      *
      * @return bool
      */
-    public function isValid( $filePath ){
+    public function thereIsWarning( $filePath ){
 
         if( !INIT::$FILTERS_OCR_CHECK ){
-            return true;
+            return false;
         }
 
         if( array_search( $this->localizedLangName, $this->supportedLatinLangs ) === false ){
@@ -136,12 +152,32 @@ class OCRCheck {
             $finfo = new finfo();
             $mimeType = $finfo->file( $filePath, FILEINFO_MIME_TYPE );
             if( array_search( $mimeType, $this->mimeTypes ) !== false  ){
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
 
+    }
+
+    public function thereIsError( $filePath ){
+
+        if( !INIT::$FILTERS_OCR_CHECK ){
+            return false;
+        }
+
+        if( array_search( $this->localizedLangName, $this->notSupportedOrRTL ) !== false ){
+            /**
+             * @var $finfo finfo
+             */
+            $finfo = new finfo();
+            $mimeType = $finfo->file( $filePath, FILEINFO_MIME_TYPE );
+            if( array_search( $mimeType, $this->mimeTypes ) !== false  ){
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
