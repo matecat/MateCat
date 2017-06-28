@@ -56,11 +56,13 @@ let ModalsActions = {
             'This operation cannot be canceled.',
             successText: "Continue",
             successCallback: function () {
-                API.JOB.confirmMerge(project, job);
+                API.JOB.confirmMerge(project, job).done(function () {
+                    if (successCallback) {
+                        successCallback.call();
+                    }
+                });
                 APP.ModalWindow.onCloseModal();
-                if (successCallback) {
-                    successCallback.call();
-                }
+
             },
             cancelText: "Cancel",
             cancelCallback: function () {
