@@ -9,18 +9,41 @@ body.analyze{
 }
 
 .project-list {
-    padding-top: 100px;
+    padding-top: 62px;
     padding-bottom: 160px;
 
-    .project {
-        background-color: #cbcbcb;
-        .project-header {
-            background-color: #f3f3f3;
-            //padding-bottom: 10px !important;
-            border-bottom: 1px solid #ccc;
 
+    .project {
+        .scroll {
+            opacity: 0.3;
+            background-color: #09beec;
+            width: 40px;
+            height: 40px;
+            position: fixed;
+            bottom: 35px;
+            left: 75px;
+            border-radius: 5px;
+            border: none;
+
+            &:hover {
+                opacity: 1;
+            }
+            i {
+                margin-left: -7px;
+                font-size: 22px;
+                margin-top: 9px;
+            }
+        }
+
+        .project-header {
+            background: #f3f3f3;
             .left-analysis {
-                padding: 20px 25px 0px 30px;
+                padding-top: 20px;
+                top: 14px;
+                position: relative;
+                left: 15px;
+                width: 55% !important;
+                height: 205px;
                 .h1 {
                     font-size: 38px;
                     font-weight: 100;
@@ -66,7 +89,8 @@ body.analyze{
                     position: relative;
                 }
                 .analysis-create {
-                    margin-top: 45px;
+                    margin-top: 35px;
+                    font-size: 16px;
                     .search-tm-matches {
                         .loader {
                             margin-right: 5px;
@@ -77,13 +101,10 @@ body.analyze{
                         }
                         .complete {
                             display: inline-block;
-
+                            font-style: 16px;
                             .number {
                                 font-weight: 700;
                             }
-                        }
-                        .progress-bar {
-                            width: 100%;
                         }
                         .downloadAnalysisReport {
                             color: #4183C4;
@@ -108,9 +129,12 @@ body.analyze{
 
             .word-count {
                 .word-percent {
-                    background-color: #f3f3f3;
-                    padding: 20px 15px 10px 20px;
+                    position: relative;
+                    background-color: #f2f4f1;
+                    padding: 25px 15px 20px 20px;
                     border: 1px solid #7eaf3e;
+                    top: 27px;
+                    font-size: 16px;
                     .percent {
                         font-size: 40px;
                         font-weight: 700;
@@ -126,7 +150,7 @@ body.analyze{
                     }
                 }
                 .word-raw, .matecat-raw {
-                    background-color: #f3f3f3;
+                    background-color: #f2f4f1;
                     padding: 5px;
                     border: 1px solid #7eaf3e;
                     text-align: center;
@@ -167,15 +191,221 @@ body.analyze{
                     display: inline-block;
                 }
             }
+            .progress {
+                padding: 0 15px;
+                top: -5px;
+                .progress-bar {
+                    width: 100%;
+                }
+            }
+        }
+
+
+        .project-top {
+            padding: 30px 15px 15px;
+            background-color: #f3f3f3;
+            margin: 0px -1rem 0;
+            .compare-table{
+                background-color: gainsboro;
+                .updated-count {
+                    background-color: #f9ffb5;
+                    transition: 0.4s ease;
+                }
+                .header-compare-table, .jobs-compare-table {
+                    h5 {
+                        margin-bottom: 0px;
+                        font-weight: 100;
+                    }
+                    p {
+                        font-size: 12px;
+                    }
+                }
+                .header-compare-table {
+                    padding-top: 15px;
+                    padding-bottom: 15px;
+                }
+                .title-job {
+                    display: inline-block;
+                    width: 33%;
+                    line-height: 50px;
+                    text-align: left;
+                    font-size: 17px;
+                }
+                .titles-compare {
+                    display: inline-block;
+                    width: 45%;
+                    text-align: center;
+                    padding-left: 0;
+                    padding-right: 0;
+                    font-size: 16px;
+                }
+                .title-total-words, .title-standard-words, .title-matecat-words {
+                    display: inline-block;
+                    width: 33.333%;
+                    border-right: 1px solid gainsboro;
+                    border-left: 1px solid gainsboro;
+                    margin-left: -1px;
+                    line-height: 50px;
+                }
+                .title-matecat-words {
+                    h5 {
+                        font-weight: 700;
+                    }
+                }
+                &.jobs {
+                    background-color: #f3f3f3;
+                    .job {
+                        margin-bottom: 15px;
+                        .chunks {
+                            .chunk {
+                                background-color: #ffffff;
+                                transition: 0.3s ease;
+                                .job-details {
+                                    display: inline-block;
+                                    text-decoration: underline;
+                                    min-width: 62px;
+                                    line-height: 30px;
+                                    position: relative;
+                                    top: 1px;
+                                    cursor: pointer;
+                                    color: #969696;
+                                    font-size: 16px;
+                                }
+                                &:hover {
+                                    background-color: #eaebef;
+                                }
+                                .ttw, .tsw, .tmw {
+                                    text-align: right;
+                                    padding-right: 15px;
+                                }
+                                .tmw {
+                                    font-weight: 700;
+                                    color: #43ba4a;
+                                    font-size: 18px;
+                                    //background: #c4df9b;
+                                    //border-bottom: 1px solid #a0b4a4;
+                                }
+                            }
+                        }
+                    }
+                }
+                .activity-icons {
+                    width: 22%;
+                    display: inline-block;
+                    text-align: right;
+                    padding-top: 11px;
+                    .split, .merge {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 5px 11px;
+                        vertical-align: top;
+                        font-size: 19px;
+                        border: 1px solid #09beec;
+                        border-radius: 2px;
+                        box-shadow: none !important;
+                        background-color: #ffffff;
+                        font-weight: 700;
+                        margin-top: -3px;
+                        &:hover {
+                            text-decoration: none;
+                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                            border: 1px solid #09beec;
+                        }
+                        &:focus {
+                            box-shadow: none !important;
+                            background-color: #f2f2f2 !important;
+                        }
+                        &:active {
+                            box-shadow: none !important;
+                            background-color: #f2f2f2 !important;
+                        }
+                    }
+                    .split {
+                        padding: 5px 20px;
+                    }
+                    .merge {
+                        margin: -3px 0 0;
+                    }
+                    .open-translate {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 6px 15px;
+                        vertical-align: top;
+                        font-size: 20px;
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                        margin: -3px 0px 0px 0px;
+                    }
+                }
+            }
+            .analyze-report {
+                text-align: center;
+                width: 160px;
+                margin: 0 auto;
+                position: relative;
+                top: 30px;
+                cursor: pointer;
+                h3 {
+                    margin-bottom: 10px;
+                }
+                .rounded {
+                    width: 34px;
+                    height: 34px;
+                    margin: 0 auto;
+                    line-height: 0px;
+                    border-radius: 17px;
+                    background: white;
+                    i {
+                        font-size: 30px;
+                        margin: 0px;
+                        padding: 0;
+                        top: -3px;
+                        position: relative;
+                    }
+                }
+            }
+        }
+        .job-id {
+            display: inline-block;
+            min-width: 70px;
+            color: #0a0a0a;
+            font-size: 14px;
+            position: relative;
+            line-height: 35px;
+            top: 1px;
+            text-align: left;
+            font-weight: 700;
+
+        }
+        .source-target {
+            min-width: 140px;
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: bold;
+            position: relative;
+            top: 1px;
+            .source-box {
+                line-height: 30px;
+                display: inline-block;
+            }
+            .in-to {
+                display: inline-block;
+                top: 3px;
+                color: #5a5a5a;
+                line-height: 28px;
+                position: relative;
+                i {
+                    margin-right: 0;
+                }
+            }
+            .target-box {
+                display: inline-block;
+                line-height: 30px;
+            }
         }
 
 
         .project-body {
             margin-top: 0;
-
-            .jobs {
-                /*margin-top: 0px;*/
-            }
+            background-color: #cdcdcd;
             .job {
                 padding: 0 15px;
                 margin-top: 35px;
@@ -185,11 +415,20 @@ body.analyze{
                     padding: 0 0 !important;
                 }
                 .job-body {
+                    background-color: #f6f6f6;
                     .chunks {
                         .chunk-container {
-                            
+
                             .analysis {
-                                background-color: #e4e6e8;
+                                padding-top: 60px;
+                                margin-top: -74px;
+                                &.show-details {
+                                    .head-chunk, .job-table-header > div,
+                                    .chunk-analyze-container > div {
+                                        background-color: #eaebef !important;
+
+                                    }
+                                }
                                 &.outsource-open {
                                     margin-left: -35px;
                                     margin-right: -35px;
@@ -202,39 +441,14 @@ body.analyze{
                                     text-align: center;
                                     position: relative;
                                     z-index: 4;
-                                    .source-target {
-                                        min-width: 140px;
-                                        float: left;
-                                        margin-right: 10px;
-                                        font-weight: bold;
-                                        position: relative;
-                                        top: 1px;
-                                        .source-box {
-                                            float: left;
-                                            line-height: 30px;
-                                        }
-                                        .in-to {
-                                            float: left;
-                                            top: 3px;
-                                            color: #5a5a5a;
-                                            line-height: 28px;
-                                            position: relative;
-                                            i {
-                                                margin-right: 0;
-                                            }
-                                        }
-                                        .target-box {
-                                            float: left;
-                                            line-height: 30px;
-                                        }
-                                    }
+                                    text-align: left;
                                     .job-not-payable {
                                         display: inline-block;
                                         padding: 0 0 0 10px !important;
-                                        float: left;
                                         line-height: 30px;
                                         position: relative;
                                         top: 1px;
+                                        display: inline-block;
                                         color: #969696;
                                         #raw-words {
                                             text-decoration: line-through;
@@ -242,40 +456,13 @@ body.analyze{
                                     }
                                     .job-payable {
                                         padding: 0 10px !important;
-                                        float: left;
                                         min-width: 105px;
                                         line-height: 30px;
                                         font-weight: 700;
                                         position: relative;
                                         top: 1px;
                                         color: #4183C4;
-                                    }
-
-                                    .split, .merge {
-                                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                                        padding: 5px 11px;
-                                        vertical-align: top;
-                                        font-size: 16px;
-                                        border: 1px solid #09beec;
-                                        border-radius: 2px;
-                                        float: right;
-                                        box-shadow: none !important;
-                                        &:hover {
-                                            text-decoration: none;
-                                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                            border: 1px solid #09beec;
-                                        }
-                                        &:focus {
-                                            box-shadow: none !important;
-                                            background-color: grey;
-                                        }
-                                        &:active {
-                                            box-shadow: none !important;
-                                            background-color: grey;
-                                        }
-                                    }
-                                    .split {
-                                        padding: 5px 20px;
+                                        display: inline-block;
                                     }
                                 }
                             }
@@ -316,7 +503,7 @@ body.analyze{
         .single-analysis {
             display: inline-block;
             margin: 0 auto;
-            width: 75%;
+            width: 85%;
             position: relative;
             float: left;
             text-align: right;
@@ -366,6 +553,7 @@ body.analyze{
                 &.machine-translation {
                     position: relative;
                     width: 9%;
+                    border-right: none;
                 }
             }
         }
@@ -374,24 +562,15 @@ body.analyze{
             position: relative;
             float: right;
             top: 2px;
-            .open-translate {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 15px;
-                vertical-align: top;
-                font-size: 16px;
-                border: 1px solid #797979;
-                border-radius: 2px;
-                float: right;
-                margin-top: 3px;
-            }
         }
 
         @media only screen and (max-width: 1199px) and (min-width: 992px) {
             .left-box {
-                width: 12%;
+               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
+
                 }
                 .file-details {
                     text-decoration: underline;
@@ -414,7 +593,6 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
                 position: relative;
                 float: left;
                 text-align: center;
@@ -422,10 +600,7 @@ body.analyze{
                 line-height: 35px;
                 .single {
                     display: inline-block;
-
                     padding: 0;
-                    width: 55px;
-
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -436,7 +611,7 @@ body.analyze{
 
         @media only screen and (max-width: 991px) and (min-width: 768px) {
             .left-box {
-                width: 12%;
+                /*width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -459,7 +634,6 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
                 position: relative;
                 float: left;
                 text-align: center;
@@ -469,7 +643,7 @@ body.analyze{
                     display: inline-block;
 
                     padding: 0;
-                    width: 55px;
+
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -480,7 +654,7 @@ body.analyze{
 
         @media only screen and (max-width: 767px) {
             .left-box {
-                width: 12%;
+               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -503,7 +677,7 @@ body.analyze{
             .single-analysis {
                 display: inline-block;
                 margin: 0 auto;
-                width: 78%;
+
                 position: relative;
                 float: left;
                 text-align: center;
@@ -511,10 +685,7 @@ body.analyze{
                 line-height: 35px;
                 .single {
                     display: inline-block;
-                    //line-height: 42px;
                     padding: 0;
-                    width: 55px;
-                    //background-color: yellow;
                     span {
                         font-size: 12px;
                         font-weight: 700;
@@ -530,7 +701,6 @@ body.analyze{
         box-shadow: none !important;
         padding-top: 0px !important;
         padding-bottom: 0px !important;
-        background: gainsboro;
         border-bottom: 1px solid #bbb;
         .single-analysis {
             line-height: 25px;
@@ -543,9 +713,10 @@ body.analyze{
                 height: 60px;
                 vertical-align: text-top;
                 border: 1px solid #bbbbbb;
-                background-color: #dcdcdc;
                 border-bottom: none;
                 border-top: none;
+                text-align: center;
+                padding-right: 6px;
             }
         }
     }
@@ -559,6 +730,8 @@ body.analyze{
             .single {
                 border: 1px solid #bbbbbb;
                 border-bottom: none;
+                text-align: right;
+                padding-right: 6px;
             }
         }
     }
@@ -573,17 +746,9 @@ body.analyze{
 
     .chunk {
         z-index: 2;
-        .job-id {
-            display: inline-block;
-            min-width: 70px;
-            color: #0a0a0a;
-            font-size: 14px;
-            position: relative;
-            line-height: 35px;
-            top: 1px;
-            text-align: left;
-            font-weight: 700;
-
+        transition: 0.3s ease;
+        &:hover {
+            background-color: #eaebef;
         }
         .file-details {
             display: inline-block;
@@ -608,6 +773,8 @@ body.analyze{
             .single {
                 border-right: 1px solid #e4e6e8;
                 border-left: 1px solid #e4e6e8;
+                text-align: right;
+                padding-right: 6px;
             }
             .payable-words {
                 background-color: #c4df9b;
@@ -654,6 +821,8 @@ body.analyze{
         transition: 0.4s ease;
     }
 }
+
+
 
 @media only screen and (min-width: 1200px) {
     .ui.container {
@@ -732,6 +901,55 @@ body.analyze{
         padding-top:0px !important;
         padding-bottom: 0px !important;
         -webkit-transition: height .3s ease;
+    }
+}
+.progress-bar {
+    height: 20px;
+    position: relative;
+    overflow: hidden;
+    &.transition-enter {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    &.transition-enter.transition-enter-active {
+        height: 20px;
+        -webkit-transition: height .3s ease;
+    }
+
+    &.transition-leave.transition-leave-active {
+        height: 0px;
+        padding-top:0px !important;
+        padding-bottom: 0px !important;
+        -webkit-transition: height .3s ease;
+    }
+}
+
+.project-body {
+    .jobs {
+        position: relative;
+        overflow-y: hidden;
+        max-height: 3000px;
+        opacity: 1;
+        &.transition-enter {
+            max-height: 0px;
+            opacity: 0;
+        }
+
+        &.transition-enter.transition-enter-active {
+            max-height: 3000px;
+            opacity: 1;
+            -webkit-transition: max-height .5s ease, opacity 1s ease;
+        }
+
+        &.transition-leave.transition-leave-active {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            opacity: 0;
+            -webkit-transition: max-height .5s ease, padding 1s ease, opacity 1s ease;
+        }
     }
 }
 

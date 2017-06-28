@@ -20,22 +20,6 @@ class JobAnalyzeHeader extends React.Component {
         });
     }
 
-    openSplitModal() {
-        let self = this;
-        let job = this.props.project.get('jobs').find(function (item) {
-           return item.get('id') == self.props.jobInfo.jid;
-        });
-        ModalsActions.openSplitJobModal(job, this.props.project, UI.reloadAnalysis);
-    }
-
-    openMergeModal() {
-        let self = this;
-        let job = this.props.project.get('jobs').find(function (item) {
-            return item.get('id') == self.props.jobInfo.jid;
-        });
-        ModalsActions.openMergeModal(this.props.project.toJS(), job.toJS(), UI.reloadAnalysis);
-    }
-
     componentDidUpdate() {
     }
 
@@ -51,12 +35,11 @@ class JobAnalyzeHeader extends React.Component {
 
     render() {
         this.calculateWords();
-        let buttonsClass = (this.props.status !== "DONE" || this.props.outsourcedChunks) ? 'disabled' : '';
         return <div className="head-chunk sixteen wide column shadow-1 pad-right-10">
                     <div className="source-target">
                         <div className="source-box">{this.props.jobInfo.source}</div>
                         <div className="in-to">
-                            <i className="icon-chevron-right icon"></i>
+                            <i className="icon-chevron-right icon"/>
                         </div>
                         <div className="target-box">{this.props.jobInfo.target}</div>
                     </div>
@@ -66,16 +49,6 @@ class JobAnalyzeHeader extends React.Component {
                     <div className="job-payable">
                         <span id="words">{parseInt(this.payable)}</span> Payable words
                     </div>
-            {(this.props.jobInfo.splitted === "splitted") ? (
-                <div className={"merge ui blue basic button "  + buttonsClass}
-                    onClick={this.openMergeModal.bind(this)} >
-                    <i className="icon-compress icon"/> Merge</div>
-            ) : (
-                <div className={"split ui blue basic button "  + buttonsClass}
-                     onClick={this.openSplitModal.bind(this)}>
-                    <i className="icon-expand icon"/> Split</div>
-            )}
-
 
                 </div>;
 
