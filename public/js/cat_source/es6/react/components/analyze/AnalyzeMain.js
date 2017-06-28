@@ -60,20 +60,17 @@ class AnalyzeMain extends React.Component {
         if (window.pageYOffset === 0) {
             clearInterval(this.state.intervalId);
         }
-        window.scroll(0, window.pageYOffset - this.props.scrollStepInPx);
+        window.scroll(0, window.pageYOffset - 50);
     }
 
     scrollToTop() {
-        let intervalId = setInterval(this.scrollStep.bind(this), this.props.delayInMs);
+        let intervalId = setInterval(this.scrollStep.bind(this), 16.6);
         this.setState({ intervalId: intervalId });
     }
 
     handleScroll() {
         let self = this;
-
-            self.setState({scrollTop: $(window).scrollTop()});
-
-
+        self.setState({scrollTop: $(window).scrollTop()});
     }
 
     componentDidUpdate() {}
