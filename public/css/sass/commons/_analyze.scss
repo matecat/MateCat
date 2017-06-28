@@ -204,7 +204,7 @@ body.analyze{
 
 
         .project-top {
-            padding: 30px 15px 15px;
+            padding: 50px 15px 15px;
             background-color: #f3f3f3;
             margin: 0px -1rem 0;
             .compare-table{
@@ -409,10 +409,10 @@ body.analyze{
 
         }
         .source-target {
-            min-width: 185px;
+            min-width: 180px;
             display: inline-block;
             font-weight: bold;
-            max-width: 63%;
+            max-width: 59%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -444,7 +444,7 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 60%;
+                    max-width: 58%;
                     min-width: 40px;
                     vertical-align: middle;
                     white-space: nowrap;
