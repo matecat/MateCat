@@ -147,7 +147,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
                                 <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
-                                    <div className="details">Details</div>
+                                    <div className="details">Analysis</div>
                                 </div>
                             </div>
                             <div className="titles-compare">
@@ -238,7 +238,7 @@ class AnalyzeChunksResume extends React.Component {
             </div>
             <div className="analyze-report"
                  onClick={this.openAnalysisReport.bind(this)}>
-                <h3>Analysis report</h3>
+                <h3>Show Analysis report</h3>
                 <div className="rounded">
                     <i className="icon-sort-down icon"/>
                 </div>
