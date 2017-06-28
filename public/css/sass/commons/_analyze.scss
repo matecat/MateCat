@@ -285,6 +285,7 @@ body.analyze{
                                 .ttw, .tsw, .tmw {
                                     text-align: right;
                                     padding-right: 15px;
+                                    color: #b0b0b0;
                                 }
                                 .tmw {
                                     font-weight: 700;
@@ -363,7 +364,7 @@ body.analyze{
             }
             .analyze-report {
                 text-align: center;
-                width: 160px;
+                width: 190px;
                 margin: 0 auto;
                 position: relative;
                 top: 30px;
@@ -408,15 +409,23 @@ body.analyze{
 
         }
         .source-target {
-            min-width: 140px;
+            min-width: 185px;
             display: inline-block;
-            margin-right: 10px;
             font-weight: bold;
-            position: relative;
-            top: 1px;
+            max-width: 63%;
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             .source-box {
                 line-height: 30px;
                 display: inline-block;
+                &.no-split {
+                    max-width: 40%;
+                    min-width: 30px;
+                    vertical-align: middle;
+                    margin-right: 5px;
+                }
             }
             .in-to {
                 display: inline-block;
@@ -434,6 +443,14 @@ body.analyze{
             .target-box {
                 display: inline-block;
                 line-height: 30px;
+                &.no-split {
+                    max-width: 60%;
+                    min-width: 40px;
+                    vertical-align: middle;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
             }
         }
 

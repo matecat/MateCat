@@ -15,7 +15,7 @@ class AnalyzeMain extends React.Component {
         this.state = {
             volumeAnalysis: null,
             project: null,
-            showAnalysis: true,
+            showAnalysis: false,
             intervalId: 0,
             scrollTop: 0
         };
