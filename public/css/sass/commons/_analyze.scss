@@ -417,6 +417,13 @@ body.analyze{
             .source-box {
                 line-height: 30px;
                 display: inline-block;
+                &.no-split {
+                    max-width: 40%;
+                    min-width: 30px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    vertical-align: middle;                }
             }
             .in-to {
                 display: inline-block;
@@ -434,6 +441,14 @@ body.analyze{
             .target-box {
                 display: inline-block;
                 line-height: 30px;
+                &.no-split {
+                    max-width: 100px;
+                    min-width: 30px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    vertical-align: middle;
+                }
             }
         }
 

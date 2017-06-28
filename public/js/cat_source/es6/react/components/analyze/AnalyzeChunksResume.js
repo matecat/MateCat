@@ -141,9 +141,9 @@ class AnalyzeChunksResume extends React.Component {
                             <div className="title-job">
                                 <div className="job-id">{self.props.jobsInfo[indexJob].jid}</div>
                                 <div className="source-target">
-                                    <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
+                                    <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                    <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
+                                    <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
                                 <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="details">Details</div>
