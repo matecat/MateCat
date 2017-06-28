@@ -80,9 +80,9 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="title-total-words ttw">
                                         <div>{chunk.total_raw_word_count_print}</div>
                                     </div>
-                                    {/*<div className="title-standard-words tsw">*/}
-                                        {/*<div>xxx</div>*/}
-                                    {/*</div>*/}
+                                    <div className="title-standard-words tsw">
+                                        <div>xxx</div>
+                                    </div>
                                     <div className="title-matecat-words tmw"
                                          ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                         <div>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
@@ -104,18 +104,17 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details"
-                                    onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
-                                    <span className="details">Show details </span>
+                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                    <div className="details">Details</div>
                                 </div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words">
 
                                 </div>
-                                {/*<div className="title-standard-words">*/}
+                                <div className="title-standard-words">
 
-                                {/*</div>*/}
+                                </div>
                                 <div className="title-matecat-words">
 
                                 </div>
@@ -220,10 +219,10 @@ class AnalyzeChunksResume extends React.Component {
                             <h5>Total Words</h5>
                             <p>(Actual words in the files)</p>
                         </div>
-                        {/*<div className="title-standard-words">*/}
-                            {/*<h5>Standard Weighted</h5>*/}
-                            {/*<p>(Industry word count)</p>*/}
-                        {/*</div>*/}
+                        <div className="title-standard-words">
+                            <h5>Standard Weighted</h5>
+                            <p>(Industry word count)</p>
+                        </div>
                         <div className="title-matecat-words">
                             <h5>MateCat Payable Words</h5>
                             <p>(Improved content reuse)</p>

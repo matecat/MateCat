@@ -343,9 +343,10 @@ body.analyze{
                         margin: -3px 0px 0px 0px;
                     }
                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                        .split {
+                        .split, .merge {
                             padding: 5px 10px;
                         }
+
                         .open-translate {
                             font-family: Calibri, Arial, Helvetica, sans-serif;
                             padding: 6px 11px;
