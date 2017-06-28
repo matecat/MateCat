@@ -14,7 +14,7 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     showDetails(idJob) {
-        AnalyzeActions.showDetails(idJob)
+        AnalyzeActions.showDetails(idJob);
     }
 
     openSplitModal(id) {
@@ -105,7 +105,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
                                 <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
-                                    <div className="details">Details</div>
+                                    <div className="details">Analysis</div>
                                 </div>
                             </div>
                             <div className="titles-compare">
