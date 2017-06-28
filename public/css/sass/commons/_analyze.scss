@@ -392,13 +392,14 @@ body.analyze{
                         padding: 0;
                         top: -3px;
                         position: relative;
-                    }
-                    &.open {
-                        -webkit-transform: rotate(180deg);
-                        -moz-transform: rotate(180deg);
-                        -ms-transform: rotate(180deg);
-                        -o-transform: rotate(180deg);
-                        transform: rotate(180deg);
+                        transition: 0.3s ease;
+                        &.open {
+                            -webkit-transform: rotate(180deg);
+                            -moz-transform: rotate(180deg);
+                            -ms-transform: rotate(180deg);
+                            -o-transform: rotate(180deg);
+                            transform: rotate(180deg);
+                        }
                     }
                 }
             }

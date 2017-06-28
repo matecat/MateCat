@@ -140,7 +140,7 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                <div className="job-id">{self.props.jobsInfo[indexJob].jid}</div>
+                                <div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>
                                 <div className="source-target">
                                     <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
