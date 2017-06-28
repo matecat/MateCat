@@ -50,8 +50,8 @@ class JobTableHeader extends React.Component {
 
                 </div>
                 <div className="single-analysis">
-                    <div className="single total">Pay</div>
-                    <div className="single payable-words"> > </div>
+                    <div className="single total">Payable Rate</div>
+                    {/*<div className="single payable-words"> > </div>*/}
                     <div className="single new">{rates.NO_MATCH}%</div>
                     <div className="single repetition">{rates.REPETITIONS}%</div>
                     <div className="single internal-matches">{rates.INTERNAL}%</div>

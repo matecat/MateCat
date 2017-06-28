@@ -146,19 +146,17 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details">
-                                    <span className="details"
-                                          onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
-                                        Show details </span>
+                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                    <div className="details">Details</div>
                                 </div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
                                     <div>{total_standard}</div>
                                 </div>
-                                {/*<div className="title-standard-words tsw">*/}
-                                    {/*<div>xxx</div>*/}
-                                {/*</div>*/}
+                                <div className="title-standard-words tsw">
+                                    <div>xxx</div>
+                                </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                     <div>{jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>

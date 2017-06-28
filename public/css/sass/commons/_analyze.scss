@@ -15,23 +15,24 @@ body.analyze{
 
     .project {
         .scroll {
-            opacity: 0.3;
-            background-color: #09beec;
+            background-color: #ffffff;
             width: 40px;
             height: 40px;
             position: fixed;
             bottom: 35px;
-            left: 75px;
+            left: 8px;
             border-radius: 5px;
             border: none;
-
+            outline: none;
+            opacity: .8;
+            z-index: 3;
             &:hover {
                 opacity: 1;
             }
             i {
                 margin-left: -7px;
                 font-size: 22px;
-                margin-top: 9px;
+                margin-top: 11px;
             }
         }
 
@@ -263,13 +264,19 @@ body.analyze{
                                 .job-details {
                                     display: inline-block;
                                     text-decoration: underline;
-                                    min-width: 62px;
-                                    line-height: 30px;
-                                    position: relative;
-                                    top: 1px;
+                                    /* min-width: 62px; */
+                                    /* line-height: 30px; */
+                                    /* position: relative; */
+                                    /* top: 1px; */
                                     cursor: pointer;
                                     color: #969696;
-                                    font-size: 16px;
+                                    font-size: 14px;
+                                    /* text-align: right; */
+                                    float: right;
+                                    top: 11px;
+                                    &:hover {
+                                        text-decoration: none;
+                                    }
                                 }
                                 &:hover {
                                     background-color: #eaebef;
@@ -302,7 +309,7 @@ body.analyze{
                         border: 1px solid #09beec;
                         border-radius: 2px;
                         box-shadow: none !important;
-                        background-color: #ffffff;
+                        background-color: #ffffff !important;
                         font-weight: 700;
                         margin-top: -3px;
                         &:hover {
@@ -324,6 +331,7 @@ body.analyze{
                     }
                     .merge {
                         margin: -3px 0 0;
+                        padding: 5px 14px;
                     }
                     .open-translate {
                         font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -334,6 +342,15 @@ body.analyze{
                         border-radius: 2px;
                         margin: -3px 0px 0px 0px;
                     }
+                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                        .split {
+                            padding: 5px 10px;
+                        }
+                        .open-translate {
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            padding: 6px 11px;
+                        }
+                    }
                 }
             }
             .analyze-report {
@@ -343,6 +360,7 @@ body.analyze{
                 position: relative;
                 top: 30px;
                 cursor: pointer;
+                z-index: 1;
                 h3 {
                     margin-bottom: 10px;
                 }
@@ -355,6 +373,7 @@ body.analyze{
                     background: white;
                     cursor: pointer;
                     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                    transition: 0.3s ease;
                     &:hover {
                         box-shadow: none !important;
                     }
@@ -466,7 +485,7 @@ body.analyze{
                                         font-weight: 700;
                                         position: relative;
                                         top: 1px;
-                                        color: #4183C4;
+                                        color: #43ba4a;
                                         display: inline-block;
                                     }
                                 }
@@ -737,6 +756,11 @@ body.analyze{
                 border-bottom: none;
                 text-align: right;
                 padding-right: 6px;
+                &.total {
+                    width: 16.9%;
+                    text-decoration: none;
+                    border-left: 1px solid #f6f6f6;
+                }
             }
         }
     }
@@ -753,7 +777,7 @@ body.analyze{
         z-index: 2;
         transition: 0.3s ease;
         &:hover {
-            background-color: #eaebef;
+            background-color: #f7f7fb;
         }
         .file-details {
             display: inline-block;
