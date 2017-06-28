@@ -2,6 +2,7 @@
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeHeader = require('./AnalyzeHeader').default;
 let AnalyzeChunksResume = require('./AnalyzeChunksResume').default;
+let AnalyzeActions = require('../../actions/AnalyzeActions');
 let ProjectAnalyze = require('./ProjectAnalyze').default;
 let AnalyzeStore = require('../../stores/AnalyzeStore');
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
@@ -50,10 +51,15 @@ class AnalyzeMain extends React.Component {
         });
     }
 
-    showDetails() {
-        this.setState({
-            showAnalysis: true
-        });
+    showDetails(idJob) {
+        if (!this.state.showAnalysis) {
+            this.setState({
+                showAnalysis: true
+            });
+            setTimeout(function () {
+                AnalyzeActions.showDetails(idJob);
+            }, 200);
+        }
     }
 
     scrollStep() {
