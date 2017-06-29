@@ -132,9 +132,7 @@ class Log {
             throw new Exception('Logger is not set. Is monolog available?');
         }
 
-        if ( !isset( self::$logger ) ) {
-            self::initMonolog() ;
-        }
+        self::initMonolog() ;
 
         return self::$logger ;
     }
