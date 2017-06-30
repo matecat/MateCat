@@ -66,13 +66,8 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValues[idJob] = payable;
     }
 
-    calculateSavengPercentual(job) {
-        let status = this.props.status;
-        // let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
-    }
-
     getResumeJobs() {
-        let self = this;
+        var self = this;
 
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
 
@@ -81,10 +76,7 @@ class AnalyzeChunksResume extends React.Component {
                 let index = 0;
                 let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
                     let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
-
                     index++;
-
-                    this.calculateSavengPercentual();
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
