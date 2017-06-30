@@ -304,6 +304,7 @@ class OutsourceModal extends React.Component {
             date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
         }
 
+        // TODO : @Ruben Modificare questo Return
 
         return <div className={"modal outsource " + loadingClass}>
         <div className="popup">
@@ -655,6 +656,7 @@ class OutsourceModal extends React.Component {
             </div>
         </div>
         </div>;
+        // TODO : @Ruben Modificare fino a qui
     }
 }
 OutsourceModal.defaultProps = {
