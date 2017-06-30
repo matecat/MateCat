@@ -411,6 +411,7 @@ body.analyze{
                             -ms-transform: rotate(180deg);
                             -o-transform: rotate(180deg);
                             transform: rotate(180deg);
+                            top: 8px;
                         }
                     }
                 }
@@ -817,7 +818,7 @@ body.analyze{
         z-index: 2;
         transition: 0.3s ease;
         &:hover {
-            background-color: #f7f7fb;
+            background-color: #f0f1f6;
         }
         .file-details {
             display: inline-block;
@@ -846,9 +847,11 @@ body.analyze{
                 padding-right: 6px;
             }
             .payable-words {
-                background-color: #c4df9b;
+                background-color: #f6ffe9;
                 font-weight: 700;
                 transition: 0.3s ease;
+                color: #43ba4a;
+                font-size: 20px;
             }
             .payable-words.updated-count {
                 background-color: #7cc576;
