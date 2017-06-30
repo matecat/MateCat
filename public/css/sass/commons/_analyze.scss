@@ -217,14 +217,15 @@ body.analyze{
                     h5 {
                         margin-bottom: 0px;
                         font-weight: 100;
+                        font-size: 17px;
                     }
                     p {
-                        font-size: 12px;
+                        font-size: 14px;
                     }
                 }
                 .header-compare-table {
-                    padding-top: 15px;
-                    padding-bottom: 15px;
+                    //padding-top: 15px;
+                    //padding-bottom: 15px;
                 }
                 .title-job {
                     display: inline-block;
@@ -248,8 +249,11 @@ body.analyze{
                     border-left: 1px solid gainsboro;
                     margin-left: -1px;
                     line-height: 50px;
+                    padding-top: 15px;
+                    padding-bottom: 15px;
                 }
                 .title-matecat-words {
+                    background-color: #c4df9b;
                     h5 {
                         font-weight: 700;
                     }
@@ -263,18 +267,15 @@ body.analyze{
                                 background-color: #ffffff;
                                 transition: 0.3s ease;
                                 .job-details {
-                                    display: inline-block;
-                                    text-decoration: underline;
-                                    /* min-width: 62px; */
-                                    /* line-height: 30px; */
-                                    /* position: relative; */
-                                    /* top: 1px; */
-                                    cursor: pointer;
-                                    color: #969696;
-                                    font-size: 14px;
-                                    /* text-align: right; */
+                                    font-size: 15px;
                                     float: right;
                                     top: 11px;
+                                    color: #4183C4;
+                                    text-decoration: underline;
+                                    font-weight: 700;
+                                    margin-left: 5px;
+                                    cursor: pointer;
+                                    display: inline-block;
                                     &:hover {
                                         text-decoration: none;
                                     }
@@ -285,14 +286,25 @@ body.analyze{
                                 .ttw, .tsw, .tmw {
                                     text-align: right;
                                     padding-right: 15px;
-                                    color: #b0b0b0;
+                                    //color: #b0b0b0;
+                                    padding-top: 0px;
+                                    padding-bottom: 0px;
                                 }
                                 .tmw {
                                     font-weight: 700;
                                     color: #43ba4a;
-                                    font-size: 18px;
-                                    //background: #c4df9b;
-                                    //border-bottom: 1px solid #a0b4a4;
+                                    font-size: 20px;
+                                    background-color: #f6ffe9;
+                                    text-decoration: underline;
+                                    cursor: pointer;
+                                    i {
+                                        font-size: 23px;
+                                        top: 4px;
+                                        position: relative;
+                                    }
+                                    &:hover {
+                                        text-decoration: none;
+                                    }
                                 }
                             }
                         }
@@ -399,7 +411,6 @@ body.analyze{
                             -ms-transform: rotate(180deg);
                             -o-transform: rotate(180deg);
                             transform: rotate(180deg);
-                            top: 8px;
                         }
                     }
                 }
@@ -861,8 +872,8 @@ body.analyze{
         .left-box {
             padding-top: 8px;
             i {
-                position: relative;
-                top: -6px;
+                position: absolute;
+                top: 12px;
             }
             .file-title-details {
                 display: inline-block;
@@ -871,6 +882,23 @@ body.analyze{
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                position: absolute;
+                transition: 0.3s ease;
+                position: absolute;
+                left: 18px;
+                &:hover {
+                    display: inline-block;
+                    max-width: 210%;
+                    min-width: 30px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    position: absolute;
+                    left: 18px;
+                    background: #c7c6c6;
+                    padding: 0 5px;
+                    z-index: 2;
+                }
             }
         }
     }
