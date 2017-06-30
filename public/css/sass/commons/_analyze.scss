@@ -226,6 +226,8 @@ body.analyze{
                 .header-compare-table {
                     //padding-top: 15px;
                     //padding-bottom: 15px;
+                    z-index: 1;
+                    position: relative;
                 }
                 .title-job {
                     display: inline-block;
@@ -260,6 +262,8 @@ body.analyze{
                 }
                 &.jobs {
                     background-color: #f3f3f3;
+                    z-index: 0;
+                    position: relative;
                     .job {
                         margin-bottom: 15px;
                         .chunks {

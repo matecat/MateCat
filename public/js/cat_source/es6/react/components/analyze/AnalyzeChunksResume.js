@@ -213,8 +213,8 @@ class AnalyzeChunksResume extends React.Component {
         let showHideText = (this.state.openDetails) ? "Hide Analysis report" : "Show Analysis report";
         let iconClass = (this.state.openDetails) ? "open" : "";
         return <div className="project-top ui grid">
-            <div className="compare-table sixteen wide column shadow-1">
-                <div className="header-compare-table ui grid">
+            <div className="compare-table sixteen wide column">
+                <div className="header-compare-table ui grid shadow-1">
                     <div className="title-job">
                         <h5></h5>
                         <p></p>
