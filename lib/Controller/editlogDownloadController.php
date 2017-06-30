@@ -29,8 +29,8 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-        $data = CatUtils::getEditingLogData($this->jid, $this->password, true);
-        $data = $data[0];
+        $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
+        list( $data, , ) = $this->model->getEditLogData();
 
         $csvHandler = new SplTempFileObject( -1 );
         $csvHandler->setCsvControl(';');
@@ -47,18 +47,18 @@ class editlogDownloadController extends downloadController {
         $csvHandler->fputcsv( $csv_fields );
 
         foreach ( $data as $d ){
-            $statistical_relevant=($d['stats-valid']=='No'?0:1);
-            $sid            = $d[ 'sid' ];
-            $sugg_source    = $d[ 'ss' ];
-            $rwc            = $d[ 'rwc' ];
-            $sugg_match     = $d[ 'sm' ];
-            $sugg_tte       = $d[ 'tte' ];
-            $pe_effort_perc = $d[ 'pe_effort_perc' ];
-            $hter           = $d[ 'ter' ];
-            $segment        = $d[ 'source_csv' ];
-            $suggestion     = $d[ 'sug_csv' ];
-            $translation    = $d[ 'translation_csv' ];
-            $id_translator  = $d[ 'tid' ];
+            $statistical_relevant = ( $d->stats_valid ? 1 : 0 );
+            $sid            = $d->id;
+            $sugg_source    = $d->suggestion_source;
+            $rwc            = $d->raw_word_count;
+            $sugg_match     = $d->suggestion_match;
+            $sugg_tte       = $d->time_to_edit;
+            $pe_effort_perc = $d->pe_effort_perc;
+            $hter           = $d->ter;
+            $segment        = $d->source_csv;
+            $suggestion     = $d->sug_csv;
+            $translation    = $d->translation_csv;
+            $id_translator  = $d->id_translator;
 
             $s1_source      = "";
             $s2_source      = "";
@@ -73,11 +73,11 @@ class editlogDownloadController extends downloadController {
             $s2_origin      = "";
             $s3_origin      = "";
 
-            $mt_qe = $d[ 'mt_qe' ];
+            $mt_qe = $d->mt_qe;
 
-            if ( !empty( $d[ 'sar' ] ) ) {
+            if ( !empty( $d->suggestions_array ) ) {
 
-                $sar            = json_decode( $d[ 'sar' ] );
+                $sar            = json_decode( $d->suggestions_array );
 
                 $s1_source      = $sar[ 0 ]->segment;
                 $s1_translation = $sar[ 0 ]->translation;
@@ -104,7 +104,7 @@ class editlogDownloadController extends downloadController {
                     $this->jid, $sid, $sugg_source, $rwc, $sugg_match, $sugg_tte, $pe_effort_perc, $hter, $segment,
                     $suggestion, $translation, $mt_qe, $id_translator, $s1_source, $s1_translation, $s1_match,
                     $s1_origin, $s2_source, $s2_translation, $s2_match, $s2_origin, $s3_source, $s3_translation,
-                    $s3_match, $s3_origin, $d[ 'sp' ],$statistical_relevant
+                    $s3_match, $s3_origin, $d->suggestion_position,$statistical_relevant
             );
 
             $csvHandler->fputcsv( $row_array );
@@ -124,7 +124,7 @@ class editlogDownloadController extends downloadController {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
-        $activity->id_project = $data[ 0 ][ 'id_project' ]; //assume that all rows have the same project id
+        $activity->id_project = Projects_ProjectDao::findByJobId( $data[ 0 ]->job_id, 60 * 60 )->id; //assume that all rows have the same project id
         $activity->action     = ActivityLogStruct::DOWNLOAD_EDIT_LOG;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->uid;

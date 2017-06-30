@@ -132,7 +132,7 @@ class EditLog_EditLogModel {
         return CatUtils::getFastStatsForJob( $wStruct );
     }
 
-    private function getEditLogData( $use_ter_diff = false ) {
+    public function getEditLogData( $use_ter_diff = false ) {
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
         $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
 
@@ -269,6 +269,8 @@ class EditLog_EditLogModel {
             if ( ( $displaySeg->suggestion_match == "85%" ) || ( $displaySeg->suggestion_match == "86%" ) ) {
                 $displaySeg->suggestion_source = 'Machine Translation';
                 $stat_mt[]                     = $seg->raw_word_count;
+            } elseif( $displaySeg->match_type == 'NO_MATCH' ) {
+                $displaySeg->suggestion_source = 'NO_MATCH';
             } else {
                 $displaySeg->suggestion_source = 'TM';
             }
@@ -291,7 +293,7 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source_csv      = preg_replace( $array_patterns, $array_replacements_csv, $seg->source );
             $displaySeg->translation_csv = preg_replace( $array_patterns, $array_replacements_csv, $seg->translation );
-            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->suggestion_view );
+            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $seg->suggestion );
             $displaySeg->diff_csv        = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->diff );
 
 
@@ -304,7 +306,7 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source          = preg_replace( $array_patterns, $array_replacements, $seg->source );
             $displaySeg->translation     = preg_replace( $array_patterns, $array_replacements, $seg->translation );
-            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->suggestion_view );
+            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $seg->suggestion );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
 
             $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );

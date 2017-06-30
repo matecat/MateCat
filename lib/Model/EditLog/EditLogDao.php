@@ -74,6 +74,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             st.suggestion_match,
             st.suggestion_position,
             st.mt_qe,
+            st.match_type,
             j.id_translator,
             j.source AS job_source,
             j.target AS job_target,
