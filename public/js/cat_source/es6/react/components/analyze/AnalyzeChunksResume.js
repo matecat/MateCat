@@ -18,7 +18,6 @@ class AnalyzeChunksResume extends React.Component {
 
     showDetails(idJob) {
         AnalyzeActions.showDetails(idJob);
-        this.props.openAnalysisReport();
         this.setState({
             openDetails: true
         });
