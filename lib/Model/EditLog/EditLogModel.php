@@ -9,12 +9,11 @@
 class EditLog_EditLogModel {
     //number of percentage point under which the post editing effor evaluation is still accepted;
     const PEE_THRESHOLD = 1;
-    const MAX_SEGMENTS_PER_PAGE = 50;
     const CACHETIME = 108000;
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;
 
-    private static $segments_per_page = 10;
+    private static $segments_per_page = 50;
     private static $start_id = -1;
     private static $sort_by = "sid";
 
@@ -133,8 +132,9 @@ class EditLog_EditLogModel {
     }
 
     public function getEditLogData( $use_ter_diff = false ) {
+
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
-        $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
+        $data       = $editLogDao->setNumSegs( self::$segments_per_page )->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
 
         //get translation mismatches and convert the array in a hashmap
         $translationMismatchList = $editLogDao->getTranslationMismatches( $this->getJid() );

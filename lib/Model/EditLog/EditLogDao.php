@@ -12,7 +12,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EditLog_EditLogSegmentStruct";
 
-    const NUM_SEGS = 10;
+    protected static $NUM_SEGS = 10;
+
+    /**
+     * @param int $NUM_SEGS
+     *
+     * @return $this
+     */
+    public function setNumSegs( $NUM_SEGS = 10 ) {
+        self::$NUM_SEGS = $NUM_SEGS;
+        return $this;
+    }
 
     /**
      * This method returns a set of 2*NUM_SEGS segments
@@ -104,13 +114,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS,
+                self::$NUM_SEGS,
                 $job_id,
                 $password,
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS
+                self::$NUM_SEGS
         );
 
         $result = $this->_fetch_array(
@@ -230,7 +240,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -271,7 +281,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -312,7 +322,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $result = $this->_fetch_array(
                 sprintf(
                         $queryBefore,
-                        self::NUM_SEGS,
+                        self::$NUM_SEGS,
                         $job_id,
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
