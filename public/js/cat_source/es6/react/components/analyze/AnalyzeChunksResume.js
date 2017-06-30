@@ -90,9 +90,9 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="title-standard-words tsw">
                                         <div>{chunk.total_st_word_count_print}</div>
                                     </div>
-                                    <div className="title-matecat-words tmw" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}
+                                    <div className="title-matecat-words tmw" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}
                                          ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                        <div><i className="icon-chart4 icon"></i>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
+                                        <div><i className="icon-chart4 icon"/>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                     </div>
                                 </div>
                                 <div className="activity-icons">
@@ -111,9 +111,6 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                {/*<div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
-                                    <div className="details">Analysis</div>
-                                </div>*/}
                             </div>
                             <div className="titles-compare">
                             </div>
@@ -144,9 +141,6 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                {/*<div className="job-details" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>*/}
-                                    {/*<div className="details">Analysis</div>*/}
-                                {/*</div>*/}
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
@@ -158,7 +152,7 @@ class AnalyzeChunksResume extends React.Component {
                                 <div className="title-matecat-words tmw"
                                     onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                    <div><i className="icon-chart4 icon"></i>{jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
+                                    <div><i className="icon-chart4 icon"/>{jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
                             </div>
                             <div className="activity-icons">
