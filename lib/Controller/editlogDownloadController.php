@@ -29,7 +29,11 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
+        $job = Jobs_JobDao::getById( $this->jid, 60 * 60 )[ 0 ];
+
         $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
+        $this->model->setStartId( $job->job_first_segment );
+        $this->model->setSegmentsPerPage( PHP_INT_MAX );
         list( $data, , ) = $this->model->getEditLogData();
 
         $csvHandler = new SplTempFileObject( -1 );
