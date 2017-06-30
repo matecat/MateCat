@@ -77,7 +77,7 @@ class AnalyzeChunksResume extends React.Component {
                     let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
                     index++;
 
-                    self.checkPayableChanged(self.props.jobsInfo[indexJob].jid, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
+                    self.checkPayableChanged(self.props.jobsInfo[indexJob].jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
                     return <div key={indexChunk} className="chunk ui grid shadow-1">
                                 <div className="title-job">
