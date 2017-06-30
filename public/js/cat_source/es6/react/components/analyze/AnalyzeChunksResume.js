@@ -18,6 +18,11 @@ class AnalyzeChunksResume extends React.Component {
 
     showDetails(idJob) {
         AnalyzeActions.showDetails(idJob);
+        this.props.openAnalysisReport();
+        this.setState({
+            openDetails: true
+        });
+
     }
 
     openSplitModal(id) {
@@ -61,8 +66,13 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValues[idJob] = payable;
     }
 
+    calculateSavengPercentual(job) {
+        let status = this.props.status;
+        // let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
+    }
+
     getResumeJobs() {
-        var self = this;
+        let self = this;
 
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
 
@@ -71,7 +81,10 @@ class AnalyzeChunksResume extends React.Component {
                 let index = 0;
                 let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
                     let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
+
                     index++;
+
+                    this.calculateSavengPercentual();
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
@@ -107,7 +120,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                <div className="job-details" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="details">Analysis</div>
                                 </div>
                             </div>
@@ -149,7 +162,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                <div className="job-details" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="details">Analysis</div>
                                 </div>
                             </div>
