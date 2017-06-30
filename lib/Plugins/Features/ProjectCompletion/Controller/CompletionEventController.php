@@ -19,6 +19,7 @@ use Exception;
 use Exceptions_RecordNotFound;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use FeatureSet;
+use Log;
 use LQA\ChunkReviewDao;
 use Utils;
 
@@ -89,6 +90,9 @@ class CompletionEventController extends BaseKleinViewController {
         ChunkReviewDao::updateStruct( $review, ['fields' => [
                 'is_pass', 'penalty_points', 'reviewed_words_count', 'undo_data'
         ] ] );
+
+        Log::doLog("CompletionEventController deleting event: " . var_export( $this->event->getArrayCopy(), true ) );
+
         ( new Chunks_ChunkCompletionEventDao())->deleteEvent( $this->event ) ;
         Database::obtain()->commit();
     }
