@@ -111,6 +111,7 @@ class QualityReportModel {
 
         $chunkReview->penalty_points = 0 ;
         $chunkReview->reviewed_words_count = 0 ;
+        $chunkReview->is_pass = 1 ;
 
         ChunkReviewDao::updateStruct( $chunkReview ) ;
     }
