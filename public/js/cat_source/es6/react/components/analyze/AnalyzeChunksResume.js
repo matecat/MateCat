@@ -18,6 +18,10 @@ class AnalyzeChunksResume extends React.Component {
 
     showDetails(idJob) {
         AnalyzeActions.showDetails(idJob);
+        this.setState({
+            openDetails: true
+        });
+
     }
 
     openSplitModal(id) {
@@ -73,7 +77,7 @@ class AnalyzeChunksResume extends React.Component {
                     let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
                     index++;
 
-                    self.checkPayableChanged(self.props.jobsInfo[indexJob].jid, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
+                    self.checkPayableChanged(self.props.jobsInfo[indexJob].jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
                     return <div key={indexChunk} className="chunk ui grid shadow-1">
                                 <div className="title-job">
@@ -107,7 +111,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                <div className="job-details" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="details">Analysis</div>
                                 </div>
                             </div>
@@ -149,7 +153,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
                                 </div>
-                                <div className="job-details" onClick={self.showDetails.bind(this, self.props.jobsInfo[indexJob].jid)}>
+                                <div className="job-details" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="details">Analysis</div>
                                 </div>
                             </div>
