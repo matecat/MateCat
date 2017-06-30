@@ -76,7 +76,7 @@ class Revise_JobQA {
         $searchErrorCountStruct->setIdJob( $this->job_id );
         $searchErrorCountStruct->setJobPassword( $this->job_password );
 
-        $jobErrorTotals = $errorCountDao->setCacheTTL( 60 * 10 )->read( $searchErrorCountStruct );
+        $jobErrorTotals = $errorCountDao->setCacheTTL( 60 * 15 )->read( $searchErrorCountStruct );
 
         /**
          * @var $jobErrorTotals ErrorCount_Struct
