@@ -29,13 +29,8 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-//        $data = CatUtils::getEditingLogData($this->jid, $this->password, true);
-
         $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
-        list( $data, $stats, $pagination ) = $this->model->getEditLogData();
-
-
-//        $data = $data[0];
+        list( $data, , ) = $this->model->getEditLogData();
 
         $csvHandler = new SplTempFileObject( -1 );
         $csvHandler->setCsvControl(';');
@@ -129,7 +124,7 @@ class editlogDownloadController extends downloadController {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
-        $activity->id_project = Projects_ProjectDao::findByJobId( $data[ 0 ]->job_id )->id; //assume that all rows have the same project id
+        $activity->id_project = Projects_ProjectDao::findByJobId( $data[ 0 ]->job_id, 60 * 60 )->id; //assume that all rows have the same project id
         $activity->action     = ActivityLogStruct::DOWNLOAD_EDIT_LOG;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->uid;
