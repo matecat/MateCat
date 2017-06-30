@@ -94,7 +94,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 translation IS NOT NULL AND
                 st.status not in( '%s', '%s' )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                ORDER BY id_segment DESC";
+                ORDER BY id_segment ASC";
 
         $querySegments = sprintf(
                 $querySegments,
