@@ -58,7 +58,7 @@ class AnalyzeMain extends React.Component {
             });
             setTimeout(function () {
                 AnalyzeActions.showDetails(idJob);
-            }, 200);
+            }, 500);
         }
     }
 
