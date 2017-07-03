@@ -900,6 +900,12 @@ class CatUtils {
         return $result ;
     }
 
+    /**
+     * @param Jobs_JobStruct $job
+     *
+     * @return array|\LQA\ChunkReviewStruct|null
+     *
+     */
     public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job ){
 
         $result = null ;
