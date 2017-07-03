@@ -498,10 +498,10 @@ body.analyze{
                     background-color: #f6f6f6;
                     .chunks {
                         .chunk-container {
-
+                            padding-top: 0;
                             .analysis {
-                                padding-top: 60px;
-                                margin-top: -74px;
+                                //padding-top: 60px;
+                                margin-top: 0px;
                                 &.show-details {
                                     .head-chunk, .job-table-header > div,
                                     .chunk-analyze-container > div {
@@ -896,6 +896,7 @@ body.analyze{
                 transition: 0.3s ease;
                 position: absolute;
                 left: 18px;
+                cursor: default;
                 &:hover {
                     display: inline-block;
                     max-width: 210%;
