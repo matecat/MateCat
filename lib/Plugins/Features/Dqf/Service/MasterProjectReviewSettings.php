@@ -8,10 +8,12 @@
 
 namespace Features\Dqf\Service;
 
+use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\ReviewSettingsRequestStruct;
 use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
 use INIT;
+use Log;
 
 class MasterProjectReviewSettings {
 
@@ -26,8 +28,8 @@ class MasterProjectReviewSettings {
 
     public function create( ReviewSettingsRequestStruct $reviewSettingsData ) {
 
-        $reviewSettingsData->sessionId = $this->session->getSessionId() ;
-        $reviewSettingsData->apiKey    = INIT::$DQF_API_KEY ;
+        $reviewSettingsData->sessionId  = $this->session->getSessionId() ;
+        $reviewSettingsData->apiKey     = INIT::$DQF_API_KEY ;
         $reviewSettingsData->projectKey = $this->remoteProject->dqfUUID ;
 
         $client = new Client();
@@ -35,9 +37,7 @@ class MasterProjectReviewSettings {
 
         $url = sprintf( '/project/%s/reviewSettings', $this->remoteProject->dqfId ) ;
 
-        var_dump( $reviewSettingsData->getParams() ) ;
-
-        $client->createResource( $url, 'post', [
+        $resource = $client->createResource( $url, 'post', [
                 'headers'    => $reviewSettingsData->getHeaders(),
                 'formData'   => $reviewSettingsData->getParams(),
                 'pathParams' => $reviewSettingsData->getPathParams()
@@ -46,13 +46,14 @@ class MasterProjectReviewSettings {
         $client->curl()->multiExec();
 
         if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new \Exception('Errors while creating reviewSettings.' .
+            throw new Exception('Errors while creating reviewSettings.' .
                     implode(', ', $client->curl()->getAllContents() )
             ) ;
         }
 
+
         return new ReviewSettingsResponseStruct(
-                json_decode( $client->curl()->getAllContents()[0], true )
+                json_decode( $client->curl()->getSingleContent($resource), true )
         );
 
     }

@@ -11,6 +11,7 @@ namespace Features\Dqf\Service;
 use API\V2\Exceptions\AuthenticationError;
 use Features\Dqf\Service\Struct\LoginRequestStruct;
 Use Features\Dqf\Service\Struct\LoginResponseStruct ;
+use Log;
 
 class Session {
 
@@ -45,7 +46,7 @@ class Session {
         $content = json_decode( $client->curl()->getSingleContent( $request ), true );
         $response = new LoginResponseStruct( $content['loginResponse'] );
 
-        \Log::doLog(" SessionId " . $response->sessionId );
+        Log::doLog(" SessionId " . $response->sessionId );
 
         $this->sessonId = $response->sessionId ;
         $this->expires = $response->expires ;

@@ -9,6 +9,8 @@
 namespace Features\Dqf\Service\Struct;
 
 
+use INIT;
+
 abstract class BaseRequestStruct extends BaseStruct {
 
     abstract function getHeaders() ;
@@ -25,7 +27,7 @@ abstract class BaseRequestStruct extends BaseStruct {
 
     public function __construct( array $array_params = array() ) {
         if ( !isset( $array_params['apiKey'] ) ) {
-            $array_params['apiKey'] = \INIT::$DQF_API_KEY ;
+            $array_params['apiKey'] = INIT::$DQF_API_KEY ;
         }
 
         parent::__construct( $array_params );

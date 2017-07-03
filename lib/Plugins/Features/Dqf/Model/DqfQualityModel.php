@@ -8,6 +8,7 @@
 
 namespace Features\Dqf\Model;
 
+use DomainException;
 use Features\Dqf\Service\Struct\Request\ReviewSettingsRequestStruct;
 use LQA\CategoryStruct;
 use LQA\ModelStruct;
@@ -32,16 +33,22 @@ class DqfQualityModel {
 
     public function __construct( Projects_ProjectStruct $project ) {
         $this->qaModelStruct = $project->getLqaModel() ;
+        $this->matecat_categories = $this->qaModelStruct->getCategories();
     }
 
     public function getReviewSettings() {
-        $this->matecat_categories = $this->qaModelStruct->getCategories();
 
         $struct = new ReviewSettingsRequestStruct();
-        $struct->reviewType = 'error_typology';
-        $struct->severityWeights = $this->getSeverities() ;
-        $struct->sampling = 20 ;
+        $struct->reviewType        = 'error_typology';
+        $struct->severityWeights   = $this->getSeverities() ;
+        $struct->sampling          = 20 ;
         $struct->passFailThreshold = 200 ;
+
+        /**
+         * Decide which categories to use. DQF expects four categories to be defined:
+         * neutral,minor,major,critical.
+         * Count of severities for the project must be 4 and all must have dqf_id set.
+         */
 
         foreach( $this->matecat_categories as $category ) {
             $options = json_decode( $category->options, true );
@@ -58,12 +65,25 @@ class DqfQualityModel {
      */
     protected function getSeverities() {
         $severities = [] ;
-        foreach( $this->matecat_categories[ 0 ]->getJsonSeverities() as $severity ) {
+
+        foreach( $this->matecat_categories[ 0 ]->getJsonSeverities() as $severity )  {
+
+            $ids[] = $severity['dqf_id'] ;
+
             $severities[] = [
                     'severityId' => $severity['dqf_id'],
-                    'weight' => $severity['penalty']
+                    'weight'     => $severity['penalty']
             ];
         }
+
+        sort($ids, SORT_NUMERIC) ;
+
+        $cachedSeverities = new CachedSeverityAttributes();
+
+        if ( $cachedSeverities->getSortedDqfIds() != $ids ) {
+            throw new DomainException('Your QA model is missing some DQF severities. All severities defined in DQF are expected.') ;
+        }
+
         return json_encode( $severities );
     }
 
