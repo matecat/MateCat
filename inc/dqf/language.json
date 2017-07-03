@@ -1588,5 +1588,60 @@
         "id": 324,
         "localeCode": "tlh",
         "name": "tlhIngan-Hol"
+    },
+    {
+        "id": 325,
+        "localeCode": "ar-TD",
+        "name": "Arabic (Chad)"
+    },
+    {
+        "id": 326,
+        "localeCode": "am-ER",
+        "name": "Amharic (Eritrea)"
+    },
+    {
+        "id": 327,
+        "localeCode": "ar",
+        "name": "Arabic"
+    },
+    {
+        "id": 328,
+        "localeCode": "uz-UZ",
+        "name": "Uzbek (Uzbekistan)"
+    },
+    {
+        "id": 329,
+        "localeCode": "nl",
+        "name": "Flemish"
+    },
+    {
+        "id": 330,
+        "localeCode": "zh",
+        "name": "Chinese"
+    },
+    {
+        "id": 331,
+        "localeCode": "en-mt",
+        "name": "English (Malta)"
+    },
+    {
+        "id": 332,
+        "localeCode": "de-be",
+        "name": "German (Belgium)"
+    },
+    {
+        "id": 333,
+        "localeCode": "es-001",
+        "name": "Castilian (World)"
+    },
+    {
+        "id": 334,
+        "localeCode": "lv",
+        "name": "Latvian"
+    },
+    {
+        "id": 335,
+        "localeCode": "da",
+        "name": "Danish"
     }
 ]
