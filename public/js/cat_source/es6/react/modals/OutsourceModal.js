@@ -308,24 +308,18 @@ class OutsourceModal extends React.Component {
 
         return <div className="ui grid">
             <div className="assign-job-translator sixteen wide column">
-                <div className="ui grid">
-                    <div className="four wide column">
-                        <div className="title-url">
-                            <div className="title">
-                                Assign Job to translator
-                            </div>
-                        </div>
+                <div className="title-url ui grid">
+                    <div className="title four wide column">
+                        Assign Job to translator
                     </div>
-                    <div className="eleven wide column">
-                        <div className="job-url">
-                            url: https://www.matecat.com/job
-                        </div>
+                    <div className="job-url eleven wide column">
+                        url: https://www.matecat.com/job
                     </div>
                     <div className="four wide column">
 
                     </div>
-                    <div className="nine wide column">
-                        <div className="translator-assign ui form">
+                    <div className="translator-assignee nine wide column">
+                        <div className="ui form">
                             <div className="fields">
                                 <div className="field">
                                     <label>First name</label>

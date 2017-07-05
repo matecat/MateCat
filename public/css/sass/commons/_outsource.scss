@@ -1,0 +1,206 @@
+
+.outsource-container {
+    padding: 0px !important;
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+    width: 110% !important;
+    margin-left: -30px !important;
+    margin-right: -30px !important;
+    box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
+    overflow: hidden;
+    .outsource-header {
+        padding: 8px 15px;
+    }
+    &.transitionOutsource-enter {
+        height: 0px;
+    }
+
+    &.transitionOutsource-enter.transitionOutsource-enter-active {
+        height: 680px;
+        -webkit-transition: height .3s ease;
+    }
+
+    &.transitionOutsource-leave.transitionOutsource-leave-active {
+        height: 0px !important;
+        -webkit-transition: height .3s ease;
+    }
+
+
+
+
+    .assign-job-translator {
+        background-color: #d5d8dc;
+        .title-url {
+            padding: 0 15px;
+            .title {
+                padding: 15px 30px;
+            }
+            .job-url {
+
+            }
+            .translator-assignee {
+
+            }
+        }
+    }
+    .divider-or {
+        position: absolute !important;
+        top: 130px;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        z-index: 1;
+        padding-left: 35px;
+        .or {
+            width: 40px;
+            height: 40px;
+            background-color: grey;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            color: #ffffff;
+        }
+    }
+
+    .outsource-to-translated {
+        background: #e9efec;
+        .payment-service {
+            padding: 15px 15px;
+            .service-box {
+                width: 70%;
+                display: inline-block;
+                padding: 0 15px;
+                vertical-align: text-bottom;
+                font-size: 28px;
+                font-weight: 700;
+                font-family: calibri;
+                .service {
+                    display: inline-block;
+                    &.project-management, .translation, .revision {
+
+                    }
+                }
+            }
+            .fiducial-logo {
+                width: 30%;
+                display: inline-block;
+                text-align: right;
+                padding: 0 15px;
+                vertical-align: text-bottom;
+                .translated-logo {
+                    display: inline-block;
+                    .logo-t {
+                        width: 125px;
+                        position: relative;
+                        top: 11px;
+                        padding: 0px;
+                        margin: 0px;
+                    }
+                }
+            }
+        }
+        .payment-details-box {
+            background-color: #ffffff;
+            padding: 15px;
+            .translator-job-details {
+                padding-bottom: 15px;
+                .translator-details-box {
+                    width: 35%;
+                    border-right: 1px solid black;
+                    display: inline-block;
+                    vertical-align: middle;
+                    padding: 0 15px;
+                    .left, .right {
+                        display: inline-block;
+                        margin: 0;
+                    }
+                    .left {
+
+                    }
+                    .right {
+                        float: right;
+                    }
+                }
+                .job-details-box {
+                    display: inline-block;
+                    width: 65% !important;
+                    vertical-align: middle;
+                    padding: 0 15px;
+                    .source-target {
+                        min-width: inherit !important;
+                        float: inherit !important;
+                        margin-right: 10px;
+                        top: 0px;
+                        display: inline-block;
+                        .source-box, .in-to, .target-box {
+                            display: inline-block;
+                            float: none !important;
+                            max-width: inherit !important;
+                            min-width: inherit !important;
+                            width: inherit !important;
+                            white-space: inherit !important;
+                            overflow: inherit !important;
+                            text-overflow: inherit !important;
+                            line-height: inherit !important;
+                        }
+                        .source-box {
+
+                        }
+                        .in-to {
+
+                        }
+                        .target-box {
+
+                        }
+                    }
+                    .job-payment {
+                        display: inline-block;
+                        .not-payable {
+                            text-decoration: line-through;
+                        }
+                        .payable {
+
+                        }
+                    }
+                    .job-price {
+                        display: inline-block;
+                        float: right;
+                        vertical-align: text-bottom;
+                        top: 20px;
+                        position: relative;
+                    }
+                }
+            }
+            .revision-box {
+                padding: 10px 15px;
+                background-color: #e4e6e8;
+                .revision-check {
+                    width: 100%;
+                    display: inline-block;
+                    text-align: right;
+                    .add-revision {
+                        display: inline-block;
+                    }
+                    .checkbox {
+                        .flag-box {
+                            opacity: 1 !important;
+                        }
+                    }
+                    .job-price {
+                        width: 30%;
+                        display: inline-block;
+                        text-align: right;
+                    }
+                }
+                .delivery-order {
+                    .delivery-box {
+
+                    }
+                    .order-box {
+
+                    }
+                }
+            }
+
+        }
+    }
+}

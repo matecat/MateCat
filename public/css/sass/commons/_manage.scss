@@ -339,44 +339,16 @@ body.manage {
                 .job-body {
                     .chunks {
                         .chunk-container {
-                            .outsource-container {
-                                padding: 0px;
-                                margin-top: 30px;
-                                margin-bottom: 30px;
-                                width: 107%;
-                                margin-left: -1.7%;
-                                margin-right: -1.7%;
-                                box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
-                                /*height: 680px;*/
-                                //height: 100%;
-                                overflow: hidden;
-                                .outsource-header {
-                                    padding: 8px 15px;
-                                }
-                                &.transitionOutsource-enter {
-                                    height: 0px;
-                                }
-
-                                &.transitionOutsource-enter.transitionOutsource-enter-active {
-                                    height: 680px;
-                                    -webkit-transition: height .3s ease;
-                                }
-
-                                &.transitionOutsource-leave.transitionOutsource-leave-active {
-                                    height: 0px !important;
-                                    -webkit-transition: height .3s ease;
-                                }
-
-
-                            }
-                            .outsource.modal .popup {
-                                box-shadow: none;
-                            }
                         }
                         .chunk {
                             transition: 0.3s ease;
                             background-color: #ffffff;
                             padding: 8px 15px;
+                            &.outsource-container {
+                            }
+                            .outsource.modal .popup {
+                                box-shadow: none;
+                            }
                             .job-id {
                                 float: left;
                                 min-width: 65px;

@@ -764,7 +764,7 @@ class JobContainer extends React.Component {
                             Open
                         </a>
                     </div>
-                    <div className="sixteen wide column shadow-1 pad-right-10">
+                    <div className="sixteen wide column shadow-1">
                         <OutsourceModal project={this.props.project.toJS()}
                                         job={this.props.job.toJS()}
                                         url={this.getTranslateUrl()}
