@@ -92,7 +92,9 @@ class AnalyzeChunksResume extends React.Component {
                                     </div>
                                     <div className="title-matecat-words tmw" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}
                                          ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                        <div><i className="icon-chart4 icon"/>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
+                                        <div>
+                                            {/*<i className="icon-chart4 icon"/>*/}
+                                            {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                     </div>
                                 </div>
                                 <div className="activity-icons">
@@ -152,7 +154,9 @@ class AnalyzeChunksResume extends React.Component {
                                 <div className="title-matecat-words tmw"
                                     onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                    <div><i className="icon-chart4 icon"/>{jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
+                                    <div>
+                                        {/*<i className="icon-chart4 icon"/>*/}
+                                        {jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
                             </div>
                             <div className="activity-icons">

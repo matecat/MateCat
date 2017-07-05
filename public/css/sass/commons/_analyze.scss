@@ -255,7 +255,6 @@ body.analyze{
                     padding-bottom: 15px;
                 }
                 .title-matecat-words {
-                    background-color: #c4df9b;
                     h5 {
                         font-weight: 700;
                     }
@@ -286,6 +285,10 @@ body.analyze{
                                 }
                                 &:hover {
                                     background-color: #eaebef;
+                                    .title-matecat-words {
+                                        background: #e8fbcc !important;
+                                        transition: 0.3s ease;
+                                    }
                                 }
                                 .ttw, .tsw, .tmw {
                                     text-align: right;
