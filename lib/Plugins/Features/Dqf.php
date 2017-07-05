@@ -8,6 +8,7 @@ use Features;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use FeatureSet;
 use INIT;
+use Log;
 use Monolog\Logger;
 
 use Features\Dqf\Utils\ProjectMetadata ;
@@ -114,13 +115,15 @@ class Dqf extends BaseFeature {
     }
 
     public function validateProjectCreation( $projectStructure ) {
+        Log::doLog('DQF validateProjectCreation -------------------- ');
+
         if ( $projectStructure['metadata'] ) {
             // TODO: other incoming DQF related options to be validated
         }
 
-        $error_user_not_set = array( -1000, 'DQF user is not set' );
+        $error_user_not_set = [ 'code' => -1000, 'message' => 'DQF user is not set' ];
 
-        if ( empty($projectStructure['id_customer'] ) ) {
+        if ( empty( $projectStructure['id_customer'] ) ) {
             $projectStructure['result']['errors'][] = $error_user_not_set  ;
             return ;
         }
@@ -139,10 +142,11 @@ class Dqf extends BaseFeature {
         }
 
         $session = new Features\Dqf\Service\Session($metadata['dqf_username'], $metadata['dqf_password']);
+        $error_on_remote_login = [ 'code' => -1000, 'message' => 'DQF credentials are not correct.' ];
         try {
             $session->login() ;
         } catch( AuthenticationError $e ) {
-            $projectStructure['result']['errors'][] = 'DQF credentials are not correct.';
+            $projectStructure['result']['errors'][] = $error_on_remote_login ;
             return ;
         }
 
@@ -152,6 +156,9 @@ class Dqf extends BaseFeature {
         if ( $projectStructure['features']['review_improved']['__meta']['qa_model'] ) {
 
         }
+
+        Log::doLog( 'DQF 2 validateProjectCreation -------------------- ' );
+        Log::doLog( $projectStructure['result']['errors'] );
     }
 
 

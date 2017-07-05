@@ -200,7 +200,7 @@ APP.getCreateProjectParams = function() {
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
-        dqf                         : $( '#dqf_switch').val()
+        dqf                         : !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") )
 
 	} ;
 };
