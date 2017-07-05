@@ -29,7 +29,7 @@ class JobTableHeader extends React.Component {
                 </div>
                 <div className="single-analysis">
                     <div className="single total">Total</div>
-                    <div className="single payable-words">Payable</div>
+                    <div className="single payable-words">Weighted</div>
                     <div className="single new">New</div>
                     <div className="single repetition">Repetition</div>
                     <div className="single internal-matches">Internal Matches <span>(75/99)%</span></div>
@@ -50,7 +50,7 @@ class JobTableHeader extends React.Component {
 
                 </div>
                 <div className="single-analysis">
-                    <div className="single total">Payable Rate</div>
+                    <div className="single total">Payable rate</div>
                     {/*<div className="single payable-words"> > </div>*/}
                     <div className="single new">{rates.NO_MATCH}%</div>
                     <div className="single repetition">{rates.REPETITIONS}%</div>
