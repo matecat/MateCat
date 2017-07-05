@@ -29,8 +29,11 @@ class createProjectController extends ajaxController {
     /**
      * @var FeatureSet
      */
-    private $featureSet ;
+    private $system_wide_features ;
 
+    /**
+     * @var FeatureSet
+     */
     private $project_features;
 
     public function __construct() {
@@ -63,7 +66,7 @@ class createProjectController extends ajaxController {
         );
 
         $this->checkLogin( false );
-        $this->__setupFeatureSet();
+        $this->setupSystemWideFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
 
@@ -160,15 +163,24 @@ class createProjectController extends ajaxController {
 
     }
 
-    private function setProjectFeatures( $__postInput ){
+    /**
+     * setProjectFeatures
+     *
+     * @param $__postInput
+     */
 
-        //change project features
+    private function setProjectFeatures( $__postInput ){
+        // change project features
+
         if( !empty( $__postInput[ 'project_completion' ] ) ){
             $feature = new BasicFeatureStruct();
             $feature->feature_code = 'project_completion';
             $this->project_features[] = $feature;
         }
 
+        $this->project_features = $this->system_wide_features->filter(
+                'filterCreateProjectFeatures', $this->project_features, $__postInput
+        ) ;
     }
 
     public function doAction() {
@@ -348,12 +360,17 @@ class createProjectController extends ajaxController {
 
     }
 
-    private function __setupFeatureSet() {
-        $this->featureSet = new FeatureSet() ;
+    /**
+     * Loads current features from current logged user.
+     */
+    private function setupSystemWideFeatures() {
+        $this->system_wide_features = new FeatureSet() ;
 
         if ( $this->userIsLogged ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+            $this->system_wide_features->loadFromUserEmail( $this->logged_user->email ) ;
         }
+
+        $this->system_wide_features->loadSystemWideFeatures() ;
     }
 
     private function __addFilterForMetadataInput( $filterArgs ) {
@@ -366,7 +383,7 @@ class createProjectController extends ajaxController {
             ],
         ));
 
-        $filterArgs = $this->featureSet->filter('filterCreateProjectInputFilters', $filterArgs );
+        $filterArgs = $this->system_wide_features->filter( 'filterCreateProjectInputFilters', $filterArgs );
 
         return $filterArgs ;
     }
@@ -425,7 +442,12 @@ class createProjectController extends ajaxController {
         return $elem->toArray();
 
     }
-    
+
+    /**
+     * This function sets metadata property from input params.
+     *
+     * @param $__postInput
+     */
     private function __setMetadataFromPostInput( $__postInput ) {
         $options = array() ;
 
@@ -436,7 +458,7 @@ class createProjectController extends ajaxController {
 
         $this->metadata = $options ;
 
-        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
+        $this->metadata = $this->system_wide_features->filter('createProjectAssignInputMetadata', $this->metadata, array(
             'input' => $__postInput
         ));
     }

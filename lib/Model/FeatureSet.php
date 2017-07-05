@@ -40,6 +40,15 @@ class FeatureSet {
         }
     }
 
+    public function loadSystemWideFeatures() {
+        $features = [];
+        if ( INIT::$DQF_ENABLED ) {
+            // load a special feature to enable side wide features, like parsing and validating input params.
+            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]) ;
+        }
+        $this->features = static::merge( $this->features, $features );
+   }
+
     /**
      * Features are attached to project via project_metadata.
      *
@@ -227,10 +236,6 @@ class FeatureSet {
      */
     private function __loadFromMandatory() {
         $features = [] ;
-
-        if ( INIT::$DQF_ENABLED ) {
-            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]) ;
-        }
 
         if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
             foreach( INIT::$MANDATORY_PLUGINS as $plugin) {

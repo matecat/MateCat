@@ -9,6 +9,7 @@
 namespace Features\Dqf\Service;
 
 use API\V2\Exceptions\AuthenticationError;
+use Exception;
 use Features\Dqf\Service\Struct\LoginRequestStruct;
 Use Features\Dqf\Service\Struct\LoginResponseStruct ;
 use Log;
@@ -40,6 +41,7 @@ class Session {
         $client->curl()->multiExec();
 
         if ( $client->curl()->hasError( $request ) ) {
+            // TODO: change this class to a DQF specific Authentication Error
             throw new AuthenticationError('Login failed with message: ' . $client->curl()->getSingleContent( $request ) );
         }
 
@@ -56,7 +58,7 @@ class Session {
 
     public function getSessionId() {
         if ( is_null($this->sessonId) ) {
-            throw new \Exception('sessionId is null, try to login first');
+            throw new Exception('sessionId is null, try to login first');
         }
         return $this->sessonId ;
     }

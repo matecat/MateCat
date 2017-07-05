@@ -37,7 +37,7 @@ class DqfAttributesDumpTask extends Command {
 
         foreach( $map as $attribute ) {
             $content = file_get_contents( $attribute['url'] );
-            $path = INIT::$ROOT . '/inc/dqf/' . $attribute[ 'path' ];
+            $path = INIT::$ROOT . '/inc/dqf/cachedAttributes' . $attribute[ 'path' ];
             $output->writeln( $attribute['url'] . ' -> ' . $path );
             $json_content = json_decode( $content, true );
 

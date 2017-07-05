@@ -2,10 +2,12 @@
 
 namespace Features;
 
+use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use Features;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use FeatureSet;
+use INIT;
 use Monolog\Logger;
 
 use Features\Dqf\Utils\ProjectMetadata ;
@@ -28,17 +30,6 @@ class Dqf extends BaseFeature {
     protected static $logger ;
 
     /**
-     * These are the dependencies we need to make to be enabled when we detedct DQF is to be
-     * activated for a given project. These will fill the project metadata table.
-     *
-     *
-     * @return array
-     */
-    public function getProjectDependencies() {
-        return self::$dependencies ;
-    }
-
-    /**
      * @return \Monolog\Logger
      */
     public static function staticLogger() {
@@ -47,6 +38,17 @@ class Dqf extends BaseFeature {
             self::$logger = ( new Dqf($feature) )->getLogger();
         }
         return self::$logger ;
+    }
+
+    /**
+     * These are the dependencies we need to make to be enabled when we detedct DQF is to be
+     * activated for a given project. These will fill the project metadata table.
+     *
+     *
+     * @return array
+     */
+    public function getProjectDependencies() {
+        return self::$dependencies ;
     }
 
     /**
@@ -72,6 +74,13 @@ class Dqf extends BaseFeature {
         $metadata = array_filter( $metadata ); // <-- remove all `empty` array elements
 
         return  $metadata ;
+    }
+
+    public function filterCreateProjectFeatures( $features, $postInput ) {
+        if ( isset( $postInput[ 'dqf' ] ) && $postInput['dqf'] == true ) {
+            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]);
+        }
+        return $features ;
     }
 
     /**
@@ -106,19 +115,35 @@ class Dqf extends BaseFeature {
 
     public function validateProjectCreation( $projectStructure ) {
         if ( $projectStructure['metadata'] ) {
-            // TODO: other incoming DQF related options to be validated,
+            // TODO: other incoming DQF related options to be validated
         }
 
-        $user_error = array( -1000, 'DQF user is not set' );
+        $error_user_not_set = array( -1000, 'DQF user is not set' );
 
         if ( empty($projectStructure['id_customer'] ) ) {
-            $projectStructure['result']['errors'][] = $user_error  ;
+            $projectStructure['result']['errors'][] = $error_user_not_set  ;
+            return ;
         }
 
         $user = ( new Users_UserDao() )->setCacheTTL(3600)->getByEmail( $projectStructure['id_customer'] ) ;
 
         if ( !$user ) {
-            $projectStructure['result']['errors'][] = $user_error  ;
+            $projectStructure['result']['errors'][] = $error_user_not_set  ;
+            return ;
+        }
+
+        $metadata = $user->getMetadataAsKeyValue();
+        if ( ! ( isset( $metadata['dqf_username'] ) && isset( $metadata['dqf_password'] ) ) ) {
+            $projectStructure['result']['errors'][] = $error_user_not_set  ;
+            return ;
+        }
+
+        $session = new Features\Dqf\Service\Session($metadata['dqf_username'], $metadata['dqf_password']);
+        try {
+            $session->login() ;
+        } catch( AuthenticationError $e ) {
+            $projectStructure['result']['errors'][] = 'DQF credentials are not correct.';
+            return ;
         }
 
         // At this point we are sure ReviewImproved::loadAndValidateModelFromJsonFile was called already
