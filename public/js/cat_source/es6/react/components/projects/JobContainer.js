@@ -735,8 +735,8 @@ class JobContainer extends React.Component {
             >
             {this.state.openOutsource ? (
                 // TODO : @Ruben Modificare questo blocco
-                <div className="chunk ui grid outsource-container">
-                    <div className="sixteen wide column shadow-1 pad-right-10 outsource-header">
+                <div className="outsource-container chunk ui grid">
+                    <div className=" outsource-header sixteen wide column shadow-1">
                         <div className="job-id" title="Job Id">
                             {"(" + idJobLabel + ")"}
                         </div>
