@@ -296,14 +296,24 @@ body.analyze{
                                     //color: #b0b0b0;
                                     padding-top: 0px;
                                     padding-bottom: 0px;
+                                    .cell-label {
+                                        float: left;
+                                        margin-left: 15px;
+                                    }
                                 }
                                 .tmw {
                                     font-weight: 700;
                                     color: #43ba4a;
-                                    font-size: 20px;
+                                    font-size: 18px;
                                     background-color: #f6ffe9;
-                                    text-decoration: underline;
-                                    cursor: pointer;
+                                    margin-bottom: 1px;
+                                    .cell-label {
+                                        text-decoration: underline;
+                                        cursor: pointer;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
                                     i {
                                         font-size: 23px;
                                         top: 4px;
@@ -311,9 +321,6 @@ body.analyze{
                                         float: right;
                                         margin-left: 5px;
                                         margin-top: 9px;
-                                    }
-                                    &:hover {
-                                        text-decoration: none;
                                     }
                                 }
                             }
@@ -431,7 +438,7 @@ body.analyze{
             display: inline-block;
             min-width: 70px;
             color: #0a0a0a;
-            font-size: 14px;
+            font-size: 18px;
             position: relative;
             line-height: 35px;
             top: 1px;
@@ -448,6 +455,7 @@ body.analyze{
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 18px;
             .source-box {
                 line-height: 30px;
                 display: inline-block;
@@ -544,7 +552,6 @@ body.analyze{
                                         font-weight: 700;
                                         position: relative;
                                         top: 1px;
-                                        color: #43ba4a;
                                         display: inline-block;
                                     }
                                 }
