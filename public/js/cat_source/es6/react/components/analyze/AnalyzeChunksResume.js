@@ -88,9 +88,10 @@ class AnalyzeChunksResume extends React.Component {
                                         <div className="cell-label">Total words:</div>
                                         <div>{chunk.total_raw_word_count_print}</div>
                                     </div>
-                                    {/*<div className="title-standard-words tsw">*/}
-                                        {/*<div>{chunk.total_st_word_count_print}</div>*/}
-                                    {/*</div>*/}
+                                    <div className="title-standard-words tsw">
+                                        <div className="cell-label">Other CAT tool</div>
+                                        <div>{chunk.total_st_word_count_print}</div>
+                                    </div>
                                     <div className="title-matecat-words tmw"
                                          ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                         <div className="cell-label" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>Weighted words:</div>
@@ -151,10 +152,10 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className="cell-label">Total words:</div>
                                     <div>{total_raw}</div>
                                 </div>
-                                {/*<div className="title-standard-words tsw">*/}
-                                    {/*<div className="cell-label">Other CAT</div>*/}
-                                    {/*<div>{total_standard}</div>*/}
-                                {/*</div>*/}
+                                <div className="title-standard-words tsw">
+                                    <div className="cell-label">Other CAT tool</div>
+                                    <div>{total_standard}</div>
+                                </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                     <div className="cell-label" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>Weighted words:</div>

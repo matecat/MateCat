@@ -231,14 +231,14 @@ body.analyze{
                 }
                 .title-job {
                     display: inline-block;
-                    width: 33%;
+                    width: 26%;
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
                 }
                 .titles-compare {
                     display: inline-block;
-                    width: 45%;
+                    width: 52%;
                     text-align: center;
                     padding-left: 0;
                     padding-right: 0;
@@ -246,7 +246,7 @@ body.analyze{
                 }
                 .title-total-words, .title-standard-words, .title-matecat-words {
                     display: inline-block;
-                    width: 50%;
+                    width: 33.333%;
                     border-right: 1px solid gainsboro;
                     border-left: 1px solid gainsboro;
                     margin-left: -1px;
@@ -299,7 +299,7 @@ body.analyze{
                                     .cell-label {
                                         float: left;
                                         margin-left: 15px;
-                                        color: #444444;
+                                        color: #9c9898;
                                         font-weight: 100;
                                         font-size: 16px;
                                     }
@@ -313,6 +313,7 @@ body.analyze{
                                     .cell-label {
                                         text-decoration: underline;
                                         cursor: pointer;
+                                        color: #646760;
                                         &:hover {
                                             text-decoration: none;
                                         }
@@ -839,6 +840,9 @@ body.analyze{
         transition: 0.3s ease;
         &:hover {
             background-color: #f0f1f6;
+            .payable-words {
+                background: #e8fbcc !important;
+            }
         }
         .file-details {
             display: inline-block;
