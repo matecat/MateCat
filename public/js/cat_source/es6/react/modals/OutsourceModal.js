@@ -306,7 +306,115 @@ class OutsourceModal extends React.Component {
 
         // TODO : @Ruben Modificare questo Return
 
-        return <div className={"modal outsource " + loadingClass}>
+        return <div className="ui grid">
+            <div className="assign-job-translator sixteen wide column">
+                <div className="ui grid">
+                    <div className="four wide column">
+                        <div className="title-url">
+                            <div className="title">
+                                Assign Job to translator
+                            </div>
+                        </div>
+                    </div>
+                    <div className="eleven wide column">
+                        <div className="job-url">
+                            url: https://www.matecat.com/job
+                        </div>
+                    </div>
+                    <div className="four wide column">
+
+                    </div>
+                    <div className="nine wide column">
+                        <div className="translator-assign ui form">
+                            <div className="fields">
+                                <div className="field">
+                                    <label>First name</label>
+                                    <input type="text" placeholder="First Name" />
+                                </div>
+                                <div className="field">
+                                    <label>Middle name</label>
+                                    <input type="text" placeholder="Middle Name" />
+                                </div>
+                                <div className="field gmt">
+                                    <div className="ui button">
+                                        (GMT +2)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="three wide column">
+                        <div className="ui primary button">Send Job to Translator</div>
+                    </div>
+                </div>
+            </div>
+            <div className="divider-or sixteen wide column">
+                <div className="or">
+                    OR
+                </div>
+            </div>
+            <div className="outsource-to-translated sixteen wide column">
+                <div className="payment-service">
+                    <div className="service-box">
+                        <div className="service project-management">Outsource: Project Management </div>
+                        <div className="service translation"> + Translation </div>
+                        <div className="service revision"> + Revision</div>
+                    </div>
+                    <div className="fiducial-logo">
+                        <div className="translated-logo">Guaranteed by
+                            <img className="logo-t" src="/public/img/logo_translated.png" />
+                        </div>
+                    </div>
+                </div>
+                <div className="payment-details-box shadow-1">
+                    <div className="translator-job-details">
+                        <div className="translator-details-box">
+                            <div className="ui list left">
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                            </div>
+                            <div className="ui list right">
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item">Esmeralda <b>by Translated</b></div>
+                            </div>
+                        </div>
+                        <div className="job-details-box">
+                            <div className="source-target st-details">
+                                <div className="source-box">Spanish</div>
+                                <div className="in-to">
+                                    <i className="icon-chevron-right icon" />
+                                </div>
+                                <div className="target-box">Haitian Creole French</div>
+                            </div>
+                            <div className="job-payment">
+                                <div className="not-payable">2,574,135 words</div>
+                                <div className="payable">1,285,722 words</div>
+                            </div>
+                            <div className="job-price">€400</div>
+                        </div>
+                    </div>
+                    <div className="revision-box">
+                        <div className="revision-check">
+                            <div className="add-revision">Add revision</div>
+                            <div className="ui checkbox">
+                                <input className="flag-box" type="checkbox" name="example" />
+                            </div>
+                            <div className="job-price">€400</div>
+                        </div>
+                        <div className="delivery-order">
+                            <div className="delivery-box"></div>
+                            <div className="order-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>;
+
+
+
+        /*<div className={"modal outsource " + loadingClass}>
         <div className="popup">
         <div className={"popup-box pricebox " + pricesClass}>
             <h2>Choose how to translate:
@@ -341,7 +449,7 @@ class OutsourceModal extends React.Component {
                             <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>
                         </div>
 
-                        {/*<!-- begin date picker -->*/}
+                        {/!*<!-- begin date picker -->*!/}
                         <div id="out-datepicker" className="modal-outsource-datepicker hide">
                             <div className="delivery-manual">
                                 <div className="delivery-manual-date">
@@ -398,7 +506,7 @@ class OutsourceModal extends React.Component {
                                         <option value="13">(GMT +13:00 ) Samoa</option>
                                     </select>
 
-                                    {/*<!--  design took fron validationEngine not the logic. Hardcoded -->*/}
+                                    {/!*<!--  design took fron validationEngine not the logic. Hardcoded -->*!/}
                                     <div id="outsource-delivery_error" className="delivery_manual_error hide">
                                         <div>* Chosen delivery date is in the past</div>
                                     </div>
@@ -509,13 +617,13 @@ class OutsourceModal extends React.Component {
 
                                 </div>
 
-                                {/*{ (!this.state.showTranslatorInfo) ? (*/}
+                                {/!*{ (!this.state.showTranslatorInfo) ? (*!/}
                                         <div className="delivery_container">
                                             {deliveryHtml}
                                         </div>
-                                    {/*) : (<div className="delivery_container">*/}
-                                        {/*<div className="delivery"/>*/}
-                                    {/*</div>)}*/}
+                                    {/!*) : (<div className="delivery_container">*!/}
+                                        {/!*<div className="delivery"/>*!/}
+                                    {/!*</div>)}*!/}
 
 
                                 <div className={"tprice " + pricesClass}>
@@ -526,17 +634,17 @@ class OutsourceModal extends React.Component {
                                     <span className="displayprice" data-currency="EUR" data-rawprice="0.00"/>
                                     <br />
 
-                                    {/*//TODO Inserire spazi*/}
+                                    {/!*!//TODO Inserire spazi*!/}
                                     <span className="displaypriceperword">about
                                         <span className="euro currency_per_word" style={{marginLeft: '2px', marginRight: '2px'}}/>
                                          <span className="price_p_word"/> / word
-                                        {/*{ (this.state.showTranslatorInfo) ? (*/}
+                                        {/!*{ (this.state.showTranslatorInfo) ? (*!/}
                                                 <div className="delivery_container">
                                                     {deliveryHtml}
                                                 </div>
-                                            {/*) : (<div className="delivery_container">*/}
-                                                {/*<div className="delivery compress"/>*/}
-                                            {/*</div>)}*/}
+                                            {/!*) : (<div className="delivery_container">*!/}
+                                                {/!*<div className="delivery compress"/>*!/}
+                                            {/!*</div>)}*!/}
                                     </span>
                                     <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank">
                                         <input type="hidden" name="url_ok" value=""/>
@@ -556,7 +664,7 @@ class OutsourceModal extends React.Component {
 
                         </div>
                     </div>
-                    {/*<!--end outsourceto-->*/}
+                    {/!*<!--end outsourceto-->*!/}
                     <div className="paymentinfo">
                         <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days of receipt</p>
                     </div>
@@ -568,9 +676,9 @@ class OutsourceModal extends React.Component {
                     ) :('')}
 
 
-                {/*<!-- end total-->*/}
-                {/*<!-- end reveal prices-->*/}
-                {/*<!-- begin date picker -->*/}
+                {/!*<!-- end total-->*!/}
+                {/!*<!-- end reveal prices-->*!/}
+                {/!*<!-- begin date picker -->*!/}
                 <div id="forceDeliveryContainer" className="modal-outsource-datepicker hide">
                     <div className="delivery-manual">
                         <span id="forceDeliveryChosenDate" className="hide">0</span>
@@ -629,7 +737,7 @@ class OutsourceModal extends React.Component {
                                 <option value="13">(GMT +13:00 ) Samoa</option>
                             </select>
 
-                            {/*<!--  design took fron validationEngine not the logic. Hardcoded -->*/}
+                            {/!*<!--  design took fron validationEngine not the logic. Hardcoded -->*!/}
                             <div id="delivery_manual_error" className="delivery_manual_error hide">
                                 <div>* Chosen delivery date is in the past</div>
                             </div>
@@ -649,13 +757,13 @@ class OutsourceModal extends React.Component {
 
                     </div>
                 </div>
-                {/*<!-- end date picker -->*/}
+                {/!*<!-- end date picker -->*!/}
 
 
                 </div>
             </div>
         </div>
-        </div>;
+        </div>;*/
         // TODO : @Ruben Modificare fino a qui
     }
 }
