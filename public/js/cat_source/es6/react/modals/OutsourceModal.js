@@ -315,19 +315,19 @@ class OutsourceModal extends React.Component {
                     <div className="job-url twelve wide column">
                         <a href="#">https://www.matecat.com/translate/keywordplanoutlet1docx/en-US-it-IT/750083-0-dbb4e9326074</a>
                     </div>
-                    <div className="four wide column">
+                    <div className="left">
 
                     </div>
                     <div className="translator-assignee">
                         <div className="ui form">
                             <div className="fields">
                                 <div className="field">
-                                    <label>First name</label>
-                                    <input type="text" placeholder="First Name" />
+                                    <label>Trasnlator email</label>
+                                    <input type="email" placeholder="translator@email.com" />
                                 </div>
                                 <div className="field">
                                     <label>Middle name</label>
-                                    <input type="text" placeholder="Middle Name" />
+                                    <input type="text" placeholder="16 Jul at 1:00 PM" />
                                 </div>
                                 <div className="field gmt">
                                     <div className="ui button">

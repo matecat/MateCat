@@ -38,23 +38,25 @@
                 font-weight: 700;
             }
             .job-url {
-                text-decoration: underline;
-                font-weight: 700;
-                font-size: 16px;
-                padding-left: 30px;
-                &:hover {
-                    text-decoration: none;
-                }
                 a {
-
+                    text-decoration: underline;
+                    font-weight: 700;
+                    font-size: 16px;
+                    padding-left: 15px;
+                    &:hover {
+                        text-decoration: none;
+                    }
                 }
             }
+            .left {
+                width: 25%;
+            }
             .translator-assignee {
-                width: 50%;
+                width: 55%;
                 .form {
                     .fields {
                         .field {
-                            width: 40%;
+                            width: 45%;
                             label {
                                 padding-left: 15px;
                             }
@@ -71,10 +73,14 @@
                             }
                             &.gmt {
                                 z-index: 2;
+                                width: 20%;
                                 .button {
-                                    top: 23px;
+                                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                                    top: 24px;
                                     position: relative;
                                     border: 1px solid #797979;
+                                    padding: 10px 15px;
+                                    width: 100%;
                                 }
                             }
                         }
@@ -82,17 +88,16 @@
                 }
             }
             .send-job-box {
-                width: 25%;
+                width: 20%;
+                text-align: right;
+                padding-top: 24px;
+                padding-right: 25px;
                 .send-job {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    /*padding: 6px 15px;
-                    vertical-align: top;
-                    font-size: 16px;*/
+                    font-size: 16px;
                     border: 1px solid #797979;
                     border-radius: 2px;
-                    float: right;
-                    position: relative;
-                    top: 23px;
+                    padding: 9px;
                 }
             }
         }
