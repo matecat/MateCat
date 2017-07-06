@@ -81,7 +81,7 @@ class AnalyzeChunksResume extends React.Component {
 
                     return <div key={indexChunk} className="chunk ui grid shadow-1">
                                 <div className="title-job">
-                                    <div className="job-id">{chunk.jid}-{index}</div>
+                                    <div className="job-id" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>{chunk.jid}-{index}</div>
                                 </div>
                                 <div className="titles-compare">
                                     <div className="title-total-words ttw">
@@ -93,7 +93,7 @@ class AnalyzeChunksResume extends React.Component {
                                         <div>{chunk.total_st_word_count_print}</div>
                                     </div>
                                     <div className="title-matecat-words tmw"
-                                         ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
+                                         ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
                                         {/*<div className="cell-label">Weighted words:</div>*/}
                                         <div>
                                             {/*<i className="icon-chart4 icon"/>*/}
@@ -141,7 +141,7 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
                                 <div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>
-                                <div className="source-target">
+                                <div className="source-target" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                     <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
