@@ -168,7 +168,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className={"split ui blue basic button " + buttonsClass}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, null)}>Translate</div>
                                 </div>
                             </div>
 
