@@ -47,7 +47,7 @@ class JobAnalyzeHeader extends React.Component {
                         {/*<span id="raw-words">{parseInt(this.total)}</span> Total words*/}
                     {/*</div>*/}
                     <div className="job-payable">
-                        <span id="words">{parseInt(this.payable)}</span> Payable words
+                        <span id="words">{parseInt(this.payable)}</span> Weighted words
                     </div>
 
                 </div>;

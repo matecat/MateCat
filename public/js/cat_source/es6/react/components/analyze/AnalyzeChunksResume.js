@@ -85,16 +85,16 @@ class AnalyzeChunksResume extends React.Component {
                                 </div>
                                 <div className="titles-compare">
                                     <div className="title-total-words ttw">
-                                        <div className="cell-label">Total words:</div>
+                                        {/*<div className="cell-label">Total</div>*/}
                                         <div>{chunk.total_raw_word_count_print}</div>
                                     </div>
                                     <div className="title-standard-words tsw">
-                                        <div className="cell-label">Other CAT tool</div>
+                                        {/*<div className="cell-label">Other CAT tool</div>*/}
                                         <div>{chunk.total_st_word_count_print}</div>
                                     </div>
                                     <div className="title-matecat-words tmw"
-                                         ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                        <div className="cell-label" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>Weighted words:</div>
+                                         ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
+                                        {/*<div className="cell-label">Weighted words:</div>*/}
                                         <div>
                                             {/*<i className="icon-chart4 icon"/>*/}
                                             {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
@@ -149,16 +149,16 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
-                                    <div className="cell-label">Total words:</div>
+                                    {/*<div className="cell-label">Total words:</div>*/}
                                     <div>{total_raw}</div>
                                 </div>
                                 <div className="title-standard-words tsw">
-                                    <div className="cell-label">Other CAT tool</div>
+                                    {/*<div className="cell-label">Other CAT tool</div>*/}
                                     <div>{total_standard}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                    <div className="cell-label" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>Weighted words:</div>
+                                    {/*<div className="cell-label" >Weighted words:</div>*/}
                                     <div>
                                         {/*<i className="icon-chart4 icon"/>*/}
                                         {jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1)}</div>
@@ -216,28 +216,28 @@ class AnalyzeChunksResume extends React.Component {
         let showHideText = (this.state.openDetails) ? "Hide Analysis report" : "Show Analysis report";
         let iconClass = (this.state.openDetails) ? "open" : "";
         return <div className="project-top ui grid">
-            {/*<div className="compare-table sixteen wide column">*/}
-                {/*<div className="header-compare-table ui grid shadow-1">*/}
-                    {/*<div className="title-job">*/}
-                        {/*<h5></h5>*/}
-                        {/*<p></p>*/}
-                    {/*</div>*/}
-                    {/*<div className="titles-compare">*/}
-                        {/*<div className="title-total-words">*/}
-                            {/*<h5>Total Words</h5>*/}
-                            {/*<p>(Actual words in the files)</p>*/}
-                        {/*</div>*/}
-                        {/*<div className="title-standard-words">*/}
-                            {/*<h5>Standard Weighted</h5>*/}
-                            {/*<p>(Industry word count)</p>*/}
-                        {/*</div>*/}
-                        {/*<div className="title-matecat-words">*/}
-                            {/*<h5>MateCat Payable Words</h5>*/}
-                            {/*<p>(Improved content reuse)</p>*/}
-                        {/*</div>*/}
-                    {/*</div>*/}
-                {/*</div>*/}
-            {/*</div>*/}
+            <div className="compare-table sixteen wide column">
+                <div className="header-compare-table ui grid shadow-1">
+                    <div className="title-job">
+                        <h5></h5>
+                        <p></p>
+                    </div>
+                    <div className="titles-compare">
+                        <div className="title-total-words">
+                            <h5>Total </h5>
+                            <p>(Actual words in the files)</p>
+                        </div>
+                        <div className="title-standard-words">
+                            <h5>Industry weighted</h5>
+                            <p>(Industry word count)</p>
+                        </div>
+                        <div className="title-matecat-words">
+                            <h5>MateCat weighted</h5>
+                            <p>(Improved content reuse)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="compare-table jobs sixteen wide column">
 
                 {this.getResumeJobs()}
