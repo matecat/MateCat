@@ -209,6 +209,7 @@ body.analyze{
             margin: 0px -1rem 0;
             .compare-table{
                 background-color: gainsboro;
+                margin-bottom: 1px;
                 .updated-count {
                     background-color: #f9ffb5;
                     transition: 0.4s ease;
@@ -284,9 +285,9 @@ body.analyze{
                                     }
                                 }
                                 &:hover {
-                                    background-color: #eaebef;
+                                    background-color: #f6f6f9;
                                     .title-matecat-words {
-                                        background: #e8fbcc !important;
+                                        background: #f6ffe9 !important;
                                         transition: 0.3s ease;
                                     }
                                 }
@@ -299,17 +300,17 @@ body.analyze{
                                     .cell-label {
                                         float: left;
                                         margin-left: 15px;
-
                                         font-weight: 100;
                                         font-size: 16px;
                                     }
                                 }
                                 .tmw {
                                     font-weight: 700;
-                                    color: #43ba4a;
+                                    //color: #43ba4a;
                                     font-size: 18px;
-                                    background-color: #f6ffe9;
+                                    /*background-color: #f6ffe9;*/
                                     margin-bottom: 1px;
+                                    color: black;
                                     .cell-label {
                                         text-decoration: underline;
                                         cursor: pointer;
@@ -874,8 +875,8 @@ body.analyze{
                 background-color: #f6ffe9;
                 font-weight: 700;
                 transition: 0.3s ease;
-                color: #43ba4a;
-                font-size: 20px;
+                color: #000000;
+                font-size: 18px;
             }
             .payable-words.updated-count {
                 background-color: #7cc576;
