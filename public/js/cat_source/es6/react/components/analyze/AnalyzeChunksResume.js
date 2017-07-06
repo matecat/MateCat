@@ -111,7 +111,7 @@ class AnalyzeChunksResume extends React.Component {
 
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                <div className="source-target">
+                                <div className="source-target" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                     <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                     <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
