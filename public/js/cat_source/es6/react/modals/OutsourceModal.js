@@ -312,13 +312,13 @@ class OutsourceModal extends React.Component {
                     <div className="title four wide column">
                         Assign Job to translator
                     </div>
-                    <div className="job-url eleven wide column">
-                        url: https://www.matecat.com/job
+                    <div className="job-url twelve wide column">
+                        <a href="#">https://www.matecat.com/translate/keywordplanoutlet1docx/en-US-it-IT/750083-0-dbb4e9326074</a>
                     </div>
                     <div className="four wide column">
 
                     </div>
-                    <div className="translator-assignee nine wide column">
+                    <div className="translator-assignee">
                         <div className="ui form">
                             <div className="fields">
                                 <div className="field">
@@ -337,9 +337,10 @@ class OutsourceModal extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="three wide column">
-                        <div className="ui primary button">Send Job to Translator</div>
+                    <div className="send-job-box">
+                        <a className="send-job ui primary button" target="_blank" href="#">Send Job to Translator</a>
                     </div>
+
                 </div>
             </div>
             <div className="divider-or sixteen wide column">
