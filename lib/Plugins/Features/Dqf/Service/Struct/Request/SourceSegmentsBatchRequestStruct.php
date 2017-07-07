@@ -6,6 +6,7 @@ namespace Features\Dqf\Service\Struct\Request ;
 use Features\Dqf\Service\Struct\BaseRequestStruct ;
 use Features\Dqf\Service\Struct\ISessionBasedRequestStruct ;
 
+use Features\Dqf\Utils\Functions;
 use LengthException;
 use Segments_SegmentStruct ;
 
@@ -51,7 +52,7 @@ class SourceSegmentsBatchRequestStruct extends BaseRequestStruct implements ISes
         $this->_sourceSegments[] = [
                 'sourceSegment' => $segment->segment,
                 'index' => $segment->id,
-                'clientId' => $segment->id
+                'clientId' => Functions::scopeId( $segment->id )
         ];
     }
 

@@ -15,6 +15,7 @@ use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ProjectTargetLanguageRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Utils\Functions;
 
 class ChildProject {
 
@@ -50,7 +51,7 @@ class ChildProject {
     public function createTranslationChild( $remoteFiles ) {
         $projectStruct            = new ChildProjectRequestStruct() ;
         $projectStruct->sessionId = $this->session->getSessionId();
-        $projectStruct->clientId  = $this->chunk->getIdentifier();
+        $projectStruct->clientId  = Functions::scopeId( $this->chunk->getIdentifier() );
         $projectStruct->parentKey = $this->parent->dqfUUID ;
         $projectStruct->type      = self::TRANSLATION ;
 
@@ -74,7 +75,7 @@ class ChildProject {
         foreach( $this->chunk->getFiles() as $file ) {
             // for each file in the chunk create a
             $languageStruct = new ProjectTargetLanguageRequestStruct();
-            $languageStruct->fileId = $remoteFiles[ $file->id ]->dqfId ;
+            $languageStruct->fileId = $remoteFiles[ Functions::scopeId($file->id) ]->dqfId ;
             $languageStruct->projectKey = $childProject->dqfUUID ;
             $languageStruct->projectId = $childProject->dqfId ;
             $languageStruct->targetLanguageCode = $this->chunk->target ;

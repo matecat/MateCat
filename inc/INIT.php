@@ -111,6 +111,7 @@ class INIT {
      */
     public static $DQF_ENABLED = true;
     public static $DQF_BASE_URL;
+    public static $DQF_ID_PREFIX = '' ;
     public static $DQF_API_KEY;
     public static $DQF_ENCRYPTION_KEY;
     public static $DQF_ENCRYPTION_IV ;

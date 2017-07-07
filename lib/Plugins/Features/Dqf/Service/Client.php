@@ -25,6 +25,7 @@ class Client {
 
     public function __construct() {
         $this->curl = new MultiCurlHandler();
+        $this->curl->verbose = true ;
     }
 
     public function setCommonHeaders($headers) {

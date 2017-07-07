@@ -27,8 +27,8 @@ class Session {
     }
 
     public function login() {
-        $struct = new LoginRequestStruct() ;
-        $struct->email = $this->encrypt( $this->email );
+        $struct           = new LoginRequestStruct() ;
+        $struct->email    = $this->encrypt( $this->email );
         $struct->password = $this->encrypt( $this->password );
 
         $client = new Client();

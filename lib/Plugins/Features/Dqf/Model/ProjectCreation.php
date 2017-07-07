@@ -18,6 +18,7 @@ use Features\Dqf\Service\Session ;
 
 
 use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
+use Features\Dqf\Utils\Functions;
 use Features\Dqf\Utils\UserMetadata;
 use Features\Dqf\Utils\ProjectMetadata ;
 use Files_FileDao;
@@ -107,11 +108,11 @@ class ProjectCreation {
         $projectInputParams = ProjectMetadata::extractProjectParameters( $this->project->getMetadataAsKeyValue() );
 
         $params = new ProjectRequestStruct(array_merge( array(
-                'name' => $this->project->name,
+                'name'               => $this->project->name,
                 'sourceLanguageCode' => $this->inputStruct->source_language,
-                'clientId' => $this->project->id,
-                'templateName' => '',
-                'tmsProjectKey' => ''
+                'clientId'           => Functions::scopeId( $this->project->id ),
+                'templateName'       => '',
+                'tmsProjectKey'      => ''
         ), $projectInputParams ) );
 
         $project = new MasterProject($this->session);

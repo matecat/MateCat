@@ -154,11 +154,11 @@ class Dqf extends BaseFeature {
         // @see FeatureSet::getSortedFeatures
 
         if ( $projectStructure['features']['review_improved']['__meta']['qa_model'] ) {
-
+            // override QA model
+            $projectStructure['features']['review_improved']['__meta']['qa_model'] = json_decode(
+                    file_get_contents( INIT::$ROOT . '/inc/dqf/qa_model.json' ), true
+            );
         }
-
-        Log::doLog( 'DQF 2 validateProjectCreation -------------------- ' );
-        Log::doLog( $projectStructure['result']['errors'] );
     }
 
 

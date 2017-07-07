@@ -89,11 +89,7 @@ if ( true )
             // Check DQF
             if ( UI.checkDqfCanActivate() ) {
                 (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
-                dqfCheck.on('change', this.toggleDqf.bind(this));
-                dqfCheck.addClass('option-unavailable');
-            }
-            else {
-
+                dqfCheck.prop('disabled', true) ;
             }
         },
 
