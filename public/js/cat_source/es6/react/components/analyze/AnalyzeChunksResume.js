@@ -255,16 +255,16 @@ class AnalyzeChunksResume extends React.Component {
                     </div>
                     <div className="titles-compare">
                         <div className="title-total-words">
-                            <h5>Total </h5>
-                            <p>(Actual words in the files)</p>
+                            <h5>Total word count</h5>
+                            <p>(Raw words in the files)</p>
                         </div>
                         <div className="title-standard-words">
                             <h5>Industry weighted</h5>
-                            <p>(Industry word count)</p>
+                            <p>(As counted by other CAT tools)</p>
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>
-                            <p>(Improved content reuse)</p>
+                            <p>(Leveraging previous translations)</p>
                         </div>
                     </div>
                 </div>
