@@ -27,7 +27,9 @@ class AnalyzeHeader extends React.Component {
         if( status === 'DONE' ) {
              html = <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <h5 className="complete">Analysis complete:</h5>
+                    <h5 className="complete">Analysis: <span>complete</span>
+                        {/*<i className="icon-checkmark" />*/}
+                    </h5>
                     <a className="downloadAnalysisReport" onClick={this.downloadAnalysisReport.bind(this)}>Download Analysis Report</a>
                 </div>
             </div>;
