@@ -1093,25 +1093,37 @@ class CatUtils {
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
 
+        $values = self::getQualityInfoFromJobStruct( $job );
+
+        $result = null ;
+
+        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+            $result = @$values->is_pass ? 'excellent' : 'fail' ;
+        } else {
+            $result = strtolower( $values['minText'] ) ;
+        }
+
+        return $result ;
+    }
+
+    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job ){
+
         $result = null ;
 
         if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
-            $result = @$review->is_pass ? 'excellent' : 'fail' ;
-        }
-        else {
+            $result = $review;
+        } else {
             $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
             $jobQA = new Revise_JobQA(
                     $job->id, $job->password, $struct->getTotal()
             );
-
             $jobQA->retrieveJobErrorTotals();
-            $overall = $jobQA->evalJobVote();
-
-            $result = strtolower( $overall['minText'] ) ;
+            $result = $jobQA->evalJobVote();
         }
 
         return $result ;
+
     }
 
     /**

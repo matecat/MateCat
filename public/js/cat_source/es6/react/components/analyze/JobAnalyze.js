@@ -39,19 +39,27 @@ class JobAnalyze extends React.Component {
 
     showDetails(idJob) {
         if (idJob == this.props.idJob) {
-            let self = this;
-            this.container.classList.add('show-details');
             this.scrollElement();
-            setTimeout(function () {
-                self.container.classList.remove('show-details');
-            }, 1000)
         }
     }
 
     scrollElement() {
-        var itemComponent = this.container;
+        let itemComponent = this.container;
+        let self = this;
         if (itemComponent) {
-            ReactDOM.findDOMNode(itemComponent).scrollIntoView({block: 'end'});
+            this.container.classList.add('show-details');
+            $('html, body').animate({
+                scrollTop: $(itemComponent).offset().top
+            }, 500);
+
+            // ReactDOM.findDOMNode(itemComponent).scrollIntoView({block: 'end'});
+            setTimeout(function () {
+                self.container.classList.remove('show-details');
+            }, 1000)
+        } else {
+            setTimeout(function () {
+                self.scrollElement();
+            }, 500)
         }
     }
 

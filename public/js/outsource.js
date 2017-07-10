@@ -11,11 +11,11 @@ $.extend(UI, {
             $(this).parent().toggleClass('noopacity');
             OutsourceActions.outsourceCloseTranslatorInfo();
             var fullTranslateUrl = $(".onyourown a.uploadbtn:not(.showprices)").attr("href");
-            if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
-                $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
-            } else {
+            // if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
+            //     $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+            // } else {
                 UI.restartOutsourceModal()
-            }
+            // }
 
             $('.revision_heading').toggleClass('hide');
         });
@@ -48,7 +48,7 @@ $.extend(UI, {
             updateTimezonesDescriptions( timezoneTo );
         });
 
-		$(".outsource.modal").on('click', '.continuebtn', function(e) {
+		$(".outsource.modal .continuebtn").on('click', function(e) {
 			e.preventDefault();
 
             if( $( this ).hasClass( 'disabled' ) ) {
