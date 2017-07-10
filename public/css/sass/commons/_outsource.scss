@@ -105,7 +105,7 @@
     }
     .divider-or {
         position: absolute !important;
-        top: 100px;
+        top: 135px;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         z-index: 1;
@@ -382,12 +382,12 @@
                         .pointer {
                             width: 12px;
                             height: 12px;
-                            background: black;
+                            background: #d5d8dc;
                             display: inline-block;
                             border-radius: 50%;
                             margin-right: 5px;
                             &.active {
-                                background: yellow;
+                                background: #7eaf3e;
                             }
                         }
                     }
@@ -405,8 +405,9 @@
                         top: 30px;
                     }
                     .customer-box-info {
-                        display: inline-block;
                         width: 90%;
+                        display: inline-block;
+                        vertical-align: middle;
                         .customer-text {
                             padding-bottom: 15px;
                         }
@@ -435,6 +436,13 @@
                             display: inline-block;
                             width: 30%;
                             text-align: right;
+                            vertical-align: middle;
+                            img {
+                                width: auto;
+                                vertical-align: middle;
+                                padding: 6px;
+                                height: 50px;
+                            }
                         }
                     }
                 }
