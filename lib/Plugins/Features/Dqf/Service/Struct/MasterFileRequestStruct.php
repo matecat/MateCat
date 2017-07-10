@@ -9,7 +9,7 @@
 namespace Features\Dqf\Service\Struct;
 
 
-class MasterFileRequestStruct extends BaseRequestStruct implements ISessionBasedRequestStruct  {
+class MasterFileRequestStruct extends BaseRequestStruct {
 
     // public $projectId ;
 

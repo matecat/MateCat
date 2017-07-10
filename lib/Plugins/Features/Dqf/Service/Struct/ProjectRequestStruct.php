@@ -9,7 +9,7 @@
 namespace Features\Dqf\Service\Struct;
 
 
-class ProjectRequestStruct extends BaseRequestStruct implements  ISessionBasedRequestStruct  {
+class ProjectRequestStruct extends BaseRequestStruct  {
 
     public $apiKey ;
     public $sessionId ;
