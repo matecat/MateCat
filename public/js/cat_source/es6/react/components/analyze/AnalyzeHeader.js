@@ -107,7 +107,7 @@ class AnalyzeHeader extends React.Component {
             if ( config.support_mail.indexOf( '@' ) === -1 ) {
                 error = config.support_mail;
             } else {
-                error = '<a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+                error = <a href="mailto: + config.support_mail + "> {config.support_mail} </a>;
             }
             html =  <div className="analysis-create">
                 <div className="search-tm-matches">
