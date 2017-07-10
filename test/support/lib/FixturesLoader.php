@@ -186,9 +186,12 @@ class FixturesLoader {
 
     protected function replaceTokens( &$record ) {
         foreach( $record as $key => &$value ) {
+
             if ( $value === '@EVER_INCREMENT' ) {
                 // generate non conflicting integers using microtime and keep the number small
-                $record[ $key ] = round( microtime( true ) * 1000 ) - 1497097000000 ;
+                $maxInt = 2147483647 ;
+                $record[ $key ] = round( microtime( true ) * 1000 ) - 1497097000000 - $maxInt ;
+                Log::doLog( $key, $record[ $key ] );
             }
 
             // Assign reference idenfiers
