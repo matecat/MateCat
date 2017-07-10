@@ -10,6 +10,9 @@
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
 
+//libs: move it?
+@import '../libs/jquery.datetimepicker.min.css';
+
 @import 'common-modals';
 @import 'modals/split_modal';
 @import "notifications";

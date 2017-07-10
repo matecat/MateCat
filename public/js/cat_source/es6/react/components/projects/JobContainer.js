@@ -1,3 +1,5 @@
+
+let OutsourceContainer = require('../outsource/OutsourceContainer').default;
 let OutsourceModal = require('../../modals/OutsourceModal').default;
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
@@ -765,8 +767,8 @@ class JobContainer extends React.Component {
                         </a>
                     </div>
                     <div className="sixteen wide column shadow-1">
-                        <OutsourceModal project={this.props.project.toJS()}
-                                        job={this.props.job.toJS()}
+                        <OutsourceContainer project={this.props.project.toJS()}
+                                        job={this.props.job}
                                         url={this.getTranslateUrl()}
                                         fromManage={true}
                                         translatorOpen={false}

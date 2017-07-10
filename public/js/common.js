@@ -894,6 +894,17 @@ APP = {
             setTimeout(this.setUserImage.bind(this), 500);
         }
     },
+
+    fromDateToString: function (date) {
+        var dd = new Date( date );
+        return {
+            day: $.format.date(dd, "d") ,
+            month: $.format.date(dd, "MMMM"),
+            year: $.format.date(dd, "yy"),
+            time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+        };
+    },
+
     getGMTDate: function (date) {
         var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
@@ -920,6 +931,14 @@ APP = {
         timezoneToShow = (timezoneToShow > 0) ? '+' + timezoneToShow : timezoneToShow;
         return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
 
+    },
+
+    getDefaultTimeZone: function () {
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        return timezoneToShow;
     },
 
     readCookie: function( cookieName ) {

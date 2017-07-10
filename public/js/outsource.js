@@ -1,4 +1,6 @@
 $.extend(UI, {
+
+    // Coupon
     populateOutsourceForm : function() {
     },
     showPopupDetails: '1',
@@ -71,13 +73,13 @@ $.extend(UI, {
             APP.closePopup();
 
 		});
-
-        $('.modal.outsource input.out-email').on('keyup', function () {
-            _.debounce(function() {
-                // UI.checkInputEmailInput();
-                UI.checkSendToTranslatorButton();
-            }, 300)();
-        });
+        //
+        // $('.modal.outsource input.out-email').on('keyup', function () {
+        //     _.debounce(function() {
+        //         // UI.checkInputEmailInput();
+        //         UI.checkSendToTranslatorButton();
+        //     }, 300)();
+        // });
 
         $(".outsource.modal .send-to-translator-btn").on('click', function(e) {
             e.preventDefault();
@@ -113,74 +115,63 @@ $.extend(UI, {
         }
     },
 
-    checkSendToTranslatorButton: function () {
-        var $email = $('.modal.outsource input.out-email');
-        var email = $email.val();
-        var date = $('.outsource .out-date').val();
+    // checkSendToTranslatorButton: function () {
+    //     var $email = $('.modal.outsource input.out-email');
+    //     var email = $email.val();
+    //     var date = $('.outsource .out-date').val();
+    //
+    //     if ($email.hasClass('error') ) {
+    //         $email.removeClass('error');
+    //         $('.modal.outsource .validation-error.email-translator-error').hide();
+    //     }
+    //
+    //     if (email.length > 0 && date.length > 0 ) {
+    //         $('.send-to-translator-btn').removeClass('disabled');
+    //         return true;
+    //     } else {
+    //         $('.send-to-translator-btn').addClass('disabled');
+    //         return false;
+    //     }
+    // },
 
-        if ($email.hasClass('error') ) {
-            $email.removeClass('error');
-            $('.modal.outsource .validation-error.email-translator-error').hide();
-        }
+    // checkInputEmailInput: function () {
+    //     var email = $('.modal.outsource input.out-email').val();
+    //     if (!APP.checkEmail(email)) {
+    //         $('.modal.outsource input.out-email').addClass('error');
+    //         $('.modal.outsource .validation-error.email-translator-error').show();
+    //         return false;
+    //     } else {
+    //         $('.modal.outsource input.out-email').removeClass('error');
+    //         $('.modal.outsource .validation-error.email-translator-error').hide();
+    //         return true;
+    //     }
+    // },
 
-        if (email.length > 0 && date.length > 0 ) {
-            $('.send-to-translator-btn').removeClass('disabled');
-            return true;
-        } else {
-            $('.send-to-translator-btn').addClass('disabled');
-            return false;
-        }
-    },
-
-    checkInputEmailInput: function () {
-        var email = $('.modal.outsource input.out-email').val();
-        if (!APP.checkEmail(email)) {
-            $('.modal.outsource input.out-email').addClass('error');
-            $('.modal.outsource .validation-error.email-translator-error').show();
-            return false;
-        } else {
-            $('.modal.outsource input.out-email').removeClass('error');
-            $('.modal.outsource .validation-error.email-translator-error').hide();
-            return true;
-        }
-    },
-
-    sendJobToTranslator: function () {
-        if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
-            var email = $('.modal.outsource input.out-email').val();
-            var date = $('.modal.outsource input.out-date').data('datesend');
-            var timezone = $( "#outsource-assign-timezone").val();
-            if (!date && UI.currentOutsourceJob.translator) {
-
-                date = new Date ( UI.currentOutsourceJob.translator.delivery_date ).getTime();
-            } else if (!date){
-                date = getChosenOutsourceDate();
-            }
-
-            UI.sendTranslatorRequest(email, date, timezone).done(function (data) {
-                APP.ModalWindow.onCloseModal();
-                if (data.job) {
-                    UI.checkShareToTranslatorResponse(data, email, date);
-                } else {
-                    UI.showShareTranslatorError();
-                }
-            }).error(function () {
+    sendJobToTranslator: function (email, date, timezone, job, project) {
+        UI.sendTranslatorRequest(email, date, timezone, job).done(function (data) {
+            APP.ModalWindow.onCloseModal();
+            if (data.job) {
+                UI.checkShareToTranslatorResponse(data, email, date, job, project);
+            } else {
                 UI.showShareTranslatorError();
-            });
-        }
+            }
+        }).error(function () {
+            UI.showShareTranslatorError();
+        });
+
     },
 
-    sendTranslatorRequest: function (email, date, timezone) {
+    sendTranslatorRequest: function (email, date, timezone, job) {
         var data = {
             email: email,
-            delivery_date: date/1000,
+            delivery_date: Math.round(date/1000),
             timezone: timezone
         };
         return $.ajax({
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password + "/translator"
+            url : "/api/v2/jobs/" + job.id +"/" + job.password + "/translator"
         });
     },
 
@@ -207,20 +198,20 @@ $.extend(UI, {
         });
     },
 
-    checkShareToTranslatorResponse: function (response, mail, date) {
+    checkShareToTranslatorResponse: function (response, mail, date, job, project) {
         var message = '';
-        if (UI.currentOutsourceJob.translator) {
+        if (job.translator) {
             var newDate = new Date(date);
-            var oldDate = new Date(UI.currentOutsourceJob.translator.delivery_date);
-            if (oldDate.getTime() != newDate.getTime()) {
+            var oldDate = new Date(job.translator.delivery_date);
+            if (oldDate.getTime() !== newDate.getTime()) {
                 message = this.shareToTranslatorDateChangeNotification(mail, oldDate, newDate);
-            } else if (UI.currentOutsourceJob.translator != mail) {
+            } else if (job.translator !== mail) {
                 message = this.shareToTranslatorMailChangeNotification(mail);
             } else {
-                message = this.shareToTranslatorNotification(mail);
+                message = this.shareToTranslatorNotification(mail, job);
             }
         } else {
-            message = this.shareToTranslatorNotification(mail);
+            message = this.shareToTranslatorNotification(mail, job);
         }
         var notification = {
             title: message.title,
@@ -231,20 +222,20 @@ $.extend(UI, {
             timer: 10000
         };
         var boxUndo = APP.addNotification(notification);
-        ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
-        ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.translator);
+        ManageActions.changeJobPasswordFromOutsource(project.id ,job.id, job.password, response.job.password);
+        ManageActions.assignTranslator(project.id ,job.id, job.password, response.job.translator);
     },
 
-    shareToTranslatorNotification : function (mail) {
+    shareToTranslatorNotification : function (mail, job) {
         return message = {
             title: 'Job sent',
             text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
             '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + job.id +')</div> ' +
             '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="source-box" style="display: inherit;">' + job.sourceTxt + '</div> ' +
             '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
+            '<div class="target-box" style="display: inherit;">' + job.targetTxt + '</div> </div> </div></div>'
         } ;
 
     },
