@@ -433,6 +433,52 @@ class OutsourceModal extends React.Component {
                         <a className="open-order ui green button">Order now</a>
                     </div>
                 </div>
+                <div className="easy-pay-box">
+                    <h4 className="easy-pay">Easy payments</h4>
+                    <p>Pay a single monthly invoice within 30 days of receipt</p>
+                </div>
+                <div className="customer-request sixteen wide column">
+                    <div className="ui grid">
+                        <div className="customer-box eight wide column">
+                            <div className="title-pointer">
+                                <h3>Our customer said</h3>
+                                <div className="pointers">
+                                    <div className="pointer active"></div>
+                                    <div className="pointer"></div>
+                                    <div className="pointer"></div>
+                                </div>
+                            </div>
+                            <div className="slider-box">
+                                <div className="appendix">
+                                    "
+                                </div>
+                                <div className="customer-box-info">
+                                    <div className="customer-text">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                                        labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                                        eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                    </div>
+                                    <div className="customer-info">
+                                        <div className="customer-photo">
+
+                                        </div>
+                                        <div className="customer-name">
+                                            Elena
+                                        </div>
+                                        <div className="customer-role">
+                                            - Digital Strategist & Project Manager
+                                        </div>
+                                    </div>
+                                    <div className="customer-corporate-logo">
+                                        Logo aziendale
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="request-box eight wide column">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>;
 

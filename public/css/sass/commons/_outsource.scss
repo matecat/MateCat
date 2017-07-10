@@ -105,17 +105,17 @@
     }
     .divider-or {
         position: absolute !important;
-        top: 130px;
+        top: 100px;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         z-index: 1;
-        padding-left: 35px;
+        padding-left: 35px !important;
         .or {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             background-color: grey;
             text-align: center;
-            line-height: 40px;
+            line-height: 30px;
             border-radius: 50%;
             color: #ffffff;
         }
@@ -123,6 +123,7 @@
 
     .outsource-to-translated {
         background: #e9efec;
+        padding: 0 15px 15px !important;
         .payment-service {
             padding: 15px 15px;
             .service-box {
@@ -246,7 +247,7 @@
             .revision-box {
                 padding: 10px 15px;
                 background-color: #e4e6e8;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
                     .add-revision {
                         display: inline-block;
                         width: 81%;
@@ -269,13 +270,10 @@
                 text-align: right;
                 display: inline-block;
                 vertical-align: top;
-                /* line-height: 15px; */
-                padding: 15px;
-                /*background-color: yellow;*/
+                padding: 10px 15px 10px 0;
                 .delivery-box {
                     text-align: right;
                     display: inline-block;
-                    padding: 6px;
                     font-size: 28px;
                     font-weight: 700;
                     label {
@@ -287,9 +285,12 @@
                     }
                     span {
                         padding: 5px;
+                        font-size: 22px;
+                        font-weight: 100;
                     }
                     .delivery-date {
                         display: inline-block;
+                        padding: 5px;
                     }
                     .delivery-time {
                         display: inline-block;
@@ -325,13 +326,12 @@
                 display: inline-block;
                 width: 18%;
                 background-color: #daeddf;
-                height: 116px;
+                height: 96px;
                 text-align: center;
                 .outsource-price {
                     font-size: 38px;
                     font-weight: 700;
-                    margin-top: 36px;
-                    margin-bottom: 22px;
+                    padding: 27px 0 20px;
                 }
                 .select-value {
                     a {
@@ -349,10 +349,98 @@
                 margin-top: 10px;
                 margin-right: 0px;
                 .open-order {
-                    padding: 15px 81px;
+                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                    padding: 10px 74px;
                     margin: 0;
                     border: 1px solid #797979;
+                    font-size: 18px;
+                    border-radius: 2px;
                 }
+            }
+        }
+        .easy-pay-box {
+            width: 100%;
+            text-align: right;
+            padding: 15px;
+            .easy-pay {
+                font-weight: 700;
+                margin-bottom: 0;
+            }
+        }
+        .customer-request {
+            .customer-box {
+                padding: 15px;
+                .title-pointer {
+                    h3 {
+                        display: inline-block;
+                        width: 50%;
+                    }
+                    .pointers {
+                        display: inline-block;
+                        text-align: right;
+                        width: 50%;
+                        .pointer {
+                            width: 12px;
+                            height: 12px;
+                            background: black;
+                            display: inline-block;
+                            border-radius: 50%;
+                            margin-right: 5px;
+                            &.active {
+                                background: yellow;
+                            }
+                        }
+                    }
+                }
+                .slider-box {
+                    border: 1px solid black;
+                    padding: 15px;
+                    display: inline-block;
+                    .appendix {
+                        display: inline-block;
+                        width: 10%;
+                        vertical-align: top;
+                        font-size: 90px;
+                        position: relative;
+                        top: 30px;
+                    }
+                    .customer-box-info {
+                        display: inline-block;
+                        width: 90%;
+                        .customer-text {
+                            padding-bottom: 15px;
+                        }
+                        .customer-info {
+                            width: 70%;
+                            display: inline-block;
+                            .customer-photo {
+                                display: inline-block;
+                                width: 50px;
+                                height: 50px;
+                                background: yellow;
+                                border-radius: 50%;
+                                vertical-align: middle;
+                            }
+                            .customer-name {
+                                display: inline-block;
+                                margin-left: 10px;
+                            }
+                            .customer-role {
+                                display: inline-block;
+                                margin-left: 3px;
+                                font-weight: 700;
+                            }
+                        }
+                        .customer-corporate-logo {
+                            display: inline-block;
+                            width: 30%;
+                            text-align: right;
+                        }
+                    }
+                }
+            }
+            .request-box {
+
             }
         }
     }
