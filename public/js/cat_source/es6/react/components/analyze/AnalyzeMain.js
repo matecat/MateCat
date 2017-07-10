@@ -2,6 +2,7 @@
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeHeader = require('./AnalyzeHeader').default;
 let AnalyzeChunksResume = require('./AnalyzeChunksResume').default;
+let AnalyzeActions = require('../../actions/AnalyzeActions');
 let ProjectAnalyze = require('./ProjectAnalyze').default;
 let AnalyzeStore = require('../../stores/AnalyzeStore');
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
@@ -15,7 +16,7 @@ class AnalyzeMain extends React.Component {
         this.state = {
             volumeAnalysis: null,
             project: null,
-            showAnalysis: true,
+            showAnalysis: false,
             intervalId: 0,
             scrollTop: 0
         };
@@ -50,30 +51,32 @@ class AnalyzeMain extends React.Component {
         });
     }
 
-    showDetails() {
-        this.setState({
-            showAnalysis: true
-        });
+    showDetails(idJob) {
+        if (!this.state.showAnalysis) {
+            this.setState({
+                showAnalysis: true
+            });
+            setTimeout(function () {
+                AnalyzeActions.showDetails(idJob);
+            }, 500);
+        }
     }
 
     scrollStep() {
         if (window.pageYOffset === 0) {
             clearInterval(this.state.intervalId);
         }
-        window.scroll(0, window.pageYOffset - this.props.scrollStepInPx);
+        window.scroll(0, window.pageYOffset - 50);
     }
 
     scrollToTop() {
-        let intervalId = setInterval(this.scrollStep.bind(this), this.props.delayInMs);
+        let intervalId = setInterval(this.scrollStep.bind(this), 16.6);
         this.setState({ intervalId: intervalId });
     }
 
     handleScroll() {
         let self = this;
-
-            self.setState({scrollTop: $(window).scrollTop()});
-
-
+        self.setState({scrollTop: $(window).scrollTop()});
     }
 
     componentDidUpdate() {}

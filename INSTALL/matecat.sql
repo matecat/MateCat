@@ -863,7 +863,7 @@ DROP TABLE IF EXISTS `segments`;
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
-  `id_file_part` bigint(20) NOT NULL,
+  `id_file_part` bigint(20) DEFAULT NULL,
   `internal_id` varchar(100) DEFAULT NULL,
   `xliff_mrk_id` varchar(70) DEFAULT NULL,
   `xliff_ext_prec_tags` text,
@@ -1083,7 +1083,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-19 13:09:52
+-- Dump completed on 2017-06-27 18:37:45
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1242,4 +1242,4 @@ INSERT INTO `phinxlog` VALUES (20170504163201,'2017-05-04 18:38:49','2017-05-04 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-19 13:09:52
+-- Dump completed on 2017-06-27 18:37:45

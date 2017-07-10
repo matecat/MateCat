@@ -150,7 +150,14 @@ class ConversionHandler {
             //we have to convert it
 
             $ocrCheck = new \Filters\OCRCheck( $this->source_lang );
-            if ( !$ocrCheck->isValid( $file_path ) ) {
+            if( $ocrCheck->thereIsError( $file_path ) ){
+                $this->result[ 'code' ]     = -21; // No Good, Default
+                $this->result[ 'errors' ][] = array( "code" => -21, "message" =>
+                        "File is not valid. OCR for RTL languages is not supported."
+                );
+                return false; //break project creation
+            }
+            if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result[ 'code' ]     = -20; // No Good, Default
                 $this->result[ 'errors' ][] = array( "code" => -20, "message" =>
                         "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental."

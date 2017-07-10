@@ -229,7 +229,8 @@ class XliffSAXTranslationReplacer {
                     || 'bpt' == $name
                     || 'ept' == $name
                     || 'ph' == $name
-                    || 'st' == $name ) {
+                    || 'st' == $name
+                    || 'note' == $name ) {
 
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
@@ -377,7 +378,8 @@ class XliffSAXTranslationReplacer {
                     || 'bpt' == $name
                     || 'ept' == $name
                     || 'ph' == $name
-                    || 'st' == $name ) { // we are closing a critical CDATA section
+                    || 'st' == $name
+                    || 'note' == $name ) { // we are closing a critical CDATA section
 
                 $this->bufferIsActive = false;
                 $tag                  = $this->CDATABuffer . "</$name>";

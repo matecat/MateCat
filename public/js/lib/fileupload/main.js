@@ -27,7 +27,9 @@ UI = {
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
-        this.initTM();
+        if (this.initTM) {
+            this.initTM();
+        }
         if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {

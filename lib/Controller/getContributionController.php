@@ -313,8 +313,11 @@ class getContributionController extends ajaxController {
                     Log::doLog( $QA->getErrors() );
                 }
             }
+            
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+            } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
+                $match[ 'created_by' ] = 'MT'; //For now do not show differences
             } else {
 
                 $uid = null;

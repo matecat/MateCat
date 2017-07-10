@@ -43,11 +43,11 @@ class JobAnalyzeHeader extends React.Component {
                         </div>
                         <div className="target-box">{this.props.jobInfo.target}</div>
                     </div>
-                    <div className="job-not-payable">
-                        <span id="raw-words">{parseInt(this.total)}</span> Total words
-                    </div>
+                    {/*<div className="job-not-payable">*/}
+                        {/*<span id="raw-words">{parseInt(this.total)}</span> Total words*/}
+                    {/*</div>*/}
                     <div className="job-payable">
-                        <span id="words">{parseInt(this.payable)}</span> Payable words
+                        <span id="words">{parseInt(this.payable)}</span>MateCat Weighted words
                     </div>
 
                 </div>;
