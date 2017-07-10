@@ -460,7 +460,7 @@ class OutsourceModal extends React.Component {
                                     </div>
                                     <div className="customer-info">
                                         <div className="customer-photo">
-
+                                            <img className="ui medium circular tiny image" src="../../public/img/outsource-clients/boss-example-client.jpg" />
                                         </div>
                                         <div className="customer-name">
                                             Elena
@@ -470,7 +470,7 @@ class OutsourceModal extends React.Component {
                                         </div>
                                     </div>
                                     <div className="customer-corporate-logo">
-                                        Logo aziendale
+                                        <img src="../../public/img/outsource-clients/client-example.png" />
                                     </div>
                                 </div>
                             </div>
