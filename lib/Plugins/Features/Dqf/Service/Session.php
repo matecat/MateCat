@@ -56,6 +56,10 @@ class Session {
         return $this;
     }
 
+    /**
+     * @return mixed
+     * @throws Exception
+     */
     public function getSessionId() {
         if ( is_null($this->sessonId) ) {
             throw new Exception('sessionId is null, try to login first');

@@ -27,6 +27,7 @@ class FixturesLoader {
         $this->loadProjectMetadata();
         $this->loadFiles();
         $this->loadJobs();
+        $this->loadJobMetadata();
         $this->loadFilesJob();
         $this->loadSegments();
         $this->loadSegmentTranslations();
@@ -157,7 +158,16 @@ class FixturesLoader {
             $struct = new Projects_MetadataStruct( $record ) ;
             Projects_MetadataDao::insertStructWithAutoIncrements( $struct ) ;
         }
+    }
 
+    public function loadJobMetadata() {
+        $this->loadFromFile('job_metadata') ;
+
+        foreach( $this->fixtures_map['job_metadata'] as $name => &$record ) {
+            $this->replaceTokens( $record ) ;
+            $struct = new \Jobs\MetadataStruct( $record ) ;
+            \Jobs\MetadataDao::insertStructWithAutoIncrements( $struct ) ;
+        }
     }
 
     public function loadEngines() {

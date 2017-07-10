@@ -50,7 +50,7 @@ abstract class DataAccess_AbstractDao {
     /**
      * @var string
      */
-    const TABLE = '';
+    const TABLE = null;
 
     public function __construct( $con = null ) {
         /**

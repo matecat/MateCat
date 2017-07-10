@@ -14,7 +14,7 @@ use Jobs_JobStruct ;
 class ProjectCompletion extends BaseFeature {
 
     public function postAddSegmentTranslation( $params ) {
-        $params = Utils::ensure_keys($params, array('is_review', 'chunk') );
+        $params = Utils::ensure_keys( $params, array('is_review', 'chunk') );
 
         // Here we need to find or update the corresponding record,
         // to register the event of the segment translation being updated

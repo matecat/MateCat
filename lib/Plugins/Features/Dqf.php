@@ -2,20 +2,26 @@
 
 namespace Features;
 
+use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
+use catController;
+use ChildProjectTranslationBatch;
+use Chunks_ChunkStruct;
+use Exception;
 use Features;
+use Features\Dqf\Model\CatAuthorizationModel;
+use Features\Dqf\Model\UserModel;
+use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
-use FeatureSet;
+use Features\Dqf\Utils\ProjectMetadata;
+use Features\ProjectCompletion\CompletionEventStruct;
 use INIT;
 use Log;
 use Monolog\Logger;
-
-use Features\Dqf\Utils\ProjectMetadata ;
 use Users_UserDao;
 use Utils;
 use WorkerClient;
-use AMQHandler ;
 
 class Dqf extends BaseFeature {
 
@@ -61,6 +67,11 @@ class Dqf extends BaseFeature {
         return array_merge( $inputFilter, ProjectMetadata::getInputFilter() ) ;
     }
 
+    /**
+     * @param catController $controller
+     */
+    public function catControllerDoActionStart( catController $controller ) {
+    }
 
     /**
      * @param $metadata
@@ -77,6 +88,24 @@ class Dqf extends BaseFeature {
         return  $metadata ;
     }
 
+    /**
+     * @param Chunks_ChunkStruct                      $chunk
+     * @param ProjectCompletion\CompletionEventStruct $params
+     * @param                                         $lastId
+     */
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $params, $lastId ) {
+        // at this point we have to enqueue delivery to DQF of the translated or reviewed segments
+        if ( $params->is_review ) {
+            // enqueue task for review
+        }
+        else {
+            // TODO: move this in a background worker class
+            // TODO: check the uid is the same as the assigned dqf_translate_user ?
+            $translationBatch = new ChildProjectTranslationBatch( $chunk );
+            $translationBatch->process();
+        }
+    }
+
     public function filterCreateProjectFeatures( $features, $postInput ) {
         if ( isset( $postInput[ 'dqf' ] ) && $postInput['dqf'] == true ) {
             $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]);
@@ -89,9 +118,9 @@ class Dqf extends BaseFeature {
      */
     public function postProjectCreate( $projectStructure ) {
         $struct = new ProjectCreationStruct([
-            'id_project'           => $projectStructure['id_project'],
-            'source_language'      => $projectStructure['source_language'],
-            'file_segments_count'  => $projectStructure['file_segments_count']
+            'id_project'          => $projectStructure['id_project'],
+            'source_language'     => $projectStructure['source_language'],
+            'file_segments_count' => $projectStructure['file_segments_count']
         ]);
 
         WorkerClient::init( new AMQHandler() );
@@ -135,17 +164,16 @@ class Dqf extends BaseFeature {
             return ;
         }
 
-        $metadata = $user->getMetadataAsKeyValue();
-        if ( ! ( isset( $metadata['dqf_username'] ) && isset( $metadata['dqf_password'] ) ) ) {
+        $dqfUser = new UserModel( $user ) ;
+
+        if ( ! $dqfUser->hasCredentials() ) {
             $projectStructure['result']['errors'][] = $error_user_not_set  ;
             return ;
         }
 
-        $session = new Features\Dqf\Service\Session($metadata['dqf_username'], $metadata['dqf_password']);
+
         $error_on_remote_login = [ 'code' => -1000, 'message' => 'DQF credentials are not correct.' ];
-        try {
-            $session->login() ;
-        } catch( AuthenticationError $e ) {
+        if ( ! $dqfUser->validCredentials() ) {
             $projectStructure['result']['errors'][] = $error_on_remote_login ;
             return ;
         }

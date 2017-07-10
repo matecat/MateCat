@@ -7,6 +7,33 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
     }
 
+    public function getExtendedTranslationSinceByFile( $file_id, $since ) {
+
+        $sql = "SELECT
+                s.id_file,
+                st.id_job,
+                s.id,
+
+                st.auto_propagated_from,
+                st.time_to_edit,
+                st.translation,
+
+                stv.creation_date,
+                stv.translation
+                FROM segment_translations st JOIN segments s ON s.id = st.id_segment
+                LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
+                AND stv.creation_date >= :since
+                WHERE id_file = :id_file
+
+                ORDER BY s.id, stv.id
+                " ;
+
+        //
+
+
+
+    }
+
     public static function getVersionsForJob($id_job) {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job " .
@@ -143,9 +170,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     public function saveVersion($old_translation) {
         $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number ) " .
+            " ( id_job, id_segment, translation, version_number, time_to_edit ) " .
             " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number )";
+            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit )";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql );
@@ -154,7 +181,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             'id_job'         => $old_translation['id_job'],
             'id_segment'     => $old_translation['id_segment'] ,
             'translation'    => $old_translation['translation'],
-            'version_number' => $old_translation['version_number']
+            'version_number' => $old_translation['version_number'],
+            'time_to_edit'   => $old_translation['time_to_edit']
         ));
     }
 

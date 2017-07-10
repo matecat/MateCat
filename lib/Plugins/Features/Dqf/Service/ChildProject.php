@@ -9,6 +9,7 @@
 namespace Features\Dqf\Service;
 
 
+use Chunks_ChunkStruct;
 use ConnectedServices\GDrive\RemoteFileService;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
@@ -32,11 +33,11 @@ class ChildProject {
     protected $parent ;
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     protected $chunk ;
 
-    public function __construct(Session $session, CreateProjectResponseStruct $parent, \Chunks_ChunkStruct $chunk ) {
+    public function __construct(Session $session, CreateProjectResponseStruct $parent, Chunks_ChunkStruct $chunk ) {
         $this->chunk   = $chunk  ;
         $this->session = $session ;
         $this->parent  = $parent ;
@@ -93,7 +94,7 @@ class ChildProject {
             throw new \Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
         }
 
-        return new CreateProjectResponseStruct( json_decode( $client->curl()->getSingleContent( $resource ), true ) );
+        return $childProject ;
     }
 
 }

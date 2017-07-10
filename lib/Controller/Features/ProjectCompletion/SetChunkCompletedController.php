@@ -1,6 +1,7 @@
 <?php
 
 
+use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ProjectCompletion\Model\EventModel ;
 
 use Features\ProjectCompletion\Model\EventStruct ;
@@ -11,7 +12,7 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     private $password ;
 
     /**
-     * @var \LQA\ChunkReviewStruct ;
+     * @var Chunks_ChunkStruct
      */
     private $chunk ;
 
@@ -43,15 +44,14 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function processInsert() {
-
-        $eventStruct = new EventStruct(array(
+        $struct = new CompletionEventStruct([
             'uid'               => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-            'is_review'         => $this->isRevision()
-        ) );
+            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review' => $this->isRevision()
+        ]));
 
-        $model = new EventModel( $this->chunk, $eventStruct ) ;
+        $model = new EventModel( $this->chunk, $struct ) ;
         $model->save();
 
         $this->result[ 'data' ] = ['event' => [

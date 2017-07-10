@@ -9,23 +9,28 @@
 namespace Features\ProjectCompletion\Model ;
 
 use Chunks_ChunkCompletionEventDao;
-use FeatureSet ;
-use Projects_ProjectDao ;
-use Exception ;
+use Chunks_ChunkStruct;
+use Exception;
+use Features\ProjectCompletion\CompletionEventStruct;
+use FeatureSet;
+use Projects_ProjectDao;
 
 
 class EventModel {
 
     /**
-     * @var EventStruct
+     * @var CompletionEventStruct
      */
-    protected $eventStruct ;
+    protected $params ;
+    /**
+     * @var Chunks_ChunkStruct
+     */
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
-    public function __construct( $chunk, EventStruct $eventStruct ) {
-        $this->eventStruct = $eventStruct ;
-        $this->chunk       = $chunk ;
+    public function __construct( Chunks_ChunkStruct $chunk, CompletionEventStruct $params ) {
+        $this->params = $params ;
+        $this->chunk = $chunk ;
     }
 
     public function save() {
@@ -49,7 +54,7 @@ class EventModel {
         $current_phase = $dao->currentPhase( $this->chunk );
 
         if (
-                ( $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
+                (  $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
                 ( !$this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
         ) {
             throw new Exception('Cannot save event, current status mismatch.') ;

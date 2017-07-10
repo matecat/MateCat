@@ -8,16 +8,16 @@
 
 namespace Features\ReviewImproved\Model;
 
+use ArrayObject;
+use Chunks_ChunkStruct;
 use Features\ReviewImproved\ChunkReviewModel;
-use Log,
-        ArrayObject;
 use LQA\ChunkReviewDao;
 
 
 class QualityReportModel {
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     private $chunk;
 
@@ -43,9 +43,9 @@ class QualityReportModel {
     private $version ;
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param Chunks_ChunkStruct $chunk
      */
-    public function __construct( \Chunks_ChunkStruct $chunk ) {
+    public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk;
     }
 

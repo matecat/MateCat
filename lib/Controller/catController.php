@@ -66,7 +66,7 @@ class catController extends viewController {
     /**
      * @var FeatureSet
      */
-    private $feature_set ;
+    private $projectFeatures ;
 
     /**
      * @var WordCount_Struct
@@ -103,8 +103,8 @@ class catController extends viewController {
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->feature_set = new FeatureSet();
-        $this->feature_set->loadForProject( $this->project ) ;
+        $this->projectFeatures = new FeatureSet();
+        $this->projectFeatures->loadForProject( $this->project ) ;
 
     }
 
@@ -123,7 +123,7 @@ class catController extends viewController {
      */
     private function findJobByIdAndPassword() {
         if ( self::isRevision() ) {
-            $this->password = $this->feature_set->filter(
+            $this->password = $this->projectFeatures->filter(
                 'filter_review_password_to_job_password',
                 $this->password,
                 $this->jid
@@ -135,6 +135,7 @@ class catController extends viewController {
     }
 
     public function doAction() {
+        $this->projectFeatures->run('catControllerDoActionStart', $this);
 
         try {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
@@ -537,7 +538,7 @@ class catController extends viewController {
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
-        $this->feature_set->appendDecorators(
+        $this->projectFeatures->appendDecorators(
             'CatDecorator',
             $this,
             $this->template

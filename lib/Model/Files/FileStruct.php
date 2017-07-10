@@ -12,4 +12,13 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         return ( new Segments_SegmentDao() )->countByFile( $this );
     }
 
+    /**
+     * @return Translations_SegmentTranslationStruct[]
+     */
+    public function getTranslations() {
+        $dao = new Translations_SegmentTranslationDao() ;
+
+        return $dao->getByFile( $this ) ;
+    }
+
 }

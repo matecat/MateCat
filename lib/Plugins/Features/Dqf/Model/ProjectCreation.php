@@ -4,6 +4,7 @@
 
 namespace Features\Dqf\Model ;
 
+use Chunks_ChunkStruct;
 use Exceptions\NotFoundError;
 use Features\Dqf\Service\ChildProject;
 use Features\Dqf\Service\MasterProject;
@@ -24,6 +25,7 @@ use Features\Dqf\Utils\ProjectMetadata ;
 use Files_FileDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct ;
+use Utils;
 
 class ProjectCreation {
 
@@ -62,11 +64,6 @@ class ProjectCreation {
     protected $segmentsBatchResult ;
 
     /**
-     * @var array
-     */
-    protected $childProjects ;
-
-    /**
      * @var ReviewSettingsResponseStruct ;
      */
     protected $reviewSettings ;
@@ -85,7 +82,6 @@ class ProjectCreation {
 
     public function process() {
         /**
-         *
          * - Creation of master project (http://dqf-api.ta-us.net/#!/Project%2FMaster/add)
          * - Submit of project files (http://dqf-api.ta-us.net/#!/Project%2FMaster%2FFile/add)
          * - Submit of project’s source segments (http://dqf-api.ta-us.net/#!/Project%2FMaster%2FFile%2FSource_segment/add)
@@ -93,7 +89,6 @@ class ProjectCreation {
          * - Submit of one child project per target language (http://dqf-api.ta-us.net/#!/Project%2FChild/add)
          * - Submit the child project’s target language (http://dqf-api.ta-us.net/#!/Project%2FChild%2FFile%2FTarget_Language/add)
          * - Submit reviewSettings to be used throughout the whole project lifecycle
-         *
          */
 
         $this->_initSession();
@@ -168,9 +163,25 @@ class ProjectCreation {
 
         foreach( $this->project->getChunks() as $chunk ) {
             $childProject = new ChildProject($this->session, $this->remoteProject, $chunk ) ;
-            $this->childProjects[ $chunk->getIdentifier() ] =
-                    $childProject->createTranslationChild( $this->remoteFiles );
+            $remoteProject = $childProject->createTranslationChild( $this->remoteFiles );
+            $this->_saveDqfChildProjectMap( $chunk, $remoteProject ) ;
         }
+    }
+
+    /**
+     * @param Chunks_ChunkStruct          $chunk
+     * @param CreateProjectResponseStruct $remoteProject
+     */
+    protected function _saveDqfChildProjectMap( Chunks_ChunkStruct $chunk, CreateProjectResponseStruct $remoteProject ) {
+        $struct = new ChildProjectMapStruct() ;
+        $struct->id_job           = $chunk->id ;
+        $struct->first_segment    = $chunk->job_first_segment ;
+        $struct->last_segment     = $chunk->job_last_segment ;
+        $struct->dqf_project_id   = $remoteProject->dqfId ;
+        $struct->dqf_project_uuid = $remoteProject->dqfUUID ;
+        $struct->create_date      = Utils::mysqlTimestamp(time()) ;
+
+        $lastId = ChildProjectsMapDao::insertStruct( $struct ) ;
     }
 
 }
