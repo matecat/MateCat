@@ -247,6 +247,10 @@ class OutsourceModal extends React.Component {
         if (!config.enable_outsource) {
             this.initOutsourceModal();
         }
+        $('.ui.rating')
+            .rating('disable')
+        ;
+
     }
     componentWillUnmount() {
         OutsourceStore.removeListener(OutsourceConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
@@ -308,32 +312,26 @@ class OutsourceModal extends React.Component {
 
         return <div className="ui grid">
             <div className="assign-job-translator sixteen wide column">
-                <div className="ui grid">
-                    <div className="four wide column">
-                        <div className="title-url">
-                            <div className="title">
-                                Assign Job to translator
-                            </div>
-                        </div>
+                <div className="title-url ui grid">
+                    <div className="title four wide column">
+                        Assign Job to translator
                     </div>
-                    <div className="eleven wide column">
-                        <div className="job-url">
-                            url: https://www.matecat.com/job
-                        </div>
+                    <div className="job-url twelve wide column">
+                        <a href="#">https://www.matecat.com/translate/keywordplanoutlet1docx/en-US-it-IT/750083-0-dbb4e9326074</a>
                     </div>
-                    <div className="four wide column">
+                    <div className="left">
 
                     </div>
-                    <div className="nine wide column">
-                        <div className="translator-assign ui form">
+                    <div className="translator-assignee">
+                        <div className="ui form">
                             <div className="fields">
                                 <div className="field">
-                                    <label>First name</label>
-                                    <input type="text" placeholder="First Name" />
+                                    <label>Trasnlator email</label>
+                                    <input type="email" placeholder="translator@email.com" />
                                 </div>
                                 <div className="field">
                                     <label>Middle name</label>
-                                    <input type="text" placeholder="Middle Name" />
+                                    <input type="text" placeholder="16 Jul at 1:00 PM" />
                                 </div>
                                 <div className="field gmt">
                                     <div className="ui button">
@@ -343,9 +341,10 @@ class OutsourceModal extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="three wide column">
-                        <div className="ui primary button">Send Job to Translator</div>
+                    <div className="send-job-box">
+                        <a className="send-job ui primary button" target="_blank" href="#">Send Job to Translator</a>
                     </div>
+
                 </div>
             </div>
             <div className="divider-or sixteen wide column">
@@ -371,17 +370,19 @@ class OutsourceModal extends React.Component {
                         <div className="translator-details-box">
                             <div className="ui list left">
                                 <div className="item">Esmeralda <b>by Translated</b></div>
-                                <div className="item">Esmeralda <b>by Translated</b></div>
-                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item"><b>8 years of experience</b></div>
+                                <div className="item">
+                                    <div className="ui mini star rating" data-rating="4" data-max-rating="5" />
+                                </div>
                             </div>
                             <div className="ui list right">
-                                <div className="item">Esmeralda <b>by Translated</b></div>
-                                <div className="item">Esmeralda <b>by Translated</b></div>
-                                <div className="item">Esmeralda <b>by Translated</b></div>
+                                <div className="item"><b>24.638</b> words translated last 12 months</div>
+                                <div className="item"><b>General, Marketing, Design</b></div>
+                                {/*<div className="item">Esmeralda <b>by Translated</b></div>*/}
                             </div>
                         </div>
                         <div className="job-details-box">
-                            <div className="source-target st-details">
+                            <div className="source-target-outsource st-details">
                                 <div className="source-box">Spanish</div>
                                 <div className="in-to">
                                     <i className="icon-chevron-right icon" />
@@ -392,21 +393,44 @@ class OutsourceModal extends React.Component {
                                 <div className="not-payable">2,574,135 words</div>
                                 <div className="payable">1,285,722 words</div>
                             </div>
-                            <div className="job-price">€400</div>
                         </div>
+                        <div className="job-price">€400</div>
                     </div>
                     <div className="revision-box">
-                        <div className="revision-check">
-                            <div className="add-revision">Add revision</div>
+                        <div className="add-revision">
                             <div className="ui checkbox">
-                                <input className="flag-box" type="checkbox" name="example" />
+                                <input type="checkbox" />
+                                <label>Add Revision</label>
                             </div>
-                            <div className="job-price">€400</div>
                         </div>
-                        <div className="delivery-order">
-                            <div className="delivery-box"></div>
-                            <div className="order-box"></div>
+                        <div className="job-price">€400</div>
+                    </div>
+                    <div className="delivery-order">
+                        <div className="delivery-box">
+                            <label>Delivery date:</label>
+                            <div className="delivery-date">15 August</div>
+                            <span>at</span>
+                            <div className="delivery-time">11:00 AM</div>
+                            <div className="gmt-button">
+                                <div className="ui button">
+                                    (GMT +2)
+                                </div>
+                            </div>
+                            <div className="need-it-faster">
+                                <a className="faster">Need it faster?</a>
+                            </div>
                         </div>
+                    </div>
+                    <div className="order-box-outsource">
+                        <div className="outsource-price">
+                            €372.234
+                        </div>
+                        <div className="select-value">
+                            <a className="value">about €0.96 / word</a>
+                        </div>
+                    </div>
+                    <div className="order-button-outsource">
+                        <a className="open-order ui green button">Order now</a>
                     </div>
                 </div>
             </div>
