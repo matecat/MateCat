@@ -489,6 +489,13 @@ body.manage {
                                     @media only screen and (max-width: 1200px) {
                                         max-width: 180px;
                                     }
+                                    a {
+                                        text-decoration: underline;
+                                        font-weight: 700;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                    }
                                 }
                                 &:hover .job-to-translator{
                                     width: inherit;
