@@ -9,7 +9,7 @@
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
-        padding: 8px 15px !important;
+        padding: 8px 45px !important;
     }
     &.transitionOutsource-enter {
         height: 0px;
@@ -33,9 +33,10 @@
         .title-url {
             padding: 15px;
             .title {
-                padding: 15px 30px;
+                padding: 15px 15px 15px 30px;
                 font-size: 20px;
                 font-weight: 700;
+                width: 25%;
             }
             .job-url {
                 a {
@@ -60,7 +61,7 @@
                             label {
                                 padding-left: 15px;
                             }
-                            input[type="text"] {
+                            input[type="text"], input[type="email"] {
                                 box-shadow: inset 0 1px 3px #ddd;
                                 border: 1px solid #ccc;
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -136,9 +137,13 @@
                 font-family: calibri;
                 .service {
                     display: inline-block;
-                    &.project-management, .translation, .revision {
+                    &.project-management {
 
                     }
+                    &.translation, &.revision {
+                        margin-left: 8px;
+                    }
+
                 }
             }
             .fiducial-logo {
@@ -153,8 +158,8 @@
                         width: 125px;
                         position: relative;
                         top: 11px;
-                        padding: 0px;
-                        margin: 0px;
+                        padding: 0;
+                        margin: 0 0 0 5px;
                     }
                 }
             }
@@ -338,7 +343,7 @@
                 .select-value {
                     a {
                         text-decoration: underline;
-                        color: 000000;
+                        color: #000000;
                         cursor: pointer;
                         &:hover {
                             text-decoration: none;
@@ -395,16 +400,17 @@
                     }
                 }
                 .slider-box {
-                    border: 1px solid black;
+                    border: 1px solid #a8bbb2;
                     padding: 15px;
                     display: inline-block;
                     .appendix {
                         display: inline-block;
                         width: 10%;
                         vertical-align: top;
-                        font-size: 90px;
+                        font-size: 46px;
                         position: relative;
-                        top: 30px;
+                        top: 5px;
+                        color: #a8bbb2;
                     }
                     .customer-box-info {
                         width: 90%;
@@ -443,14 +449,216 @@
                                 width: auto;
                                 vertical-align: middle;
                                 padding: 6px;
-                                height: 50px;
+                                height: 45px;
                             }
                         }
                     }
                 }
             }
             .request-box {
+                vertical-align: middle;
+                .title-request {
+                    h3 {
+                        margin-bottom: 14px;
+                    }
+                }
+                .request-info-box {
+                    background-color: #d4dcd8;
+                    padding: 16px 15px 15px;
+                    .mobile-mail-box {
+                        width: 50%;
+                        display: inline-block;
+                        padding: 15px;
+                        vertical-align: top;
+                        .call {
+                            padding-bottom: 15px;
+                            padding-top: 0;
+                        }
+                        .send-email {
+                            padding-bottom: 0;
+                            padding-top: 15px;
+                        }
+                    }
+                    .account-box {
+                        width: 50%;
+                        display: inline-block;
+                        padding: 15px;
+                        .open-chat {
+                           i {
+                               position: relative;
+                               top: -10px;
+                           }
+                            .content {
+                                .header, .description {
+                                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                                }
+                                .header {
+                                    .online {
+                                        color: #09beec;
+                                    }
+                                    .offline {
+                                        color: gray;
+                                    }
+                                }
+                                .button {
+                                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                                    border: 1px solid #c1c1c1;
+                                    background: #f3f3f3;
+                                    padding-top: 13px;
+                                    position: relative;
+                                    top: 5px;
+                                    width: 100%;
+                                    .sign {
+                                        width: 10px;
+                                        height: 10px;
+                                        display: inline-block;
+                                        vertical-align: baseline;
+                                        margin-right: 5px;
+                                        border-radius: 50%;
+                                        position: relative;
+                                        top: 1px;
+                                        &.online-item {
+                                            background-color: #09beec;
+                                        }
+                                        &.offline-item {
+                                            background-color: gray;
+                                        }
+                                    }
+                                }
+                            }
 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .outsource-to-translated-reduced {
+        padding-top: 45px !important;
+        padding-left: 45px !important;
+        padding-right: 40px !important;
+        background-color: #e9efec;
+        .job-menu, .open-translate {
+            display: none;
+        }
+        .title-reduced {
+            width: 75%;
+            font-size: 24px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .payment-service {
+            display: inline-block;
+            width: 48%;
+            vertical-align: -webkit-baseline-middle;
+            .service-box {
+                display: inline-block;
+                font-size: 22px;
+                font-weight: 700;
+                .service {
+                    display: inline-block;
+                    &.project-management {
+
+                    }
+                    &.translation {
+                        margin-left: 6px;
+                    }
+                    &.revision {
+                        margin-left: 6px;
+                    }
+                }
+            }
+            .fiducial-logo {
+                display: inline-block;
+                margin-left: 6px;
+                img {
+                    width: 100px;
+                    position: relative;
+                    top: 9px;
+                    margin-left: 4px;
+                }
+            }
+            .view-more {
+                a {
+                    text-decoration: underline;
+                    cursor: pointer;
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
+        }
+        .delivery-order {
+            display: inline-block;
+            padding: 0 10px;
+            .delivery-box {
+                display: inline-block;
+                font-size: 18px;
+                font-weight: 700;
+                label {
+                    padding: 5px;
+                    font-size: 16px;
+                    color: gray;
+                    font-weight: 100;
+                }
+                .delivery-date, .delivery-time{
+                    display: inline-block;
+                    padding: 5px;
+                }
+                span {
+                    display: inline-block;
+                }
+                .gmt-button {
+                    display: inline-block;
+                    position: relative;
+                    top: -2px;
+                    .button {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 10px 15px;
+                        width: 100%;
+                        border: 1px solid #c1c1c1;
+                        background: #f3f3f3;
+                    }
+                }
+            }
+        }
+        .order-box-outsource {
+            display: inline-block;
+            width: 14%;
+
+            float: right;
+            text-align: center;
+            margin-top: -53px;
+            .order-box {
+                background-color: #daeddf;
+                padding: 25px 15px 15px;
+                margin-bottom: 5px;
+                .outsource-price {
+                    font-size: 28px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                }
+                .select-value {
+                    a {
+                        text-decoration: underline;
+                        cursor: pointer;
+                        &:hover {
+                            text-decoration: none;
+                        }
+                    }
+                }
+            }
+            .order-button-outsource {
+                .open-order {
+                    width: 100%;
+                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                    padding: 10px 22px;
+                    vertical-align: top;
+                    font-size: 16px;
+                    border: 1px solid #797979;
+                    border-radius: 2px;
+                    margin: 0px;
+                }
             }
         }
     }
