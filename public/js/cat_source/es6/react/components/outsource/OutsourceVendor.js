@@ -1,5 +1,7 @@
 let OutsourceInfo = require('./OutsourceInfo').default;
 let Immutable = require('immutable');
+let GMTSelect = require('./GMTSelect').default;
+
 
 class OutsourceVendor extends React.Component {
 
@@ -26,7 +28,7 @@ class OutsourceVendor extends React.Component {
         UI.getOutsourceQuoteFromManage(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService).done(function (quoteData) {
             if (quoteData.data) {
 
-                this.state.quoteResponse = Immutable.fromJS(quoteData.data[0]);
+                self.quoteResponse = Immutable.fromJS(quoteData.data[0]);
                 self.chunk = quoteData.data[0][0];
 
                 UI.url_ok = quoteData.return_url.url_ok;
@@ -123,7 +125,7 @@ class OutsourceVendor extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-
+        return true;
     }
 
     render() {
@@ -194,9 +196,7 @@ class OutsourceVendor extends React.Component {
                         <span>at</span>
                         <div className="delivery-time">{delivery.time}</div>
                         <div className="gmt-button">
-                            <div className="ui button">
-                                (GMT +2)
-                            </div>
+                            <GMTSelect/>
                         </div>
                         <div className="need-it-faster">
                             <a className="faster"
