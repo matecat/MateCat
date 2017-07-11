@@ -11,7 +11,7 @@ class OutsourceVendor extends React.Component {
         this.state = {
             outsource: false,
             revision: false,
-            quoteResponse: null
+            chunkQuote: null
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -21,23 +21,24 @@ class OutsourceVendor extends React.Component {
 
     }
 
-    getOutsourceQuote() {
+    getOutsourceQuote(delivery) {
         let self = this;
         let typeOfService = this.state.revision ? "premium" : "professional";
-        let fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+        let fixedDelivery =  (delivery) ? delivery : "";
         UI.getOutsourceQuoteFromManage(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService).done(function (quoteData) {
             if (quoteData.data) {
 
                 self.quoteResponse = Immutable.fromJS(quoteData.data[0]);
-                self.chunk = quoteData.data[0][0];
+                let chunk = Immutable.fromJS(quoteData.data[0][0]);
 
                 UI.url_ok = quoteData.return_url.url_ok;
                 UI.url_ko = quoteData.return_url.url_ko;
                 UI.confirm_urls = quoteData.return_url.confirm_urls;
-                UI.data_key = self.chunk.id;
+                UI.data_key = chunk.id;
 
                 self.setState({
-                    outsource: true
+                    outsource: true,
+                    chunkQuote: chunk
                 });
             }
         });
@@ -54,9 +55,9 @@ class OutsourceVendor extends React.Component {
             // let timeZone = this.getTimeZone();
             // let dateString =  this.getDateString(deliveryToShow, timeZone);
             if (this.state.revision) {
-                return APP.getGMTDate(this.chunk.r_delivery);
+                return APP.getGMTDate( this.state.chunkQuote.get('r_delivery'));
             } else {
-                return APP.getGMTDate(this.chunk.delivery);
+                return APP.getGMTDate(  this.state.chunkQuote.get('delivery'));
             }
         }
 
@@ -65,27 +66,27 @@ class OutsourceVendor extends React.Component {
     getPrice() {
         if (this.state.outsource) {
             if (this.state.revision) {
-                return parseFloat(parseFloat( this.chunk.r_price ) + parseFloat( this.chunk.price )).toFixed( 2);
+                return parseFloat(parseFloat(   this.state.chunkQuote.get('r_price') ) + parseFloat(   this.state.chunkQuote.get('price') )).toFixed( 2);
             } else {
-                return this.chunk.price;
+                return   this.state.chunkQuote.get('price');
             }
         }
     }
 
     getTranslatedWords() {
         if (this.state.outsource) {
-            return this.chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+            return   this.state.chunkQuote.get('t_words_total').toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
         }
     }
 
     getTranslatorSubjects() {
         if (this.state.outsource) {
-            if (this.chunk.t_chosen_subject.length > 0 && this.chunk.t_subjects.length > 0) {
-                return this.chunk.t_chosen_subject + ', ' + this.chunk.t_subjects;
-            } else if (this.chunk.t_chosen_subject.length > 0) {
-                return this.chunk.t_chosen_subject;
+            if (  this.state.chunkQuote.get('t_chosen_subject').length > 0 &&   this.state.chunkQuote.get('t_subjects').length > 0) {
+                return   this.state.chunkQuote.get('t_chosen_subject') + ', ' +   this.state.chunkQuote.get('t_subjects');
+            } else if (  this.state.chunkQuote.get('t_chosen_subject').length > 0) {
+                return   this.state.chunkQuote.get('t_chosen_subject');
             } else {
-                return this.chunk.t_subjects;
+                return   this.state.chunkQuote.get('t_subjects');
             }
         }
     }
@@ -103,8 +104,8 @@ class OutsourceVendor extends React.Component {
     }
 
     componentDidUpdate() {
-        if (this.state.outsource && !this.datePickerStart) {
-            this.datePickerStart = true;
+        let self = this;
+        if (this.state.outsource ) {
             $(this.dateFaster).datetimepicker({
                 validateOnBlur: false,
                 defaultTime: '09:00',
@@ -114,18 +115,23 @@ class OutsourceVendor extends React.Component {
                 selectButtonLabel: "Get Price",
                 allowTimes: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
                 disabledWeekDays: [0,6],
-                onSelectDateButton: function () {
-
+                onSelectDateButton: function (newDateTime) {
+                    let timestamp = (new Date(newDateTime)).getTime();
+                    self.setState({
+                        outsource: false
+                    });
+                    self.getOutsourceQuote(timestamp);
                 },
                 onChangeDateTime: function (newDateTime, $input) {
                     console.log("onChangeDateTime");
                 }
             });
         }
+        $(this.rating).rating('disable');
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return true;
+        return (!nextState.chunkQuote.equals(this.state.chunkQuote) || nextState.outsource !== this.state.outsource);
     }
 
     render() {
@@ -152,10 +158,11 @@ class OutsourceVendor extends React.Component {
                 <div className="translator-job-details">
                     <div className="translator-details-box">
                         <div className="ui list left">
-                            <div className="item">{this.chunk.t_name}<b> by Translated</b></div>
-                            <div className="item"><b>{this.chunk.t_experience_years} years of experience</b></div>
+                            <div className="item">{ this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
+                            <div className="item"><b>{ this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
                             <div className="item">
-                                <div className="ui mini star rating" data-rating="4" data-max-rating="5" />
+                                <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
+                                ref={(rating) => this.rating = rating}/>
                             </div>
                         </div>
                         <div className="ui list right">
@@ -176,7 +183,7 @@ class OutsourceVendor extends React.Component {
                             <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
                         </div>
                     </div>
-                    <div className="job-price">€{this.chunk.price}</div>
+                    <div className="job-price">€{ this.state.chunkQuote.get('price')}</div>
                 </div>
                 <div className="revision-box">
                     <div className="add-revision">
@@ -187,7 +194,7 @@ class OutsourceVendor extends React.Component {
                             <label>Add Revision</label>
                         </div>
                     </div>
-                    <div className="job-price">€{this.chunk.r_price}</div>
+                    <div className="job-price">€{ this.state.chunkQuote.get('r_price')}</div>
                 </div>
                 <div className="delivery-order">
                     <div className="delivery-box">
