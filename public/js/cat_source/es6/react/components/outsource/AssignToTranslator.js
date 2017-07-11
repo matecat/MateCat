@@ -13,7 +13,7 @@ class AssignToTranslator extends React.Component {
         let date = $(this.date).data('timestamp');
         let email = this.email.value;
 
-        OutsourceActions.sendJobToTranslator(email, date, this.timezone, this.props.job.toJS(), this.props.project);
+        OutsourceActions.sendJobToTranslator(email, date, this.timezone, this.props.job.toJS(), this.props.project.toJS());
     }
 
     GmtSelectChanged(value) {
@@ -26,27 +26,22 @@ class AssignToTranslator extends React.Component {
     }
 
     componentDidMount () {
-        $('#date-picker-translator').datetimepicker({
+        $(this.dateInput).datetimepicker({
             step:30,
             validateOnBlur: false,
             defaultTime: '09:00',
-            // format:'unixtime',
+            minDate:0,
             onChangeDateTime: function (newDateTime, $input) {
                 let date = APP.fromDateToString(newDateTime);
                 let dateString = date.day + ' ' + date.month + ' ' + date.year + ' at ' + date.time ;
                 $input.val(dateString);
                 $input.data('timestamp', new Date(newDateTime).getTime());
             }
-            // allowTimes: ['07:00', '09:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
-            // onGenerate: function(ct) {
-            //     $(this).find('.xdsoft_date.xdsoft_weekend').addClass('disabled');
-            //     $('.xdsoft_calendar table thead tr th').filter(':nth-child(6), :nth-child(7)').addClass('disabled');
-            // }
         });
     }
 
     componentWillUnmount() {
-        $('#date-picker-translator').datetimepicker('destroy');
+        $(this.dateInput).datetimepicker('destroy');
     }
 
     componentDidUpdate() {}
@@ -81,9 +76,9 @@ class AssignToTranslator extends React.Component {
                                        ref={(email) => this.email = email}/>
                             </div>
                             <div className="field">
-                                <label>Middle name</label>
+                                <label>Delivery date</label>
                                 <input id="date-picker-translator" type="text" placeholder="Date" defaultValue={date}
-                                       ref={(date) => this.date = date}/>
+                                       ref={(date) => this.dateInput = date}/>
                             </div>
                             <div className="field gmt">
                                 <GMTSelect changeValue={this.GmtSelectChanged.bind(this)}/>

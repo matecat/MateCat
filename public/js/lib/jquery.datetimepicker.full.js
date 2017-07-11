@@ -1201,6 +1201,7 @@ var DateFormatter;
 		onShow: function () {},
 		onClose: function () {},
 		onGenerate: function () {},
+        onSelectDateButton: function () {},
 
 		withoutCopyright: true,
 		inverseButton: false,
@@ -1215,6 +1216,7 @@ var DateFormatter;
 		prevButton: true,
 		nextButton: true,
 		defaultSelect: true,
+        selectButtonLabel: "Save Selected",
 
 		scrollMonth: true,
 		scrollTime: true,
@@ -1545,7 +1547,7 @@ var DateFormatter;
 				timepicker = $('<div class="xdsoft_timepicker active"><button type="button" class="xdsoft_prev"></button><div class="xdsoft_time_box"></div><button type="button" class="xdsoft_next"></button></div>'),
 				timeboxparent = timepicker.find('.xdsoft_time_box').eq(0),
 				timebox = $('<div class="xdsoft_time_variant"></div>'),
-				applyButton = $('<button type="button" class="xdsoft_save_selected blue-gradient-button">Save Selected</button>'),
+				applyButton = $('<button type="button" class="xdsoft_save_selected blue-gradient-button">' + options.selectButtonLabel + '</button>'),
 
 				monthselect = $('<div class="xdsoft_select xdsoft_monthselect"><div></div></div>'),
 				yearselect = $('<div class="xdsoft_select xdsoft_yearselect"><div></div></div>'),
@@ -2074,6 +2076,9 @@ var DateFormatter;
 				_xdsoft_datetime.setCurrentTime(getCurrentValue());
 				input.val(_xdsoft_datetime.str());
 				datetimepicker.trigger('close.xdsoft');
+                if (options.onSelectDateButton &&	$.isFunction(options.onSelectDateButton)) {
+                    options.onSelectDateButton.call(datetimepicker, _xdsoft_datetime.currentTime, datetimepicker.data('input'), e);
+                }
 			});
 			month_picker
 				.find('.xdsoft_today_button')

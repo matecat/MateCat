@@ -175,26 +175,46 @@ $.extend(UI, {
         });
     },
 
-    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
+    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
 
-        return APP.doRequest({
-            data: {
-                action: 'outsourceTo',
+        // return APP.doRequest({
+        //     data: {
+        //         action: 'outsourceTo',
+        //         pid: idProject,
+        //         ppassword: password,
+        //         fixedDelivery: fixedDelivery,
+        //         typeOfService: typeOfService,
+        //         jobs: [
+        //             {
+        //                 jid: jid,
+        //                 jpassword: jpassword
+        //             }
+        //         ]
+        //     },
+        //     success: function (d) {
+        //         if (typeof callback == "function")
+        //             callback(d);
+        //     }
+        // });
+
+        var data = {
+            action: 'outsourceTo',
                 pid: idProject,
                 ppassword: password,
                 fixedDelivery: fixedDelivery,
                 typeOfService: typeOfService,
                 jobs: [
-                    {
-                        jid: jid,
-                        jpassword: jpassword
-                    }
-                ]
-            },
-            success: function (d) {
-                if (typeof callback == "function")
-                    callback(d);
-            }
+                {
+                    jid: jid,
+                    jpassword: jpassword
+                }
+            ]
+        };
+
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=outsourceTo"
         });
     },
 
