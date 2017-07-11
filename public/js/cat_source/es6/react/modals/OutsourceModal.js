@@ -525,51 +525,7 @@ class OutsourceModal extends React.Component {
                     </div>
                 </div>
             </div>*/}
-            <div className="outsource-to-translated-reduced sixteen wide column">
-                <div className="title-reduced">Let us do it for you</div>
 
-                <div className="payment-service">
-                    <div className="service-box">
-                        <div className="service project-management">Outsource: PM </div>
-                        <div className="service translation"> + Translation </div>
-                        <div className="service revision"> + Revision</div>
-                    </div>
-                    <div className="fiducial-logo">
-                        <div className="translated-logo">Guaranteed by
-                            <img className="logo-t" src="/public/img/logo_translated.png" />
-                        </div>
-                    </div>
-                    <div className="view-more">
-                        <a className="open-view-more">+ view more</a>
-                    </div>
-                </div>
-                <div className="delivery-order">
-                    <div className="delivery-box">
-                        <label>Delivery date:</label><br />
-                        <div className="delivery-date">15 August</div>
-                        <span>at</span>
-                        <div className="delivery-time">11:00 AM</div>
-                        <div className="gmt-button">
-                            <div className="ui button">
-                                (GMT +2)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="order-box-outsource">
-                    <div className="order-box">
-                        <div className="outsource-price">
-                            €372.234
-                        </div>
-                        <div className="select-value">
-                            <a className="value">about €0.96 / word</a>
-                        </div>
-                    </div>
-                    <div className="order-button-outsource">
-                        <a className="open-order ui green button">Order now</a>
-                    </div>
-                </div>
-            </div>
         </div>;
 
 

@@ -21,16 +21,22 @@ class OutsourceContainer extends React.Component {
 
     render() {
         return <div className="ui grid">
-            <AssignToTranslator job={this.props.job}
-                                url={this.props.url}
-                                project={this.props.project}/>
-            <div className="divider-or sixteen wide column">
-                <div className="or">
-                    OR
-                </div>
-            </div>
-            <OutsourceVendor project={this.props.project}
-                             job={this.props.job}/>
+                {(this.props.showTranslatorBox) ? (
+                    <AssignToTranslator job={this.props.job}
+                                        url={this.props.url}
+                                        project={this.props.project}/>
+                ) : (null)}
+
+                {(this.props.showTranslatorBox) ? (
+                    <div className="divider-or sixteen wide column">
+                        <div className="or">
+                            OR
+                        </div>
+                    </div>
+                ) : (null)}
+
+                <OutsourceVendor project={this.props.project}
+                                 job={this.props.job} />
         </div>;
     }
 }
