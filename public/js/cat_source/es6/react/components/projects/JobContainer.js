@@ -452,12 +452,6 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal(showTranslatorBox) {
-        // if (this.props.job.get('outsource') && this.props.job.get('outsource').get('quote_review_link')) {
-        //     window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
-        // } else {
-        //     ModalsActions.openOutsourceModal(this.props.project.toJS(), this.props.job.toJS(), this.getTranslateUrl(), true, false);
-        // }
-
         this.setState({
             openOutsource: !this.state.openOutsource,
             showTranslatorBox: showTranslatorBox
@@ -663,10 +657,12 @@ class JobContainer extends React.Component {
 
         let outsourceContainerClass = (this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource';
 
+
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="sixteen wide column chunk-container">
                 <div className="ui grid" ref={(container) => this.container = container}>
+                    {!this.state.openOutsource ? (
                     <div className="chunk wide column shadow-1 pad-right-10">
                         <div className="job-id" title="Job Id">
                             {"(" + idJobLabel + ")"}
@@ -732,15 +728,14 @@ class JobContainer extends React.Component {
                     { this.state.showDownloadProgress ? (
                         <div className="chunk-download-progress"/>
                     ):('')}
-                    </div>
+                    </div> ) :(null)}
             </div>
             <CSSTransitionGroup component="div" className="ui grid"
                                 transitionName="transitionOutsource"
                                 transitionEnterTimeout={500}
                                 transitionLeaveTimeout={300}
             >
-            {this.state.openOutsource ? (
-                // TODO : @Ruben Modificare questo blocco
+                {this.state.openOutsource ? (
                 <div className={"outsource-container chunk ui grid " + outsourceContainerClass}>
                     <div className=" outsource-header sixteen wide column shadow-1">
                         <div className="job-id" title="Job Id">
@@ -776,11 +771,11 @@ class JobContainer extends React.Component {
                                         url={this.getTranslateUrl()}
                                         fromManage={true}
                                         translatorOpen={false}
-                                        showTranslatorBox={this.state.showTranslatorBox}/>
+                                        showTranslatorBox={this.state.showTranslatorBox}
+                                        onClickOutside={this.openOutsourceModal.bind(this)}/>
                     </div>
                 </div>
-                // TODO : @Ruben Modificare questo blocco
-            ) : (null)}
+                ) : (null)}
             </CSSTransitionGroup>
         </div>
     }
