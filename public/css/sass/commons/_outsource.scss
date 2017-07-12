@@ -10,6 +10,7 @@
     overflow: hidden;
     .outsource-header {
         padding: 8px 45px !important;
+        z-index: 1;
     }
     &.transitionOutsource-enter {
         height: 0px;
@@ -35,25 +36,25 @@
         padding-top: 23px;
         float: none;
         display: inline-block;
-    }
-
-    .ui.selection.dropdown.gmt-select {
-        min-width: 40px !important;
-        width: auto;
-        .text .gmt-description {
-            display: none;
-        }
-        .menu {
-            min-width: 350px;
-            .item {
-                .gmt-value {
-                    display: inline-block;
-                    margin-right: 5px;
-                }
+        .ui.selection.dropdown {
+            min-width: 40px !important;
+            width: auto;
+            .text {
                 .gmt-description {
-                    display: inline-block;
+                    display: none;
                 }
             }
+            .menu {
+                min-width: 350px;
+                .item {
+                    .gmt-value {
+                        display: inline-block;
+                        margin-right: 5px;
+                    }
+                    .gmt-description {
+                        display: inline-block;
+                    }
+                }
 
         }
     }
@@ -150,141 +151,139 @@
             color: #ffffff;
         }
     }
-
-    .outsource-to-translated {
+    .background-outsource-vendor {
         background: #e9efec;
-        padding: 0 15px 15px !important;
-        .payment-service {
-            padding: 15px 15px;
-            .service-box {
-                width: 70%;
-                display: inline-block;
-                padding: 0 15px;
-                vertical-align: text-bottom;
-                font-size: 26px;
-                font-weight: 700;
-                font-family: calibri;
-                .service {
+        .outsource-to-vendor {
+            .payment-service {
+                padding: 15px 15px;
+                .service-box {
+                    width: 70%;
                     display: inline-block;
-                    &.project-management {
-
-                    }
-                    &.translation, &.revision {
-                        margin-left: 8px;
-                    }
-
-                }
-            }
-            .fiducial-logo {
-                width: 30%;
-                display: inline-block;
-                text-align: right;
-                padding: 0 15px;
-                vertical-align: text-bottom;
-                .translated-logo {
-                    display: inline-block;
-                    .logo-t {
-                        width: 125px;
-                        position: relative;
-                        top: 11px;
-                        padding: 0;
-                        margin: 0 0 0 5px;
-                    }
-                }
-            }
-        }
-        .payment-details-box {
-            background-color: #ffffff;
-            padding: 15px;
-            position: relative;
-            min-height: 330px;
-            height: 305px;
-            .translator-job-details {
-                padding-bottom: 15px;
-                .translator-details-box {
-                    width: 40%;
-                    border-right: 1px solid black;
-                    display: inline-block;
-                    vertical-align: middle;
                     padding: 0 15px;
-                    .left, .right {
+                    vertical-align: text-bottom;
+                    font-size: 26px;
+                    font-weight: 700;
+                    font-family: calibri;
+                    .service {
                         display: inline-block;
-                        margin: 0;
+                        &.project-management {
+
+                        }
+                        &.translation, &.revision {
+                            margin-left: 8px;
+                        }
+
                     }
-                    .left {
-                        width: 45%;
-                        .star {
+                }
+                .fiducial-logo {
+                    width: 30%;
+                    display: inline-block;
+                    text-align: right;
+                    padding: 0 15px;
+                    vertical-align: text-bottom;
+                    .translated-logo {
+                        display: inline-block;
+                        .logo-t {
+                            width: 125px;
                             position: relative;
-                            left: -2px;
-                            .icon {
-                                &.active {
-                                    background: transparent !important;
-                                    color: #7eaf3e !important;
-                                    text-shadow: none !important;
+                            top: 11px;
+                            padding: 0;
+                            margin: 0 0 0 5px;
+                        }
+                    }
+                }
+            }
+            .payment-details-box {
+                background-color: #ffffff;
+                padding: 15px;
+                position: relative;
+                min-height: 315px;
+                .translator-job-details {
+                    padding-bottom: 15px;
+                    .translator-details-box {
+                        width: 40%;
+                        border-right: 1px solid black;
+                        display: inline-block;
+                        vertical-align: middle;
+                        padding: 0 15px;
+                        .left, .right {
+                            display: inline-block;
+                            margin: 0;
+                        }
+                        .left {
+                            width: 45%;
+                            .star {
+                                position: relative;
+                                left: -2px;
+                                .icon {
+                                    &.active {
+                                        background: transparent !important;
+                                        color: #7eaf3e !important;
+                                        text-shadow: none !important;
+                                    }
                                 }
                             }
                         }
-                    }
-                    .right {
-                        float: right;
-                        width: 55%;
-                        text-align: right;
-                    }
-                }
-                .job-details-box {
-                    display: inline-block;
-                    width: 46% !important;
-                    vertical-align: middle;
-                    padding: 0 15px;
-                    position: relative;
-                    top: -9px;
-                    .source-target-outsource {
-                        display: inline-block;
-                        width: 65%;
-                        font-size: 20px;
-                        font-weight: 700;
-                        .source-box {
-                            display: inline-block;
+                        .right {
+                            float: right;
+                            width: 55%;
+                            text-align: right;
                         }
-                        .in-to {
+                    }
+                    .job-details-box {
+                        display: inline-block;
+                        width: 46% !important;
+                        vertical-align: middle;
+                        padding: 0 15px;
+                        position: relative;
+                        top: -9px;
+                        .source-target-outsource {
                             display: inline-block;
-                            font-size: 18px;
-                            i {
-                                position: relative;
-                                top: 2px;
+                            width: 65%;
+                            font-size: 20px;
+                            font-weight: 700;
+                            .source-box {
+                                display: inline-block;
+                            }
+                            .in-to {
+                                display: inline-block;
+                                font-size: 18px;
+                                i {
+                                    position: relative;
+                                    top: 2px;
+                                }
+                            }
+                            .target-box {
+                                display: inline-block;
                             }
                         }
-                        .target-box {
+                        .job-payment {
                             display: inline-block;
+                            width: 30%;
+                            text-align: center;
+                            .not-payable {
+                                text-decoration: line-through;
+                                font-size: 16px;
+                            }
+                            .payable {
+                                font-size: 18px;
+                                font-weight: 700;
+                            }
                         }
                     }
-                    .job-payment {
+                    .job-price {
                         display: inline-block;
-                        width: 30%;
-                        text-align: center;
-                        .not-payable {
-                            text-decoration: line-through;
-                            font-size: 16px;
-                        }
-                        .payable {
-                            font-size: 18px;
-                            font-weight: 700;
-                        }
+                        width: 10%;
+                        text-align: right;
+                        padding-right: 15px;
+                        font-size: 20px;
+                        font-weight: 700;
                     }
                 }
-                .job-price {
-                    display: inline-block;
-                    width: 10%;
-                    text-align: right;
-                    padding-right: 15px;
-                    font-size: 20px;
-                    font-weight: 700;
-                }
-            }
-            .revision-box {
-                padding: 10px 15px;
-                background-color: #e4e6e8;
-                margin-bottom: 10px;
+                .revision-box {
+                    padding: 10px 15px;
+                    background-color: #e4e6e8;
+                    margin-bottom: 10px;
                     .add-revision {
                         display: inline-block;
                         width: 81%;
@@ -301,379 +300,312 @@
                         width: 15%;
                     }
 
-            }
-            .delivery-order {
-                width: 80%;
-                text-align: right;
-                display: inline-block;
-                vertical-align: top;
-                padding: 10px 15px 10px 0;
-                .delivery-box {
+                }
+                .delivery-order {
+                    width: 80%;
                     text-align: right;
                     display: inline-block;
-                    font-size: 28px;
-                    font-weight: 700;
-                    label {
-                        font-size: 16px;
-                        display: inline-block;
-                        vertical-align: middle;
-                        font-weight: 100;
-                        padding: 5px;
-                    }
-                    span {
-                        padding: 5px;
-                        font-size: 22px;
-                        font-weight: 100;
-                    }
-                    .delivery-date {
-                        display: inline-block;
-                        padding: 5px;
-                    }
-                    .delivery-time {
-                        display: inline-block;
-                        padding: 5px;
-                    }
-                    //.gmt-button {
-                    //    display: inline-block;
-                    //    vertical-align: middle;
-                    //    padding: 9px 0px 10px 10px;
-                    //    position: relative;
-                    //    top: -2px;
-                    //    .button {
-                    //        font-family: Calibri, Arial, Helvetica, sans-serif;
-                    //        border: 1px solid #e0e0e0;
-                    //        padding: 10px 27px;
-                    //        width: 100%;
-                    //        background: #f3f3f3;
-                    //    }
-                    //}
-                    .need-it-faster {
-                        font-size: 19px;
-                        a {
-                            text-decoration: underline;
-                            cursor: pointer;
-                            &:hover {
-                                text-decoration: none;
-                            }
-                        }
-                    }
-                }
-            }
-            .order-box-outsource {
-                display: inline-block;
-                width: 18%;
-                float: right;
-                text-align: right;
-                .order-box {
-                    background-color: #daeddf;
-                    height: 96px;
-                    text-align: center;
-                    margin-bottom: 5px;
-                    .outsource-price {
-                        font-size: 32px;
-                        font-weight: 700;
-                        padding: 30px 0 10px;
-                    }
-                    .select-value {
-                        a {
-                            text-decoration: underline;
-                            color: #000000;
-                            cursor: pointer;
-                            &:hover {
-                                text-decoration: none;
-                            }
-                        }
-                    }
-                }
-                .order-button-outsource {
-                    margin: 0;
-                    .open-order {
-                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                        /*padding: 10px 74px;*/
-                        margin: 0;
-                        border: 1px solid #797979;
-                        font-size: 18px;
-                        border-radius: 2px;
-                        width: 100%;
-                    }
-                }
-            }
-        }
-        .easy-pay-box {
-            width: 100%;
-            text-align: right;
-            padding: 15px;
-            .easy-pay {
-                font-weight: 700;
-                margin-bottom: 0;
-            }
-        }
-        .customer-request {
-            .customer-box {
-                padding: 15px;
-                .title-pointer {
-                    h3 {
-                        display: inline-block;
-                        width: 50%;
-                        padding-left: 30px;
-                    }
-                    .pointers {
-                        display: inline-block;
+                    vertical-align: top;
+                    margin-top: 28px;
+                    .delivery-box {
                         text-align: right;
-                        width: 50%;
-                        .pointer {
-                            width: 12px;
-                            height: 12px;
-                            background: #d5d8dc;
-                            display: inline-block;
-                            border-radius: 50%;
-                            margin-right: 5px;
-                            &.active {
-                                background: #7eaf3e;
-                            }
-                        }
-                    }
-                }
-                .slider-box {
-                    border: 1px solid #a8bbb2;
-                    padding: 15px;
-                    display: inline-block;
-                    .appendix {
                         display: inline-block;
-                        width: 10%;
-                        vertical-align: top;
-                        font-size: 46px;
-                        position: relative;
-                        top: 5px;
-                        color: #a8bbb2;
-                    }
-                    .customer-box-info {
-                        width: 90%;
-                        display: inline-block;
-                        vertical-align: middle;
-                        .customer-text {
-                            padding-bottom: 15px;
-                        }
-                        .customer-info {
-                            width: 70%;
+                        font-size: 28px;
+                        font-weight: 700;
+                        label {
+                            font-size: 16px;
                             display: inline-block;
-                            .customer-photo {
-                                display: inline-block;
-                                width: 50px;
-                                height: 50px;
-                                background: yellow;
-                                border-radius: 50%;
-                                vertical-align: middle;
-                            }
-                            .customer-name {
-                                display: inline-block;
-                                margin-left: 10px;
-                            }
-                            .customer-role {
-                                display: inline-block;
-                                margin-left: 3px;
-                                font-weight: 700;
-                            }
-                        }
-                        .customer-corporate-logo {
-                            display: inline-block;
-                            width: 30%;
-                            text-align: right;
                             vertical-align: middle;
-                            img {
-                                width: auto;
-                                vertical-align: middle;
-                                padding: 6px;
-                                height: 45px;
-                            }
+                            font-weight: 100;
+                            padding: 5px;
                         }
-                    }
-                }
-            }
-            .request-box {
-                vertical-align: middle;
-                .title-request {
-                    h3 {
-                        margin-bottom: 14px;
-                        padding-left: 30px;
-                    }
-                }
-                .request-info-box {
-                    background-color: #d4dcd8;
-                    padding: 16px 15px 15px;
-                    .mobile-mail-box {
-                        width: 50%;
-                        display: inline-block;
-                        padding: 15px;
-                        vertical-align: top;
-                        .call {
-                            padding-bottom: 15px;
+                        span {
+                            font-size: 22px;
+                            font-weight: 100;
+                        }
+                        .delivery-date {
+                            display: inline-block;
+                            padding: 5px;
+                        }
+                        .delivery-time {
+                            display: inline-block;
+                            padding: 5px;
+                        }
+                        .gmt {
                             padding-top: 0;
+                            .gmt-select {
+                                top: -5px;
+                            }
                         }
-                        .send-email {
-                            padding-bottom: 0;
-                            padding-top: 15px;
-                        }
-                    }
-                    .account-box {
-                        width: 50%;
-                        display: inline-block;
-                        padding: 15px;
-                        .open-chat {
-                           i {
-                               position: relative;
-                               top: -10px;
-                           }
-                            .content {
-                                .header, .description {
-                                    font-family: Calibri, Arial, Helvetica, sans-serif;
-                                }
-                                .header {
-                                    .online {
-                                        color: #09beec;
-                                    }
-                                    .offline {
-                                        color: gray;
-                                    }
-                                }
-                                .button {
-                                    font-family: Calibri, Arial, Helvetica, sans-serif;
-                                    border: 1px solid #c1c1c1;
-                                    background: #f3f3f3;
-                                    padding-top: 13px;
-                                    position: relative;
-                                    top: 5px;
-                                    width: 100%;
-                                    .sign {
-                                        width: 10px;
-                                        height: 10px;
-                                        display: inline-block;
-                                        vertical-align: baseline;
-                                        margin-right: 5px;
-                                        border-radius: 50%;
-                                        position: relative;
-                                        top: 1px;
-                                        &.online-item {
-                                            background-color: #09beec;
-                                        }
-                                        &.offline-item {
-                                            background-color: gray;
-                                        }
-                                    }
+                        .need-it-faster {
+                            font-size: 19px;
+                            a {
+                                text-decoration: underline;
+                                cursor: pointer;
+                                &:hover {
+                                    text-decoration: none;
                                 }
                             }
+                        }
+                    }
+                }
+                .order-box-outsource {
+                    display: inline-block;
+                    width: 18%;
+                    text-align: right;
+                    margin-left: 25px;
+                    .order-box {
+                        background-color: #daeddf;
+                        height: 96px;
+                        text-align: center;
+                        margin-bottom: 5px;
+                        .outsource-price {
+                            font-size: 32px;
+                            font-weight: 700;
+                            padding: 30px 0 10px;
+                        }
+                        .select-value {
+                            a {
+                                text-decoration: underline;
+                                color: #000000;
+                                cursor: pointer;
+                                &:hover {
+                                    text-decoration: none;
+                                }
+                            }
+                        }
+                    }
+                    .order-button-outsource {
+                        margin: 0;
+                        .open-order {
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            /*padding: 10px 74px;*/
+                            margin: 0;
+                            border: 1px solid #797979;
+                            font-size: 18px;
+                            border-radius: 2px;
+                            width: 100%;
+                        }
+                    }
+                }
+            }
+            .easy-pay-box {
+                width: 100%;
+                text-align: right;
+                padding: 15px;
+                .easy-pay {
+                    font-weight: 700;
+                    margin-bottom: 0;
+                }
+            }
+            .customer-request {
+                .customer-box {
+                    padding: 15px;
+                    .title-pointer {
+                        h3 {
+                            display: inline-block;
+                            width: 50%;
+                            padding-left: 30px;
+                        }
+                        .pointers {
+                            display: inline-block;
+                            text-align: right;
+                            width: 50%;
+                            .pointer {
+                                width: 12px;
+                                height: 12px;
+                                background: #d5d8dc;
+                                display: inline-block;
+                                border-radius: 50%;
+                                margin-right: 5px;
+                                &.active {
+                                    background: #7eaf3e;
+                                }
+                            }
+                        }
+                    }
+                    .slider-box {
+                        border: 1px solid #a8bbb2;
+                        padding: 15px;
+                        display: inline-block;
+                        .appendix {
+                            display: inline-block;
+                            width: 10%;
+                            vertical-align: top;
+                            font-size: 46px;
+                            position: relative;
+                            top: 5px;
+                            color: #a8bbb2;
+                        }
+                        .customer-box-info {
+                            width: 90%;
+                            display: inline-block;
+                            vertical-align: middle;
+                            .customer-text {
+                                padding-bottom: 15px;
+                            }
+                            .customer-info {
+                                width: 70%;
+                                display: inline-block;
+                                .customer-photo {
+                                    display: inline-block;
+                                    width: 50px;
+                                    height: 50px;
+                                    background: yellow;
+                                    border-radius: 50%;
+                                    vertical-align: middle;
+                                }
+                                .customer-name {
+                                    display: inline-block;
+                                    margin-left: 10px;
+                                }
+                                .customer-role {
+                                    display: inline-block;
+                                    margin-left: 3px;
+                                    font-weight: 700;
+                                }
+                            }
+                            .customer-corporate-logo {
+                                display: inline-block;
+                                width: 30%;
+                                text-align: right;
+                                vertical-align: middle;
+                                img {
+                                    width: auto;
+                                    vertical-align: middle;
+                                    padding: 6px;
+                                    height: 45px;
+                                }
+                            }
+                        }
+                    }
+                }
+                .request-box {
+                    vertical-align: middle;
+                    .title-request {
+                        h3 {
+                            margin-bottom: 14px;
+                            padding-left: 30px;
+                        }
+                    }
+                    .request-info-box {
+                        background-color: #d4dcd8;
+                        padding: 16px 15px 15px;
+                        .mobile-mail-box {
+                            width: 50%;
+                            display: inline-block;
+                            padding: 15px;
+                            vertical-align: top;
+                            .call {
+                                padding-bottom: 15px;
+                                padding-top: 0;
+                            }
+                            .send-email {
+                                padding-bottom: 0;
+                                padding-top: 15px;
+                            }
+                        }
+                        .account-box {
+                            width: 50%;
+                            display: inline-block;
+                            padding: 15px;
+                            .open-chat {
+                                i {
+                                    position: relative;
+                                    top: -10px;
+                                }
+                                .content {
+                                    .header, .description {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                    }
+                                    .header {
+                                        .online {
+                                            color: #09beec;
+                                        }
+                                        .offline {
+                                            color: gray;
+                                        }
+                                    }
+                                    .button {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                        border: 1px solid #c1c1c1;
+                                        background: #f3f3f3;
+                                        padding-top: 13px;
+                                        position: relative;
+                                        top: 5px;
+                                        width: 100%;
+                                        .sign {
+                                            width: 10px;
+                                            height: 10px;
+                                            display: inline-block;
+                                            vertical-align: baseline;
+                                            margin-right: 5px;
+                                            border-radius: 50%;
+                                            position: relative;
+                                            top: 1px;
+                                            &.online-item {
+                                                background-color: #09beec;
+                                            }
+                                            &.offline-item {
+                                                background-color: gray;
+                                            }
+                                        }
+                                    }
+                                }
 
+                            }
                         }
                     }
                 }
             }
         }
-    }
-    .outsource-to-translated-reduced {
-        padding-top: 45px !important;
-        padding-left: 45px !important;
-        padding-right: 40px !important;
-        background-color: #e9efec;
-        .job-menu, .open-translate {
-            display: none;
-        }
-        .title-reduced {
-            width: 75%;
-            font-size: 24px;
-            font-weight: 700;
-            display: inline-block;
-        }
-        .payment-service {
-            display: inline-block;
-            width: 48%;
-            vertical-align: -webkit-baseline-middle;
-            .service-box {
-                display: inline-block;
-                font-size: 22px;
-                font-weight: 700;
-                .service {
-                    display: inline-block;
-                    &.project-management {
 
-                    }
-                    &.translation {
-                        margin-left: 6px;
-                    }
-                    &.revision {
-                        margin-left: 6px;
-                    }
-                }
+        .outsource-to-vendor-reduced {
+            padding-top: 45px !important;
+            padding-left: 45px !important;
+            padding-right: 40px !important;
+            background-color: #e9efec;
+            .job-menu, .open-translate {
+                display: none;
             }
-            .fiducial-logo {
-                display: inline-block;
-                margin-left: 6px;
-                img {
-                    width: 100px;
-                    position: relative;
-                    top: 9px;
-                    margin-left: 4px;
-                }
-            }
-            .view-more {
-                a {
-                    text-decoration: underline;
-                    cursor: pointer;
-                    &:hover {
-                        text-decoration: none;
-                    }
-                }
-            }
-        }
-        .delivery-order {
-            display: inline-block;
-            padding: 0 10px;
-            .delivery-box {
-                display: inline-block;
-                font-size: 18px;
+            .title-reduced {
+                width: 75%;
+                font-size: 24px;
                 font-weight: 700;
-                label {
-                    padding: 5px;
-                    font-size: 16px;
-                    color: gray;
-                    font-weight: 100;
-                }
-                .delivery-date, .delivery-time{
+                display: inline-block;
+            }
+            .payment-service {
+                display: inline-block;
+                width: 48%;
+                vertical-align: -webkit-baseline-middle;
+                .service-box {
                     display: inline-block;
-                    padding: 5px;
-                }
-                span {
-                    display: inline-block;
-                }
-                .gmt-button {
-                    display: inline-block;
-                    position: relative;
-                    top: -2px;
-                    .button {
-                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                        padding: 10px 15px;
-                        width: 100%;
-                        border: 1px solid #c1c1c1;
-                        background: #f3f3f3;
+                    font-size: 22px;
+                    font-weight: 700;
+                    .service {
+                        display: inline-block;
+                        &.project-management {
+
+                        }
+                        &.translation {
+                            margin-left: 6px;
+                        }
+                        &.revision {
+                            margin-left: 6px;
+                        }
                     }
                 }
-            }
-        }
-        .order-box-outsource {
-            display: inline-block;
-            width: 14%;
-            float: right;
-            text-align: center;
-            margin-top: -53px;
-            .order-box {
-                background-color: #daeddf;
-                padding: 25px 15px 15px;
-                margin-bottom: 5px;
-                .outsource-price {
-                    font-size: 28px;
-                    font-weight: 700;
-                    margin-bottom: 10px;
+                .fiducial-logo {
+                    display: inline-block;
+                    margin-left: 6px;
+                    img {
+                        width: 100px;
+                        position: relative;
+                        top: 9px;
+                        margin-left: 4px;
+                    }
                 }
-                .select-value {
+                .view-more {
                     a {
                         text-decoration: underline;
                         cursor: pointer;
@@ -683,18 +615,80 @@
                     }
                 }
             }
-            .order-button-outsource {
-                .open-order {
-                    width: 100%;
-                    font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 10px 22px;
-                    vertical-align: top;
-                    font-size: 16px;
-                    border: 1px solid #797979;
-                    border-radius: 2px;
-                    margin: 0px;
+            .delivery-order {
+                display: inline-block;
+                padding: 0 10px;
+                .delivery-box {
+                    display: inline-block;
+                    font-size: 18px;
+                    font-weight: 700;
+                    label {
+                        padding: 5px;
+                        font-size: 16px;
+                        color: gray;
+                        font-weight: 100;
+                    }
+                    .delivery-date, .delivery-time{
+                        display: inline-block;
+                        padding: 5px;
+                    }
+                    span {
+                        display: inline-block;
+                    }
+                    .gmt-button {
+                        display: inline-block;
+                        position: relative;
+                        top: -2px;
+                        .button {
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            padding: 10px 15px;
+                            width: 100%;
+                            border: 1px solid #c1c1c1;
+                            background: #f3f3f3;
+                        }
+                    }
+                }
+            }
+            .order-box-outsource {
+                display: inline-block;
+                width: 14%;
+                float: right;
+                text-align: center;
+                margin-top: -53px;
+                .order-box {
+                    background-color: #daeddf;
+                    padding: 25px 15px 15px;
+                    margin-bottom: 5px;
+                    .outsource-price {
+                        font-size: 28px;
+                        font-weight: 700;
+                        margin-bottom: 10px;
+                    }
+                    .select-value {
+                        a {
+                            text-decoration: underline;
+                            cursor: pointer;
+                            &:hover {
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+                .order-button-outsource {
+                    .open-order {
+                        width: 100%;
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        padding: 10px 22px;
+                        vertical-align: top;
+                        font-size: 16px;
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                        margin: 0px;
+                    }
                 }
             }
         }
     }
+
+
 }
