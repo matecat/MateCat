@@ -218,6 +218,30 @@ $.extend(UI, {
         });
     },
 
+    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
+
+        return APP.doRequest({
+            data: {
+                action: 'outsourceTo',
+                pid: idProject,
+                ppassword: password,
+                fixedDelivery: fixedDelivery,
+                typeOfService: typeOfService,
+                jobs: [
+                    {
+                        jid: jid,
+                        jpassword: jpassword
+                    }
+                ]
+            },
+            success: function (d) {
+                if (typeof callback == "function")
+                    callback(d);
+            }
+        });
+
+    },
+
     checkShareToTranslatorResponse: function (response, mail, date, job, project) {
         var message = '';
         if (job.translator) {
