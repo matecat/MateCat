@@ -38,6 +38,10 @@ class AssignToTranslator extends React.Component {
                 $input.data('timestamp', new Date(newDateTime).getTime());
             }
         });
+
+        $('.ui.dropdown')
+            .dropdown()
+        ;
     }
 
     componentWillUnmount() {
@@ -55,17 +59,14 @@ class AssignToTranslator extends React.Component {
             date =  delivery.day + ' ' + delivery.month + ' ' + delivery.year + ' at ' + delivery.time;
             translatorEmail = this.props.job.get('translator').get('email');
         }
-        return <div className="assign-job-translator sixteen wide column">
+        return <div className="assign-job-translator">
+            <div className="title">
+                Assign Job to translator
+            </div>
             <div className="title-url ui grid">
-                <div className="title four wide column">
-                    Assign Job to translator
-                </div>
-                <div className="job-url twelve wide column">
+                <div className="job-url">
                     <a href={window.location.protocol + '//' + window.location.host + this.props.url} target="_blank">
                         {window.location.protocol + '//' + window.location.host + this.props.url}</a>
-                </div>
-                <div className="left">
-
                 </div>
                 <div className="translator-assignee">
                     <div className="ui form">
@@ -82,16 +83,13 @@ class AssignToTranslator extends React.Component {
                             </div>
                             <div className="field gmt">
                                 <GMTSelect changeValue={this.GmtSelectChanged.bind(this)}/>
-                                {/*<div className="ui button">*/}
-                                    {/*(GMT +2)*/}
-                                {/*</div>*/}
+                            </div>
+                            <div className="field send-job-box">
+                                <button className="send-job ui primary button"
+                                onClick={this.shareJob.bind(this)}>Send Job to Translator</button>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="send-job-box">
-                    <div className="send-job ui primary button"
-                    onClick={this.shareJob.bind(this)}>Send Job to Translator</div>
                 </div>
 
             </div>

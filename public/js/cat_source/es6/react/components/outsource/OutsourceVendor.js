@@ -195,7 +195,7 @@ class OutsourceVendor extends React.Component {
                         <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
                         <span>at</span>
                         <div className="delivery-time">{delivery.time}</div>
-                        <div className="gmt-button">
+                        <div className="gmt">
                             <GMTSelect/>
                         </div>
                         <div className="need-it-faster">
@@ -206,16 +206,19 @@ class OutsourceVendor extends React.Component {
                     </div>
                 </div>
                 <div className="order-box-outsource">
-                    <div className="outsource-price">
-                        €{price}
+                    <div className="order-box">
+                        <div className="outsource-price">
+                            €{price}
+                        </div>
+                        <div className="select-value">
+                            <a className="value">about €0.96 / word</a>
+                        </div>
                     </div>
-                    <div className="select-value">
-                        <a className="value">about €0.96 / word</a>
+                    <div className="order-button-outsource">
+                        <a className="open-order ui green button">Order now</a>
                     </div>
                 </div>
-                <div className="order-button-outsource">
-                    <a className="open-order ui green button">Order now</a>
-                </div>
+
             </div>
             ) : (
                 <div className="payment-details-box shadow-1">
