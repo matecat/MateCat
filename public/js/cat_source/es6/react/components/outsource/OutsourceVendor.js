@@ -184,89 +184,88 @@ class OutsourceVendor extends React.Component {
                     {(this.state.outsource ? (
                         <div className="payment-details-box shadow-1">
 
-                            <div className="translator-job-details">
-                                <div className="translator-details-box">
-                                    <div className="ui list left">
-                                        <div className="item">{ this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
-                                        <div className="item"><b>{ this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
-                                        <div className="item">
-                                            <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
-                                                 ref={(rating) => this.rating = rating}/>
-                                        </div>
-                                    </div>
-                                    <div className="ui list right">
-                                        <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
-                                        <div className="item"><b>{translatorSubjects}</b></div>
-                                    </div>
-                                </div>
-                                <div className="job-details-box">
-                                    <div className="source-target-outsource st-details">
-                                        <div className="source-box">{this.props.job.get('sourceTxt')}</div>
-                                        <div className="in-to">
-                                            <i className="icon-chevron-right icon" />
-                                        </div>
-                                        <div className="target-box">{this.props.job.get('targetTxt')}</div>
-                                    </div>
-                                    <div className="job-payment">
-                                        <div className="not-payable">{this.props.job.get('total_raw_wc')} words</div>
-                                        <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
-                                    </div>
-                                </div>
-                                <div className="job-price">€{ this.state.chunkQuote.get('price')}</div>
-                            </div>
-                            <div className="revision-box">
-                                <div className="add-revision">
-                                    <div className="ui checkbox">
-                                        <input type="checkbox"
-                                               ref={(checkbox) => this.revisionCheckbox = checkbox}
-                                               onClick={this.clickRevision.bind(this)}/>
-                                        <label>Add Revision</label>
-                                    </div>
-                                </div>
-                                <div className="job-price">€{ this.state.chunkQuote.get('r_price')}</div>
-                            </div>
-                            <div className="delivery-order">
-                                <div className="delivery-box">
-                                    <label>Delivery date:</label>
-                                    <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                    <span>at</span>
-                                    <div className="delivery-time">{delivery.time}</div>
-                                    <div className="gmt-button">
-                                        <GMTSelect/>
-                                    </div>
-                                    <div className="need-it-faster">
-                                        <a className="faster"
-                                           ref={(faster) => this.dateFaster = faster}
-                                        >Need it faster?</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="order-box-outsource">
-                                <div className="outsource-price">
-                                    €{price}
-                                </div>
-                                <div className="select-value">
-                                    <a className="value">about €0.96 / word</a>
-                                </div>
-                            </div>
-                            <div className="order-button-outsource">
-                                <a className="open-order ui green button"
-                                onClick={this.sendOutsource.bind(this)}>Order now</a>
-                            </div>
+                <div className="translator-job-details">
+                    <div className="translator-details-box">
+                        <div className="ui list left">
+                            <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
+                            <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
+                            <div className="item">
+                                <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
+                            ref={(rating) => this.rating = rating}/></div>
                         </div>
-                    ) : (
-                        <div className="payment-details-box shadow-1">
-                            <div className="ui active inverted dimmer">
-                                <div className="ui medium text loader">Loading</div>
-                            </div>
+                        <div className="ui list right">
+                            <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
+                            <div className="item"><b>{translatorSubjects}</b></div>
                         </div>
-                    ))}
-                    <div className="easy-pay-box">
-                        <h4 className="easy-pay">Easy payments</h4>
-                        <p>Pay a single monthly invoice within 30 days of receipt</p>
                     </div>
-                    <OutsourceInfo/>
+                    <div className="job-details-box">
+                        <div className="source-target-outsource st-details">
+                            <div className="source-box">{this.props.job.get('sourceTxt')}</div>
+                            <div className="in-to">
+                                <i className="icon-chevron-right icon" />
+                            </div>
+                            <div className="target-box">{this.props.job.get('targetTxt')}</div>
+                        </div>
+                        <div className="job-payment">
+                            <div className="not-payable">{this.props.job.get('total_raw_wc')} words</div>
+                            <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
+                        </div>
+                    </div>
+                    <div className="job-price">€{this.state.chunkQuote.get('price')}</div>
                 </div>
+                <div className="revision-box">
+                    <div className="add-revision">
+                        <div className="ui checkbox">
+                            <input type="checkbox"
+                            ref={(checkbox) => this.revisionCheckbox = checkbox}
+                            onClick={this.clickRevision.bind(this)}/>
+                            <label>Add Revision</label>
+                        </div>
+                    </div>
+                    <div className="job-price">€{this.state.chunkQuote.get('r_price')}</div>
+                </div>
+                <div className="delivery-order">
+                    <div className="delivery-box">
+                        <label>Delivery date:</label>
+                        <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                        <span>at</span>
+                        <div className="delivery-time">{delivery.time}</div>
+                        <div className="gmt">
+                            <GMTSelect/>
+                        </div>
+                        <div className="need-it-faster">
+                            <a className="faster"
+                               ref={(faster) => this.dateFaster = faster}
+                            >Need it faster?</a>
+                        </div>
+                    </div>
+                </div>
+                <div className="order-box-outsource">
+                    <div className="order-box">
+                        <div className="outsource-price">
+                        €{price}
+                    </div>
+                    <div className="select-value">
+                        <a className="value">about €0.96 / word</a>
+                    </div>
+                </div>
+                <div className="order-button-outsource">
+                    <a className="open-order ui green button"onClick={this.sendOutsource.bind(this)}>Order now</a>
+                </div>
+                        </div>
+            </div>
+            ) : (
+                <div className="payment-details-box shadow-1">
+                    <div className="ui active inverted dimmer">
+                        <div className="ui medium text loader">Loading</div>
+                    </div>
+                </div>
+            ))}
+            <div className="easy-pay-box">
+                <h4 className="easy-pay">Easy payments</h4>
+                <p>Pay a single monthly invoice within 30 days of receipt</p>
+            </div>
+            <OutsourceInfo/></div>
             ): (
                 <div className="outsource-to-translated-reduced sixteen wide column">
                     <div className="title-reduced">Let us do it for you</div>
