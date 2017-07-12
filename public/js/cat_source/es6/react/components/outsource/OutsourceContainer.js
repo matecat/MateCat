@@ -7,20 +7,37 @@ class OutsourceContainer extends React.Component {
 
     constructor(props) {
         super(props);
+        this.handleDocumentClick = this.handleDocumentClick.bind(this);
     }
 
     allowHTML(string) {
         return { __html: string };
     }
 
-    componentDidMount () {}
+    handleDocumentClick(evt)  {
+        const area = ReactDOM.findDOMNode(this.refs.container);
 
-    componentWillUnmount() {}
+        if (!area.contains(evt.target)) {
+            this.props.onClickOutside(evt)
+        }
+    }
+
+    componentDidMount () {
+        let self = this;
+        setTimeout(function () {
+            window.addEventListener('click', self.handleDocumentClick)
+        }, 200)
+    }
+
+    componentWillUnmount() {
+        window.addEventListener('click', self.handleDocumentClick)
+    }
 
     componentDidUpdate() {}
 
     render() {
-        return <div className="ui grid">
+        return <div className="ui grid"
+        ref='container'>
                 {(this.props.showTranslatorBox) ? (
                     <AssignToTranslator job={this.props.job}
                                         url={this.props.url}

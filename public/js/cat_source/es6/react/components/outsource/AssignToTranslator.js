@@ -21,6 +21,18 @@ class AssignToTranslator extends React.Component {
         console.log("GMT Changed : ", value);
     }
 
+    checkSendToTranslatorButton() {
+        // if ($(this.email).hasClass('error')) {
+        //     $(this.email).removeClass('error');
+        // }
+        if (this.email.value.length > 0 && this.dateInput.value.length > 0 && APP.checkEmail(this.email.value)) {
+            $(this.sendButton).removeClass('disabled');
+            return true;
+        } else {
+            $(this.sendButton).addClass('disabled');
+        }
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -38,10 +50,6 @@ class AssignToTranslator extends React.Component {
                 $input.data('timestamp', new Date(newDateTime).getTime());
             }
         });
-
-        $('.ui.dropdown')
-            .dropdown()
-        ;
     }
 
     componentWillUnmount() {
@@ -74,7 +82,8 @@ class AssignToTranslator extends React.Component {
                             <div className="field">
                                 <label>Translator email</label>
                                 <input type="email" placeholder="translator@email.com" defaultValue={translatorEmail}
-                                       ref={(email) => this.email = email}/>
+                                       ref={(email) => this.email = email}
+                                        onKeyUp={this.checkSendToTranslatorButton.bind(this)}/>
                             </div>
                             <div className="field">
                                 <label>Delivery date</label>
@@ -85,8 +94,9 @@ class AssignToTranslator extends React.Component {
                                 <GMTSelect changeValue={this.GmtSelectChanged.bind(this)}/>
                             </div>
                             <div className="field send-job-box">
-                                <button className="send-job ui primary button"
-                                onClick={this.shareJob.bind(this)}>Send Job to Translator</button>
+                                <button className="send-job ui primary button disabled"
+                                onClick={this.shareJob.bind(this)}
+                                ref={(send) => this.sendButton=send }>Send Job to Translator</button>
                             </div>
                         </div>
                     </div>
