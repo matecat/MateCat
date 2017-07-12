@@ -10,7 +10,7 @@ class OutsourceVendor extends React.Component {
         super(props);
         this.state = {
             outsource: false,
-            revision: false,
+            revision: true,
             chunkQuote: null,
             extendedView: this.props.extendedView
         };
@@ -92,6 +92,13 @@ class OutsourceVendor extends React.Component {
         }
     }
 
+    getPricePW(price) {
+        if (this.state.outsource) {
+            let words = this.props.job.get('stats').get('TOTAL');
+            return ( parseFloat(price) / words ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+        }
+    }
+
     getTranslatedWords() {
         if (this.state.outsource) {
             return   this.state.chunkQuote.get('t_words_total').toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
@@ -167,6 +174,7 @@ class OutsourceVendor extends React.Component {
         let price = this.getPrice();
         let translatedWords = this.getTranslatedWords();
         let translatorSubjects = this.getTranslatorSubjects();
+        let pricePWord = this.getPricePW(price);
         return <div className="background-outsource-vendor">
                 {this.state.extendedView ? ( <div className="outsource-to-vendor sixteen wide column">
                     <div className="payment-service">
@@ -216,7 +224,7 @@ class OutsourceVendor extends React.Component {
                 <div className="revision-box">
                     <div className="add-revision">
                         <div className="ui checkbox">
-                            <input type="checkbox"
+                            <input type="checkbox" checked={true}
                             ref={(checkbox) => this.revisionCheckbox = checkbox}
                             onClick={this.clickRevision.bind(this)}/>
                             <label>Add Revision</label>
@@ -246,7 +254,7 @@ class OutsourceVendor extends React.Component {
                         €{price}
                     </div>
                     <div className="select-value">
-                        <a className="value">about €0.96 / word</a>
+                        <a className="value">about €{pricePWord} / word</a>
                     </div>
                 </div>
                 <div className="order-button-outsource">
@@ -289,12 +297,12 @@ class OutsourceVendor extends React.Component {
                     <div className="delivery-order">
                         <div className="delivery-box">
                             <label>Delivery date:</label><br />
-                            <div className="delivery-date">15 August</div>
+                            <div className="delivery-date">000</div>
                             <span>at</span>
                             <div className="delivery-time">11:00 AM</div>
                             <div className="gmt">
                                 <div className="ui button">
-                                    (GMT +2)
+                                    <GMTSelect/>
                                 </div>
                             </div>
                         </div>
@@ -302,10 +310,10 @@ class OutsourceVendor extends React.Component {
                     <div className="order-box-outsource">
                         <div className="order-box">
                             <div className="outsource-price">
-                                €372.234
+                                €{price}
                             </div>
                             <div className="select-value">
-                                <a className="value">about €0.96 / word</a>
+                                <a className="value">about €{pricePWord} / word</a>
                             </div>
                         </div>
                         <div className="order-button-outsource">
