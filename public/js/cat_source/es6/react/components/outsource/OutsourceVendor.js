@@ -129,7 +129,7 @@ class OutsourceVendor extends React.Component {
         let translatedWords = this.getTranslatedWords();
         let translatorSubjects = this.getTranslatorSubjects();
         let pricePWord = this.getPricePW(price);
-        return <div className="outsource-to-translated sixteen wide column">
+        return <div className="outsource-to-vendor sixteen wide column">
             <div className="payment-service">
                 <div className="service-box">
                     <div className="service project-management">Outsource: Project Management </div>
@@ -262,7 +262,7 @@ class OutsourceVendor extends React.Component {
                             <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
                             <span>at</span>
                             <div className="delivery-time">{delivery.time}</div>
-                            <div className="gmt-button">
+                            <div className="gmt">
                                 <div className="ui button">
                                     <GMTSelect/>
                                 </div>
@@ -339,7 +339,7 @@ class OutsourceVendor extends React.Component {
 
     render() {
 
-        return <div>
+        return <div className="background-outsource-vendor">
             {this.state.extendedView ? ( this.getExtendedView()
             ): (
                 this.getCompactView()
