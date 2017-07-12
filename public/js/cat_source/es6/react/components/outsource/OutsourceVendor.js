@@ -123,6 +123,174 @@ class OutsourceVendor extends React.Component {
         });
     }
 
+    getExtendedView() {
+        let delivery = this.getDeliveryDate();
+        let price = this.getPrice();
+        let translatedWords = this.getTranslatedWords();
+        let translatorSubjects = this.getTranslatorSubjects();
+        let pricePWord = this.getPricePW(price);
+        return <div className="outsource-to-translated sixteen wide column">
+            <div className="payment-service">
+                <div className="service-box">
+                    <div className="service project-management">Outsource: Project Management </div>
+                    <div className="service translation"> + Translation </div>
+                    {this.state.revision ? (<div className="service revision"> + Revision</div>) : (null)}
+                </div>
+                <div className="fiducial-logo">
+                    <div className="translated-logo">Guaranteed by
+                        <img className="logo-t" src="/public/img/logo_translated.png" />
+                    </div>
+                </div>
+            </div>
+            {(this.state.outsource ? (
+                <div className="payment-details-box shadow-1">
+
+                    <div className="translator-job-details">
+                        <div className="translator-details-box">
+                            <div className="ui list left">
+                                <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
+                                <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
+                                <div className="item">
+                                    <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
+                                         ref={(rating) => this.rating = rating}/></div>
+                            </div>
+                            <div className="ui list right">
+                                <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
+                                <div className="item"><b>{translatorSubjects}</b></div>
+                            </div>
+                        </div>
+                        <div className="job-details-box">
+                            <div className="source-target-outsource st-details">
+                                <div className="source-box">{this.props.job.get('sourceTxt')}</div>
+                                <div className="in-to">
+                                    <i className="icon-chevron-right icon" />
+                                </div>
+                                <div className="target-box">{this.props.job.get('targetTxt')}</div>
+                            </div>
+                            <div className="job-payment">
+                                <div className="not-payable">{this.props.job.get('total_raw_wc')} words</div>
+                                <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
+                            </div>
+                        </div>
+                        <div className="job-price">€{this.state.chunkQuote.get('price')}</div>
+                    </div>
+                    <div className="revision-box">
+                        <div className="add-revision">
+                            <div className="ui checkbox">
+                                <input type="checkbox" checked={true}
+                                       ref={(checkbox) => this.revisionCheckbox = checkbox}
+                                       onClick={this.clickRevision.bind(this)}/>
+                                <label>Add Revision</label>
+                            </div>
+                        </div>
+                        <div className="job-price">€{this.state.chunkQuote.get('r_price')}</div>
+                    </div>
+                    <div className="delivery-order">
+                        <div className="delivery-box">
+                            <label>Delivery date:</label>
+                            <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                            <span>at</span>
+                            <div className="delivery-time">{delivery.time}</div>
+                            <div className="gmt">
+                                <GMTSelect/>
+                            </div>
+                            <div className="need-it-faster">
+                                <a className="faster"
+                                   ref={(faster) => this.dateFaster = faster}
+                                >Need it faster?</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="order-box-outsource">
+                        <div className="order-box">
+                            <div className="outsource-price">
+                                €{price}
+                            </div>
+                            <div className="select-value">
+                                <a className="value">about €{pricePWord} / word</a>
+                            </div>
+                        </div>
+                        <div className="order-button-outsource">
+                            <a className="open-order ui green button"onClick={this.sendOutsource.bind(this)}>Order now</a>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="payment-details-box shadow-1">
+                    <div className="ui active inverted dimmer">
+                        <div className="ui medium text loader">Loading</div>
+                    </div>
+                </div>
+            ))}
+            <div className="easy-pay-box">
+                <h4 className="easy-pay">Easy payments</h4>
+                <p>Pay a single monthly invoice within 30 days of receipt</p>
+            </div>
+            <OutsourceInfo/></div>
+    }
+
+    getCompactView() {
+        let delivery = this.getDeliveryDate();
+        let price = this.getPrice();
+        let translatedWords = this.getTranslatedWords();
+        let translatorSubjects = this.getTranslatorSubjects();
+        let pricePWord = this.getPricePW(price);
+        return <div className="outsource-to-translated-reduced sixteen wide column">
+            {this.state.outsource ? (
+                <div>
+                    <div className="title-reduced">Let us do it for you</div>
+
+                    <div className="payment-service">
+                        <div className="service-box">
+                            <div className="service project-management">Outsource: PM </div>
+                            <div className="service translation"> + Translation </div>
+                            <div className="service revision"> + Revision</div>
+                        </div>
+                        <div className="fiducial-logo">
+                            <div className="translated-logo">Guaranteed by
+                                <img className="logo-t" src="/public/img/logo_translated.png" />
+                            </div>
+                        </div>
+                        <div className="view-more">
+                            <a className="open-view-more"
+                               onClick={this.viewMoreClick.bind(this)}>+ view more</a>
+                        </div>
+                    </div>
+                    <div className="delivery-order">
+                        <div className="delivery-box">
+                            <label>Delivery date:</label><br />
+                            <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                            <span>at</span>
+                            <div className="delivery-time">{delivery.time}</div>
+                            <div className="gmt-button">
+                                <div className="ui button">
+                                    <GMTSelect/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="order-box-outsource">
+                        <div className="order-box">
+                            <div className="outsource-price">
+                                €{price}
+                            </div>
+                            <div className="select-value">
+                                <a className="value">about €{pricePWord} / word</a>
+                            </div>
+                        </div>
+                        <div className="order-button-outsource">
+                            <a className="open-order ui green button">Order now</a>
+                        </div>
+                    </div>
+                </div>
+            ):(
+                <div className="ui active inverted dimmer">
+                    <div className="ui medium text loader">Loading</div>
+                </div>
+            )}
+        </div>
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -164,167 +332,21 @@ class OutsourceVendor extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         return (!nextState.chunkQuote.equals(this.state.chunkQuote)
-                || nextState.outsource !== this.state.outsource
-                || nextState.extendedView !== this.state.extendedView
-                || nextState.revision !== this.state.revision);
+        || nextState.outsource !== this.state.outsource
+        || nextState.extendedView !== this.state.extendedView
+        || nextState.revision !== this.state.revision);
     }
 
     render() {
-        let delivery = this.getDeliveryDate();
-        let price = this.getPrice();
-        let translatedWords = this.getTranslatedWords();
-        let translatorSubjects = this.getTranslatorSubjects();
-        let pricePWord = this.getPricePW(price);
+
         return <div>
-                {this.state.extendedView ? ( <div className="outsource-to-translated sixteen wide column">
-                    <div className="payment-service">
-                        <div className="service-box">
-                            <div className="service project-management">Outsource: Project Management </div>
-                            <div className="service translation"> + Translation </div>
-                            {this.state.revision ? (<div className="service revision"> + Revision</div>) : (null)}
-                        </div>
-                        <div className="fiducial-logo">
-                            <div className="translated-logo">Guaranteed by
-                                <img className="logo-t" src="/public/img/logo_translated.png" />
-                            </div>
-                        </div>
-                    </div>
-                    {(this.state.outsource ? (
-                        <div className="payment-details-box shadow-1">
-
-                <div className="translator-job-details">
-                    <div className="translator-details-box">
-                        <div className="ui list left">
-                            <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
-                            <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
-                            <div className="item">
-                                <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
-                            ref={(rating) => this.rating = rating}/></div>
-                        </div>
-                        <div className="ui list right">
-                            <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
-                            <div className="item"><b>{translatorSubjects}</b></div>
-                        </div>
-                    </div>
-                    <div className="job-details-box">
-                        <div className="source-target-outsource st-details">
-                            <div className="source-box">{this.props.job.get('sourceTxt')}</div>
-                            <div className="in-to">
-                                <i className="icon-chevron-right icon" />
-                            </div>
-                            <div className="target-box">{this.props.job.get('targetTxt')}</div>
-                        </div>
-                        <div className="job-payment">
-                            <div className="not-payable">{this.props.job.get('total_raw_wc')} words</div>
-                            <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
-                        </div>
-                    </div>
-                    <div className="job-price">€{this.state.chunkQuote.get('price')}</div>
-                </div>
-                <div className="revision-box">
-                    <div className="add-revision">
-                        <div className="ui checkbox">
-                            <input type="checkbox" checked={true}
-                            ref={(checkbox) => this.revisionCheckbox = checkbox}
-                            onClick={this.clickRevision.bind(this)}/>
-                            <label>Add Revision</label>
-                        </div>
-                    </div>
-                    <div className="job-price">€{this.state.chunkQuote.get('r_price')}</div>
-                </div>
-                <div className="delivery-order">
-                    <div className="delivery-box">
-                        <label>Delivery date:</label>
-                        <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                        <span>at</span>
-                        <div className="delivery-time">{delivery.time}</div>
-                        <div className="gmt">
-                            <GMTSelect/>
-                        </div>
-                        <div className="need-it-faster">
-                            <a className="faster"
-                               ref={(faster) => this.dateFaster = faster}
-                            >Need it faster?</a>
-                        </div>
-                    </div>
-                </div>
-                <div className="order-box-outsource">
-                    <div className="order-box">
-                        <div className="outsource-price">
-                        €{price}
-                    </div>
-                    <div className="select-value">
-                        <a className="value">about €{pricePWord} / word</a>
-                    </div>
-                </div>
-                <div className="order-button-outsource">
-                    <a className="open-order ui green button"onClick={this.sendOutsource.bind(this)}>Order now</a>
-                </div>
-                        </div>
-            </div>
-            ) : (
-                <div className="payment-details-box shadow-1">
-                    <div className="ui active inverted dimmer">
-                        <div className="ui medium text loader">Loading</div>
-                    </div>
-                </div>
-            ))}
-            <div className="easy-pay-box">
-                <h4 className="easy-pay">Easy payments</h4>
-                <p>Pay a single monthly invoice within 30 days of receipt</p>
-            </div>
-            <OutsourceInfo/></div>
+            {this.state.extendedView ? ( this.getExtendedView()
             ): (
-                <div className="outsource-to-translated-reduced sixteen wide column">
-                    <div className="title-reduced">Let us do it for you</div>
-
-                    <div className="payment-service">
-                        <div className="service-box">
-                            <div className="service project-management">Outsource: PM </div>
-                            <div className="service translation"> + Translation </div>
-                            <div className="service revision"> + Revision</div>
-                        </div>
-                        <div className="fiducial-logo">
-                            <div className="translated-logo">Guaranteed by
-                                <img className="logo-t" src="/public/img/logo_translated.png" />
-                            </div>
-                        </div>
-                        <div className="view-more">
-                            <a className="open-view-more"
-                            onClick={this.viewMoreClick.bind(this)}>+ view more</a>
-                        </div>
-                    </div>
-                    <div className="delivery-order">
-                        <div className="delivery-box">
-                            <label>Delivery date:</label><br />
-                            <div className="delivery-date">000</div>
-                            <span>at</span>
-                            <div className="delivery-time">000</div>
-                            <div className="gmt-button">
-                                <div className="ui button">
-                                    <GMTSelect/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="order-box-outsource">
-                        <div className="order-box">
-                            <div className="outsource-price">
-                                €{price}
-                            </div>
-                            <div className="select-value">
-                                <a className="value">about €{pricePWord} / word</a>
-                            </div>
-                        </div>
-                        <div className="order-button-outsource">
-                            <a className="open-order ui green button">Order now</a>
-                        </div>
-                    </div>
-                </div>
+                this.getCompactView()
             )}
 
             <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
-            ref={(form) => this.outsourceForm = form}>
+                  ref={(form) => this.outsourceForm = form}>
                 <input type="hidden" name="url_ok" value=""/>
                 <input type="hidden" name="url_ko" value=""/>
                 <input type="hidden" name="confirm_urls" value=""/>
