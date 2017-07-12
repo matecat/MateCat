@@ -35,25 +35,26 @@
         padding-top: 23px;
         float: none;
         display: inline-block;
-        .ui.selection.dropdown {
-            min-width: 40px !important;
-            width: auto;
-            .text .gmt-description {
-                display: none;
-            }
-            .menu {
-                min-width: 350px;
-                .item {
-                    .gmt-value {
-                        display: inline-block;
-                        margin-right: 5px;
-                    }
-                    .gmt-description {
-                        display: inline-block;
-                    }
-                }
+    }
 
+    .ui.selection.dropdown.gmt-select {
+        min-width: 40px !important;
+        width: auto;
+        .text .gmt-description {
+            display: none;
+        }
+        .menu {
+            min-width: 350px;
+            .item {
+                .gmt-value {
+                    display: inline-block;
+                    margin-right: 5px;
+                }
+                .gmt-description {
+                    display: inline-block;
+                }
             }
+
         }
     }
 
