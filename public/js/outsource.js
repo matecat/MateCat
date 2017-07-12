@@ -175,7 +175,7 @@ $.extend(UI, {
         });
     },
 
-    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
+    getOutsourceQuote: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
 
         // return APP.doRequest({
         //     data: {
@@ -356,30 +356,30 @@ function renderQuoteFromManage( idProject, password, jid, jpassword) {
 
 
 
-function getOutsourceQuote( clickedButton, callback ) {
-    var row = clickedButton.parents('.tablestats');
-
-    APP.doRequest({
-        data: {
-            action: 'outsourceTo',
-            pid: config.id_project,
-            ppassword: config.password,
-            fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
-            typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
-            jobs: [
-                {
-                    jid: row.attr('data-jid'),
-                    jpassword: row.attr('data-pwd')
-                }
-            ]
-        },
-        context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
-        success: function(d) {
-            if( typeof callback == "function" )
-                callback( d );
-        }
-    });
-}
+// function getOutsourceQuote( clickedButton, callback ) {
+//     var row = clickedButton.parents('.tablestats');
+//
+//     APP.doRequest({
+//         data: {
+//             action: 'outsourceTo',
+//             pid: config.id_project,
+//             ppassword: config.password,
+//             fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
+//             typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
+//             jobs: [
+//                 {
+//                     jid: row.attr('data-jid'),
+//                     jpassword: row.attr('data-pwd')
+//                 }
+//             ]
+//         },
+//         context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
+//         success: function(d) {
+//             if( typeof callback == "function" )
+//                 callback( d );
+//         }
+//     });
+// }
 
 
 function renderGenericErrorQuote() {

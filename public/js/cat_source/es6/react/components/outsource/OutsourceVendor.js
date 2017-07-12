@@ -26,23 +26,41 @@ class OutsourceVendor extends React.Component {
         let self = this;
         let typeOfService = this.state.revision ? "premium" : "professional";
         let fixedDelivery =  (delivery) ? delivery : "";
-        UI.getOutsourceQuoteFromManage(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService).done(function (quoteData) {
+        UI.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService).done(function (quoteData) {
             if (quoteData.data) {
 
-                self.quoteResponse = Immutable.fromJS(quoteData.data[0]);
+                self.quoteResponse = quoteData.data[0];
                 let chunk = Immutable.fromJS(quoteData.data[0][0]);
 
-                UI.url_ok = quoteData.return_url.url_ok;
-                UI.url_ko = quoteData.return_url.url_ko;
-                UI.confirm_urls = quoteData.return_url.confirm_urls;
-                UI.data_key = chunk.id;
+                self.url_ok = quoteData.return_url.url_ok;
+                self.url_ko = quoteData.return_url.url_ko;
+                self.confirm_urls = quoteData.return_url.confirm_urls;
+                self.data_key = chunk.get('id');
 
                 self.setState({
                     outsource: true,
                     chunkQuote: chunk
                 });
+
+                // Intercom
+                $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
+
             }
         });
+    }
+
+    sendOutsource() {
+        $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
+        $(this.outsourceForm).find('input[name=url_ko]').attr('value', this.url_ko);
+        $(this.outsourceForm).find('input[name=confirm_urls]').attr('value', this.confirm_urls);
+        $(this.outsourceForm).find('input[name=data_key]').attr('value', this.data_key);
+
+        UI.populateOutsourceForm();
+
+        //IMPORTANT post out the quotes
+        $(this.outsourceForm).find('input[name=quoteData]').attr('value', JSON.stringify( this.quoteResponse ) );
+        $(this.outsourceForm).submit();
+        $(this.outsourceForm).find('input[name=quoteData]').attr('value', '' );
     }
 
     clickRevision() {
@@ -138,8 +156,10 @@ class OutsourceVendor extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (!nextState.chunkQuote.equals(this.state.chunkQuote) || nextState.outsource !== this.state.outsource
-                || nextState.extendedView !== this.state.extendedView);
+        return (!nextState.chunkQuote.equals(this.state.chunkQuote)
+                || nextState.outsource !== this.state.outsource
+                || nextState.extendedView !== this.state.extendedView
+                || nextState.revision !== this.state.revision);
     }
 
     render() {
@@ -230,7 +250,8 @@ class OutsourceVendor extends React.Component {
                                 </div>
                             </div>
                             <div className="order-button-outsource">
-                                <a className="open-order ui green button">Order now</a>
+                                <a className="open-order ui green button"
+                                onClick={this.sendOutsource.bind(this)}>Order now</a>
                             </div>
                         </div>
                     ) : (
@@ -294,6 +315,15 @@ class OutsourceVendor extends React.Component {
                     </div>
                 </div>
             )}
+
+            <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
+            ref={(form) => this.outsourceForm = form}>
+                <input type="hidden" name="url_ok" value=""/>
+                <input type="hidden" name="url_ko" value=""/>
+                <input type="hidden" name="confirm_urls" value=""/>
+                <input type='hidden' name='data_key' value="" />
+                <input type="hidden" name="quoteData" value=""/>
+            </form>
         </div>;
 
     }
