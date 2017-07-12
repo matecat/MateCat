@@ -6,8 +6,13 @@ export default class GMTSelect extends React.Component {
     
     componentDidMount()  {
         let self = this;
+        let direction = 'downward';
+        if (this.props.direction && this.props.direction === 'up') {
+            direction = 'upward';
+        }
         $(this.gmtSelect).dropdown('set selected', '2');
         $(this.gmtSelect).dropdown({
+            direction: direction,
             onChange: function(value, text, $selectedItem) {
                 self.props.changeValue(value);
             }

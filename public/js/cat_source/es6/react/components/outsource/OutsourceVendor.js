@@ -261,7 +261,7 @@ class OutsourceVendor extends React.Component {
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
                                 <div className="ui button">
-                                    <GMTSelect/>
+                                    <GMTSelect direction="up"/>
                                 </div>
                             </div>
                         </div>
