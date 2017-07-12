@@ -167,8 +167,8 @@ class OutsourceVendor extends React.Component {
         let price = this.getPrice();
         let translatedWords = this.getTranslatedWords();
         let translatorSubjects = this.getTranslatorSubjects();
-        return <div>
-                {this.state.extendedView ? ( <div className="outsource-to-translated sixteen wide column">
+        return <div className="background-outsource-vendor">
+                {this.state.extendedView ? ( <div className="outsource-to-vendor sixteen wide column">
                     <div className="payment-service">
                         <div className="service-box">
                             <div className="service project-management">Outsource: Project Management </div>
