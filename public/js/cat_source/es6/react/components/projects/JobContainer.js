@@ -755,15 +755,6 @@ class JobContainer extends React.Component {
                         <div className="job-payable">
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
-
-                        <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
-                             ref={(dropdown) => this.dropdown = dropdown}>
-                            <i className="icon-more_vert icon"/>
-                            {jobMenu}
-                        </div>
-                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
-                            Open
-                        </a>
                     </div>
                     <div className="sixteen wide column shadow-1">
                         <OutsourceContainer project={this.props.project}
