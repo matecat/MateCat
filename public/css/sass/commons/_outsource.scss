@@ -17,12 +17,12 @@
     }
 
     &.showTranslator.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 345px;
+        height: 339px;
         -webkit-transition: all .3s ease;
     }
 
     &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 700px;
+        height: 717px;
         -webkit-transition: all .3s ease;
     }
 
@@ -157,6 +157,7 @@
         background: #e9efec;
         width: 100%;
         padding-bottom: 15px;
+        padding-top: 15px;
         .outsource-to-vendor {
             .payment-service {
                 padding: 15px 15px;
@@ -565,12 +566,12 @@
         }
 
         .outsource-to-vendor-reduced {
-            padding-top: 45px !important;
+            padding-top: 30px !important;
             padding-left: 15px !important;
             padding-right: 15px !important;
             background-color: #e9efec;
             position: relative;
-            min-height: 140px;
+            min-height: 125px;
             .container-reduced {
                 .job-menu, .open-translate {
                     display: none;

@@ -176,7 +176,7 @@ class OutsourceVendor extends React.Component {
                     <div className="revision-box">
                         <div className="add-revision">
                             <div className="ui checkbox">
-                                <input type="checkbox" checked={true}
+                                <input type="checkbox" defaultChecked
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
                                        onClick={this.clickRevision.bind(this)}/>
                                 <label>Add Revision</label>
