@@ -15,14 +15,20 @@
         height: 0px;
     }
 
-    &.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 680px;
-        -webkit-transition: height .3s ease;
+    &.showTranslator.transitionOutsource-enter.transitionOutsource-enter-active {
+        height: 345px;
+        -webkit-transition: all .3s ease;
+    }
+
+    &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
+        height: 700px;
+        -webkit-transition: all .3s ease;
     }
 
     &.transitionOutsource-leave.transitionOutsource-leave-active {
         height: 0px !important;
-        -webkit-transition: height .3s ease;
+        margin: 0 !important;
+        -webkit-transition: all .3s ease;
     }
 
     .gmt {
@@ -187,7 +193,7 @@
             background-color: #ffffff;
             padding: 15px;
             position: relative;
-            min-height: 200px;
+            min-height: 330px;
             height: 305px;
             .translator-job-details {
                 padding-bottom: 15px;
