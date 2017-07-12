@@ -55,7 +55,7 @@
                         display: inline-block;
                     }
                 }
-
+            }
         }
     }
 
@@ -153,6 +153,7 @@
     }
     .background-outsource-vendor {
         background: #e9efec;
+        width: 100%;
         .outsource-to-vendor {
             .payment-service {
                 padding: 15px 15px;

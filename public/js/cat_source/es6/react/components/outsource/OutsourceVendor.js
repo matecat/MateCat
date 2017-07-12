@@ -144,7 +144,6 @@ class OutsourceVendor extends React.Component {
             </div>
             {(this.state.outsource ? (
                 <div className="payment-details-box shadow-1">
-
                     <div className="translator-job-details">
                         <div className="translator-details-box">
                             <div className="ui list left">
@@ -211,7 +210,7 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <a className="open-order ui green button"onClick={this.sendOutsource.bind(this)}>Order now</a>
+                            <a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</a>
                         </div>
                     </div>
                 </div>
@@ -232,10 +231,8 @@ class OutsourceVendor extends React.Component {
     getCompactView() {
         let delivery = this.getDeliveryDate();
         let price = this.getPrice();
-        let translatedWords = this.getTranslatedWords();
-        let translatorSubjects = this.getTranslatorSubjects();
         let pricePWord = this.getPricePW(price);
-        return <div className="outsource-to-translated-reduced sixteen wide column">
+        return <div className="outsource-to-vendor-reduced sixteen wide column">
             {this.state.outsource ? (
                 <div>
                     <div className="title-reduced">Let us do it for you</div>
@@ -279,7 +276,8 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <a className="open-order ui green button">Order now</a>
+                            <a className="open-order ui green button"
+                               onClick={this.sendOutsource.bind(this)}>Order now</a>
                         </div>
                     </div>
                 </div>
