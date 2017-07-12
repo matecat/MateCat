@@ -31,39 +31,70 @@
         -webkit-transition: all .3s ease;
     }
 
+    .gmt {
+        padding-top: 23px;
+        float: none;
+        display: inline-block;
+        .ui.selection.dropdown {
+            min-width: 40px !important;
+            width: auto;
+            .menu {
+                min-width: 350px;
+                .item {
+                    .gmt-value {
+                        display: inline-block;
+                        margin-right: 5px;
+                    }
+                    .gmt-description {
+                        display: inline-block;
+                    }
+                }
 
-
+            }
+        }
+    }
 
     .assign-job-translator {
         background-color: #d5d8dc;
+        padding: 15px;
+        width: 100%;
+        .title {
+            display: inline-block;
+            padding: 15px 15px 15px 30px;
+            font-size: 20px;
+            font-weight: 700;
+            width: 25%;
+        }
         .title-url {
             padding: 15px;
-            .title {
-                padding: 15px 15px 15px 30px;
-                font-size: 20px;
-                font-weight: 700;
-                width: 25%;
-            }
+            width: 75%;
+            display: inline-block;
             .job-url {
+                display: inline-block;
                 a {
                     text-decoration: underline;
                     font-weight: 700;
                     font-size: 16px;
-                    padding-left: 15px;
                     &:hover {
                         text-decoration: none;
                     }
                 }
             }
-            .left {
-                width: 25%;
-            }
             .translator-assignee {
-                width: 55%;
-                .form {
+                width: 100%;
+                display: inline-block;
+                padding: 20px 0 0;
+                .ui.form {
+                    margin: 0;
+                    display: inline-block;
+                    width: 100%;
                     .fields {
+                        margin: 0;
                         .field {
-                            width: 45%;
+                            width: 25%;
+                            display: inline-block;
+                            vertical-align: bottom;
+                            float: none;
                             label {
                                 padding-left: 15px;
                             }
@@ -78,34 +109,22 @@
                                     border-color: #85B7D9;
                                 }
                             }
-                            &.gmt {
-                                z-index: 2;
-                                width: 20%;
-                                .button {
+                            &.send-job-box {
+                                padding: 0;
+                                padding-top: 23px;
+                                .send-job {
                                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                                    top: 24px;
-                                    position: relative;
-                                    padding: 10px 15px;
-                                    width: 100%;
-                                    border: 1px solid #c1c1c1;
-                                    background: #f3f3f3;
+                                    font-size: 16px;
+                                    border: 1px solid #797979;
+                                    border-radius: 2px;
+                                    padding: 9px 15px;
+                                    margin: 0;
+                                    float: right;
                                 }
                             }
+
                         }
                     }
-                }
-            }
-            .send-job-box {
-                width: 20%;
-                text-align: right;
-                padding-top: 24px;
-                padding-right: 25px;
-                .send-job {
-                    font-family: Calibri, Arial, Helvetica, sans-serif;
-                    font-size: 16px;
-                    border: 1px solid #797979;
-                    border-radius: 2px;
-                    padding: 9px 15px;
                 }
             }
         }
@@ -175,6 +194,7 @@
             padding: 15px;
             position: relative;
             min-height: 330px;
+            height: 305px;
             .translator-job-details {
                 padding-bottom: 15px;
                 .translator-details-box {
@@ -279,7 +299,7 @@
 
             }
             .delivery-order {
-                width: 82%;
+                width: 80%;
                 text-align: right;
                 display: inline-block;
                 vertical-align: top;
@@ -309,20 +329,20 @@
                         display: inline-block;
                         padding: 5px;
                     }
-                    .gmt-button {
-                        display: inline-block;
-                        vertical-align: middle;
-                        padding: 9px 0px 10px 10px;
-                        position: relative;
-                        top: -2px;
-                        .button {
-                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                            border: 1px solid #e0e0e0;
-                            padding: 10px 27px;
-                            width: 100%;
-                            background: #f3f3f3;
-                        }
-                    }
+                    //.gmt-button {
+                    //    display: inline-block;
+                    //    vertical-align: middle;
+                    //    padding: 9px 0px 10px 10px;
+                    //    position: relative;
+                    //    top: -2px;
+                    //    .button {
+                    //        font-family: Calibri, Arial, Helvetica, sans-serif;
+                    //        border: 1px solid #e0e0e0;
+                    //        padding: 10px 27px;
+                    //        width: 100%;
+                    //        background: #f3f3f3;
+                    //    }
+                    //}
                     .need-it-faster {
                         font-size: 19px;
                         a {
@@ -338,36 +358,40 @@
             .order-box-outsource {
                 display: inline-block;
                 width: 18%;
-                background-color: #daeddf;
-                height: 96px;
-                text-align: center;
-                .outsource-price {
-                    font-size: 38px;
-                    font-weight: 700;
-                    padding: 27px 0 20px;
-                }
-                .select-value {
-                    a {
-                        text-decoration: underline;
-                        color: #000000;
-                        cursor: pointer;
-                        &:hover {
-                            text-decoration: none;
+                float: right;
+                text-align: right;
+                .order-box {
+                    background-color: #daeddf;
+                    height: 96px;
+                    text-align: center;
+                    margin-bottom: 5px;
+                    .outsource-price {
+                        font-size: 32px;
+                        font-weight: 700;
+                        padding: 30px 0 10px;
+                    }
+                    .select-value {
+                        a {
+                            text-decoration: underline;
+                            color: #000000;
+                            cursor: pointer;
+                            &:hover {
+                                text-decoration: none;
+                            }
                         }
                     }
                 }
-            }
-            .order-button-outsource {
-                text-align: right;
-                margin-top: 10px;
-                margin-right: 0px;
-                .open-order {
-                    font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 10px 74px;
+                .order-button-outsource {
                     margin: 0;
-                    border: 1px solid #797979;
-                    font-size: 18px;
-                    border-radius: 2px;
+                    .open-order {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                        /*padding: 10px 74px;*/
+                        margin: 0;
+                        border: 1px solid #797979;
+                        font-size: 18px;
+                        border-radius: 2px;
+                        width: 100%;
+                    }
                 }
             }
         }
@@ -387,6 +411,7 @@
                     h3 {
                         display: inline-block;
                         width: 50%;
+                        padding-left: 30px;
                     }
                     .pointers {
                         display: inline-block;
@@ -466,6 +491,7 @@
                 .title-request {
                     h3 {
                         margin-bottom: 14px;
+                        padding-left: 30px;
                     }
                 }
                 .request-info-box {
@@ -631,7 +657,6 @@
         .order-box-outsource {
             display: inline-block;
             width: 14%;
-
             float: right;
             text-align: center;
             margin-top: -53px;

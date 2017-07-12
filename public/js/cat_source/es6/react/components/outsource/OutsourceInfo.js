@@ -20,7 +20,7 @@ class OutsourceInfo extends React.Component {
     render() {
         return <div className="customer-request sixteen wide column">
             <div className="ui grid">
-                <div className="customer-box ten wide column">
+                <div className="customer-box nine wide column">
                     <div className="title-pointer">
                         <h3>Our customer said</h3>
                         <div className="pointers">
@@ -55,9 +55,9 @@ class OutsourceInfo extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="request-box six wide column">
+                <div className="request-box seven wide column">
                     <div className="title-request">
-                        <h3>Our customer said</h3>
+                        <h3>Have an specific request?</h3>
                     </div>
                     <div className="request-info-box">
                         <div className="mobile-mail-box">
