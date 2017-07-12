@@ -573,6 +573,7 @@
             position: relative;
             min-height: 125px;
             .container-reduced {
+                padding: 0 15px;
                 .job-menu, .open-translate {
                     display: none;
                 }
@@ -584,7 +585,7 @@
                 }
                 .payment-service {
                     display: inline-block;
-                    width: 48%;
+                    width: 49%;
                     vertical-align: -webkit-baseline-middle;
                     .service-box {
                         display: inline-block;
@@ -626,6 +627,7 @@
                 .delivery-order {
                     display: inline-block;
                     padding: 0 10px;
+                    width: 32%;
                     .delivery-box {
                         display: inline-block;
                         font-size: 18px;
@@ -654,7 +656,7 @@
                 }
                 .order-box-outsource {
                     display: inline-block;
-                    width: 14%;
+                    width: 177px;
                     float: right;
                     text-align: center;
                     margin-top: -53px;
