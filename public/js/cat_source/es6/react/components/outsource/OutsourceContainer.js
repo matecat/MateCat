@@ -15,9 +15,10 @@ class OutsourceContainer extends React.Component {
     }
 
     handleDocumentClick(evt)  {
-        const area = ReactDOM.findDOMNode(this.refs.container);
+        evt.stopPropagation();
+        const area = ReactDOM.findDOMNode(this.container);
 
-        if (!area.contains(evt.target)) {
+        if (this.container && !area.contains(evt.target) && !$(evt.target).hasClass('open-view-more')) {
             this.props.onClickOutside(evt)
         }
     }
@@ -37,7 +38,7 @@ class OutsourceContainer extends React.Component {
 
     render() {
         return <div className="ui grid"
-        ref='container'>
+        ref={(container) => this.container = container}>
                 {(this.props.showTranslatorBox) ? (
                     <AssignToTranslator job={this.props.job}
                                         url={this.props.url}
