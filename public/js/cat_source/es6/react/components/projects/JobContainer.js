@@ -10,7 +10,8 @@ class JobContainer extends React.Component {
         super(props);
         this.state = {
             showDownloadProgress: false,
-            openOutsource: false
+            openOutsource: false,
+            showTranslatorBox: false
         };
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
@@ -450,7 +451,7 @@ class JobContainer extends React.Component {
         }
     }
 
-    openOutsourceModal() {
+    openOutsourceModal(showTranslatorBox) {
         // if (this.props.job.get('outsource') && this.props.job.get('outsource').get('quote_review_link')) {
         //     window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
         // } else {
@@ -458,24 +459,25 @@ class JobContainer extends React.Component {
         // }
 
         this.setState({
-            openOutsource: !this.state.openOutsource
+            openOutsource: !this.state.openOutsource,
+            showTranslatorBox: showTranslatorBox
         });
     }
 
     getOutsourceButton() {
         let label = <a className="open-outsource ui green button"
-                       onClick={this.openOutsourceModal.bind(this)}>
+                       onClick={this.openOutsourceModal.bind(this, false)}>
            Outsource
         </a>;
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 label = <a className="open-outsourced ui button "
-                           onClick={this.openOutsourceModal.bind(this)}>
+                           onClick={this.openOutsourceModal.bind(this, false)}>
                     View status
                 </a>;
             } else {
                 label = <a className="open-outsource ui green button"
-                           onClick={this.openOutsourceModal.bind(this)}>
+                           onClick={this.openOutsourceModal.bind(this, false)}>
                     Outsource
                 </a>;
             }
@@ -504,7 +506,7 @@ class JobContainer extends React.Component {
                                 </div>;
         } else {
             outsourceJobLabel = <div className="job-to-translator" data-variation="tiny">
-                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this)}>Assign job to translator</a>
+                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this, true)}>Assign job to translator</a>
             </div>;
         }
         return outsourceJobLabel;
@@ -659,6 +661,8 @@ class JobContainer extends React.Component {
         let tmIcon = this.getTMIcon();
         let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
+        let outsourceContainerClass = (this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource';
+
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="sixteen wide column chunk-container">
@@ -737,7 +741,7 @@ class JobContainer extends React.Component {
             >
             {this.state.openOutsource ? (
                 // TODO : @Ruben Modificare questo blocco
-                <div className="outsource-container chunk ui grid">
+                <div className={"outsource-container chunk ui grid " + outsourceContainerClass}>
                     <div className=" outsource-header sixteen wide column shadow-1">
                         <div className="job-id" title="Job Id">
                             {"(" + idJobLabel + ")"}
@@ -772,7 +776,7 @@ class JobContainer extends React.Component {
                                         url={this.getTranslateUrl()}
                                         fromManage={true}
                                         translatorOpen={false}
-                                        showTranslatorBox={true}/>
+                                        showTranslatorBox={this.state.showTranslatorBox}/>
                     </div>
                 </div>
                 // TODO : @Ruben Modificare questo blocco

@@ -36,7 +36,8 @@ class OutsourceContainer extends React.Component {
                 ) : (null)}
 
                 <OutsourceVendor project={this.props.project}
-                                 job={this.props.job} />
+                                 job={this.props.job}
+                                 extendedView={!this.props.showTranslatorBox}/>
         </div>;
     }
 }

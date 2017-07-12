@@ -12,7 +12,7 @@ class OutsourceVendor extends React.Component {
             outsource: false,
             revision: false,
             chunkQuote: null,
-            compressView: true
+            extendedView: this.props.extendedView
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -94,7 +94,7 @@ class OutsourceVendor extends React.Component {
 
     viewMoreClick() {
         this.setState({
-            compressView: false
+            extendedView: true
         });
     }
 
@@ -139,7 +139,7 @@ class OutsourceVendor extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         return (!nextState.chunkQuote.equals(this.state.chunkQuote) || nextState.outsource !== this.state.outsource
-                || nextState.compressView !== this.state.compressView);
+                || nextState.extendedView !== this.state.extendedView);
     }
 
     render() {
@@ -148,7 +148,7 @@ class OutsourceVendor extends React.Component {
         let translatedWords = this.getTranslatedWords();
         let translatorSubjects = this.getTranslatorSubjects();
         return <div>
-                {!this.state.compressView ? ( <div className="outsource-to-translated sixteen wide column">
+                {this.state.extendedView ? ( <div className="outsource-to-translated sixteen wide column">
                     <div className="payment-service">
                         <div className="service-box">
                             <div className="service project-management">Outsource: Project Management </div>
