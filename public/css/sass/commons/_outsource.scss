@@ -38,6 +38,9 @@
         .ui.selection.dropdown {
             min-width: 40px !important;
             width: auto;
+            .text .gmt-description {
+                display: none;
+            }
             .menu {
                 min-width: 350px;
                 .item {
