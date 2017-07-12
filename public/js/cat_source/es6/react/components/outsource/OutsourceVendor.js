@@ -234,7 +234,7 @@ class OutsourceVendor extends React.Component {
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor-reduced sixteen wide column">
             {this.state.outsource ? (
-                <div>
+                <div className="container-reduced">
                     <div className="title-reduced">Let us do it for you</div>
 
                     <div className="payment-service">
@@ -260,9 +260,7 @@ class OutsourceVendor extends React.Component {
                             <span>at</span>
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
-                                <div className="ui button">
-                                    <GMTSelect direction="up"/>
-                                </div>
+                                <GMTSelect direction="up"/>
                             </div>
                         </div>
                     </div>

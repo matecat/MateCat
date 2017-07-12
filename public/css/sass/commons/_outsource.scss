@@ -69,6 +69,8 @@
             font-size: 20px;
             font-weight: 700;
             width: 25%;
+            position: relative;
+            top: -38px;
         }
         .title-url {
             padding: 15px;
@@ -136,7 +138,7 @@
     }
     .divider-or {
         position: absolute !important;
-        top: 135px;
+        top: 118px;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         z-index: 1;
@@ -154,6 +156,7 @@
     .background-outsource-vendor {
         background: #e9efec;
         width: 100%;
+        padding-bottom: 15px;
         .outsource-to-vendor {
             .payment-service {
                 padding: 15px 15px;
@@ -303,11 +306,12 @@
 
                 }
                 .delivery-order {
-                    width: 80%;
+                    width: 82%;
                     text-align: right;
                     display: inline-block;
                     vertical-align: top;
                     margin-top: 28px;
+                    padding-right: 25px;
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
@@ -354,7 +358,6 @@
                     display: inline-block;
                     width: 18%;
                     text-align: right;
-                    margin-left: 25px;
                     .order-box {
                         background-color: #daeddf;
                         height: 96px;
@@ -563,111 +566,53 @@
 
         .outsource-to-vendor-reduced {
             padding-top: 45px !important;
-            padding-left: 45px !important;
-            padding-right: 40px !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
             background-color: #e9efec;
             position: relative;
-            min-height: 155px;
-            .job-menu, .open-translate {
-                display: none;
-            }
-            .title-reduced {
-                width: 75%;
-                font-size: 24px;
-                font-weight: 700;
-                display: inline-block;
-            }
-            .payment-service {
-                display: inline-block;
-                width: 48%;
-                vertical-align: -webkit-baseline-middle;
-                .service-box {
-                    display: inline-block;
-                    font-size: 22px;
+            min-height: 140px;
+            .container-reduced {
+                .job-menu, .open-translate {
+                    display: none;
+                }
+                .title-reduced {
+                    width: 75%;
+                    font-size: 24px;
                     font-weight: 700;
-                    .service {
-                        display: inline-block;
-                        &.project-management {
-
-                        }
-                        &.translation {
-                            margin-left: 6px;
-                        }
-                        &.revision {
-                            margin-left: 6px;
-                        }
-                    }
-                }
-                .fiducial-logo {
                     display: inline-block;
-                    margin-left: 6px;
-                    img {
-                        width: 100px;
-                        position: relative;
-                        top: 9px;
-                        margin-left: 4px;
-                    }
                 }
-                .view-more {
-                    a {
-                        text-decoration: underline;
-                        cursor: pointer;
-                        &:hover {
-                            text-decoration: none;
-                        }
-                    }
-                }
-            }
-            .delivery-order {
-                display: inline-block;
-                padding: 0 10px;
-                .delivery-box {
+                .payment-service {
                     display: inline-block;
-                    font-size: 18px;
-                    font-weight: 700;
-                    label {
-                        padding: 5px;
-                        font-size: 16px;
-                        color: gray;
-                        font-weight: 100;
-                    }
-                    .delivery-date, .delivery-time{
+                    width: 48%;
+                    vertical-align: -webkit-baseline-middle;
+                    .service-box {
                         display: inline-block;
-                        padding: 5px;
-                    }
-                    span {
-                        display: inline-block;
-                    }
-                    .gmt-button {
-                        display: inline-block;
-                        position: relative;
-                        top: -2px;
-                        .button {
-                            font-family: Calibri, Arial, Helvetica, sans-serif;
-                            padding: 10px 15px;
-                            width: 100%;
-                            border: 1px solid #c1c1c1;
-                            background: #f3f3f3;
-                        }
-                    }
-                }
-            }
-            .order-box-outsource {
-                display: inline-block;
-                width: 14%;
-                float: right;
-                text-align: center;
-                margin-top: -53px;
-                .order-box {
-                    background-color: #daeddf;
-                    padding: 25px 15px 15px;
-                    margin-bottom: 5px;
-                    .outsource-price {
-                        font-size: 28px;
+                        font-size: 22px;
                         font-weight: 700;
-                        margin-bottom: 10px;
+                        .service {
+                            display: inline-block;
+                            &.project-management {
+
+                            }
+                            &.translation {
+                                margin-left: 6px;
+                            }
+                            &.revision {
+                                margin-left: 6px;
+                            }
+                        }
                     }
-                    .select-value {
+                    .fiducial-logo {
+                        display: inline-block;
+                        margin-left: 6px;
+                        img {
+                            width: 100px;
+                            position: relative;
+                            top: 9px;
+                            margin-left: 4px;
+                        }
+                    }
+                    .view-more {
                         a {
                             text-decoration: underline;
                             cursor: pointer;
@@ -677,16 +622,71 @@
                         }
                     }
                 }
-                .order-button-outsource {
-                    .open-order {
-                        width: 100%;
-                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                        padding: 10px 22px;
-                        vertical-align: top;
-                        font-size: 16px;
-                        border: 1px solid #797979;
-                        border-radius: 2px;
-                        margin: 0px;
+                .delivery-order {
+                    display: inline-block;
+                    padding: 0 10px;
+                    .delivery-box {
+                        display: inline-block;
+                        font-size: 18px;
+                        font-weight: 700;
+                        label {
+                            padding: 5px;
+                            font-size: 16px;
+                            color: gray;
+                            font-weight: 100;
+                        }
+                        .delivery-date, .delivery-time{
+                            display: inline-block;
+                            padding: 5px;
+                        }
+                        span {
+                            display: inline-block;
+                        }
+                        .gmt {
+                            padding: 0;
+                            .gmt-select {
+                                position: relative;
+                                top: -3px;
+                            }
+                        }
+                    }
+                }
+                .order-box-outsource {
+                    display: inline-block;
+                    width: 14%;
+                    float: right;
+                    text-align: center;
+                    margin-top: -53px;
+                    .order-box {
+                        background-color: #daeddf;
+                        padding: 25px 15px 15px;
+                        margin-bottom: 5px;
+                        .outsource-price {
+                            font-size: 28px;
+                            font-weight: 700;
+                            margin-bottom: 10px;
+                        }
+                        .select-value {
+                            a {
+                                text-decoration: underline;
+                                cursor: pointer;
+                                &:hover {
+                                    text-decoration: none;
+                                }
+                            }
+                        }
+                    }
+                    .order-button-outsource {
+                        .open-order {
+                            width: 100%;
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            padding: 10px 22px;
+                            vertical-align: top;
+                            font-size: 16px;
+                            border: 1px solid #797979;
+                            border-radius: 2px;
+                            margin: 0px;
+                        }
                     }
                 }
             }
