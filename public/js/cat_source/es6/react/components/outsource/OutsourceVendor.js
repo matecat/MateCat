@@ -292,7 +292,7 @@ class OutsourceVendor extends React.Component {
                             <div className="delivery-date">15 August</div>
                             <span>at</span>
                             <div className="delivery-time">11:00 AM</div>
-                            <div className="gmt-button">
+                            <div className="gmt">
                                 <div className="ui button">
                                     (GMT +2)
                                 </div>
