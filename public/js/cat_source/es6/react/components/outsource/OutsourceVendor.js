@@ -145,19 +145,33 @@ class OutsourceVendor extends React.Component {
             {(this.state.outsource ? (
                 <div className="payment-details-box shadow-1">
                     <div className="translator-job-details">
+                        { this.state.chunkQuote.get('t_name') !== '' ? (
                         <div className="translator-details-box">
+
                             <div className="ui list left">
                                 <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
                                 <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
                                 <div className="item">
-                                    <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
-                                         ref={(rating) => this.rating = rating}/></div>
+                                <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
+                                ref={(rating) => this.rating = rating}/></div>
                             </div>
                             <div className="ui list right">
                                 <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
                                 <div className="item"><b>{translatorSubjects}</b></div>
-                            </div>
+                             </div>
                         </div>
+                        ) : (
+                            <div className="translator-details-box">
+                                <div className="translator-no-found">
+                                    <p>
+                                        Translated.net uses the <b>most qualified translator</b> for your subject (General) and <b>keeps using the same translator for your next projects. </b>
+                                        Translated has over 15 years' experience as a translation company and offers <b><a href="#">two key guarantees on quality and delivery.</a></b>
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+
                         <div className="job-details-box">
                             <div className="source-target-outsource st-details">
                                 <div className="source-box">{this.props.job.get('sourceTxt')}</div>
