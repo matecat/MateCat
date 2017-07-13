@@ -19,7 +19,9 @@ class AnalyzeChunksResume extends React.Component {
         }
     }
 
-    showDetails(idJob) {
+    showDetails(idJob, evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
         AnalyzeActions.showDetails(idJob);
         this.setState({
             openDetails: true
@@ -27,7 +29,9 @@ class AnalyzeChunksResume extends React.Component {
 
     }
 
-    openSplitModal(id) {
+    openSplitModal(id, evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
