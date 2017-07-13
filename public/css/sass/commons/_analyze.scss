@@ -99,21 +99,29 @@ body.analyze{
                         h5 {
                             display: inline-block;
                             margin-bottom: 0;
+                            span {
+                                color: green;
+                            }
+                            i {
+                                color: green;
+                            }
                         }
                         .complete {
                             display: inline-block;
-                            font-style: 16px;
+                            font-size: 16px;
                             .number {
                                 font-weight: 700;
                             }
                         }
                         .downloadAnalysisReport {
-                            color: #4183C4;
+                            display: inline-block;
+                            border-left: 1px solid black;
+                            padding-left: 10px;
+                            color: #444444;
                             text-decoration: underline;
                             font-weight: 700;
-                            margin-left: 5px;
+                            margin-left: 10px;
                             cursor: pointer;
-                            display: inline-block;
                             &:hover {
                                 text-decoration: none;
                             }
