@@ -22,7 +22,7 @@
     }
 
     &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 717px;
+        height: 639px;
         -webkit-transition: all .3s ease;
     }
 
@@ -160,7 +160,7 @@
         padding-top: 15px;
         .outsource-to-vendor {
             .payment-service {
-                padding: 15px 15px;
+                padding: 5px 15px 15px;
                 .service-box {
                     width: 70%;
                     display: inline-block;
@@ -202,15 +202,15 @@
                 background-color: #ffffff;
                 padding: 15px;
                 position: relative;
-                min-height: 315px;
+                min-height: 270px;
                 .translator-job-details {
-                    padding-bottom: 15px;
+                    padding-bottom: 10px;
                     .translator-details-box {
                         width: 40%;
                         border-right: 1px solid black;
                         display: inline-block;
                         vertical-align: middle;
-                        padding: 0 15px;
+                        padding: 2px 15px;
                         .left, .right {
                             display: inline-block;
                             margin: 0;
@@ -286,7 +286,7 @@
                     }
                 }
                 .revision-box {
-                    padding: 10px 15px;
+                    padding: 5px 15px;
                     background-color: #e4e6e8;
                     margin-bottom: 10px;
                     .add-revision {
@@ -311,7 +311,7 @@
                     text-align: right;
                     display: inline-block;
                     vertical-align: top;
-                    margin-top: 28px;
+                    margin-top: 22px;
                     padding-right: 25px;
                     .delivery-box {
                         text-align: right;
@@ -361,13 +361,13 @@
                     text-align: right;
                     .order-box {
                         background-color: #daeddf;
-                        height: 96px;
+                        height: 84px;
                         text-align: center;
                         margin-bottom: 5px;
                         .outsource-price {
                             font-size: 32px;
                             font-weight: 700;
-                            padding: 30px 0 10px;
+                            padding: 25px 0 10px;
                         }
                         .select-value {
                             a {
@@ -384,12 +384,13 @@
                         margin: 0;
                         .open-order {
                             font-family: Calibri, Arial, Helvetica, sans-serif;
-                            /*padding: 10px 74px;*/
+                            padding: 10px;
                             margin: 0;
                             border: 1px solid #797979;
                             font-size: 18px;
                             border-radius: 2px;
                             width: 100%;
+
                         }
                     }
                 }
@@ -397,7 +398,7 @@
             .easy-pay-box {
                 width: 100%;
                 text-align: right;
-                padding: 15px;
+                padding: 10px 15px 20px;
                 .easy-pay {
                     font-weight: 700;
                     margin-bottom: 0;
@@ -437,7 +438,7 @@
                             display: inline-block;
                             width: 10%;
                             vertical-align: top;
-                            font-size: 46px;
+                            font-size: 36px;
                             position: relative;
                             top: 5px;
                             color: #a8bbb2;
@@ -447,15 +448,17 @@
                             display: inline-block;
                             vertical-align: middle;
                             .customer-text {
-                                padding-bottom: 15px;
+                                padding-bottom: 10px;
+                                font-size: 13px;
+                                line-height: 15px;
                             }
                             .customer-info {
                                 width: 70%;
                                 display: inline-block;
                                 .customer-photo {
                                     display: inline-block;
-                                    width: 50px;
-                                    height: 50px;
+                                    width: 40px;
+                                    height: 40px;
                                     background: yellow;
                                     border-radius: 50%;
                                     vertical-align: middle;
@@ -479,7 +482,7 @@
                                     width: auto;
                                     vertical-align: middle;
                                     padding: 6px;
-                                    height: 45px;
+                                    height: 40px;
                                 }
                             }
                         }
@@ -499,7 +502,7 @@
                         .mobile-mail-box {
                             width: 50%;
                             display: inline-block;
-                            padding: 15px;
+                            padding: 0 15px;
                             vertical-align: top;
                             .call {
                                 padding-bottom: 15px;
@@ -513,7 +516,7 @@
                         .account-box {
                             width: 50%;
                             display: inline-block;
-                            padding: 15px;
+                            padding: 0 15px;
                             .open-chat {
                                 i {
                                     position: relative;
