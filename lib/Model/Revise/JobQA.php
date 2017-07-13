@@ -152,7 +152,7 @@ class Revise_JobQA {
     }
 
     /**
-     * @return float
+     * @return array
      */
     public function evalJobVote() {
         foreach ( self::$error_info as $field => $info ) {
