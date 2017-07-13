@@ -459,6 +459,9 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
+        if (!config.enable_outsource) {
+            return null;
+        }
         let label = <a className="open-outsource ui green button"
                        onClick={this.openOutsourceModal.bind(this, false)}>
            Outsource
@@ -476,12 +479,6 @@ class JobContainer extends React.Component {
                 </a>;
             }
         }
-        // else if (this.props.job.get('translator')) {
-        //     label = <a className="open-vendor ui basic green button"
-        //                onClick={this.openOutsourceModal.bind(this)}>
-        //         Change vendor
-        //     </a>;
-        // }
         return label;
     }
 
@@ -655,7 +652,7 @@ class JobContainer extends React.Component {
         let tmIcon = this.getTMIcon();
         let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
-        let outsourceContainerClass = (this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource';
+        let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') : ((this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource');
 
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;

@@ -45,17 +45,19 @@ class OutsourceContainer extends React.Component {
                                         project={this.props.project}/>
                 ) : (null)}
 
-                {(this.props.showTranslatorBox) ? (
+                {(this.props.showTranslatorBox && config.enable_outsource) ? (
                     <div className="divider-or sixteen wide column">
                         <div className="or">
                             OR
                         </div>
                     </div>
                 ) : (null)}
+                {config.enable_outsource ? (
+                    <OutsourceVendor project={this.props.project}
+                                     job={this.props.job}
+                                     extendedView={!this.props.showTranslatorBox}/>
+                ) :(null)}
 
-                <OutsourceVendor project={this.props.project}
-                                 job={this.props.job}
-                                 extendedView={!this.props.showTranslatorBox}/>
         </div>;
     }
 }
