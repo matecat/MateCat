@@ -11,6 +11,10 @@ class OutsourceInfo extends React.Component {
         return { __html: string };
     }
 
+    openChat() {
+        $(document).trigger('openChat');
+    }
+
     componentDidMount () {}
 
     componentWillUnmount() {}
@@ -88,11 +92,13 @@ class OutsourceInfo extends React.Component {
                                             <span className="online"> (On line)</span>
                                             <span className="offline"> (Off line)</span>
                                         </div>
-                                        <div className="ui button">
-                                            <div className="sign online-item"></div>
-                                            Open chat</div>
-                                            <div className="sign offline-item"></div>
-                                            Chat offline</div>
+                                        <div className="ui button intercom-button">
+                                            <div className="sign online-item"/>
+                                            Open chat
+                                        </div>
+                                        <div className="sign offline-item"/>
+                                            Chat offline
+                                        </div>
                                     </div>
                             </div>
                         </div>
