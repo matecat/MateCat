@@ -220,7 +220,23 @@ class OutsourceVendor extends React.Component {
                                 €{price}
                             </div>
                             <div className="select-value">
-                                <a className="value">about €{pricePWord} / word</a>
+                                {/*<a className="value">about €{pricePWord} / word</a>*/}
+                                <h4 className="ui header">
+                                    <div className="content">
+                                        <div className="ui inline dropdown"
+                                            ref={(select) => this.currencySelect = select}>
+                                            <a className="text value">about €{pricePWord} / word</a>
+                                            <i className="dropdown icon"></i>
+                                            <div className="menu">
+                                                <div className="header">Select Currency</div>
+                                                <div className="divider"></div>
+                                                <div className="active item" data-value="0">Turkish LT</div>
+                                                <div className="item" data-value="1">Pound</div>
+                                                <div className="item" data-value="2">Dollar</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h4>
                             </div>
                         </div>
                         <div className="order-button-outsource">
@@ -284,7 +300,22 @@ class OutsourceVendor extends React.Component {
                                 €{price}
                             </div>
                             <div className="select-value">
-                                <a className="value">about €{pricePWord} / word</a>
+                                <h4 className="ui header">
+                                    <div className="content">
+                                        <div className="ui inline dropdown"
+                                             ref={(select) => this.currencySelect = select}>
+                                            <a className="text value">about €{pricePWord} / word</a>
+                                            <i className="dropdown icon"></i>
+                                            <div className="menu">
+                                                <div className="header">Select Currency</div>
+                                                <div className="divider"></div>
+                                                <div className="active item" data-value="0">Turkish LT</div>
+                                                <div className="item" data-value="1">Pound</div>
+                                                <div className="item" data-value="2">Dollar</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h4>
                             </div>
                         </div>
                         <div className="order-button-outsource">
@@ -336,6 +367,8 @@ class OutsourceVendor extends React.Component {
                     console.log("onChangeDateTime");
                 }
             });
+
+            $(this.currencySelect).dropdown();
         }
         $(this.rating).rating('disable');
     }
