@@ -18,15 +18,14 @@ class OutsourceVendor extends React.Component {
         if ( config.enable_outsource ) {
             this.getOutsourceQuote();
         }
-        this.datePickerStart = false;
-
     }
 
     getOutsourceQuote(delivery) {
         let self = this;
         let typeOfService = this.state.revision ? "premium" : "professional";
         let fixedDelivery =  (delivery) ? delivery : "";
-        UI.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService).done(function (quoteData) {
+        var timezoneToShow = $.cookie( "matecat_timezone" );
+        UI.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService, timezoneToShow).done(function (quoteData) {
             if (quoteData.data) {
 
                 self.quoteResponse = quoteData.data[0];
@@ -49,7 +48,16 @@ class OutsourceVendor extends React.Component {
         });
     }
 
+    checkTimezone() {
+
+    }
+
     sendOutsource() {
+        let typeOfService = this.state.revision ? "premium" : "professional";
+
+        this.quoteResponse[0].typeOfService = typeOfService;
+
+
         $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
         $(this.outsourceForm).find('input[name=url_ko]').attr('value', this.url_ko);
         $(this.outsourceForm).find('input[name=confirm_urls]').attr('value', this.confirm_urls);
