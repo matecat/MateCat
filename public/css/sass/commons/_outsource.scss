@@ -68,6 +68,25 @@
         }
     }
 
+    .outsource-header {
+        .job-payable {
+            display: inline-block;
+            padding: 0 0 0 10px !important;
+            line-height: 30px;
+            position: relative;
+            top: 1px;
+            display: inline-block;
+            color: #969696;
+            a {
+                text-decoration: underline;
+                font-weight: 700;
+                &:hover {
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+
     .assign-job-translator {
         background-color: #d5d8dc;
         padding: 15px;
