@@ -25,6 +25,11 @@
         -webkit-transition: all .3s ease;
     }
 
+    &.no-outsource.transitionOutsource-enter.transitionOutsource-enter-active {
+        height: 179px;
+        -webkit-transition: all .3s ease;
+    }
+
     &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
         height: 639px;
         -webkit-transition: all .3s ease;

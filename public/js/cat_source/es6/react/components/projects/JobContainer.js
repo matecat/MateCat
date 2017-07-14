@@ -1,8 +1,5 @@
 
 let OutsourceContainer = require('../outsource/OutsourceContainer').default;
-let OutsourceModal = require('../../modals/OutsourceModal').default;
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
-
 
 class JobContainer extends React.Component {
 
@@ -459,6 +456,9 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
+        if (!config.enable_outsource) {
+            return null;
+        }
         let label = <a className="open-outsource ui green button"
                        onClick={this.openOutsourceModal.bind(this, false)}>
            Outsource
@@ -476,12 +476,6 @@ class JobContainer extends React.Component {
                 </a>;
             }
         }
-        // else if (this.props.job.get('translator')) {
-        //     label = <a className="open-vendor ui basic green button"
-        //                onClick={this.openOutsourceModal.bind(this)}>
-        //         Change vendor
-        //     </a>;
-        // }
         return label;
     }
 
@@ -655,7 +649,7 @@ class JobContainer extends React.Component {
         let tmIcon = this.getTMIcon();
         let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
-        let outsourceContainerClass = (this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource';
+        let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') : ((this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource');
 
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
@@ -730,44 +724,13 @@ class JobContainer extends React.Component {
                     ):('')}
                     </div> ) :(null)}
             </div>
-            <CSSTransitionGroup component="div" className="ui grid"
-                                transitionName="transitionOutsource"
-                                transitionEnterTimeout={500}
-                                transitionLeaveTimeout={300}
-            >
-                {this.state.openOutsource ? (
-                <div className={"outsource-container chunk ui grid " + outsourceContainerClass}>
-                    <div className=" outsource-header sixteen wide column shadow-1">
-                        <div className="job-id" title="Job Id">
-                            {"(" + idJobLabel + ")"}
-                        </div>
-                        <div className="source-target languages-tooltip"
-                             ref={(tooltip) => this.languageTooltip = tooltip}
-                             data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
-                            <div className="source-box">
-                                {this.props.job.get('sourceTxt')}
-                            </div>
-                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                            <div className="target-box">
-                                {this.props.job.get('targetTxt')}
-                            </div>
-                        </div>
-                        <div className="job-payable">
-                            <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                        </div>
-                    </div>
-                    <div className="sixteen wide column shadow-1">
-                        <OutsourceContainer project={this.props.project}
-                                        job={this.props.job}
-                                        url={this.getTranslateUrl()}
-                                        fromManage={true}
-                                        translatorOpen={false}
-                                        showTranslatorBox={this.state.showTranslatorBox}
-                                        onClickOutside={this.openOutsourceModal.bind(this)}/>
-                    </div>
-                </div>
-                ) : (null)}
-            </CSSTransitionGroup>
+            <OutsourceContainer project={this.props.project}
+                                job={this.props.job}
+                                url={this.getTranslateUrl()}
+                                showTranslatorBox={this.state.showTranslatorBox}
+                                onClickOutside={this.openOutsourceModal.bind(this)}
+                                openOutsource={this.state.openOutsource}
+                                idJobLabel={idJobLabel}/>
         </div>
     }
 }

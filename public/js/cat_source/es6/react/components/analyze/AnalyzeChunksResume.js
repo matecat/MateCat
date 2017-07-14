@@ -1,6 +1,7 @@
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeActions = require('../../actions/AnalyzeActions');
+let OutsourceContainer = require('../outsource/OutsourceContainer').default;
 
 
 
@@ -12,11 +13,15 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValuesChenged = [];
         this.containers = {};
         this.state = {
-            openDetails: false
+            openDetails: false,
+            openOutsource: false,
+            outsourceJobId : null
         }
     }
 
-    showDetails(idJob) {
+    showDetails(idJob, evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
         AnalyzeActions.showDetails(idJob);
         this.setState({
             openDetails: true
@@ -24,7 +29,9 @@ class AnalyzeChunksResume extends React.Component {
 
     }
 
-    openSplitModal(id) {
+    openSplitModal(id, evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
@@ -51,11 +58,20 @@ class AnalyzeChunksResume extends React.Component {
         return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
     }
 
-    openOutsourceModal(id, index) {
-        let job = this.props.project.get('jobs').find(function (item) {
-            return item.get('id') == id;
+    openOutsourceModal(idJob, evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.setState({
+            openOutsource: true,
+            outsourceJobId : idJob
         });
-        ModalsActions.openOutsourceModal(this.props.project.toJS(), job.toJS(), this.getTranslateUrl(job, index), false, false, false);
+    }
+
+    closeOutsourceModal() {
+        this.setState({
+            openOutsource: false,
+            outsourceJobId : null
+        });
     }
 
     checkPayableChanged(idJob, payable) {
@@ -75,9 +91,16 @@ class AnalyzeChunksResume extends React.Component {
                     let index = 0;
                     let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
                         let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
+                        let chunkJob = self.props.project.get('jobs').find(function (job) {
+                            return job.get('id') == indexJob && job.get('password') == indexChunk;
+                        });
                         index++;
 
-                        self.checkPayableChanged(self.props.jobsInfo[indexJob].jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
+                        let idChunk = self.props.jobsInfo[indexJob].jid +'-'+ index;
+
+                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === idChunk);
+
+                        self.checkPayableChanged(idChunk, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
                         return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                             <div className="title-job">
@@ -102,8 +125,16 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <div className="activity-icons">
                                 <div className="open-translate ui primary button open"
-                                     onClick={self.openOutsourceModal.bind(self, chunk.jid, index)}>Translate</div>
+                                     onClick={self.openOutsourceModal.bind(self, chunk.jid + '-' + index)}>Translate</div>
                             </div>
+                            <OutsourceContainer project={self.props.project}
+                                                job={chunkJob}
+                                                url={self.getTranslateUrl(chunkJob, index)}
+                                                showTranslatorBox={true}
+                                                onClickOutside={self.closeOutsourceModal.bind(self)}
+                                                openOutsource={openOutsource}
+                                                idJobLabel={chunk.jid + '-' + index}
+                                                outsourceJobId={self.state.outsourceJobId}/>
                         </div>;
                     }).toList().toJS();
                     return <div key={indexJob} className="job ui grid">
@@ -132,6 +163,14 @@ class AnalyzeChunksResume extends React.Component {
                     let obj = self.props.jobsInfo[indexJob].chunks;
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
                     let total_standard = obj[Object.keys(obj)[0]].total_st_word_count_print;
+
+                    let chunkJob = self.props.project.get('jobs').find(function (job) {
+                        return job.get('id') == indexJob ;
+                    });
+
+                    let idChunk = self.props.jobsInfo[indexJob].jid;
+
+                    let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === idChunk);
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
@@ -168,10 +207,17 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className={"split ui blue basic button " + buttonsClass}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, null)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
                                 </div>
                             </div>
-
+                            <OutsourceContainer project={self.props.project}
+                                                job={chunkJob}
+                                                url={self.getTranslateUrl(chunkJob)}
+                                                showTranslatorBox={true}
+                                                onClickOutside={self.closeOutsourceModal.bind(self)}
+                                                openOutsource={openOutsource}
+                                                idJobLabel={self.props.jobsInfo[indexJob].jid}
+                                                outsourceJobId={self.state.outsourceJobId}/>
                         </div>
                     </div>
                 }
@@ -240,7 +286,8 @@ class AnalyzeChunksResume extends React.Component {
     shouldComponentUpdate(nextProps, nextState){
         return ( !nextProps.jobsAnalysis.equals(this.props.jobsAnalysis) ||
             nextProps.status !== this.props.status ||
-            nextState.openDetails !== this.state.openDetails)
+            nextState.openDetails !== this.state.openDetails ||
+            nextState.outsourceJobId !== this.state.outsourceJobId)
     }
 
     render() {
