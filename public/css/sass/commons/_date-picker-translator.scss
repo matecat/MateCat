@@ -28,3 +28,20 @@
     background: #d0d0d0 !important;
     box-shadow: none !important;
 }
+
+
+
+.xdsoft_datetimepicker .blue-gradient-button {
+    background: #09beec;
+    color: white;
+    font-family: Calibri;
+    border: 1px solid #797979 !important;
+    padding: 4px;
+}
+
+.xdsoft_datetimepicker .blue-gradient-button:hover {
+    background: #09beec;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    color: #fff;
+    border: 1px solid #797979 !important;
+}
