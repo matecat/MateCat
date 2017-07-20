@@ -19,13 +19,13 @@ class ConfirmMessageModal extends React.Component {
                     </div>
                     <div className="column">
                         {this.props.cancelCallback ? (
-                            <div className="ui button-modal grey margin right-10" onClick={this.props.cancelCallback}>{this.props.cancelText}</div>
+                            <div className="ui button cancel-button" onClick={this.props.cancelCallback}>{this.props.cancelText}</div>
                         ) : ('') }
                         {this.props.warningCallback ? (
                                 <div className="ui button-modal orange margin left-10 right-10" onClick={this.props.warningCallback}>{this.props.warningText}</div>
                             ) : ('') }
                         {this.props.successCallback ? (
-                                <div className="ui button-modal blue margin left-10" onClick={this.props.successCallback}>{this.props.successText}</div>
+                                <div className="ui primary button" onClick={this.props.successCallback}>{this.props.successText}</div>
                             ) : ('') }
                     </div>
                 </div>
