@@ -140,7 +140,7 @@ body.analyze{
                 .word-percent {
                     position: relative;
                     background-color: #f2f4f1;
-                    padding: 25px 15px 20px 20px;
+                    padding: 25px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
                     top: 27px;
                     font-size: 16px;
@@ -156,6 +156,25 @@ body.analyze{
                         font-size: 20px;
                         .sub.header {
                             font-size: 12px;
+                        }
+                    }
+                    a {
+                        text-decoration: underline;
+                        font-weight: 700;
+                        cursor: pointer;
+                        &:hover {
+                            text-decoration: none;
+                        }
+                        &:active {
+                            text-decoration: none;
+                        }
+                        &:focus {
+                            text-decoration: none;
+                        }
+                    }
+                    .custom {
+                        &.popup {
+                            min-width: 90%;
                         }
                     }
                 }
@@ -262,6 +281,16 @@ body.analyze{
                     line-height: 50px;
                     padding-top: 15px;
                     padding-bottom: 15px;
+                }
+                .title-standard-words {
+                    h5 {
+                        span {
+                            color: #a7a7a7;
+                            font-weight: 100;
+                            position: relative;
+                            top: 2px;
+                        }
+                    }
                 }
                 .title-matecat-words {
                     h5 {
