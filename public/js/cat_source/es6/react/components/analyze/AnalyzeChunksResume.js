@@ -81,7 +81,7 @@ class AnalyzeChunksResume extends React.Component {
 
                         return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                             <div className="title-job">
-                                <div className="job-id" >Part {index}</div>
+                                <div className="job-id" >Chunk {index}</div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">

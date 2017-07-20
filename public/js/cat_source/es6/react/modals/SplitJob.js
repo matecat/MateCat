@@ -151,7 +151,7 @@ class SplitJobModal extends React.Component {
             let disableClass = (value > 0 ) ? '' : 'void';
             let emptyClass = (value == 0 && this.state.splitChecked) ? 'empty' : '';
             let part = <li key={"split-" + i} className={disableClass}>
-                        <div><h4>Part {i+1}</h4></div>
+                        <div><h4>Chunk {i+1}</h4></div>
                         <div className="job-details">
                             <div className="job-perc"><p>
 

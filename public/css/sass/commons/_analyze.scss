@@ -49,19 +49,18 @@ body.analyze{
                     font-size: 38px;
                     font-weight: 100;
                     color: grey;
-                    margin-bottom: 0px;
+                    margin-bottom: 0;
                 }
                 .ui.ribbon.label {
                     position: relative;
                     top: 0px;
                     z-index: 2;
                     left: -45px;
-                    max-width: 110%;
-                    min-width: 340px;
+                    max-width: 100%;
                     background-color: #d8d8d8;
                     color: #000000;
-                    border-radius: 0px 2px 2px 0px;
-                    padding-right: 10px;
+                    border-radius: 0 2px 2px 0;
+                    padding-right: 15px;
                     .project-id, .project-name {
                         display: inline-block;
                         vertical-align: text-bottom;
@@ -77,12 +76,13 @@ body.analyze{
                     }
                     .project-name {
                         font-size: 20px;
-                        max-width: 90%;
+                        max-width: 100%;
                         min-width: 30px;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
+                        padding-left: 15px;
                     }
                 }
                 .project-create {
