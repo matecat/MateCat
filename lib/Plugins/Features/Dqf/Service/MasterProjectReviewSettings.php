@@ -13,7 +13,6 @@ use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\ReviewSettingsRequestStruct;
 use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
 use INIT;
-use Log;
 
 class MasterProjectReviewSettings {
 

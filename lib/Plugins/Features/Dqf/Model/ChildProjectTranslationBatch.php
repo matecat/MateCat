@@ -133,11 +133,11 @@ class ChildProjectTranslationBatch {
                             "mtEngineId"        => 22,
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
-                            "matchRate"         => $translation->suggestion_match
+                            "matchRate"         => '85' // $translation->suggestion_match
                     ]) )->toArray() ;
                 }
 
-                $segmentParisChunks = array_chunk( $segmentPairs, 100 );
+                $segmentParisChunks = array_chunk( $segmentPairs, 80 );
 
                 foreach( $segmentParisChunks as $segmentParisChunk ) {
                     $requestStruct                 = new ChildProjectTranslationRequestStruct();

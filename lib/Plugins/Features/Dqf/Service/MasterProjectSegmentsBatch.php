@@ -41,8 +41,8 @@ class MasterProjectSegmentsBatch {
 
     public function __construct(Session $session, CreateProjectResponseStruct $remoteProject, $remoteFiles) {
         $this->remoteProject = $remoteProject ;
-        $this->session = $session ;
-        $this->remoteFiles = $remoteFiles ;
+        $this->session       = $session ;
+        $this->remoteFiles   = $remoteFiles ;
     }
 
     public function getResult() {
