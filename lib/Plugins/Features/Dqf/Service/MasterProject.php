@@ -7,6 +7,7 @@ namespace Features\Dqf\Service;
 use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct ;
+use INIT;
 use Log;
 
 class MasterProject {
@@ -22,14 +23,14 @@ class MasterProject {
     public function create( ProjectRequestStruct $projectRequestData ) {
 
         $projectRequestData->sessionId = $this->session->getSessionId() ;
-        $projectRequestData->apiKey    = \INIT::$DQF_API_KEY ;
+        $projectRequestData->apiKey    = INIT::$DQF_API_KEY ;
 
         $client = new Client();
         $client->setSession( $this->session );
 
         $request = $client->createResource( '/project/master', 'post', [
                 'formData' => $projectRequestData->getParams(),
-                'headers' => $projectRequestData->getHeaders()
+                'headers'  => $projectRequestData->getHeaders()
         ] );
 
         $client->curl()->multiExec();

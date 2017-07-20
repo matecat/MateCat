@@ -5,8 +5,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     const TABLE       = "jobs";
     const STRUCT_TYPE = "Jobs_JobStruct";
 
-    protected static $auto_increment_fields = array( 'id' );
-    protected static $primary_keys          = array( 'id', 'password' );
+    protected static $auto_increment_fields = [ 'id' ];
+    protected static $primary_keys          = [ 'id', 'password' ];
 
     protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
 

@@ -47,8 +47,8 @@ job2:
   id: @EVER_INCREMENT
   password: 62394cc5b716
   id_project: @REF:projects:dqf_project_1:id
-  job_first_segment: 56353
-  job_last_segment: 56356
+  job_first_segment: 1
+  job_last_segment: 4
   id_translator:
   tm_keys: "[]"
   job_type: NULL

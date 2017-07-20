@@ -8,11 +8,13 @@
 
 namespace Features\Dqf\Service;
 
+use Exception;
+use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
+use Features\Dqf\Service\Struct\Request\SourceSegmentsBatchRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
 use Features\Dqf\Service\Struct\Response\SourceSegmentsBatchResponseStruct;
-
-use Features\Dqf\Service\Struct\Request\SourceSegmentsBatchRequestStruct;
-use Features\Dqf\Service\Struct\CreateProjectResponseStruct ;
+use Features\Dqf\Utils\Functions;
+use Segments_SegmentDao;
 
 class MasterProjectSegmentsBatch {
 
@@ -53,7 +55,7 @@ class MasterProjectSegmentsBatch {
         $this->batchRequests = [];
 
         foreach( $this->remoteFiles as $localFileId => $file ) {
-            $segments = ( new \Segments_SegmentDao())->getByFileId( $localFileId, ['id', 'segment'] ) ;
+            $segments = ( new Segments_SegmentDao())->getByFileId( Functions::descope( $localFileId ), ['id', 'segment'] ) ;
 
             $chunked_segments = array_chunk( $segments, SourceSegmentsBatchRequestStruct::BATCH_LIMIT, true );
 
@@ -77,17 +79,18 @@ class MasterProjectSegmentsBatch {
     /**
      * @return SourceSegmentsBatchResponseStruct[]
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected  function _processRequests() {
         $resources = [];
         $client = new Client() ;
 
         foreach( $this->batchRequests as $request ) {
-            $resources[] = $client->createResource( '/project/master/%s/file/%s/sourceSegment/batch', 'post', [
-                            'json' => $request->getBody(),
+            $resources[] = $client->createResource(
+                    '/project/master/%s/file/%s/sourceSegment/batch', 'post', [
+                            'json'       => $request->getBody(),
                             'pathParams' => $request->getPathParams(),
-                            'headers' => $request->getHeaders()
+                            'headers'    => $request->getHeaders()
                     ]
             );
         }
@@ -95,7 +98,9 @@ class MasterProjectSegmentsBatch {
         $client->curl()->multiExec();
 
         if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new \Exception( 'error during master segments batch' ) ;
+            throw new Exception( 'Error during master segments batch ' .
+                    var_export( $client->curl()->getAllContents(), true )
+            ) ;
         }
 
         return array_map( function( $item ) {

@@ -37,6 +37,9 @@ class Client {
         $this->session = $session ;
     }
 
+    /**
+     * @return MultiCurlHandler
+     */
     public function curl() {
         return $this->curl ;
     }
@@ -98,9 +101,13 @@ class Client {
             $params['headers'] [ 'sessionId' ] = $this->session->getSessionId() ;
         }
 
+        $curlopts[ CURLOPT_RETURNTRANSFER ] = true ;
+
         if ( $method == 'post' ) {
-            $curlopts[ CURLOPT_POST ]           = true ;
-            $curlopts[ CURLOPT_RETURNTRANSFER ] = true ;
+            $curlopts[ CURLOPT_POST ] = true ;
+        }
+
+        elseif ( $method == 'get' ) {
         }
 
         elseif ( $method == 'put' ) {

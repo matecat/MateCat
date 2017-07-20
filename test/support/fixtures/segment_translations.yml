@@ -4,7 +4,7 @@ st1:
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   autopropagated_from: NULL
   status: NEW
-  translation: NULL
+  translation: Ciao mondo 4WD
   translation_date: NULL
   time_to_edit: 0
   match_type: NO_MATCH
@@ -30,7 +30,7 @@ st2:
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
   status: NEW
-  translation: NULL
+  translation: Ciao mondo
   translation_date: NULL
   time_to_edit: 0
   match_type: 95%-99%
@@ -56,7 +56,7 @@ st3:
   segment_hash: 37d2a389ba71f6de1df030220703785d
   autopropagated_from: NULL
   status: NEW
-  translation: NULL
+  translation: Anche questa unità ha un commento
   translation_date: NULL
   time_to_edit: 0
   match_type: NO_MATCH
@@ -82,7 +82,7 @@ st4:
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
   status: NEW
-  translation: NULL
+  translation: Ciao mondo
   translation_date: NULL
   time_to_edit: 0
   match_type: REPETITIONS

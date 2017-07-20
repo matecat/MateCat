@@ -13,6 +13,7 @@ use Features\Dqf\Service\Struct\MasterFileRequestStruct;
 use Features\Dqf\Service\Struct\Request\FileTargetLanguageRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
 use Features\Dqf\Utils\Functions;
+use Files_FileStruct;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 
@@ -48,14 +49,14 @@ class MasterProjectFiles {
         $this->remoteProject = $remoteProject ;
     }
 
-    public function setFile( \Files_FileStruct $file, $numberOfSegments ) {
+    public function setFile( Files_FileStruct $file, $numberOfSegments ) {
         $fileRequestStruct = new MasterFileRequestStruct();
 
         $fileRequestStruct->sessionId   = $this->session->getSessionId();
         $fileRequestStruct->projectKey  = $this->remoteProject->dqfUUID ;
 
         $fileRequestStruct->name             = $file->filename ;
-        $fileRequestStruct->clientId         = Functions::scopeId($file->id);
+        $fileRequestStruct->clientId         = Functions::scopeId( $file->id );
         $fileRequestStruct->numberOfSegments = $numberOfSegments ;
 
         $this->files[] = $fileRequestStruct ;

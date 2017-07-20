@@ -16,6 +16,10 @@ class Functions {
         return INIT::$DQF_ID_PREFIX . '-' . $id ;
     }
 
+    public static function descope( $id ) {
+        return str_replace( static::scopeId(''), '', $id ) ;
+    }
+
     public static function mapMtEngine( $input ) {
         // TODO: ...
         return $input ;

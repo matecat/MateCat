@@ -7,6 +7,7 @@ class CreateTableForDqfProjects extends AbstractMatecatMigration
     public $sql_up = "CREATE TABLE `dqf_child_projects_map` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_job` BIGINT(20)  NOT NULL,
+  `password` VARCHAR(50) NOT NULL,
   `first_segment` INT(11) NOT NULL,
   `last_segment` INT(11) NOT NULL,
   `dqf_project_id` INT(11) NOT NULL,

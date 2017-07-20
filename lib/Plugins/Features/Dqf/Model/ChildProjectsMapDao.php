@@ -11,6 +11,7 @@ namespace Features\Dqf\Model;
 use Chunks_ChunkStruct;
 use DataAccess_AbstractDao;
 use Database;
+use Files_FileStruct;
 use PDO;
 
 class ChildProjectsMapDao extends DataAccess_AbstractDao  {
@@ -21,21 +22,39 @@ class ChildProjectsMapDao extends DataAccess_AbstractDao  {
     protected static $auto_increment_fields = [ 'id' ];
     protected static $primary_keys          = [ 'id' ];
 
-    public function getByChunk( Chunks_ChunkStruct $chunk ) {
+    /**
+     *
+     * Return one record where id job and start and stop segment match, ignore archived records.
+     *
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return ChildProjectsMapStruct[]
+     */
+    public function getByChunkAndFile( Chunks_ChunkStruct $chunk, Files_FileStruct $file ){
+        list ( $min, $max ) = $file->getMaxMinSegmentBoundariesForChunk( $chunk );
+        return $this->getByChunkAndSegmentsInterval( $chunk, $min, $max );
+    }
+
+    public function getByChunkAndSegmentsInterval( Chunks_ChunkStruct $chunk, $min, $max) {
         $sql = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job AND  " .
-        " first_segment = :first_segment AND last_segment = :last_segment AND " .
-        " archvied_at IS NULL ";
+                " password = :password AND archive_date IS NULL AND " .
+                " (
+                ( first_segment BETWEEN :min AND :max ) OR ( last_segment BETWEEN :min AND :max )
+            ) " ;
 
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+
         $stmt->execute([
-                'id_job'        => $chunk->id,
-                'first_segment' => $chunk->job_first_segment,
-                'last_segment'  => $chunk->job_last_segment
+                'id_job'   => $chunk->id,
+                'password' => $chunk->password,
+                'min'      => $min,
+                'max'      => $max
         ]);
 
-
+        return $stmt->fetchAll() ;
     }
+
 }

@@ -33,14 +33,14 @@ class SourceSegmentsBatchRequestStruct extends BaseRequestStruct implements ISes
      * @return array
      */
     public function getPathParams() {
-        return ['projectId' => $this->projectId, 'fileId' => $this->fileId ] ;
+        return [ 'projectId' => $this->projectId, 'fileId' => $this->fileId ] ;
     }
 
     /**
      * @return array
      */
     public function getBody() {
-        return ['sourceSegments' => $this->_sourceSegments ];
+        return [ 'sourceSegments' => $this->_sourceSegments ];
     }
 
     public function appendSegment( Segments_SegmentStruct $segment ) {
@@ -51,10 +51,9 @@ class SourceSegmentsBatchRequestStruct extends BaseRequestStruct implements ISes
 
         $this->_sourceSegments[] = [
                 'sourceSegment' => $segment->segment,
-                'index' => $segment->id,
-                'clientId' => Functions::scopeId( $segment->id )
+                'index'         => $segment->id,
+                'clientId'      => Functions::scopeId( $segment->id )
         ];
     }
-
 
 }

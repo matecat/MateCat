@@ -41,9 +41,12 @@ class ChildProjectTranslationRequestStruct extends BaseRequestStruct {
      * @return array
      */
     public function getBody() {
-        return [
-                'sourceSegments' => $this->_segmentsForBody
+        return  [
+                'segmentPairs' => $this->_segmentsForBody
         ];
+    }
 
+    public function setSegments( $segments ) {
+        $this->_segmentsForBody = $segments ;
     }
 }

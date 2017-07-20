@@ -1,37 +1,94 @@
 <?php
 
+use Features\Dqf\Model\ExtendedTranslationStruct;
+
 class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
+    const TABLE = 'segment_translation_versions';
+
     public $source_page ;
     public $uid ;
 
     protected function _buildResult( $array_result ) {
     }
 
-    public function getExtendedTranslationSinceByFile( $file_id, $since ) {
+    /**
+     * @param $file
+     * @param $since
+     * @param $min
+     * @param $max
+     *
+     * @return ExtendedTranslationStruct[]
+     */
+    public function getExtendedTranslationByFile( $file, $since, $min, $max ) {
 
         $sql = "SELECT
+
                 s.id_file,
                 st.id_job,
                 s.id,
 
-                st.auto_propagated_from,
+                st.autopropagated_from,
                 st.time_to_edit,
                 st.translation,
 
                 stv.creation_date,
-                stv.translation
+                stv.translation AS versioned_translation,
+                stv.time_to_edit AS versioned_time_to_edit
+
                 FROM segment_translations st JOIN segments s ON s.id = st.id_segment
-                LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
-                AND stv.creation_date >= :since
-                WHERE id_file = :id_file
+                  LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
+                  AND stv.creation_date >= :since
+
+              WHERE id_file = :id_file
+              AND s.id >= :min AND s.id <= :max
 
                 ORDER BY s.id, stv.id
                 " ;
 
-        //
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
 
+        $stmt->execute([
+                'id_file' => $file->id,
+                'since'   => $since,
+                'min'     => $min,
+                'max'     => $max
+        ]) ;
 
+        $result             = [] ;
+        $current_segment    = null ;
+        $time               = 0 ;
+        $translation_before = '' ;
 
+        while( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
+            if ( !is_null( $current_segment ) && $row['id'] != $current_segment ) {
+
+                /**
+                 * Close the iteration: assign the row to the result and reset the variables
+                 */
+
+                $result[] = new ExtendedTranslationStruct([
+                                'id_job'             => $row['id_job'],
+                                'id_segment'         => $row['id'],
+                                'time'               => $time + $row['time_to_edit'],
+                                'translation_before' => $translation_before,
+                                'translation_after'  => $row['translation']
+                        ]);
+
+                $time = 0  ;
+                $translation_before = '' ;
+            }
+
+            if ( $translation_before != '' ) {
+                // we are in the first iteration of a segment
+                $time = $time + $row['versioned_time_to_edit'] ;
+            }
+
+            $translation_before = ( is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'] ) ;
+            $current_segment    = $row['id'] ;
+        }
+
+        return $result ;
     }
 
     public static function getVersionsForJob($id_job) {

@@ -1,5 +1,7 @@
 <?php
 
+use Files\FilesJobDao;
+
 class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id  ;
     public $id_project  ;
@@ -19,6 +21,15 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         $dao = new Translations_SegmentTranslationDao() ;
 
         return $dao->getByFile( $this ) ;
+    }
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return array
+     */
+    public function getMaxMinSegmentBoundariesForChunk( Chunks_ChunkStruct $chunk ) {
+        return ( new FilesJobDao() )->getSegmentBoundariesForChunk( $this, $chunk ) ;
     }
 
 }

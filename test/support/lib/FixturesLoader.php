@@ -31,6 +31,7 @@ class FixturesLoader {
         $this->loadFilesJob();
         $this->loadSegments();
         $this->loadSegmentTranslations();
+        $this->loadSegmentTranslationVersions();
         $this->loadQaChunkRevies();
         $this->loadQaCategories();
     }
@@ -86,6 +87,17 @@ class FixturesLoader {
             $this->replaceTokens( $record ) ;
             $struct = new Translations_SegmentTranslationStruct( $record ) ;
             Translations_SegmentTranslationDao::insertStruct( $struct ) ;
+        }
+    }
+
+    protected function loadSegmentTranslationVersions() {
+        $this->loadFromFile('segment_translation_versions') ;
+
+        foreach( $this->fixtures_map['segment_translation_versions'] as $name => &$record ) {
+            $this->replaceTokens( $record ) ;
+            $struct = new Translations_TranslationVersionStruct( $record ) ;
+            $struct->creation_date = Utils::mysqlTimestamp( $record['creation_date'] ) ;
+            $insert = Translations_TranslationVersionDao::insertStruct( $struct ) ;
         }
     }
 

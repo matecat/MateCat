@@ -3,12 +3,19 @@
 namespace Features\Dqf\Model ;
 
 use Chunks_ChunkStruct;
+use Features\Dqf\Service\ChildProjectTranslationBatchService;
+use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Utils\Functions;
+use Files\FilesJobDao;
+use Files\FilesJobStruct;
 use Files_FileStruct;
+use INIT;
 use Jobs\MetadataDao;
+use Translations_TranslationVersionDao;
 use Users_UserDao;
+use Utils;
 
 /**
  * Created by PhpStorm.
@@ -28,12 +35,25 @@ class ChildProjectTranslationBatch {
      */
     protected  $session ;
 
+    /**
+     * @var ChildProjectsMapStruct[]
+     */
+    protected  $remoteDqfProjects ;
+
+    /**
+     * @var Files_FileStruct[]
+     */
+    protected $files ;
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
-        $this->chunk   = $chunk ;
+        $this->chunk = $chunk ;
         $record = ( new MetadataDao() )->get( $chunk->id, $chunk->password, 'dqf_translate_user' ) ;
 
         $dqfUser = new UserModel( ( new Users_UserDao() )->getByUid( $record->value ) ) ;
         $this->session = $dqfUser->getSession()->login();
+
+        $this->service = new ChildProjectTranslationBatchService($this->session) ;
+
     }
 
     public function process() {
@@ -55,7 +75,7 @@ class ChildProjectTranslationBatch {
          *       "targetSegment":"",                                                            <--- in order to collect this data we must read all segment versions since the last update...
          *       "editedSegment":"Proin interdum mauris non ligula pellentesque ultrices.",     <--- in fact we cannot rely on the latest version only. Subsequent edits may have happened.
          *       "time":6582,                                                                   <-- same thing here, we must make a sum of the time to edit of all versions ??? hum...
-         *       "segmentOriginId":5,                         <--- ???? no idea what this field is
+         *       "segmentOriginId":5,                         <--- segment origin mapping, read the docs
          *       "mtEngineId":null,                           <--- ??  we should have this field
          *       "mtEngineOtherName":null,                    <--- not needed ? ?
          *       "matchRate":0                                <---- we have this one.
@@ -77,46 +97,71 @@ class ChildProjectTranslationBatch {
          *
          */
 
-        foreach( $this->chunk->getFiles() as $file ) {
-            $this->requestForFile( $file ) ;
+        $this->files = $this->chunk->getFiles() ;
+
+        foreach( $this->files as $file ) {
+            list ( $min, $max ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
+
+            $dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunkAndSegmentsInterval( $this->chunk, $min, $max ) ;
+            $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $min, $max ) ;
+
+            // DQF child project
+
+            $remoteFileId = $this->_findRemoteFileId( $file );
+
+            foreach ( $dqfChildProjects as $dqfChildProject ) {
+                $dao   = new Translations_TranslationVersionDao();
+                $translations = $dao->getExtendedTranslationByFile(
+                        $file,
+                        $dqfChildProject->create_date,  // <--- TODO: check if this is correct
+                        $dqfChildProject->first_segment,
+                        $dqfChildProject->last_segment
+                ) ;
+
+                // Now we have translations, make the actual call, one per file per project
+                $segmentPairs = [] ;
+                foreach ( $translations as $translation ) {
+                    // Using a struct and converting it to array immediately allows us to validate the
+                    // input array.
+                    $segmentPairs[] = ( new SegmentPairStruct([
+                            "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ],
+                            "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
+                            "targetSegment"     => $translation->translation_before,
+                            "editedSegment"     => $translation->translation_after,
+                            "time"              => $translation->time,
+                            "segmentOriginId"   => 5, // HT hardcoded for now
+                            "mtEngineId"        => 22,
+                            // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
+                            "mtEngineOtherName" => '',
+                            "matchRate"         => $translation->suggestion_match
+                    ]) )->toArray() ;
+                }
+
+                $segmentParisChunks = array_chunk( $segmentPairs, 100 );
+
+                foreach( $segmentParisChunks as $segmentParisChunk ) {
+                    $requestStruct                 = new ChildProjectTranslationRequestStruct();
+                    $requestStruct->sessionId      = $this->session->getSessionId();
+                    $requestStruct->fileId         = $remoteFileId ;
+                    $requestStruct->projectKey     = $dqfChildProject->dqf_project_uuid ;
+                    $requestStruct->projectId      = $dqfChildProject->dqf_project_id ;
+                    $requestStruct->targetLangCode = $this->chunk->target ;
+                    $requestStruct->apiKey         = INIT::$DQF_API_KEY ;
+
+                    $requestStruct->setSegments( $segmentParisChunk ) ;
+
+                    $this->service->addRequestStruct( $requestStruct ) ;
+
+                }
+            }
         }
 
-        $requestStruct = new ChildProjectTranslationRequestStruct();
-        $requestStruct->sessionId = $this->session->getSessionId();
-
-        // we need to get projectId to use and fileId
-        // file id
-
-        // public $projectId ; // child project id
-        // public $fileId ; // file ID legato al che ?
-        // public $targetLangCode ;
-        // public $sessionId ;
-        // public $apiKey ;
-        // public $projectKey ;
+        $this->service->process() ;
     }
 
-    /**
-     * @param Files_FileStruct $file
-     */
-    protected function requestForFile( Files_FileStruct $file ) {
-        $segmentPairs = [] ;
-
-        foreach ( $file->getTranslations() as $translation ) {
-            // Using a struct and converting it to array immediately allows us to validate the
-            // input array.
-            $segmentPairs[] = ( new SegmentPairStruct([
-                    "sourceSegmentId"   => $translation->id_segment,
-                    "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
-                    "targetSegment"     => $translation->before,
-                    "editedSegment"     => $translation->after,
-                    "time"              => $translation->time,
-                    "segmentOriginId"   => 5, // HT hardcoded for now
-                    "mtEngineId"        => 22,
-                    // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
-                    "mtEngineOtherName" => '',
-                    "matchRate"         => $translation->suggestion_match
-            ]))->toArray() ;
-        }
+    protected function _findRemoteFileId( Files_FileStruct $file ) {
+        $service = new FileIdMapping( $this->session, $file ) ;
+        return $service->getRemoteId() ;
     }
 
 }

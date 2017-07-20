@@ -1,5 +1,5 @@
 segment1:
-  id: @EVER_INCREMENT
+  id: 1
   id_file: @REF:files:file1:id
   id_file_part: NULL
   internal_id: 251971551069
@@ -14,7 +14,7 @@ segment1:
   show_in_cattool: 1
 
 segment2:
-  id: @EVER_INCREMENT
+  id: 2
   id_file: @REF:files:file1:id
   id_file_part: NULL
   internal_id: 251971551065
@@ -29,7 +29,7 @@ segment2:
   show_in_cattool: 1
 
 segment3:
-  id: @EVER_INCREMENT
+  id: 3
   id_file: @REF:files:file1:id
   id_file_part: NULL
   internal_id: 251971551066
@@ -44,7 +44,7 @@ segment3:
   show_in_cattool: 1
 
 segment4:
-  id: @EVER_INCREMENT
+  id: 4
   id_file: @REF:files:file1:id
   id_file_part: NULL
   internal_id: 251971551067

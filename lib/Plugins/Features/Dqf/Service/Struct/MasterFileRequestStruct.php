@@ -9,6 +9,8 @@
 namespace Features\Dqf\Service\Struct;
 
 
+use Features\Dqf\Utils\Functions;
+
 class MasterFileRequestStruct extends BaseRequestStruct {
 
     // public $projectId ;
@@ -21,8 +23,22 @@ class MasterFileRequestStruct extends BaseRequestStruct {
     public $numberOfSegments ;
     public $clientId ;
 
+    protected $_unscopedClientId ;
+
     public function getHeaders() {
         return $this->toArray(['sessionId', 'apiKey', 'projectKey']);
+    }
+
+    public function __set( $name, $value ) {
+        if ( $name == '_unscopedClientId' ) {
+            $this->_unscopedClientId = $value ;
+            $this->clientId = Functions::scopeId( $value );
+        }
+
+        if ( $name == 'clientId' ) {
+            $this->_unscopedClientId = Functions::descope( $value ) ;
+            $this->clientId = $value ;
+        }
     }
 
 }

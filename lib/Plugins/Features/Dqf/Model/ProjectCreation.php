@@ -5,27 +5,29 @@
 namespace Features\Dqf\Model ;
 
 use Chunks_ChunkStruct;
+use Exception;
 use Exceptions\NotFoundError;
 use Features\Dqf\Service\ChildProject;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\MasterProjectReviewSettings;
-use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\MasterProjectSegmentsBatch;
+use Features\Dqf\Service\Session;
+use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
-use Features\Dqf\Service\Session ;
-
-
 use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
 use Features\Dqf\Utils\Functions;
+use Features\Dqf\Utils\ProjectMetadata;
 use Features\Dqf\Utils\UserMetadata;
-use Features\Dqf\Utils\ProjectMetadata ;
 use Files_FileDao;
+use Log;
 use Projects_ProjectDao;
-use Projects_ProjectStruct ;
+use Projects_ProjectStruct;
+use Users_UserDao;
 use Utils;
+
 
 class ProjectCreation {
 
@@ -138,7 +140,7 @@ class ProjectCreation {
     }
 
     protected function _getCredentials() {
-        $user = ( new \Users_UserDao() )->getByEmail( $this->project->id_customer );
+        $user = ( new Users_UserDao() )->getByEmail( $this->project->id_customer );
 
         if ( !$user ) {
             throw new NotFoundError("User not found") ;
@@ -155,7 +157,24 @@ class ProjectCreation {
 
     protected function _submitSourceSegments() {
         $batchSegments = new MasterProjectSegmentsBatch($this->session, $this->remoteProject, $this->remoteFiles);
-        $this->segmentsBatchResult = $batchSegments->getResult() ;
+        $results = $batchSegments->getResult() ;
+
+        foreach( $results as $result ) {
+            if ( empty( $result->segmentList ) ) {
+                throw new Exception('segmentList is empty');
+            }
+            $this->_saveSegmentsList( $result->segmentList ) ;
+        }
+    }
+
+    protected function _saveSegmentsList( $segmentList ) {
+        $dao = new DqfSegmentsDao() ;
+        $dao->insertBulkMap( array_map(function( $item ) {
+            return [
+                    Functions::descope($item['clientId']),
+                    $item['dqfId']
+            ];
+        }, $segmentList ) ) ;
     }
 
     protected function _submitChildProjects() {
@@ -168,15 +187,18 @@ class ProjectCreation {
         }
     }
 
+
     /**
      * @param Chunks_ChunkStruct          $chunk
      * @param CreateProjectResponseStruct $remoteProject
      */
     protected function _saveDqfChildProjectMap( Chunks_ChunkStruct $chunk, CreateProjectResponseStruct $remoteProject ) {
-        $struct = new ChildProjectMapStruct() ;
+        $struct = new ChildProjectsMapStruct() ;
+
         $struct->id_job           = $chunk->id ;
         $struct->first_segment    = $chunk->job_first_segment ;
         $struct->last_segment     = $chunk->job_last_segment ;
+        $struct->password         = $chunk->password ;
         $struct->dqf_project_id   = $remoteProject->dqfId ;
         $struct->dqf_project_uuid = $remoteProject->dqfUUID ;
         $struct->create_date      = Utils::mysqlTimestamp(time()) ;
