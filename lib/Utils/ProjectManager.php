@@ -1894,7 +1894,7 @@ class ProjectManager {
 
     protected function _storeSegments( $fid ){
 
-        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file, id_project, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
+        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file,/* id_project, */ segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );
@@ -1927,7 +1927,8 @@ class ProjectManager {
              *  $mrk_ext_succ_tags
              */
             $tuple = $this->projectStructure[ 'segments' ][ $fid ][ $position ];
-            $tuple_string = "'{$tuple[0]}',{$tuple[1]},{$tuple[2]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
+//            $tuple_string = "'{$tuple[0]}',{$tuple[1]},{$tuple[2]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
+            $tuple_string = "'{$tuple[0]}',{$tuple[1]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
