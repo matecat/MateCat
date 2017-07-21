@@ -461,7 +461,7 @@ $(window).resize(function() {
 
 <div metal:use-macro="common.html/footer_includes" />
 
-<script tal:condition="php: INIT::$DQF_ENABLED">
+<script tal:condition="exists:dqf_user_status">
     <tal:block>
         /*<![CDATA[*/
         config.dqf_user_status = '${dqf_user_status}' ;
