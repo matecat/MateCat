@@ -23,7 +23,7 @@ class AnalyzeChunksResume extends React.Component {
         });
 
     }
-
+    //TODO: Togliere dallo split modal l'id job @Federico
     openSplitModal(id) {
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
@@ -81,7 +81,7 @@ class AnalyzeChunksResume extends React.Component {
 
                         return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                             <div className="title-job">
-                                <div className="job-id" >{chunk.jid}-{index}</div>
+                                <div className="job-id" >Chunk {index}</div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
@@ -140,7 +140,7 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunks sixteen wide column">
                             <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
-                                    <div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>
+                                    {/*<div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>*/}
                                     <div className="source-target" >
                                         <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                         <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -182,7 +182,7 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                <div className="job-id">({jobInfo.get('id')})</div>
+                                {/*<div className="job-id">({jobInfo.get('id')})</div>*/}
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -244,7 +244,7 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     render() {
-        let showHideText = (this.state.openDetails) ? "Hide Analysis report" : "Show Analysis report";
+        let showHideText = (this.state.openDetails) ? "Hide Details" : "Show Details";
         let iconClass = (this.state.openDetails) ? "open" : "";
         return <div className="project-top ui grid">
             <div className="compare-table sixteen wide column">
@@ -256,15 +256,15 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="titles-compare">
                         <div className="title-total-words">
                             <h5>Total word count</h5>
-                            <p>(Raw words in the files)</p>
+                            {/*<p>(Raw words in the files)</p>*/}
                         </div>
                         <div className="title-standard-words">
-                            <h5>Industry weighted</h5>
-                            <p>(As counted by other CAT tools)</p>
+                            <h5 data-tooltip="As counted by other CAT tools">Industry weighted <span className="icon-info icon"></span></h5>
+                            {/*<p>(As counted by other CAT tools)</p>*/}
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>
-                            <p>(Leveraging previous translations)</p>
+                            {/*<p>(Leveraging previous translations)</p>*/}
                         </div>
                     </div>
                 </div>

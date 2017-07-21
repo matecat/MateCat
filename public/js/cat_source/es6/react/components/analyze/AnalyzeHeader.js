@@ -195,19 +195,26 @@ class AnalyzeHeader extends React.Component {
                                 </div>
                             </div>
                         </h2>
-                        <p>MateCat gives you <b>more matches than any other CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
+                        {/*<p>MateCat gives you more matches than any other tool thanks to a better
+                            <a className="mc-description" data-tooltip="MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to offer machine translation suggestions or translation memory matches thanks to the millions of words corrected by the MateCat community. This data is also used to define a fair pricing scheme that splits the benefits of the technology between the customer and the translator. "><b> of machine translation and translation memories.</b></a>
+                        </p>*/}
+                        <p>MateCat gives you more matches than any other tool thanks to a better
+                            <a className="ui custom show"> integration of machine translation and translation memories</a>
                         </p>
+                        <div className="ui custom popup">
+                            MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to offer machine translation suggestions or translation memory matches thanks to the millions of words corrected by the MateCat community. This data is also used to define a fair pricing scheme that splits the benefits of the technology between the customer and the translator.
+                        </div>
                     </div>
                 </div>
             </div>
 
 
     }
-
-    getDate() {
+    //TODO: messaggio from Ruben: io l'ho commentato poi lo dobbiamo cancellare nel modo giusto
+    /*getDate() {
         let date = this.props.project.get('create_date').substr(0,10);
         return new Date(date).toDateString();
-    }
+    }*/
 
     downloadAnalysisReport() {
         UI.downloadAnalysisReport();
@@ -232,6 +239,13 @@ class AnalyzeHeader extends React.Component {
     }
 
     componentDidMount() {
+        $('.custom.show')
+            .popup({
+                position : 'bottom left',
+                popup : $('.custom.popup'),
+                on    : 'click'
+            })
+        ;
     }
 
     componentWillUnmount() {
@@ -248,10 +262,10 @@ class AnalyzeHeader extends React.Component {
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
-                            <div className="project-id" title="Project id"> ({this.props.project.get('id')}) </div>
+                            {/*<div className="project-id" title="Project id"> ({this.props.project.get('id')}) </div>*/}
                             <div className="project-name" title="Project name"> {this.props.project.get('name')} </div>
                         </div>
-                        <div className="project-create">Created on {this.getDate()}</div>
+                        {/*<div className="project-create">Created on {this.getDate()}</div>*/}
                         {analysisStateHtml}
                     </div>
 

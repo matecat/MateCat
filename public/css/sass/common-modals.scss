@@ -579,7 +579,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     max-width: 600px;
     min-width: 400px;
     -webkit-box-shadow: 0 1px 20px #000;
-    box-shadow: 0 1px 20px #000;
+    box-shadow: 0 1px 20px #6f6e6e;
 }
 
 .matecat-modal-body h1 {
@@ -1268,4 +1268,29 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 
 .dropdown > .menu {
     z-index: 100000000;
+}
+
+/*.primary {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    !* padding: 6px 15px; *!
+    vertical-align: top;
+    font-size: 16px;
+    border: 1px solid #797979;
+    border-radius: 2px;
+}*/
+.ui.button.cancel-button {
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    margin-top: 0;
+    border: 1px solid #797979;
+    border-radius: 2px;
+    padding: 10px 23px;
+    background-color: #f6f6f6;
+    margin-right: 15px;
+    &:hover {
+        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    }
+    &:focus {
+        box-shadow: none;
+    }
 }
