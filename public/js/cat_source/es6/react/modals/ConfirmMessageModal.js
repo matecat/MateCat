@@ -13,11 +13,11 @@ class ConfirmMessageModal extends React.Component {
     render() {
         return <div className="message-modal">
             <div className="matecat-modal-middle">
-                <div className="ui one column grid center aligned">
+                <div className="ui one column grid left aligned">
                     <div className="column" style={{fontSize:'18px'}}>
                         <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)}/>
                     </div>
-                    <div className="column">
+                    <div className="column right aligned">
                         {this.props.cancelCallback ? (
                             <div className="ui button-modal grey margin right-10" onClick={this.props.cancelCallback}>{this.props.cancelText}</div>
                         ) : ('') }
