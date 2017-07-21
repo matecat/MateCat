@@ -369,6 +369,16 @@
     ,
         {
             "localized":[{
+                "en":"Dari"
+            }],
+            "isocode":"fa",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"fa-PRS"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Dutch"
             }],
             "isocode":"nl",
@@ -1534,7 +1544,7 @@
                 "en":"Syriac (Aramaic)"
             }],
             "isocode":"syc",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"syc-TR"
         }
@@ -1565,7 +1575,7 @@
                 "en":"Tamashek (Tuareg)"
             }],
             "isocode":"tmh",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"tmh-DZ"
         }
@@ -1636,9 +1646,9 @@
                 "en":"Tigrinya"
             }],
             "isocode":"ti",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ti-TI"
+            "rfc3066code":"ti-TIR"
         }
     ,
         {

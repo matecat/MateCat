@@ -367,7 +367,8 @@ class INIT {
                     'srt'         => array( '', '', 'extsrt' ),
                     'wix'         => array( '', '', 'extwix' ),
                     'po'          => array( '', '', 'extpo'  ),
-                    'g'           => array( '', '', 'extg' )
+                    'g'           => array( '', '', 'extg' ),
+                    'ts'          => array( '', '', 'exts' ),
             )
     );
 

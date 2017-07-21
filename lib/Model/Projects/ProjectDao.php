@@ -110,18 +110,19 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     /**
      * @param int $id_job
+     * @param int $ttl
+     *
      * @return Projects_ProjectStruct
      */
-    static function findByJobId( $id_job ) {
+    static function findByJobId( $id_job, $ttl = 0 ) {
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT projects.* FROM projects " .
             " INNER JOIN jobs ON projects.id = jobs.id_project " .
             " WHERE jobs.id = :id_job " .
             " LIMIT 1 " ;
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array('id_job' => $id_job ) );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Projects_ProjectStruct' );
-        return $stmt->fetch();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[0];
     }
 
     /**
