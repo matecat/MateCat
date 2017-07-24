@@ -17,6 +17,12 @@ use Features\ReviewImproved\Controller;
 use Projects_ProjectStruct ;
 use Jobs_JobStruct ;
 
+use Features\ProjectCompletion\Model\EventStruct ;
+
+use Features ;
+use Chunks_ChunkStruct ;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
+use Features\ReviewImproved\Model\QualityReportModel ;
 
 class ReviewImproved extends BaseFeature {
 
@@ -246,6 +252,26 @@ class ReviewImproved extends BaseFeature {
         $translation_model->notify();
     }
 
+    /**
+     * project_completion_event_saved
+     *
+     * @param Chunks_ChunkStruct $chunk
+     * @param EventStruct $event
+     * @param $completion_event_id
+     */
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $completion_event_id ) {
+        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) ) {
+            if ( $event->is_review ) {
+                $model = new ArchivedQualityReportModel( $chunk );
+                $model->saveWithUID( $event->uid );
+            }
+            else {
+                $model = new QualityReportModel( $chunk ) ;
+                $model->resetScore( $completion_event_id );
+            }
+        }
+    }
+
     public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
         $dao = new ChunkReviewDao();
         $dao->updatePassword( $job->id, $job->password, $new_password );
@@ -372,19 +398,22 @@ class ReviewImproved extends BaseFeature {
 
     }
 
+
     /**
      * Install routes for this plugin
      *
      * @param \Klein\Klein $klein
      */
-
     public static function loadRoutes( \Klein\Klein $klein ) {
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]', function ($request, $response, $service, $app) {
-            $controller = new Controller\QualityReportController( $request, $response, $service, $app);
-            $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
-            $controller->setView( $template_path );
-            $controller->respond();
-        });
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]',                    array(__CLASS__, 'callbackQualityReport')  );
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/versions/[:version]', array(__CLASS__, 'callbackQualityReport')  );
+    }
+
+    public static function callbackQualityReport($request, $response, $service, $app) {
+        $controller = new Controller\QualityReportController( $request, $response, $service, $app);
+        $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
+        $controller->setView( $template_path );
+        $controller->respond();
     }
 
 }

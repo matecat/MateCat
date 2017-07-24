@@ -3239,7 +3239,7 @@ UI = {
         if ( UI.someUserSelection )           return;
 
         UI.selectingReadonly = setTimeout(function() {
-            APP.alert({msg: UI.messageForClickOnReadonly() });
+            APP.alert({ msg: UI.messageForClickOnReadonly() });
         }, 200);
     },
 
