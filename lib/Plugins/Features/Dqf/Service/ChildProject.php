@@ -10,10 +10,12 @@ namespace Features\Dqf\Service;
 
 
 use Chunks_ChunkStruct;
-use ConnectedServices\GDrive\RemoteFileService;
+use Exception;
+use Features\Dqf\Model\ChildProjectsMapStruct;
+use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
+use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\Struct\Request\ProjectTargetLanguageRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
 use Features\Dqf\Utils\Functions;
@@ -27,20 +29,45 @@ class ChildProject {
      * @var Session
      */
     protected $session ;
-    /**
-     * @var CreateProjectResponseStruct
-     */
-    protected $parent ;
 
     /**
      * @var Chunks_ChunkStruct
      */
     protected $chunk ;
 
-    public function __construct(Session $session, CreateProjectResponseStruct $parent, Chunks_ChunkStruct $chunk ) {
+    public function __construct(Session $session, Chunks_ChunkStruct $chunk ) {
         $this->chunk   = $chunk  ;
         $this->session = $session ;
-        $this->parent  = $parent ;
+    }
+
+    public function getRemoteResource() {
+        $client = new Client();
+        $client ->setSession( $this->session ) ;
+    }
+
+    /***
+     * @param ChildProjectsMapStruct    $dqfChildProject
+     * @param ChildProjectRequestStruct $request
+     *
+     * @return array
+     *
+     * Find back the remote project, merge data and update the resource again.
+     */
+    public function updateTranslationChild(ChildProjectsMapStruct $dqfChildProject, ChildProjectRequestStruct $request) {
+        $client = new Client();
+        $client ->setSession( $this->session ) ;
+
+        $resource = $client->createResource('/project/child/%s', 'put', [
+                'headers'     =>  $request->getHeaders(),
+                'formData'    =>  $request->getParams(),
+                'pathParams'  =>  $request->getPathParams()
+        ]);
+
+        $client->execRequests() ;
+
+        $response =  $client->curl()->getAllContents();
+
+        return $response ;
     }
 
     /**
@@ -49,30 +76,31 @@ class ChildProject {
      * @param remoteFiles MasterFileResponseStruct[]
      *
      */
-    public function createTranslationChild( $remoteFiles ) {
+    public function createTranslationChild(CreateProjectResponseStruct $parent, $remoteFiles ) {
         $projectStruct            = new ChildProjectRequestStruct() ;
         $projectStruct->sessionId = $this->session->getSessionId();
         $projectStruct->clientId  = Functions::scopeId( $this->chunk->getIdentifier() );
-        $projectStruct->parentKey = $this->parent->dqfUUID ;
+        $projectStruct->parentKey = $parent->dqfUUID ;
         $projectStruct->type      = self::TRANSLATION ;
 
         $client = new Client() ;
         $client->setSession( $this->session );
         $resource = $client->createResource('/project/child', 'post', [
                 'formData' => $projectStruct->getParams(),
-                'headers' => $projectStruct->getHeaders()
+                'headers'  => $projectStruct->getHeaders()
         ]);
 
-        $client->curl()->multiExec();
+        $client->execRequests();
 
         if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new \Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
+            throw new Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
         }
 
         $childProject = new CreateProjectResponseStruct( json_decode( $client->curl()->getSingleContent( $resource ), true ) );
 
         $client = new Client() ;
         $client->setSession( $this->session );
+
         foreach( $this->chunk->getFiles() as $file ) {
             // for each file in the chunk create a
             $languageStruct = new ProjectTargetLanguageRequestStruct();
@@ -91,7 +119,7 @@ class ChildProject {
         $client->curl()->multiExec();
 
         if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new \Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
+            throw new Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
         }
 
         return $childProject ;

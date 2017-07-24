@@ -15,6 +15,12 @@ abstract class BaseRequestStruct extends BaseStruct {
 
     abstract function getHeaders() ;
 
+    /**
+     * Returns all the params that are not pathParams or headers.
+     * This method shold be ok to return params for `formData` or json for PUT requests.
+     *
+     * @return array
+     */
     public function getParams() {
         $params = array_diff_key( $this->toArray(), $this->getHeaders() );
         $params = array_diff_key( $params, $this->getPathParams() );

@@ -11,6 +11,7 @@ namespace Features\Dqf\Model;
 use API\V2\Exceptions\AuthenticationError;
 use Exception;
 use Features\Dqf\Service\Session;
+use Users_UserDao;
 use Users_UserStruct;
 
 class UserModel {
@@ -57,5 +58,10 @@ class UserModel {
             return false ;
         }
         return true ;
+    }
+
+    public static function createByEmail( $email ) {
+        $user = ( new Users_UserDao() )->getByEmail( $email ) ;
+        return new UserModel( $user );
     }
 }

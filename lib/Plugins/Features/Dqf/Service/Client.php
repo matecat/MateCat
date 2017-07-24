@@ -32,6 +32,9 @@ class Client {
         $this->commonHeaders = $headers ;
     }
 
+    public function execRequests() {
+        $this->curl()->multiExec();
+    }
 
     public function setSession( Session $session ) {
         $this->session = $session ;
@@ -111,12 +114,16 @@ class Client {
         }
 
         elseif ( $method == 'put' ) {
-            // TODO
+            $curlopts[ CURLOPT_CUSTOMREQUEST ] = 'PUT' ;
         }
 
         if ( isset( $params['json'] ) ) {
+            $json_string = json_encode( $params['json'] ) ;
+
             $params['headers'] ['Content-Type' ] = 'application/json' ;
-            $curlopts[ CURLOPT_POSTFIELDS ]      = json_encode( $params['json'] );
+            $params['headers'] ['Content-Length'] = strlen( $json_string ) ;
+
+            $curlopts[ CURLOPT_POSTFIELDS ] = $json_string ;
         }
         elseif ( isset( $params['formData'] ) ) {
             $curlopts[ CURLOPT_POSTFIELDS ] = http_build_query( $params['formData'] );

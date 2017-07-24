@@ -48,7 +48,7 @@ class ProjectCreation {
     /**
      * @var CreateProjectResponseStruct
      */
-    protected $remoteProject ;
+    protected $remoteMasterProject ;
 
     /**
      * @var ProjectCreationStruct
@@ -112,13 +112,13 @@ class ProjectCreation {
                 'tmsProjectKey'      => ''
         ), $projectInputParams ) );
 
-        $project = new MasterProject($this->session);
-        $this->remoteProject = $project->create( $params ) ;
+        $project                   = new MasterProject($this->session);
+        $this->remoteMasterProject = $project->create( $params ) ;
     }
 
     protected function _submitProjectFiles() {
         $files = Files_FileDao::getByProjectId($this->project->id) ;
-        $filesSubmit = new MasterProjectFiles( $this->session, $this->remoteProject ) ;
+        $filesSubmit = new MasterProjectFiles( $this->session, $this->remoteMasterProject ) ;
 
         foreach( $files as $file ) {
             $segmentsCount = $this->inputStruct->file_segments_count[ $file->id ];
@@ -132,7 +132,7 @@ class ProjectCreation {
 
     protected function _submitReviewSettings() {
         $dqfQaModel = new DqfQualityModel( $this->project ) ;
-        $request = new MasterProjectReviewSettings( $this->session, $this->remoteProject );
+        $request = new MasterProjectReviewSettings( $this->session, $this->remoteMasterProject );
 
         $struct = $dqfQaModel->getReviewSettings() ;
 
@@ -156,7 +156,7 @@ class ProjectCreation {
     }
 
     protected function _submitSourceSegments() {
-        $batchSegments = new MasterProjectSegmentsBatch($this->session, $this->remoteProject, $this->remoteFiles);
+        $batchSegments = new MasterProjectSegmentsBatch($this->session, $this->remoteMasterProject, $this->remoteFiles);
         $results = $batchSegments->getResult() ;
 
         foreach( $results as $result ) {
@@ -178,11 +178,12 @@ class ProjectCreation {
     }
 
     protected function _submitChildProjects() {
+        // TODO: save the parent child into database table to we always know the parent when acting through API.
         $this->childProjects = [] ;
 
         foreach( $this->project->getChunks() as $chunk ) {
-            $childProject = new ChildProject($this->session, $this->remoteProject, $chunk ) ;
-            $remoteProject = $childProject->createTranslationChild( $this->remoteFiles );
+            $childProject = new ChildProject($this->session, $chunk ) ;
+            $remoteProject = $childProject->createTranslationChild( $this->remoteMasterProject, $this->remoteFiles );
             $this->_saveDqfChildProjectMap( $chunk, $remoteProject ) ;
         }
     }
@@ -201,6 +202,7 @@ class ProjectCreation {
         $struct->password         = $chunk->password ;
         $struct->dqf_project_id   = $remoteProject->dqfId ;
         $struct->dqf_project_uuid = $remoteProject->dqfUUID ;
+        $struct->dqf_parent_uuid  = $this->remoteMasterProject->dqfUUID ;
         $struct->create_date      = Utils::mysqlTimestamp(time()) ;
 
         $lastId = ChildProjectsMapDao::insertStruct( $struct ) ;

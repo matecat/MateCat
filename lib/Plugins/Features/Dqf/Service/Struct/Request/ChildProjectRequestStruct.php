@@ -11,18 +11,20 @@ namespace Features\Dqf\Service\Struct\Request;
 use Features\Dqf\Service\Struct\BaseRequestStruct;
 use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
 
-class ChildProjectRequestStruct extends BaseRequestStruct  implements ISessionBasedRequestStruct {
+class ChildProjectRequestStruct extends BaseRequestStruct {
 
     public $sessionId ;
     public $apiKey ;
     public $parentKey ;
+    public $projectId ;
     public $name ;
     public $type ;
     public $assignee ;
+    public $reviewSettingId ;
     public $clientId ;
 
     public function getPathParams() {
-        return [];
+        return array_filter( [ $this->projectId  ] );
     }
 
     public function getParams() {
@@ -30,7 +32,7 @@ class ChildProjectRequestStruct extends BaseRequestStruct  implements ISessionBa
     }
 
     public function getHeaders() {
-        return $this->toArray(['sessonId', 'apiKey']);
+        return array_filter( $this->toArray(['sessonId', 'apiKey', 'projectKey']) ) ;
     }
 
 }

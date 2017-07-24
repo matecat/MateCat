@@ -11,6 +11,7 @@ namespace Features\Dqf\Model;
 use Chunks_ChunkStruct;
 use DataAccess_AbstractDao;
 use Database;
+use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Files_FileStruct;
 use PDO;
 
@@ -21,6 +22,28 @@ class ChildProjectsMapDao extends DataAccess_AbstractDao  {
 
     protected static $auto_increment_fields = [ 'id' ];
     protected static $primary_keys          = [ 'id' ];
+
+    /**
+     * @param $chunk
+     *
+     * @return ChildProjectsMapStruct[]
+     */
+    public function getByChunk( $chunk ) {
+        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
+                  AND password = :password  AND archive_date IS NULL " ;
+
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+
+        $stmt->execute([
+                'id_job'   => $chunk->id,
+                'password' => $chunk->password,
+        ]);
+
+        return $stmt->fetchAll() ;
+    }
 
     /**
      *

@@ -3,9 +3,11 @@
 namespace Features\Dqf\Model ;
 
 use Chunks_ChunkStruct;
+use Features\Dqf\Service\ChildProject;
 use Features\Dqf\Service\ChildProjectTranslationBatchService;
 use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\Session;
+use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Utils\Functions;
 use Files\FilesJobDao;
@@ -13,8 +15,10 @@ use Files\FilesJobStruct;
 use Files_FileStruct;
 use INIT;
 use Jobs\MetadataDao;
+use Log;
 use Translations_TranslationVersionDao;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 
 /**
@@ -25,6 +29,8 @@ use Utils;
  */
 class ChildProjectTranslationBatch {
 
+    const SEGMENT_PAIRS_CHUNK_SIZE = 80 ;
+
     /**
      * @var Chunks_ChunkStruct
      */
@@ -33,7 +39,12 @@ class ChildProjectTranslationBatch {
     /**
      * @var Session
      */
-    protected  $session ;
+    protected $ownerSession ;
+
+    /**
+     * @var Session
+     */
+    protected $userSession ;
 
     /**
      * @var ChildProjectsMapStruct[]
@@ -45,21 +56,76 @@ class ChildProjectTranslationBatch {
      */
     protected $files ;
 
+
+    /**
+     * @var ChildProjectTranslationBatchService
+     */
+    protected $translationBatchService ;
+
+    /**
+     * @var Users_UserStruct
+     */
+    protected $dqfTranslateUser ;
+
+    /**
+     * ChildProjectTranslationBatch constructor.
+     *
+     * @param Chunks_ChunkStruct $chunk
+     */
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk ;
-        $record = ( new MetadataDao() )->get( $chunk->id, $chunk->password, 'dqf_translate_user' ) ;
 
-        $dqfUser = new UserModel( ( new Users_UserDao() )->getByUid( $record->value ) ) ;
-        $this->session = $dqfUser->getSession()->login();
+        $uid = ( new MetadataDao() )->get( $chunk->id, $chunk->password, 'dqf_translate_user' )->value ;
+        $this->dqfTranslateUser = ( new Users_UserDao() )->getByUid( $uid ) ;
 
-        $this->service = new ChildProjectTranslationBatchService($this->session) ;
+        $ownerUser = ( new Users_UserDao() )->getByEmail( $this->chunk->getProject()->id_customer );
+        $this->ownerSession = ( new UserModel( $ownerUser ) )->getSession();
+        $this->ownerSession->login();
 
+        $this->userSession = ( new UserModel( $this->dqfTranslateUser ) )->getSession() ;
+        $this->userSession->login();
+
+        $this->translationBatchService = new ChildProjectTranslationBatchService($this->userSession) ;
     }
 
     public function process() {
+
+        $this->_assignToTranslator() ;
+        $this->_submitSegmentPairs() ;
+
+    }
+
+    protected function _assignToTranslator() {
+        /**
+         * In order to assign to translator I need to do know what are the DQF child projects
+         * we are working on.
+         */
+
+        $dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
+
+        foreach( $dqfChildProjects as $dqfChildProject ) {
+            $service = new ChildProject($this->ownerSession, $this->chunk) ;
+
+            $requestStruct =  new ChildProjectRequestStruct([
+                    'sessionId'  => $this->ownerSession->getSessionId(),
+                    'projectKey' => $dqfChildProject->dqf_project_uuid,
+                    'projectId'  => $dqfChildProject->dqf_project_id,
+                    'parentKey'  => $dqfChildProject->dqf_parent_uuid,
+                    'assignee'   => $this->dqfTranslateUser->email
+            ]);
+
+            $response = $service->updateTranslationChild( $requestStruct ) ;
+
+            Log::doLog( var_export( $response, true ) ) ;
+        }
+    }
+
+    protected function _submitSegmentPairs() {
         /**
          * At this point we must call this endpoint:
          * https://dqf-api.stag.taus.net/#!/Project%2FChild%2FFile%2FTarget_Language%2FSegment/add_0
+
          *
          * in order to do that, the most complext data structure we need to arrange is the one we pass in the
          * request's body:
@@ -137,11 +203,11 @@ class ChildProjectTranslationBatch {
                     ]) )->toArray() ;
                 }
 
-                $segmentParisChunks = array_chunk( $segmentPairs, 80 );
+                $segmentParisChunks = array_chunk( $segmentPairs, self::SEGMENT_PAIRS_CHUNK_SIZE );
 
                 foreach( $segmentParisChunks as $segmentParisChunk ) {
                     $requestStruct                 = new ChildProjectTranslationRequestStruct();
-                    $requestStruct->sessionId      = $this->session->getSessionId();
+                    $requestStruct->sessionId      = $this->userSession->getSessionId();
                     $requestStruct->fileId         = $remoteFileId ;
                     $requestStruct->projectKey     = $dqfChildProject->dqf_project_uuid ;
                     $requestStruct->projectId      = $dqfChildProject->dqf_project_id ;
@@ -150,17 +216,16 @@ class ChildProjectTranslationBatch {
 
                     $requestStruct->setSegments( $segmentParisChunk ) ;
 
-                    $this->service->addRequestStruct( $requestStruct ) ;
-
+                    $this->translationBatchService->addRequestStruct( $requestStruct ) ;
                 }
             }
         }
 
-        $this->service->process() ;
+        $this->translationBatchService->process() ;
     }
 
     protected function _findRemoteFileId( Files_FileStruct $file ) {
-        $service = new FileIdMapping( $this->session, $file ) ;
+        $service = new FileIdMapping( $this->userSession, $file ) ;
         return $service->getRemoteId() ;
     }
 

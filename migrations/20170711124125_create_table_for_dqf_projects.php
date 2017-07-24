@@ -12,6 +12,7 @@ class CreateTableForDqfProjects extends AbstractMatecatMigration
   `last_segment` INT(11) NOT NULL,
   `dqf_project_id` INT(11) NOT NULL,
   `dqf_project_uuid` VARCHAR(255) NOT NULL,
+  `dqf_parent_uuid` VARCHAR (255) NULL,
   `archive_date` DATETIME NULL ,
   `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
   PRIMARY KEY (`id`),
