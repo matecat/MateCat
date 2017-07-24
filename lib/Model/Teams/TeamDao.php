@@ -8,10 +8,12 @@
 
 namespace Teams;
 
+use Constants_Teams;
 use Database;
 use PDO;
 use Users_UserDao;
 use Users_UserStruct;
+use Utils;
 
 class TeamDao extends \DataAccess_AbstractDao {
 
@@ -67,7 +69,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     public function createPersonalTeam( Users_UserStruct $user ) {
         return $this->createUserTeam( $user, array(
                 'name' => 'Personal',
-                'type' => \Constants_Teams::PERSONAL
+                'type' => Constants_Teams::PERSONAL
         ) );
     }
 
@@ -77,12 +79,12 @@ class TeamDao extends \DataAccess_AbstractDao {
      *
      * @return  TeamStruct
      */
-    public function createUserTeam( \Users_UserStruct $orgCreatorUser, $params = array() ) {
+    public function createUserTeam( Users_UserStruct $orgCreatorUser, $params = array() ) {
 
         $teamStruct = new TeamStruct( array(
                 'name'       => $params[ 'name' ],
                 'created_by' => $orgCreatorUser->uid,
-                'created_at' => \Utils::mysqlTimestamp( time() ),
+                'created_at' => Utils::mysqlTimestamp( time() ),
                 'type'       => $params[ 'type' ]
         ) );
 
@@ -159,7 +161,7 @@ class TeamDao extends \DataAccess_AbstractDao {
                 $teamQuery,
                 array(
                         'created_by' => $teamQuery->created_by,
-                        'type'       => \Constants_Teams::PERSONAL
+                        'type'       => Constants_Teams::PERSONAL
                 )
         )[ 0 ];
     }
@@ -172,7 +174,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         return $this->_destroyObjectCache( $stmt,
                 array(
                         'created_by' => $teamQuery->created_by,
-                        'type'       => \Constants_Teams::PERSONAL
+                        'type'       => Constants_Teams::PERSONAL
                 )
         );
     }
