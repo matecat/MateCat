@@ -1,4 +1,3 @@
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeActions = require('../../actions/AnalyzeActions');
 
@@ -23,15 +22,18 @@ class AnalyzeChunksResume extends React.Component {
         });
 
     }
-    //TODO: Togliere dallo split modal l'id job @Federico
-    openSplitModal(id) {
+    openSplitModal(id,e) {
+        e.stopPropagation();
+        e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
         ModalsActions.openSplitJobModal(job, this.props.project, UI.reloadAnalysis);
     }
 
-    openMergeModal(id) {
+    openMergeModal(id, e) {
+        e.stopPropagation();
+        e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
@@ -51,7 +53,9 @@ class AnalyzeChunksResume extends React.Component {
         return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
     }
 
-    openOutsourceModal(id, index) {
+    openOutsourceModal(id, index, e) {
+        e.stopPropagation();
+        e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
@@ -85,18 +89,14 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
-                                    {/*<div className="cell-label">Total</div>*/}
                                     <div>{chunk.total_raw_word_count_print}</div>
                                 </div>
                                 <div className="title-standard-words tsw">
-                                    {/*<div className="cell-label">Other CAT tool</div>*/}
                                     <div>{chunk.total_st_word_count_print}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                    {/*<div className="cell-label">Weighted words:</div>*/}
                                     <div>
-                                        {/*<i className="icon-chart4 icon"/>*/}
                                         {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
                             </div>
@@ -182,7 +182,6 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                {/*<div className="job-id">({jobInfo.get('id')})</div>*/}
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -250,21 +249,19 @@ class AnalyzeChunksResume extends React.Component {
             <div className="compare-table sixteen wide column">
                 <div className="header-compare-table ui grid shadow-1">
                     <div className="title-job">
-                        <h5></h5>
-                        <p></p>
+                        <h5/>
+                        <p/>
                     </div>
                     <div className="titles-compare">
                         <div className="title-total-words">
                             <h5>Total word count</h5>
-                            {/*<p>(Raw words in the files)</p>*/}
                         </div>
                         <div className="title-standard-words">
-                            <h5 data-tooltip="As counted by other CAT tools">Industry weighted <span className="icon-info icon"></span></h5>
-                            {/*<p>(As counted by other CAT tools)</p>*/}
+                            <h5 data-tooltip="As counted by other CAT tools">Industry weighted
+                                <span className="icon-info icon"/></h5>
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>
-                            {/*<p>(Leveraging previous translations)</p>*/}
                         </div>
                     </div>
                 </div>

@@ -10,7 +10,6 @@
         background: #f1f1f1;
         border-radius: 0 0 4px 4px;
         text-align: left;
-        font-size: 18px;
         border: 1px solid #666;
     }
     .popup .splitbtn-cont {
@@ -65,20 +64,20 @@
         overflow: hidden;
         .primary {
             font-family: Calibri, Arial, Helvetica, sans-serif;
-            /* padding: 6px 15px; */
+            //padding: 11px 22px;
             vertical-align: top;
-            font-size: 16px;
+            //font-size: 18px;
             border: 1px solid #797979;
             border-radius: 2px;
             float: right;
         }
         .cancel-button {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            font-size: 15px;
+            //font-size: 18px;
             margin-top: 0;
             border: 1px solid #797979;
             border-radius: 2px;
-            padding: 13px 23px;
+            //padding: 11px 22px;
             background-color: #f6f6f6;
             margin-right: 15px;
             &:hover {

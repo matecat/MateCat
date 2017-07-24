@@ -180,7 +180,8 @@ class SplitJobModal extends React.Component {
         return <div className="modal popup-split">
             <div className="popup" id="split-modal-cont">
                 <div className="splitbtn-cont">
-                    <h3><span className="popup-split-job-id">({this.props.job.get('id')}) </span>
+                    <h3>
+                        {/*<span className="popup-split-job-id">({this.props.job.get('id')}) </span>*/}
                         <span className="popup-split-job-title">{this.props.job.get('sourceTxt') + " > " + this.props.job.get('targetTxt')}</span>
                     </h3>
 
