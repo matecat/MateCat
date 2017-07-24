@@ -1,5 +1,6 @@
 <?php
 
+use Database;
 use Email\InvitedToTeamEmail;
 use Email\MembershipCreatedEmail;
 use Email\MembershipDeletedEmail;
@@ -75,7 +76,7 @@ class TeamModel {
     public function updateMembers() {
         $this->removed_users = array();
 
-        \Database::obtain()->begin();
+        Database::obtain()->begin();
 
         $membershipDao = new MembershipDao();
 
@@ -122,7 +123,7 @@ class TeamModel {
                 ->setCacheTTL( 3600 )
                 ->getMemberListByTeamId( $this->struct->id );
 
-        \Database::obtain()->commit();
+        Database::obtain()->commit();
 
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
@@ -231,7 +232,7 @@ class TeamModel {
 
         $dao = new TeamDao();
 
-        \Database::obtain()->begin();
+        Database::obtain()->begin();
         $team = $dao->createUserTeam( $this->user, [
                 'type'    => $this->struct->type,
                 'name'    => $this->struct->name,
@@ -240,7 +241,7 @@ class TeamModel {
 
         $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are obviously all existent members
 
-        \Database::obtain()->commit();
+        Database::obtain()->commit();
 
         return $team;
     }
