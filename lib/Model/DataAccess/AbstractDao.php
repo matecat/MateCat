@@ -229,7 +229,7 @@ abstract class DataAccess_AbstractDao {
      * @return mixed
      */
     protected function _getFromCache( $query ) {
-        if ( $this->cacheTTL == 0 ) {
+        if ( \INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
             return null;
         }
 

@@ -20,12 +20,21 @@ class CatDecorator extends AbstractDecorator {
         $this->stats = $this->controller->getJobStats();
         $completed = $job->isMarkedComplete( array('is_review' => $this->controller->isRevision() ) ) ;
 
+        $lastCompletionEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $job, ['is_review' => $this->controller->isRevision() ]
+        );
+
         $dao = new \Chunks_ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase( $this->controller->getJob() );
 
         $this->template->project_completion_feature_enabled = true ;
         $this->template->header_main_button_id  = 'markAsCompleteButton' ;
         $this->template->job_completion_current_phase = $this->current_phase ;
+
+        if ( $lastCompletionEvent ) {
+            $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'] ;
+        }
+
         if ( $completed ) {
             $this->varsForComplete();
         }

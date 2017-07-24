@@ -4,6 +4,8 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\ValidationError;
+use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 
 class SegmentTranslationIssue extends Base {
 
@@ -20,8 +22,27 @@ class SegmentTranslationIssue extends Base {
 
     private $parent_validator ;
 
+    /**
+     * @var ChunkReviewStruct
+     */
+    protected $chunk_review ;
+
     public function validate() {
+        // if method is delete we expect the password to be revise password.
+
+        if ( $this->request->method('delete') ) {
+            $this->chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->password, $this->request->id_job );
+            if ( ! $this->chunk_review ) {
+                throw new ValidationError('Record not found') ;
+            }
+            $password = $this->chunk_review->password ;
+        }
+        else {
+            $password = $this->request->password ;
+        }
+
         $this->parent_validator = new SegmentTranslation( $this->request );
+        $this->parent_validator->setPassword( $password ) ;
         $this->parent_validator->validate();
 
         $this->translation = $this->parent_validator->translation ;
@@ -32,6 +53,10 @@ class SegmentTranslationIssue extends Base {
             $this->ensureIssueIsInScope();
         }
 
+    }
+
+    public function getChunkReview() {
+        return $this->chunk_review ;
     }
 
     private function ensureIssueIsInScope() {

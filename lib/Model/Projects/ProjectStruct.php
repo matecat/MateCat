@@ -209,4 +209,8 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return $originalZipPath ;
     }
 
+    public function hasFeature( $feature_code ) {
+        return in_array( $feature_code, $this->getFeatures()->getCodes() ) ;
+    }
+
 }
