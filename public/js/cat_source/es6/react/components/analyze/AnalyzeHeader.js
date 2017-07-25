@@ -157,6 +157,11 @@ class AnalyzeHeader extends React.Component {
     }
 
     getWordscount() {
+        let tooltipText = 'MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
+            'offer machine translation suggestions or translation memory matches thanks to the millions ' +
+            'of words corrected by the MateCat community.<br> This data is also used to define a fair pricing ' +
+            'scheme that splits the benefits of the technology between the customer and the translator.';
+
         let status = this.props.data.get('STATUS');
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
@@ -189,19 +194,14 @@ class AnalyzeHeader extends React.Component {
                             </div>
                         </h2>
                         <p>MateCat gives you more matches than any other tool thanks to a better
-                            <a className="ui custom show"> integration of machine translation and translation memories</a>
+                            integration of machine translation and translation memories.
+                            <span style={{top: '1px'}} data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
+                                <span className="icon-info icon"/>
+                            </span>
                         </p>
-                        <div className="ui custom popup">
-                            MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to
-                            offer machine translation suggestions or translation memory matches thanks to the millions
-                            of words corrected by the MateCat community. This data is also used to define a fair pricing
-                            scheme that splits the benefits of the technology between the customer and the translator.
-                        </div>
                     </div>
                 </div>
             </div>
-
-
     }
 
     downloadAnalysisReport() {
@@ -220,13 +220,9 @@ class AnalyzeHeader extends React.Component {
     }
 
     componentDidMount() {
-        $('.custom.show')
-            .popup({
-                position : 'bottom left',
-                popup : $('.custom.popup'),
-                on    : 'click'
-            })
-        ;
+        $(this.tooltip).popup({
+            position: 'bottom left'
+        });
     }
 
     componentWillUnmount() {
