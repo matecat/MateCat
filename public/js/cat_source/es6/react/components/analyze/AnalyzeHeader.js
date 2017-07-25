@@ -51,14 +51,17 @@ class AnalyzeHeader extends React.Component {
                 if ( this.previousQueueSize <= in_queue_before ) {
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete"><p className="label">There are other projects in queue. Please wait...</p></span>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait... <p className="label">There are other projects in queue. </p></span>
+
                         </div>
                     </div>
                 } else { //decreasing ( TM analysis on another project )
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete">
-                                <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue. Please wait...</p>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait...
+                            <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue.</p>
                             </span>
                         </div>
                     </div>
