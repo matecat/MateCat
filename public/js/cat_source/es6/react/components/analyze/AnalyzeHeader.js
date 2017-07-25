@@ -51,7 +51,7 @@ class AnalyzeHeader extends React.Component {
                 if ( this.previousQueueSize <= in_queue_before ) {
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <div className="ui active inline loader"/>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
                             <span className="complete">Please wait... <p className="label">There are other projects in queue. </p></span>
 
                         </div>
