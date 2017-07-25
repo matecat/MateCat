@@ -51,14 +51,17 @@ class AnalyzeHeader extends React.Component {
                 if ( this.previousQueueSize <= in_queue_before ) {
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete"><p className="label">There are other projects in queue. Please wait...</p></span>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait... <p className="label">There are other projects in queue. </p></span>
+
                         </div>
                     </div>
                 } else { //decreasing ( TM analysis on another project )
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete">
-                                <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue. Please wait...</p>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait...
+                            <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue.</p>
                             </span>
                         </div>
                     </div>
@@ -157,6 +160,11 @@ class AnalyzeHeader extends React.Component {
     }
 
     getWordscount() {
+        let tooltipText = 'MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
+            'offer machine translation suggestions or translation memory matches thanks to the millions ' +
+            'of words corrected by the MateCat community.<br> This data is also used to define a fair pricing ' +
+            'scheme that splits the benefits of the technology between the customer and the translator.';
+
         let status = this.props.data.get('STATUS');
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
@@ -189,19 +197,14 @@ class AnalyzeHeader extends React.Component {
                             </div>
                         </h2>
                         <p>MateCat gives you more matches than any other tool thanks to a better
-                            <a className="ui custom show"> integration of machine translation and translation memories</a>
+                            integration of machine translation and translation memories.
+                            <span style={{top: '1px'}} data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
+                                <span className="icon-info icon"/>
+                            </span>
                         </p>
-                        <div className="ui custom popup">
-                            MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to
-                            offer machine translation suggestions or translation memory matches thanks to the millions
-                            of words corrected by the MateCat community. This data is also used to define a fair pricing
-                            scheme that splits the benefits of the technology between the customer and the translator.
-                        </div>
                     </div>
                 </div>
             </div>
-
-
     }
 
     downloadAnalysisReport() {
@@ -220,13 +223,9 @@ class AnalyzeHeader extends React.Component {
     }
 
     componentDidMount() {
-        $('.custom.show')
-            .popup({
-                position : 'bottom left',
-                popup : $('.custom.popup'),
-                on    : 'click'
-            })
-        ;
+        $(this.tooltip).popup({
+            position: 'bottom left'
+        });
     }
 
     componentWillUnmount() {

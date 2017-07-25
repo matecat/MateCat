@@ -34,7 +34,6 @@ class JobAnalyze extends React.Component {
             }).toList().toJS();
         }
         return '';
-
     }
 
     showDetails(idJob) {
