@@ -53,11 +53,11 @@ class AnalyzeChunksResume extends React.Component {
         return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
     }
 
-    openOutsourceModal(id, index, e) {
+    openOutsourceModal(id, pass, index, e) {
         e.stopPropagation();
         e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
-            return item.get('id') == id;
+            return item.get('id') == id && item.get('password') == pass;
         });
         ModalsActions.openOutsourceModal(this.props.project.toJS(), job.toJS(), this.getTranslateUrl(job, index), false, false, false);
     }
@@ -102,7 +102,7 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <div className="activity-icons">
                                 <div className="open-translate ui primary button open"
-                                     onClick={self.openOutsourceModal.bind(self, chunk.jid, index)}>Translate</div>
+                                     onClick={self.openOutsourceModal.bind(self, chunk.jid, indexChunk, index)}>Translate</div>
                             </div>
                         </div>;
                     }).toList().toJS();
@@ -168,7 +168,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className={"split ui blue basic button " + buttonsClass}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, null)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, self.props.project.toJS().jobs[0].password, null)}>Translate</div>
                                 </div>
                             </div>
 
