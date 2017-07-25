@@ -346,9 +346,13 @@ body.manage {
                             padding: 8px 15px;
                             &.outsource-container {
                             }
-                            &.after-outsource-container {
-
-                            }
+                            /*&.after-outsource-container {
+                                @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                                    .outsource-container {
+                                        width: 105%;
+                                    }
+                                }
+                            }*/
                             .outsource.modal .popup {
                                 box-shadow: none;
                             }
@@ -857,7 +861,11 @@ footer nav ul a:hover {
         margin-left: auto !important;
         margin-right: auto !important;
         transition: 0.3s ease;
+        .outsource-container {
+            width: 105%;
+        }
     }
+
 }
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {

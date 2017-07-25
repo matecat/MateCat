@@ -7,9 +7,9 @@
     padding: 0px !important;
     margin-top: 30px !important;
     margin-bottom: 30px !important;
-    width: 104.7% !important;
-    margin-left: -30px !important;
-    margin-right: -30px !important;
+    width: 107%;
+    margin-left: -2% !important;
+    margin-right: -2% !important;
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
@@ -63,6 +63,25 @@
                     .gmt-description {
                         display: inline-block;
                     }
+                }
+            }
+        }
+    }
+
+    .outsource-header {
+        .job-payable {
+            display: inline-block;
+            padding: 0 0 0 10px !important;
+            line-height: 30px;
+            position: relative;
+            top: 1px;
+            display: inline-block;
+            color: #969696;
+            a {
+                text-decoration: underline;
+                font-weight: 700;
+                &:hover {
+                    text-decoration: none;
                 }
             }
         }
@@ -721,5 +740,25 @@
         }
     }
 
+    @media only screen and (min-width: 1200px) {
 
+    }
+
+    @media only screen and (min-width: 1380px) {
+
+    }
+
+    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+        .outsource-container {
+            width: 105%;
+        }
+    }
+
+    @media only screen and (max-width: 991px) and (min-width: 768px) {
+
+    }
+
+    @media only screen and (max-width: 767px) {
+
+    }
 }

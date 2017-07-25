@@ -18,6 +18,18 @@
     box-shadow: none !important;
 }
 
+.xdsoft_datetimepicker .xdsoft_calendar td:active {
+    color: #ffffff !important;
+    background: #09beec !important;
+    box-shadow: none !important;
+}
+
+.xdsoft_datetimepicker .xdsoft_calendar td:focus {
+    color: #ffffff !important;
+    background: #09beec !important;
+    box-shadow: none !important;
+}
+
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current {
     background: #09BEEC;
     box-shadow: none;
@@ -28,8 +40,6 @@
     background: #d0d0d0 !important;
     box-shadow: none !important;
 }
-
-
 
 .xdsoft_datetimepicker .blue-gradient-button {
     background: #09beec;
