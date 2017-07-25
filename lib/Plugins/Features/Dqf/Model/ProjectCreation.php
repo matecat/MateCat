@@ -7,7 +7,7 @@ namespace Features\Dqf\Model ;
 use Chunks_ChunkStruct;
 use Exception;
 use Exceptions\NotFoundError;
-use Features\Dqf\Service\ChildProject;
+use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\MasterProjectReviewSettings;
@@ -182,7 +182,7 @@ class ProjectCreation {
         $this->childProjects = [] ;
 
         foreach( $this->project->getChunks() as $chunk ) {
-            $childProject = new ChildProject($this->session, $chunk ) ;
+            $childProject = new ChildProjectService($this->session, $chunk ) ;
             $remoteProject = $childProject->createTranslationChild( $this->remoteMasterProject, $this->remoteFiles );
             $this->_saveDqfChildProjectMap( $chunk, $remoteProject ) ;
         }

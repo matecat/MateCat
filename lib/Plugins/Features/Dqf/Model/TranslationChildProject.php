@@ -3,12 +3,14 @@
 namespace Features\Dqf\Model ;
 
 use Chunks_ChunkStruct;
-use Features\Dqf\Service\ChildProject;
+use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\ChildProjectTranslationBatchService;
+use Features\Dqf\Service\Client;
 use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
+use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use Features\Dqf\Utils\Functions;
 use Files\FilesJobDao;
 use Files\FilesJobStruct;
@@ -27,7 +29,7 @@ use Utils;
  * Date: 10/07/2017
  * Time: 17:09
  */
-class ChildProjectTranslationBatch {
+class TranslationChildProject {
 
     const SEGMENT_PAIRS_CHUNK_SIZE = 80 ;
 
@@ -49,13 +51,12 @@ class ChildProjectTranslationBatch {
     /**
      * @var ChildProjectsMapStruct[]
      */
-    protected  $remoteDqfProjects ;
+    protected $remoteDqfProjects ;
 
     /**
      * @var Files_FileStruct[]
      */
     protected $files ;
-
 
     /**
      * @var ChildProjectTranslationBatchService
@@ -63,9 +64,17 @@ class ChildProjectTranslationBatch {
     protected $translationBatchService ;
 
     /**
-     * @var Users_UserStruct
+     * @var UserModel
      */
     protected $dqfTranslateUser ;
+
+
+    /**
+     * @var ChildProjectsMapStruct[]
+     */
+    protected $dqfChildProjects ;
+
+    protected $parentKeysMap = [] ;
 
     /**
      * ChildProjectTranslationBatch constructor.
@@ -77,47 +86,56 @@ class ChildProjectTranslationBatch {
         $this->chunk = $chunk ;
 
         $uid = ( new MetadataDao() )->get( $chunk->id, $chunk->password, 'dqf_translate_user' )->value ;
-        $this->dqfTranslateUser = ( new Users_UserDao() )->getByUid( $uid ) ;
+        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
 
         $ownerUser = ( new Users_UserDao() )->getByEmail( $this->chunk->getProject()->id_customer );
         $this->ownerSession = ( new UserModel( $ownerUser ) )->getSession();
         $this->ownerSession->login();
 
-        $this->userSession = ( new UserModel( $this->dqfTranslateUser ) )->getSession() ;
+        $this->userSession = $this->dqfTranslateUser->getSession();
         $this->userSession->login();
 
         $this->translationBatchService = new ChildProjectTranslationBatchService($this->userSession) ;
+
+        $this->dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
     }
 
-    public function process() {
-
+    public function submitTranslationBatch() {
         $this->_assignToTranslator() ;
         $this->_submitSegmentPairs() ;
-
     }
 
     protected function _assignToTranslator() {
-        /**
-         * In order to assign to translator I need to do know what are the DQF child projects
-         * we are working on.
-         */
+        // $service = new ChildProjectService($this->ownerSession, $this->chunk ) ;
+        // $service->updateTranslationChildren( ['assignee' => $this->dqfTranslateUser->email ] ) ;
+        $this->_findRemoteDqfChildProjects() ;
 
-        $dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
+        $updateRequests = array_map( function( ProjectResponseStruct $project ) {
+            return new ChildProjectRequestStruct([
+                    'projectKey' => $project->uuid,
+                    'projectId'  => $project->id,
+                    'parentKey'  => $this->parentKeysMap[ $project->id ],
+                    'assignee'   => $this->dqfTranslateUser->getDqfUsername(),
+                    'type'       => $project->type
+            ]) ;
+        }, $this->remoteDqfProjects ) ;
 
-        foreach( $dqfChildProjects as $dqfChildProject ) {
-            $service = new ChildProject($this->ownerSession, $this->chunk) ;
+        $childProjectService = new ChildProjectService( $this->ownerSession, $this->chunk );
+        $childProjectService->updateChildProjects( $updateRequests ) ;
+    }
 
-            $requestStruct =  new ChildProjectRequestStruct([
-                    'sessionId'  => $this->ownerSession->getSessionId(),
-                    'projectKey' => $dqfChildProject->dqf_project_uuid,
-                    'projectId'  => $dqfChildProject->dqf_project_id,
-                    'parentKey'  => $dqfChildProject->dqf_parent_uuid,
-                    'assignee'   => $this->dqfTranslateUser->email
-            ]);
+    protected function _findRemoteDqfChildProjects() {
+        $childProjectService = new ChildProjectService( $this->ownerSession, $this->chunk );
+        $this->remoteDqfProjects = $childProjectService->getRemoteResources( array_map( function( ChildProjectsMapStruct $item ) {
+            return new ChildProjectRequestStruct([
+                    'projectId'  =>  $item->dqf_project_id,
+                    'projectKey' =>  $item->dqf_project_uuid,
+            ]) ;
+        }, $this->dqfChildProjects ) ) ;
 
-            $response = $service->updateTranslationChild( $requestStruct ) ;
-
-            Log::doLog( var_export( $response, true ) ) ;
+        $this->parentKeysMap = [] ;
+        foreach( $this->dqfChildProjects as $dqfChildProject ) {
+            $this->parentKeysMap[ $dqfChildProject->dqf_project_id ] = $dqfChildProject->dqf_parent_uuid ;
         }
     }
 

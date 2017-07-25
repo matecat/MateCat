@@ -8,7 +8,6 @@
 
 namespace Features\Dqf\Service;
 
-
 use Chunks_ChunkStruct;
 use Exception;
 use Features\Dqf\Model\ChildProjectsMapStruct;
@@ -18,10 +17,10 @@ use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\Struct\Request\ProjectTargetLanguageRequestStruct;
 use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use Features\Dqf\Utils\Functions;
 
-class ChildProject {
-
+class ChildProjectService {
     const TRANSLATION = 'translation' ;
     const REVIEW = 'review' ;
 
@@ -35,14 +34,71 @@ class ChildProject {
      */
     protected $chunk ;
 
+    protected $remoteProjects;
+
     public function __construct(Session $session, Chunks_ChunkStruct $chunk ) {
         $this->chunk   = $chunk  ;
         $this->session = $session ;
     }
 
-    public function getRemoteResource() {
+    public function updateChildProjects( $requestStructs ) {
+        $client = new Client() ;
+        $client->setSession( $this->session );
+
+        $resources = [] ;
+
+        /** @var ChildProjectRequestStruct $requestStruct */
+        foreach( $requestStructs as $requestStruct ) {
+            $resources[] = $client->createResource('/project/child/%s', 'put', [
+                    'headers'    => $requestStruct->getHeaders(),
+                    'pathParams' => $requestStruct->getPathParams(),
+                    'formData'   => $requestStruct->getParams()
+            ]) ;
+        }
+
+        $client->execRequests();
+
+        $responses = $client->curl()->getAllContents();
+
+        if ( count($client->curl()->getErrors() ) > 0 ) {
+            throw  new Exception('Error on update of remote child project' );
+        }
+
+        $returnable = $client->curl()->getAllContents();
+
+        // $returnable =  array_map( function( $item ) {
+        //     return new ProjectResponseStruct( json_decode( $item, true )['model'] );
+        // }, $responses );
+
+        return $returnable  ;
+    }
+
+    public function getRemoteResources( $requestStructs ) {
         $client = new Client();
         $client ->setSession( $this->session ) ;
+
+        $resources = [] ;
+        /** @var ChildProjectRequestStruct $requestStruct */
+        foreach( $requestStructs as $requestStruct ) {
+            $resources[] = $client->createResource('/project/child/%s', 'get', [
+                    'headers'    => $requestStruct->getHeaders(),
+                    'pathParams' => $requestStruct->getPathParams()
+            ]) ;
+        }
+
+        $client->execRequests();
+
+        $responses = $client->curl()->getAllContents();
+
+        if ( count($client->curl()->getErrors() ) > 0 ) {
+            throw  new Exception('Error while fetching remote child project' );
+        }
+
+        $returnable =  array_values( array_map( function( $item ) {
+            return new ProjectResponseStruct( json_decode( $item, true )['model'] );
+        }, $responses ) ) ;
+
+        return $returnable  ;
     }
 
     /***

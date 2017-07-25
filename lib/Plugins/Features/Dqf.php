@@ -3,16 +3,12 @@
 namespace Features;
 
 use AMQHandler;
-use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use catController;
-use ChildProjectTranslationBatch;
 use Chunks_ChunkStruct;
-use Exception;
 use Features;
-use Features\Dqf\Model\CatAuthorizationModel;
+use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
-use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
@@ -99,10 +95,8 @@ class Dqf extends BaseFeature {
             // enqueue task for review
         }
         else {
-            // TODO: move this in a background worker class
-            // TODO: check the uid is the same as the assigned dqf_translate_user ?
-            $translationBatch = new ChildProjectTranslationBatch( $chunk );
-            $translationBatch->process();
+            $translationBatch = new TranslationChildProject( $chunk ) ;
+            $translationBatch->submitTranslationBatch();
         }
     }
 

@@ -17,6 +17,7 @@ class ChildProjectRequestStruct extends BaseRequestStruct {
     public $apiKey ;
     public $parentKey ;
     public $projectId ;
+    public $projectKey ;
     public $name ;
     public $type ;
     public $assignee ;
