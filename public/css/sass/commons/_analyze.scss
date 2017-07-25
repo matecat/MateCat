@@ -49,19 +49,18 @@ body.analyze{
                     font-size: 38px;
                     font-weight: 100;
                     color: grey;
-                    margin-bottom: 0px;
+                    margin-bottom: 0;
                 }
                 .ui.ribbon.label {
                     position: relative;
                     top: 0px;
                     z-index: 2;
                     left: -45px;
-                    max-width: 110%;
-                    min-width: 340px;
+                    max-width: 100%;
                     background-color: #d8d8d8;
                     color: #000000;
-                    border-radius: 0px 2px 2px 0px;
-                    padding-right: 10px;
+                    border-radius: 0 2px 2px 0;
+                    padding-right: 15px;
                     .project-id, .project-name {
                         display: inline-block;
                         vertical-align: text-bottom;
@@ -77,12 +76,13 @@ body.analyze{
                     }
                     .project-name {
                         font-size: 20px;
-                        max-width: 90%;
+                        max-width: 100%;
                         min-width: 30px;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
+                        padding-left: 15px;
                     }
                 }
                 .project-create {
@@ -112,6 +112,14 @@ body.analyze{
                             .number {
                                 font-weight: 700;
                             }
+                            a {
+                                font-weight: 700;
+                                text-decoration: underline;
+                                &:hover {
+                                    text-decoration: none;
+                                }
+                            }
+
                         }
                         .downloadAnalysisReport {
                             display: inline-block;
@@ -140,7 +148,7 @@ body.analyze{
                 .word-percent {
                     position: relative;
                     background-color: #f2f4f1;
-                    padding: 25px 15px 20px 20px;
+                    padding: 25px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
                     top: 27px;
                     font-size: 16px;
@@ -156,6 +164,25 @@ body.analyze{
                         font-size: 20px;
                         .sub.header {
                             font-size: 12px;
+                        }
+                    }
+                    a {
+                        text-decoration: underline;
+                        font-weight: 700;
+                        cursor: pointer;
+                        &:hover {
+                            text-decoration: none;
+                        }
+                        &:active {
+                            text-decoration: none;
+                        }
+                        &:focus {
+                            text-decoration: none;
+                        }
+                    }
+                    .custom {
+                        &.popup {
+                            min-width: 90%;
                         }
                     }
                 }
@@ -262,6 +289,16 @@ body.analyze{
                     line-height: 50px;
                     padding-top: 15px;
                     padding-bottom: 15px;
+                }
+                .title-standard-words {
+                    h5 {
+                        span {
+                            color: #a7a7a7;
+                            font-weight: 100;
+                            position: relative;
+                            top: 2px;
+                        }
+                    }
                 }
                 .title-matecat-words {
                     h5 {
@@ -387,7 +424,7 @@ body.analyze{
                         border-radius: 2px;
                         margin: -3px 0px 0px 0px;
                     }
-                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                    @media only screen and (max-width: 1199px) {
                         .merge {
                              padding: 5px 10px;
                         }
@@ -464,7 +501,7 @@ body.analyze{
             min-width: 180px;
             display: inline-block;
             font-weight: bold;
-            max-width: 59%;
+            max-width: 100%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -474,10 +511,12 @@ body.analyze{
                 line-height: 30px;
                 display: inline-block;
                 &.no-split {
-                    max-width: 40%;
+                    max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
                     margin-right: 5px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
             }
             .in-to {
@@ -497,8 +536,8 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 58%;
-                    min-width: 40px;
+                    max-width: 40%;
+                    min-width: 30px;
                     vertical-align: middle;
                     white-space: nowrap;
                     overflow: hidden;
@@ -679,7 +718,7 @@ body.analyze{
                 .file-details {
                     text-decoration: underline;
                     min-width: 25px;
-                    line-height: 30px;
+                    line-height: 35px;
                     font-weight: 700;
                     position: relative;
                     top: 1px;

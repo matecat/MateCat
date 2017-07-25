@@ -131,6 +131,7 @@ class AnalyzeMain extends React.Component {
                         </div>
 
                         <AnalyzeChunksResume jobsAnalysis={this.state.volumeAnalysis.get('jobs')}
+                                             standardWc={this.state.volumeAnalysis.get('summary').get('TOTAL_STANDARD_WC_PRINT')}
                                              jobsInfo={this.props.jobsInfo}
                                              project={this.state.project}
                                              status={this.state.volumeAnalysis.get('summary').get('STATUS')}
