@@ -257,8 +257,11 @@ class AnalyzeChunksResume extends React.Component {
                             <h5>Total word count</h5>
                         </div>
                         <div className="title-standard-words">
-                            <h5 data-tooltip="As counted by other CAT tools">Industry weighted
-                                <span className="icon-info icon"/></h5>
+                            <h5>Industry weighted
+                                <span data-tooltip="As counted by other CAT tools">
+                                    <span className="icon-info icon"/>
+                                </span>
+                            </h5>
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>
