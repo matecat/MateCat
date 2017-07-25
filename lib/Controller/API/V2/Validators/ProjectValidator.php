@@ -2,6 +2,8 @@
 
 namespace API\V2\Validators;
 
+use Log;
+
 class ProjectValidator {
 
     private $api_record;
@@ -44,9 +46,8 @@ class ProjectValidator {
     }
 
     private function inProjectScope() {
-
-        \Log::doLog( $this->api_record->getUser()->email );
-        \Log::doLog( $this->project->id_customer );
+        Log::doLog( $this->api_record->getUser()->email );
+        Log::doLog( $this->project->id_customer );
 
         return $this->api_record->getUser()->email == $this->project->id_customer;
     }

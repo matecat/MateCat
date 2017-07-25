@@ -89,7 +89,7 @@ class AnalyzeChunksResume extends React.Component {
             return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
                 if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
                     let index = 0;
-                    let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
+                    let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
                         let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
                         let chunkJob = self.props.project.get('jobs').find(function (job) {
                             return job.get('id') == indexJob && job.get('password') == indexChunk;
@@ -300,8 +300,11 @@ class AnalyzeChunksResume extends React.Component {
                             <h5>Total word count</h5>
                         </div>
                         <div className="title-standard-words">
-                            <h5 data-tooltip="As counted by other CAT tools">Industry weighted
-                                <span className="icon-info icon"/></h5>
+                            <h5>Industry weighted
+                                <span data-tooltip="As counted by other CAT tools">
+                                    <span className="icon-info icon"/>
+                                </span>
+                            </h5>
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>

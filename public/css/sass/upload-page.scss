@@ -2692,7 +2692,7 @@ div.continue-gdrive {
 }
 
 td.action .btn {
-    height: 29px;
+    //height: 29px;
     /*width: 116px !important;*/
 }
 
@@ -2713,6 +2713,10 @@ td.action .btn {
     width: 117px !important;
 }*/
 
+a.btn.addtmx {
+    height: 29px;
+}
+
 .popup-tm .btn-ok.right {
     font-family: calibri;
     font-weight: bold;
@@ -2729,7 +2733,7 @@ td.action .btn {
 }
 
 .btn-confirm-small {
-    height: 35px;
+    //height: 35px;
 }
 
 .mgmt-tm {

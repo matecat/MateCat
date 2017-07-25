@@ -24,6 +24,7 @@ class Bootstrap {
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
         self::$CONFIG       = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
+
         register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
 
         $mv = parse_ini_file( 'version.ini' );
@@ -46,6 +47,11 @@ class Bootstrap {
 
         //get the environment configuration
         self::initConfig();
+
+        ini_set( 'display_errors', false );
+        if ( INIT::$PRINT_ERRORS ) {
+            ini_set( 'display_errors', true );
+        }
 
         if ( empty( INIT::$STORAGE_DIR ) ) {
             INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage" ;
@@ -167,8 +173,6 @@ class Bootstrap {
             case E_USER_ERROR:
             case E_RECOVERABLE_ERROR:
 
-                ini_set( 'display_errors', 'Off' );
-
                 if ( !ob_get_level() ) {
                     ob_start();
                 } else {
@@ -201,7 +205,7 @@ class Bootstrap {
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
-                    if ( INIT::$EXCEPTION_DEBUG ) {
+                    if ( INIT::$PRINT_ERRORS ) {
                         echo json_encode( array(
                                 "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
                         ) );
@@ -216,7 +220,7 @@ class Bootstrap {
                         ) );
                     }
 
-                } elseif ( INIT::$EXCEPTION_DEBUG ) {
+                } elseif ( INIT::$PRINT_ERRORS ) {
                     echo $output;
                 }
 

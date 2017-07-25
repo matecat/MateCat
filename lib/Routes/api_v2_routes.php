@@ -13,6 +13,7 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
     route( '/creation_status',      'GET',  'API\V2\ProjectCreationStatusController',   'get' );
+    route( '/completion_status',    'GET',  'API\V2\ProjectCompletionStatus', 'status' ) ;
 
 });
 
@@ -34,22 +35,15 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
-    /**
-     * This should be moved in plugin space
-     */
-    route( '/quality-report', 'GET',
-        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
-    );
+    route( '/quality-report',          'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/versions', 'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'versions' );
 
     route( '/translator', 'GET',  '\API\V2\JobsTranslatorsController', 'get' ) ;
     route( '/translator', 'POST',  '\API\V2\JobsTranslatorsController', 'add' ) ;
 
 });
 
-route(
-    '/api/v2/project-completion-status/[i:id_project]', 'GET',
-    '\API\V2\ProjectCompletionStatus', 'status'
-);
+route( '/api/v2/project-completion-status/[i:id_project]', 'GET', '\API\V2\ProjectCompletionStatus', 'status' );
 
 route(
     '/api/v2/project-translation/[i:id_project]', 'GET',
@@ -132,6 +126,7 @@ route(
 );
 
 route( '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping' );
+route( '/api/v2/user/[:user_api_key]', 'GET',  '\API\V2\KeyCheckController', 'getUID' );
 
 $klein->with('/api/v2/teams', function() {
 

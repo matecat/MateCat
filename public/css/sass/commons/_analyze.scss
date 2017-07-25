@@ -296,7 +296,8 @@ body.analyze{
                             color: #a7a7a7;
                             font-weight: 100;
                             position: relative;
-                            top: 2px;
+                            top: 1px;
+                            left: 2px;
                         }
                     }
                 }
@@ -454,8 +455,8 @@ body.analyze{
                     margin-bottom: 10px;
                 }
                 .rounded {
-                    width: 34px;
-                    height: 34px;
+                    width: 35px;
+                    height: 35px;
                     margin: 0 auto;
                     line-height: 0px;
                     border-radius: 17px;
@@ -760,7 +761,7 @@ body.analyze{
                 .file-details {
                     text-decoration: underline;
                     min-width: 25px;
-                    line-height: 30px;
+                    line-height: 35px;
                     font-weight: 700;
                     position: relative;
                     top: 1px;
@@ -799,7 +800,7 @@ body.analyze{
                 .file-details {
                     text-decoration: underline;
                     min-width: 25px;
-                    line-height: 30px;
+                    line-height: 35px;
                     font-weight: 700;
                     position: relative;
                     top: 1px;
@@ -897,7 +898,7 @@ body.analyze{
             display: inline-block;
             text-decoration: underline;
             min-width: 62px;
-            line-height: 30px;
+            line-height: 35px;
             position: relative;
             top: 1px;
             cursor: pointer;
