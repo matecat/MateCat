@@ -131,7 +131,7 @@ class AnalyzeChunksResume extends React.Component {
                     let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
-                    let total_standard = obj[Object.keys(obj)[0]].total_st_word_count_print;
+                    let total_standard = self.props.standardWc;
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));

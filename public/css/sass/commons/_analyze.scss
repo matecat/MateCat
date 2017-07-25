@@ -112,6 +112,14 @@ body.analyze{
                             .number {
                                 font-weight: 700;
                             }
+                            a {
+                                font-weight: 700;
+                                text-decoration: underline;
+                                &:hover {
+                                    text-decoration: none;
+                                }
+                            }
+
                         }
                         .downloadAnalysisReport {
                             display: inline-block;
@@ -416,7 +424,7 @@ body.analyze{
                         border-radius: 2px;
                         margin: -3px 0px 0px 0px;
                     }
-                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                    @media only screen and (max-width: 1199px) {
                         .merge {
                              padding: 5px 10px;
                         }
@@ -493,7 +501,7 @@ body.analyze{
             min-width: 180px;
             display: inline-block;
             font-weight: bold;
-            max-width: 59%;
+            max-width: 100%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -503,10 +511,12 @@ body.analyze{
                 line-height: 30px;
                 display: inline-block;
                 &.no-split {
-                    max-width: 40%;
+                    max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
                     margin-right: 5px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
             }
             .in-to {
@@ -526,8 +536,8 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 58%;
-                    min-width: 40px;
+                    max-width: 40%;
+                    min-width: 30px;
                     vertical-align: middle;
                     white-space: nowrap;
                     overflow: hidden;
@@ -708,7 +718,7 @@ body.analyze{
                 .file-details {
                     text-decoration: underline;
                     min-width: 25px;
-                    line-height: 30px;
+                    line-height: 35px;
                     font-weight: 700;
                     position: relative;
                     top: 1px;

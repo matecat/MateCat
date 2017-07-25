@@ -57,10 +57,10 @@ class ChunkAnalyzeHeader extends React.Component {
     render() {
         let total = this.props.total;
         this.checkWhatChanged();
-        let id = (this.props.chunksSize > 1) ? 'Chunk ' +this.props.index : '';
+        let id = (this.props.chunksSize > 1) ? <div className="job-id">{ 'Chunk ' +this.props.index }</div> : '';
         return <div className="chunk sixteen wide column shadow-1 pad-right-10">
                 <div className="left-box">
-                    <div className="job-id">{id}</div>
+                    {id}
                     <div className="file-details" onClick={this.props.showFiles}>
                         File <span className="details">details </span>
                     </div>
