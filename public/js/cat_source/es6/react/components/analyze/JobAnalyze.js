@@ -16,7 +16,7 @@ class JobAnalyze extends React.Component {
         let self = this;
         if (this.props.chunks) {
             let index = 0;
-            return this.props.chunks.map(function (files, i) {
+            return this.props.chunks.reverse().map(function (files, i) {
                 index++;
                 let job = self.props.project.get('jobs').find(function (jobElem) {
                     return jobElem.get('password') === i
