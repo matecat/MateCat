@@ -26,6 +26,8 @@ abstract class Engines_AbstractEngine {
 
     public $doLog = true;
 
+    protected $enableOnAnalyze = true;
+
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
         $this->className    = get_class( $this );

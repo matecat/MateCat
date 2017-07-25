@@ -34,6 +34,14 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
     }
 
+    public function checkAccount( $_config ){
+        //TODO implement: https://docs.google.com/document/d/1Yhb-8UaFWzD_HtYhBhZlLf2-QZdB2g7sUZVzAjUcZqA/edit#heading=h.wwkqqi9fm7a6
+    }
+
+    public function activate( $_config ){
+        //TODO implement: L’attivazione di MMT ritornerà una licenza che Matecat salverà in engines e che aggiungerà come header in ogni chiamata verso MMT
+    }
+
     /**
      * @param $rawValue
      *
@@ -89,8 +97,6 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         $parameters           = array();
         $parameters[ 's' ]    = $config[ 'source' ];
         $parameters[ 't' ]    = $config[ 'target' ];
-//        $parameters[ 'sl' ]   = $config[ 'source_lang' ];
-//        $parameters[ 'tl' ]   = $config[ 'target_lang' ];
         $parameters[ 'hint' ] = $config[ 'suggestion' ];
 
         /*

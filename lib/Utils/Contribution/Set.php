@@ -46,7 +46,18 @@ class Set {
     }
 
     public static function contributionMT( ContributionStruct $contribution ){
+        try{
+            WorkerClient::enqueue( 'CONTRIBUTION_MT', '\AsyncTasks\Workers\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        } catch ( Exception $e ){
 
+            # Handle the error, logging, ...
+            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $contribution, true );
+            Log::doLog( $output );
+            throw $e;
+
+        }
     }
 
 }
