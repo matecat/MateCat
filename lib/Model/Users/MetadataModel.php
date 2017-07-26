@@ -9,6 +9,8 @@
 namespace Users;
 
 
+use FeatureSet;
+
 class MetadataModel {
 
     /**
@@ -29,7 +31,7 @@ class MetadataModel {
 
     public function save() {
         // validate
-        $features = new \FeatureSet() ;
+        $features = new FeatureSet() ;
 
         $metadataFilters = $features->filter('filterUserMetadataFilters', array() ) ;
         $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;

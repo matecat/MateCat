@@ -47,9 +47,9 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
         $struct = new CompletionEventStruct([
             'uid'               => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-            'is_review' => $this->isRevision()
-        ]));
+            'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review'         => $this->isRevision()
+        ]);
 
         $model = new EventModel( $this->chunk, $struct ) ;
         $model->save();

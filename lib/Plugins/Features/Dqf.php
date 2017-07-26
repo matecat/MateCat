@@ -3,9 +3,11 @@
 namespace Features;
 
 use AMQHandler;
+use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use catController;
 use Chunks_ChunkStruct;
+use Exceptions\ValidationError;
 use Features;
 use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
@@ -41,6 +43,28 @@ class Dqf extends BaseFeature {
             self::$logger = ( new Dqf($feature) )->getLogger();
         }
         return self::$logger ;
+    }
+
+
+    public function filterUserMetadataFilters($filters) {
+        $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
+        $filters['dqf_password'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
+
+        return $filters ;
+    }
+
+    public function filterValidateUserMetadata( $metadata, $params ) {
+        $user = $params['user'] ;
+
+        if ( !empty($metadata['dqf_username']) && !empty($metadata['dqf_password']) )  {
+            $session = new Features\Dqf\Service\Session($metadata['dqf_username'], $metadata['dqf_password'] )  ;
+            try {
+                $session->login();
+            } catch(AuthenticationError $e) {
+                throw new ValidationError('DQF credentials are not valid') ;
+            }
+        }
+        return $metadata ;
     }
 
     /**
