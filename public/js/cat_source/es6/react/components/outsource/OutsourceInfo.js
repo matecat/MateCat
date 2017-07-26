@@ -90,16 +90,14 @@ class OutsourceInfo extends React.Component {
                                     <div className="content">
                                         <div className="header">Talk with us
                                             <span className="online"> (On line)</span>
-                                            <span className="offline"> (Off line)</span>
+                                            {/*<span className="offline"> (Off line)</span>*/}
                                         </div>
                                         <div className="ui button intercom-button">
                                             <div className="sign online-item"/>
                                             Open chat
                                         </div>
-                                        <div className="sign offline-item"/>
-                                            Chat offline
-                                        </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
 
