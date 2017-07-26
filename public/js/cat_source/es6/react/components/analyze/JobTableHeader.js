@@ -32,11 +32,11 @@ class JobTableHeader extends React.Component {
                     <div className="single payable-words">Weighted</div>
                     <div className="single new">New</div>
                     <div className="single repetition">Repetition</div>
-                    <div className="single internal-matches">Internal Matches <span>(75/99)%</span></div>
-                    <div className="single p-50-74">TM Partial <span>(50/74)%</span></div>
-                    <div className="single p-75-84">TM Partial <span>(75/84)%</span></div>
-                    <div className="single p-65-94">TM Partial <span>(85/94)%</span></div>
-                    <div className="single p-95-99">TM Partial <span>(95/99)%</span></div>
+                    <div className="single internal-matches">Internal Matches <br/> <span> 75-99% </span></div>
+                    <div className="single p-50-74">TM Partial <span> 50-74% </span></div>
+                    <div className="single p-75-84">TM Partial <span> 75-84% </span></div>
+                    <div className="single p-65-94">TM Partial <span> 85-94% </span></div>
+                    <div className="single p-95-99">TM Partial <span> 95-99% </span></div>
                     <div className="single tm-100">TM <span>100%</span></div>
                     <div className="single tm-public">Public TM 100%</div>
                     <div className="single tm-context">TM 100% in context</div>
