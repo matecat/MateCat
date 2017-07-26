@@ -1,3 +1,8 @@
+let TextField = require('../common/TextField').default;
+import * as RuleRunner from '../common/ruleRunner';
+import * as FormRules from '../common/formRules';
+import update from 'react-addons-update';
+
 class PreferencesModal extends React.Component {
 
 
@@ -9,11 +14,35 @@ class PreferencesModal extends React.Component {
             coupon: this.props.metadata.coupon,
             couponError: '',
             validCoupon : false,
-            openCoupon: false
+            openCoupon: false,
+            showErrors: false,
+            validationErrors: {},
         };
-
+        this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
+
+    handleDQFFieldChanged(field) {
+        return (e) => {
+            var newState = update(this.state, {
+                [field]: {$set: e.target.value}
+            });
+            newState.validationErrors = RuleRunner.run(newState, fieldValidations);
+            newState.generalError = '';
+            this.setState(newState);
+        }
+    }
+
+    handleDQFSubmitClicked() {
+        let self = this;
+        this.setState({showErrors: true});
+        if($.isEmptyObject(this.state.validationErrors) == false) return null;
+    }
+
+    errorFor(field) {
+        return this.state.validationErrors[field];
+    }
+
 
     openResetPassword() {
         $('#modal').trigger('openresetpassword');
@@ -222,10 +251,26 @@ class PreferencesModal extends React.Component {
                             </div>
                             <label>{services_label}</label>
                         </div>
+
+                        <h2>DQF Credentials</h2>
+                        <div className="user-dqf">
+                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("emailAddress")}
+                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("password")}
+                                       placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
+                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                            <div className="ui primary button">Sign in</div>
+                        </div>
                         {couponHtml}
                     </div>
             </div>;
     }
 }
+
+const fieldValidations = [
+    RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
+    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
+];
 
 export default PreferencesModal ;

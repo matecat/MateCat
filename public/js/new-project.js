@@ -200,7 +200,7 @@ APP.getCreateProjectParams = function() {
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
-        dqf                         : !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") )
+        dqf                         : !!( $("#dqf_key").prop("checked") && !$("#dqf_key").prop("disabled") )
 
 	} ;
 };
@@ -241,8 +241,15 @@ APP.checkForSpeechToText = function(){
 };
 
 APP.checkForDqf = function() {
-    $('#dqf_switch').prop("disabled", false);
-    $('#dqf_switch').attr("checked", false);
+    var dqfCheck = $('.dqf-box #dqf_switch');
+    dqfCheck.prop("disabled", false);
+    dqfCheck.prop("checked", false);
+    dqfCheck.off('click').on('change', function () {
+        if ( dqfCheck.prop('checked') ) {
+            $('#modal').trigger('openpreferences');
+        }
+
+    });
 };
 
 UI.UPLOAD_PAGE = {};
@@ -572,6 +579,7 @@ $.extend(UI.UPLOAD_PAGE, {
         $("#disable_tms_engine").change(function(e){
             if(this.checked){
                 $("input[id^='private-tm-']").prop("disabled", true);
+
                 // $("#create_private_tm_btn").addClass("disabled", true);
             } else {
                 if(!$('#create_private_tm_btn[data-key]').length) {

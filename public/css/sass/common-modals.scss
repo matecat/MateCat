@@ -141,6 +141,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     padding: 20px 20px;
 }
 
+.preferences-modal .user-dqf ,
 .preferences-modal .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
@@ -196,6 +197,23 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     font-size: 18px;
     margin-top: 25px;
 }
+
+.preferences-modal .user-dqf  {
+    text-align: right;
+    margin-left: 80%;
+    input {
+        max-width: 98%;
+    }
+    .button {
+        font-family: Calibri, Arial, Helvetica, sans-serif;
+        vertical-align: top;
+        border: 1px solid #797979;
+        border-radius: 2px;
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+}
+
 
 .onoffswitch-drive {
     position: relative;
@@ -328,6 +346,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .preferences-modal input[type=text],
+.preferences-modal input[type=password],
 .login-container-left input,
 .register-form-container input[type=text],
 .register-form-container input[type=password],
