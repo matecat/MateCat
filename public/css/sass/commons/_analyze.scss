@@ -5,6 +5,9 @@ body.analyze{
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
     overflow: visible;
+    header {
+        z-index: 1001 !important;
+    }
 
 }
 
@@ -127,7 +130,6 @@ body.analyze{
                             padding-left: 10px;
                             color: #444444;
                             text-decoration: underline;
-                            font-weight: 700;
                             margin-left: 10px;
                             cursor: pointer;
                             &:hover {
@@ -353,9 +355,7 @@ body.analyze{
                                 }
                                 .tmw {
                                     font-weight: 700;
-                                    //color: #43ba4a;
                                     font-size: 18px;
-                                    /*background-color: #f6ffe9;*/
                                     margin-bottom: 1px;
                                     color: black;
                                     .cell-label {
@@ -537,7 +537,7 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 40%;
+                    max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
                     white-space: nowrap;
@@ -661,7 +661,6 @@ body.analyze{
                 padding: 4px 6px 0px 2px;
                 span {
                     font-size: 13px;
-                    font-weight: 700;
                     vertical-align: top;
                 }
                 &.total {
@@ -921,7 +920,6 @@ body.analyze{
                 padding-right: 6px;
             }
             .payable-words {
-                background-color: #f6ffe9;
                 font-weight: 700;
                 transition: 0.3s ease;
                 color: #000000;
