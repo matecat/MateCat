@@ -1085,6 +1085,7 @@ class ProjectManager {
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
             $newJob->dqf_key           = $projectStructure[ 'dqf_key' ];
+            $newJob->total_raw_wc      = $this->files_word_count;
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
