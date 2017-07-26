@@ -199,7 +199,7 @@ class AnalyzeHeader extends React.Component {
                         <p>MateCat gives you more matches than any other tool thanks to a better
                             integration of machine translation and translation memories.
                             <span style={{marginLeft: '2px'}} data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
-                                <span className="icon-info icon" style={{position: 'relative', top: '2px'}}/>
+                                <span className="icon-info icon" style={{position: 'relative', top: '2px', color: '#a7a7a7'}}/>
                             </span>
                         </p>
                     </div>
