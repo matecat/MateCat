@@ -149,26 +149,15 @@ class PreferencesModal extends React.Component {
                     },
                 });
             } else {
-                // self.setState({
-                //     dqfError: 'Invalid credentials'
-                // });
+                self.setState({
+                    dqfError: 'Invalid credentials'
+                });
             }
         }).fail(function () {
-            dqfCheck.trigger('dqfEnable');
-            APP.USER.STORE.metadata.dqf = {
-                username : self.state.dqfUsername,
-                password : self.state.dqfPassword
-            };
+
             self.setState({
-                dqfValid: true,
-                dqfCredentials : {
-                    dqfUsername : 'franco',
-                    dqfPassword : '1234567865'
-                },
+                dqfError: 'Invalid credentials'
             });
-            // self.setState({
-            //     dqfError: 'Invalid credentials'
-            // });
         });
     }
 
@@ -209,7 +198,7 @@ class PreferencesModal extends React.Component {
     }
 
     getDqfHtml() {
-        if (this.state.dqfValid) {
+        if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
                 <div className="user-dqf">
