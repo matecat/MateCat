@@ -12,6 +12,10 @@ class PreferencesModal extends React.Component {
         this.state = {
             service: this.props.service,
             coupon: this.props.metadata.coupon,
+            dqfCredentials : {
+                dqfUsername : this.props.metadata.dqf_username,
+                dqfPassword : this.props.metadata.dqf_password
+            },
             couponError: '',
             validCoupon : false,
             dqfValid: false,
@@ -124,6 +128,7 @@ class PreferencesModal extends React.Component {
 
     submitDQFCredentials() {
         let self = this;
+        let dqfCheck = $('.dqf-box #dqf_switch');
         return $.post('/api/app/user/metadata', { metadata : {
             dqf_username : this.state.dqfUsername,
             dqf_password : this.state.dqfPassword
@@ -135,19 +140,35 @@ class PreferencesModal extends React.Component {
                     username : self.state.dqfUsername,
                     password : self.state.dqfPassword
                 };
-                dqfCheck.on('dqfEnable');
+                dqfCheck.trigger('dqfEnable');
                 self.setState({
-                    dqfValid: true
+                    dqfValid: true,
+                    dqfCredentials : {
+                        dqfUsername : self.state.dqfUsername,
+                        dqfPassword : self.state.dqfPassword
+                    },
                 });
             } else {
-                self.setState({
-                    dqfError: 'Invalid credentials'
-                });
+                // self.setState({
+                //     dqfError: 'Invalid credentials'
+                // });
             }
         }).fail(function () {
+            dqfCheck.trigger('dqfEnable');
+            APP.USER.STORE.metadata.dqf = {
+                username : self.state.dqfUsername,
+                password : self.state.dqfPassword
+            };
             self.setState({
-                dqfError: 'Invalid credentials'
+                dqfValid: true,
+                dqfCredentials : {
+                    dqfUsername : 'franco',
+                    dqfPassword : '1234567865'
+                },
             });
+            // self.setState({
+            //     dqfError: 'Invalid credentials'
+            // });
         });
     }
 
@@ -185,6 +206,36 @@ class PreferencesModal extends React.Component {
         this.setState({
             openCoupon: true
         });
+    }
+
+    getDqfHtml() {
+        if (this.state.dqfValid) {
+            return <div className="dqf-container">
+                <h2>DQF Credentials</h2>
+                <div className="user-dqf">
+                    <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
+                    <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
+                    <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}>Clear</div>
+
+                </div>
+            </div>
+        } else {
+            return <div className="dqf-container">
+                <h2>DQF Credentials</h2>
+                <div className="user-dqf">
+                    <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
+                               placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
+                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                    <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
+                               placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
+                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                    <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
+                    <div className="dqf-message">
+                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
+                    </div>
+                </div>
+            </div>
+        }
     }
 
     render() {
@@ -283,19 +334,8 @@ class PreferencesModal extends React.Component {
                             <label>{services_label}</label>
                         </div>
 
-                        <h2>DQF Credentials</h2>
-                        <div className="user-dqf">
-                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
-                                       placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
-                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
-                                       placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
-                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                            <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
-                            <div className="dqf-message">
-                                <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
-                            </div>
-                        </div>
+                        {this.getDqfHtml()}
+
                         {couponHtml}
                     </div>
             </div>;
