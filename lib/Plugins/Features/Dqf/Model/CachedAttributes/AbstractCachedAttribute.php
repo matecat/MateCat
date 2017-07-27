@@ -24,4 +24,8 @@ abstract class AbstractCachedAttribute {
         $this->resource_json = json_decode( file_get_contents( $path ), true );
     }
 
+    public function getArray() {
+        return $this->resource_json ;
+    }
+
 }

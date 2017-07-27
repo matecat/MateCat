@@ -524,40 +524,45 @@
                                 <div class="dqf-options-container closed-options">
                                     <div class="dqf-option">
                                         <h4>Content Type</h4>
+
                                         <select name="contentType" id="contentType">
                                             <option value="">Choose</option>
-                                            <option value="1">User Interface Text</option>
-                                            <option value="2">Technical Specifications</option>
-                                            <option value="3">User Manual</option>
-                                            <option value="4">Online Help</option>
+                                            <tal:block tal:repeat="entry dqf_content_types">
+                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
+                                            </tal:block>
                                         </select>
+
                                     </div>
                                     <div class="dqf-option">
                                         <h4>Industry</h4>
                                         <select name="industry" id="industry">
                                             <option value="">Choose</option>
-                                            <option value="1">Aerospace / Aviation</option>
-                                            <option value="2">Automotive</option>
-                                            <option value="3">Business Services</option>
-                                            <option value="4">Chemicals</option>
+
+                                            <tal:block tal:repeat="entry dqf_industry">
+                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
+                                            </tal:block>
                                         </select>
                                     </div>
                                     <div class="dqf-option">
                                         <h4>Process</h4>
                                         <select name="process" id="process">
                                             <option value="">Choose</option>
-                                            <option value="1">MT+PE+Human</option>
-                                            <option value="2">MT+PE</option>
-                                            <option value="3">MT+PE+TM+Human</option>
-                                            <option value="4">TM+Human</option>
+
+                                            <tal:block tal:repeat="entry dqf_process">
+                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
+                                            </tal:block>
+
                                         </select>
                                     </div>
                                     <div class="dqf-option">
                                         <h4>Quality level</h4>
                                         <select name="qualityLevel" id="qualityLevel">
                                             <option value="">Choose</option>
-                                            <option value="1">Good Enough</option>
-                                            <option value="2">High Quality</option>
+
+                                            <tal:block tal:repeat="entry dqf_quality_level">
+                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
+                                            </tal:block>
+
                                         </select>
                                     </div>
                                 </div>
