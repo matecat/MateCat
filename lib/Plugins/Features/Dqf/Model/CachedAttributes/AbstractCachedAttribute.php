@@ -6,12 +6,11 @@
  * Time: 16:16
  */
 
-namespace Features\Dqf\Model;
-
+namespace Features\Dqf\Model\CachedAttributes;
 
 use INIT;
 
-abstract class DqfCachedAttribute {
+abstract class AbstractCachedAttribute {
 
     protected $resource_name;
 

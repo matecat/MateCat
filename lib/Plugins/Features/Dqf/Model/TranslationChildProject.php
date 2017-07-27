@@ -5,23 +5,16 @@ namespace Features\Dqf\Model ;
 use Chunks_ChunkStruct;
 use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\ChildProjectTranslationBatchService;
-use Features\Dqf\Service\Client;
 use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
-use Features\Dqf\Utils\Functions;
-use Files\FilesJobDao;
-use Files\FilesJobStruct;
 use Files_FileStruct;
 use INIT;
 use Jobs\MetadataDao;
-use Log;
 use Translations_TranslationVersionDao;
 use Users_UserDao;
-use Users_UserStruct;
-use Utils;
 
 /**
  * Created by PhpStorm.

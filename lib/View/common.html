@@ -4,13 +4,15 @@
         if ( typeof config == 'undefined' ) {
             config = {} ;
         }
-        config.userMail = '${userMail}';
+        config.userMail  = '${userMail}';
         config.userFullName = '${extended_user}';
         config.userShortName = '${logged_user}';
         config.isLoggedIn = ${isLoggedIn|string:false};
 
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.authURL = ${structure php:json_encode(authURL)} ;
+
+        config.dqf_enabled = ${dqf_enabled} ;
         /*]]>*/
 
     <tal:block  tal:repeat="config_data config_js">

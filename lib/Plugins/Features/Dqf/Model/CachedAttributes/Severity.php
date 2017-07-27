@@ -6,13 +6,11 @@
  * Time: 17:41
  */
 
-namespace Features\Dqf\Model;
+namespace Features\Dqf\Model\CachedAttributes ;
 
-
-class CachedSeverityAttributes extends DqfCachedAttribute {
+class Severity extends AbstractCachedAttribute {
 
     protected $resource_name = 'severity' ;
-
 
     public function getSeveritiesForReviewSettings() {
         return array_map(function( $severity ) {
