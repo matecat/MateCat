@@ -161,6 +161,25 @@ class PreferencesModal extends React.Component {
         });
     }
 
+    clearDQFCredentials() {
+        let self = this;
+        let dqfCheck = $('.dqf-box #dqf_switch');
+        return $.post('/api/app/user/metadata', { metadata : {
+                dqf_clear : 1,
+            }
+        }).done( function( data ) {
+            if (data) {
+                APP.USER.STORE.metadata = data;
+                dqfCheck.trigger('dqfDisable');
+                self.setState({
+                    dqfValid: false,
+                    dqfCredentials : {},
+                });
+            }
+        });
+    }
+
+
     onKeyPressCoupon(e) {
         var length = this.couponInput.value.length;
         var validCoupon = false;
@@ -204,7 +223,8 @@ class PreferencesModal extends React.Component {
                 <div className="user-dqf">
                     <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
                     <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
-                    <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}>Clear</div>
+                    <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}
+                        onClick={this.clearDQFCredentials.bind(this)}>Clear</div>
 
                 </div>
             </div>

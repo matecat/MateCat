@@ -278,6 +278,12 @@ APP.checkForDqf = function() {
         dqfCheck.prop('checked', true);
         $('.dqf-box .dqf-options-container').removeClass('closed-options')
     });
+
+    dqfCheck.on('dqfDisable', function (e) {
+        dqfCheck.attr('checked', false);
+        dqfCheck.prop('checked', false);
+        $('.dqf-box .dqf-options-container').addClass('closed-options')
+    });
 };
 
 UI.UPLOAD_PAGE = {};
