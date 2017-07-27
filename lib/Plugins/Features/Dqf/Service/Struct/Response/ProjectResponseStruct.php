@@ -35,9 +35,13 @@ class ProjectResponseStruct extends BaseStruct {
     public $fileProjectTargetLangs ;
     public $active ;
 
+    protected $_user ;
+    protected $_ownerUser ;
+
     public function __set($method, $data) {
         if ( $method == 'user' || $method == 'ownerUser' ) {
-            $this->_user = new UserResponseStruct( $data );
+            $new_name = "_$method";
+            $this->$new_name = new UserResponseStruct( $data );
         }
     }
 

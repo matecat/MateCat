@@ -20,7 +20,7 @@ use Features\ReviewImproved\Controller;
 use Projects_ProjectStruct ;
 use Jobs_JobStruct ;
 
-use Features\ProjectCompletion\Model\EventStruct ;
+use Features\ProjectCompletion\CompletionEventStruct ;
 
 use Features ;
 use Chunks_ChunkStruct ;
@@ -263,10 +263,10 @@ class ReviewImproved extends BaseFeature {
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct $chunk
-     * @param EventStruct $event
+     * @param CompletionEventStruct $event
      * @param $completion_event_id
      */
-    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $completion_event_id ) {
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
         if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) ) {
             if ( $event->is_review ) {
                 $model = new ArchivedQualityReportModel( $chunk );

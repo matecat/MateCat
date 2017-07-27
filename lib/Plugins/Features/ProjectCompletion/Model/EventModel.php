@@ -21,15 +21,17 @@ class EventModel {
     /**
      * @var CompletionEventStruct
      */
-    protected $params ;
+    protected $eventStruct ;
     /**
      * @var Chunks_ChunkStruct
      */
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
-    public function __construct( Chunks_ChunkStruct $chunk, CompletionEventStruct $params ) {
-        $this->params = $params ;
+
+
+    public function __construct( Chunks_ChunkStruct $chunk, CompletionEventStruct $eventStruct ) {
+        $this->eventStruct = $eventStruct ;
         $this->chunk = $chunk ;
     }
 

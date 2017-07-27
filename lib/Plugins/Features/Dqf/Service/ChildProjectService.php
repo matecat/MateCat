@@ -61,7 +61,7 @@ class ChildProjectService {
         $responses = $client->curl()->getAllContents();
 
         if ( count($client->curl()->getErrors() ) > 0 ) {
-            throw  new Exception('Error on update of remote child project' );
+            throw  new Exception('Error on update of remote child project: ' . implode( ', ',  $client->curl()->getAllContents() ) ) ;
         }
 
         $returnable = $client->curl()->getAllContents();

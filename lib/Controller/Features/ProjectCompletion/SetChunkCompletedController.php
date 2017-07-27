@@ -2,9 +2,7 @@
 
 
 use Features\ProjectCompletion\CompletionEventStruct;
-use Features\ProjectCompletion\Model\EventModel ;
-
-use Features\ProjectCompletion\Model\EventStruct ;
+use Features\ProjectCompletion\Model\EventModel;
 
 class Features_ProjectCompletion_SetChunkCompletedController extends ajaxController {
 
