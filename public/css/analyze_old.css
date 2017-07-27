@@ -105,15 +105,15 @@ a:hover{text-decoration:none}
 .standardbtn {
     width: auto !important;
 }
-.downloadAnalysisReport {
-    margin-top: -8px !important;
-    text-decoration: underline;
-    cursor: pointer;
-}
-.analysisNotPerformed {
-	margin-top: -8px !important;
-    text-decoration: underline;
-}
+/*.downloadAnalysisReport {*/
+    /*margin-top: -8px !important;*/
+    /*text-decoration: underline;*/
+    /*cursor: pointer;*/
+/*}*/
+/*.analysisNotPerformed {*/
+	/*margin-top: -8px !important;*/
+    /*text-decoration: underline;*/
+/*}*/
 span.complete {
     margin-right: 30px !important;
 }

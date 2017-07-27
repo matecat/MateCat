@@ -315,11 +315,11 @@ class ModifyTeam extends React.Component {
                 allowAdditions: true,
                 action: this.onLabelCreate,
             });
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
     }
 
     componentWillUnmount() {
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
     }
 
     shouldComponentUpdate(nextProps, nextState) {

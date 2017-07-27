@@ -200,7 +200,7 @@ APP.getCreateProjectParams = function() {
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
-        dqf                         : !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") )
+        dqf                         : !!( $("#dqf_key").prop("checked") && !$("#dqf_key").prop("disabled") )
 
 	} ;
 };
@@ -241,8 +241,21 @@ APP.checkForSpeechToText = function(){
 };
 
 APP.checkForDqf = function() {
-    $('#dqf_switch').prop("disabled", false);
-    $('#dqf_switch').attr("checked", false);
+    var dqfCheck = $('.dqf-box #dqf_switch');
+    dqfCheck.prop("disabled", false);
+    dqfCheck.prop("checked", false);
+    dqfCheck.off('click').on('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if ( dqfCheck.prop('checked') ) {
+            $('#modal').trigger('openpreferences');
+        }
+
+    });
+    dqfCheck.on('dqfEnable', function (e) {
+        dqfCheck.attr('checked', true);
+
+    });
 };
 
 UI.UPLOAD_PAGE = {};
@@ -281,11 +294,11 @@ $.extend(UI.UPLOAD_PAGE, {
                 showModals: false,
                 showLinks: true
             }), headerMountPoint);
-            this.getAllTeams().done(function (data) {
+            API.TEAM.getAllTeams().done(function (data) {
                 self.teams = data.teams;
-                ManageActions.renderTeams(self.teams);
+                TeamsActions.renderTeams(self.teams);
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
-                ManageActions.selectTeam(self.selectedTeam);
+                TeamsActions.selectTeam(self.selectedTeam);
             });
         } else {
             ReactDOM.render(React.createElement(Header, {
@@ -431,19 +444,6 @@ $.extend(UI.UPLOAD_PAGE, {
         }
     },
 
-    getAllTeams: function () {
-        if ( APP.USER.STORE.teams ) {
-            var data = {
-                teams: APP.USER.STORE.teams
-            };
-            var deferred = $.Deferred().resolve(data);
-            return deferred.promise();
-        } else {
-            return APP.USER.loadUserData();
-        }
-
-    },
-
     getSelectedTeam: function () {
         var selectedTeamId;
         if (config.isLoggedIn) {
@@ -572,6 +572,7 @@ $.extend(UI.UPLOAD_PAGE, {
         $("#disable_tms_engine").change(function(e){
             if(this.checked){
                 $("input[id^='private-tm-']").prop("disabled", true);
+
                 // $("#create_private_tm_btn").addClass("disabled", true);
             } else {
                 if(!$('#create_private_tm_btn[data-key]').length) {

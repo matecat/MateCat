@@ -90,7 +90,7 @@ abstract class Analysis_AbstractStatus {
         $this->result[ 'data' ] = $this->_data_struct;
 
         //array of totals per job-files
-        $total_payable                    = array();
+        $total_word_counters                    = array();
         $_total_segments_analyzed         = 0;
         $_total_wc_fast_analysis          = 0;
         $_total_wc_standard_fast_analysis = 0;
@@ -131,12 +131,12 @@ abstract class Analysis_AbstractStatus {
                 $this->result[ 'data' ][ 'jobs' ][ $jid ]             = array();
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] = array();
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] = array();
-                $total_payable[ $jid ]                                = array();
+                $total_word_counters[ $jid ]                                = array();
             }
 
             if ( !array_key_exists( $jpassword, $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] ) ) {
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
-                $total_payable[ $jid ][ $jpassword ]                                = array();
+                $total_word_counters[ $jid ][ $jpassword ]                                = array();
             }
 
             if ( !array_key_exists( $jpassword, $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] ) ) {
@@ -192,31 +192,30 @@ abstract class Analysis_AbstractStatus {
             );
 
             //SUM WITH PREVIOUS ( Accumulator )
-            $eq_words                                                                                                       = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
-            $eq_words_print                                                                                                 = number_format( $eq_words, 0, ".", "," );
-            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array(
-                $eq_words, $eq_words_print
-            );
-
             //take note of payable words for job/file combination
-            $total_payable[ $jid ][ $jpassword ][ $segInfo[ 'id_file' ] ] = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] += $segInfo[ 'eq_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] += $segInfo[ 'raw_word_count' ];
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
         }
+
         $this->_resultSet = array(); //free memory
 
         //sum all totals for each job
-        //N^3 but there are a little number of rows max 30
-        foreach ( $total_payable as $jid => $chunks ) {
-
-            foreach ( $chunks as $_jpassword => $files ) {
-                foreach ( $files as $fid => $v ) {
-                    $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] += $v;
-
-                    //format numbers after sum
-                    $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] + 0.00000001, 0, ".", "," );
-                }
+        //N^2 but there are a little number of rows max 30
+        foreach ( $total_word_counters as $jid => $chunks ) {
+            foreach ( $chunks as $_jpassword => $v ) {
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ]       = $v[ 'eq_word_count' ]; //compatibility
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "eq_word_count" ][ 0 ]       = $v[ 'eq_word_count' ];
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "standard_word_count" ][ 0 ] = $v[ 'standard_word_count' ];
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "raw_word_count" ][ 0 ]      = $v[ 'raw_word_count' ];
+                //format numbers after sum
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001, 0, ".", "," );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "eq_word_count" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001, 0, ".", "," );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "standard_word_count" ][ 1 ] = number_format( $v[ 'standard_word_count' ] + 0.00000001, 0, ".", "," );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "raw_word_count" ][ 1 ]      = number_format( $v[ 'raw_word_count' ] + 0.00000001, 0, ".", "," );
             }
         }
 

@@ -899,7 +899,7 @@ color:#333;}
     overflow-x: hidden;
     overflow-y: auto;
     position: fixed;
-    z-index: 10000000000000;
+    z-index: 99999999;
     top: 0;
     right: -1100px;
     background: #fff;
@@ -3925,6 +3925,7 @@ float: left;
     content: "Clear Archive";
     font-size: 12px;
     font-weight: bold;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 .more.minus:before {

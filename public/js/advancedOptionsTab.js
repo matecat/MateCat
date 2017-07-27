@@ -90,6 +90,7 @@ if ( true )
             if ( UI.checkDqfCanActivate() ) {
                 (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
                 dqfCheck.prop('disabled', true) ;
+
             }
         },
 
@@ -108,9 +109,6 @@ if ( true )
             (selected) ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob();
         },
 
-        toggleDqfOption: function() {
-            // TODO
-        },
         checkDqfCanActivate : function() {
             return true ;
         },
