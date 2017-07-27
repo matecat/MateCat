@@ -390,7 +390,7 @@ abstract class viewController extends controller {
 
             $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled          = INIT::$DQF_ENABLED ;
+            $this->template->dqf_enabled          = false ;
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
