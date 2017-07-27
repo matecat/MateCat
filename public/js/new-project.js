@@ -245,16 +245,27 @@ APP.checkForDqf = function() {
     dqfCheck.prop("disabled", false);
     dqfCheck.prop("checked", false);
     dqfCheck.off('click').on('click', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-        if ( dqfCheck.prop('checked') ) {
-            $('#modal').trigger('openpreferences');
+        if ( dqfCheck.prop('checked')) {
+            if (!_.isUndefined(APP.USER.STORE.metadata) && _.isUndefined(APP.USER.STORE.metadata.dqf_username)) {
+                e.stopPropagation();
+                e.preventDefault();
+                $('#modal').trigger('openpreferences');
+            } else if( _.isUndefined(APP.USER.STORE.metadata) ) {
+                e.stopPropagation();
+                e.preventDefault();
+                $('#modal').trigger('openlogin');
+            } else {
+                $('.dqf-box .dqf-options-container').removeClass('closed-options');
+            }
+        } else {
+            $('.dqf-box .dqf-options-container').addClass('closed-options')
         }
 
     });
     dqfCheck.on('dqfEnable', function (e) {
         dqfCheck.attr('checked', true);
-
+        dqfCheck.prop('checked', true);
+        $('.dqf-box .dqf-options-container').removeClass('closed-options')
     });
 };
 
