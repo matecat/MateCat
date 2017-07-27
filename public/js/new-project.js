@@ -182,6 +182,14 @@ APP.checkForTagProjectionLangs = function(){
 };
 
 APP.getCreateProjectParams = function() {
+    var dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
+    var dqf_contentType, dqf_industry, dqf_process, dqf_quality_level;
+    if (dqfEnabled) {
+        dqf_contentType     = $('#contentType option:selected').val();
+        dqf_industry        = $('#industry option:selected').val();
+        dqf_process         = $('#process option:selected').val();
+        dqf_quality_level   = $('#qualityLevel option:selected').val();
+    }
 	return {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
@@ -200,8 +208,11 @@ APP.getCreateProjectParams = function() {
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
-        dqf                         : !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") )
-
+        dqf                         : dqfEnabled,
+        dqf_contentType             : dqf_contentType,
+        dqf_industry                : dqf_industry,
+        dqf_process                 : dqf_process,
+        dqf_quality_level           : dqf_quality_level
 	} ;
 };
 
