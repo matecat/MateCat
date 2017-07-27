@@ -80,14 +80,6 @@ $(document).ready(function(){
             $(this).removeClass('on').find('input').removeAttr('checked');
         });
     });
-
-    $('#dqf_key').on('paste', function(e){
-        UI.checkDQFKey();
-    }).on('keypress', function(e){
-        e.preventDefault();
-    }).on('focus', function(e){
-        $(this).val('').removeClass('error valid');
-    })
 });
 
 

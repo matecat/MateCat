@@ -86,7 +86,6 @@ public function setUp(){
         $this->assertEquals($this->job['revision_stats_terminology_maj'], $result['revision_stats_terminology_maj']);
         $this->assertEquals($this->job['revision_stats_language_quality_maj'], $result['revision_stats_language_quality_maj']);
         $this->assertEquals($this->job['revision_stats_style_maj'], $result['revision_stats_style_maj']);
-        $this->assertEquals($this->job['dqf_key'], $result['dqf_key']);
         $this->assertEquals($this->job['total_raw_wc'], $result['total_raw_wc']);
     }
 

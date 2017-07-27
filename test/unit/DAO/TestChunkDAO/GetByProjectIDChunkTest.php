@@ -91,7 +91,6 @@ class GetByProjectIdChunkTest extends AbstractTest
         $this->assertEquals($expected_chunk['revision_stats_terminology_maj'], $result['revision_stats_terminology_maj']);
         $this->assertEquals($expected_chunk['revision_stats_language_quality_maj'], $result['revision_stats_language_quality_maj']);
         $this->assertEquals($expected_chunk['revision_stats_style_maj'], $result['revision_stats_style_maj']);
-        $this->assertEquals($expected_chunk['dqf_key'], $result['dqf_key']);
         $this->assertEquals($expected_chunk['total_raw_wc'], $result['total_raw_wc']);
 
     }
