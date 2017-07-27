@@ -14,6 +14,7 @@ class PreferencesModal extends React.Component {
             coupon: this.props.metadata.coupon,
             couponError: '',
             validCoupon : false,
+            dqfValid: false,
             openCoupon: false,
             showErrors: false,
             validationErrors: {},
@@ -37,6 +38,7 @@ class PreferencesModal extends React.Component {
         let self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+        this.submitDQFCredentials();
     }
 
     errorFor(field) {
@@ -93,8 +95,7 @@ class PreferencesModal extends React.Component {
         }
 
     }
-
-    submitUserChanges() {
+    submitCoupon() {
         var self = this;
         if (!this.state.validCoupon) {
             return;
@@ -120,6 +121,36 @@ class PreferencesModal extends React.Component {
         });
     }
 
+
+    submitDQFCredentials() {
+        let self = this;
+        return $.post('/api/app/user/metadata', { metadata : {
+            dqf_username : this.state.dqfUsername,
+            dqf_password : this.state.dqfPassword
+        }
+        }).done( function( data ) {
+            if (data) {
+                APP.USER.STORE.metadata = data;
+                APP.USER.STORE.metadata.dqf = {
+                    username : self.state.dqfUsername,
+                    password : self.state.dqfPassword
+                };
+                dqfCheck.on('dqfEnable');
+                self.setState({
+                    dqfValid: true
+                });
+            } else {
+                self.setState({
+                    dqfError: 'Invalid credentials'
+                });
+            }
+        }).fail(function () {
+            self.setState({
+                dqfError: 'Invalid credentials'
+            });
+        });
+    }
+
     onKeyPressCoupon(e) {
         var length = this.couponInput.value.length;
         var validCoupon = false;
@@ -131,7 +162,7 @@ class PreferencesModal extends React.Component {
             validCoupon : validCoupon
         });
         if (e.key === 'Enter') {
-            this.submitUserChanges();
+            this.submitCoupon();
         }
     }
 
@@ -189,7 +220,7 @@ class PreferencesModal extends React.Component {
                         <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
                         onKeyUp={this.onKeyPressCoupon.bind(this)}
                         ref={(input) => this.couponInput = input}/>
-                        <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
+                        <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitCoupon.bind(this)}>Apply</a>
                         <div className="coupon-message">
                             <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
                         </div>
@@ -254,13 +285,16 @@ class PreferencesModal extends React.Component {
 
                         <h2>DQF Credentials</h2>
                         <div className="user-dqf">
-                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("emailAddress")}
-                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
+                                       placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("password")}
-                                       placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
+                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
+                                       placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                            <div className="ui primary button">Sign in</div>
+                            <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
+                            <div className="dqf-message">
+                                <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
+                            </div>
                         </div>
                         {couponHtml}
                     </div>
@@ -269,8 +303,8 @@ class PreferencesModal extends React.Component {
 }
 
 const fieldValidations = [
-    RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
-    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
+    RuleRunner.ruleRunner("dqfUsername", "Username", FormRules.requiredRule),
+    RuleRunner.ruleRunner("dqfPassword", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
 export default PreferencesModal ;

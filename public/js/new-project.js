@@ -244,10 +244,16 @@ APP.checkForDqf = function() {
     var dqfCheck = $('.dqf-box #dqf_switch');
     dqfCheck.prop("disabled", false);
     dqfCheck.prop("checked", false);
-    dqfCheck.off('click').on('change', function () {
+    dqfCheck.off('click').on('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
         if ( dqfCheck.prop('checked') ) {
             $('#modal').trigger('openpreferences');
         }
+
+    });
+    dqfCheck.on('dqfEnable', function (e) {
+        dqfCheck.attr('checked', true);
 
     });
 };

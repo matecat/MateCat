@@ -199,8 +199,6 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .preferences-modal .user-dqf  {
-    text-align: right;
-    margin-left: 80%;
     input {
         max-width: 98%;
     }
@@ -211,6 +209,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         border-radius: 2px;
         font-size: 16px;
         margin-bottom: 15px;
+        margin-left: 80%;
+    }
+    .dqf-message {
+        float: right;
+        margin-top: 10px;
     }
 }
 
