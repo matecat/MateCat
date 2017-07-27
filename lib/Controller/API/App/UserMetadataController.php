@@ -10,16 +10,16 @@ namespace API\App;
 
 
 use API\V2\KleinController;
+use Bootstrap;
 use Exceptions\NotFoundError;
 use Users\MetadataDao;
 use Users\MetadataModel;
+use Users_UserDao;
 
 class UserMetadataController extends AbstractStatefulKleinController {
 
     public function update() {
-        // TODO
-
-        $dao  = new \Users_UserDao();
+        $dao  = new Users_UserDao();
         $user = $dao->getByUid( $_SESSION[ 'uid' ] );
 
         if ( !$user ) {
@@ -30,19 +30,16 @@ class UserMetadataController extends AbstractStatefulKleinController {
 
         $model->save();
         $data = $user->getMetadataAsKeyValue();
+
         if ( empty ( $data ) ) {
             $data = null;
         }
 
-        $this->response->json(
-                $data
-        );
-
+        $this->response->json( $data );
     }
 
     protected function afterConstruct() {
-        \Bootstrap::sessionClose();
+        Bootstrap::sessionClose();
     }
-
 
 }
