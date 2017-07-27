@@ -514,15 +514,17 @@ abstract class DataAccess_AbstractDao {
 
         $attrs = $struct->attributes();
 
+        $fields = isset( $options['fields'] ) ? $options['fields'] : null ;
+
         $sql = " UPDATE " . static::TABLE;
-        $sql .= " SET " . static::buildUpdateSet( $attrs, $options[ 'fields' ] );
+        $sql .= " SET " . static::buildUpdateSet( $attrs, $fields );
         $sql .= " WHERE " . static::buildPkeyCondition( $attrs );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $data = array_merge(
-                $struct->toArray( $options[ 'fields' ] ),
+                $struct->toArray( $fields ),
                 self::structKeys( $struct )
         );
 

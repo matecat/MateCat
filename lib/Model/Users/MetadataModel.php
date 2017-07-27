@@ -34,7 +34,7 @@ class MetadataModel {
         $features = new FeatureSet() ;
         $features->loadSystemWideFeatures();
 
-        $metadataFilters = $features->filter('filterUserMetadataFilters', array() ) ;
+        $metadataFilters = $features->filter('filterUserMetadataFilters', array(), $this->metadata ) ;
         $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;
 
         $this->metadata = $features->filter('filterValidateUserMetadata', $this->metadata, array('user' => $this->user ) ) ;

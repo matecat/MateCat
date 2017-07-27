@@ -110,18 +110,26 @@ class TranslationChildProject {
         // $service->updateTranslationChildren( ['assignee' => $this->dqfTranslateUser->email ] ) ;
         $this->_findRemoteDqfChildProjects() ;
 
-        $updateRequests = array_map( function( ProjectResponseStruct $project ) {
-            return new ChildProjectRequestStruct([
-                    'projectKey' => $project->uuid,
-                    'projectId'  => $project->id,
-                    'parentKey'  => $this->parentKeysMap[ $project->id ],
-                    'assignee'   => $this->dqfTranslateUser->getDqfUsername(),
-                    'type'       => $project->type
-            ]) ;
-        }, $this->remoteDqfProjects ) ;
+        $updateRequests = array_filter( array_map( function( ProjectResponseStruct $project ) {
 
-        $childProjectService = new ChildProjectService( $this->ownerSession, $this->chunk );
-        $childProjectService->updateChildProjects( $updateRequests ) ;
+            if ( !is_null($project->user->email ) ) {
+                return null ;
+            }
+
+            return new ChildProjectRequestStruct([
+                    'projectKey'   =>   $project->uuid,
+                    'projectId'    =>   $project->id,
+                    'parentKey'    =>   $this->parentKeysMap[ $project->id ],
+                    'assignee'     =>   $this->dqfTranslateUser->getDqfUsername(),
+                    'type'         =>   $project->type
+            ]) ;
+
+        }, $this->remoteDqfProjects ) )  ;
+
+        if ( !empty( $updateRequests ) ) {
+            $childProjectService = new ChildProjectService( $this->ownerSession, $this->chunk );
+            $childProjectService->updateChildProjects( $updateRequests ) ;
+        }
     }
 
     protected function _findRemoteDqfChildProjects() {

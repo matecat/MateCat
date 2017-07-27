@@ -46,9 +46,11 @@ class Dqf extends BaseFeature {
     }
 
 
-    public function filterUserMetadataFilters($filters) {
-        $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
-        $filters['dqf_password'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
+    public function filterUserMetadataFilters($filters, $metadata) {
+        if ( isset( $metadata['dqf_username'] ) || isset( $metadata['dqf_password'] ) ) {
+            $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
+            $filters['dqf_password'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
+        }
 
         return $filters ;
     }
