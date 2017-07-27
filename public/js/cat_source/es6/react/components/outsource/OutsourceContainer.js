@@ -10,10 +10,19 @@ class OutsourceContainer extends React.Component {
     constructor(props) {
         super(props);
         this.handleDocumentClick = this.handleDocumentClick.bind(this);
+        this.checkTimezone();
     }
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    checkTimezone() {
+        var timezoneToShow = $.cookie( "matecat_timezone" );
+        if ( !timezoneToShow) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+            $.cookie( "matecat_timezone" , timezoneToShow);
+        }
     }
 
     getProjectAnalyzeUrl() {

@@ -1,4 +1,3 @@
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeActions = require('../../actions/AnalyzeActions');
 let OutsourceContainer = require('../outsource/OutsourceContainer').default;
@@ -28,17 +27,18 @@ class AnalyzeChunksResume extends React.Component {
         });
 
     }
-
-    openSplitModal(id, evt) {
-        evt.preventDefault();
-        evt.stopPropagation();
+    openSplitModal(id,e) {
+        e.stopPropagation();
+        e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
         ModalsActions.openSplitJobModal(job, this.props.project, UI.reloadAnalysis);
     }
 
-    openMergeModal(id) {
+    openMergeModal(id, e) {
+        e.stopPropagation();
+        e.preventDefault();
         let job = this.props.project.get('jobs').find(function (item) {
             return item.get('id') == id;
         });
@@ -58,9 +58,9 @@ class AnalyzeChunksResume extends React.Component {
         return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
     }
 
-    openOutsourceModal(idJob, evt) {
-        evt.preventDefault();
-        evt.stopPropagation();
+    openOutsourceModal(idJob, e) {
+        e.stopPropagation();
+        e.preventDefault();
         this.setState({
             openOutsource: true,
             outsourceJobId : idJob
@@ -89,7 +89,7 @@ class AnalyzeChunksResume extends React.Component {
             return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
                 if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
                     let index = 0;
-                    let chunksHtml = jobAnalysis.get('totals').map(function (chunkAnalysis, indexChunk) {
+                    let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
                         let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
                         let chunkJob = self.props.project.get('jobs').find(function (job) {
                             return job.get('id') == indexJob && job.get('password') == indexChunk;
@@ -104,22 +104,18 @@ class AnalyzeChunksResume extends React.Component {
 
                         return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                             <div className="title-job">
-                                <div className="job-id" >{chunk.jid}-{index}</div>
+                                <div className="job-id" >Chunk {index}</div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
-                                    {/*<div className="cell-label">Total</div>*/}
                                     <div>{chunk.total_raw_word_count_print}</div>
                                 </div>
                                 <div className="title-standard-words tsw">
-                                    {/*<div className="cell-label">Other CAT tool</div>*/}
                                     <div>{chunk.total_st_word_count_print}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
-                                    {/*<div className="cell-label">Weighted words:</div>*/}
                                     <div>
-                                        {/*<i className="icon-chart4 icon"/>*/}
                                         {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
                             </div>
@@ -162,7 +158,7 @@ class AnalyzeChunksResume extends React.Component {
                     let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
-                    let total_standard = obj[Object.keys(obj)[0]].total_st_word_count_print;
+                    let total_standard = self.props.standardWc;
 
                     let chunkJob = self.props.project.get('jobs').find(function (job) {
                         return job.get('id') == indexJob ;
@@ -179,7 +175,7 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunks sixteen wide column">
                             <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
-                                    <div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>
+                                    {/*<div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>*/}
                                     <div className="source-target" >
                                         <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                         <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -228,7 +224,6 @@ class AnalyzeChunksResume extends React.Component {
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
                             <div className="title-job">
-                                <div className="job-id">({jobInfo.get('id')})</div>
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -291,27 +286,28 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     render() {
-        let showHideText = (this.state.openDetails) ? "Hide Analysis report" : "Show Analysis report";
+        let showHideText = (this.state.openDetails) ? "Hide Details" : "Show Details";
         let iconClass = (this.state.openDetails) ? "open" : "";
         return <div className="project-top ui grid">
             <div className="compare-table sixteen wide column">
                 <div className="header-compare-table ui grid shadow-1">
                     <div className="title-job">
-                        <h5></h5>
-                        <p></p>
+                        <h5/>
+                        <p/>
                     </div>
                     <div className="titles-compare">
                         <div className="title-total-words">
                             <h5>Total word count</h5>
-                            <p>(Raw words in the files)</p>
                         </div>
                         <div className="title-standard-words">
-                            <h5>Industry weighted</h5>
-                            <p>(As counted by other CAT tools)</p>
+                            <h5>Industry weighted
+                                <span data-tooltip="As counted by other CAT tools">
+                                    <span className="icon-info icon"/>
+                                </span>
+                            </h5>
                         </div>
                         <div className="title-matecat-words">
                             <h5>MateCat weighted</h5>
-                            <p>(Leveraging previous translations)</p>
                         </div>
                     </div>
                 </div>

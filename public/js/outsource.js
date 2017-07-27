@@ -175,34 +175,16 @@ $.extend(UI, {
         });
     },
 
-    getOutsourceQuote: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
-
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'outsourceTo',
-        //         pid: idProject,
-        //         ppassword: password,
-        //         fixedDelivery: fixedDelivery,
-        //         typeOfService: typeOfService,
-        //         jobs: [
-        //             {
-        //                 jid: jid,
-        //                 jpassword: jpassword
-        //             }
-        //         ]
-        //     },
-        //     success: function (d) {
-        //         if (typeof callback == "function")
-        //             callback(d);
-        //     }
-        // });
+    getOutsourceQuote: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService, timezone ) {
 
         var data = {
             action: 'outsourceTo',
                 pid: idProject,
+                currency: 'EUR',
                 ppassword: password,
                 fixedDelivery: fixedDelivery,
                 typeOfService: typeOfService,
+                timezone: timezone,
                 jobs: [
                 {
                     jid: jid,

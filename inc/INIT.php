@@ -32,12 +32,12 @@ class INIT {
     public static $HTTPHOST;
     public static $PROTOCOL;
     public static $DEBUG               = true;
-    public static $EXCEPTION_DEBUG     = false;
+    public static $PRINT_ERRORS        = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $INSTANCE_ID = 0;
+    public static $INSTANCE_ID         = 0;
     public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
@@ -260,6 +260,9 @@ class INIT {
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
+
+    public static $SKIP_SQL_CACHE = false ;
+
 
     public function __construct(){
 

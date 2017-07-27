@@ -2,7 +2,10 @@
 
 namespace API\V2\Validators;
 
+use Database;
 use Exceptions\NotFoundError ;
+use Segments_SegmentDao;
+use Translations_SegmentTranslationDao;
 
 class SegmentTranslation extends Base {
 
@@ -16,6 +19,12 @@ class SegmentTranslation extends Base {
      */
     public $translation ;
 
+    protected $password ;
+
+    public function setPassword( $password ) {
+        $this->password = $password  ;
+    }
+
     public function validate() {
         $this->ensureSegmentExists();
         $this->ensureTranslationExists();
@@ -27,7 +36,7 @@ class SegmentTranslation extends Base {
      */
 
     private function ensureTranslationExists() {
-        $this->translation = \Translations_SegmentTranslationDao::
+        $this->translation = Translations_SegmentTranslationDao::
             findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
 
         if ( !$this->translation ) {
@@ -36,11 +45,11 @@ class SegmentTranslation extends Base {
     }
 
     private function ensureSegmentExists() {
-        $dao = new \Segments_SegmentDao( \Database::obtain() );
+        $dao = new Segments_SegmentDao( Database::obtain() );
 
         $this->segment = $dao->getByChunkIdAndSegmentId(
             $this->request->id_job,
-            $this->request->password,
+            $this->password,
             $this->request->id_segment
         );
 

@@ -2,6 +2,7 @@
 
 namespace Users ;
 
+use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
@@ -63,12 +64,14 @@ class Signup {
 
         if ( isset( $this->user->uid ) ) {
             $this->__updatePersistedUser() ;
-            \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
+            Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
         } else {
             $this->__prepareNewUser() ;
-            $this->user->uid = \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+            $this->user->uid = Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
 
+            Database::obtain()->begin();
             ( new TeamDao() )->createPersonalTeam( $this->user ) ;
+            Database::obtain()->commit();
         }
 
         $this->__saveWantedUrl();

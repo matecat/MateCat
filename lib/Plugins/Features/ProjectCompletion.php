@@ -2,6 +2,8 @@
 
 namespace Features;
 
+use CompletionEventController;
+use Klein\Klein;
 use Utils ;
 use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct ;
@@ -19,11 +21,15 @@ class ProjectCompletion extends BaseFeature {
         // from a review page or a translate page.
 
         $chunk = $params['chunk'];
-        $chunk_completion_update_struct = new Chunks_ChunkCompletionUpdateStruct( $chunk->attributes() );
+        $chunk_completion_update_struct            = new Chunks_ChunkCompletionUpdateStruct( $chunk->attributes() );
         $chunk_completion_update_struct->is_review = $params['is_review'];
-        $chunk_completion_update_struct->source = 'user' ;
-        $chunk_completion_update_struct->uid = $params['uid'];
-        $chunk_completion_update_struct->id_job = $chunk->id ;
+        $chunk_completion_update_struct->source    = 'user' ;
+        $chunk_completion_update_struct->id_job    = $chunk->id ;
+
+        if ( isset( $params['logged_user'] ) && $params['logged_user']->uid ) {
+            $chunk_completion_update_struct->uid = $params['logged_user']->uid ;
+        }
+
         $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
 
         $dao = new Chunks_ChunkCompletionEventDao();
@@ -48,4 +54,5 @@ class ProjectCompletion extends BaseFeature {
         $dao = new Chunks_ChunkCompletionEventDao() ;
         $dao->updatePassword( $job->id, $job->password, $old_password );
     }
+
 }

@@ -27,8 +27,8 @@ class AnalyzeHeader extends React.Component {
         if( status === 'DONE' ) {
              html = <div className="analysis-create">
                 <div className="search-tm-matches">
-                    <h5 className="complete">Analysis: <span>complete</span>
-                        {/*<i className="icon-checkmark" />*/}
+                    <h5 className="complete">Analysis:
+                        <span> complete</span>
                     </h5>
                     <a className="downloadAnalysisReport" onClick={this.downloadAnalysisReport.bind(this)}>Download Analysis Report</a>
                 </div>
@@ -51,14 +51,17 @@ class AnalyzeHeader extends React.Component {
                 if ( this.previousQueueSize <= in_queue_before ) {
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete"><p className="label">There are other projects in queue. Please wait...</p></span>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait... <p className="label">There are other projects in queue. </p></span>
+
                         </div>
                     </div>
                 } else { //decreasing ( TM analysis on another project )
                     html = <div className="analysis-create">
                         <div className="search-tm-matches">
-                            <span className="complete">
-                                <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue. Please wait...</p>
+                            <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                            <span className="complete">Please wait...
+                            <p className="label">There are still <span className="number">{this.props.data.get('IN_QUEUE_BEFORE_PRINT') }</span> segments in queue.</p>
                             </span>
                         </div>
                     </div>
@@ -157,19 +160,20 @@ class AnalyzeHeader extends React.Component {
     }
 
     getWordscount() {
+        let tooltipText = 'MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
+            'offer machine translation suggestions or translation memory matches thanks to the millions ' +
+            'of words corrected by the MateCat community.<br> This data is also used to define a fair pricing ' +
+            'scheme that splits the benefits of the technology between the customer and the translator.';
+
         let status = this.props.data.get('STATUS');
-        // let raw_words_text = this.props.data.get('TOTAL_RAW_WC_PRINT'), weightedWords_text = '0';
         let raw_words = this.props.data.get('TOTAL_RAW_WC'), weightedWords = '';
         if ( ((status === 'NEW') || (status === '') || this.props.data.get('IN_QUEUE_BEFORE') > 0) && config.daemon_warning ) {
-            // weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
             weightedWords = this.props.data.get('TOTAL_RAW_WC');
         } else {
             if ( status === 'DONE' || this.props.data.get('TOTAL_PAYABLE') > 0 ) {
-                // weightedWords_text = this.props.data.get('TOTAL_PAYABLE_PRINT');
                 weightedWords = this.props.data.get('TOTAL_PAYABLE');
             }
             if( status === 'NOT_TO_ANALYZE' ) {
-                // weightedWords_text = this.props.data.get('TOTAL_RAW_WC_PRINT');
                 weightedWords = this.props.data.get('TOTAL_RAW_WC');
             }
         }
@@ -178,11 +182,7 @@ class AnalyzeHeader extends React.Component {
             this.updatedSavingWords = true;
         }
         this.saving_perc_value = saving_perc;
-        //
-        // if (weightedWords !== this.weightedWords) {
-        //     this.updatedWeightedWords = true;
-        // }
-        // this.weightedWords = weightedWords;
+
 
         return <div className="word-count ui grid">
                 <div className="sixteen wide column">
@@ -191,22 +191,20 @@ class AnalyzeHeader extends React.Component {
                             <div className="percent">{saving_perc}</div>
                             <div className="content">
                                 Saving on word count
-                                <div className="sub header">{this.props.data.get('PAYABLE_WC_TIME')} work {this.props.data.get('PAYABLE_WC_UNIT')} at 3.000 w/day
+                                <div className="sub header">
+                                    {this.props.data.get('PAYABLE_WC_TIME')} work {this.props.data.get('PAYABLE_WC_UNIT')} at 3.000 w/day
                                 </div>
                             </div>
                         </h2>
-                        <p>MateCat gives you <b>more matches than any other CAT tool</b> thanks to a mix of public and private translation memories, and machine translation.
+                        <p>MateCat gives you more matches than any other tool thanks to a better
+                            integration of machine translation and translation memories.
+                            <span style={{marginLeft: '2px'}} data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
+                                <span className="icon-info icon" style={{position: 'relative', top: '2px', color: '#a7a7a7'}}/>
+                            </span>
                         </p>
                     </div>
                 </div>
             </div>
-
-
-    }
-
-    getDate() {
-        let date = this.props.project.get('create_date').substr(0,10);
-        return new Date(date).toDateString();
     }
 
     downloadAnalysisReport() {
@@ -222,16 +220,12 @@ class AnalyzeHeader extends React.Component {
                 self.containerSavingWords.classList.remove('updated-count');
             }, 400)
         }
-        // if (this.updatedWeightedWords) {
-        //     this.containerWeightedWords.classList.add('updated-count');
-        //     this.updatedSavingWords = false;
-        //     setTimeout(function () {
-        //         self.containerWeightedWords.classList.remove('updated-count');
-        //     }, 400)
-        // }
     }
 
     componentDidMount() {
+        $(this.tooltip).popup({
+            position: 'bottom left'
+        });
     }
 
     componentWillUnmount() {
@@ -248,10 +242,8 @@ class AnalyzeHeader extends React.Component {
                     <div className="left-analysis nine wide column">
                         <h1>Volume Analysis</h1>
                         <div className="ui ribbon label">
-                            <div className="project-id" title="Project id"> ({this.props.project.get('id')}) </div>
                             <div className="project-name" title="Project name"> {this.props.project.get('name')} </div>
                         </div>
-                        <div className="project-create">Created on {this.getDate()}</div>
                         {analysisStateHtml}
                     </div>
 

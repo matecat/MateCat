@@ -21,6 +21,7 @@ window.ReviewTranslationIssue = require('./components/ReviewTranslationIssue').d
 window.ReviewTranslationIssueCommentsContainer = require('./components/ReviewTranslationIssueCommentsContainer').default ;
 window.ReviewIssueSelectionPanel = require('./components/ReviewIssueSelectionPanel').default ;
 window.ReviewIssueCategorySelector = require('./components/ReviewIssueCategorySelector').default ;
+window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
 
 
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;

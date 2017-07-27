@@ -9,11 +9,14 @@
 namespace Features\ReviewImproved;
 
 
+use LQA\EntryDao;
+use LQA\EntryStruct;
+
 class TranslationIssueModel
 {
 
     /**
-     * @var \LQA\EntryStruct
+     * @var EntryStruct
      */
     private $issue ;
 
@@ -26,9 +29,9 @@ class TranslationIssueModel
     /**
      * @param $id_job
      * @param $password
-     * @param \LQA\EntryStruct $issue
+     * @param EntryStruct $issue
      */
-    public function __construct( $id_job, $password, \LQA\EntryStruct $issue ) {
+    public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
        $reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( array(
@@ -40,24 +43,30 @@ class TranslationIssueModel
     }
 
     /**
-     * public deletes the entry and updates the review result
+     * Deletes the entry and subtracts penalty potins.
+     * Penalty points are not subtracted if deletion is coming from a review and the issue is rebutted, because in that
+     * case we could end up with negative sum of penalty points
+     *
      */
 
     public function delete() {
-        \LQA\EntryDao::deleteEntry($this->issue);
-        $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
+        EntryDao::deleteEntry($this->issue);
+
+        if ( is_null( $this->issue->rebutted_at ) ) {
+            $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
+            $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
+        }
     }
 
 
     /**
      * Inserts the struct in database and updates review result
      *
-     * @return \LQA\EntryStruct
+     * @return EntryStruct
      */
     public function save() {
         $data = $this->issue->attributes();
-        $this->issue = \LQA\EntryDao::createEntry( $data );
+        $this->issue = EntryDao::createEntry( $data );
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
         $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points );

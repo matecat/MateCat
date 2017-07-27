@@ -14,6 +14,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $is_pass ;
     public $force_pass_at ;
     public $reviewed_words_count ;
+    public $undo_data ;
 
     /**
      * Sets default values for an empty struct
@@ -40,6 +41,10 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
         return round( ($this->reviewed_words_count /
         $this->getChunk()->totalWordsCount() *
         100), 2 );
+    }
+
+    public function getUndoData() {
+        return json_decode( $this->undo_data, true ) ;
     }
 
 

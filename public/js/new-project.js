@@ -532,10 +532,10 @@ $.extend(UI.UPLOAD_PAGE, {
         $(".popup-languages .listlang li label").click(function(e) {
             $(this).parent().toggleClass('on');
             var c = $(this).parent().find('input');
-            if(c.attr('checked') == 'checked') {
-                c.removeAttr('checked');
+            if(c.is(':checked')) {
+                c.prop("checked", false);
             } else {
-                c.attr('checked','checked');
+                c.prop("checked", true);
             }
             $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
         });

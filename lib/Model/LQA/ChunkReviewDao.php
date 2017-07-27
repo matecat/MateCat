@@ -59,19 +59,17 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
-
-
     /**
      * @param \Chunks_ChunkStruct $chunk
      *
      * @return int
      */
     public static function getPenaltyPointsForChunk( \Chunks_ChunkStruct $chunk ) {
-        $sql = "select sum(penalty_points) from qa_entries e
-            join segment_translations st
-            on st.version_number = e.translation_version
-            and st.id_segment = e.id_segment
-            join jobs on jobs.id = st.id_job
+        $sql = "SELECT SUM(penalty_points) FROM qa_entries e
+            JOIN segment_translations st
+            ON st.version_number = e.translation_version
+            AND st.id_segment = e.id_segment
+            JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = :id_job AND jobs.password = :password
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
@@ -92,7 +90,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @return int
      */
     public static function getReviewedWordsCountForChunk( \Chunks_ChunkStruct $chunk ) {
-        $sql = "select sum(segments.raw_word_count) from segment_translations st
+        $sql = "SELECT SUM(segments.raw_word_count) FROM segment_translations st
             JOIN segments ON segments.id = st.id_segment
             JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = :id_job AND jobs.password = :password

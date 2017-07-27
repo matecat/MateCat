@@ -9,9 +9,12 @@
 namespace Teams;
 
 use API\V2\Json\User;
+use Database;
+use Exception;
 use PDO;
 use Users\MetadataDao;
 use Users_UserDao;
+use Utils;
 
 class MembershipDao extends \DataAccess_AbstractDao {
 
@@ -182,17 +185,24 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * This method takes a list of email addresses as argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param [
+     * @param array [
      *            'team'     => TeamStruct,
      *            'members'  => emails[]
      *            ] $obj_arr
      *
      * @return MembershipStruct[]
+     * @throws Exception
      */
     public function createList( Array $obj_arr ) {
-        $obj_arr = \Utils::ensure_keys( $obj_arr, array( 'members', 'team' ) );
+
+        if ( !Database::obtain()->getConnection()->inTransaction() ) {
+            throw new Exception('this method requires to be wrapped in a transaction' ) ;
+        }
+
+        $obj_arr = Utils::ensure_keys( $obj_arr, array( 'members', 'team' ) );
 
         $users = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
+
         if ( empty( $users ) ) {
             return array();
         }

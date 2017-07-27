@@ -40,12 +40,21 @@ class QualityReportModel {
     private $avg_time_to_edit ;
     private $avg_edit_distance ;
 
+    private $version ;
 
     /**
      * @param \Chunks_ChunkStruct $chunk
      */
     public function __construct( \Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk;
+    }
+
+    public function setVersionNumber( $version ) {
+        $this->version = $version;
+    }
+
+    public function getVersionNumber() {
+        return $this->version ;
     }
 
     public function getChunk() {
@@ -57,9 +66,12 @@ class QualityReportModel {
     }
 
     public function getStructure() {
-        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
-
-        return $this->buildQualityReportStructure( $records );
+        if ( $this->version ) {
+            return $this->__getArchviedStructure();
+        }
+        else {
+            return $this->__getCurrentStructure();
+        }
     }
 
     public function getChunkReview() {
@@ -72,12 +84,36 @@ class QualityReportModel {
         return $this->chunk_review;
     }
 
+    public function getScore() {
+        return number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+    }
+
+    public function isPass() {
+        return (bool) $this->getChunkReview()->is_pass ;
+    }
+
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
             $this->chunk_review_model = new ChunkReviewModel( $this->getChunkReview() );
         }
 
         return $this->chunk_review_model;
+    }
+
+    public function resetScore( $event_id ) {
+        $chunkReview = $this->getChunkReview() ;
+        $chunkReview->undo_data = json_encode( array(
+            'reset_by_event_id' => $event_id,
+            'penalty_points' => $chunkReview->penalty_points,
+            'reviewed_words_count' => $chunkReview->reviewed_words_count,
+            'is_pass' => $chunkReview->is_pass
+        ));
+
+        $chunkReview->penalty_points = 0 ;
+        $chunkReview->reviewed_words_count = 0 ;
+        $chunkReview->is_pass = 1 ;
+
+        ChunkReviewDao::updateStruct( $chunkReview ) ;
     }
 
     /**
@@ -99,7 +135,7 @@ class QualityReportModel {
 
         $this->__setAverages();
 
-        $scoreFormatted = number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+        $scoreFormatted = $this->getScore() ;
 
         $this->quality_report_structure = array(
                 'chunk'   => array(
@@ -285,4 +321,23 @@ class QualityReportModel {
 
         return $out;
     }
+
+    private function __getCurrentStructure() {
+        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
+        return $this->buildQualityReportStructure( $records );
+    }
+
+    private function __getArchviedStructure() {
+        $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version ) ;
+        $decoded = new \RecursiveArrayObject( json_decode( $archivedRecord->quality_report, TRUE ) );
+
+        foreach( $decoded['chunk']['files'] as $file ) {
+            foreach( $file['segments'] as $segment ) {
+                $this->all_segments[] = new ArrayObject( $segment ) ;
+            }
+        }
+
+        return $decoded ;
+    }
+
 }
