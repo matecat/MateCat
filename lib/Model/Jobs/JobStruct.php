@@ -54,7 +54,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $revision_stats_terminology_maj;
     public $revision_stats_language_quality_maj;
     public $revision_stats_style_maj;
-    public $dqf_key;
     public $total_raw_wc;
 
     /**

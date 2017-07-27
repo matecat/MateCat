@@ -61,10 +61,6 @@
 
             <h1 style="margin-bottom:0px">Editing Log - Project: <span id="pname" tal:content="pname">Project</span></h1>
 
-		<div tal:condition="showDQF" id="editlog-boxed"><strong>DQF</strong> is being used to collect editing statistics.
-                Log in to the dashboard to check the data for this job. <a href="https://dqf.taus.net/login" target="blanck"> https://dqf.taus.net/login </a></div>
-
-
             <h2 style="margin-top:20px;margin-bottom:10px">
                 Stats for translation job <span tal:replace="jid | default"></span> -
                 <b><span tal:replace="source_code">---</span> </b> &gt; <b>

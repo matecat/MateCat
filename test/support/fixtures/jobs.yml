@@ -40,7 +40,6 @@ job1:
   revision_stats_terminology_maj: 0
   revision_stats_language_quality_maj: 0
   revision_stats_style_maj: 0
-  dqf_key:
   total_raw_wc: 1
 
 job2:
@@ -85,5 +84,4 @@ job2:
   revision_stats_terminology_maj: 0
   revision_stats_language_quality_maj: 0
   revision_stats_style_maj: 0
-  dqf_key: NULL
   total_raw_wc: 1

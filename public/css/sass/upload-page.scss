@@ -1236,9 +1236,6 @@ button.ui-button::-moz-focus-inner {
     .translate-box input[type="text"] {
         width: 200px;
     }
-    input#dqf_key {
-        width: 126px !important;
-    }
     .translate-box #private-tm-key {
         width: 180px !important;
         height: 28px;
@@ -1250,9 +1247,6 @@ button.ui-button::-moz-focus-inner {
 
     .translate-box input[type="text"] {
         width: 186px !important;
-    }
-    input#dqf_key {
-        width: 126px !important;
     }
     .translate-box #private-tm-key {
         width: 169px !important;
@@ -1687,12 +1681,6 @@ body {
 }
 
 #private-tm-key {
-    width: 220px;
-    height: 28px;
-    margin: 0 0 5px 0;
-}
-
-#dqf_key {
     width: 220px;
     height: 28px;
     margin: 0 0 5px 0;

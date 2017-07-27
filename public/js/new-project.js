@@ -212,7 +212,7 @@ APP.getCreateProjectParams = function() {
         dqf_contentType             : dqf_contentType,
         dqf_industry                : dqf_industry,
         dqf_process                 : dqf_process,
-        dqf_quality_level           : dqf_quality_level,
+        dqf_quality_level           : dqf_quality_level
 	} ;
 };
 

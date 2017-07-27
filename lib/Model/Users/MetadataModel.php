@@ -33,6 +33,7 @@ class MetadataModel {
         // validate
         $features = new FeatureSet() ;
         $features->loadSystemWideFeatures();
+        $features->loadFromUserEmail( $this->user->email ) ;
 
         $metadataFilters = $features->filter('filterUserMetadataFilters', array(), $this->metadata ) ;
         $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;
