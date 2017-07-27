@@ -280,41 +280,6 @@ function doReplaceAll( Array $queryParams ) {
 
 }
 
-/**
- * @param      $jid
- * @param      $jpass
- * @param      $sid
- * @param null $binaries
- *
- * @return mixed
- *
- * @deprecated
- */
-function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
-
-    $db = Database::obtain();
-
-    $jpass = $db->escape( $jpass );
-    $sid   = (int)$sid;
-    $jid   = (int)$jid;
-
-    if ( $binaries != null ) {
-        $binaries = ', serialized_reference_binaries';
-    }
-
-    $query = "SELECT serialized_reference_meta $binaries
-		FROM segments s
-		JOIN files_job using ( id_file )
-		JOIN jobs on files_job.id_job = jobs.id
-		LEFT JOIN file_references fr ON s.id_file_part = fr.id
-		WHERE s.id  = $sid
-		AND jobs.id = $jid
-		AND jobs.password = '$jpass'
-		";
-
-    return $db->query_first( $query );
-}
-
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
     $db      = Database::obtain();
@@ -770,7 +735,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                           WHERE segment_hash = s.segment_hash
                           AND id_job =  j.id
                 ) repetitions_in_chunk
-                ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
                 $optional_fields
 
@@ -781,7 +745,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 JOIN segments s ON s.id_file = f.id
                 LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
                 LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = j.id
-                LEFT JOIN file_references fr ON s.id_file_part = fr.id
                 JOIN (
 
                   $subQuery
@@ -1625,6 +1588,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
+			   SUM(st.standard_word_count) AS file_st_word_count,
 			   COUNT(s.id) AS total_segments,
 
 			   p.fast_analysis_wc,

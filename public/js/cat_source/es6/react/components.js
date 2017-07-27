@@ -31,9 +31,18 @@ window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel'
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
+window.TeamConstants = require('./constants/TeamConstants');
+
 window.ManageActions = require('./actions/ManageActions');
+window.AnalyzeActions = require('./actions/AnalyzeActions');
+window.TeamsActions = require('./actions/TeamsActions');
+window.ModalsActions = require('./actions/ModalsActions');
+window.OutsourceActions = require('./actions/OutsourceActions');
+
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
+window.OutsourceStore = require('./stores/OutsourceStore');
+
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 
 window.Header = require("./components/Header").default;
@@ -54,5 +63,8 @@ window.SplitJobModal = require('./modals/SplitJob').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
+
+
+window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 
 

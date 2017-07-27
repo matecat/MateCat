@@ -288,11 +288,11 @@ $.extend(UI.UPLOAD_PAGE, {
                 showModals: false,
                 showLinks: true
             }), headerMountPoint);
-            this.getAllTeams().done(function (data) {
+            API.TEAM.getAllTeams().done(function (data) {
                 self.teams = data.teams;
-                ManageActions.renderTeams(self.teams);
+                TeamsActions.renderTeams(self.teams);
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
-                ManageActions.selectTeam(self.selectedTeam);
+                TeamsActions.selectTeam(self.selectedTeam);
             });
         } else {
             ReactDOM.render(React.createElement(Header, {
@@ -436,19 +436,6 @@ $.extend(UI.UPLOAD_PAGE, {
                 $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
             }
         }
-    },
-
-    getAllTeams: function () {
-        if ( APP.USER.STORE.teams ) {
-            var data = {
-                teams: APP.USER.STORE.teams
-            };
-            var deferred = $.Deferred().resolve(data);
-            return deferred.promise();
-        } else {
-            return APP.USER.loadUserData();
-        }
-
     },
 
     getSelectedTeam: function () {

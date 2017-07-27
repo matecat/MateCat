@@ -284,10 +284,7 @@ module.exports = function(grunt) {
 
             libs_upload: {
                 src: [
-                    // basePath + 'lib/jquery.js', //1.7.2
-                    // basePath + 'lib/jquery.1.8.2.min.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
-
                     basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
 
                     basePath + 'lib/jquery.cookie.js',
@@ -342,15 +339,26 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'manage.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
             },
             analyze: {
                 src: [
+                    basePath + 'analyze_old.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                ],
+                dest: buildPath + 'analyze_old.js'
+            },
+            analyze_new: {
+                src: [
                     basePath + 'analyze.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze.js'
             },
@@ -360,7 +368,8 @@ module.exports = function(grunt) {
                     basePath + 'gdrive.picker.js',
                     basePath + 'upload.js',
                     basePath + 'new-project.js',
-                    basePath + 'tm.js'
+                    basePath + 'tm.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'upload.js'
             }
@@ -417,15 +426,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
+            },
+            cssAnalyze: {
+                files:  cssWatchManage,
+                tasks: ['sass:distAnalyze', 'replace'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
             }
-            // cssManage: {
-            //     files:  cssWatchManage,
-            //     tasks: ['sass:distManage', 'replace'],
-            //     options: {
-            //         interrupt: true,
-            //         livereload : true
-            //     }
-            // }
         },
         sass: {
             distCommon: {
@@ -467,6 +476,16 @@ module.exports = function(grunt) {
                     cssBase + 'sass/manage_main.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
+            },
+            distAnalyze: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/analyze_main.scss'
+                ],
+                dest: cssBase + 'build/analyze-build.css'
             },
             distSemantic: {
                 options : {
@@ -562,6 +581,7 @@ module.exports = function(grunt) {
         'concat:common',
         'concat:manage',
         'concat:analyze',
+        'concat:analyze_new',
         'concat:upload',
         'replace:version'
     ]);

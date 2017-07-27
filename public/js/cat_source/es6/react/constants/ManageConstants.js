@@ -15,20 +15,16 @@ module.exports = keyMirror({
     CHANGE_PROJECT_NAME: null,
     HIDE_PROJECT: null,
     ASSIGN_TRANSLATOR: null,
+    SHOW_RELOAD_SPINNER: null,
     //MODALS
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
     OPEN_CHANGE_TEAM_MODAL: null,
     OPEN_INFO_TEAMS_POPUP: null,
     //TEAMS
-    RENDER_TEAMS: null,
     REMOVE_TEAM: null,
-    UPDATE_TEAM: null,
-    UPDATE_TEAMS: null,
     UPDATE_TEAM_NAME: null,
     UPDATE_TEAM_MEMBERS: null,
-    CHOOSE_TEAM: null,
-    ADD_TEAM: null,
     FILTER_PROJECTS: null,
     CHANGE_PROJECT_ASSIGNEE: null,
     CHANGE_PROJECT_TEAM: null,
@@ -40,10 +36,5 @@ module.exports = keyMirror({
     ENABLE_DOWNLOAD_BUTTON: null,
     DISABLE_DOWNLOAD_BUTTON: null,
 
-    UPDATE_JOB_OUTSOURCE: null,
-
-    CLOSE_TRANSLATOR: null,
-    GET_OUTSOURCE_QUOTE: null
-
-
+    UPDATE_JOB_OUTSOURCE: null
 });

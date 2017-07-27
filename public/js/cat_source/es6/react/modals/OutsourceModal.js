@@ -1,4 +1,4 @@
-
+let OutsourceConstants = require('../constants/OutsourceConstants');
 
 class OutsourceModal extends React.Component {
 
@@ -242,15 +242,15 @@ class OutsourceModal extends React.Component {
     }
 
     componentDidMount () {
-        ProjectsStore.addListener(ManageConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
-        ProjectsStore.addListener(ManageConstants.CLOSE_TRANSLATOR, this.hideTranslator);
+        OutsourceStore.addListener(OutsourceConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
+        OutsourceStore.addListener(OutsourceConstants.CLOSE_TRANSLATOR, this.hideTranslator);
         if (!config.enable_outsource) {
             this.initOutsourceModal();
         }
     }
     componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
-        ProjectsStore.removeListener(ManageConstants.CLOSE_TRANSLATOR, this.hideTranslator);
+        OutsourceStore.removeListener(OutsourceConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
+        OutsourceStore.removeListener(OutsourceConstants.CLOSE_TRANSLATOR, this.hideTranslator);
     }
 
 

@@ -266,7 +266,6 @@ abstract class viewController extends controller {
 
         $this->setTemplateFinalVars();
 
-        try {
 
             $buffer = ob_get_contents();
             ob_get_clean();
@@ -279,15 +278,6 @@ abstract class viewController extends controller {
              * Execute Template Rendering
              */
             echo $this->template->execute();
-
-        } catch ( Exception $e ) {
-            echo "<pre>";
-            print_r( $e );
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
-
     }
 
 

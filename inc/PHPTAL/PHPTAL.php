@@ -689,7 +689,9 @@ class PHPTAL
         }
         catch (Exception $e)
         {
-            PHPTAL_ExceptionHandler::handleException($e, $this->getEncoding());
+            // PHPTAL_ExceptionHandler::handleException($e, $this->getEncoding());
+            // In order to catch exception in MateCat we need to disable `handleException`
+            throw $e;
         }
 
         return $res;
@@ -720,7 +722,9 @@ class PHPTAL
         }
         catch (Exception $e)
         {
-            PHPTAL_ExceptionHandler::handleException($e, $this->getEncoding());
+            // PHPTAL_ExceptionHandler::handleException($e, $this->getEncoding());
+            // In order to catch exception in MateCat we need to disable `handleException`
+            throw $e;
         }
     }
 

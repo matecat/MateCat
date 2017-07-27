@@ -145,9 +145,9 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
+        TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams);
     }
 
     componentWillUnmount() {
@@ -156,9 +156,9 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams);
     }
 
     componentDidUpdate() {

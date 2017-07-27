@@ -214,6 +214,20 @@ header {
         margin-top: 2px;
         float: right;
     }
+    .organization-name {
+        color: #fff;
+        font-size: 15px;
+        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        font-weight: 600;
+        text-decoration: none;
+        float: right;
+        line-height: 37px;
+        min-width: 0px;
+        max-width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 
