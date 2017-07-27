@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+use ConnectedServices\GDrive;
 
 
 /**
@@ -238,7 +239,7 @@ abstract class viewController extends controller {
             }
         }
 
-	//unsupported browsers: hack for home page
+        // unsupported browsers: hack for home page
         if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
 
         return 0;
@@ -252,13 +253,8 @@ abstract class viewController extends controller {
      * @return mixed|void
      */
     public function finalize() {
-
         $this->setInitialTemplateVars();
 
-        /**
-         * Call child for template vars fill
-         *
-         */
         $this->setTemplateVars();
 
         $featureSet = new FeatureSet();
@@ -266,20 +262,18 @@ abstract class viewController extends controller {
 
         $this->setTemplateFinalVars();
 
+        ob_get_contents();
+        ob_get_clean();
+        ob_start( "ob_gzhandler" ); // compress page before sending
+        $this->nocache();
 
-            $buffer = ob_get_contents();
-            ob_get_clean();
-            ob_start( "ob_gzhandler" ); // compress page before sending
-            $this->nocache();
+        header( 'Content-Type: text/html; charset=utf-8' );
 
-            header( 'Content-Type: text/html; charset=utf-8' );
-
-            /**
-             * Execute Template Rendering
-             */
-            echo $this->template->execute();
+        /**
+         * Execute Template Rendering
+         */
+        echo $this->template->execute();
     }
-
 
     /**
      * @return string
