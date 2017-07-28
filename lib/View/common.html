@@ -28,6 +28,16 @@
         /*]]>*/
     </tal:block>
 
+    <tal:block tal:condition="exists: dqf_active_on_project">
+        /*<![CDATA[*/
+        config.dqf_selected_content_types = ${ dqf_selected_content_types } ;
+        config.dqf_selected_industry      = ${ dqf_selected_industry } ;
+        config.dqf_selected_process       = ${ dqf_selected_process } ;
+        config.dqf_selected_quality_level = ${ dqf_selected_quality_level } ;
+        config.dqf_active_on_project      = ${ php: json_encode( dqf_active_on_project ) } ;
+        /*]]>*/
+    </tal:block>
+
     <tal:block tal:condition="php: !empty(flashMessages)">
         /*<![CDATA[*/
         config.flash_messages = ${structure php: json_encode(flashMessages)} ;

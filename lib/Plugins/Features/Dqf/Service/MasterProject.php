@@ -40,7 +40,7 @@ class MasterProject {
         Log::doLog( var_export( $content, true ) ) ;
 
         if ( $client->curl()->hasError( $request ) ) {
-            throw new Exception('Error during project creation: ' . implode(',', $client->curl()->getErrors() ) ) ;
+            throw new Exception('Error during project creation: ' . json_encode( $client->curl()->getErrors() ) ) ;
         }
 
         return new CreateProjectResponseStruct( $content );

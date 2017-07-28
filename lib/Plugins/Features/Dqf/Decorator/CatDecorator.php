@@ -4,8 +4,9 @@ namespace Features\Dqf\Decorator ;
 
 use AbstractDecorator;
 use catController;
+use Features\Dqf;
 use Features\Dqf\Model\CatAuthorizationModel;
-use INIT;
+use Features\Dqf\Utils\Functions;
 use Routes;
 
 class CatDecorator extends AbstractDecorator {
@@ -23,14 +24,22 @@ class CatDecorator extends AbstractDecorator {
     public function decorate() {
         $controller = $this->controller ; // done for PHP7 warning
 
-        $authorizationModel = new CatAuthorizationModel(
-                $this->controller->getJob(), $controller::isRevision()
-        );
+        Functions::commonVarsForDecorator( $this->template );
 
-        if ( INIT::$DQF_ENABLED ) {
+        $project = $this->controller->getJob()->getProject() ;
+
+        if ( $project->isFeatureEnabled( Dqf::FEATURE_CODE ) ) {
             $this->template->append('footer_js', Routes::appRoot() . 'public/js/dqf-cat.js') ;
-            $this->template->dqf_user_status = $authorizationModel->getStatusWithImplicitAssignment( $controller->getLoggedUser() ) ;
-        }
 
+            $authorizationModel = new CatAuthorizationModel( $this->controller->getJob(), $controller::isRevision() );
+            $this->template->dqf_user_status   = $authorizationModel->getStatusWithImplicitAssignment( $controller->getLoggedUser() ) ;
+
+            $metadataKeyValue = $project->getMetadataAsKeyValue() ;
+            $this->template->dqf_selected_content_types = $metadataKeyValue['dqf_content_type'] ;
+            $this->template->dqf_selected_industry      = $metadataKeyValue['dqf_industry'] ;
+            $this->template->dqf_selected_quality_level = $metadataKeyValue['dqf_quality_level'] ;
+            $this->template->dqf_selected_process       = $metadataKeyValue['dqf_process'] ;
+            $this->template->dqf_active_on_project      = true ;
+        }
     }
 }

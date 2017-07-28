@@ -14,6 +14,7 @@ use Features\Dqf\Model\CachedAttributes\ContentType;
 use Features\Dqf\Model\CachedAttributes\Industry;
 use Features\Dqf\Model\CachedAttributes\Process;
 use Features\Dqf\Model\CachedAttributes\QualityLevel;
+use Features\Dqf\Utils\Functions;
 
 class NewProjectDecorator extends AbstractDecorator {
 
@@ -23,11 +24,7 @@ class NewProjectDecorator extends AbstractDecorator {
     protected $template ;
 
     public function decorate() {
-        $this->template->dqf_enabled = true ;
-        $this->template->dqf_content_types = (new ContentType())->getArray();
-        $this->template->dqf_industry = (new Industry())->getArray();
-        $this->template->dqf_process = (new Process())->getArray();
-        $this->template->dqf_quality_level = (new QualityLevel())->getArray();
+        Functions::commonVarsForDecorator($this->template) ;
     }
 
 }

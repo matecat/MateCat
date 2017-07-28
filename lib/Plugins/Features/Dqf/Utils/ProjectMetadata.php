@@ -5,9 +5,13 @@ namespace Features\Dqf\Utils ;
 
 class ProjectMetadata {
 
-    public static $keys = array(
-            'dqf'
-    );
+    public static $keys = [
+            'dqf',
+            'dqf_content_type',
+            'dqf_industry',
+            'dqf_process',
+            'dqf_quality_level'
+    ];
 
     /**
      * This function is to be used to filter both postInput from UI and
