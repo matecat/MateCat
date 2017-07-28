@@ -16,27 +16,22 @@ class ProjectMetadata {
      * @return array
      */
     public static function getInputFilter() {
-        return array(
-                'dqf' => array(
-                        'filter' => FILTER_VALIDATE_BOOLEAN,
-                )
-        );
-
+        return [
+                'dqf'               => ['filter' => FILTER_VALIDATE_BOOLEAN],
+                'dqf_content_type'  => ['filter' => FILTER_VALIDATE_INT ],
+                'dqf_industry'      => ['filter' => FILTER_VALIDATE_INT ],
+                'dqf_process'       => ['filter' => FILTER_VALIDATE_INT ],
+                'dqf_quality_level' => ['filter' => FILTER_VALIDATE_INT ]
+        ];
     }
 
-    /**
-     *
-     */
     public static function extractProjectParameters($project_metadata) {
-        // TODO: mocking for now, get saved project options into project metadata
-
-        return array(
-                'contentTypeId'  => 1, // User interface text
-                'industryId'     => 2, // Automotive
-                'processId'      => 5, // Human Translation
-                'qualityLevelId' => 2  // High quality
-        );
+        return [
+                'contentTypeId'  => $project_metadata['dqf_content_type'],
+                'industryId'     => $project_metadata['dqf_industry'],
+                'processId'      => $project_metadata['dqf_process'],
+                'qualityLevelId' => $project_metadata['dqf_quality_level']
+        ];
     }
-
 
 }
