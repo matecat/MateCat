@@ -1153,38 +1153,10 @@ color:#333;}
     height: 35px;
 }
 
-.dqf-options-container {
-    width: 100%;
-    float: left;
-    height: 200px;
-    overflow-y: hidden;
-    padding-left: 12%;
-    padding-top: 15px;
-    transition-property: all;
-    transition-duration: .5s;
-    transition-timing-function: cubic-bezier(0.5, 1, 0.5, 1);
-}
-
-.dqf-options-container.closed-options {
-    height: 0;
-}
-
-.dqf-option {
-    width: 40%;
-    float: left;
-    text-align: left;
-    padding: 10px;
-}
-
-.dqf-option h4 {
-    float: left;
-    margin-top: 10px;
-}
-
-.dqf-option select {
-    float: right !important;
-    margin-right: 30% !important;
-    width: 40% !important;
+.dqf-settings {
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 /********** TM panel End **********/

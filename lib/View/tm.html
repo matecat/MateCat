@@ -503,6 +503,7 @@
                                 <h3>DQF  </h3>
                                 <p tal:condition="php: !empty(logged_user)">
                                     Enable this option to use DQF in MateCat.
+                                    <span class="dqf-settings">Open Settings</span>
                                 </p>
                                 <p tal:condition="php: empty(logged_user)" >
                                     Login and set your DQF credentials to use DQF in MateCat.
@@ -521,46 +522,46 @@
                                     </div>
                                 </div>
 
-                                <div class="dqf-options-container closed-options">
-                                    <div class="dqf-option">
-                                        <h4>Content Type</h4>
-                                        <select name="contentType" id="contentType">
-                                            <option value="">Choose</option>
-                                            <option value="1">User Interface Text</option>
-                                            <option value="2">Technical Specifications</option>
-                                            <option value="3">User Manual</option>
-                                            <option value="4">Online Help</option>
-                                        </select>
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Industry</h4>
-                                        <select name="industry" id="industry">
-                                            <option value="">Choose</option>
-                                            <option value="1">Aerospace / Aviation</option>
-                                            <option value="2">Automotive</option>
-                                            <option value="3">Business Services</option>
-                                            <option value="4">Chemicals</option>
-                                        </select>
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Process</h4>
-                                        <select name="process" id="process">
-                                            <option value="">Choose</option>
-                                            <option value="1">MT+PE+Human</option>
-                                            <option value="2">MT+PE</option>
-                                            <option value="3">MT+PE+TM+Human</option>
-                                            <option value="4">TM+Human</option>
-                                        </select>
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Quality level</h4>
-                                        <select name="qualityLevel" id="qualityLevel">
-                                            <option value="">Choose</option>
-                                            <option value="1">Good Enough</option>
-                                            <option value="2">High Quality</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <!--<div class="dqf-options-container closed-options">-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Content Type</h4>-->
+                                        <!--<select name="contentType" id="contentType">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<option value="1">User Interface Text</option>-->
+                                            <!--<option value="2">Technical Specifications</option>-->
+                                            <!--<option value="3">User Manual</option>-->
+                                            <!--<option value="4">Online Help</option>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Industry</h4>-->
+                                        <!--<select name="industry" id="industry">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<option value="1">Aerospace / Aviation</option>-->
+                                            <!--<option value="2">Automotive</option>-->
+                                            <!--<option value="3">Business Services</option>-->
+                                            <!--<option value="4">Chemicals</option>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Process</h4>-->
+                                        <!--<select name="process" id="process">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<option value="1">MT+PE+Human</option>-->
+                                            <!--<option value="2">MT+PE</option>-->
+                                            <!--<option value="3">MT+PE+TM+Human</option>-->
+                                            <!--<option value="4">TM+Human</option>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Quality level</h4>-->
+                                        <!--<select name="qualityLevel" id="qualityLevel">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<option value="1">Good Enough</option>-->
+                                            <!--<option value="2">High Quality</option>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                <!--</div>-->
                             </div>
 
                         </div>

@@ -3,7 +3,7 @@ import * as RuleRunner from '../common/ruleRunner';
 import * as FormRules from '../common/formRules';
 import update from 'react-addons-update';
 
-class PreferencesModal extends React.Component {
+class DQFModal extends React.Component {
 
 
     constructor(props) {
@@ -14,12 +14,12 @@ class PreferencesModal extends React.Component {
                 dqfUsername : this.props.metadata.dqf_username,
                 dqfPassword : this.props.metadata.dqf_password
             },
+            dqfOptions : this.props.metadata.dqf_options,
             dqfValid: false,
             showErrors: false,
             validationErrors: {},
         };
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
-        this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
 
     handleDQFFieldChanged(field) {
@@ -34,7 +34,6 @@ class PreferencesModal extends React.Component {
     }
 
     handleDQFSubmitClicked() {
-        let self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
         this.submitDQFCredentials();
@@ -42,15 +41,6 @@ class PreferencesModal extends React.Component {
 
     errorFor(field) {
         return this.state.validationErrors[field];
-    }
-
-
-    componentWillMount() { }
-
-    componentDidMount() {
-        if ( this.state.service && !this.state.service.disabled_at) {
-            $(this.checkDrive).attr('checked', true);
-        }
     }
 
     submitDQFCredentials() {
@@ -63,11 +53,7 @@ class PreferencesModal extends React.Component {
         }).done( function( data ) {
             if (data) {
                 APP.USER.STORE.metadata = data;
-                APP.USER.STORE.metadata.dqf = {
-                    username : self.state.dqfUsername,
-                    password : self.state.dqfPassword
-                };
-                dqfCheck.trigger('dqfEnable');
+
                 self.setState({
                     dqfValid: true,
                     dqfCredentials : {
@@ -98,18 +84,71 @@ class PreferencesModal extends React.Component {
             if (data) {
                 APP.USER.STORE.metadata = data;
                 dqfCheck.trigger('dqfDisable');
+                self.saveButton.classList.remove('disabled');
                 self.setState({
                     dqfValid: false,
                     dqfCredentials : {},
+                    dqfOptions: {}
                 });
             }
         });
     }
 
+    saveDQFOptions() {
+        let dqf_options = {};
+        let errors = false;
+
+        if (this.contentType.value === "") {
+            errors = true;
+            this.contentType.classList.add('error');
+        } else {
+            this.contentType.classList.remove('error');
+        }
+
+        if (this.industry.value === "") {
+            errors = true;
+            this.industry.classList.add('error');
+        } else {
+            this.industry.classList.remove('error');
+
+        }
+
+        if (this.process.value === "") {
+            errors = true;
+            this.process.classList.add('error');
+        } else {
+            this.process.classList.remove('error');
+        }
+
+        if (this.qualityLevel.value === "") {
+            errors = true;
+            this.qualityLevel.classList.add('error');
+        } else {
+            this.qualityLevel.classList.remove('error');
+        }
+
+        if (!errors) {
+            this.saveButton.classList.add('disabled');
+            dqf_options.contentType = this.contentType.value;
+            dqf_options.industry = this.industry.value;
+            dqf_options.process = this.process.value;
+            dqf_options.qualityLevel = this.qualityLevel.value;
+            $('.dqf-box #dqf_switch').trigger('dqfEnable');
+            APP.USER.STORE.metadata.dqf_options = dqf_options;
+            APP.ModalWindow.onCloseModal();
+        }
+    }
+
+    resetOptions() {
+        this.saveButton.classList.remove('disabled');
+        this.contentType.classList.remove('error');
+        this.process.classList.remove('error');
+        this.industry.classList.remove('error');
+        this.qualityLevel.classList.remove('error');
+    }
+
     getDqfHtml() {
-        if (!config.dqf_enabled) {
-            return '';
-        } else if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
+        if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
                 <div className="user-dqf">
@@ -119,6 +158,58 @@ class PreferencesModal extends React.Component {
                          onClick={this.clearDQFCredentials.bind(this)}>Clear</div>
 
                 </div>
+                {!config.is_cattool ? (
+
+                <div className="dqf-options-container">
+                    <h2>DQF Options</h2>
+                    <div className="dqf-option">
+                        <h4>Content Type</h4>
+                        <select name="contentType" id="contentType"
+                                ref={(select)=> this.contentType = select}
+                            onChange={this.resetOptions.bind(this)}>
+                            <option value="">Choose</option>
+                            <option value="1">User Interface Text</option>
+                            <option value="2">Technical Specifications</option>
+                            <option value="3">User Manual</option>
+                            <option value="4">Online Help</option>
+                        </select>
+                    </div>
+                    <div className="dqf-option">
+                        <h4>Industry</h4>
+                        <select name="industry" id="industry"
+                                ref={(select)=> this.industry = select}>
+                            <option value="">Choose</option>
+                            <option value="1">Aerospace / Aviation</option>
+                            <option value="2">Automotive</option>
+                            <option value="3">Business Services</option>
+                            <option value="4">Chemicals</option>
+                        </select>
+                    </div>
+                    <div className="dqf-option">
+                        <h4>Process</h4>
+                        <select name="process" id="process"
+                                ref={(select)=> this.process = select}>
+                            <option value="">Choose</option>
+                            <option value="1">MT+PE+Human</option>
+                            <option value="2">MT+PE</option>
+                            <option value="3">MT+PE+TM+Human</option>
+                            <option value="4">TM+Human</option>
+                        </select>
+                    </div>
+                    <div className="dqf-option">
+                        <h4>Quality level</h4>
+                        <select name="qualityLevel" id="qualityLevel"
+                                ref={(select)=> this.qualityLevel = select}>
+                            <option value="">Choose</option>
+                            <option value="1">Good Enough</option>
+                            <option value="2">High Quality</option>
+                        </select>
+                    </div>
+                    <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}
+                         onClick={this.saveDQFOptions.bind(this)}
+                        ref={(button)=> this.saveButton=button}>Save</div>
+                </div>
+                    ) : ('')}
             </div>
         } else {
             return <div className="dqf-container">
@@ -132,16 +223,64 @@ class PreferencesModal extends React.Component {
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
                     <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
                     <div className="dqf-message">
-                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
+                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}}
+                              className="coupon-message">{this.state.dqfError}</span>
                     </div>
                 </div>
-            </div>
+                {!config.is_cattool ? (
+
+                    <div className="dqf-options-container" style={{opacity: 0.5, pointerEvents: 'none'}}>
+                        <h2>DQF Options</h2>
+                        <div className="dqf-option">
+                            <h4>Content Type</h4>
+                            <select name="contentType" id="contentType">
+                                <option value="">Choose</option>
+                            </select>
+                        </div>
+                        <div className="dqf-option">
+                            <h4>Industry</h4>
+                            <select name="industry" id="industry">
+                                <option value="">Choose</option>
+                            </select>
+                        </div>
+                        <div className="dqf-option">
+                            <h4>Process</h4>
+                            <select name="process" id="process">
+                                <option value="">Choose</option>
+                            </select>
+                        </div>
+                        <div className="dqf-option">
+                            <h4>Quality level</h4>
+                            <select name="qualityLevel" id="qualityLevel">
+                                <option value="">Choose</option>
+                            </select>
+                        </div>
+                        <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}>Save</div>
+                    </div>
+                ) : ('')}
+                </div>
+        }
+    }
+
+    componentWillMount() { }
+
+    componentDidMount() {
+        if ( this.state.service && !this.state.service.disabled_at) {
+            $(this.checkDrive).attr('checked', true);
+        }
+
+        if (this.state.dqfOptions) {
+            this.contentType.value = this.state.dqfOptions.contentType;
+            this.industry.value = this.state.dqfOptions.industry;
+            this.process.value = this.state.dqfOptions.process;
+            this.qualityLevel.value = this.state.dqfOptions.qualityLevel;
+            this.saveButton.classList.add('disabled');
         }
     }
 
     render() {
 
-        return <div className="preferences-modal">
+        return <div className="dqf-modal">
                     <div className="user-info-attributes">
                         {this.getDqfHtml()}
                     </div>
@@ -154,4 +293,4 @@ const fieldValidations = [
     RuleRunner.ruleRunner("dqfPassword", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
-export default PreferencesModal ;
+export default DQFModal ;

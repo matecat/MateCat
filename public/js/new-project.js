@@ -191,11 +191,11 @@ APP.getDQFParameters = function () {
 
     dqf.dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
 
-    if (dqfEnabled) {
-        dqf.dqf_contentType     = $('#contentType option:selected').val();
-        dqf.dqf_industry        = $('#industry option:selected').val();
-        dqf.dqf_process         = $('#process option:selected').val();
-        dqf.dqf_quality_level   = $('#qualityLevel option:selected').val();
+    if (dqf.dqfEnabled) {
+        dqf.dqf_contentType     = APP.USER.STORE.metadata.dqf_options.contentType;
+        dqf.dqf_industry        = APP.USER.STORE.metadata.dqf_options.industry;
+        dqf.dqf_process         = APP.USER.STORE.metadata.dqf_options.process;
+        dqf.dqf_quality_level   = APP.USER.STORE.metadata.dqf_options.qualityLevel;
     }
     return dqf;
 };
@@ -267,34 +267,37 @@ APP.checkForDqf = function() {
     var dqfCheck = $('.dqf-box #dqf_switch');
     dqfCheck.prop("disabled", false);
     dqfCheck.prop("checked", false);
+    $('.dqf-box .dqf-settings').on('click', function () {
+        ModalsActions.openDQFModal();
+    });
+
     dqfCheck.off('click').on('click', function (e) {
         if ( dqfCheck.prop('checked')) {
-            if (!_.isUndefined(APP.USER.STORE.metadata) && _.isUndefined(APP.USER.STORE.metadata.dqf_username)) {
+            if (!_.isUndefined(APP.USER.STORE.metadata) &&
+                (_.isUndefined(APP.USER.STORE.metadata.dqf_username) ||
+                _.isUndefined(APP.USER.STORE.metadata.dqf_options))) {
                 e.stopPropagation();
                 e.preventDefault();
-                $('#modal').trigger('openpreferences');
+                ModalsActions.openDQFModal();
             } else if( _.isUndefined(APP.USER.STORE.metadata) ) {
                 e.stopPropagation();
                 e.preventDefault();
                 $('#modal').trigger('openlogin');
             } else {
-                $('.dqf-box .dqf-options-container').removeClass('closed-options');
             }
         } else {
-            $('.dqf-box .dqf-options-container').addClass('closed-options')
         }
 
     });
+
     dqfCheck.on('dqfEnable', function (e) {
         dqfCheck.attr('checked', true);
         dqfCheck.prop('checked', true);
-        $('.dqf-box .dqf-options-container').removeClass('closed-options')
     });
 
     dqfCheck.on('dqfDisable', function (e) {
         dqfCheck.attr('checked', false);
         dqfCheck.prop('checked', false);
-        $('.dqf-box .dqf-options-container').addClass('closed-options')
     });
 };
 
