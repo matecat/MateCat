@@ -148,6 +148,15 @@ class DQFModal extends React.Component {
     }
 
     getDqfHtml() {
+        let contentTypeOptions = config.dqf_content_types.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        let industryOptions = config.dqf_industry.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        let processOptions = config.dqf_process.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
         if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
@@ -168,38 +177,32 @@ class DQFModal extends React.Component {
                                 ref={(select)=> this.contentType = select}
                             onChange={this.resetOptions.bind(this)}>
                             <option value="">Choose</option>
-                            <option value="1">User Interface Text</option>
-                            <option value="2">Technical Specifications</option>
-                            <option value="3">User Manual</option>
-                            <option value="4">Online Help</option>
+                            {contentTypeOptions}
                         </select>
                     </div>
                     <div className="dqf-option">
                         <h4>Industry</h4>
                         <select name="industry" id="industry"
-                                ref={(select)=> this.industry = select}>
+                                ref={(select)=> this.industry = select}
+                                onChange={this.resetOptions.bind(this)}>
                             <option value="">Choose</option>
-                            <option value="1">Aerospace / Aviation</option>
-                            <option value="2">Automotive</option>
-                            <option value="3">Business Services</option>
-                            <option value="4">Chemicals</option>
+                            {industryOptions}
                         </select>
                     </div>
                     <div className="dqf-option">
                         <h4>Process</h4>
                         <select name="process" id="process"
-                                ref={(select)=> this.process = select}>
+                                ref={(select)=> this.process = select}
+                                onChange={this.resetOptions.bind(this)}>
                             <option value="">Choose</option>
-                            <option value="1">MT+PE+Human</option>
-                            <option value="2">MT+PE</option>
-                            <option value="3">MT+PE+TM+Human</option>
-                            <option value="4">TM+Human</option>
+                            {processOptions}
                         </select>
                     </div>
                     <div className="dqf-option">
                         <h4>Quality level</h4>
                         <select name="qualityLevel" id="qualityLevel"
-                                ref={(select)=> this.qualityLevel = select}>
+                                ref={(select)=> this.qualityLevel = select}
+                                onChange={this.resetOptions.bind(this)}>
                             <option value="">Choose</option>
                             <option value="1">Good Enough</option>
                             <option value="2">High Quality</option>
