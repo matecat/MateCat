@@ -26,7 +26,8 @@ abstract class Engines_AbstractEngine {
 
     public $doLog = true;
 
-    protected $enableOnAnalyze = true;
+    protected $_isAnalysis   = false;
+    protected $_skipAnalysis = false;
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
@@ -41,6 +42,13 @@ abstract class Engines_AbstractEngine {
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
+    }
+
+    /**
+     * @param bool $bool
+     */
+    public function setAnalysis( $bool = true ){
+        $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
     }
 
     /**
@@ -176,7 +184,22 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    public function call( $function, Array $parameters = array(), $isPostRequest = false ) {
+    public function call( $function, Array $parameters = array(), $isPostRequest = false, $isJsonRequest = false ) {
+
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            $this->result = [
+                    "responseData" => [
+                            "translatedText" => null,
+                            "match" => null,
+                            "quotaFinished" => false,
+                            "responseDetails" => "",
+                            "responseStatus" => 200,
+                            "responderId" => "0",
+                            "matches" => []
+                    ]
+            ];
+            return;
+        }
 
         $this->error = array(); // reset last error
         if ( !$this->$function ) {
@@ -194,7 +217,7 @@ abstract class Engines_AbstractEngine {
             $function = strtolower( trim( $function ) );
             $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
-                    CURLOPT_POSTFIELDS => $parameters,
+                    CURLOPT_POSTFIELDS => ( !$isJsonRequest ? $parameters : json_encode( $parameters ) ),
                     CURLINFO_HEADER_OUT => true,
                     CURLOPT_TIMEOUT    => 120
             );

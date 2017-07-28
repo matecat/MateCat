@@ -16,7 +16,63 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
             'suggestion'  => null
     );
 
+    /**
+     * @var array
+     */
+    protected $_head_parameters = [];
+
+    /**
+     * @var bool
+     */
+    protected $_skipAnalysis = true;
+
+    public function __construct( $engineRecord ) {
+
+        parent::__construct( $engineRecord );
+
+        if ( $this->engineRecord->type != "MT" ) {
+            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        }
+
+        $this->_head_parameters = [
+                'MyMemory-License' => $this->engineRecord->extra_parameters[ 'MyMemory-License' ],
+                'User_id'          => $this->engineRecord->extra_parameters[ 'User_id' ],
+                'Platform_type'    => "MateCat",
+                'Platform_name'    => "translated_matecat",
+                'Platform_version' => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                'Plugin_version'   => "1.0"
+        ];
+    }
+
+    protected function _setHeader(){
+        if( !isset( $this->curl_additional_params[ CURLOPT_HTTPHEADER ] ) ){
+            $this->_setAdditionalCurlParams( [
+                            CURLOPT_HTTPHEADER     => [
+                                    "PluginHeader: " . json_encode( $this->_head_parameters )
+                            ],
+                            CURLOPT_SSL_VERIFYPEER => false,
+                    ]
+            );
+        }
+    }
+
+    /**
+     * @param       $url
+     * @param array $curl_options
+     *
+     * @return array|bool|null|string
+     */
+    public function _call( $url, Array $curl_options = [] ) {
+        $this->_setHeader();
+        return parent::_call( $url, $curl_options );
+    }
+
+    /**
+     * MMT exception name from tag_projection call
+     * @see Engines_MMT::_decode
+     */
     const LanguagePairNotSupportedException = 1;
+
 
     public function get( $_config ) {
         throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
@@ -34,12 +90,86 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
     }
 
-    public function checkAccount( $_config ){
-        //TODO implement: https://docs.google.com/document/d/1Yhb-8UaFWzD_HtYhBhZlLf2-QZdB2g7sUZVzAjUcZqA/edit#heading=h.wwkqqi9fm7a6
+    /**
+     *
+     * @param $file \SplFileObject
+     * @param $langPairs array
+     *
+     * @return mixed
+     */
+    public function getContext( \SplFileObject $file, $langPairs ) {
+
+        $fileName = $file->getRealPath();
+        $file->rewind();
+
+        $fp_out = gzopen( "$fileName.gz", 'wb9' );
+
+        if( !$fp_out ){
+            $fp_out = null;
+            $file = null;
+            @unlink( $fileName );
+            @unlink( "$fileName.gz" );
+            throw new RuntimeException( 'IOException. Unable to create temporary file.' );
+        }
+
+        while ( ! $file->eof() ) {
+            gzwrite( $fp_out, $file->fgets() );
+        }
+
+        $file = null;
+        gzclose( $fp_out );
+
+        $postFields = [
+                'content'             => "@" . realpath( "$fileName.gz" ),
+                'content_compression' => 'gzip',
+                'langpairs'           => implode( ",", $langPairs ),
+        ];
+
+        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
+            /**
+             * Added in PHP 5.5.0 with FALSE as the default value.
+             * PHP 5.6.0 changes the default value to TRUE.
+             */
+            $options[ CURLOPT_SAFE_UPLOAD ] = false;
+            $this->_setAdditionalCurlParams( $options );
+        }
+
+        $this->call( "context_get", $postFields, true );
+
+        @unlink( $fileName );
+        @unlink( "$fileName.gz" );
+
+        return $this->result;
+
     }
 
-    public function activate( $_config ){
-        //TODO implement: L’attivazione di MMT ritornerà una licenza che Matecat salverà in engines e che aggiungerà come header in ogni chiamata verso MMT
+    /**
+     * Call to check the license key validity
+     * @return mixed
+     */
+    public function checkAccount(){
+        $this->call( 'api_key_check_auth_url' );
+        return $this->result;
+    }
+
+    /**
+     * Activate the account and also update/add keys to User MMT data
+     *
+     * @param $keyList TmKeyManagement_MemoryKeyStruct[]
+     *
+     * @return mixed
+     */
+    public function activate( Array $keyList ){
+
+        $_config = [];
+        foreach ( $keyList as $p => $kStruct ){
+            $_config[ $p ][ 'id' ] = $kStruct->tm_key->key;
+            $_config[ $p ][ 'description' ] = $kStruct->tm_key->name;
+        }
+
+        $this->call( 'user_update_activate', $_config, true, true );
+        return $this->result;
+
     }
 
     /**
@@ -67,6 +197,11 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         switch ( $functionName ) {
             case 'tags_projection' :
                 $result_object = Engines_Results_MMT_TagProjectionResponse::getInstance( $decoded );
+                break;
+            case 'api_key_check_auth_url':
+            case 'user_update_activate':
+            case 'context_get':
+                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded );
                 break;
             default:
                 //this case should not be reached
