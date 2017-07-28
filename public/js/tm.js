@@ -397,7 +397,7 @@
         },
         enableTM: function (el) {
             UI.checkTMGrantsModifications(el);
-            if(APP.isCattool) UI.saveTMdata(el);
+            if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMKeysUpdateChecks();
         },
         disableAllTM: function () {
