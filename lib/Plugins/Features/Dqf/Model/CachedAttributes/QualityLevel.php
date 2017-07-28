@@ -11,6 +11,6 @@ namespace Features\Dqf\Model\CachedAttributes;
 
 class QualityLevel extends AbstractCachedAttribute {
 
-    protected $resource_name = 'qualityLevel' ;
+    protected $resource_name = 'qualitylevel' ;
 
 }
