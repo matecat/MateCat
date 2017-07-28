@@ -157,6 +157,9 @@ class DQFModal extends React.Component {
         let processOptions = config.dqf_process.map(function(item){
             return <option key={item.id} value={item.id}>{item.name}</option>
         });
+        let qualityOptions = config.dqf_quality_level.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
         if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
@@ -204,8 +207,7 @@ class DQFModal extends React.Component {
                                 ref={(select)=> this.qualityLevel = select}
                                 onChange={this.resetOptions.bind(this)}>
                             <option value="">Choose</option>
-                            <option value="1">Good Enough</option>
-                            <option value="2">High Quality</option>
+                            {qualityOptions}
                         </select>
                     </div>
                     <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}
