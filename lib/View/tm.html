@@ -503,6 +503,7 @@
                                 <h3>DQF  </h3>
                                 <p tal:condition="php: !empty(logged_user)">
                                     Enable this option to use DQF in MateCat.
+                                    <span class="dqf-settings">Open Settings</span>
                                 </p>
                                 <p tal:condition="php: empty(logged_user)" >
                                     Login and set your DQF credentials to use DQF in MateCat.
@@ -520,52 +521,51 @@
                                         </label>
                                     </div>
                                 </div>
+                                <!--<div class="dqf-options-container closed-options">-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Content Type</h4>-->
 
-                                <div class="dqf-options-container closed-options">
-                                    <div class="dqf-option">
-                                        <h4>Content Type</h4>
+                                        <!--<select name="contentType" id="contentType">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<tal:block tal:repeat="entry dqf_content_types">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+                                        <!--</select>-->
 
-                                        <select name="contentType" id="contentType">
-                                            <option value="">Choose</option>
-                                            <tal:block tal:repeat="entry dqf_content_types">
-                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
-                                            </tal:block>
-                                        </select>
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Industry</h4>-->
+                                        <!--<select name="industry" id="industry">-->
+                                            <!--<option value="">Choose</option>-->
 
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Industry</h4>
-                                        <select name="industry" id="industry">
-                                            <option value="">Choose</option>
+                                            <!--<tal:block tal:repeat="entry dqf_industry">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Process</h4>-->
+                                        <!--<select name="process" id="process">-->
+                                            <!--<option value="">Choose</option>-->
 
-                                            <tal:block tal:repeat="entry dqf_industry">
-                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
-                                            </tal:block>
-                                        </select>
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Process</h4>
-                                        <select name="process" id="process">
-                                            <option value="">Choose</option>
+                                            <!--<tal:block tal:repeat="entry dqf_process">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
 
-                                            <tal:block tal:repeat="entry dqf_process">
-                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
-                                            </tal:block>
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Quality level</h4>-->
+                                        <!--<select name="qualityLevel" id="qualityLevel">-->
+                                            <!--<option value="">Choose</option>-->
 
-                                        </select>
-                                    </div>
-                                    <div class="dqf-option">
-                                        <h4>Quality level</h4>
-                                        <select name="qualityLevel" id="qualityLevel">
-                                            <option value="">Choose</option>
+                                            <!--<tal:block tal:repeat="entry dqf_quality_level">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
 
-                                            <tal:block tal:repeat="entry dqf_quality_level">
-                                                <option tal:attributes="value entry/id" tal:content="entry/name" ></option>
-                                            </tal:block>
-
-                                        </select>
-                                    </div>
-                                </div>
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                <!--</div>-->
                             </div>
 
                         </div>

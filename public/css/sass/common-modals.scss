@@ -141,7 +141,6 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     padding: 20px 20px;
 }
 
-.preferences-modal .user-dqf ,
 .preferences-modal .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
@@ -198,9 +197,24 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     margin-top: 25px;
 }
 
-.preferences-modal .user-dqf  {
-    input {
-        max-width: 98%;
+.dqf-modal .dqf-container {
+    padding: 40px;
+    .user-dqf  {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 4px;
+        background: #f8f6f6;
+        width: 100%;
+        min-height: 40px;
+        margin-bottom: 25px;
+        margin-top: 10px;
+        input {
+            max-width: 100%;
+        }
+        .dqf-message {
+            float: right;
+            margin-top: 10px;
+        }
     }
     .button {
         font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -211,11 +225,45 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         margin-bottom: 15px;
         margin-left: 80%;
     }
-    .dqf-message {
-        float: right;
-        margin-top: 10px;
+    .dqf-options-container {
+        h2 {
+            margin-bottom: 10px;
+        }
+        width: 100%;
+        overflow-y: hidden;
+        padding-top: 15px;
+    }
+
+    .dqf-option {
+        width: 50%;
+        float: left;
+        text-align: left;
+        padding: 5px;
+        padding-bottom: 20px;
+    }
+
+    .dqf-option h4 {
+        float: left;
+        margin-top: 5px;
+        margin-left: 10px;
+    }
+
+    .dqf-option select {
+        &.error {
+            border: 1px solid red;
+            color: black;
+        }
+        float: right !important;
+        width: 65%;
+        height: 30px;
+        font-size: 16px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        margin: 1px 0 5px 0;
     }
 }
+
+
 
 
 .onoffswitch-drive {
@@ -350,6 +398,8 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .preferences-modal input[type=text],
 .preferences-modal input[type=password],
+.dqf-modal input[type=text],
+.dqf-modal input[type=password],
 .login-container-left input,
 .register-form-container input[type=text],
 .register-form-container input[type=password],
