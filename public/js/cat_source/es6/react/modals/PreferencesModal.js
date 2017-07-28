@@ -217,7 +217,9 @@ class PreferencesModal extends React.Component {
     }
 
     getDqfHtml() {
-        if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
+        if (!config.dqf_enabled) {
+            return '';
+        } else if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
                 <div className="user-dqf">

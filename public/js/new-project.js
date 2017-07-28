@@ -181,15 +181,27 @@ APP.checkForTagProjectionLangs = function(){
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
 
-APP.getCreateProjectParams = function() {
-    var dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
-    var dqf_contentType, dqf_industry, dqf_process, dqf_quality_level;
-    if (dqfEnabled) {
-        dqf_contentType     = $('#contentType option:selected').val();
-        dqf_industry        = $('#industry option:selected').val();
-        dqf_process         = $('#process option:selected').val();
-        dqf_quality_level   = $('#qualityLevel option:selected').val();
+APP.getDQFParameters = function () {
+    var dqf = {
+        dqfEnabled: false
+    };
+    if (!config.dqf_enabled) {
+        return dqf;
     }
+
+    dqf.dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
+
+    if (dqfEnabled) {
+        dqf.dqf_contentType     = $('#contentType option:selected').val();
+        dqf.dqf_industry        = $('#industry option:selected').val();
+        dqf.dqf_process         = $('#process option:selected').val();
+        dqf.dqf_quality_level   = $('#qualityLevel option:selected').val();
+    }
+    return dqf;
+};
+
+APP.getCreateProjectParams = function() {
+    var dqf = APP.getDQFParameters();
 	return {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
@@ -208,11 +220,11 @@ APP.getCreateProjectParams = function() {
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
-        dqf                         : dqfEnabled,
-        dqf_contentType             : dqf_contentType,
-        dqf_industry                : dqf_industry,
-        dqf_process                 : dqf_process,
-        dqf_quality_level           : dqf_quality_level
+        dqf                         : dqf.dqfEnabled,
+        dqf_contentType             : dqf.dqf_contentType,
+        dqf_industry                : dqf.dqf_industry,
+        dqf_process                 : dqf.dqf_process,
+        dqf_quality_level           : dqf.dqf_quality_level
 	} ;
 };
 
