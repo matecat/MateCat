@@ -36,17 +36,9 @@ class AnalyzeHeader extends React.Component {
 
         } else if ( (status === 'NEW') || (status === '') || in_queue_before > 0 ) {
             if ( config.daemon_warning ) {
-                let analyzerNotRunningErrorString;
-                if ( config.support_mail.indexOf( '@' ) === -1 ) {
-                    analyzerNotRunningErrorString = <p className="label">The analysis seems not to be running. Contact {config.support_mail}.</p>;
-                } else {
-                    analyzerNotRunningErrorString = <p className="label">The analysis seems not to be running. Contact <a href={"mailto: " + config.support_mail}>{config.support_mail}</a>.</p>;
-                }
-                html = <div className="analysis-create">
-                    <div className="search-tm-matches">
-                        <span className="complete">{analyzerNotRunningErrorString}</span>
-                    </div>
-                </div>;
+
+                html = this.errorAnalysisHtml();
+
             } else if ( in_queue_before > 0 ) {
                 if ( this.previousQueueSize <= in_queue_before ) {
                     html = <div className="analysis-create">
@@ -82,17 +74,7 @@ class AnalyzeHeader extends React.Component {
 
                 this.noProgressTail++;
                 if ( this.noProgressTail > 9 ) {
-                    let analyzerNotRunningErrorString = '';
-                    if ( config.support_mail.indexOf( '@' ) === -1 ) {
-                        analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
-                    } else {
-                        analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
-                    }
-                    html = <div className="analysis-create">
-                        <div className="search-tm-matches">
-                            <span className="complete">{analyzerNotRunningErrorString}</span>
-                        </div>
-                    </div>
+                    html = this.errorAnalysisHtml();
                 }
 
             }
@@ -119,19 +101,24 @@ class AnalyzeHeader extends React.Component {
 
                 </div>
             </div>;
-        } else {
-            if ( config.support_mail.indexOf( '@' ) === -1 ) {
-                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
-            } else {
-                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
-            }
-            html = <div className="analysis-create">
-                <div className="search-tm-matches">
-                    <span className="complete">{analyzerNotRunningErrorString}</span>
-                </div>
-            </div>
+        } else {  // Unknown error :)
+            html = this.errorAnalysisHtml();
         }
         return html;
+    }
+
+    errorAnalysisHtml() {
+        let analyzerNotRunningErrorString;
+        if ( config.support_mail.indexOf( '@' ) === -1 ) {
+            analyzerNotRunningErrorString = <p className="label">The analysis seems not to be running. Contact {config.support_mail}.</p>;
+        } else {
+            analyzerNotRunningErrorString = <p className="label">The analysis seems not to be running. Contact <a href={"mailto: " + config.support_mail}>{config.support_mail}</a>.</p>;
+        }
+        return <div className="analysis-create">
+            <div className="search-tm-matches">
+                <span className="complete">{analyzerNotRunningErrorString}</span>
+            </div>
+        </div>;
     }
 
     getProgressBarText() {

@@ -92,7 +92,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div>{chunk.total_raw_word_count_print}</div>
                                 </div>
                                 <div className="title-standard-words tsw">
-                                    <div>{chunk.total_st_word_count_print}</div>
+                                    <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
@@ -131,7 +131,7 @@ class AnalyzeChunksResume extends React.Component {
                     let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
-                    let total_standard = self.props.standardWc;
+                    let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
