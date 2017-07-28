@@ -192,7 +192,7 @@ APP.getDQFParameters = function () {
     dqf.dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
 
     if (dqf.dqfEnabled) {
-        dqf.dqf_contentType     = APP.USER.STORE.metadata.dqf_options.contentType;
+        dqf.dqf_content_type     = APP.USER.STORE.metadata.dqf_options.contentType;
         dqf.dqf_industry        = APP.USER.STORE.metadata.dqf_options.industry;
         dqf.dqf_process         = APP.USER.STORE.metadata.dqf_options.process;
         dqf.dqf_quality_level   = APP.USER.STORE.metadata.dqf_options.qualityLevel;
@@ -221,7 +221,7 @@ APP.getCreateProjectParams = function() {
 		segmentation_rule			: $( '#segm_rule' ).val(),
         id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
         dqf                         : dqf.dqfEnabled,
-        dqf_contentType             : dqf.dqf_contentType,
+        dqf_content_type            : dqf.dqf_content_type,
         dqf_industry                : dqf.dqf_industry,
         dqf_process                 : dqf.dqf_process,
         dqf_quality_level           : dqf.dqf_quality_level

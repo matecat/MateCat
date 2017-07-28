@@ -9,6 +9,7 @@
 namespace Features\Dqf\Model;
 
 use DomainException;
+use Features\Dqf\Model\CachedAttributes\Severity;
 use Features\Dqf\Service\Struct\Request\ReviewSettingsRequestStruct;
 use LQA\CategoryStruct;
 use LQA\ModelStruct;
@@ -78,7 +79,7 @@ class DqfQualityModel {
 
         sort($ids, SORT_NUMERIC) ;
 
-        $cachedSeverities = new CachedSeverityAttributes();
+        $cachedSeverities = new Severity();
 
         if ( $cachedSeverities->getSortedDqfIds() != $ids ) {
             throw new DomainException('Your QA model is missing some DQF severities. All severities defined in DQF are expected.') ;
