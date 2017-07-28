@@ -8,16 +8,23 @@
         config.userFullName = '${extended_user}';
         config.userShortName = '${logged_user}';
         config.isLoggedIn = ${isLoggedIn|string:false};
-
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.authURL = ${structure php:json_encode(authURL)} ;
-
         config.dqf_enabled = ${dqf_enabled} ;
         /*]]>*/
 
-    <tal:block  tal:repeat="config_data config_js">
+    <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
         config.plugin_data = ${structure php: json_encode( config_data )} ;
+        /*]]>*/
+    </tal:block>
+
+    <tal:block tal:condition="dqf_enabled">
+        /*<![CDATA[*/
+        config.dqf_content_types = ${structure php: json_encode( dqf_content_types )} ;
+        config.dqf_industry      = ${structure php: json_encode( dqf_industry )} ;
+        config.dqf_process       = ${structure php: json_encode( dqf_process )} ;
+        config.dqf_quality_level = ${structure php: json_encode( dqf_quality_level )} ;
         /*]]>*/
     </tal:block>
 
