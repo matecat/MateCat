@@ -66,7 +66,7 @@ function waitforpastedata(elem, savedcontent) {
 		processpaste(elem, savedcontent);
 	}
 	else {
-		that = {
+		var that = {
 			e: elem,
 			s: savedcontent
 		};
@@ -78,7 +78,7 @@ function waitforpastedata(elem, savedcontent) {
 }
 
 function processpaste(elem, savedcontent) {
-	pasteddata = elem.innerHTML;
+	var pasteddata = elem.innerHTML;
 
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
@@ -244,6 +244,7 @@ function removeSelectedText() {
 				$(ss).remove();
 			} else {
 				oSelection.deleteFromDocument();
+				oSelection.collapseToStart();
 			}
 		}
 	} else {
