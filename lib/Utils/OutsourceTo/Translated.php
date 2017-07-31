@@ -330,8 +330,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . urlencode($volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ]) .
                 "&subject=$subject&jt=R&fd=" . urlencode( $fixedDeliveryDateForQuote ) . "&of=json";
 
+            $curl_opt = array(
+                    CURLOPT_HTTPGET        => true,
+                    CURLOPT_TIMEOUT        => 15,
+                    CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                    CURLOPT_CONNECTTIMEOUT => 5
+            );
+
             Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
-            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
+            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery, $curl_opt );
         }
 
 

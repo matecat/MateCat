@@ -244,6 +244,7 @@ function removeSelectedText() {
 				$(ss).remove();
 			} else {
 				oSelection.deleteFromDocument();
+                oSelection.collapseToStart();
 			}
 		}
 	} else {

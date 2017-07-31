@@ -42,7 +42,7 @@ ForceDelivery = {
 
         $('.modal.outsource .cancelForceDelivery').click(function (e) {
             e.preventDefault();
-            ManageActions.outsourceCloseTranslatorInfo();
+            OutsourceActions.outsourceCloseTranslatorInfo();
             prepareAndSubmitQuote(0, true);
         });
 
@@ -1204,7 +1204,7 @@ var EYE = {
             return false;
         }
 
-        ManageActions.outsourceCloseTranslatorInfo();
+        OutsourceActions.outsourceCloseTranslatorInfo();
         if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
             $( "#delivery_manual_error").removeClass( "hide" );
             $('.delivery_before_time,.delivery_not_available,.modal.outsource .tooltip').addClass('hide');

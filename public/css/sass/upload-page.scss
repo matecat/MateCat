@@ -1620,8 +1620,9 @@ h2.payoff {
 /*.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}*/
 
 .cancel button:hover, .delete button:hover {
-    background: #ca2a2e;
+    background: #f26522;
     color: #fff;
+    border: 1px solid #848689;
 }
 
 .cancel .ui-button-text span, .delete .ui-button-text span {
