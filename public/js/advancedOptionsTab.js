@@ -87,11 +87,8 @@ if ( true )
             }
 
             // Check DQF
-            if ( UI.checkDqfCanActivate() ) {
-                (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
-                dqfCheck.prop('disabled', true) ;
-
-            }
+            (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
+            dqfCheck.prop('disabled', true) ;
         },
 
         toggleLexiqaOption: function () {
@@ -109,11 +106,8 @@ if ( true )
             (selected) ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob();
         },
 
-        checkDqfCanActivate : function() {
-            return true ;
-        },
         checkDqfIsActive : function() {
-            return true ;
+            if (dqf_enabled)
         }
 
     });

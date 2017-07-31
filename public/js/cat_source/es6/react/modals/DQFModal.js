@@ -148,19 +148,20 @@ class DQFModal extends React.Component {
     }
 
     getDqfHtml() {
-        let contentTypeOptions = config.dqf_content_types.map(function(item){
-            return <option key={item.id} value={item.id}>{item.name}</option>
-        });
-        let industryOptions = config.dqf_industry.map(function(item){
-            return <option key={item.id} value={item.id}>{item.name}</option>
-        });
-        let processOptions = config.dqf_process.map(function(item){
-            return <option key={item.id} value={item.id}>{item.name}</option>
-        });
-        let qualityOptions = config.dqf_quality_level.map(function(item){
-            return <option key={item.id} value={item.id}>{item.name}</option>
-        });
+
         if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
+            let contentTypeOptions = config.dqf_content_types.map(function(item){
+                return <option key={item.id} value={item.id}>{item.name}</option>
+            });
+            let industryOptions = config.dqf_industry.map(function(item){
+                return <option key={item.id} value={item.id}>{item.name}</option>
+            });
+            let processOptions = config.dqf_process.map(function(item){
+                return <option key={item.id} value={item.id}>{item.name}</option>
+            });
+            let qualityOptions = config.dqf_quality_level.map(function(item){
+                return <option key={item.id} value={item.id}>{item.name}</option>
+            });
             return <div className="dqf-container">
                 <h2>DQF Credentials</h2>
                 <div className="user-dqf">
