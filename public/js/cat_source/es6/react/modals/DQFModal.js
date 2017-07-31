@@ -84,7 +84,9 @@ class DQFModal extends React.Component {
             if (data) {
                 APP.USER.STORE.metadata = data;
                 dqfCheck.trigger('dqfDisable');
-                self.saveButton.classList.remove('disabled');
+                if (self.saveButton) {
+                    self.saveButton.classList.remove('disabled');
+                }
                 self.setState({
                     dqfValid: false,
                     dqfCredentials : {},
@@ -147,123 +149,101 @@ class DQFModal extends React.Component {
         this.qualityLevel.classList.remove('error');
     }
 
+    getOptions() {
+        let validUser = !!(this.state.dqfValid || this.state.dqfCredentials.dqfUsername);
+        let containerStyle = (validUser && !config.dqf_active_on_project)? {} : {opacity: 0.5, pointerEvents: 'none'};
+        let contentTypeOptions = config.dqf_content_types.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        let industryOptions = config.dqf_industry.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        let processOptions = config.dqf_process.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        let qualityOptions = config.dqf_quality_level.map(function(item){
+            return <option key={item.id} value={item.id}>{item.name}</option>
+        });
+        return <div className="dqf-options-container" style={containerStyle}>
+            <h2>DQF Options</h2>
+            <div className="dqf-option">
+                <h4>Content Type</h4>
+                <select name="contentType" id="contentType"
+                        ref={(select)=> this.contentType = select}
+                        onChange={this.resetOptions.bind(this)}>
+                    <option value="">Choose</option>
+                    {contentTypeOptions}
+                </select>
+            </div>
+            <div className="dqf-option">
+                <h4>Industry</h4>
+                <select name="industry" id="industry"
+                        ref={(select)=> this.industry = select}
+                        onChange={this.resetOptions.bind(this)}>
+                    <option value="">Choose</option>
+                    {industryOptions}
+                </select>
+            </div>
+            <div className="dqf-option">
+                <h4>Process</h4>
+                <select name="process" id="process"
+                        ref={(select)=> this.process = select}
+                        onChange={this.resetOptions.bind(this)}>
+                    <option value="">Choose</option>
+                    {processOptions}
+                </select>
+            </div>
+            <div className="dqf-option">
+                <h4>Quality level</h4>
+                <select name="qualityLevel" id="qualityLevel"
+                        ref={(select)=> this.qualityLevel = select}
+                        onChange={this.resetOptions.bind(this)}>
+                    <option value="">Choose</option>
+                    {qualityOptions}
+                </select>
+            </div>
+            {!config.is_cattool ? (
+                <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}
+                     onClick={this.saveDQFOptions.bind(this)}
+                     ref={(button)=> this.saveButton=button}>Save</div>
+            ) : ('')}
+
+        </div>
+    }
+
     getDqfHtml() {
 
         if (this.state.dqfValid || this.state.dqfCredentials.dqfUsername) {
-            let contentTypeOptions = config.dqf_content_types.map(function(item){
-                return <option key={item.id} value={item.id}>{item.name}</option>
-            });
-            let industryOptions = config.dqf_industry.map(function(item){
-                return <option key={item.id} value={item.id}>{item.name}</option>
-            });
-            let processOptions = config.dqf_process.map(function(item){
-                return <option key={item.id} value={item.id}>{item.name}</option>
-            });
-            let qualityOptions = config.dqf_quality_level.map(function(item){
-                return <option key={item.id} value={item.id}>{item.name}</option>
-            });
+
             return <div className="dqf-container">
-                <h2>DQF Credentials</h2>
-                <div className="user-dqf">
-                    <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
-                    <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
-                    <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}
-                         onClick={this.clearDQFCredentials.bind(this)}>Clear</div>
+                    <h2>DQF Credentials</h2>
+                    <div className="user-dqf">
+                        <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
+                        <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
+                        <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}
+                             onClick={this.clearDQFCredentials.bind(this)}>Clear</div>
+                    </div>
+
+                    {this.getOptions()}
 
                 </div>
-                {!config.is_cattool ? (
-
-                <div className="dqf-options-container">
-                    <h2>DQF Options</h2>
-                    <div className="dqf-option">
-                        <h4>Content Type</h4>
-                        <select name="contentType" id="contentType"
-                                ref={(select)=> this.contentType = select}
-                            onChange={this.resetOptions.bind(this)}>
-                            <option value="">Choose</option>
-                            {contentTypeOptions}
-                        </select>
-                    </div>
-                    <div className="dqf-option">
-                        <h4>Industry</h4>
-                        <select name="industry" id="industry"
-                                ref={(select)=> this.industry = select}
-                                onChange={this.resetOptions.bind(this)}>
-                            <option value="">Choose</option>
-                            {industryOptions}
-                        </select>
-                    </div>
-                    <div className="dqf-option">
-                        <h4>Process</h4>
-                        <select name="process" id="process"
-                                ref={(select)=> this.process = select}
-                                onChange={this.resetOptions.bind(this)}>
-                            <option value="">Choose</option>
-                            {processOptions}
-                        </select>
-                    </div>
-                    <div className="dqf-option">
-                        <h4>Quality level</h4>
-                        <select name="qualityLevel" id="qualityLevel"
-                                ref={(select)=> this.qualityLevel = select}
-                                onChange={this.resetOptions.bind(this)}>
-                            <option value="">Choose</option>
-                            {qualityOptions}
-                        </select>
-                    </div>
-                    <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}
-                         onClick={this.saveDQFOptions.bind(this)}
-                        ref={(button)=> this.saveButton=button}>Save</div>
-                </div>
-                    ) : ('')}
-            </div>
         } else {
             return <div className="dqf-container">
-                <h2>DQF Credentials</h2>
-                <div className="user-dqf">
-                    <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
-                               placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
-                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                    <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
-                               placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
-                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                    <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
-                    <div className="dqf-message">
-                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}}
-                              className="coupon-message">{this.state.dqfError}</span>
+                    <h2>DQF Credentials</h2>
+                    <div className="user-dqf">
+                        <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
+                                   placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
+                                   onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                        <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
+                                   placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
+                                   onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                        <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
+                        <div className="dqf-message">
+                            <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}}
+                                  className="coupon-message">{this.state.dqfError}</span>
+                        </div>
                     </div>
-                </div>
-                {!config.is_cattool ? (
-
-                    <div className="dqf-options-container" style={{opacity: 0.5, pointerEvents: 'none'}}>
-                        <h2>DQF Options</h2>
-                        <div className="dqf-option">
-                            <h4>Content Type</h4>
-                            <select name="contentType" id="contentType">
-                                <option value="">Choose</option>
-                            </select>
-                        </div>
-                        <div className="dqf-option">
-                            <h4>Industry</h4>
-                            <select name="industry" id="industry">
-                                <option value="">Choose</option>
-                            </select>
-                        </div>
-                        <div className="dqf-option">
-                            <h4>Process</h4>
-                            <select name="process" id="process">
-                                <option value="">Choose</option>
-                            </select>
-                        </div>
-                        <div className="dqf-option">
-                            <h4>Quality level</h4>
-                            <select name="qualityLevel" id="qualityLevel">
-                                <option value="">Choose</option>
-                            </select>
-                        </div>
-                        <div className="ui primary button" style={{margin:'0 auto', marginTop: '16px'}}>Save</div>
-                    </div>
-                ) : ('')}
+                    {this.getOptions()}
                 </div>
         }
     }
@@ -281,6 +261,11 @@ class DQFModal extends React.Component {
             this.process.value = this.state.dqfOptions.process;
             this.qualityLevel.value = this.state.dqfOptions.qualityLevel;
             this.saveButton.classList.add('disabled');
+        } else if (config.dqf_active_on_project) {
+            this.contentType.value = config.dqf_selected_content_types;
+            this.industry.value = config.dqf_selected_industry;
+            this.process.value = config.dqf_selected_process;
+            this.qualityLevel.value = config.dqf_selected_quality_level;
         }
     }
 

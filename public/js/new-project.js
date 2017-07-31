@@ -283,9 +283,7 @@ APP.checkForDqf = function() {
                 e.stopPropagation();
                 e.preventDefault();
                 $('#modal').trigger('openlogin');
-            } else {
             }
-        } else {
         }
 
     });

@@ -87,8 +87,14 @@ if ( true )
             }
 
             // Check DQF
-            (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
-            dqfCheck.prop('disabled', true) ;
+            if ( UI.checkDqfCanActivate() ) {
+                (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
+                dqfCheck.prop('disabled', true) ;
+
+                $('.dqf-box .dqf-settings').on('click', function () {
+                    ModalsActions.openDQFModal();
+                });
+            }
         },
 
         toggleLexiqaOption: function () {
@@ -106,8 +112,11 @@ if ( true )
             (selected) ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob();
         },
 
+        checkDqfCanActivate : function() {
+            return !!config.dqf_enabled ;
+        },
         checkDqfIsActive : function() {
-            if (dqf_enabled)
+            return config.dqf_active_on_project ;
         }
 
     });
