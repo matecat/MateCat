@@ -128,8 +128,8 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
+                    let password = Object.keys(obj)[0];
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
@@ -168,7 +168,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className={"split ui blue basic button " + buttonsClass}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, self.props.project.toJS().jobs[0].password, null)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, password, null)}>Translate</div>
                                 </div>
                             </div>
 
