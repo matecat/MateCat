@@ -188,7 +188,14 @@ class FeatureSet {
      * TODO: conver into something abstract.
      */
     public function sortFeatures() {
-        if ( in_array( Dqf::FEATURE_CODE, $this->getCodes() )  ) {
+        $codes = $this->getCodes() ;
+
+        if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
+            $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+            if ( !empty( $missing_dependencies ) ) {
+                throw new Exception('Missing dependencies for DQF: ' . implode(',', $missing_dependencies ) ) ;
+            }
+
            usort( $this->features, function( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
                if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
                    return 0 ;

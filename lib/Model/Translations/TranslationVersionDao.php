@@ -91,6 +91,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         return $result ;
     }
 
+    /**
+     * @param $id_job
+     *
+     * @return array
+     */
     public static function getVersionsForJob($id_job) {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job " .
