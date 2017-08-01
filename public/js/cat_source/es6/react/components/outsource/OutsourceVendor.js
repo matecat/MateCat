@@ -12,7 +12,8 @@ class OutsourceVendor extends React.Component {
             outsource: false,
             revision: true,
             chunkQuote: null,
-            extendedView: this.props.extendedView
+            extendedView: this.props.extendedView,
+            timezone: $.cookie( "matecat_timezone")
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -24,7 +25,7 @@ class OutsourceVendor extends React.Component {
         let self = this;
         let typeOfService = this.state.revision ? "premium" : "professional";
         let fixedDelivery =  (delivery) ? delivery : "";
-        var timezoneToShow = $.cookie( "matecat_timezone" );
+        let timezoneToShow = this.state.timezone;
         UI.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService, timezoneToShow).done(function (quoteData) {
             if (quoteData.data) {
 
@@ -48,8 +49,11 @@ class OutsourceVendor extends React.Component {
         });
     }
 
-    checkTimezone() {
-
+    changeTimezone(value) {
+        $.cookie( "matecat_timezone" , value);
+        this.setState({
+            timezone: value
+        });
     }
 
     sendOutsource() {
@@ -213,7 +217,7 @@ class OutsourceVendor extends React.Component {
                             <span>at</span>
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
-                                <GMTSelect/>
+                                <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                             </div>
                             <div className="need-it-faster">
                                 <a className="faster"
@@ -234,13 +238,24 @@ class OutsourceVendor extends React.Component {
                                         <div className="ui inline dropdown"
                                             ref={(select) => this.currencySelect = select}>
                                             <a className="text value">about €{pricePWord} / word</a>
-                                            <i className="dropdown icon"></i>
+                                            <i className="dropdown icon"/>
                                             <div className="menu">
                                                 <div className="header">Select Currency</div>
-                                                <div className="divider"></div>
-                                                <div className="active item" data-value="0">Turkish LT</div>
-                                                <div className="item" data-value="1">Pound</div>
-                                                <div className="item" data-value="2">Dollar</div>
+                                                <div className="divider"/>
+                                                <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
+                                                <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
+                                                <div className="item" data-value="AUD" data-symbol="$">Australian dollar (AUD)</div>
+                                                <div className="item" data-value="CAD" data-symbol="$">Canadian dollar (CAD)</div>
+                                                <div className="item" data-value="NZD" data-symbol="$">New Zealand dollar (NZD)</div>
+                                                <div className="item" data-value="GBP" data-symbol="£">Pound sterling (GBP)</div>
+                                                <div className="item" data-value="BRL" data-symbol="R$">Real (BRL)</div>
+                                                <div className="item" data-value="RUB" data-symbol="руб">Russian ruble (RUB)</div>
+                                                <div className="item" data-value="SEK" data-symbol="kr">Swedish krona (SEK)</div>
+                                                <div className="item" data-value="CHF" data-symbol="Fr.">Swiss franc (CHF)</div>
+                                                <div className="item" data-value="TRY" data-symbol="TL">Turkish lira (TL)</div>
+                                                <div className="item" data-value="KRW" data-symbol="￦">Won (KRW)</div>
+                                                <div className="item" data-value="JPY" data-symbol="￥">Yen (JPY)</div>
+                                                <div className="item" data-value="PLN" data-symbol="zł">Złoty (PLN)</div>
                                             </div>
                                         </div>
                                     </div>
@@ -316,10 +331,21 @@ class OutsourceVendor extends React.Component {
                                             <i className="dropdown icon"></i>
                                             <div className="menu">
                                                 <div className="header">Select Currency</div>
-                                                <div className="divider"></div>
-                                                <div className="active item" data-value="0">Turkish LT</div>
-                                                <div className="item" data-value="1">Pound</div>
-                                                <div className="item" data-value="2">Dollar</div>
+                                                <div className="divider"/>
+                                                <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
+                                                <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
+                                                <div className="item" data-value="AUD" data-symbol="$">Australian dollar (AUD)</div>
+                                                <div className="item" data-value="CAD" data-symbol="$">Canadian dollar (CAD)</div>
+                                                <div className="item" data-value="NZD" data-symbol="$">New Zealand dollar (NZD)</div>
+                                                <div className="item" data-value="GBP" data-symbol="£">Pound sterling (GBP)</div>
+                                                <div className="item" data-value="BRL" data-symbol="R$">Real (BRL)</div>
+                                                <div className="item" data-value="RUB" data-symbol="руб">Russian ruble (RUB)</div>
+                                                <div className="item" data-value="SEK" data-symbol="kr">Swedish krona (SEK)</div>
+                                                <div className="item" data-value="CHF" data-symbol="Fr.">Swiss franc (CHF)</div>
+                                                <div className="item" data-value="TRY" data-symbol="TL">Turkish lira (TL)</div>
+                                                <div className="item" data-value="KRW" data-symbol="￦">Won (KRW)</div>
+                                                <div className="item" data-value="JPY" data-symbol="￥">Yen (JPY)</div>
+                                                <div className="item" data-value="PLN" data-symbol="zł">Złoty (PLN)</div>
                                             </div>
                                         </div>
                                     </div>
@@ -385,7 +411,8 @@ class OutsourceVendor extends React.Component {
         return (!nextState.chunkQuote.equals(this.state.chunkQuote)
         || nextState.outsource !== this.state.outsource
         || nextState.extendedView !== this.state.extendedView
-        || nextState.revision !== this.state.revision);
+        || nextState.revision !== this.state.revision
+        || nextState.timezone !== this.state.timezone);
     }
 
     render() {
