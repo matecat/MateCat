@@ -113,7 +113,8 @@ class OutsourceContainer extends React.Component {
                                 {config.enable_outsource ? (
                                     <OutsourceVendor project={this.props.project}
                                                      job={this.props.job}
-                                                     extendedView={this.props.extendedView}/>
+                                                     extendedView={this.props.extendedView}
+                                                     standardWC={this.props.standardWC}/>
                                 ) :(null)}
 
                         </div>
