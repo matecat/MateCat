@@ -1,6 +1,6 @@
 $.extend(UI, {
 
-    // Coupon
+    // Coupon : calledd now from the outsourceVendor Component
     populateOutsourceForm : function() {
     },
     showPopupDetails: '1',

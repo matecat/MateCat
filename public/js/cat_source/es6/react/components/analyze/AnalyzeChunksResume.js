@@ -129,7 +129,9 @@ class AnalyzeChunksResume extends React.Component {
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
                                                 url={self.getTranslateUrl(chunkJob, index)}
-                                                showTranslatorBox={true}
+                                                showTranslatorBox={false}
+                                                extendedView={true}
+                                                showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
                                                 idJobLabel={chunk.jid + '-' + index}
@@ -212,7 +214,9 @@ class AnalyzeChunksResume extends React.Component {
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
                                                 url={self.getTranslateUrl(chunkJob)}
-                                                showTranslatorBox={true}
+                                                showTranslatorBox={false}
+                                                extendedView={true}
+                                                showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
                                                 idJobLabel={self.props.jobsInfo[indexJob].jid}
