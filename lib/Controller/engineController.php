@@ -262,6 +262,21 @@ class engineController extends ajaxController {
 
                 break;
 
+            case strtolower( Constants_Engines::MMT ):
+
+                /**
+                 * Create a record of type MMT
+                 */
+                $newEngine = EnginesModel_MMTStruct::getStruct();
+
+                $newEngine->name                                   = $this->name;
+                $newEngine->uid                                    = $this->uid;
+                $newEngine->type                                   = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'MyMemory-License' ] = $this->engineData[ 'secret' ];
+                $newEngine->extra_parameters[ 'User_id' ]          = $this->userMail;
+
+                break;
+
             default:
                 $validEngine = false;
         }
@@ -347,6 +362,19 @@ class engineController extends ajaxController {
             // Do a simple translation request so that the system wakes up by the time the user needs it for translating
             $engine_test = Engine::getInstance( $result->id );
             $engine_test->wakeUp();
+        } elseif( $newEngine instanceof EnginesModel_MMTStruct ){
+            $engine_test = Engine::getInstance( $result->id );
+            /**
+             * @var $engine_test Engines_MMT
+             */
+            $mt_result = $engine_test->checkAccount()->get_as_array();
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
         }
 
         $this->result['data']['id'] = $result->id;

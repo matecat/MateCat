@@ -274,6 +274,7 @@
                                        
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
+                                                <option value="mmt">MMT</option>
                                                 <option value="altlang">AltLang</option>
                                                 <option value="apertium">Apertium</option>
                                                 <option value="deeplingo" >DeepLingo</option>
@@ -526,6 +527,7 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
+    <div metal:use-macro="mt_engines.html/template-mmt" />
     <div metal:use-macro="mt_engines.html/template-microsofthub" />
     <div metal:use-macro="mt_engines.html/template-iptranslator" />
     <div metal:use-macro="mt_engines.html/template-deeplingo" />

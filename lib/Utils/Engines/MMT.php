@@ -249,7 +249,7 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
 
     /**
      * Call to check the license key validity
-     * @return mixed
+     * @return Engines_Results_MMT_MT
      */
     public function checkAccount(){
         $this->call( 'api_key_check_auth_url' );

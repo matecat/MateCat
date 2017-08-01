@@ -23,4 +23,6 @@ class Constants_Engines {
     const LETSMT           = 'LetsMT';
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
+    const MMT = 'MMT';
+
 }

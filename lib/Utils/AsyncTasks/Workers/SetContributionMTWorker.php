@@ -23,6 +23,8 @@ use INIT;
 
 class SetContributionMTWorker extends SetContributionWorker {
 
+    const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
+
     /**
      * @param ContributionStruct $contributionStruct
      *

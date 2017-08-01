@@ -207,7 +207,7 @@ abstract class Engines_AbstractEngine {
             $this->result = array(
                     'error' => array(
                             'code'    => -43,
-                            'message' => " Bad Method Call. Requested method ' . $function . ' not Found."
+                            'message' => " Bad Method Call. Requested method '$function' not Found."
                     )
             ); //return negative number
             return;
