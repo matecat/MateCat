@@ -8,7 +8,8 @@ class JobContainer extends React.Component {
         this.state = {
             showDownloadProgress: false,
             openOutsource: false,
-            showTranslatorBox: false
+            showTranslatorBox: false,
+            extendedView: true
         };
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
@@ -448,10 +449,11 @@ class JobContainer extends React.Component {
         }
     }
 
-    openOutsourceModal(showTranslatorBox) {
+    openOutsourceModal(showTranslatorBox, extendedView) {
         this.setState({
             openOutsource: !this.state.openOutsource,
-            showTranslatorBox: showTranslatorBox
+            showTranslatorBox: showTranslatorBox,
+            extendedView: extendedView
         });
     }
 
@@ -460,18 +462,18 @@ class JobContainer extends React.Component {
             return null;
         }
         let label = <a className="open-outsource ui green button"
-                       onClick={this.openOutsourceModal.bind(this, false)}>
+                       onClick={this.openOutsourceModal.bind(this, false, true)}>
            Outsource
         </a>;
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 label = <a className="open-outsourced ui button "
-                           onClick={this.openOutsourceModal.bind(this, false)}>
+                           onClick={this.openOutsourceModal.bind(this, false, true)}>
                     View status
                 </a>;
             } else {
                 label = <a className="open-outsource ui green button"
-                           onClick={this.openOutsourceModal.bind(this, false)}>
+                           onClick={this.openOutsourceModal.bind(this, false, true)}>
                     Outsource
                 </a>;
             }
@@ -494,7 +496,7 @@ class JobContainer extends React.Component {
                                 </div>;
         } else {
             outsourceJobLabel = <div className="job-to-translator" data-variation="tiny">
-                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this, true)}>Assign job to translator</a>
+                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this, true, false)}>Assign job to translator</a>
             </div>;
         }
         return outsourceJobLabel;
@@ -728,6 +730,7 @@ class JobContainer extends React.Component {
                                 job={this.props.job}
                                 url={this.getTranslateUrl()}
                                 showTranslatorBox={this.state.showTranslatorBox}
+                                extendedView={this.state.extendedView}
                                 onClickOutside={this.openOutsourceModal.bind(this)}
                                 openOutsource={this.state.openOutsource}
                                 idJobLabel={idJobLabel}/>

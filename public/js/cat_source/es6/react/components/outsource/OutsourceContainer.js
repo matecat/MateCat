@@ -1,6 +1,7 @@
 let OutsourceConstants = require('../../constants/OutsourceConstants');
 let AssignToTranslator = require('./AssignToTranslator').default;
 let OutsourceVendor = require('./OutsourceVendor').default;
+let OpenJobBox = require('./OpenJobBox').default;
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 
@@ -57,7 +58,8 @@ class OutsourceContainer extends React.Component {
     }
 
     render() {
-        let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') : ((this.props.showTranslatorBox) ? 'showTranslator' : 'showOutsource');
+        let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') :
+            ((this.props.showTranslatorBox) ? 'showTranslator' : ((this.props.showOpenBox)? 'showOpenBox': 'showOutsource') );
 
         return <CSSTransitionGroup component="div" className="ui grid"
                                    transitionName="transitionOutsource"
@@ -88,13 +90,20 @@ class OutsourceContainer extends React.Component {
                     <div className="sixteen wide column shadow-1">
                         <div className="ui grid"
                         ref={(container) => this.container = container}>
-                                {(this.props.showTranslatorBox) ? (
+                                {(this.props.showTranslatorBox ) ? (
                                     <AssignToTranslator job={this.props.job}
                                                         url={this.props.url}
-                                                        project={this.props.project}/>
+                                                        project={this.props.project}
+                                                        showOpenBox={this.props.showOpenBox}/>
                                 ) : (null)}
 
-                                {(this.props.showTranslatorBox && config.enable_outsource) ? (
+                                {(this.props.showOpenBox ) ? (
+                                    <OpenJobBox job={this.props.job}
+                                                url={this.props.url}
+                                                project={this.props.project}/>
+                                ) : (null)}
+
+                                {( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
                                     <div className="divider-or sixteen wide column">
                                         <div className="or">
                                             OR
@@ -104,7 +113,7 @@ class OutsourceContainer extends React.Component {
                                 {config.enable_outsource ? (
                                     <OutsourceVendor project={this.props.project}
                                                      job={this.props.job}
-                                                     extendedView={!this.props.showTranslatorBox}/>
+                                                     extendedView={this.props.extendedView}/>
                                 ) :(null)}
 
                         </div>
@@ -115,7 +124,9 @@ class OutsourceContainer extends React.Component {
     }
 }
 OutsourceContainer.defaultProps = {
-    showTranslatorBox: true
+    showTranslatorBox: true,
+    extendedView: true,
+    showOpenBox: false
 };
 
 export default OutsourceContainer ;

@@ -13,12 +13,31 @@ class OutsourceVendor extends React.Component {
             revision: true,
             chunkQuote: null,
             extendedView: this.props.extendedView,
-            timezone: $.cookie( "matecat_timezone")
+            timezone: $.cookie( "matecat_timezone"),
+            changeRates: $.parseJSON( $.cookie( "matecat_changeRates"))
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
             this.getOutsourceQuote();
         }
+        this.getChangeRates();
+
+        this.currencies = {
+            "EUR" : { symbol :"€", name:'Euro (EUR)' },
+            "USD" : { symbol :"US$", name:'US dollar (USD)' },
+            "AUD" : { symbol :"$", name:'Australian dollar (AUD)' },
+            "CAD" : { symbol :"$", name:'Canadian dollar (CAD)' },
+            "NZD" : { symbol :"$", name:'New Zealand dollar (NZD)' },
+            "GBP" : { symbol :"£", name:'Pound sterling (GBP)' },
+            "BRL" : { symbol :"R$", name:'Real (BRL)' },
+            "RUB" : { symbol :"руб", name:'Russian ruble (RUB)' },
+            "SEK" : { symbol :"kr", name:'Swedish krona (SEK)' },
+            "CHF" : { symbol :"Fr.", name:'Swiss franc (CHF)' },
+            "TRY" : { symbol :"TL", name:'Turkish lira (TL)' },
+            "KRW" : { symbol :"￦", name:'Won (KRW)' },
+            "JPY" : { symbol :"￥", name:'Yen (JPY)' },
+            "PLN" : { symbol :"zł", name:'Złoty (PLN)' }
+        };
     }
 
     getOutsourceQuote(delivery) {
@@ -26,27 +45,55 @@ class OutsourceVendor extends React.Component {
         let typeOfService = this.state.revision ? "premium" : "professional";
         let fixedDelivery =  (delivery) ? delivery : "";
         let timezoneToShow = this.state.timezone;
-        UI.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService, timezoneToShow).done(function (quoteData) {
-            if (quoteData.data) {
+        let currency = this.getCurrentCurrency();
+        API.OUTSOURCE.getOutsourceQuote(this.props.project.get('id'), this.props.project.get('password'),
+            this.props.job.get('id'), this.props.job.get('password'), fixedDelivery, typeOfService, timezoneToShow, currency)
+            .done(function (quoteData) {
+                if (quoteData.data) {
 
-                self.quoteResponse = quoteData.data[0];
-                let chunk = Immutable.fromJS(quoteData.data[0][0]);
+                    self.quoteResponse = quoteData.data[0];
+                    let chunk = Immutable.fromJS(quoteData.data[0][0]);
 
-                self.url_ok = quoteData.return_url.url_ok;
-                self.url_ko = quoteData.return_url.url_ko;
-                self.confirm_urls = quoteData.return_url.confirm_urls;
-                self.data_key = chunk.get('id');
+                    self.url_ok = quoteData.return_url.url_ok;
+                    self.url_ko = quoteData.return_url.url_ko;
+                    self.confirm_urls = quoteData.return_url.confirm_urls;
+                    self.data_key = chunk.get('id');
 
-                self.setState({
-                    outsource: true,
-                    chunkQuote: chunk
-                });
+                    self.setState({
+                        outsource: true,
+                        chunkQuote: chunk
+                    });
 
-                // Intercom
-                $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
+                    // Intercom
+                    $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
 
             }
         });
+    }
+
+    getCurrentCurrency() {
+        let currency = $.cookie( "matecat_currency");
+        if (!_.isUndefined(currency)) {
+            return currency;
+        } else {
+            $.cookie( "matecat_currency", 'EUR');
+            return 'EUR';
+        }
+    }
+
+    getPriceCurrencySymbol() {
+        if (this.state.outsource) {
+            let currency = this.state.chunkQuote.get('currency');
+            return this.currencies[currency].symbol;
+        } else {
+            return "";
+        }
+    }
+
+    getCurrencyPrice(price) {
+        let current = this.getCurrentCurrency();
+        return parseFloat(price * this.state.changeRates[current]/this.state.changeRates['EUR'])
+            .toFixed(2);
     }
 
     changeTimezone(value) {
@@ -56,10 +103,31 @@ class OutsourceVendor extends React.Component {
         });
     }
 
-    sendOutsource() {
-        let typeOfService = this.state.revision ? "premium" : "professional";
+    getChangeRates() {
+        let self = this;
+        let changeRates = $.cookie( "matecat_changeRates");
+        if( _.isUndefined(changeRates)) {
+            API.OUTSOURCE.fetchChangeRates().done(function (response) {
+                self.setState({
+                    changeRates: response.data
+                });
+                $.cookie( "matecat_changeRates", $.parseJSON( response.data ) , { expires: 1 });
+            });
+        }
+    }
 
-        this.quoteResponse[0].typeOfService = typeOfService;
+    onCurrencyChange(value) {
+        $.cookie("matecat_currency", value);
+        let quote = this.state.chunkQuote.set('currency', value);
+        this.setState({
+            chunkQuote: quote
+        });
+    }
+
+
+    sendOutsource() {
+
+        this.quoteResponse[0] = this.state.chunkQuote;
 
 
         $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
@@ -76,9 +144,13 @@ class OutsourceVendor extends React.Component {
     }
 
     clickRevision() {
+        let service = (this.revisionCheckbox.checked) ? 'premium' : 'professional';
+        let quote = this.state.chunkQuote.set('typeOfService', service);
         this.setState({
+            chunkQuote: quote,
             revision: this.revisionCheckbox.checked
         });
+
     }
 
     getDeliveryDate() {
@@ -95,12 +167,14 @@ class OutsourceVendor extends React.Component {
     }
 
     getPrice() {
+        let price;
         if (this.state.outsource) {
             if (this.state.revision) {
-                return parseFloat(parseFloat(   this.state.chunkQuote.get('r_price') ) + parseFloat(   this.state.chunkQuote.get('price') )).toFixed( 2);
+                price = parseFloat(parseFloat(   this.state.chunkQuote.get('r_price') ) + parseFloat(   this.state.chunkQuote.get('price') ));
             } else {
-                return   this.state.chunkQuote.get('price');
+                price = parseFloat(this.state.chunkQuote.get('price'))
             }
+            return this.getCurrencyPrice(parseFloat(price));
         }
     }
 
@@ -138,6 +212,7 @@ class OutsourceVendor extends React.Component {
     getExtendedView() {
         let delivery = this.getDeliveryDate();
         let price = this.getPrice();
+        let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let translatedWords = this.getTranslatedWords();
         let translatorSubjects = this.getTranslatorSubjects();
         let pricePWord = this.getPricePW(price);
@@ -197,7 +272,9 @@ class OutsourceVendor extends React.Component {
                                 <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
                             </div>
                         </div>
-                        <div className="job-price">€{this.state.chunkQuote.get('price')}</div>
+                        <div className="job-price">
+                            {priceCurrencySymbol}
+                            {this.getCurrencyPrice(this.state.chunkQuote.get('price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
                     </div>
                     <div className="revision-box">
                         <div className="add-revision">
@@ -208,7 +285,9 @@ class OutsourceVendor extends React.Component {
                                 <label>Add Revision</label>
                             </div>
                         </div>
-                        <div className="job-price">€{this.state.chunkQuote.get('r_price')}</div>
+                        <div className="job-price">
+                            {priceCurrencySymbol}
+                            {this.getCurrencyPrice(this.state.chunkQuote.get('r_price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
                     </div>
                     <div className="delivery-order">
                         <div className="delivery-box">
@@ -229,7 +308,7 @@ class OutsourceVendor extends React.Component {
                     <div className="order-box-outsource">
                         <div className="order-box">
                             <div className="outsource-price">
-                                €{price}
+                                {priceCurrencySymbol} {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
                             </div>
                             <div className="select-value">
                                 {/*<a className="value">about €{pricePWord} / word</a>*/}
@@ -237,7 +316,7 @@ class OutsourceVendor extends React.Component {
                                     <div className="content">
                                         <div className="ui inline dropdown"
                                             ref={(select) => this.currencySelect = select}>
-                                            <a className="text value">about €{pricePWord} / word</a>
+                                            <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
                                             <i className="dropdown icon"/>
                                             <div className="menu">
                                                 <div className="header">Select Currency</div>
@@ -284,6 +363,7 @@ class OutsourceVendor extends React.Component {
     getCompactView() {
         let delivery = this.getDeliveryDate();
         let price = this.getPrice();
+        let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor-reduced sixteen wide column">
             {this.state.outsource ? (
@@ -320,15 +400,15 @@ class OutsourceVendor extends React.Component {
                     <div className="order-box-outsource">
                         <div className="order-box">
                             <div className="outsource-price">
-                                €{price}
+                                {priceCurrencySymbol} {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
                             </div>
                             <div className="select-value">
                                 <h4 className="ui header">
                                     <div className="content">
                                         <div className="ui inline dropdown"
                                              ref={(select) => this.currencySelect = select}>
-                                            <a className="text value">about €{pricePWord} / word</a>
-                                            <i className="dropdown icon"></i>
+                                            <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
+                                            <i className="dropdown icon"/>
                                             <div className="menu">
                                                 <div className="header">Select Currency</div>
                                                 <div className="divider"/>
@@ -370,9 +450,7 @@ class OutsourceVendor extends React.Component {
         return { __html: string };
     }
 
-    componentDidMount () {
-
-    }
+    componentDidMount () {}
 
     componentWillUnmount() {
         $(this.dateFaster).datetimepicker('destroy');
@@ -402,7 +480,13 @@ class OutsourceVendor extends React.Component {
                 }
             });
 
-            $(this.currencySelect).dropdown();
+            let currencyToShow = $.cookie( "matecat_currency" );
+            $(this.currencySelect).dropdown('set selected', currencyToShow);
+            $(this.currencySelect).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.onCurrencyChange(value)
+                }
+            });
         }
         $(this.rating).rating('disable');
     }

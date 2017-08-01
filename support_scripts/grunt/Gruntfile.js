@@ -339,8 +339,8 @@ module.exports = function(grunt) {
             manage: {
                 src: [
                     basePath + 'manage.js',
-                    basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js',
+                    // basePath + 'forcedelivery.js',
+                    // basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
