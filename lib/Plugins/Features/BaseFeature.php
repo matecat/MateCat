@@ -17,6 +17,8 @@ abstract class BaseFeature  {
 
     private $logger_name ;
 
+    protected $autoActivateOnProject = true ;
+
     /**
      * Warning: passing a $projectStructure prevents the possibility to pass
      * a persisted project in the future. TODO: this is likely to be reworked
@@ -30,6 +32,10 @@ abstract class BaseFeature  {
     public function __construct( BasicFeatureStruct $feature ) {
         $this->feature = $feature ;
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
+    }
+
+    public function autoActivateOnProject() {
+        return $this->autoActivateOnProject ;
     }
 
     // gets a feature specific logger
@@ -59,4 +65,7 @@ abstract class BaseFeature  {
         return static::getClassPath() . '/View' ;
     }
 
+    public function getFeatureStruct() {
+        return $this->feature ;
+    }
 }

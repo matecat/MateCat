@@ -145,6 +145,7 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $features = [];
+
         if( !empty( $this->projectStructure[ 'project_features' ] ) ){
             foreach( $this->projectStructure[ 'project_features' ] as $key => $feature ){
                 /**
@@ -157,8 +158,8 @@ class ProjectManager {
 
         $this->features = new FeatureSet( $features );
 
-        if ( !empty( $this->projectStructure['id_customer']) ) {
-           $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
+        if ( !empty( $this->projectStructure['id_customer'] ) ) {
+           $this->features->loadAutoActivablesOnProject( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure['array_files'] = $this->features->filter(
@@ -240,10 +241,12 @@ class ProjectManager {
      * 
      */
     private function saveMetadata() {
-        /// TODO: before this is processed we need to add dependencies of features for the project, for instance
-        /// we must set review_improved in case DQF is enabled and active for the current project.
         $options = $this->projectStructure['metadata'];
 
+        /**
+         * Here we have the opportunity to add other features as dependencies of the ones
+         * which are already explicitly set.
+         */
         $this->features->loadProjectDependenciesFromProjectMetadata( $options ) ;
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
@@ -255,7 +258,10 @@ class ProjectManager {
         }
 
         $dao = new Projects_MetadataDao();
-        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
+        $dao->set( $this->projectStructure['id_project'],
+                Projects_MetadataDao::FEATURES_KEY,
+                implode(',', $this->features->getCodes() )
+        );
 
         foreach( $options as $key => $value ) {
             $dao->set(

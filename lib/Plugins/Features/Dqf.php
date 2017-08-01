@@ -25,6 +25,8 @@ class Dqf extends BaseFeature {
 
     const FEATURE_CODE = 'dqf' ;
 
+    protected $autoActivateOnProject = false ;
+
     public static $dependencies = [
             Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS
     ] ;
@@ -127,8 +129,8 @@ class Dqf extends BaseFeature {
     }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
-        if ( isset( $postInput[ 'dqf' ] ) && $postInput['dqf'] == true ) {
-            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]);
+        if ( isset( $postInput[ 'dqf' ] ) && $postInput[ 'dqf' ] == true ) {
+            $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
     }

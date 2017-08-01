@@ -29,12 +29,12 @@ class createProjectController extends ajaxController {
     /**
      * @var FeatureSet
      */
-    private $system_wide_features ;
+    private $systemWideFeatures ;
 
     /**
      * @var FeatureSet
      */
-    private $project_features;
+    private $projectFeatures ;
 
     public function __construct() {
 
@@ -173,13 +173,13 @@ class createProjectController extends ajaxController {
         // change project features
 
         if( !empty( $__postInput[ 'project_completion' ] ) ){
-            $feature = new BasicFeatureStruct();
-            $feature->feature_code = 'project_completion';
-            $this->project_features[] = $feature;
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = 'project_completion';
+            $this->projectFeatures[] = $feature;
         }
 
-        $this->project_features = $this->system_wide_features->filter(
-                'filterCreateProjectFeatures', $this->project_features, $__postInput
+        $this->projectFeatures = $this->systemWideFeatures->filter(
+                'filterCreateProjectFeatures', $this->projectFeatures, $__postInput
         ) ;
     }
 
@@ -342,7 +342,7 @@ class createProjectController extends ajaxController {
         }
 
         //set features override
-        $projectStructure[ 'project_features' ] = $this->project_features;
+        $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
@@ -364,13 +364,11 @@ class createProjectController extends ajaxController {
      * Loads current features from current logged user.
      */
     private function setupSystemWideFeatures() {
-        $this->system_wide_features = new FeatureSet() ;
+        $this->systemWideFeatures = new FeatureSet() ;
 
         if ( $this->userIsLogged ) {
-            $this->system_wide_features->loadFromUserEmail( $this->logged_user->email ) ;
+            $this->systemWideFeatures->loadFromUserEmail( $this->logged_user->email ) ;
         }
-
-        $this->system_wide_features->loadSystemWideFeatures() ;
     }
 
     private function __addFilterForMetadataInput( $filterArgs ) {
@@ -383,7 +381,7 @@ class createProjectController extends ajaxController {
             ],
         ));
 
-        $filterArgs = $this->system_wide_features->filter( 'filterCreateProjectInputFilters', $filterArgs );
+        $filterArgs = $this->systemWideFeatures->filter( 'filterCreateProjectInputFilters', $filterArgs );
 
         return $filterArgs ;
     }
@@ -458,7 +456,7 @@ class createProjectController extends ajaxController {
 
         $this->metadata = $options ;
 
-        $this->metadata = $this->system_wide_features->filter('createProjectAssignInputMetadata', $this->metadata, array(
+        $this->metadata = $this->systemWideFeatures->filter('createProjectAssignInputMetadata', $this->metadata, array(
             'input' => $__postInput
         ));
     }

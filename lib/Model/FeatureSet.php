@@ -40,15 +40,6 @@ class FeatureSet {
         }
     }
 
-    public function loadSystemWideFeatures() {
-        $features = [];
-        if ( INIT::$DQF_ENABLED ) {
-            // load a special feature to enable side wide features, like parsing and validating input params.
-            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]) ;
-        }
-        $this->features = static::merge( $this->features, $features );
-   }
-
     /**
      * Features are attached to project via project_metadata.
      *
@@ -58,6 +49,9 @@ class FeatureSet {
         $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
     }
 
+    /**
+     * @param $metadata
+     */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
         $project_dependencies = [];
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
@@ -75,6 +69,40 @@ class FeatureSet {
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->features = static::merge( $this->features, $features );
+    }
+
+    /**
+     * Loads features that can be activated automatically on proejct, i.e. those that
+     * don't require a parameter to be passed from the UI.
+     *
+     * This functions does some transformation in order to leverage `autoActivateOnProject()` function
+     * which is defined on the concrete feature class.
+     *
+     * So it does the following:
+     *
+     * 1. find all owner_features for the given user
+     * 2. instantiate a concrete feature class for each record
+     * 3. filter the list based on the return of autoActivateOnProject()
+     * 4. populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
+     *
+     *
+     * @param $id_customer
+     *
+     * @return array
+     */
+    public function loadAutoActivablesOnProject( $id_customer ) {
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $objs = array_map( function( $feature ) {
+            return self::getObj( $feature );
+        }, $features ) ;
+
+        $returnable =  array_filter($objs, function( BaseFeature $obj ) {
+            return $obj->autoActivateOnProject();
+        }) ;
+
+        $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
+            return $feature->getFeatureStruct();
+        }, $returnable ) ) ;
     }
 
     /**
