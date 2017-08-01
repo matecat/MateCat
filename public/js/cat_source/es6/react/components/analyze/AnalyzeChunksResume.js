@@ -75,6 +75,9 @@ class AnalyzeChunksResume extends React.Component {
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
         if (!this.props.jobsAnalysis.isEmpty()) {
             return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
+                if (_.isUndefined(self.props.jobsInfo[indexJob])) {
+                    return;
+                }
                 if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
                     let index = 0;
                     let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
