@@ -87,6 +87,9 @@ class AnalyzeChunksResume extends React.Component {
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
         if (!this.props.jobsAnalysis.isEmpty()) {
             return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
+                if (_.isUndefined(self.props.jobsInfo[indexJob])) {
+                    return;
+                }
                 if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
                     let index = 0;
                     let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
@@ -111,7 +114,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div>{chunk.total_raw_word_count_print}</div>
                                 </div>
                                 <div className="title-standard-words tsw">
-                                    <div>{chunk.total_st_word_count_print}</div>
+                                    <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
                                      ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
@@ -155,10 +158,10 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
+                    let password = Object.keys(obj)[0];
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
-                    let total_standard = self.props.standardWc;
+                    let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
                     let chunkJob = self.props.project.get('jobs').find(function (job) {
                         return job.get('id') == indexJob ;

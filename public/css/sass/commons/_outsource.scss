@@ -392,6 +392,34 @@
                             }
                         }
                     }
+                    .confirm-delivery-input {
+                        position: relative;
+                        top: 31px;
+                        .back, .email-confirm, .input {
+                            display: inline-block;
+                        }
+                        .back {
+                            float: left;
+                            position: relative;
+                            top: 14px;
+                        }
+                        .email-confirm {
+                            padding-right: 15px;
+                        }
+                        input {
+                            min-width: 250px !important;
+                        }
+
+                    }
+                    .confirm-delivery-box {
+                        background: #daefe5;
+                        height: 69px;
+                        padding: 15px;
+                        .confirm-title {
+                            font-size: 19px;
+                            font-weight: 700;
+                        }
+                    }
                 }
                 .order-box-outsource {
                     display: inline-block;
@@ -706,7 +734,7 @@
                     width: 177px;
                     float: right;
                     text-align: center;
-                    margin-top: -53px;
+                    margin-top: -32px;
                     .order-box {
                         background-color: #daeddf;
                         padding: 25px 15px 15px;

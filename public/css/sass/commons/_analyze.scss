@@ -5,6 +5,9 @@ body.analyze{
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
     overflow: visible;
+    header {
+        z-index: 1001 !important;
+    }
 
 }
 
@@ -57,6 +60,7 @@ body.analyze{
                     z-index: 2;
                     left: -45px;
                     max-width: 100%;
+                    min-width: 0;
                     background-color: #d8d8d8;
                     color: #000000;
                     border-radius: 0 2px 2px 0;
@@ -127,7 +131,6 @@ body.analyze{
                             padding-left: 10px;
                             color: #444444;
                             text-decoration: underline;
-                            font-weight: 700;
                             margin-left: 10px;
                             cursor: pointer;
                             &:hover {
@@ -535,7 +538,7 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 40%;
+                    max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
                     white-space: nowrap;
@@ -650,7 +653,7 @@ body.analyze{
             float: left;
             text-align: right;
             font-size: 15px;
-            line-height: 35px;
+            line-height: 30px;
             .single {
                 display: inline-block;
                 width: 8.5%;
@@ -659,7 +662,6 @@ body.analyze{
                 padding: 4px 6px 0px 2px;
                 span {
                     font-size: 13px;
-                    font-weight: 700;
                     vertical-align: top;
                 }
                 &.total {
@@ -737,9 +739,9 @@ body.analyze{
                 margin: 0 auto;
                 position: relative;
                 float: left;
-                text-align: center;
+                text-align: right;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;
@@ -778,7 +780,7 @@ body.analyze{
                 float: left;
                 text-align: center;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;
@@ -818,7 +820,7 @@ body.analyze{
                 float: left;
                 text-align: center;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;
@@ -919,7 +921,6 @@ body.analyze{
                 padding-right: 6px;
             }
             .payable-words {
-                background-color: #f6ffe9;
                 font-weight: 700;
                 transition: 0.3s ease;
                 color: #000000;
