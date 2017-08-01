@@ -135,7 +135,7 @@ class OutsourceVendor extends React.Component {
         let delivery = this.getDeliveryDate();
         let price = this.getPrice();
         let translatedWords = this.getTranslatedWords();
-        let translatorSubjects = this.getTranslatorSubjects();
+        /*let translatorSubjects = this.getTranslatorSubjects();*/
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor sixteen wide column">
             <div className="payment-service">
@@ -158,14 +158,14 @@ class OutsourceVendor extends React.Component {
 
                             <div className="ui list left">
                                 <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
-                                <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
                                 <div className="item">
                                 <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
                                 ref={(rating) => this.rating = rating}/></div>
                             </div>
                             <div className="ui list right">
                                 <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
-                                <div className="item"><b>{translatorSubjects}</b></div>
+                                <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
+                                {/*<div className="item"><b>{translatorSubjects}</b></div>*/}
                              </div>
                         </div>
                         ) : (
