@@ -75,19 +75,111 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
 
 
     public function get( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+
+        $parameters                 = [];
+        $parameters[ 'q' ]          = $_config[ 'segment' ];
+        $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]         = $_config[ 'email' ];
+        $parameters[ 'mt_context' ] = $_config[ 'mt_context' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'keys' ] = implode( ",", $_config[ 'id_user' ] );
+        }
+
+        $function = "translate_relative_url";
+        $this->call( $function, $parameters );
+
+        return $this->result;
+
     }
 
     public function set( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+
+        $parameters               = [];
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+        }
+
+        $this->call( "contribute_relative_url", $parameters );
+
+        if ( $this->result->responseStatus != "200" ) {
+            return false;
+        }
+
+        return true;
+
     }
 
     public function update( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+        }
+
+        $this->call( "update_relative_url", $parameters, true );
+
+        if ( $this->result->responseStatus != "200" ) {
+            return false;
+        }
+
+        return true;
+
     }
 
     public function delete( $_config ) {
         throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+    }
+
+    /**
+     * @param      $file
+     * @param      $key
+     * @param bool $name
+     *
+     * @return mixed
+     */
+    public function import( $file, $key, $name = false ) {
+
+        $postFields = array(
+                'tmx'  => "@" . realpath( $file ),
+                'name' => $name
+        );
+
+        $postFields[ 'key' ] = trim( $key );
+
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
+            /**
+             * Added in PHP 5.5.0 with FALSE as the default value.
+             * PHP 5.6.0 changes the default value to TRUE.
+             */
+            $options[CURLOPT_SAFE_UPLOAD] = false;
+            $this->_setAdditionalCurlParams($options);
+        }
+
+
+        $this->call( "tmx_import_relative_url", $postFields, true );
+
+        return $this->result;
     }
 
     /**
@@ -139,7 +231,19 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         @unlink( $fileName );
         @unlink( "$fileName.gz" );
 
-        return $this->result;
+        if( $this->result->responseStatus != 200 ){
+            throw new RuntimeException( $this->result->responseDetails );
+        }
+
+        $plainContexts = array_fill_keys( array_keys( $this->result->responseData ), null );
+        foreach( $this->result->responseData as $languagePair => $context ){
+            foreach( $context as $contextKey => $contextValue ){
+                $plainContexts[ $languagePair ] .= $contextKey . ":" . $contextValue . ",";
+            }
+            $plainContexts[ $languagePair ] = rtrim( $plainContexts[ $languagePair ], "," );
+        }
+
+        return $plainContexts;
 
     }
 
@@ -201,18 +305,22 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
             case 'api_key_check_auth_url':
             case 'user_update_activate':
             case 'context_get':
-                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded );
+            case 'translate_relative_url':
+            case 'contribute_relative_url':
+            case 'update_relative_url':
+            case 'tmx_import_relative_url':
+                $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
                 break;
             default:
                 //this case should not be reached
-                $result_object = Engines_Results_MMT_TagProjectionResponse::getInstance( array(
-                        'error' => array(
+                $result_object = Engines_Results_MMT_MT::getInstance( [
+                        'error' => [
                                 'code'      => -1100,
                                 'message'   => " Unknown Error.",
                                 'response'  => " Unknown Error." // Some useful info might still be contained in the response body
-                        ),
+                        ],
                         'responseStatus'    => 400
-                ) ); //return generic error
+                ] ); //return generic error
                 break;
         }
 
