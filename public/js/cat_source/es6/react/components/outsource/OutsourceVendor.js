@@ -268,13 +268,12 @@ class OutsourceVendor extends React.Component {
                                 <div className="target-box">{this.props.job.get('targetTxt')}</div>
                             </div>
                             <div className="job-payment">
-                                <div className="not-payable">{this.props.job.get('total_raw_wc')} words</div>
-                                <div className="payable">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</div>
+                                <div className="not-payable">{this.props.standardWC} words</div>
+                                <div className="payable">{this.state.chunkQuote.get('words')} words</div>
                             </div>
                         </div>
                         <div className="job-price">
-                            {priceCurrencySymbol}
-                            {this.getCurrencyPrice(this.state.chunkQuote.get('price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
+                            {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
                     </div>
                     <div className="revision-box">
                         <div className="add-revision">
@@ -286,8 +285,7 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="job-price">
-                            {priceCurrencySymbol}
-                            {this.getCurrencyPrice(this.state.chunkQuote.get('r_price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
+                            {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('r_price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
                     </div>
                     <div className="delivery-order">
                         <div className="delivery-box">

@@ -19,12 +19,15 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     showDetails(idJob, evt) {
-        evt.preventDefault();
-        evt.stopPropagation();
-        AnalyzeActions.showDetails(idJob);
-        this.setState({
-            openDetails: true
-        });
+        if ($(evt.target).parents('.outsource-container').length ===  0) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            AnalyzeActions.showDetails(idJob);
+            this.setState({
+                openDetails: true
+            });
+        }
+
 
     }
     openSplitModal(id,e) {
@@ -128,6 +131,7 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
+                                                standardWC={chunkAnalysis.get('standard_word_count').get(1)}
                                                 url={self.getTranslateUrl(chunkJob, index)}
                                                 showTranslatorBox={false}
                                                 extendedView={true}
@@ -214,6 +218,7 @@ class AnalyzeChunksResume extends React.Component {
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
                                                 url={self.getTranslateUrl(chunkJob)}
+                                                standardWC={total_standard}
                                                 showTranslatorBox={false}
                                                 extendedView={true}
                                                 showOpenBox={true}
