@@ -18,7 +18,6 @@ export default class GMTSelect extends React.Component {
                 if (self.props.changeValue) {
                     self.props.changeValue(value);
                 }
-                $.cookie( "matecat_timezone" , value);
             }
         });
     }
