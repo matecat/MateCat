@@ -35,10 +35,12 @@
         -webkit-transition: all .3s ease;
     }
 
+    /*
     &.showOpenBox.transitionOutsource-enter.transitionOutsource-enter-active {
         height: 732px;
         -webkit-transition: all .3s ease;
     }
+    */
 
     &.transitionOutsource-leave.transitionOutsource-leave-active {
         height: 0px !important;
@@ -171,52 +173,13 @@
             }
         }
     }
-    .open-job-box {
-        background-color: #d5d8dc;
-        padding: 15px;
-        width: 100%;
-        .title {
-            display: inline-block;
-            padding: 15px 15px 15px 30px;
-            font-size: 20px;
-            font-weight: 700;
-            width: 25%;
-            position: relative;
-        }
-        .title-url {
-            padding: 15px;
-            width: 75%;
-            display: inline-block;
-            .job-url {
-                display: inline-block;
-                a {
-                    text-decoration: underline;
-                    font-weight: 700;
-                    font-size: 16px;
-                    &:hover {
-                        text-decoration: none;
-                    }
-                }
-            }
-            .button {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                font-size: 16px;
-                border: 1px solid #797979;
-                border-radius: 2px;
-                padding: 9px 15px;
-                margin: 0;
-                float: right;
-                margin-top: -10px;
-            }
-        }
-    }
-
     .divider-or {
+        position: absolute !important;
+        top: 118px;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         z-index: 1;
         padding-left: 35px !important;
-        height: 0;
         .or {
             width: 30px;
             height: 30px;
@@ -225,8 +188,6 @@
             line-height: 30px;
             border-radius: 50%;
             color: #ffffff;
-            position: absolute;
-            top: -15px;
         }
     }
     .background-outsource-vendor {
