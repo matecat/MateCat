@@ -211,11 +211,22 @@ class getContributionController extends ajaxController {
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
             /**
-             * @var $mt Engines_Moses
+             * @var $mt Engines_MMT
              */
             $mt        = Engine::getInstance( $this->id_mt_engine );
 
             $config = $mt->getConfigStruct();
+
+            if( $mt instanceof Engines_MMT ){
+                $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $this->tm_keys ] );
+                $config[ 'keys' ] = array_map( function( $tm_key ) {
+                    /**
+                     * @var $tm_key TmKeyManagement_MemoryKeyStruct
+                     */
+                    return $tm_key->key;
+                }, $tm_keys );
+            }
+
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
             $config[ 'target' ]  = $this->target;

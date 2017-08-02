@@ -77,20 +77,19 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
     public function get( $_config ) {
 
         $parameters                 = [];
-        $parameters[ 'q' ]          = $_config[ 'segment' ];
+        $parameters[ 'q' ]          = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]         = $_config[ 'email' ];
+        $parameters[ 'de' ]         = $_config[ 'id_user' ];
         $parameters[ 'mt_context' ] = $_config[ 'mt_context' ];
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+        if ( !empty( $_config[ 'keys' ] ) ) {
+            if ( !is_array( $_config[ 'keys' ] ) ) {
+                $_config[ 'keys' ] = array( $_config[ 'keys' ] );
             }
-            $parameters[ 'keys' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters[ 'keys' ] = implode( ",", $_config[ 'keys' ] );
         }
 
-        $function = "translate_relative_url";
-        $this->call( $function, $parameters );
+        $this->call( "translate_relative_url", $parameters );
 
         return $this->result;
 
@@ -302,14 +301,23 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
             case 'tags_projection' :
                 $result_object = Engines_Results_MMT_TagProjectionResponse::getInstance( $decoded );
                 break;
-            case 'api_key_check_auth_url':
             case 'user_update_activate':
             case 'context_get':
-            case 'translate_relative_url':
             case 'contribute_relative_url':
             case 'update_relative_url':
+            case 'api_key_check_auth_url':
             case 'tmx_import_relative_url':
                 $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
+                break;
+            case 'translate_relative_url':
+                $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
+                $result_object = ( new Engines_Results_MyMemory_Matches(
+                        $this->_resetSpecialStrings( $args[ 1 ][ 'q' ] ),
+                        $result_object->translatedText,
+                        100 - $this->getPenalty() . "%",
+                        "MT-" . $this->getName(),
+                        date( "Y-m-d" )
+                ) )->get_as_array();
                 break;
             default:
                 //this case should not be reached

@@ -363,6 +363,7 @@ class engineController extends ajaxController {
             $engine_test = Engine::getInstance( $result->id );
             $engine_test->wakeUp();
         } elseif( $newEngine instanceof EnginesModel_MMTStruct ){
+
             $engine_test = Engine::getInstance( $result->id );
             /**
              * @var $engine_test Engines_MMT

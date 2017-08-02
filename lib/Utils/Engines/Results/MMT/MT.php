@@ -6,7 +6,7 @@
  * @property string responseData
  * @property string responseStatus
  * @property mixed  translatedText
- * @property string error
+ * @property Engines_Results_ErrorMatches error
  */
 class Engines_Results_MMT_MT extends Engines_Results_AbstractResponse {
 
