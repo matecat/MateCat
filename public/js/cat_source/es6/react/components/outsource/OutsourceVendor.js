@@ -306,16 +306,16 @@ class OutsourceVendor extends React.Component {
                         </div>
                         <div className="confirm-delivery-input">
                             <div className="back">
-                                <a href="#"><i className="icon-chevron-left icon"></i> Back </a>
+                                <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
                             </div>
                             <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
                             <div className="ui input">
-                                <input type="text" placeholder="ruben.santillan@translated.net" />
+                                <input type="text" placeholder="ruben.santillan@translated.net" value="ruben.santillan@translated.net" />
                             </div>
 
                         </div>
                         {/*<div className="confirm-delivery-box">
-                            <h5 className="confirm-title">Order sent correctly</h5>
+                            <div className="confirm-title">Order sent correctly</div>
                             <p>Thank you for choosing our Outsource service<br />
                                 You will soon be contacted by a Account Manager to send you an invoice</p>
                         </div>*/}

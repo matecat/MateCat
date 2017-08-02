@@ -22,10 +22,9 @@ class OpenJobBox extends React.Component {
             <div className="title">
                 Open job
             </div>
-            <div className="title-url ui grid">
+            <div className="title-url">
                 <div className="job-url">
-                    <a href={window.location.protocol + '//' + window.location.host + this.props.url} target="_blank">
-                        {window.location.protocol + '//' + window.location.host + this.props.url}</a>
+                    {window.location.protocol + '//' + window.location.host + this.props.url}
                 </div>
                 <button className="ui primary button"
                         onClick={this.openJob.bind(this)}
