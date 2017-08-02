@@ -129,7 +129,7 @@ class OutsourceVendor extends React.Component {
 
     sendOutsource() {
 
-        this.quoteResponse[0] = this.state.chunkQuote;
+        this.quoteResponse[0] = this.state.chunkQuote.toJS();
 
 
         $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
@@ -143,6 +143,7 @@ class OutsourceVendor extends React.Component {
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', JSON.stringify( this.quoteResponse ) );
         $(this.outsourceForm).submit();
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', '' );
+        $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );
     }
 
     clickRevision() {
@@ -298,11 +299,11 @@ class OutsourceVendor extends React.Component {
                             <div className="gmt">
                                 <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                             </div>
-                            {/*<div className="need-it-faster">
-                                <a className="faster"
-                                   ref={(faster) => this.dateFaster = faster}
-                                >Need it faster?</a>
-                            </div>*/}
+                            {/*<div className="need-it-faster">*/}
+                                {/*<a className="faster"*/}
+                                   {/*ref={(faster) => this.dateFaster = faster}*/}
+                                {/*>Need it faster?</a>*/}
+                            {/*</div>*/}
                         </div>
                         <div className="confirm-delivery-input">
                             <div className="back">
@@ -357,8 +358,8 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            {/*<a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</a>*/}
-                            <a className="open-order ui green button">Confirm</a>
+                            {/*<a className="open-order ui green button" >Order now</a>*/}
+                            <a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</a>
                         </div>
                     </div>
                 </div>
