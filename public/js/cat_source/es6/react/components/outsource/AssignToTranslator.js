@@ -33,11 +33,8 @@ class AssignToTranslator extends React.Component {
         }
     }
 
-   /* allowHTML(string) {
-        return { __html: string };
-    }*/
-
     componentDidMount () {
+        let self = this;
         $(this.dateInput).datetimepicker({
             step:30,
             validateOnBlur: false,
@@ -48,6 +45,7 @@ class AssignToTranslator extends React.Component {
                 let dateString = date.day + ' ' + date.month + ' ' + date.year + ' at ' + date.time ;
                 $input.val(dateString);
                 $input.data('timestamp', new Date(newDateTime).getTime());
+                self.checkSendToTranslatorButton();
             }
         });
     }
@@ -88,7 +86,8 @@ class AssignToTranslator extends React.Component {
                                     <div className="field">
                                         <label>Delivery date</label>
                                         <input id="date-picker-translator" type="text" placeholder="Date" defaultValue={date}
-                                               ref={(date) => this.dateInput = date}/>
+                                               ref={(date) => this.dateInput = date}
+                                               onChange={this.checkSendToTranslatorButton.bind(this)}/>
                                     </div>
                                     <div className="field gmt">
                                         <GMTSelect changeValue={this.GmtSelectChanged.bind(this)}/>

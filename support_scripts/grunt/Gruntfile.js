@@ -340,7 +340,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'manage.js',
                     // basePath + 'forcedelivery.js',
-                    // basePath + 'outsource.js',
+                    basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
@@ -349,7 +349,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'analyze_old.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js',
+                    basePath + 'outsource_old.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze_old.js'
@@ -357,7 +357,7 @@ module.exports = function(grunt) {
             analyze_new: {
                 src: [
                     basePath + 'analyze.js',
-                    basePath + 'forcedelivery.js',
+                    // basePath + 'forcedelivery.js',
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],

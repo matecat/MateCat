@@ -409,7 +409,7 @@ class OutsourceVendor extends React.Component {
                             <span>at</span>
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
-                                <GMTSelect direction="up"/>
+                                <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
                             </div>
                         </div>
                     </div>
