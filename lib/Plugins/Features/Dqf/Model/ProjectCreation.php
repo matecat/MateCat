@@ -172,7 +172,8 @@ class ProjectCreation {
         $dao->insertBulkMap( array_map(function( $item ) {
             return [
                     Functions::descope($item['clientId']),
-                    $item['dqfId']
+                    $item['dqfId'],
+                    null
             ];
         }, $segmentList ) ) ;
     }

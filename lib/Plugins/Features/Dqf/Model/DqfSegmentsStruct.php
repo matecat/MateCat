@@ -12,5 +12,6 @@ use DataAccess_AbstractDaoSilentStruct;
 
 class DqfSegmentsStruct extends DataAccess_AbstractDaoSilentStruct {
     public $id_segment ;
-    public $id_dqf_segment ;
+    public $dqf_segment_id ;
+    public $dqf_translation_id ;
 }

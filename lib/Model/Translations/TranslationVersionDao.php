@@ -21,6 +21,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      */
     public function getExtendedTranslationByFile( $file, $since, $min, $max ) {
 
+        Log::doLog('getExtendedTranslationByFile', func_get_args() ) ;
+
         $sql = "SELECT
 
                 s.id_file,
@@ -30,10 +32,12 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 st.autopropagated_from,
                 st.time_to_edit,
                 st.translation,
+                st.version_number AS current_version,
 
                 stv.creation_date,
                 stv.translation AS versioned_translation,
-                stv.time_to_edit AS versioned_time_to_edit
+                stv.time_to_edit AS versioned_time_to_edit,
+                stv.version_number
 
                 FROM segment_translations st JOIN segments s ON s.id = st.id_segment
                   LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
@@ -55,37 +59,23 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 'max'     => $max
         ]) ;
 
-        $result             = [] ;
-        $current_segment    = null ;
-        $time               = 0 ;
-        $translation_before = '' ;
+        /** @var ExtendedTranslationStruct[] $result */
+        $result = [] ;
 
-        while( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
-            if ( !is_null( $current_segment ) && $row['id'] != $current_segment ) {
-
-                /**
-                 * Close the iteration: assign the row to the result and reset the variables
-                 */
-
-                $result[] = new ExtendedTranslationStruct([
-                                'id_job'             => $row['id_job'],
-                                'id_segment'         => $row['id'],
-                                'time'               => $time + $row['time_to_edit'],
-                                'translation_before' => $translation_before,
-                                'translation_after'  => $row['translation']
-                        ]);
-
-                $time = 0  ;
-                $translation_before = '' ;
+        while( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ) {
+            if ( isset( $result[ $row['id'] ] ) ) {
+                continue ;
             }
-
-            if ( $translation_before != '' ) {
-                // we are in the first iteration of a segment
-                $time = $time + $row['versioned_time_to_edit'] ;
+            else {
+                $result[ $row['id'] ] = new ExtendedTranslationStruct([
+                        'id_job'             => $row['id_job'],
+                        'id_segment'         => $row['id'],
+                        'translation_before' => is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'],
+                        'translation_after'  => $row['translation'],
+                        'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 ),
+                        'suggestion_match'   => null, // $row['suggestion_match']
+                ]) ;
             }
-
-            $translation_before = ( is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'] ) ;
-            $current_segment    = $row['id'] ;
         }
 
         return $result ;

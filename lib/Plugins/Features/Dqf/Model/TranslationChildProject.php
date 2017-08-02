@@ -195,7 +195,7 @@ class TranslationChildProject {
             $remoteFileId = $this->_findRemoteFileId( $file );
 
             foreach ( $dqfChildProjects as $dqfChildProject ) {
-                $dao   = new Translations_TranslationVersionDao();
+                $dao = new Translations_TranslationVersionDao();
                 $translations = $dao->getExtendedTranslationByFile(
                         $file,
                         $dqfChildProject->create_date,  // <--- TODO: check if this is correct
@@ -209,7 +209,7 @@ class TranslationChildProject {
                     // Using a struct and converting it to array immediately allows us to validate the
                     // input array.
                     $segmentPairs[] = ( new SegmentPairStruct([
-                            "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ],
+                            "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ]['dqf_segment_id'],
                             "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,

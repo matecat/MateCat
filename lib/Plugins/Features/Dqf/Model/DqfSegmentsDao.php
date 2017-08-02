@@ -31,7 +31,7 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * Returns a map that is an array whith key = id_segment and value = id_dqf_segment ;
+     * Returns a map that is an array whith key = id_segment and value = dqf_id_seg ;
      *
      * @param $min
      * @param $max
@@ -49,7 +49,10 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
 
         $result = [] ;
         while( $row = $stmt->fetch() ) {
-            $result[ $row->id_segment ] = $row->id_dqf_segment ;
+            $result[ $row->id_segment ] = [
+                    'dqf_segment_id'     => $row->dqf_segment_id,
+                    'dqf_translation_id' => $row->dqf_translation_id
+            ];
         }
 
         return $result ;
@@ -60,8 +63,8 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
      * @param array $structs
      */
     public function insertBulkMap( array $structs ) {
-        $sql = " INSERT INTO dqf_segments VALUES " ;
-        $sql .= implode(', ', array_fill( 0, count( $structs ), " ( ?, ? ) " ) );
+        $sql = " INSERT INTO dqf_segments (id_segment, dqf_segment_id, dqf_translation_id) VALUES " ;
+        $sql .= implode(', ', array_fill( 0, count( $structs ), " ( ?, ?, ? ) " ) );
 
         $conn = $this->getConnection()->getConnection() ;
 
