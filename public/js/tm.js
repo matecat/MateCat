@@ -108,7 +108,27 @@
                 if($(this).hasClass('disabled')) return false;
                 var provider = $("#mt_engine_int").val();
                 var providerName = $("#mt_engine_int option:selected").text();
-                UI.addMTEngine(provider, providerName);
+                if (provider === 'mmt') {
+                    var props = {
+                        modalName: 'mmt-message-modal',
+                        text: 'MMT is an adaptive machine translation system that learns from your translation memories ' +
+                        'and corrections. To provide the best results,<strong>the following data will be synchronised with your ' +
+                        'private MMT engine</strong>: <ul><li>Private translation memories uploaded to MateCat</li><li>All segments translated or revised in MateCat </li></ul>' +
+                        'To stop data from being synchronised, please delete the MMT engine from your list of available engines in MateCat.',
+                        successText: "Continue",
+                        successCallback: function() {
+                            UI.addMTEngine(provider, providerName);
+                            APP.ModalWindow.onCloseModal();
+                        },
+                        warningText: 'Cancel',
+                        warningCallback: function() {
+                            APP.ModalWindow.onCloseModal();
+                        }
+                    };
+                    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
+                } else {
+                    UI.addMTEngine(provider, providerName);
+                }
             });
             $('#add-mt-provider-cancel').click(function(e) {
                 console.log('clicked add-mt-provider-cancel');
@@ -1446,7 +1466,7 @@
                 success: function(d) {
                     if(d.errors.length) {
                         console.log('error');
-                        $('#mt-provider-details .error').text(d.errors[0].message);
+                        $('#mt-provider-details .mt-error-key').text("API key non valid").show();
                     } else {
                         if(d.data.config && Object.keys(d.data.config).length) {
                             UI.renderMTConfig(provider, d.name, d.data.config);
