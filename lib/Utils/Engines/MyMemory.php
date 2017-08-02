@@ -7,7 +7,7 @@
  * Time: 18.53
  *
  */
-class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_MyMemory extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'       => null,

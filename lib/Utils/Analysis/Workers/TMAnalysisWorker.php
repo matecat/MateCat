@@ -440,6 +440,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
             try {
                 $mt     = \Engine::getInstance( $id_mt_engine );
+
+                //tell to the engine that this is the analysis phase ( some engines want to skip the analysis )
+                $mt->setAnalysis();
+
                 $config = $mt->getConfigStruct();
                 $config = array_merge( $config, $_config );
 

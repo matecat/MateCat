@@ -16,7 +16,7 @@
  * @property string   client_id
  * @property string   client_secret
  */
-class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_MicrosoftHub extends Engines_AbstractEngine {
 
     use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
 

@@ -42,4 +42,9 @@ interface Engines_EngineInterface {
      */
     public function getConfigStruct();
 
+    /**
+     * @return Engines_EngineInterface
+     */
+    public function setAnalysis();
+
 }

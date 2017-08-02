@@ -7,7 +7,7 @@
  * Time: 11.59
  *
  */
-abstract class Engines_AbstractEngine {
+abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @var EnginesModel_EngineStruct
@@ -46,9 +46,12 @@ abstract class Engines_AbstractEngine {
 
     /**
      * @param bool $bool
+     *
+     * @return $this
      */
     public function setAnalysis( $bool = true ){
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
+        return $this;
     }
 
     /**
@@ -187,17 +190,7 @@ abstract class Engines_AbstractEngine {
     public function call( $function, Array $parameters = array(), $isPostRequest = false, $isJsonRequest = false ) {
 
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-            $this->result = [
-                    "responseData" => [
-                            "translatedText" => null,
-                            "match" => null,
-                            "quotaFinished" => false,
-                            "responseDetails" => "",
-                            "responseStatus" => 200,
-                            "responderId" => "0",
-                            "matches" => []
-                    ]
-            ];
+            $this->result = [];
             return;
         }
 

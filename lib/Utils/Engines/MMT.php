@@ -6,7 +6,7 @@
  * Date: 17/05/16
  * Time: 13:11
  */
-class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_MMT extends Engines_AbstractEngine {
 
     protected $_config = array(
             'source'      => null,
@@ -79,8 +79,8 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         $parameters                 = [];
         $parameters[ 'q' ]          = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]         = $_config[ 'id_user' ];
-        $parameters[ 'mt_context' ] = $_config[ 'mt_context' ];
+        $parameters[ 'de' ]         = @$_config[ 'id_user' ];
+        $parameters[ 'mt_context' ] = @$_config[ 'mt_context' ];
 
         if ( !empty( $_config[ 'keys' ] ) ) {
             if ( !is_array( $_config[ 'keys' ] ) ) {

@@ -8,7 +8,7 @@
  * Time: 12.10
  *
  */
-class Engines_SmartMATE extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_SmartMATE extends Engines_AbstractEngine {
 
     use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
 
