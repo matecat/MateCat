@@ -53,6 +53,7 @@
         .ui.selection.dropdown {
             min-width: 40px !important;
             width: auto;
+            background: transparent;
             .text {
                 .gmt-description {
                     display: none;
@@ -93,17 +94,18 @@
     }
 
     .assign-job-translator {
-        background-color: #d5d8dc;
-        padding: 15px;
+        background-color: #d3dde3;
+        padding: 15px 15px 30px;
         width: 100%;
+        cursor: auto;
         .title {
             display: inline-block;
-            padding: 15px 15px 15px 30px;
-            font-size: 20px;
+            padding: 5px 15px 5px 30px;
+            font-size: 22px;
             font-weight: 700;
             width: 25%;
             position: relative;
-            top: -38px;
+            top: 33px;
         }
         .title-url {
             padding: 15px;
@@ -228,10 +230,11 @@
         }
     }
     .background-outsource-vendor {
-        background: #e9efec;
+        background: #f0f9f5;
         width: 100%;
         padding-bottom: 15px;
         padding-top: 15px;
+        cursor: auto;
         .outsource-to-vendor {
             .payment-service {
                 padding: 5px 15px 15px;
@@ -276,7 +279,7 @@
                 background-color: #ffffff;
                 padding: 15px;
                 position: relative;
-                min-height: 270px;
+                min-height: 255px;
                 .translator-job-details {
                     padding-bottom: 10px;
                     .translator-details-box {
@@ -319,7 +322,6 @@
                         vertical-align: middle;
                         padding: 0 15px;
                         position: relative;
-                        top: -9px;
                         .source-target-outsource {
                             display: inline-block;
                             width: 65%;
@@ -347,10 +349,13 @@
                             .not-payable {
                                 text-decoration: line-through;
                                 font-size: 16px;
+                                display: inline-block;
+                                margin-right: 5px;
                             }
                             .payable {
                                 font-size: 18px;
                                 font-weight: 700;
+                                display: inline-block;
                             }
                         }
                     }
@@ -361,6 +366,7 @@
                         padding-right: 15px;
                         font-size: 20px;
                         font-weight: 700;
+                        vertical-align: middle;
                     }
                 }
                 .revision-box {
@@ -430,6 +436,34 @@
                                     text-decoration: none;
                                 }
                             }
+                        }
+                    }
+                    .confirm-delivery-input {
+                        position: relative;
+                        top: 31px;
+                        .back, .email-confirm, .input {
+                            display: inline-block;
+                        }
+                        .back {
+                            float: left;
+                            position: relative;
+                            top: 14px;
+                        }
+                        .email-confirm {
+                            padding-right: 15px;
+                        }
+                        input {
+                            min-width: 250px !important;
+                        }
+
+                    }
+                    .confirm-delivery-box {
+                        background: #daefe5;
+                        height: 69px;
+                        padding: 15px;
+                        .confirm-title {
+                            font-size: 19px;
+                            font-weight: 700;
                         }
                     }
                 }
@@ -524,15 +558,18 @@
                             position: relative;
                             top: 5px;
                             color: #a8bbb2;
+                            padding-left: 15px;
                         }
                         .customer-box-info {
                             width: 90%;
                             display: inline-block;
                             vertical-align: middle;
+                            padding-left: 15px;
                             .customer-text {
                                 padding-bottom: 10px;
                                 font-size: 13px;
-                                line-height: 15px;
+                                line-height: 18px;
+                                color: #545d58;
                             }
                             .customer-info {
                                 width: 70%;
@@ -579,8 +616,8 @@
                         }
                     }
                     .request-info-box {
-                        background-color: #d4dcd8;
-                        padding: 16px 15px 15px;
+                        background-color: #daefe5;
+                        padding: 26px 15px 17px;
                         .mobile-mail-box {
                             width: 50%;
                             display: inline-block;
@@ -654,7 +691,6 @@
             padding-top: 30px !important;
             padding-left: 15px !important;
             padding-right: 15px !important;
-            background-color: #e9efec;
             position: relative;
             min-height: 125px;
             .container-reduced {
@@ -676,6 +712,7 @@
                         display: inline-block;
                         font-size: 22px;
                         font-weight: 700;
+                        margin-right: 5px;
                         .service {
                             display: inline-block;
                             &.project-management {
@@ -691,7 +728,6 @@
                     }
                     .fiducial-logo {
                         display: inline-block;
-                        margin-left: 6px;
                         img {
                             width: 100px;
                             position: relative;
@@ -744,7 +780,7 @@
                     width: 177px;
                     float: right;
                     text-align: center;
-                    margin-top: -53px;
+                    margin-top: -32px;
                     .order-box {
                         background-color: #daeddf;
                         padding: 25px 15px 15px;
@@ -783,6 +819,9 @@
                     }
                 }
             }
+        }
+        &.reduced-background {
+            backround-color: #ffffff;
         }
     }
 

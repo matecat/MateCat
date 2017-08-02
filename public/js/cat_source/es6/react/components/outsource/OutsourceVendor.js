@@ -214,7 +214,7 @@ class OutsourceVendor extends React.Component {
         let price = this.getPrice();
         let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let translatedWords = this.getTranslatedWords();
-        let translatorSubjects = this.getTranslatorSubjects();
+        /*let translatorSubjects = this.getTranslatorSubjects();*/
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor sixteen wide column">
             <div className="payment-service">
@@ -237,14 +237,14 @@ class OutsourceVendor extends React.Component {
 
                             <div className="ui list left">
                                 <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
-                                <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
                                 <div className="item">
                                 <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
                                 ref={(rating) => this.rating = rating}/></div>
                             </div>
                             <div className="ui list right">
                                 <div className="item"><b>{translatedWords}</b> words translated last 12 months</div>
-                                <div className="item"><b>{translatorSubjects}</b></div>
+                                <div className="item"><b>{this.state.chunkQuote.get('t_experience_years')} years of experience</b></div>
+                                {/*<div className="item"><b>{translatorSubjects}</b></div>*/}
                              </div>
                         </div>
                         ) : (
@@ -296,12 +296,27 @@ class OutsourceVendor extends React.Component {
                             <div className="gmt">
                                 <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                             </div>
-                            <div className="need-it-faster">
+                            {/*<div className="need-it-faster">
                                 <a className="faster"
                                    ref={(faster) => this.dateFaster = faster}
                                 >Need it faster?</a>
-                            </div>
+                            </div>*/}
                         </div>
+                        <div className="confirm-delivery-input">
+                            <div className="back">
+                                <a href="#"><i className="icon-left-arrow icon"></i> Back </a>
+                            </div>
+                            <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
+                            <div className="ui input">
+                                <input type="text" placeholder="ruben.santillan@translated.net" />
+                            </div>
+
+                        </div>
+                        {/*<div className="confirm-delivery-box">
+                            <h5 className="confirm-title">Order sent correctly</h5>
+                            <p>Thank you for choosing our Outsource service<br />
+                                You will soon be contacted by a Account Manager to send you an invoice</p>
+                        </div>*/}
                     </div>
                     <div className="order-box-outsource">
                         <div className="order-box">
@@ -340,7 +355,8 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</a>
+                            {/*<a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</a>*/}
+                            <a className="open-order ui green button">Confirm</a>
                         </div>
                     </div>
                 </div>

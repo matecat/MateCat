@@ -33,9 +33,9 @@ class AssignToTranslator extends React.Component {
         }
     }
 
-    allowHTML(string) {
+   /* allowHTML(string) {
         return { __html: string };
-    }
+    }*/
 
     componentDidMount () {
         $(this.dateInput).datetimepicker({
@@ -72,10 +72,10 @@ class AssignToTranslator extends React.Component {
                         Assign Job to translator
                     </div>
                     <div className="title-url ui grid">
-                        <div className="job-url">
+                       {/* <div className="job-url">
                             <a href={window.location.protocol + '//' + window.location.host + this.props.url} target="_blank">
                                 {window.location.protocol + '//' + window.location.host + this.props.url}</a>
-                        </div>
+                        </div>*/}
                         <div className="translator-assignee">
                             <div className="ui form">
                                 <div className="fields">
