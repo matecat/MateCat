@@ -8,13 +8,15 @@ class OutsourceVendor extends React.Component {
 
     constructor(props) {
         super(props);
+        let changesRates = (!_.isUndefined($.cookie( "matecat_changeRates")) ) ? $.parseJSON( $.cookie( "matecat_changeRates"))
+            : {};
         this.state = {
             outsource: false,
             revision: true,
             chunkQuote: null,
             extendedView: this.props.extendedView,
             timezone: $.cookie( "matecat_timezone"),
-            changeRates: $.parseJSON( $.cookie( "matecat_changeRates"))
+            changeRates: changesRates
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -109,9 +111,9 @@ class OutsourceVendor extends React.Component {
         if( _.isUndefined(changeRates)) {
             API.OUTSOURCE.fetchChangeRates().done(function (response) {
                 self.setState({
-                    changeRates: response.data
+                    changeRates: $.parseJSON(response.data)
                 });
-                $.cookie( "matecat_changeRates", $.parseJSON( response.data ) , { expires: 1 });
+                $.cookie( "matecat_changeRates",  response.data  , { expires: 1 });
             });
         }
     }
@@ -506,7 +508,7 @@ class OutsourceVendor extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (!nextState.chunkQuote.equals(this.state.chunkQuote)
+        return ( (nextState.chunkQuote && !nextState.chunkQuote.equals(this.state.chunkQuote))
         || nextState.outsource !== this.state.outsource
         || nextState.extendedView !== this.state.extendedView
         || nextState.revision !== this.state.revision
