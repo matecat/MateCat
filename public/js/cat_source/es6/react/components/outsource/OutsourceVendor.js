@@ -517,8 +517,8 @@ class OutsourceVendor extends React.Component {
     }
 
     render() {
-
-        return <div className="background-outsource-vendor">
+        let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
+        return <div className={"background-outsource-vendor " + containerClass}>
             {this.state.extendedView ? ( this.getExtendedView()
             ): (
                 this.getCompactView()
