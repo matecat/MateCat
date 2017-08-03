@@ -298,14 +298,15 @@ class OutsourceVendor extends React.Component {
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
                                 <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                               {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                             </div>
-                            {/*<div className="need-it-faster">*/}
-                                {/*<a className="faster"*/}
-                                   {/*ref={(faster) => this.dateFaster = faster}*/}
-                                {/*>Need it faster?</a>*/}
-                            {/*</div>*/}
+                            <div className="need-it-faster">
+                                <a className="faster"
+                                   ref={(faster) => this.dateFaster = faster}
+                                >Need it faster?</a>
+                            </div>
                         </div>
-                        <div className="confirm-delivery-input">
+                        {/*<div className="confirm-delivery-input">
                             <div className="back">
                                 <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
                             </div>
@@ -314,7 +315,7 @@ class OutsourceVendor extends React.Component {
                                 <input type="text" placeholder="ruben.santillan@translated.net" value="ruben.santillan@translated.net" />
                             </div>
 
-                        </div>
+                        </div>*/}
                         {/*<div className="confirm-delivery-box">
                             <div className="confirm-title">Order sent correctly</div>
                             <p>Thank you for choosing our Outsource service<br />
@@ -358,8 +359,9 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            {/*<a className="open-order ui green button" >Order now</a>*/}
-                            <a className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</a>
+                            <button className="open-order ui green button">Order now</button>
+                            {/* <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
+                            {/*<button className="open-outsourced ui button ">View status</button>*/}
                         </div>
                     </div>
                 </div>
@@ -384,35 +386,49 @@ class OutsourceVendor extends React.Component {
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor-reduced sixteen wide column">
             {this.state.outsource ? (
-                <div className="container-reduced">
-                    <div className="title-reduced">Let us do it for you</div>
+                <div className="reduced-boxes">
+                    <div className="container-reduced">
+                        <div className="title-reduced">Let us do it for you</div>
 
-                    <div className="payment-service">
-                        <div className="service-box">
-                            <div className="service project-management">Outsource: PM </div>
-                            <div className="service translation"> + Translation </div>
-                            <div className="service revision"> + Revision</div>
-                        </div>
-                        <div className="fiducial-logo">
-                            <div className="translated-logo">Guaranteed by
-                                <img className="logo-t" src="/public/img/logo_translated.png" />
+                        <div className="payment-service">
+                            <div className="service-box">
+                                <div className="service project-management">Outsource: PM </div>
+                                <div className="service translation"> + Translation </div>
+                                <div className="service revision"> + Revision</div>
+                            </div>
+                            <div className="fiducial-logo">
+                                <div className="translated-logo">Guaranteed by
+                                    <img className="logo-t" src="/public/img/logo_translated.png" />
+                                </div>
+                            </div>
+                            <div className="view-more">
+                                <a className="open-view-more"
+                                   onClick={this.viewMoreClick.bind(this)}>+ view more</a>
                             </div>
                         </div>
-                        <div className="view-more">
-                            <a className="open-view-more"
-                               onClick={this.viewMoreClick.bind(this)}>+ view more</a>
-                        </div>
-                    </div>
-                    <div className="delivery-order">
-                        <div className="delivery-box">
-                            <label>Delivery date:</label><br />
-                            <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                            <span>at</span>
-                            <div className="delivery-time">{delivery.time}</div>
-                            <div className="gmt">
-                                <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
+                        <div className="delivery-order">
+                            <div className="delivery-box">
+                                <label>Delivery date:</label>{/*<br />*/}
+                                <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                                <span>at</span>
+                                <div className="delivery-time">{delivery.time}</div>
+                                <div className="gmt">
+                                    <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
+                                    {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
+                                </div>
                             </div>
                         </div>
+                        {/*<div className="confirm-delivery-input">
+                            <div className="back">
+                                <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
+                            </div>
+                            <div className="email-confirm">Great, an Account Manager will contact you to send you the invoice as a customer to this email</div>
+                            <div className="ui input">
+                                <input type="text" placeholder="ruben.santillan@translated.net" />
+                            </div>
+
+                        </div>*/}
+
                     </div>
                     <div className="order-box-outsource">
                         <div className="order-box">
@@ -450,10 +466,16 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <a className="open-order ui green button"
-                               onClick={this.sendOutsource.bind(this)}>Order now</a>
+                            <button className="open-order ui green button">Order now</button>
+                            {/*<button className="confirm-order ui green button"
+                             onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
+                            {/*<button className="open-outsourced ui button ">View status</button>*/}
                         </div>
                     </div>
+                    {/*<div className="confirm-delivery-box">
+                        <div className="confirm-title">Order sent correctly</div>
+                        <p>Thank you for choosing our Outsource service.</p>
+                    </div>*/}
                 </div>
             ):(
                 <div className="ui active inverted dimmer">
@@ -517,22 +539,21 @@ class OutsourceVendor extends React.Component {
     }
 
     render() {
-        let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
-        return <div className={"background-outsource-vendor " + containerClass}>
-            {this.state.extendedView ? ( this.getExtendedView()
-            ): (
-                this.getCompactView()
-            )}
-
-            <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
-                  ref={(form) => this.outsourceForm = form}>
-                <input type="hidden" name="url_ok" value=""/>
-                <input type="hidden" name="url_ko" value=""/>
-                <input type="hidden" name="confirm_urls" value=""/>
-                <input type='hidden' name='data_key' value="" />
-                <input type="hidden" name="quoteData" value=""/>
-            </form>
-        </div>;
+        let containerClass = (!this.state.extendedView) ? 'compact-background' : '';
+        return<div className={"background-outsource-vendor " + containerClass}>
+                {this.state.extendedView ? ( this.getExtendedView()
+                ): (
+                    this.getCompactView()
+                )}
+                <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
+                      ref={(form) => this.outsourceForm = form}>
+                    <input type="hidden" name="url_ok" value=""/>
+                    <input type="hidden" name="url_ko" value=""/>
+                    <input type="hidden" name="confirm_urls" value=""/>
+                    <input type='hidden' name='data_key' value="" />
+                    <input type="hidden" name="quoteData" value=""/>
+                </form>
+            </div>;
 
     }
 }
