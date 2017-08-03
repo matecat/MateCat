@@ -297,14 +297,14 @@ class OutsourceVendor extends React.Component {
                             <span>at</span>
                             <div className="delivery-time">{delivery.time}</div>
                             <div className="gmt">
-                                {/*<GMTSelect changeValue={this.changeTimezone.bind(this)}/>*/}
-                                <div className="gmt-outsourced"> GMT +2 </div>
+                                <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                               {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                             </div>
-                            {/*<div className="need-it-faster">*/}
-                                {/*<a className="faster"*/}
-                                   {/*ref={(faster) => this.dateFaster = faster}*/}
-                                {/*>Need it faster?</a>*/}
-                            {/*</div>*/}
+                            <div className="need-it-faster">
+                                <a className="faster"
+                                   ref={(faster) => this.dateFaster = faster}
+                                >Need it faster?</a>
+                            </div>
                         </div>
                         {/*<div className="confirm-delivery-input">
                             <div className="back">
@@ -316,11 +316,11 @@ class OutsourceVendor extends React.Component {
                             </div>
 
                         </div>*/}
-                        <div className="confirm-delivery-box">
+                        {/*<div className="confirm-delivery-box">
                             <div className="confirm-title">Order sent correctly</div>
                             <p>Thank you for choosing our Outsource service<br />
                                 You will soon be contacted by a Account Manager to send you an invoice</p>
-                        </div>
+                        </div>*/}
                     </div>
                     <div className="order-box-outsource">
                         <div className="order-box">
@@ -359,9 +359,9 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            {/*<button className="open-order ui green button">Order now</button>*/}
+                            <button className="open-order ui green button">Order now</button>
                             {/* <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
-                            <button className="open-outsourced ui button ">View status</button>
+                            {/*<button className="open-outsourced ui button ">View status</button>*/}
                         </div>
                     </div>
                 </div>
@@ -414,6 +414,7 @@ class OutsourceVendor extends React.Component {
                                 <div className="delivery-time">{delivery.time}</div>
                                 <div className="gmt">
                                     <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
+                                    {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
                                 </div>
                             </div>
                         </div>
@@ -465,16 +466,16 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            {/*<button className="open-order ui green button"
-                               onClick={this.sendOutsource.bind(this)}>Order now</button>*/}
-                            {/*<button className="confirm-order ui green button">Confirm</button>*/}
-                            <button className="open-outsourced ui button ">View status</button>
+                            <button className="open-order ui green button">Order now</button>
+                            {/*<button className="confirm-order ui green button"
+                             onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
+                            {/*<button className="open-outsourced ui button ">View status</button>*/}
                         </div>
                     </div>
-                    <div className="confirm-delivery-box">
+                    {/*<div className="confirm-delivery-box">
                         <div className="confirm-title">Order sent correctly</div>
                         <p>Thank you for choosing our Outsource service.</p>
-                    </div>
+                    </div>*/}
                 </div>
             ):(
                 <div className="ui active inverted dimmer">
@@ -538,9 +539,8 @@ class OutsourceVendor extends React.Component {
     }
 
     render() {
-        let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
-        return <div className="outsource-all-container">
-            <div className={"background-outsource-vendor " + containerClass}>
+        let containerClass = (!this.state.extendedView) ? 'compact-background' : '';
+        return<div className={"background-outsource-vendor " + containerClass}>
                 {this.state.extendedView ? ( this.getExtendedView()
                 ): (
                     this.getCompactView()
@@ -553,8 +553,7 @@ class OutsourceVendor extends React.Component {
                     <input type='hidden' name='data_key' value="" />
                     <input type="hidden" name="quoteData" value=""/>
                 </form>
-            </div>
-        </div>;
+            </div>;
 
     }
 }
