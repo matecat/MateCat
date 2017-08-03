@@ -539,13 +539,12 @@ class OutsourceVendor extends React.Component {
     }
 
     render() {
-
-        return <div className="outsource-all-container">
-            <div className="background-outsource-vendor compact-background">
-                {this.state.extendedView ? ( this.getExtendedView()
-                ): (
-                    this.getCompactView()
-                )}
+        let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
+        return <div className={"background-outsource-vendor " + containerClass}>
+            {this.state.extendedView ? ( this.getExtendedView()
+            ): (
+                this.getCompactView()
+            )}
 
                 <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
                       ref={(form) => this.outsourceForm = form}>
