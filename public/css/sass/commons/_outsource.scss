@@ -81,6 +81,10 @@
                 }
             }
         }
+        .gmt-outsourced {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
     }
 
     .outsource-header {
@@ -93,6 +97,38 @@
             display: inline-block;
             color: #969696;
 
+        }
+    }
+    .delivery-order, .container-reduced {
+        .confirm-delivery-input {
+            margin-top: 31px;
+            .back, .email-confirm, .input {
+                display: inline-block;
+            }
+            .back {
+                float: left;
+                margin-top: 12px;
+                a {
+                    i {
+                        position: relative;
+                        top: 2px;
+                    }
+                }
+            }
+            .email-confirm {
+                padding-right: 15px;
+            }
+            input {
+                min-width: 235px;
+            }
+        }
+        .confirm-delivery-box {
+            background: #daeddf;
+            padding: 9px 15px 3px;
+            .confirm-title {
+                font-size: 18px;
+                font-weight: 700;
+            }
         }
     }
 
@@ -234,6 +270,7 @@
         width: 100%;
         padding-bottom: 15px;
         padding-top: 15px;
+        cursor: auto;
         .outsource-to-vendor {
             .payment-service {
                 padding: 5px 15px 15px;
@@ -244,12 +281,10 @@
                     vertical-align: text-bottom;
                     font-size: 26px;
                     font-weight: 700;
-                    font-family: calibri;
+                    font-family: Calibri, Arial, Helvetica, sans-serif;
                     .service {
                         display: inline-block;
-                        &.project-management {
-
-                        }
+                        &.project-management {  }
                         &.translation, &.revision {
                             margin-left: 8px;
                         }
@@ -427,36 +462,6 @@
                             font-size: 19px;
                         }
                     }
-                    .confirm-delivery-input {
-                        margin-top: 31px;
-                        .back, .email-confirm, .input {
-                            display: inline-block;
-                        }
-                        .back {
-                            float: left;
-                            margin-top: 12px;
-                            a {
-                                i {
-                                    position: relative;
-                                    top: 2px;
-                                }
-                            }
-                        }
-                        .email-confirm {
-                            padding-right: 15px;
-                        }
-                        input {
-                            min-width: 235px;
-                        }
-                    }
-                    .confirm-delivery-box {
-                        background: #daeddf;
-                        padding: 9px 15px 3px;
-                        .confirm-title {
-                            font-size: 18px;
-                            font-weight: 700;
-                        }
-                    }
                 }
                 .order-box-outsource {
                     display: inline-block;
@@ -468,7 +473,7 @@
                         text-align: center;
                         margin-bottom: 5px;
                         .outsource-price {
-                            font-size: 32px;
+                            font-size: 28px;
                             font-weight: 700;
                             padding: 25px 0 10px;
                         }
@@ -484,7 +489,7 @@
                     }
                     .order-button-outsource {
                         margin: 0;
-                        .open-order {
+                        .open-order, .confirm-order {
                             font-family: Calibri, Arial, Helvetica, sans-serif;
                             padding: 10px;
                             margin: 0;
@@ -493,6 +498,26 @@
                             border-radius: 2px;
                             width: 100%;
 
+                        }
+                        .open-outsourced {
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            padding: 11px 0 !important;
+                            vertical-align: top;
+                            font-size: 16px;
+                            border: 1px solid #797979;
+                            border-radius: 2px;
+                            width: 100%;
+                            float: right;
+                            margin-right: 0 !important;
+                            &:hover {
+                                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                            }
+                            &:focus {
+                                box-shadow: none !important;
+                            }
+                            &:active {
+                                box-shadow: none !important;
+                            }
                         }
                     }
                 }
@@ -538,9 +563,9 @@
                         display: inline-block;
                         .appendix {
                             display: inline-block;
-                            width: 10%;
+                            width: 8%;
                             vertical-align: top;
-                            font-size: 36px;
+                            font-size: 28px;
                             position: relative;
                             top: 5px;
                             color: #a8bbb2;
@@ -561,7 +586,6 @@
                                     display: inline-block;
                                     width: 40px;
                                     height: 40px;
-                                    background: yellow;
                                     border-radius: 50%;
                                     vertical-align: middle;
                                 }
@@ -677,87 +701,93 @@
             background-color: #e9efec;
             position: relative;
             min-height: 125px;
-            .container-reduced {
-                padding: 0 15px;
-                .job-menu, .open-translate {
-                    display: none;
-                }
-                .title-reduced {
-                    width: 75%;
-                    font-size: 24px;
-                    font-weight: 700;
+            .reduced-boxes {
+                .container-reduced {
+                    padding: 0 15px;
+                    width: 85%;
                     display: inline-block;
-                }
-                .payment-service {
-                    display: inline-block;
-                    width: 49%;
-                    vertical-align: -webkit-baseline-middle;
-                    .service-box {
-                        display: inline-block;
-                        font-size: 22px;
+                    .job-menu, .open-translate {
+                        display: none;
+                    }
+                    .title-reduced {
+                        font-size: 24px;
                         font-weight: 700;
-                        .service {
+                    }
+                    .payment-service {
+                        display: inline-block;
+                        width: 58%;
+                        vertical-align: -webkit-baseline-middle;
+                        .service-box {
                             display: inline-block;
-                            &.project-management {
+                            font-size: 22px;
+                            font-weight: 700;
+                            .service {
+                                display: inline-block;
+                                &.project-management {
 
-                            }
-                            &.translation {
-                                margin-left: 6px;
-                            }
-                            &.revision {
-                                margin-left: 6px;
+                                }
+                                &.translation {
+                                    margin-left: 6px;
+                                }
+                                &.revision {
+                                    margin-left: 6px;
+                                }
                             }
                         }
-                    }
-                    .fiducial-logo {
-                        display: inline-block;
-                        margin-left: 6px;
-                        img {
-                            width: 100px;
-                            position: relative;
-                            top: 9px;
-                            margin-left: 4px;
-                        }
-                    }
-                    .view-more {
-                    }
-                }
-                .delivery-order {
-                    display: inline-block;
-                    padding: 0 10px;
-                    width: 32%;
-                    .delivery-box {
-                        display: inline-block;
-                        font-size: 18px;
-                        font-weight: 700;
-                        label {
-                            padding: 5px;
-                            font-size: 16px;
-                            color: gray;
-                            font-weight: 100;
-                        }
-                        .delivery-date, .delivery-time{
+                        .fiducial-logo {
                             display: inline-block;
-                            padding: 5px;
-                        }
-                        span {
-                            display: inline-block;
-                        }
-                        .gmt {
-                            padding: 0;
-                            .gmt-select {
+                            margin-left: 6px;
+                            img {
+                                width: 100px;
                                 position: relative;
-                                top: -3px;
+                                top: 9px;
+                                margin-left: 4px;
                             }
                         }
+                        .view-more {
+                        }
+                    }
+                    .delivery-order {
+                        display: inline-block;
+                        padding: 0 10px;
+                        width: 42%;
+                        .delivery-box {
+                            display: inline-block;
+                            font-size: 18px;
+                            font-weight: 700;
+                            label {
+                                padding: 5px;
+                                font-size: 16px;
+                                color: gray;
+                                font-weight: 100;
+                            }
+                            .delivery-date, .delivery-time{
+                                display: inline-block;
+                                padding: 5px;
+                            }
+                            span {
+                                display: inline-block;
+                            }
+                            .gmt {
+                                padding: 0;
+                                .gmt-select {
+                                    position: relative;
+                                    top: -3px;
+                                }
+                            }
+                        }
+                    }
+                    .confirm-delivery-input {
+                        text-align: right;
+                        margin-top: 0;
                     }
                 }
                 .order-box-outsource {
                     display: inline-block;
-                    width: 177px;
                     float: right;
                     text-align: center;
-                    margin-top: -53px;
+                    margin-top: -27px;
+                    width: 15%;
                     .order-box {
                         background-color: #daeddf;
                         padding: 25px 15px 15px;
@@ -778,7 +808,7 @@
                         }
                     }
                     .order-button-outsource {
-                        .open-order {
+                        .open-order, .confirm-order {
                             width: 100%;
                             font-family: Calibri, Arial, Helvetica, sans-serif;
                             padding: 10px 22px;
