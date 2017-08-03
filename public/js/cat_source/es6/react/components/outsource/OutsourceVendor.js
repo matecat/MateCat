@@ -473,8 +473,7 @@ class OutsourceVendor extends React.Component {
                     </div>
                     <div className="confirm-delivery-box">
                         <div className="confirm-title">Order sent correctly</div>
-                        <p>Thank you for choosing our Outsource service<br />
-                            You will soon be contacted by a Account Manager to send you an invoice</p>
+                        <p>Thank you for choosing our Outsource service.</p>
                     </div>
                 </div>
             ):(
@@ -540,12 +539,12 @@ class OutsourceVendor extends React.Component {
 
     render() {
         let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
-        return <div className={"background-outsource-vendor " + containerClass}>
-            {this.state.extendedView ? ( this.getExtendedView()
-            ): (
-                this.getCompactView()
-            )}
-
+        return <div className="outsource-all-container">
+            <div className={"background-outsource-vendor " + containerClass}>
+                {this.state.extendedView ? ( this.getExtendedView()
+                ): (
+                    this.getCompactView()
+                )}
                 <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
                       ref={(form) => this.outsourceForm = form}>
                     <input type="hidden" name="url_ok" value=""/>
