@@ -417,7 +417,7 @@ class OutsourceVendor extends React.Component {
                                 </div>
                             </div>
                         </div>
-                        <div className="confirm-delivery-input">
+                        {/*<div className="confirm-delivery-input">
                             <div className="back">
                                 <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
                             </div>
@@ -426,12 +426,8 @@ class OutsourceVendor extends React.Component {
                                 <input type="text" placeholder="ruben.santillan@translated.net" />
                             </div>
 
-                        </div>
-                            {/*<div className="confirm-delivery-box">
-                             <div className="confirm-title">Order sent correctly</div>
-                             <p>Thank you for choosing our Outsource service<br />
-                             You will soon be contacted by a Account Manager to send you an invoice</p>
-                             </div>*/}
+                        </div>*/}
+
                     </div>
                     <div className="order-box-outsource">
                         <div className="order-box">
@@ -471,9 +467,14 @@ class OutsourceVendor extends React.Component {
                         <div className="order-button-outsource">
                             {/*<button className="open-order ui green button"
                                onClick={this.sendOutsource.bind(this)}>Order now</button>*/}
-                            <button className="confirm-order ui green button">Confirm</button>
-                            {/*<button className="open-outsourced ui button ">View status</button>*/}
+                            {/*<button className="confirm-order ui green button">Confirm</button>*/}
+                            <button className="open-outsourced ui button ">View status</button>
                         </div>
+                    </div>
+                    <div className="confirm-delivery-box">
+                        <div className="confirm-title">Order sent correctly</div>
+                        <p>Thank you for choosing our Outsource service<br />
+                            You will soon be contacted by a Account Manager to send you an invoice</p>
                     </div>
                 </div>
             ):(
@@ -539,20 +540,22 @@ class OutsourceVendor extends React.Component {
 
     render() {
 
-        return <div className="background-outsource-vendor">
-            {this.state.extendedView ? ( this.getExtendedView()
-            ): (
-                this.getCompactView()
-            )}
+        return <div className="outsource-all-container">
+            <div className="background-outsource-vendor compact-background">
+                {this.state.extendedView ? ( this.getExtendedView()
+                ): (
+                    this.getCompactView()
+                )}
 
-            <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
-                  ref={(form) => this.outsourceForm = form}>
-                <input type="hidden" name="url_ok" value=""/>
-                <input type="hidden" name="url_ko" value=""/>
-                <input type="hidden" name="confirm_urls" value=""/>
-                <input type='hidden' name='data_key' value="" />
-                <input type="hidden" name="quoteData" value=""/>
-            </form>
+                <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank"
+                      ref={(form) => this.outsourceForm = form}>
+                    <input type="hidden" name="url_ok" value=""/>
+                    <input type="hidden" name="url_ko" value=""/>
+                    <input type="hidden" name="confirm_urls" value=""/>
+                    <input type='hidden' name='data_key' value="" />
+                    <input type="hidden" name="quoteData" value=""/>
+                </form>
+            </div>
         </div>;
 
     }
