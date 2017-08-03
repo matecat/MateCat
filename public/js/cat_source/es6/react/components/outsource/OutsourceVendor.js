@@ -169,6 +169,17 @@ class OutsourceVendor extends React.Component {
 
     }
 
+    checkChosenDateIsAfter() {
+        if (this.state.outsource && this.selectedDate) {
+            if (this.state.revision) {
+                return this.selectedDate > new Date(this.state.chunkQuote.get('r_delivery')).getTime();
+            } else {
+                return this.selectedDate > new Date(this.state.chunkQuote.get('delivery')).getTime();
+            }
+        }
+        return false;
+    }
+
     getPrice() {
         let price;
         if (this.state.outsource) {
@@ -214,6 +225,7 @@ class OutsourceVendor extends React.Component {
 
     getExtendedView() {
         let delivery = this.getDeliveryDate();
+        let showDateMessage = this.checkChosenDateIsAfter();
         let price = this.getPrice();
         let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let translatedWords = this.getTranslatedWords();
@@ -299,11 +311,16 @@ class OutsourceVendor extends React.Component {
                             <div className="gmt">
                                 <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                             </div>
-                            {/*<div className="need-it-faster">*/}
-                                {/*<a className="faster"*/}
-                                   {/*ref={(faster) => this.dateFaster = faster}*/}
-                                {/*>Need it faster?</a>*/}
-                            {/*</div>*/}
+                            <div className="need-it-faster">
+                                <a className="faster"
+                                   ref={(faster) => this.dateFaster = faster}
+                                >Need it faster?</a>
+                            </div>
+                            {showDateMessage ? (<div className="need-it-faster-message">
+                                <strong>We will deliver before the selected date.</strong>This date already provides us
+                                with all the time we need to deliver quality work at the lowest price
+                            </div>) :('')}
+
                         </div>
                         <div className="confirm-delivery-input">
                             <div className="back">
@@ -327,7 +344,6 @@ class OutsourceVendor extends React.Component {
                                 {priceCurrencySymbol} {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
                             </div>
                             <div className="select-value">
-                                {/*<a className="value">about €{pricePWord} / word</a>*/}
                                 <h4 className="ui header">
                                     <div className="content">
                                         <div className="ui inline dropdown"
@@ -487,6 +503,7 @@ class OutsourceVendor extends React.Component {
                 disabledWeekDays: [0,6],
                 onSelectDateButton: function (newDateTime) {
                     let timestamp = (new Date(newDateTime)).getTime();
+                    self.selectedDate = timestamp;
                     self.setState({
                         outsource: false
                     });
@@ -517,7 +534,7 @@ class OutsourceVendor extends React.Component {
     }
 
     render() {
-        let containerClass = (!this.state.extendedView) ? 'compact_background' : '';
+        let containerClass = (!this.state.extendedView) ? 'compact-background' : '';
         return <div className={"background-outsource-vendor " + containerClass}>
             {this.state.extendedView ? ( this.getExtendedView()
             ): (
