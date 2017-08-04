@@ -230,7 +230,7 @@ class getContributionController extends ajaxController {
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
             $config[ 'target' ]  = $this->target;
-            $config[ 'id_user' ] = INIT::$MYMEMORY_API_KEY;
+            $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
             $config[ 'segid' ]   = $this->id_segment;
 
             $mt_result = $mt->get( $config );

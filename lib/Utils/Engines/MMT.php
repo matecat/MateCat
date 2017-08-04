@@ -8,13 +8,19 @@
  */
 class Engines_MMT extends Engines_AbstractEngine {
 
-    protected $_config = array(
-            'source'      => null,
-            'target'      => null,
-            'source_lang' => null,
-            'target_lang' => null,
-            'suggestion'  => null
-    );
+    protected $_config = [
+            'segment'        => null,
+            'translation'    => null,
+            'newsegment'     => null,
+            'newtranslation' => null,
+            'source'         => null,
+            'target'         => null,
+            'langpair'       => null,
+            'email'          => null,
+            'keys'           => null,
+            'mt_context'     => null,
+            'id_user'        => null
+    ];
 
     /**
      * @var array
@@ -79,7 +85,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $parameters                 = [];
         $parameters[ 'q' ]          = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]         = @$_config[ 'id_user' ];
+        $parameters[ 'de' ]         = @$_config[ 'email' ];
         $parameters[ 'mt_context' ] = @$_config[ 'mt_context' ];
 
         if ( !empty( $_config[ 'keys' ] ) ) {
@@ -103,11 +109,11 @@ class Engines_MMT extends Engines_AbstractEngine {
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+        if ( !empty( $_config[ 'keys' ] ) ) {
+            if ( !is_array( $_config[ 'keys' ] ) ) {
+                $_config[ 'keys' ] = array( $_config[ 'keys' ] );
             }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters[ 'keys' ] = implode( ",", $_config[ 'keys' ] );
         }
 
         $this->call( "contribute_relative_url", $parameters );

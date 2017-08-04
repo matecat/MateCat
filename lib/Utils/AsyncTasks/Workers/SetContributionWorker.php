@@ -9,17 +9,16 @@
 
 namespace AsyncTasks\Workers;
 
-use CatUtils,
-        Contribution\ContributionStruct,
+use Contribution\ContributionStruct,
         Engine,
-        Engines_MyMemory,
         TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException,
         TaskRunner\Exceptions\ReQueueException,
         TmKeyManagement_Filter,
         TmKeyManagement_TmKeyManagement,
-        TaskRunner\Commons\AbstractElement;
+        TaskRunner\Commons\AbstractElement,
+        Jobs_JobStruct;
 use INIT;
 
 class SetContributionWorker extends AbstractWorker {
@@ -30,17 +29,17 @@ class SetContributionWorker extends AbstractWorker {
     const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
     /**
-     * @var Engines_MyMemory
+     * @var \Engines_EngineInterface
      */
-    protected $_tms;
+    protected $_engine;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
-     * @param \Engines_AbstractEngine $_tms
+     * @param \Engines_EngineInterface $_tms
      */
     public function setEngine( $_tms ){
-        $this->_tms = $_tms;
+        $this->_engine = $_tms;
     }
 
     /**
@@ -107,43 +106,37 @@ class SetContributionWorker extends AbstractWorker {
 //        $userInfoList = $contributionStruct->getUserInfo();
 //        $userInfo = array_pop( $userInfoList );
 
-        $id_tms  = $jobStruct->id_tms;
+        $this->_loadEngine( $jobStruct );
 
-        if ( $id_tms != 0 ) {
+        $config = $this->_engine->getConfigStruct();
+        $config[ 'source' ]      = $jobStruct->source;
+        $config[ 'target' ]      = $jobStruct->target;
+        $config[ 'email' ]       = $contributionStruct->api_key;
 
-            if( empty( $this->_tms ) ){
-                $this->_tms = Engine::getInstance( 1 ); //Load MyMemory
-            }
+        $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-            $config = $this->_tms->getConfigStruct();
-            $config[ 'source' ]      = $jobStruct->source;
-            $config[ 'target' ]      = $jobStruct->target;
-            $config[ 'email' ]       = $contributionStruct->api_key;
+        $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+        $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
-            $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
-
-            $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-            $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
-
-            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
-                $this->_update( $config, $contributionStruct );
-                $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
-            } else {
-                $this->_set( $config, $contributionStruct );
-                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
-            }
-
-            $this->_queueHandler->getRedisClient()->expire(
-                    $redisSetKey,
-                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
-            ); //TTL 3 months, the time for job archivability
-
+        if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
+            $this->_update( $config, $contributionStruct );
+            $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
         } else {
-
-            throw new EndQueueException( "No TM engine configured for the job. Skip, OK", self::ERR_NO_TM_ENGINE );
-            
+            $this->_set( $config, $contributionStruct );
+            $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
         }
 
+        $this->_queueHandler->getRedisClient()->expire(
+                $redisSetKey,
+                60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
+        ); //TTL 3 months, the time for job archivability
+
+    }
+
+    protected function _loadEngine( Jobs_JobStruct $jobStruct ){
+        if( empty( $this->_engine ) ){
+            $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
+        }
     }
 
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
@@ -155,9 +148,9 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_tms->set( $config );
+        $res = $this->_engine->set( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            throw new ReQueueException( "Set failed on " . get_class( $this->_engine ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
         }
 
     }
@@ -171,14 +164,14 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
 
-        $res = $this->_tms->update( $config );
+        $res = $this->_engine->update( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Update failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            throw new ReQueueException( "Update failed on " . get_class( $this->_engine ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
         }
 
     }
 
-    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -192,7 +185,7 @@ class SetContributionWorker extends AbstractWorker {
         $config = [];
         if ( !empty( $tm_keys ) ) {
 
-            $config[ 'id_user' ] = array();
+            $config[ 'keys' ] = array();
             foreach ( $tm_keys as $i => $tm_info ) {
                 $config[ 'id_user' ][] = $tm_info->key;
             }

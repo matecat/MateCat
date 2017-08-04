@@ -90,6 +90,11 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $propagationRequest =true;
 
     /**
+     * @var string
+     */
+    public $context = "";
+
+    /**
      * @param $name
      *
      * @return mixed
@@ -109,7 +114,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
      * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
      * because we want control the cache eviction from other entrypoints.
      *
-     * @return mixed
+     * @return Jobs_JobStruct[]
      *
      * @throws ValidationError
      */
