@@ -14,9 +14,11 @@ class OutsourceVendor extends React.Component {
             outsource: false,
             revision: true,
             chunkQuote: null,
+            outsourceConfirmed: (!!this.props.job.get('outsource')),
             extendedView: this.props.extendedView,
             timezone: $.cookie( "matecat_timezone"),
-            changeRates: changesRates
+            changeRates: changesRates,
+            jobOutsourced: (!!this.props.job.get('outsource')),
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -126,6 +128,17 @@ class OutsourceVendor extends React.Component {
         });
     }
 
+    confirmOutsource() {
+        this.setState({
+            outsourceConfirmed: true
+        });
+    }
+
+    goBack() {
+        this.setState({
+            outsourceConfirmed: false
+        });
+    }
 
     sendOutsource() {
 
@@ -144,6 +157,14 @@ class OutsourceVendor extends React.Component {
         $(this.outsourceForm).submit();
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', '' );
         $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );
+
+        this.setState({
+            jobOutsourced: true
+        });
+    }
+
+    openOutsourcePage() {
+        window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
     }
 
     clickRevision() {
@@ -157,7 +178,9 @@ class OutsourceVendor extends React.Component {
     }
 
     getDeliveryDate() {
-        if (this.state.outsource) {
+        if ( !_.isNull(this.props.job.get('outsource')) ) {
+            return APP.getGMTDate( this.props.job.get('outsource').get('delivery_date'));
+        } else if (this.state.outsource) {
             // let timeZone = this.getTimeZone();
             // let dateString =  this.getDateString(deliveryToShow, timeZone);
             if (this.state.revision) {
@@ -182,7 +205,10 @@ class OutsourceVendor extends React.Component {
 
     getPrice() {
         let price;
-        if (this.state.outsource) {
+        if ( !_.isNull(this.props.job.get('outsource')) ) {
+            price = this.props.job.get('outsource').get('price');
+            return this.getCurrencyPrice(parseFloat(price));
+        } else if (this.state.outsource) {
             if (this.state.revision) {
                 price = parseFloat(parseFloat(   this.state.chunkQuote.get('r_price') ) + parseFloat(   this.state.chunkQuote.get('price') ));
             } else {
@@ -224,6 +250,7 @@ class OutsourceVendor extends React.Component {
     }
 
     getExtendedView() {
+        let checkboxDisabledClass = (this.state.outsourceConfirmed) ? "disabled" : "";
         let delivery = this.getDeliveryDate();
         let showDateMessage = this.checkChosenDateIsAfter();
         let price = this.getPrice();
@@ -292,7 +319,7 @@ class OutsourceVendor extends React.Component {
                     </div>
                     <div className="revision-box">
                         <div className="add-revision">
-                            <div className="ui checkbox">
+                            <div className={"ui checkbox " + checkboxDisabledClass}>
                                 <input type="checkbox" defaultChecked
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
                                        onClick={this.clickRevision.bind(this)}/>
@@ -312,32 +339,40 @@ class OutsourceVendor extends React.Component {
                                 <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                                {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                             </div>
-                            <div className="need-it-faster">
-                                <a className="faster"
-                                   ref={(faster) => this.dateFaster = faster}
-                                >Need it faster?</a>
-                            </div>
-                            {showDateMessage ? (<div className="need-it-faster-message">
-                                <strong>We will deliver before the selected date.</strong>This date already provides us
-                                with all the time we need to deliver quality work at the lowest price
-                            </div>) :('')}
+                            {!this.state.outsourceConfirmed ? (
+                                <div className="need-it-faster">
+                                    <a className="faster"
+                                       ref={(faster) => this.dateFaster = faster}
+                                    >Need it faster?</a>
+                                </div>
+                            ):('')}
 
+                            {(!this.state.outsourceConfirmed && showDateMessage) ? (
+                                <div className="need-it-faster-message">
+                                    <strong>We will deliver before the selected date.</strong>This date already provides us
+                                    with all the time we need to deliver quality work at the lowest price
+                                </div>
+                            ):('')}
                         </div>
-                        {/*<div className="confirm-delivery-input">
-                            <div className="back">
-                                <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
-                            </div>
-                            <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
-                            <div className="ui input">
-                                <input type="text" placeholder="ruben.santillan@translated.net" value="ruben.santillan@translated.net" />
-                            </div>
+                        {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
+                            <div className="confirm-delivery-input">
+                                <div className="back" onClick={this.goBack.bind(this)}>
+                                    <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
+                                </div>
+                                <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
+                                <div className="ui input">
+                                    <input type="text" placeholder="ruben.santillan@translated.net" defaultValue="ruben.santillan@translated.net" />
+                                </div>
 
-                        </div>*/}
-                        {/*<div className="confirm-delivery-box">
-                            <div className="confirm-title">Order sent correctly</div>
-                            <p>Thank you for choosing our Outsource service<br />
-                                You will soon be contacted by a Account Manager to send you an invoice</p>
-                        </div>*/}
+                            </div>
+                        ) :('')}
+                        {this.state.outsourceConfirmed && this.state.jobOutsourced ? (
+                            <div className="confirm-delivery-box">
+                                <div className="confirm-title">Order sent correctly</div>
+                                <p>Thank you for choosing our Outsource service<br />
+                                    You will soon be contacted by a Account Manager to send you an invoice</p>
+                            </div>
+                        ) :('')}
                     </div>
                     <div className="order-box-outsource">
                         <div className="order-box">
@@ -375,9 +410,14 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <button className="open-order ui green button">Order now</button>
-                            {/* <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
-                            {/*<button className="open-outsourced ui button ">View status</button>*/}
+                            {!this.state.outsourceConfirmed ? (
+                                <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
+                            ):((!this.state.jobOutsourced) ? (
+                                    <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>
+
+                                ) : (<button className="open-outsourced ui button " onClick={this.openOutsourcePage.bind(this)}
+                                >View status</button>)
+                            )}
                         </div>
                     </div>
                 </div>
@@ -434,16 +474,19 @@ class OutsourceVendor extends React.Component {
                                 </div>
                             </div>
                         </div>
-                        {/*<div className="confirm-delivery-input">
-                            <div className="back">
-                                <a href="#"><i className="icon-chevron-left icon"></i>Back</a>
-                            </div>
-                            <div className="email-confirm">Great, an Account Manager will contact you to send you the invoice as a customer to this email</div>
-                            <div className="ui input">
-                                <input type="text" placeholder="ruben.santillan@translated.net" />
-                            </div>
+                        {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
+                            <div className="confirm-delivery-input">
+                                <div className="back" onClick={this.goBack.bind(this)}>
+                                    <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
+                                </div>
+                                <div className="email-confirm">Great, an Account Manager will contact you to send you the invoice as a customer to this email</div>
+                                <div className="ui input">
+                                    <input type="text" placeholder="ruben.santillan@translated.net" defaultValue="ruben.santillan@translated.net"/>
+                                </div>
 
-                        </div>*/}
+                            </div>
+                        ) :('')}
+
 
                     </div>
                     <div className="order-box-outsource">
@@ -482,16 +525,22 @@ class OutsourceVendor extends React.Component {
                             </div>
                         </div>
                         <div className="order-button-outsource">
-                            <button className="open-order ui green button">Order now</button>
-                            {/*<button className="confirm-order ui green button"
-                             onClick={this.sendOutsource.bind(this)}>Confirm</button>*/}
-                            {/*<button className="open-outsourced ui button ">View status</button>*/}
+                            {!this.state.outsourceConfirmed ? (
+                                <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
+                            ):((!this.state.jobOutsourced) ? (
+                                    <button className="confirm-order ui green button"
+                                            onClick={this.sendOutsource.bind(this)}>Confirm</button>
+                                ) : (<button className="open-outsourced ui button " href=""
+                                             onClick={this.openOutsourcePage.bind(this)}>View status</button>)
+                            )}
                         </div>
                     </div>
-                    {/*<div className="confirm-delivery-box">
-                        <div className="confirm-title">Order sent correctly</div>
-                        <p>Thank you for choosing our Outsource service.</p>
-                    </div>*/}
+                    {this.state.jobOutsourced ? (
+                        <div className="confirm-delivery-box">
+                            <div className="confirm-title">Order sent correctly</div>
+                            <p>Thank you for choosing our Outsource service.</p>
+                        </div>
+                        ) :('')}
                 </div>
             ):(
                 <div className="ui active inverted dimmer">
@@ -543,8 +592,15 @@ class OutsourceVendor extends React.Component {
                     self.onCurrencyChange(value)
                 }
             });
+
+            if (this.state.outsourceConfirmed && !!this.props.job.get('outsource')) {
+                this.revisionCheckbox.checked = (this.state.chunkQuote.get('typeOfService') === "premium") ? true : false;
+            }
         }
+
         $(this.rating).rating('disable');
+
+
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -552,7 +608,9 @@ class OutsourceVendor extends React.Component {
         || nextState.outsource !== this.state.outsource
         || nextState.extendedView !== this.state.extendedView
         || nextState.revision !== this.state.revision
-        || nextState.timezone !== this.state.timezone);
+        || nextState.timezone !== this.state.timezone
+        || nextState.outsourceConfirmed !== this.state.outsourceConfirmed
+        || nextState.jobOutsourced !== this.state.jobOutsourced);
     }
 
     render() {

@@ -34,7 +34,9 @@ class OutsourceContainer extends React.Component {
         evt.stopPropagation();
         const area = ReactDOM.findDOMNode(this.container);
 
-        if (this.container && !area.contains(evt.target) && !$(evt.target).hasClass('open-view-more')) {
+        if (this.container && !area.contains(evt.target) &&
+            !$(evt.target).hasClass('open-view-more') &&
+            !$(evt.target).hasClass('outsource-goBack')) {
             this.props.onClickOutside(evt)
         }
     }
