@@ -1,0 +1,146 @@
+[
+    {
+        "id": 1,
+        "name": "<none>"
+    },
+    {
+        "id": 2,
+        "name": "Across"
+    },
+    {
+        "id": 3,
+        "name": "Cloudwords"
+    },
+    {
+        "id": 4,
+        "name": "Coach"
+    },
+    {
+        "id": 5,
+        "name": "Conyac"
+    },
+    {
+        "id": 6,
+        "name": "Easyling"
+    },
+    {
+        "id": 7,
+        "name": "Gengo"
+    },
+    {
+        "id": 8,
+        "name": "Globalsight"
+    },
+    {
+        "id": 9,
+        "name": "Google Translator Toolkit"
+    },
+    {
+        "id": 40,
+        "name": "Kaleidoscope"
+    },
+    {
+        "id": 10,
+        "name": "Kinetic Globalizer"
+    },
+    {
+        "id": 11,
+        "name": "Language Studio"
+    },
+    {
+        "id": 32,
+        "name": "Lingotek"
+    },
+    {
+        "id": 12,
+        "name": "MateCat"
+    },
+    {
+        "id": 13,
+        "name": "MemoQ"
+    },
+    {
+        "id": 14,
+        "name": "Memsource"
+    },
+    {
+        "id": 15,
+        "name": "MultiTRANS"
+    },
+    {
+        "id": 43,
+        "name": "Ocelot"
+    },
+    {
+        "id": 16,
+        "name": "OmegaT"
+    },
+    {
+        "id": 17,
+        "name": "Ontram"
+    },
+    {
+        "id": 18,
+        "name": "Plunet"
+    },
+    {
+        "id": 19,
+        "name": "SDL TMS"
+    },
+    {
+        "id": 23,
+        "name": "SDL Trados Studio"
+    },
+    {
+        "id": 29,
+        "name": "SDL Worldserver"
+    },
+    {
+        "id": 20,
+        "name": "SmartCAT"
+    },
+    {
+        "id": 41,
+        "name": "Smartling"
+    },
+    {
+        "id": 21,
+        "name": "SmartMATE"
+    },
+    {
+        "id": 22,
+        "name": "TDC Globalink"
+    },
+    {
+        "id": 24,
+        "name": "Transit - Star"
+    },
+    {
+        "id": 25,
+        "name": "Translation Workspace"
+    },
+    {
+        "id": 34,
+        "name": "Unbabel"
+    },
+    {
+        "id": 26,
+        "name": "Wordbee"
+    },
+    {
+        "id": 27,
+        "name": "Wordfast"
+    },
+    {
+        "id": 28,
+        "name": "Wordfish"
+    },
+    {
+        "id": 30,
+        "name": "XTM Cloud"
+    },
+    {
+        "id": 31,
+        "name": "XTRF"
+    }
+]

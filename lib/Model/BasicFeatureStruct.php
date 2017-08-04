@@ -1,17 +1,26 @@
 <?php
 
 /**
- * Created by PhpStorm.
- * User: fregini
- * Date: 06/09/16
- * Time: 15:19
+ * Class BasicFeatureStruct
+ *
+ * A BasicFeatureStruct is a feature that is not bound to a specific user. Example of such class is the DQF feature
+ * which is enabled application-wide.
+ *
+ * BasicFeatureStruct can have options injected when the class is instantiated.
+ *
+ *
  */
 class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $feature_code ;
+    public $options ;
 
     public function toClassName() {
         return Utils::underscoreToCamelCase( $this->feature_code );
+    }
+
+    public function getOptions() {
+        return $this->options ;
     }
 
 }

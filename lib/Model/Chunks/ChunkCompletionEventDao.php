@@ -1,6 +1,6 @@
 <?php
 
-use Features\ProjectCompletion\Model\EventStruct ;
+use Features\ProjectCompletion\CompletionEventStruct;
 
 class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
@@ -60,7 +60,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      *
      * @return string
      */
-    public static function createFromChunk( $chunk, EventStruct $params ) {
+    public static function createFromChunk( $chunk, CompletionEventStruct $params ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare("INSERT INTO chunk_completion_events " .
@@ -80,7 +80,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             'job_first_segment' => $chunk->job_first_segment,
             'job_last_segment'  => $chunk->job_last_segment,
             'source'            => $validSources[ $params->source ],
-            'create_date'       => date('Y-m-d H:i:s'),
+            'create_date'       => Utils::mysqlTimestamp(time()),
             'remote_ip_address' => $params->remote_ip_address,
             'uid'               => $params->uid,
             'is_review'         => $params->is_review

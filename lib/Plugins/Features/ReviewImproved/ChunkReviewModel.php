@@ -90,7 +90,11 @@ class ChunkReviewModel
      * Returns the calculated score
      */
     public function getScore() {
-        return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000 ;
+        if ( $this->chunk_review->reviewed_words_count == 0 ) {
+            return 0 ;
+        } else {
+            return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000 ;
+        }
     }
 
     /**

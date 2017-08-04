@@ -302,11 +302,8 @@ class newProjectController extends viewController {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-
-        $this->template->DQF_enabled = INIT::$DQF_ENABLED;
-
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
-        $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
+        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
 
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         $this->template->currentSourceLang = $this->getCurrentSourceLang();

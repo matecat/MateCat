@@ -119,7 +119,6 @@ class ProjectManager {
                             'uid'                  => null,
                             'skip_lang_validation' => false,
                             'pretranslate_100'     => 0,
-                            'dqf_key'              => null,
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => [],
@@ -128,7 +127,8 @@ class ProjectManager {
                             'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
                             'id_team'              => null,
                             'team'                 => null,
-                            'sanitize_project_options' => true
+                            'sanitize_project_options' => true,
+                            'file_segments_count'  => []
                     ] );
 
         }
@@ -145,6 +145,7 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $features = [];
+
         if( !empty( $this->projectStructure[ 'project_features' ] ) ){
             foreach( $this->projectStructure[ 'project_features' ] as $key => $feature ){
                 /**
@@ -157,8 +158,8 @@ class ProjectManager {
 
         $this->features = new FeatureSet( $features );
 
-        if ( !empty( $this->projectStructure['id_customer']) ) {
-           $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
+        if ( !empty( $this->projectStructure['id_customer'] ) ) {
+           $this->features->loadAutoActivablesOnProject( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure['array_files'] = $this->features->filter(
@@ -240,18 +241,27 @@ class ProjectManager {
      * 
      */
     private function saveMetadata() {
-        $dao = new Projects_MetadataDao();
-        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
-
         $options = $this->projectStructure['metadata'];
-        
+
+        /**
+         * Here we have the opportunity to add other features as dependencies of the ones
+         * which are already explicitly set.
+         */
+        $this->features->loadProjectDependenciesFromProjectMetadata( $options ) ;
+
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
-            $options = $this->sanitizeProjectOptions( $options ) ; 
+            $options = $this->sanitizeProjectOptions( $options ) ;
         }
 
         if ( empty( $options ) ) {
             return ;
         }
+
+        $dao = new Projects_MetadataDao();
+        $dao->set( $this->projectStructure['id_project'],
+                Projects_MetadataDao::FEATURES_KEY,
+                implode(',', $this->features->getCodes() )
+        );
 
         foreach( $options as $key => $value ) {
             $dao->set(
@@ -690,47 +700,8 @@ class ProjectManager {
 
         $this->pushActivityLog();
 
-        //create Project into DQF queue
-        if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
-
-            $dqfProjectStruct                  = DQF_DqfProjectStruct::getStruct();
-            $dqfProjectStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
-            $dqfProjectStruct->project_id      = $this->projectStructure[ 'id_project' ];
-            $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
-            $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
-
-            $dqfQueue = new DqfQueueHandler();
-
-            try {
-
-                $projectManagerInfo = $dqfQueue->checkProjectManagerKey( $this->projectStructure[ 'dqf_key' ] );
-
-                $dqfQueue->createProject( $dqfProjectStruct );
-
-                //for each job, push a task into AMQ's DQF queue
-                foreach ( $this->projectStructure[ 'array_jobs' ][ 'job_list' ] as $i => $jobID ) {
-                    /**
-                     * @var $dqfTaskStruct DQF_DqfTaskStruct
-                     */
-                    $dqfTaskStruct                  = DQF_DqfTaskStruct::getStruct();
-                    $dqfTaskStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
-                    $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
-                    $dqfTaskStruct->task_id         = $jobID;
-                    $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
-                    $dqfTaskStruct->file_name       = uniqid( '', true ) . $this->projectStructure[ 'project_name' ];
-
-                    $dqfQueue->createTask( $dqfTaskStruct );
-
-                }
-            } catch ( Exception $exn ) {
-                $output = __METHOD__ . " (code " . $exn->getCode() . " ) - " . $exn->getMessage();
-                Log::doLog( $output );
-
-                Utils::sendErrMailReport( $output, $exn->getMessage() );
-            }
-        }
-        
         Database::obtain()->begin();
+
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );
@@ -1084,7 +1055,6 @@ class ProjectManager {
             $newJob->job_last_segment  = $this->min_max_segments_id[ 'job_last_segment' ];
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
-            $newJob->dqf_key           = $projectStructure[ 'dqf_key' ];
             $newJob->total_raw_wc      = $this->files_word_count;
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
@@ -1933,6 +1903,12 @@ class ProjectManager {
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
+            if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] )  ) {
+                $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
+            }
+            $this->projectStructure[ 'file_segments_count' ] [ $fid ] ++ ;
+
+            // TODO: continue here to find the count of segments per project
             $segments_metadata[] = [
                     'id'              => $id_segment,
                     'internal_id'     => self::sanitizedUnitId( $tuple[ 0 ], $fid ),

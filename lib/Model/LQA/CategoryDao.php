@@ -3,6 +3,8 @@
 namespace LQA;
 
 class CategoryDao extends \DataAccess_AbstractDao {
+    const TABLE = 'qa_categories' ;
+
     protected function _buildResult( $array_result ) {
 
     }
@@ -23,17 +25,18 @@ class CategoryDao extends \DataAccess_AbstractDao {
      */
     public static function createRecord( $data ) {
         $sql = "INSERT INTO qa_categories " .
-            " ( id_model, label, id_parent, severities ) " .
+            " ( id_model, label, id_parent, severities, options ) " .
             " VALUES " .
-            " ( :id_model, :label, :id_parent, :severities )" ;
+            " ( :id_model, :label, :id_parent, :severities, :options )" ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(
             array(
-                'id_model'  => $data['id_model'],
-                'label'     => $data['label'] ,
-                'id_parent' => $data['id_parent'],
+                'id_model'   => $data['id_model'],
+                'label'      => $data['label'] ,
+                'id_parent'  => $data['id_parent'],
+                'options'    => $data['options'],
                 'severities' => $data['severities']
             )
         );
@@ -91,7 +94,9 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
                 $out[ $row['id'] ]['label'] = $row['label'];
                 $out[ $row['id'] ]['id'] = $row['id'];
+                $out[ $row['id'] ]['options'] = json_decode( $row['options'] );
                 $out[ $row['id'] ]['severities'] = json_decode( $row['severities'], true );
+
             }
 
             else {
@@ -99,6 +104,8 @@ class CategoryDao extends \DataAccess_AbstractDao {
                 $current = array(
                     'label'      => $row['label'],
                     'id'         => $row['id'],
+                    'options'    => json_decode( $row['option'], true ),
+
                     'severities' => json_decode( $row['severities'], true)
                 );
 
@@ -111,6 +118,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
                 'label'         => $element['label'],
                 'id'            => $element['id'],
                 'severities'    => $element['severities'] ,
+                'options'       => $element['options'] ,
                 'subcategories' => $element['subcategories']
             );
         }, array_values($out) );

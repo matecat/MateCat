@@ -56,9 +56,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
       $stmt = $conn->prepare( $query );
 
       $array = array(
-        'id_job' => $chunk->id,
+        'id_job'            => $chunk->id,
         'job_first_segment' => $chunk->job_first_segment ,
-        'job_last_segment' => $chunk->job_last_segment
+        'job_last_segment'  => $chunk->job_last_segment
       ) ;
 
       $stmt->execute( $array );
@@ -97,6 +97,24 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct');
 
         return $stmt->fetchAll( );
+    }
+
+    /**
+     * @param Files_FileStruct $file
+     *
+     * @return Translations_SegmentTranslationStruct[]
+     */
+    public function getByFile( Files_FileStruct $file ) {
+        $sql = "SELECT * FROM segment_translations st " .
+               " JOIN segments s on s.id  = st.id_segment AND s.id_file = :id_file " .
+               " WHERE s.show_in_cattool = 1 " ;
+
+        $conn = $this->con->getConnection();
+
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( ['id_file' => $file->id ] ) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct');
+        return $stmt->fetchAll() ;
     }
 
     protected function _buildResult( $array_result ) {

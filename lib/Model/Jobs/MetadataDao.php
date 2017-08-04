@@ -4,8 +4,9 @@ namespace Jobs;
 
 use Database ;
 
-class MetadataDao extends \DataAccess_AbstractDao
-{
+class MetadataDao extends \DataAccess_AbstractDao {
+
+    const TABLE = 'job_metadata' ;
 
     /**
      * @param $id_job

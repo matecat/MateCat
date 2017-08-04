@@ -5,8 +5,9 @@ namespace Users;
 use Database ;
 use PDO;
 
-class MetadataDao extends \DataAccess_AbstractDao
-{
+class MetadataDao extends \DataAccess_AbstractDao {
+
+    const TABLE = 'user_metadata' ;
 
     public function getAllByUid( $uid ) {
         $conn = Database::obtain()->getConnection();

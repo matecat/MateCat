@@ -8,8 +8,9 @@
 
 namespace Jobs;
 
-class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct  implements \DataAccess_IDaoStruct {
+use DataAccess_IDaoStruct;
 
+class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct  implements DataAccess_IDaoStruct {
     public $id ;
     public $id_job ;
     public $password ;

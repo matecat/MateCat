@@ -15,7 +15,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $fast_analysis_wc ;
     public $standard_analysis_wc ;
     public $remote_ip_address ;
-    public $instance_number ;
+    public $instance_id ;
     public $pretranslate_100 ;
     public $id_qa_model ;
     public $id_assignee ;
@@ -37,6 +37,15 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return $this->cachable(__function__, $this->id, function($id) {
             return Jobs_JobDao::getByProjectId( $id );
         });
+    }
+
+    /**
+     * @return array
+     */
+    public function getTargetLanguages() {
+        return array_map(function(Jobs_JobStruct $job) {
+            return $job->target ;
+        }, $this->getJobs() );
     }
 
     /**
@@ -82,12 +91,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return null|Projects_MetadataStruct[]
      */
     public function getMetadata(){
-
         return $this->cachable( __function__, $this, function ( $project ) {
             $mDao = new Projects_MetadataDao();
             return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
         } );
-
     }
 
     /**

@@ -197,6 +197,95 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     margin-top: 25px;
 }
 
+.dqf-modal .dqf-container {
+    padding: 40px;
+    .user-dqf  {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 4px;
+        background: #f8f6f6;
+        min-height: 40px;
+        margin-bottom: 25px;
+        margin-top: 10px;
+        input {
+            max-width: 100%;
+        }
+        .dqf-message {
+            float: right;
+            margin-top: 10px;
+        }
+    }
+    .button {
+        font-family: Calibri, Arial, Helvetica, sans-serif;
+        vertical-align: top;
+        border: 1px solid #797979;
+        border-radius: 2px;
+        font-size: 16px;
+        margin-bottom: 15px;
+        margin-left: 80%;
+        background-color: #09beec;
+        transition: 0.3s ease;
+        color: #FFFFFF;
+        text-shadow: none;
+        background-image: none;
+        cursor: pointer;
+        display: inline-block;
+        min-height: 1em;
+        outline: none;
+        padding: 0.78571429em 1.5em 0.78571429em;
+        font-weight: bold;
+        line-height: 1em;
+        font-style: normal;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        &:hover {
+            background-color: #08b3de;
+            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important
+        }
+    }
+    .dqf-options-container {
+        h2 {
+            margin-bottom: 10px;
+        }
+        width: 100%;
+        overflow-y: hidden;
+        padding-top: 15px;
+    }
+
+    .dqf-option {
+        width: 48%;
+        float: left;
+        text-align: left;
+        padding: 5px;
+        padding-bottom: 20px;
+    }
+
+    .dqf-option h4 {
+        float: left;
+        margin-top: 5px;
+        margin-left: 10px;
+        font-size: 15px;
+    }
+
+    .dqf-option select {
+        &.error {
+            border: 1px solid red;
+            color: black;
+        }
+        float: right !important;
+        width: 65%;
+        height: 30px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        margin: 1px 0 5px 0;
+        font: inherit;
+    }
+}
+
+
+
+
 .onoffswitch-drive {
     position: relative;
     width: 60px;
@@ -328,6 +417,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .preferences-modal input[type=text],
+.preferences-modal input[type=password],
+.dqf-modal input[type=text],
+.dqf-modal input[type=password],
 .login-container-left input,
 .register-form-container input[type=text],
 .register-form-container input[type=password],

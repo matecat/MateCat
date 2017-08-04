@@ -312,8 +312,7 @@ function getJobData( $id_job, $password = null ) {
         'approved_words',
         'rejected_words',
         'subject',
-        'dqf_key', 
-        'payable_rates', 
+        'payable_rates',
         'total_time_to_edit', 
         'avg_post_editing_effort'
     );

@@ -566,31 +566,6 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
-     *
-     * @param QueueElement $queueElement
-     *
-     * @throws EndQueueException
-     */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ){
-
-        /**
-         *
-         * check for loop re-queuing
-         */
-        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
-
-            $this->_forceSetSegmentAnalyzed( $queueElement );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
-            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
-
-        } elseif ( isset( $queueElement->reQueueNum ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
-        }
-
-    }
-
-    /**
      * Initialize the counter for the analysis.
      * Take the info from the project and initialize it.
      * There is a lock for every project on redis, so only one worker can initialize the counter

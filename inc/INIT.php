@@ -40,7 +40,6 @@ class INIT {
     public static $INSTANCE_ID         = 0;
     public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
-    public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $USE_COMPILED_ASSETS = false;
 
@@ -54,11 +53,6 @@ class INIT {
     public static $TRACKING_CODES_VIEW_PATH = "";
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
-    //This queue will be used for dqf project creation
-    public static $DQF_PROJECTS_TASKS_QUEUE_NAME = "matecat_dqf_project_task_queue";
-    //This queue will be used for dqf project creation
-    public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
-
     public static $COMMENTS_ENABLED = true ;
     public static $SSE_COMMENTS_QUEUE_NAME = "matecat_sse_comments";
     public static $SSE_BASE_URL;
@@ -96,7 +90,6 @@ class INIT {
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
-    public static $DQF_ENABLED = false;
 
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $FILTERS_OCR_CHECK         = true;
@@ -111,6 +104,17 @@ class INIT {
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
+
+    /**
+     * DQF configuration
+     *
+     */
+    public static $DQF_ENABLED = true;
+    public static $DQF_BASE_URL;
+    public static $DQF_ID_PREFIX = '' ;
+    public static $DQF_API_KEY;
+    public static $DQF_ENCRYPTION_KEY;
+    public static $DQF_ENCRYPTION_IV ;
 
     /**
      * We proose that lxq_server is in a configuration file
@@ -262,7 +266,6 @@ class INIT {
     public static $UNLOCKABLE_TAGS = false;
 
     public static $SKIP_SQL_CACHE = false ;
-
 
     public function __construct(){
 

@@ -1,0 +1,98 @@
+[
+    {
+        "id": 1,
+        "name": "Aerospace \/ Aviation"
+    },
+    {
+        "id": 2,
+        "name": "Automotive"
+    },
+    {
+        "id": 3,
+        "name": "Business Services"
+    },
+    {
+        "id": 4,
+        "name": "Chemicals"
+    },
+    {
+        "id": 16,
+        "name": "Cloud Services & Computer Software"
+    },
+    {
+        "id": 5,
+        "name": "Construction \/ Real Estate"
+    },
+    {
+        "id": 6,
+        "name": "Consumer Goods \/ Electronics & Hardware"
+    },
+    {
+        "id": 7,
+        "name": "Education"
+    },
+    {
+        "id": 8,
+        "name": "Energy, Water & Utilities"
+    },
+    {
+        "id": 9,
+        "name": "Engineering"
+    },
+    {
+        "id": 10,
+        "name": "Entertainment"
+    },
+    {
+        "id": 11,
+        "name": "Financial Services"
+    },
+    {
+        "id": 12,
+        "name": "Food Services \/ Agriculture"
+    },
+    {
+        "id": 13,
+        "name": "Healthcare \/ Medical Equipment & Supplies"
+    },
+    {
+        "id": 14,
+        "name": "Hospitality \/ Travel \/ Tourism"
+    },
+    {
+        "id": 15,
+        "name": "Humanities \/ Arts \/ Religion"
+    },
+    {
+        "id": 17,
+        "name": "Legal Services"
+    },
+    {
+        "id": 18,
+        "name": "Manufacturing \/ Industrial Electronics"
+    },
+    {
+        "id": 19,
+        "name": "Pharmaceuticals & Biotechnology"
+    },
+    {
+        "id": 20,
+        "name": "Public Sector \/ Non-Profit"
+    },
+    {
+        "id": 21,
+        "name": "Retail & Wholesale Distribution \/ E-Commerce"
+    },
+    {
+        "id": 22,
+        "name": "Telecommunication"
+    },
+    {
+        "id": 23,
+        "name": "Transportation \/ Logistics"
+    },
+    {
+        "id": 24,
+        "name": "Undefined Sector"
+    }
+]
