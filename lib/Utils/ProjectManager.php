@@ -1247,42 +1247,7 @@ class ProjectManager {
             throw new Exception( "Requested words per chunk available only for Matecat PRO version", -4 );
         }
 
-        /**
-         * Select all rows raw_word_count and eq_word_count
-         * and their totals ( ROLLUP )
-         * reserve also two columns for job_first_segment and job_last_segment
-         *
-         * +----------------+-------------------+---------+-------------------+------------------+
-         * | raw_word_count | eq_word_count     | id      | job_first_segment | job_last_segment |
-         * +----------------+-------------------+---------+-------------------+------------------+
-         * |          26.00 |             22.10 | 2390662 |           2390418 |          2390665 |
-         * |          30.00 |             25.50 | 2390663 |           2390418 |          2390665 |
-         * |          48.00 |             40.80 | 2390664 |           2390418 |          2390665 |
-         * |          45.00 |             38.25 | 2390665 |           2390418 |          2390665 |
-         * |        3196.00 |           2697.25 |    NULL |           2390418 |          2390665 |  -- ROLLUP ROW
-         * +----------------+-------------------+---------+-------------------+------------------+
-         *
-         */
-        $query = "SELECT
-                    SUM( raw_word_count ) AS raw_word_count,
-                    SUM( eq_word_count ) AS eq_word_count,
-                    job_first_segment, job_last_segment, s.id, s.show_in_cattool
-                        FROM segments s
-                        JOIN files_job fj on fj.id_file=s.id_file
-                        JOIN jobs j ON j.id = fj.id_job
-                        LEFT  JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
-                        WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                        AND j.id = %u
-                        AND j.password = '%s'
-                        GROUP BY s.id
-                    WITH ROLLUP";
-
-        $query = sprintf( $query,
-                $projectStructure[ 'job_to_split' ],
-                $this->dbHandler->escape( $projectStructure[ 'job_to_split_pass' ] )
-        );
-
-        $rows = $this->dbHandler->fetch_array( $query );
+        $rows = ( new Jobs_JobDao() )->getSplitData( $projectStructure['job_to_split'], $projectStructure['job_to_split_pass'] );
 
         if ( empty( $rows ) ) {
             throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ], -5 );
@@ -1365,7 +1330,7 @@ class ProjectManager {
             throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7 );
         }
 
-        $result = array_merge( $row_totals, array( 'chunks' => $counter ) );
+        $result = array_merge( $row_totals->getArrayCopy(), array( 'chunks' => $counter ) );
 
         $projectStructure[ 'split_result' ] = new ArrayObject( $result );
 
@@ -2087,12 +2052,13 @@ class ProjectManager {
             foreach ( $struct as $pos => $translation_row ) {
 
                 $sql_values = sprintf(
-                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE' )",
+                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE', '%s' )",
                     $translation_row [ 0 ],
                     $jid,
                     $translation_row [ 3 ],
                     $status,
-                    $translation_row [ 2 ]
+                    $translation_row [ 2 ],
+                    0
                 );
 
                 $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
@@ -2105,7 +2071,7 @@ class ProjectManager {
 
             $baseQuery = "INSERT INTO segment_translations (
                 id_segment, id_job, segment_hash, status, translation, translation_date,
-                tm_analysis_status, locked, match_type )
+                tm_analysis_status, locked, match_type, eq_word_count )
 				values ";
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
