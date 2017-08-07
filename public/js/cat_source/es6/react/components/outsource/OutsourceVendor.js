@@ -19,6 +19,7 @@ class OutsourceVendor extends React.Component {
             timezone: $.cookie( "matecat_timezone"),
             changeRates: changesRates,
             jobOutsourced: (!!this.props.job.get('outsource')),
+            errorPastDate: false
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -244,6 +245,14 @@ class OutsourceVendor extends React.Component {
         }
     }
 
+    getUserEmail() {
+        if (APP.USER.STORE.user) {
+            return APP.USER.STORE.user.email;
+        } else {
+            return '';
+        }
+    }
+
     viewMoreClick() {
         this.setState({
             extendedView: true
@@ -257,6 +266,7 @@ class OutsourceVendor extends React.Component {
         let price = this.getPrice();
         let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let translatedWords = this.getTranslatedWords();
+        let email = this.getUserEmail();
         /*let translatorSubjects = this.getTranslatorSubjects();*/
         let pricePWord = this.getPricePW(price);
         return <div className="outsource-to-vendor sixteen wide column">
@@ -348,7 +358,10 @@ class OutsourceVendor extends React.Component {
                             </div>
                             {!this.state.outsourceConfirmed ? (
                                 <div className="need-it-faster">
-                                    <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+                                    {this.state.errorPastDate ? (
+                                        <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+                                    ) : (null)}
+
 
                                     <a className="faster"
                                        ref={(faster) => this.dateFaster = faster}
@@ -369,7 +382,7 @@ class OutsourceVendor extends React.Component {
                                 </div>
                                 <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
                                 <div className="ui input">
-                                    <input type="text" placeholder="ruben.santillan@translated.net" defaultValue="ruben.santillan@translated.net" />
+                                    <input type="text" placeholder="Insert email" defaultValue={email} />
                                 </div>
 
                             </div>
@@ -448,6 +461,7 @@ class OutsourceVendor extends React.Component {
         let price = this.getPrice();
         let priceCurrencySymbol = this.getPriceCurrencySymbol();
         let pricePWord = this.getPricePW(price);
+        let email = this.getUserEmail();
         return <div className="outsource-to-vendor-reduced sixteen wide column">
             {this.state.outsource ? (
                 <div className="reduced-boxes">
@@ -490,7 +504,7 @@ class OutsourceVendor extends React.Component {
                                 </div>
                                 <div className="email-confirm">Great, an Account Manager will contact you to send you the invoice as a customer to this email</div>
                                 <div className="ui input">
-                                    <input type="text" placeholder="ruben.santillan@translated.net" defaultValue="ruben.santillan@translated.net"/>
+                                    <input type="text" placeholder="Insert email" defaultValue={email}/>
                                 </div>
 
                             </div>
@@ -583,11 +597,21 @@ class OutsourceVendor extends React.Component {
                 disabledWeekDays: [0,6],
                 onSelectDateButton: function (newDateTime) {
                     let timestamp = (new Date(newDateTime)).getTime();
-                    self.selectedDate = timestamp;
-                    self.setState({
-                        outsource: false
-                    });
-                    self.getOutsourceQuote(timestamp);
+                    let now = new Date().getTime();
+                    if (timestamp < now) {
+                        self.selectedDate = null;
+                        self.setState({
+                            errorPastDate: true
+                        });
+                    } else {
+                        self.selectedDate = timestamp;
+                        self.setState({
+                            outsource: false,
+                            errorPastDate: false
+                        });
+                        self.getOutsourceQuote(timestamp);
+                    }
+
                 },
                 onChangeDateTime: function (newDateTime, $input) {
                     console.log("onChangeDateTime");
@@ -619,7 +643,8 @@ class OutsourceVendor extends React.Component {
         || nextState.revision !== this.state.revision
         || nextState.timezone !== this.state.timezone
         || nextState.outsourceConfirmed !== this.state.outsourceConfirmed
-        || nextState.jobOutsourced !== this.state.jobOutsourced);
+        || nextState.jobOutsourced !== this.state.jobOutsourced
+        || nextState.errorPastDate !== this.state.errorPastDate);
     }
 
     render() {
