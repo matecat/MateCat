@@ -3014,7 +3014,7 @@ body.filterOpen .searchbox
 .step2,.step1 {
     clear: both;
     margin: 0 auto;
-    overflow: hidden;
+    overflow: initial;
     width: 50%;
 }
 
