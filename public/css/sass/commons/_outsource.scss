@@ -478,7 +478,7 @@
                             &.past-date {
                                 color: red;
                             }
-                            &.far-date {
+                            &.too-far-date {
                                 color: #000000;
                                 .tip {
                                     display: inline-block;
