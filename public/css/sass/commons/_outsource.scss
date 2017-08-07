@@ -519,6 +519,8 @@
             .customer-request {
                 .customer-box {
                     padding: 15px;
+                    position: relative;
+                    overflow: hidden;
                     .title-pointer {
                         h3 {
                             display: inline-block;
@@ -536,6 +538,8 @@
                                 display: inline-block;
                                 border-radius: 50%;
                                 margin-right: 5px;
+                                cursor: pointer;
+                                transition: 0.3s ease;
                                 &.active {
                                     background: #7eaf3e;
                                 }
@@ -546,6 +550,10 @@
                         border: 1px solid #a8bbb2;
                         padding: 15px;
                         display: inline-block;
+                        width: 100%;
+                        height: 110px;
+                        overflow: hidden;
+                        position: relative;
                         .appendix {
                             display: inline-block;
                             width: 8%;
@@ -559,6 +567,12 @@
                             width: 90%;
                             display: inline-block;
                             vertical-align: middle;
+                            position: absolute;
+                            opacity: 0;
+                            &.fade-in {
+                                transition: 1s;
+                                opacity: 1;
+                            }
                             .customer-text {
                                 padding-bottom: 10px;
                                 font-size: 13px;
