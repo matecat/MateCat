@@ -65,7 +65,8 @@ class OutsourceVendor extends React.Component {
 
                     self.setState({
                         outsource: true,
-                        chunkQuote: chunk
+                        chunkQuote: chunk,
+                        revision: (chunk.get('typeOfService') === "premium") ? true : false
                     });
 
                     // Intercom
@@ -145,7 +146,7 @@ class OutsourceVendor extends React.Component {
         this.quoteResponse[0] = this.state.chunkQuote.toJS();
 
 
-        $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
+        /*$(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
         $(this.outsourceForm).find('input[name=url_ko]').attr('value', this.url_ko);
         $(this.outsourceForm).find('input[name=confirm_urls]').attr('value', this.confirm_urls);
         $(this.outsourceForm).find('input[name=data_key]').attr('value', this.data_key);
@@ -156,7 +157,7 @@ class OutsourceVendor extends React.Component {
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', JSON.stringify( this.quoteResponse ) );
         $(this.outsourceForm).submit();
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', '' );
-        $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );
+        $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );*/
 
         this.setState({
             jobOutsourced: true
@@ -314,8 +315,11 @@ class OutsourceVendor extends React.Component {
                                 <div className="payable">{this.state.chunkQuote.get('words')} words</div>
                             </div>
                         </div>
-                        <div className="job-price">
-                            {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
+                        {this.state.outsourceConfirmed ? ('') : (
+                            <div className="job-price">
+                                {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                            </div>
+                        )}
                     </div>
                     <div className="revision-box">
                         <div className="add-revision">
@@ -326,8 +330,11 @@ class OutsourceVendor extends React.Component {
                                 <label>Add Revision</label>
                             </div>
                         </div>
-                        <div className="job-price">
-                            {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('r_price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</div>
+                        {this.state.outsourceConfirmed ? ('') : (
+                            <div className="job-price">
+                                {priceCurrencySymbol} {this.getCurrencyPrice(this.state.chunkQuote.get('r_price')).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                            </div>
+                        )}
                     </div>
                     <div className="delivery-order">
                         <div className="delivery-box">
