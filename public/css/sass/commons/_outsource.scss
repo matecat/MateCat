@@ -565,13 +565,10 @@
                         }
                     }
                     .slider-box {
+                        min-height: 123px;
+                        position: relative;
                         border: 1px solid #a8bbb2;
                         padding: 15px;
-                        display: inline-block;
-                        width: 100%;
-                        height: 110px;
-                        overflow: hidden;
-                        position: relative;
                         .appendix {
                             display: inline-block;
                             width: 8%;
@@ -584,17 +581,18 @@
                         .customer-box-info {
                             width: 90%;
                             display: inline-block;
-                            vertical-align: middle;
                             position: absolute;
                             opacity: 0;
+                            padding: 0 15px 0 0px;
                             &.fade-in {
-                                transition: 1s;
+                                transition: 1.5s;
                                 opacity: 1;
                             }
                             .customer-text {
                                 padding-bottom: 10px;
                                 font-size: 13px;
                                 line-height: 15px;
+                                height: 55px;
                             }
                             .customer-info {
                                 width: 70%;

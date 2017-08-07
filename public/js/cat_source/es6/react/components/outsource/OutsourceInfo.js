@@ -58,6 +58,7 @@ class OutsourceInfo extends React.Component {
                             <div className="pointer active" onClick={this.slideItem.bind(this, 1)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 2)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 3)}/>
+                            <div className="pointer" onClick={this.slideItem.bind(this, 4)}/>
                         </div>
                     </div>
                     <div className="slider-box" >
@@ -66,18 +67,38 @@ class OutsourceInfo extends React.Component {
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                1 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                                labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                1 - The outsourcing option in Matecat is so straightforward. You simply choose your language pairs,
+                                upload the document, get the price and send it off to the Project Manager. So easy!
+                            </div>
+                            <div className="customer-info">
+                                <div className="customer-photo">
+                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />
+                                </div>
+                                <div className="customer-name">
+                                    Kevin Connor
+                                </div>
+                                <div className="customer-role">
+                                    - Lorem Ipsum (role)
+                                </div>
+                            </div>
+                            <div className="customer-corporate-logo">
+                               {/* <img src="../../public/img/outsource-clients/client-example.png" />*/}
+                               Kevin Connor (company?)
+                            </div>
+                        </div>
+                        <div className="customer-box-info">
+                            <div className="customer-text">
+                                2 - I always receive translations back, exactly as I want. Great service, well worth trying out.
+                                I now want to use it for further languages and for projects with a tight delivery.
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
                                     <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
                                 <div className="customer-name">
-                                    Gina
+                                    Name Surname
                                 </div>
                                 <div className="customer-role">
-                                    - Digital Strategist & Project Manager
+                                    - Need role
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
@@ -86,17 +107,17 @@ class OutsourceInfo extends React.Component {
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                2 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                                labore et dolore magna aliqua. Lorem ipsum dolor sit amet.
+                                3 - Managing many file formats also simplifies our whole workflow, before and after delivery to the customer.
+                                Thanks for the excellent tool!
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
                                     <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
                                 <div className="customer-name">
-                                    Franca
+                                    Name Surname
                                 </div>
                                 <div className="customer-role">
-                                    - Digital Strategist & Project Manager
+                                    - Need role
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
@@ -105,17 +126,16 @@ class OutsourceInfo extends React.Component {
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                3 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                                labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                4 - Sometimes I even split projects, outsource only a part, and then immediately assign the revision to a third person.
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
                                     <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
                                 <div className="customer-name">
-                                    Paola
+                                    Name Surname
                                 </div>
                                 <div className="customer-role">
-                                    - Digital Strategist & Project Manager
+                                    - Need role
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
