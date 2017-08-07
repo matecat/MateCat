@@ -2427,6 +2427,13 @@ input.email-export-tmx {
     margin-right: 20px !important;
 }
 
+.mmt-message-modal .warning-button.left-10.right-20 {
+    height: 43px;
+    overflow: inherit;
+    line-height: 40px;
+    position: relative;
+    top: -1px;
+}
 
 
 /*******************/
@@ -3007,7 +3014,7 @@ body.filterOpen .searchbox
 .step2,.step1 {
     clear: both;
     margin: 0 auto;
-    overflow: hidden;
+    overflow: initial;
     width: 50%;
 }
 
