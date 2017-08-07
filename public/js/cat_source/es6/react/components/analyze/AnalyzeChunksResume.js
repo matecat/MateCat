@@ -102,7 +102,7 @@ class AnalyzeChunksResume extends React.Component {
                             return job.get('id') == indexJob && job.get('password') == indexChunk;
                         });
                         index++;
-                        if ( !_.isNull(chunkJob.outsource) ) {
+                        if ( !_.isNull(chunkJob.get('outsource')) ) {
                             thereIsJobOutsourced = true;
                         }
 
@@ -181,7 +181,7 @@ class AnalyzeChunksResume extends React.Component {
                         return job.get('id') == indexJob ;
                     });
 
-                    if ( !_.isNull(chunkJob.outsource) ) {
+                    if ( !_.isNull(chunkJob.get('outsource') ) ) {
                         thereIsJobOutsourcedClass = 'disabled';
                     }
 
