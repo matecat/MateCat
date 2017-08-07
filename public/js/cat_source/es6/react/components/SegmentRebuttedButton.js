@@ -1,9 +1,8 @@
-
-
 class SegmentRebuttedButton extends React.Component{
 
-    getInitialState() {
-        return {
+    constructor(props) {
+        super(props);
+        this.state = {
             disabled: false,
         };
     }
@@ -23,7 +22,7 @@ class SegmentRebuttedButton extends React.Component{
 
         return <li>
             <a className="button button-rebutted status-rebutted"
-               onClick={this.handleClick}
+               onClick={this.handleClick.bind(this)}
                href="javascript:;"
                disabled={!this.state.disabled} >
                 Rebutted
