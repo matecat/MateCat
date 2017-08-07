@@ -478,10 +478,12 @@
                             &.past-date {
                                 color: red;
                             }
-                            &.too-close-date {
+                            &.far-date {
                                 color: #000000;
                                 .tip {
                                     display: inline-block;
+                                    width: 5px;
+                                    margin-right: 20px;
                                     i {
                                         position: relative;
                                         color: #a7a7a7;

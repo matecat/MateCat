@@ -363,7 +363,7 @@ class OutsourceVendor extends React.Component {
                                     ) : (null)}
                                     {/*<div className="errors-date generic-error">* This is a generic error</div>*/}
                                     {(showDateMessage) ? (
-                                        <div className="errors-date too-close-date" >We will delivery before the selected date
+                                        <div className="errors-date too-far-date" >We will delivery before the selected date
                                             <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
                                                  data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
                                         </div>
