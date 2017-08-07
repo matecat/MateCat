@@ -348,12 +348,13 @@ class OutsourceVendor extends React.Component {
                             </div>
                             {!this.state.outsourceConfirmed ? (
                                 <div className="need-it-faster">
+                                    <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+
                                     <a className="faster"
                                        ref={(faster) => this.dateFaster = faster}
                                     >Need it faster?</a>
                                 </div>
                             ):('')}
-
                             {(!this.state.outsourceConfirmed && showDateMessage) ? (
                                 <div className="need-it-faster-message">
                                     <strong>We will deliver before the selected date.</strong>This date already provides us
@@ -480,6 +481,7 @@ class OutsourceVendor extends React.Component {
                                     {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
                                 </div>
                             </div>
+                            <div className="errors-date past-date">* Chosen delivery date is in the past</div>
                         </div>
                         {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
                             <div className="confirm-delivery-input">

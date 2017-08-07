@@ -469,6 +469,15 @@
                             width: 600px;
                             margin-top: 9px;
                         }
+                        .errors-date {
+                            font-weight: 100;
+                            font-size: 14px;
+                            display: inline-block;
+                            margin-right: 6px;
+                            &.past-date {
+                                color: red;
+                            }
+                        }
                     }
                 }
                 .order-box-outsource {
@@ -750,6 +759,15 @@
                                     position: relative;
                                     top: -3px;
                                 }
+                            }
+                        }
+                        .errors-date {
+                            font-weight: 100;
+                            font-size: 14px;
+                            display: inline-block;
+                            margin-right: 6px;
+                            &.past-date {
+                                color: red;
                             }
                         }
                     }
