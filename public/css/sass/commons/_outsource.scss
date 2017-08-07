@@ -474,8 +474,24 @@
                             font-size: 14px;
                             display: inline-block;
                             margin-right: 6px;
+                            text-align: right;
                             &.past-date {
                                 color: red;
+                            }
+                            &.too-close-date {
+                                color: #000000;
+                                .tip {
+                                    display: inline-block;
+                                    i {
+                                        position: relative;
+                                        color: #a7a7a7;
+                                        font-size: 16px;
+                                        top: 2px;
+                                    }
+                                }
+                            }
+                            &.generic-error {
+                                color: #000000;
                             }
                         }
                     }
@@ -730,12 +746,15 @@
                             }
                         }
                         .view-more {
+                            z-index: 1;
+                            position: relative;
                         }
                     }
                     .delivery-order {
                         display: inline-block;
-                        padding: 0 10px;
+                        padding: 0 0 0 10px;
                         width: 42%;
+                        text-align: right;
                         .delivery-box {
                             display: inline-block;
                             font-size: 18px;
@@ -761,26 +780,30 @@
                                 }
                             }
                         }
-                        .errors-date {
-                            font-weight: 100;
-                            font-size: 14px;
-                            display: inline-block;
-                            margin-right: 6px;
-                            &.past-date {
-                                color: red;
-                            }
+                    }
+                    .errors-date {
+                        font-weight: 100;
+                        font-size: 14px;
+                        display: inline-block;
+                        margin-right: 6px;
+                        text-align: right;
+                        width: 100%;
+                        position: relative;
+                        top: -10px;
+                        &.generic-error {
+                            color: red;
                         }
                     }
                     .confirm-delivery-input {
                         text-align: right;
-                        margin-top: 0;
+                        margin-top: 8px;
                     }
                 }
                 .order-box-outsource {
                     display: inline-block;
                     float: right;
                     text-align: center;
-                    margin-top: -27px;
+                    margin-top: -17px;
                     width: 15%;
                     .order-box {
                         background-color: #daeddf;
