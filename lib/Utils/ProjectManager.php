@@ -1095,17 +1095,17 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
-            foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
-
-                try {
-                    //prepare pre-translated segments queries
-                    if ( !empty( $projectStructure[ 'translations' ] ) ) {
-                        $this->_insertPreTranslations( $newJob->id );
-                    }
-                } catch ( Exception $e ) {
-                    $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
-                    Utils::sendErrMailReport( $msg );
+            try {
+                //prepare pre-translated segments queries
+                if ( !empty( $projectStructure[ 'translations' ] ) ) {
+                    $this->_insertPreTranslations( $newJob->id );
                 }
+            } catch ( Exception $e ) {
+                $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
+                Utils::sendErrMailReport( $msg );
+            }
+
+            foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
                 if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
                     $this->insertSegmentNotesForFile();
@@ -1118,6 +1118,9 @@ class ProjectManager {
                 }
             }
         }
+
+        //Clean Translation array
+        $this->projectStructure[ 'translations' ]->exchangeArray( array() );
 
         $this->features->run('processJobsCreated', $projectStructure );
 
@@ -2130,7 +2133,6 @@ class ProjectManager {
 
         //clean translations and queries
         $this->projectStructure[ 'query_translations' ]->exchangeArray( array() );
-        $this->projectStructure[ 'translations' ]->exchangeArray( array() );
 
     }
 
