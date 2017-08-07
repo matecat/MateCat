@@ -15,6 +15,8 @@ class getContributionController extends ajaxController {
 
     private $jobData;
 
+    private $feature_set;
+
     private $__postInput = array();
 
     public function __construct() {
@@ -50,6 +52,9 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
+
+        $this->feature_set = new FeatureSet();
+
     }
 
     public function doAction() {
@@ -214,18 +219,10 @@ class getContributionController extends ajaxController {
              * @var $mt Engines_MMT
              */
             $mt        = Engine::getInstance( $this->id_mt_engine );
-
             $config = $mt->getConfigStruct();
 
-            if( $mt instanceof Engines_MMT ){
-                $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $this->tm_keys ] );
-                $config[ 'keys' ] = array_map( function( $tm_key ) {
-                    /**
-                     * @var $tm_key TmKeyManagement_MemoryKeyStruct
-                     */
-                    return $tm_key->key;
-                }, $tm_keys );
-            }
+            //if a callback is not set only the first argument is returned, get the config params from the callback
+            $config = $this->feature_set->filter( 'beforeGetContribution', $config, $mt, $this->tm_keys, $this->id_job );
 
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;

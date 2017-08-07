@@ -301,7 +301,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $result_object = null;
+        $result_object = [];
 
         switch ( $functionName ) {
             case 'tags_projection' :
@@ -316,14 +316,16 @@ class Engines_MMT extends Engines_AbstractEngine {
                 $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
                 break;
             case 'translate_relative_url':
-                $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
-                $result_object = ( new Engines_Results_MyMemory_Matches(
-                        $this->_resetSpecialStrings( $args[ 1 ][ 'q' ] ),
-                        $result_object->translatedText,
-                        100 - $this->getPenalty() . "%",
-                        "MT-" . $this->getName(),
-                        date( "Y-m-d" )
-                ) )->get_as_array();
+                if( !empty( $result_object->translatedText ) ){
+                    $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
+                    $result_object = ( new Engines_Results_MyMemory_Matches(
+                            $this->_resetSpecialStrings( $args[ 1 ][ 'q' ] ),
+                            $result_object->translatedText,
+                            100 - $this->getPenalty() . "%",
+                            "MT-" . $this->getName(),
+                            date( "Y-m-d" )
+                    ) )->get_as_array();
+                }
                 break;
             default:
                 //this case should not be reached

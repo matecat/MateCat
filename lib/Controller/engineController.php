@@ -13,6 +13,12 @@ class engineController extends ajaxController {
     private $id;
     private $name;
     private $engineData;
+
+    /**
+     * @var Features
+     */
+    private $feature_set;
+
     private static $allowed_actions = array(
             'add', 'delete', 'execute'
     );
@@ -74,6 +80,9 @@ class engineController extends ajaxController {
                     'message' => "Login is required to perform this action"
             );
         }
+
+        $this->feature_set = new FeatureSet();
+
     }
 
     /**
@@ -264,6 +273,8 @@ class engineController extends ajaxController {
 
             case strtolower( Constants_Engines::MMT ):
 
+                //TODO Move this piece of code in the plugin
+
                 /**
                  * Create a record of type MMT
                  */
@@ -286,8 +297,13 @@ class engineController extends ajaxController {
             return;
         }
 
+        $engineList = $this->feature_set->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
+
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result = $engineDAO->create( $newEngine );
+        $result = null;
+        if( array_search( $newEngine->class_load, $engineList ) ){
+            $result = $engineDAO->create( $newEngine );
+        }
 
         if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
@@ -364,6 +380,8 @@ class engineController extends ajaxController {
             $engine_test->wakeUp();
         } elseif( $newEngine instanceof EnginesModel_MMTStruct ){
 
+            //TODO Move this piece of code in the plugin
+
             $engine_test = Engine::getInstance( $result->id );
             /**
              * @var $engine_test Engines_MMT
@@ -377,6 +395,8 @@ class engineController extends ajaxController {
             }
 
         }
+
+        $this->feature_set->run( 'postEngineCreation', $this->logged_user, $result->id );
 
         $this->result['data']['id'] = $result->id;
 

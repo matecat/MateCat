@@ -132,7 +132,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
          */
         $query = $this->_buildQueryForEngine( $obj );
         $arr_result = $this->_fetch_array( $query );
-        return $this->_buildResult( $arr_result );
+        return $this->_buildResult( $arr_result, Constants_Engines::getAvailableEnginesList() );
 
     }
 
@@ -261,9 +261,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
         $result = array();
 
+        $availableEngines = func_get_arg( 1 );
+
         foreach ( $array_result as $item ) {
 
-            $build_arr = array(
+            if( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
+                $result[ ] = new EnginesModel_NONEStruct();
+                continue;
+            }
+
+            $build_arr = [
                     'id'                           => (int)$item[ 'id' ],
                     'name'                         => $item[ 'name' ],
                     'type'                         => $item[ 'type' ],
@@ -280,7 +287,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                     'penalty'                      => $item[ 'penalty' ],
                     'active'                       => $item[ 'active' ],
                     'uid'                          => $item[ 'uid' ]
-            );
+            ];
 
             $obj = new EnginesModel_EngineStruct( $build_arr );
 

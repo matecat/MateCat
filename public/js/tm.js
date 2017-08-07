@@ -1466,7 +1466,7 @@
                 success: function(d) {
                     if(d.errors.length) {
                         console.log('error');
-                        $('#mt-provider-details .mt-error-key').text("API key non valid").show();
+                        $('#mt-provider-details .mt-error-key').text("API key not valid").show();
                     } else {
                         if(d.data.config && Object.keys(d.data.config).length) {
                             UI.renderMTConfig(provider, d.name, d.data.config);
