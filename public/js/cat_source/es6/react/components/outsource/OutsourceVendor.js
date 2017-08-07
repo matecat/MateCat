@@ -361,19 +361,19 @@ class OutsourceVendor extends React.Component {
                                     {this.state.errorPastDate ? (
                                         <div className="errors-date past-date">* Chosen delivery date is in the past</div>
                                     ) : (null)}
-
-
+                                    {/*<div className="errors-date generic-error">* This is a generic error</div>*/}
+                                    {(showDateMessage) ? (
+                                        <div className="errors-date too-close-date" >We will delivery before the selected date
+                                            <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                 data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
+                                        </div>
+                                    ):('')}
                                     <a className="faster"
                                        ref={(faster) => this.dateFaster = faster}
                                     >Need it faster?</a>
                                 </div>
                             ):('')}
-                            {(!this.state.outsourceConfirmed && showDateMessage) ? (
-                                <div className="need-it-faster-message">
-                                    <strong>We will deliver before the selected date.</strong>This date already provides us
-                                    with all the time we need to deliver quality work at the lowest price
-                                </div>
-                            ):('')}
+
                         </div>
                         {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
                             <div className="confirm-delivery-input">
@@ -495,8 +495,8 @@ class OutsourceVendor extends React.Component {
                                     {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
                                 </div>
                             </div>
-                            <div className="errors-date past-date">* Chosen delivery date is in the past</div>
                         </div>
+                        <div className="errors-date generic-error">* This is a generic error</div>
                         {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
                             <div className="confirm-delivery-input">
                                 <div className="back" onClick={this.goBack.bind(this)}>
