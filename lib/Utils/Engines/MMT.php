@@ -5,6 +5,8 @@
  * User: Hashashiyyin
  * Date: 17/05/16
  * Time: 13:11
+ *
+ * @property int id
  */
 class Engines_MMT extends Engines_AbstractEngine {
 

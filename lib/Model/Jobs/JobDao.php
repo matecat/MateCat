@@ -109,10 +109,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
-     * @param                    $requestedWordsPerSplit
+     * @param int $id
+     * @param string $password
+     * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]|LoudArray[]
+     * @internal param Chunks_ChunkStruct $chunk
+     * @internal param $requestedWordsPerSplit
+     *
      */
 
     public function getSplitData( $id, $password, $ttl = 0 ) {
