@@ -58,19 +58,38 @@ class ChildProjectService {
 
         $client->execRequests();
 
-        $responses = $client->curl()->getAllContents();
-
         if ( count($client->curl()->getErrors() ) > 0 ) {
             throw  new Exception('Error on update of remote child project: ' . implode( ', ',  $client->curl()->getAllContents() ) ) ;
         }
 
         $returnable = $client->curl()->getAllContents();
 
-        // $returnable =  array_map( function( $item ) {
-        //     return new ProjectResponseStruct( json_decode( $item, true )['model'] );
-        // }, $responses );
-
         return $returnable  ;
+    }
+
+    public function setCompleted(ChildProjectRequestStruct $requestStruct ) {
+        $client = new Client();
+        $client->setSession( $this->session );
+
+        $resource =  $client->createResource('/project/child/%s/status', 'put', [
+                'headers'    =>  $requestStruct->getHeaders(),
+                'pathParams' =>  $requestStruct->getPathParams(),
+                'formData'   =>  ['status' => '']
+        ] );
+
+        $client->execRequests();
+        $this->_checkError( $client, 'Error while updating child project status to completed.');
+
+        return $client->curl()->getSingleContent( $resource );
+
+    }
+
+    private function _checkError( Client $client, $message ) {
+        $client->execRequests();
+
+        if ( count($client->curl()->getErrors() ) > 0 ) {
+            throw  new Exception( $message . ' - ' . var_export( $client->curl()->getAllContents(), true ) );
+        }
     }
 
     public function getRemoteResources( $requestStructs ) {

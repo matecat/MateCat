@@ -2,6 +2,7 @@
 
 namespace Features\Dqf\Model ;
 
+use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\ChildProjectTranslationBatchService;
@@ -93,14 +94,33 @@ class TranslationChildProject {
         $this->dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
     }
 
+    /**
+     *
+     */
+    public function setCompleted() {
+        $service = new ChildProjectService( $this->userSession, $this->chunk ) ;
+
+        foreach( $this->dqfChildProjects as $project ) {
+            $struct = new ChildProjectRequestStruct([
+                    'projectId' => $project->dqf_project_id,
+                    'projectKey' => $project->dqf_project_uuid
+            ]);
+
+            $service->setCompleted( $struct );
+        }
+    }
+
+    public function setUncompleted() {
+        $service = new ChildProjectService( $this->userSession, $this->chunk ) ;
+
+    }
+
     public function submitTranslationBatch() {
         $this->_assignToTranslator() ;
         $this->_submitSegmentPairs() ;
     }
 
     protected function _assignToTranslator() {
-        // $service = new ChildProjectService($this->ownerSession, $this->chunk ) ;
-        // $service->updateTranslationChildren( ['assignee' => $this->dqfTranslateUser->email ] ) ;
         $this->_findRemoteDqfChildProjects() ;
 
         $updateRequests = array_filter( array_map( function( ProjectResponseStruct $project ) {
@@ -198,7 +218,7 @@ class TranslationChildProject {
                 $dao = new Translations_TranslationVersionDao();
                 $translations = $dao->getExtendedTranslationByFile(
                         $file,
-                        $dqfChildProject->create_date,  // <--- TODO: check if this is correct
+                        $this->getLimitDate($dqfChildProject),
                         $dqfChildProject->first_segment,
                         $dqfChildProject->last_segment
                 ) ;
@@ -246,6 +266,16 @@ class TranslationChildProject {
     protected function _findRemoteFileId( Files_FileStruct $file ) {
         $service = new FileIdMapping( $this->userSession, $file ) ;
         return $service->getRemoteId() ;
+    }
+
+    protected function getLimitDate(ChildProjectsMapStruct $dqfChildProject) {
+        $lastEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $this->chunk, ['is_review' => false ] );
+        if ( $lastEvent ) {
+            return $dqfChildProject->create_date ;
+        }
+        else {
+            return $lastEvent['create_date'];
+        }
     }
 
 }

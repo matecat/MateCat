@@ -123,8 +123,9 @@ class Dqf extends BaseFeature {
             // enqueue task for review
         }
         else {
-            $translationBatch = new TranslationChildProject( $chunk ) ;
-            $translationBatch->submitTranslationBatch();
+            $translationChildProject = new TranslationChildProject( $chunk ) ;
+            $translationChildProject->submitTranslationBatch();
+            $translationChildProject->setCompleted();
         }
     }
 

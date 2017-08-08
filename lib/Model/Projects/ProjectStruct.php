@@ -31,6 +31,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return Users_UserStruct
+     */
+    public function getOwner() {
+        return ( new Users_UserDao())->getByEmail( $this->id_customer ) ;
+    }
+
+    /**
      * @return Jobs_JobStruct[]
      */
     public function getJobs() {

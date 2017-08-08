@@ -58,6 +58,13 @@ class ChildProjectsMapDao extends DataAccess_AbstractDao  {
         return $this->getByChunkAndSegmentsInterval( $chunk, $min, $max );
     }
 
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     * @param                    $min
+     * @param                    $max
+     *
+     * @return ChildProjectsMapStruct[]
+     */
     public function getByChunkAndSegmentsInterval( Chunks_ChunkStruct $chunk, $min, $max) {
         $sql = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job AND  " .
                 " password = :password AND archive_date IS NULL AND " .

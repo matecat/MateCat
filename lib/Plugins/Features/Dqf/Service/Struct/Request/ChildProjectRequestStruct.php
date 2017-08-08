@@ -9,7 +9,6 @@
 namespace Features\Dqf\Service\Struct\Request;
 
 use Features\Dqf\Service\Struct\BaseRequestStruct;
-use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
 
 class ChildProjectRequestStruct extends BaseRequestStruct {
 
