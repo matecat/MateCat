@@ -44,7 +44,9 @@ class OutsourceInfo extends React.Component {
         this.startSlider()
     }
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        clearTimeout(this.timeoutSlider);
+    }
 
     componentDidUpdate() {}
 

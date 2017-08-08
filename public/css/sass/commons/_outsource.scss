@@ -493,9 +493,21 @@
                                 }
                             }
                             &.generic-error {
-                                color: #000000;
+                                color: red;
                             }
                         }
+                    }
+                }
+                .delivery-order-not-available {
+                    margin-top: 24px;
+                    width: 45%;
+                    float: right;
+                    .quote-not-available-message {
+                        float: right;
+                        text-align: right;
+                        font-size: 20px;
+                        margin-right: 57px;
+                        line-height: 30px;
                     }
                 }
                 .order-box-outsource {
@@ -795,6 +807,21 @@
                             }
                         }
                     }
+                    .delivery-order-not-available {
+                        width: 40%;
+                        float: right;
+                        position: absolute;
+                        right: -10px;
+                        top: 20px;
+                        .quote-not-available-message {
+                            float: right;
+                            text-align: right;
+                            font-size: 20px;
+                            margin-right: 57px;
+                            line-height: 30px;
+                        }
+                    }
+
                     .errors-date {
                         font-weight: 100;
                         font-size: 14px;

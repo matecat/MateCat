@@ -19,7 +19,9 @@ class OutsourceVendor extends React.Component {
             timezone: $.cookie( "matecat_timezone"),
             changeRates: changesRates,
             jobOutsourced: (!!this.props.job.get('outsource')),
-            errorPastDate: false
+            errorPastDate: false,
+            quoteNotAvailable: false,
+            errorQuote: false
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -56,6 +58,21 @@ class OutsourceVendor extends React.Component {
             .done(function (quoteData) {
                 if (quoteData.data) {
 
+                    if (quoteData.data[0][0].quote_available !== '1') {
+                        self.setState({
+                            outsource: true,
+                            quoteNotAvailable: true
+                        });
+                        return;
+                    } else if (quoteData.data[0][0].quote_result !== '1') {
+                        self.setState({
+                            outsource: true,
+                            errorQuote: true
+                        });
+                        return;
+                    }
+
+
                     self.quoteResponse = quoteData.data[0];
                     let chunk = Immutable.fromJS(quoteData.data[0][0]);
 
@@ -66,6 +83,8 @@ class OutsourceVendor extends React.Component {
 
                     self.setState({
                         outsource: true,
+                        quoteNotAvailable: false,
+                        errorQuote: false,
                         chunkQuote: chunk,
                         revision: (chunk.get('typeOfService') === "premium") ? true : false
                     });
@@ -321,7 +340,9 @@ class OutsourceVendor extends React.Component {
                                 <div className="target-box">{this.props.job.get('targetTxt')}</div>
                             </div>
                             <div className="job-payment">
-                                <div className="not-payable">{this.props.standardWC} words</div>
+                                {this.props.standardWC ? (
+                                    <div className="not-payable">{this.props.standardWC} words</div>
+                                ) : (null)}
                                 <div className="payable">{this.state.chunkQuote.get('words')} words</div>
                             </div>
                         </div>
@@ -346,101 +367,117 @@ class OutsourceVendor extends React.Component {
                             </div>
                         )}
                     </div>
-                    <div className="delivery-order">
-                        <div className="delivery-box">
-                            <label>Delivery date:</label>
-                            <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                            <span>at</span>
-                            <div className="delivery-time">{delivery.time}</div>
-                            <div className="gmt">
-                                <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
-                               {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
-                            </div>
-                            {!this.state.outsourceConfirmed ? (
-                                <div className="need-it-faster">
-                                    {this.state.errorPastDate ? (
-                                        <div className="errors-date past-date">* Chosen delivery date is in the past</div>
-                                    ) : (null)}
-                                    {/*<div className="errors-date generic-error">* This is a generic error</div>*/}
-                                    {(showDateMessage) ? (
-                                        <div className="errors-date too-far-date" >We will delivery before the selected date
-                                            <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
-                                                 data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
-                                        </div>
-                                    ):('')}
-                                    <a className="faster"
-                                       ref={(faster) => this.dateFaster = faster}
-                                    >Need it faster?</a>
+                    {!this.state.errorQuote ? (
+                        <div className="delivery-order">
+                            <div className="delivery-box">
+                                <label>Delivery date:</label>
+                                <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                                <span>at</span>
+                                <div className="delivery-time">{delivery.time}</div>
+                                <div className="gmt">
+                                    <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                                    {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                                 </div>
-                            ):('')}
+                                {!this.state.outsourceConfirmed ? (
+                                    <div className="need-it-faster">
+                                        {this.state.errorPastDate ? (
+                                            <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+                                        ) : (null)}
+                                        {this.state.quoteNotAvailable ? (
+                                            <div className="errors-date generic-error">* Deadline too close, pick another one.</div>
+                                        ) : (null)}
 
+                                        {(showDateMessage) ? (
+                                            <div className="errors-date too-far-date" >We will delivery before the selected date
+                                                <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                     data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
+                                            </div>
+                                        ):('')}
+                                        <a className="faster"
+                                           ref={(faster) => this.dateFaster = faster}
+                                        >Need it faster?</a>
+                                    </div>
+                                ):('')}
+
+                            </div>
+                            {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
+                                <div className="confirm-delivery-input">
+                                    <div className="back" onClick={this.goBack.bind(this)}>
+                                        <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
+                                    </div>
+                                    <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
+                                    <div className="ui input">
+                                        <input type="text" placeholder="Insert email" defaultValue={email} />
+                                    </div>
+
+                                </div>
+                            ) :('')}
+                            {this.state.outsourceConfirmed && this.state.jobOutsourced ? (
+                                <div className="confirm-delivery-box">
+                                    <div className="confirm-title">Order sent correctly</div>
+                                    <p>Thank you for choosing our Outsource service<br />
+                                        You will soon be contacted by a Account Manager to send you an invoice</p>
+                                </div>
+                            ) :('')}
                         </div>
-                        {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
-                            <div className="confirm-delivery-input">
-                                <div className="back" onClick={this.goBack.bind(this)}>
-                                    <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
-                                </div>
-                                <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
-                                <div className="ui input">
-                                    <input type="text" placeholder="Insert email" defaultValue={email} />
-                                </div>
+                    ) : (
+                        <div className="delivery-order-not-available">
+                            <div className="quote-not-available-message">
+                                Quote not available, please contact us at info@translated.net
+                                or call +39 06 90 254 001
+                            </div>
+                        </div>
+                    )}
 
-                            </div>
-                        ) :('')}
-                        {this.state.outsourceConfirmed && this.state.jobOutsourced ? (
-                            <div className="confirm-delivery-box">
-                                <div className="confirm-title">Order sent correctly</div>
-                                <p>Thank you for choosing our Outsource service<br />
-                                    You will soon be contacted by a Account Manager to send you an invoice</p>
-                            </div>
-                        ) :('')}
-                    </div>
-                    <div className="order-box-outsource">
-                        <div className="order-box">
-                            <div className="outsource-price">
-                                {priceCurrencySymbol} {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
-                            </div>
-                            <div className="select-value">
-                                <h4 className="ui header">
-                                    <div className="content">
-                                        <div className="ui inline dropdown"
-                                            ref={(select) => this.currencySelect = select}>
-                                            <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
-                                            <i className="dropdown icon"/>
-                                            <div className="menu">
-                                                <div className="header">Select Currency</div>
-                                                <div className="divider"/>
-                                                <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
-                                                <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
-                                                <div className="item" data-value="AUD" data-symbol="$">Australian dollar (AUD)</div>
-                                                <div className="item" data-value="CAD" data-symbol="$">Canadian dollar (CAD)</div>
-                                                <div className="item" data-value="NZD" data-symbol="$">New Zealand dollar (NZD)</div>
-                                                <div className="item" data-value="GBP" data-symbol="£">Pound sterling (GBP)</div>
-                                                <div className="item" data-value="BRL" data-symbol="R$">Real (BRL)</div>
-                                                <div className="item" data-value="RUB" data-symbol="руб">Russian ruble (RUB)</div>
-                                                <div className="item" data-value="SEK" data-symbol="kr">Swedish krona (SEK)</div>
-                                                <div className="item" data-value="CHF" data-symbol="Fr.">Swiss franc (CHF)</div>
-                                                <div className="item" data-value="TRY" data-symbol="TL">Turkish lira (TL)</div>
-                                                <div className="item" data-value="KRW" data-symbol="￦">Won (KRW)</div>
-                                                <div className="item" data-value="JPY" data-symbol="￥">Yen (JPY)</div>
-                                                <div className="item" data-value="PLN" data-symbol="zł">Złoty (PLN)</div>
+                    {!this.state.errorQuote ? (
+                        <div className="order-box-outsource">
+                            <div className="order-box">
+                                <div className="outsource-price">
+                                    {priceCurrencySymbol} {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                                </div>
+                                <div className="select-value">
+                                    <h4 className="ui header">
+                                        <div className="content">
+                                            <div className="ui inline dropdown"
+                                                 ref={(select) => this.currencySelect = select}>
+                                                <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
+                                                <i className="dropdown icon"/>
+                                                <div className="menu">
+                                                    <div className="header">Select Currency</div>
+                                                    <div className="divider"/>
+                                                    <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
+                                                    <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
+                                                    <div className="item" data-value="AUD" data-symbol="$">Australian dollar (AUD)</div>
+                                                    <div className="item" data-value="CAD" data-symbol="$">Canadian dollar (CAD)</div>
+                                                    <div className="item" data-value="NZD" data-symbol="$">New Zealand dollar (NZD)</div>
+                                                    <div className="item" data-value="GBP" data-symbol="£">Pound sterling (GBP)</div>
+                                                    <div className="item" data-value="BRL" data-symbol="R$">Real (BRL)</div>
+                                                    <div className="item" data-value="RUB" data-symbol="руб">Russian ruble (RUB)</div>
+                                                    <div className="item" data-value="SEK" data-symbol="kr">Swedish krona (SEK)</div>
+                                                    <div className="item" data-value="CHF" data-symbol="Fr.">Swiss franc (CHF)</div>
+                                                    <div className="item" data-value="TRY" data-symbol="TL">Turkish lira (TL)</div>
+                                                    <div className="item" data-value="KRW" data-symbol="￦">Won (KRW)</div>
+                                                    <div className="item" data-value="JPY" data-symbol="￥">Yen (JPY)</div>
+                                                    <div className="item" data-value="PLN" data-symbol="zł">Złoty (PLN)</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </h4>
+                                    </h4>
+                                </div>
+                            </div>
+                            <div className="order-button-outsource">
+                                {!this.state.outsourceConfirmed ? (
+                                    <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
+                                ):((!this.state.jobOutsourced) ? (
+                                        <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>
+
+                                    ) : (<button className="open-outsourced ui button " onClick={this.openOutsourcePage.bind(this)}
+                                    >View status</button>)
+                                )}
                             </div>
                         </div>
-                        <div className="order-button-outsource">
-                            {!this.state.outsourceConfirmed ? (
-                                <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
-                            ):((!this.state.jobOutsourced) ? (
-                                    <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>
+                    ) : (null)}
 
-                                ) : (<button className="open-outsourced ui button " onClick={this.openOutsourcePage.bind(this)}
-                                >View status</button>)
-                            )}
-                        </div>
-                    </div>
                 </div>
             ) : (
                 <div className="payment-details-box shadow-1">
@@ -484,19 +521,29 @@ class OutsourceVendor extends React.Component {
                                    onClick={this.viewMoreClick.bind(this)}>+ view more</a>
                             </div>
                         </div>
-                        <div className="delivery-order">
-                            <div className="delivery-box">
-                                <label>Delivery date:</label>{/*<br />*/}
-                                <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                <span>at</span>
-                                <div className="delivery-time">{delivery.time}</div>
-                                <div className="gmt">
-                                    <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
-                                    {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
+                        {!this.state.errorQuote ? (
+                            <div className="delivery-order">
+                                <div className="delivery-box">
+                                    <label>Delivery date:</label>{/*<br />*/}
+                                    <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                                    <span>at</span>
+                                    <div className="delivery-time">{delivery.time}</div>
+                                    <div className="gmt">
+                                        <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>
+                                        {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="errors-date generic-error">* This is a generic error</div>
+                        ) : (
+                            <div className="delivery-order-not-available">
+                                <div className="quote-not-available-message">
+                                    Quote not available, please contact us at info@translated.net
+                                    or call +39 06 90 254 001
+                                </div>
+                            </div>
+                        )}
+
+                        {/*<div className="errors-date generic-error">* This is a generic error</div>*/}
                         {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
                             <div className="confirm-delivery-input">
                                 <div className="back" onClick={this.goBack.bind(this)}>
@@ -512,6 +559,7 @@ class OutsourceVendor extends React.Component {
 
 
                     </div>
+                    {!this.state.errorQuote ? (
                     <div className="order-box-outsource">
                         <div className="order-box">
                             <div className="outsource-price">
@@ -558,6 +606,7 @@ class OutsourceVendor extends React.Component {
                             )}
                         </div>
                     </div>
+                    ) :(null)}
                     {this.state.jobOutsourced ? (
                         <div className="confirm-delivery-box">
                             <div className="confirm-title">Order sent correctly</div>
@@ -644,7 +693,8 @@ class OutsourceVendor extends React.Component {
         || nextState.timezone !== this.state.timezone
         || nextState.outsourceConfirmed !== this.state.outsourceConfirmed
         || nextState.jobOutsourced !== this.state.jobOutsourced
-        || nextState.errorPastDate !== this.state.errorPastDate);
+        || nextState.errorPastDate !== this.state.errorPastDate
+        || nextState.quoteNotAvailable !== this.state.quoteNotAvailable);
     }
 
     render() {
