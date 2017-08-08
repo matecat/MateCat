@@ -75,6 +75,9 @@ class AnalyzeChunksResume extends React.Component {
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
         if (!this.props.jobsAnalysis.isEmpty()) {
             return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
+                if (_.isUndefined(self.props.jobsInfo[indexJob])) {
+                    return;
+                }
                 if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
                     let index = 0;
                     let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
@@ -128,8 +131,8 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let totals = jobAnalysis.get('totals').get(0);
                     let obj = self.props.jobsInfo[indexJob].chunks;
+                    let password = Object.keys(obj)[0];
                     let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
@@ -168,7 +171,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div className={"split ui blue basic button " + buttonsClass}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, self.props.project.toJS().jobs[0].password, null)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, password, null)}>Translate</div>
                                 </div>
                             </div>
 

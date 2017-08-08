@@ -60,6 +60,7 @@ body.analyze{
                     z-index: 2;
                     left: -45px;
                     max-width: 100%;
+                    min-width: 0;
                     background-color: #d8d8d8;
                     color: #000000;
                     border-radius: 0 2px 2px 0;
@@ -652,7 +653,7 @@ body.analyze{
             float: left;
             text-align: right;
             font-size: 15px;
-            line-height: 35px;
+            line-height: 30px;
             .single {
                 display: inline-block;
                 width: 8.5%;
@@ -738,9 +739,9 @@ body.analyze{
                 margin: 0 auto;
                 position: relative;
                 float: left;
-                text-align: center;
+                text-align: right;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;
@@ -779,7 +780,7 @@ body.analyze{
                 float: left;
                 text-align: center;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;
@@ -819,7 +820,7 @@ body.analyze{
                 float: left;
                 text-align: center;
                 font-size: 14px;
-                line-height: 35px;
+                line-height: 30px;
                 .single {
                     span {
                         font-size: 12px;

@@ -18,7 +18,7 @@
 .modal .popup p {
     font-size: 18px;
     margin-top: 20px;
-    padding: 0 20px;
+    padding: 0 0px;
 }
 
 .popup h1 {
@@ -1193,6 +1193,7 @@ cursor: pointer;
 .outsource.modal .popup p {
     background-size: 200px;
     background-position: 300px 35px;
+    padding: 0 !important;
 }
 .pricebox .total {
     margin-top:-40px;
@@ -1912,6 +1913,7 @@ span.title-source {
 
 .popup.popup-confirm.confirm_checkbox p{
     text-align: left;
+    padding: 20px;
 }
 
 .popup.popup-confirm.confirm_checkbox .btn-ok{
