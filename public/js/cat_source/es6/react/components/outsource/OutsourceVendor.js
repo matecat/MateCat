@@ -92,7 +92,12 @@ class OutsourceVendor extends React.Component {
                     // Intercom
                     $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
 
-            }
+                } else {
+                    self.setState({
+                        outsource: true,
+                        quoteNotAvailable: true
+                    });
+                }
         });
     }
 
