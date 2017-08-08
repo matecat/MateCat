@@ -131,9 +131,9 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let obj = self.props.jobsInfo[indexJob].chunks;
-                    let password = Object.keys(obj)[0];
-                    let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
+                    let obj = self.props.jobsInfo[indexJob].chunks[0];
+                    let password = obj.jpassword;
+                    let total_raw = obj.total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
