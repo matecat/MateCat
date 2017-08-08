@@ -1869,6 +1869,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			AND ( st.eq_word_count != 0  OR s.raw_word_count != 0 )
+			ORDER BY j.id, j.job_last_segment
 			";
 
     $db      = Database::obtain();

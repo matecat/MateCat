@@ -15,23 +15,24 @@ class JobAnalyze extends React.Component {
     getChunks() {
         let self = this;
         if (this.props.chunks) {
-            let index = 0;
-            return this.props.chunks.reverse().map(function (files, i) {
+            return _.map(this.props.jobInfo.chunks, function (item, index) {
+                let files = self.props.chunks.get(item.jpassword);
+                // });
+                // return this.props.chunks.reverse().map(function (files, i) {
                 index++;
                 let job = self.props.project.get('jobs').find(function (jobElem) {
-                    return jobElem.get('password') === i
+                    return jobElem.get('password') === item.jpassword
                 });
-                if (!_.isUndefined(self.props.jobInfo.chunks[job.get('password')])) {
-                    return <ChunkAnalyze key={i}
-                                         files={files}
-                                         job={job}
-                                         project={self.props.project}
-                                         total={self.props.total.get(i)}
-                                         index={index}
-                                         chunkInfo={self.props.jobInfo.chunks[i]}
-                                         chunksSize={_.size(self.props.jobInfo.chunks)}   />
-                }
-            }).toList().toJS();
+
+                return <ChunkAnalyze key={item.jpassword}
+                                     files={files}
+                                     job={job}
+                                     project={self.props.project}
+                                     total={self.props.total.get(item.jpassword)}
+                                     index={index}
+                                     chunkInfo={item}
+                                     chunksSize={_.size(self.props.jobInfo.chunks)}   />
+            });
         }
         return '';
     }
