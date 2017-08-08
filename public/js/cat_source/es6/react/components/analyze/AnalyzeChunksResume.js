@@ -76,15 +76,11 @@ class AnalyzeChunksResume extends React.Component {
         if (!this.props.jobsAnalysis.isEmpty()) {
             return _.map(this.props.jobsInfo,function (item, indexJob) {
                 let jobAnalysis = self.props.jobsAnalysis.get(indexJob);
-                // if (_.isUndefined(self.props.jobsInfo[indexJob])) {
-                //     return;
-                // }
+
                 if (item.splitted !== "" && _.size(item.chunks) > 1) {
                     let chunksHtml = _.map(item.chunks, function (chunkConfig, index) {
                         let indexChunk = chunkConfig.jpassword;
                         let chunkAnalysis = jobAnalysis.get('totals').get(indexChunk);
-                    // });
-                    // let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
                         let chunk = chunkConfig;
                         index++;
 
