@@ -12,6 +12,7 @@ namespace Features;
 
 use Constants_Engines;
 use Database;
+use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use Exception;
@@ -22,6 +23,7 @@ use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use Users\MetadataDao;
+use Users_UserDao;
 use Users_UserStruct;
 
 class Mmt extends BaseFeature {
@@ -80,7 +82,8 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $config[ 'mt_context' ] = @array_pop( ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' ) );
+            $mt_context = @array_pop( ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' ) );
+            $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
 
         }
 
@@ -106,4 +109,56 @@ class Mmt extends BaseFeature {
 
     }
 
+    public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
+
+        $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
+
+        if( $engine instanceof Engines_MMT ){
+
+            $source       = $segments[ 0 ][ 'source' ];
+            $jobLanguages = [];
+            foreach( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ){
+                list( $jobId, $target ) = explode( ":", $jid_Lang );
+                $jobLanguages[ $jobId ] = $source . "|" . $target;
+            }
+
+            $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
+            foreach ( $segments as $pos => $segment ) {
+                $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+            }
+
+            try {
+
+                /*
+                    $result = Array
+                    (
+                        [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
+                        [en-US|it-IT] =>
+                    )
+                */
+                $result = $engine->getContext( $tmpFileObject, array_values( $jobLanguages ) );
+
+                $jMetadataDao = new \Jobs\MetadataDao();
+                Database::obtain()->begin();
+                foreach( $result as $langPair => $context ){
+                    $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                }
+                Database::obtain()->commit();
+
+            } catch( Exception $e ){
+                Log::doLog( $e->getMessage() );
+                Log::doLog( $e->getTraceAsString() );
+            }
+
+        }
+
+
+//        if( !empty( $projectRows['id_customer'] ) ){
+//            $uStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectRows['id_customer'] );
+//            $engineEnabled = ( new MetadataDao() )->setCacheTTL( 60 * 60 *24 * 30 )->get( $uStruct->uid, 'mmt' );
+//        }
+
+    }
+
 }
+

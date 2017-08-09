@@ -194,6 +194,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @param $file \SplFileObject
      * @param $langPairs array
      *
+     * @throws Exception
      * @return mixed
      */
     public function getContext( \SplFileObject $file, $langPairs ) {
@@ -318,7 +319,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                 $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
                 break;
             case 'translate_relative_url':
-                if( !empty( $result_object->translatedText ) ){
+                if( !empty( $decoded[ 'responseData' ][ 'translatedText' ] ) ){
                     $result_object = Engines_Results_MMT_MT::getInstance( $decoded );
                     $result_object = ( new Engines_Results_MyMemory_Matches(
                             $this->_resetSpecialStrings( $args[ 1 ][ 'q' ] ),

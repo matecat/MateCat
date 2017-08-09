@@ -288,6 +288,14 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
     return $results[ 'suggestions_array' ];
 }
 
+/**
+ * @param      $id_job
+ * @param null $password
+ *
+ * @return array
+ *
+ * @deprecated Substitute this with Jobs_JobDao
+ */
 function getJobData( $id_job, $password = null ) {
 
     $fields = array(

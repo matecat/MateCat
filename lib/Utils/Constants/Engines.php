@@ -39,6 +39,9 @@ class Constants_Engines {
             self::YANDEX_TRANSLATE => self::YANDEX_TRANSLATE,
     ];
 
+    /**
+     * @return array
+     */
     public static function getAvailableEnginesList(){
         return self::$ENGINES_LIST;
     }

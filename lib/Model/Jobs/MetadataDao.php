@@ -25,6 +25,11 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$result;
     }
 
+    public function destroyCacheByJobId( $id_job, $key ){
+        $stmt = $this->_getStatementForCache( self::_query_metadata_by_job_id_key );
+        return $this->_destroyObjectCache( $stmt, [ 'id_job' => $id_job, 'key' => $key ] );
+    }
+
     /**
      * @param $id_job
      * @param $password
@@ -71,6 +76,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
             'key' => $key,
             'value' => $value
         ) );
+
+        $this->destroyCacheByJobId( $id_job, $key );
 
         return $this->get($id_job, $password, $key);
     }

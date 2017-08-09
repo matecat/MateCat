@@ -120,7 +120,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     /**
      * @param EnginesModel_EngineStruct $obj
      *
-     * @return array|void
+     * @return array
      * @throws Exception
      */
     public function read( EnginesModel_EngineStruct $obj ) {
