@@ -769,7 +769,7 @@ class setTranslationController extends ajaxController {
         if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $old_count = $segment['raw_word_count'];
         } else {
-            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation['status'] == 'ICE' ) {
+            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation[ 'match_type' ] == 'ICE' ) {
                 $old_count = $segment[ 'raw_word_count' ] ;
             } else {
                 $old_count = $old_translation[ 'eq_word_count' ] ;

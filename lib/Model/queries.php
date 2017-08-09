@@ -1152,33 +1152,31 @@ function getCurrentTranslation( $id_job, $id_segment ) {
 function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
     $query = "
-		select
+        select
 		j.id,
 		SUM(
-				IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count )
+				IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count )
 		   ) as TOTAL,
 		SUM(
 				IF(
 					st.status IS NULL OR
 					st.status='NEW',
-					IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count ),0 )
+					IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as NEW,
 		SUM(
-				IF(
-					st.status IS NULL OR
-					st.status='DRAFT' OR
-					st.status='NEW',
-					IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count ),0 )
+				IF( 
+					st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',
+					IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as DRAFT,
 		SUM(
-				IF( st.status='TRANSLATED', IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count ),0 )
+				IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as TRANSLATED,
            
 		SUM(
-				IF(st.status='APPROVED', IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count ),0 )
+				IF(st.status='APPROVED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as APPROVED,
 		SUM(
-				IF(st.status='REJECTED', IF( st.match_type = 'ICE', s.raw_word_count, st.eq_word_count ),0 )
+				IF(st.status='REJECTED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as REJECTED
 			FROM jobs AS j
 			INNER JOIN files_job as fj on j.id=fj.id_job

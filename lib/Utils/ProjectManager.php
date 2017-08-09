@@ -1314,9 +1314,10 @@ class ProjectManager {
 
     private function getWordCountType( $row_totals ) {
         $project_count_type = $this->project->getWordCountType();
+        $eq_word_count =  (float)$row_totals[ 'eq_word_count' ];
         if (
                 $project_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT &&
-                !empty( $row_totals[ 'eq_word_count' ] )
+                !empty( $eq_word_count )
         ) {
             $count_type = 'eq_word_count';
         } else {
