@@ -21,52 +21,52 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoSilentStruct implements Da
     /**
      * @var int
      */
-    protected $typing_min;
+    public $typing_min;
 
     /**
      * @var int
      */
-    protected $translation_min;
+    public $translation_min;
 
     /**
      * @var int
      */
-    protected $terminology_min;
+    public $terminology_min;
 
     /**
      * @var int
      */
-    protected $language_min;
+    public $language_min;
 
     /**
      * @var int
      */
-    protected $style_min;
+    public $style_min;
 
     /**
      * @var int
      */
-    protected $typing_maj;
+    public $typing_maj;
 
     /**
      * @var int
      */
-    protected $translation_maj;
+    public $translation_maj;
 
     /**
      * @var int
      */
-    protected $terminology_maj;
+    public $terminology_maj;
 
     /**
      * @var int
      */
-    protected $language_maj;
+    public $language_maj;
 
     /**
      * @var int
      */
-    protected $style_maj;
+    public $style_maj;
     
     
     /**
@@ -270,6 +270,14 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoSilentStruct implements Da
         $this->style_maj = $style_maj;
 
         return $this;
+    }
+
+    public function thereAreDifferences(){
+        $err = false;
+        foreach ( $this->toArray() as $errName => $errValue ){
+            $err |= (bool)$errValue;
+        }
+        return $err;
     }
 
 }

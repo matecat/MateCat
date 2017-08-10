@@ -166,7 +166,18 @@ class setRevisionController extends ajaxController {
 
         $errorCountDao = new ErrorCount_ErrorCountDAO( Database::obtain() );
         try {
-            $errorCountDao->update( $errorCountStruct );
+
+            $jobQA = new Revise_JobQA(
+                $this->id_job,
+                $this->password_job,
+                $wStruct->getTotal()
+            );
+
+            if( $errorCountStruct->thereAreDifferences() ){
+                $errorCountDao->update( $errorCountStruct );
+                $jobQA->cleanErrorCache();
+            }
+
         } catch ( Exception $e ) {
             Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
             $this->result[ 'errors' ] [ ] = array( 'code' => -5, 'message' => "Did not update job error counters." );
@@ -179,12 +190,6 @@ class setRevisionController extends ajaxController {
          * ( Note: these information are fed by the revision process )
          * @see setRevisionController
          */
-        $jobQA = new Revise_JobQA(
-                $this->id_job,
-                $this->password_job,
-                $wStruct->getTotal()
-        );
-
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
 
