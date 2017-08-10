@@ -3,9 +3,6 @@
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
     public static function bulkInsertFromProjectStructure( $notes ) {
-
-        Log::doLog( $notes ) ;
-
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note ) VALUES " ;
 
         $insert_values = array();
