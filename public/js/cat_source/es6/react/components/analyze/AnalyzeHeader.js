@@ -23,7 +23,7 @@ class AnalyzeHeader extends React.Component {
             </div>
         </div>;
         let status = this.props.data.get('STATUS');
-        let in_queue_before = this.props.data.get('IN_QUEUE_BEFORE');
+        let in_queue_before = parseInt(this.props.data.get('IN_QUEUE_BEFORE'));
         if( status === 'DONE' ) {
              html = <div className="analysis-create">
                 <div className="search-tm-matches hide" ref={(container) => this.containerAnalysisComplete = container}>
@@ -206,6 +206,12 @@ class AnalyzeHeader extends React.Component {
             setTimeout(function () {
                 self.containerSavingWords.classList.remove('updated-count');
             }, 400)
+        }
+        let status = this.props.data.get('STATUS');
+        if (status === 'DONE') {
+            setTimeout(function () {
+                self.containerAnalysisComplete.classList.remove('hide');
+            }, 600)
         }
 
     }
