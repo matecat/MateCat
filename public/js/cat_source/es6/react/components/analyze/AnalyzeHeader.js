@@ -227,7 +227,7 @@ class AnalyzeHeader extends React.Component {
             setTimeout(function () {
                 self.containerSavingWords.classList.remove('updated-count');
                 self.containerAnalysisComplete.classList.remove('hide');
-            }, 600)
+            }, 400)
         }
     }
 
