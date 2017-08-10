@@ -12,8 +12,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "ErrorCount_Struct";
 
-    public function read( DataAccess_IDaoStruct $obj ) {
-
+    public function getReadQuery(  DataAccess_IDaoStruct $obj  ){
         /**
          * @var $obj ErrorCount_Struct
          */
@@ -47,11 +46,22 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
             throw new Exception( "Where condition needed." );
         }
 
-        $query = sprintf( $query, $where_string );
+        return sprintf( $query, $where_string );
+
+    }
+
+    public function read( DataAccess_IDaoStruct $obj ) {
+
+        $query = $this->getReadQuery( $obj );
 
         $arr_result = $this->_fetch_array( $query );
 
         return $this->_buildResult( $arr_result );
+    }
+
+    public function cleanErrorCache( DataAccess_IDaoStruct $obj ){
+        $query = $this->getReadQuery( $obj );
+        $this->_destroyCache( $query );
     }
 
     /**
