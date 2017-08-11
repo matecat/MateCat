@@ -47,9 +47,12 @@ class OutsourceVendor extends React.Component {
         };
     }
 
-    getOutsourceQuote(delivery) {
+    getOutsourceQuote(delivery, revisionType) {
         let self = this;
         let typeOfService = this.state.revision ? "premium" : "professional";
+        if ( revisionType ) {
+            typeOfService = revisionType;
+        }
         let fixedDelivery =  (delivery) ? delivery : "";
         let timezoneToShow = this.state.timezone;
         let currency = this.getCurrentCurrency();
@@ -171,7 +174,7 @@ class OutsourceVendor extends React.Component {
         this.quoteResponse[0] = this.state.chunkQuote.toJS();
 
 
-        /*$(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
+        $(this.outsourceForm).find('input[name=url_ok]').attr('value', this.url_ok);
         $(this.outsourceForm).find('input[name=url_ko]').attr('value', this.url_ko);
         $(this.outsourceForm).find('input[name=confirm_urls]').attr('value', this.confirm_urls);
         $(this.outsourceForm).find('input[name=data_key]').attr('value', this.data_key);
@@ -182,11 +185,11 @@ class OutsourceVendor extends React.Component {
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', JSON.stringify( this.quoteResponse ) );
         $(this.outsourceForm).submit();
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', '' );
-        $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );*/
+        $(document).trigger('outsource-clicked', { quote_data : this.quoteResponse } );
 
-        this.setState({
-            jobOutsourced: true
-        });
+        // this.setState({
+        //     jobOutsourced: true
+        // });
     }
 
     openOutsourcePage() {
@@ -195,11 +198,10 @@ class OutsourceVendor extends React.Component {
 
     clickRevision() {
         let service = (this.revisionCheckbox.checked) ? 'premium' : 'professional';
-        let quote = this.state.chunkQuote.set('typeOfService', service);
         this.setState({
-            chunkQuote: quote,
             revision: this.revisionCheckbox.checked
         });
+        this.getOutsourceQuote(this.selectedDate, service);
 
     }
 
@@ -472,7 +474,7 @@ class OutsourceVendor extends React.Component {
                             </div>
                             <div className="order-button-outsource">
                                 {!this.state.outsourceConfirmed ? (
-                                    <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
+                                    <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</button>
                                 ):((!this.state.jobOutsourced) ? (
                                         <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Confirm</button>
 
@@ -680,9 +682,9 @@ class OutsourceVendor extends React.Component {
                 }
             });
 
-            if (this.state.outsourceConfirmed && !!this.props.job.get('outsource')) {
+            // if (this.state.outsourceConfirmed && !!this.props.job.get('outsource')) {
                 this.revisionCheckbox.checked = (this.state.chunkQuote.get('typeOfService') === "premium") ? true : false;
-            }
+            // }
         }
 
         $(this.rating).rating('disable');
