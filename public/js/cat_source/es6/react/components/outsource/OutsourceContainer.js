@@ -108,7 +108,7 @@ class OutsourceContainer extends React.Component {
                                 {( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
                                     <div className="divider-or sixteen wide column">
                                         <div className="or">
-                                            OR
+                                            or
                                         </div>
                                     </div>
                                 ) : (null)}
