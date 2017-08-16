@@ -58,7 +58,7 @@ body.analyze{
                     position: relative;
                     top: 0px;
                     z-index: 2;
-                    left: -48px;
+                    left: -45px;
                     max-width: 100%;
                     min-width: 0;
                     background-color: #d8d8d8;
@@ -86,7 +86,7 @@ body.analyze{
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
-                        padding-left: 20px;
+                        padding-left: 15px;
                     }
                 }
                 .project-create {
@@ -274,14 +274,15 @@ body.analyze{
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
+                    padding: 0 0 0 20px;
                 }
                 .titles-compare {
                     display: inline-block;
-                    width: 26%;
-                    line-height: 50px;
-                    text-align: left;
-                    font-size: 17px;
-                    padding: 0 0 0 20px;
+                    width: 52%;
+                    text-align: center;
+                    padding-left: 0;
+                    padding-right: 0;
+                    font-size: 16px;
                 }
                 .title-total-words, .title-standard-words, .title-matecat-words {
                     display: inline-block;
@@ -643,7 +644,6 @@ body.analyze{
             float: left;
             text-align: left;
             width: 15%;
-            padding-left: 5px;
         }
         .single-analysis {
             display: inline-block;
@@ -952,15 +952,16 @@ body.analyze{
                 top: 12px;
             }
             .file-title-details {
-                position: absolute;
                 display: inline-block;
                 max-width: 82%;
                 min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                position: absolute;
                 transition: 0.3s ease;
-                left: 25px;
+                position: absolute;
+                left: 18px;
                 cursor: default;
                 &:hover {
                     display: inline-block;
