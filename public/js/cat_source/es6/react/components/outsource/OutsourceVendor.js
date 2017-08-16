@@ -493,8 +493,8 @@ class OutsourceVendor extends React.Component {
                 </div>
             ))}
             <div className="easy-pay-box">
-                <h4 className="easy-pay">Easy payments</h4>
-                <p>Pay a single monthly invoice within 30 days of receipt</p>
+                <h4 className="easy-pay">Easy payments <span>Pay a single monthly invoice within 30 days of receipt</span></h4>
+                {/*<p>Pay a single monthly invoice within 30 days of receipt</p>*/}
             </div>
             <OutsourceInfo/></div>
     }
