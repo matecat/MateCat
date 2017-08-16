@@ -207,7 +207,7 @@
     }
     .open-job-box {
         background-color: #d5d8dc;
-        padding: 30px 35px 25px;
+        padding: 30px 35px 25px 45px;
         width: 100%;
         cursor: auto;
         .title {
@@ -315,7 +315,7 @@
                 background-color: #ffffff;
                 padding: 15px;
                 position: relative;
-                min-height: 242px;
+                min-height: 238px;
                 .translator-job-details {
                     padding-bottom: 10px;
                     .translator-details-box {
@@ -323,7 +323,7 @@
                         border-right: 1px solid black;
                         display: inline-block;
                         vertical-align: middle;
-                        padding: 2px 15px;
+                        padding: 0px 15px;
                         .left, .right {
                             display: inline-block;
                             margin: 0;
@@ -358,7 +358,6 @@
                         vertical-align: middle;
                         padding: 0 15px;
                         position: relative;
-                        top: -9px;
                         .source-target-outsource {
                             display: inline-block;
                             width: 65%;
@@ -386,6 +385,9 @@
                             .not-payable {
                                 text-decoration: line-through;
                                 font-size: 16px;
+                                position: absolute;
+                                top: -17px;
+                                width: 28%;
                             }
                             .payable {
                                 font-size: 18px;
@@ -395,13 +397,12 @@
                     }
                     .job-price {
                         display: inline-block;
+                        vertical-align: middle;
                         width: 10%;
                         text-align: right;
                         padding-right: 15px;
                         font-size: 20px;
                         font-weight: 700;
-                        position: relative;
-                        top: 2px;
                     }
                 }
                 .revision-box {
@@ -694,10 +695,11 @@
                                         font-family: Calibri, Arial, Helvetica, sans-serif;
                                         border: 1px solid #c1c1c1;
                                         background: #f3f3f3;
-                                        padding-top: 13px;
                                         position: relative;
                                         top: 5px;
                                         width: 100%;
+                                        margin-right: 0;
+                                        padding: 10px 0;
                                         .sign {
                                             width: 10px;
                                             height: 10px;
