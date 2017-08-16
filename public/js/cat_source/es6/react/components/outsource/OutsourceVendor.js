@@ -331,7 +331,6 @@ class OutsourceVendor extends React.Component {
                                 <div className="translator-no-found">
                                     <p>
                                         Translated.net uses the <b>most qualified translator</b> for your subject (General) and <b>keeps using the same translator for your next projects. </b>
-                                        Translated has over 15 years' experience as a translation company and offers <b><a href="#">two key guarantees on quality and delivery.</a></b>
                                     </p>
                                 </div>
                             </div>

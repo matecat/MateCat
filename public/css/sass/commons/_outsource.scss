@@ -207,7 +207,7 @@
     }
     .open-job-box {
         background-color: #d5d8dc;
-        padding: 35px;
+        padding: 30px 35px 25px;
         width: 100%;
         cursor: auto;
         .title {
@@ -315,7 +315,7 @@
                 background-color: #ffffff;
                 padding: 15px;
                 position: relative;
-                min-height: 252px;
+                min-height: 242px;
                 .translator-job-details {
                     padding-bottom: 10px;
                     .translator-details-box {
@@ -400,12 +400,15 @@
                         padding-right: 15px;
                         font-size: 20px;
                         font-weight: 700;
+                        position: relative;
+                        top: 2px;
                     }
                 }
                 .revision-box {
                     padding: 5px 15px;
                     background-color: #e4e6e8;
                     margin-bottom: 10px;
+                    height: 30px;
                     .add-revision {
                         display: inline-block;
                         width: 81%;
@@ -428,12 +431,12 @@
                     text-align: right;
                     display: inline-block;
                     vertical-align: top;
-                    margin-top: 22px;
+                    margin-top: 20px;
                     padding-right: 25px;
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
-                        font-size: 28px;
+                        font-size: 26px;
                         font-weight: 700;
                         label {
                             font-size: 16px;
@@ -516,13 +519,13 @@
                     text-align: right;
                     .order-box {
                         background-color: #daeddf;
-                        height: 84px;
+                        height: 75px;
                         text-align: center;
                         margin-bottom: 5px;
                         .outsource-price {
-                            font-size: 28px;
+                            font-size: 26px;
                             font-weight: 700;
-                            padding: 25px 0 10px;
+                            padding: 20px 0 10px;
                         }
                         .select-value {
                             .content {
@@ -530,6 +533,7 @@
                                 a {
                                     color: #000000;
                                     font-weight: 100;
+                                    margin-left: 10px;
                                 }
                             }
                         }
@@ -540,7 +544,7 @@
             .easy-pay-box {
                 width: 100%;
                 text-align: right;
-                padding: 10px 15px 20px;
+                padding: 5px 15px 15px;
                 .easy-pay {
                     font-weight: 700;
                     margin-bottom: 0;
@@ -577,7 +581,7 @@
                         }
                     }
                     .slider-box {
-                        min-height: 123px;
+                        min-height: 110px;
                         position: relative;
                         border: 1px solid #a8bbb2;
                         padding: 15px;
@@ -602,17 +606,16 @@
                             }
                             .customer-text {
                                 padding-bottom: 10px;
-                                font-size: 13px;
-                                line-height: 15px;
-                                height: 55px;
+                                font-size: 14px;
+                                line-height: 18px;
                             }
                             .customer-info {
                                 width: 70%;
                                 display: inline-block;
                                 .customer-photo {
                                     display: inline-block;
-                                    width: 40px;
-                                    height: 40px;
+                                    width: 30px;
+                                    height: 30px;
                                     border-radius: 50%;
                                     vertical-align: middle;
                                 }
@@ -651,19 +654,19 @@
                     }
                     .request-info-box {
                         background-color: #d4e4d8;
-                        padding: 16px 15px 15px;
+                        padding: 15px 15px 12px;
                         .mobile-mail-box {
                             width: 50%;
                             display: inline-block;
                             padding: 0 15px;
                             vertical-align: top;
                             .call {
-                                padding-bottom: 15px;
+                                padding-bottom: 10px;
                                 padding-top: 0;
                             }
                             .send-email {
                                 padding-bottom: 0;
-                                padding-top: 15px;
+                                padding-top: 10px;
                             }
                         }
                         .account-box {
