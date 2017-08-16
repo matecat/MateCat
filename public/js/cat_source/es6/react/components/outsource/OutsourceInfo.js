@@ -61,6 +61,7 @@ class OutsourceInfo extends React.Component {
                             <div className="pointer" onClick={this.slideItem.bind(this, 2)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 3)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 4)}/>
+                            <div className="pointer" onClick={this.slideItem.bind(this, 5)}/>
                         </div>
                     </div>
                     <div className="slider-box" >
@@ -69,7 +70,27 @@ class OutsourceInfo extends React.Component {
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                1 - The outsourcing option in Matecat is so straightforward. You simply choose your language pairs,
+                                We love how easy it is to assign a translation job and to know exactly how much it will cost and when we will receive it.
+                                You never miss a deadline! Thanks a lot.
+                            </div>
+                            <div className="customer-info">
+                                <div className="customer-photo">
+                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />
+                                </div>
+                                <div className="customer-name">
+                                    Sandra Alonso
+                                </div>
+                                <div className="customer-role">
+                                    - Project Manager
+                                </div>
+                            </div>
+                            <div className="customer-corporate-logo">
+                                 <img src="../../public/img/outsource-clients/testimonial-responsive-translation.png" />
+                            </div>
+                        </div>
+                        <div className="customer-box-info">
+                            <div className="customer-text">
+                                The outsourcing option in Matecat is so straightforward. You simply choose your language pairs,
                                 upload the document, get the price and send it off to the Project Manager. So easy!
                             </div>
                             <div className="customer-info">
@@ -80,68 +101,70 @@ class OutsourceInfo extends React.Component {
                                     Kevin Connor
                                 </div>
                                 <div className="customer-role">
-                                    - Lorem Ipsum (role)
+                                    - Freelance professional translator
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
-                               {/* <img src="../../public/img/outsource-clients/client-example.png" />*/}
-                               Kevin Connor (company?)
+                               Kevin Connor
                             </div>
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                2 - I always receive translations back, exactly as I want. Great service, well worth trying out.
+                                I always receive translations back, exactly as I want. Great service, well worth trying out.
                                 I now want to use it for further languages and for projects with a tight delivery.
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
-                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
+                                    <img className="ui circular image" src="../../public/img/outsource-clients/testimonial-kennet.jpg" />
+                                </div>
                                 <div className="customer-name">
-                                    Name Surname
+                                    Kenneth van der Vlugt
                                 </div>
                                 <div className="customer-role">
-                                    - Need role
+                                    - Professional Translator
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
-                                <img src="../../public/img/outsource-clients/client-example.png" />
+                                <img src="../../public/img/outsource-clients/testimonial-topdutch.png" />
                             </div>
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                3 - Managing many file formats also simplifies our whole workflow, before and after delivery to the customer.
+                                Managing many file formats also simplifies our whole workflow, before and after delivery to the customer.
                                 Thanks for the excellent tool!
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
-                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
+                                    <img className="ui circular image" src="../../public/img/outsource-clients/testimonial-bruno-spagna.jpg" />
+                                </div>
                                 <div className="customer-name">
-                                    Name Surname
+                                    Bruno Spagna
                                 </div>
                                 <div className="customer-role">
-                                    - Need role
+                                    - IT Manager
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
-                                <img src="../../public/img/outsource-clients/client-example.png" />
+                                <img src="../../public/img/outsource-clients/testimonial-intradoc.png" />
                             </div>
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                4 - Sometimes I even split projects, outsource only a part, and then immediately assign the revision to a third person.
+                                Sometimes I even split projects, outsource only a part, and then immediately assign the revision to a third person.
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
-                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />                                </div>
+                                    <img className="ui circular image" src="../../public/img/outsource-clients/testimonial-roberto-coppola.jpg" />
+                                </div>
                                 <div className="customer-name">
-                                    Name Surname
+                                    Roberto Coppola
                                 </div>
                                 <div className="customer-role">
-                                    - Need role
+                                    - Export adviser
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
-                                <img src="../../public/img/outsource-clients/client-example.png" />
+                                <img className="c-export" src="../../public/img/outsource-clients/testimonial-consulenza-export4.png" />
                             </div>
                         </div>
                     </div>

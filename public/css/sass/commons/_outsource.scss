@@ -612,7 +612,7 @@
                                 line-height: 18px;
                             }
                             .customer-info {
-                                width: 70%;
+                                width: 50%;
                                 display: inline-block;
                                 .customer-photo {
                                     display: inline-block;
@@ -633,7 +633,7 @@
                             }
                             .customer-corporate-logo {
                                 display: inline-block;
-                                width: 30%;
+                                width: 50%;
                                 text-align: right;
                                 vertical-align: middle;
                                 img {
@@ -641,6 +641,9 @@
                                     vertical-align: middle;
                                     padding: 6px;
                                     height: 40px;
+                                }
+                                .c-export {
+                                    height: 30px !important;
                                 }
                             }
                         }
