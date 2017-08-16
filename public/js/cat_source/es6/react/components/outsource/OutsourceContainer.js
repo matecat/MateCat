@@ -51,8 +51,12 @@ class OutsourceContainer extends React.Component {
         let self = this;
         if (this.props.openOutsource) {
             setTimeout(function () {
-                window.addEventListener('click', self.handleDocumentClick)
-            }, 600)
+                window.addEventListener('click', self.handleDocumentClick);
+                $('html, body').animate({
+                    scrollTop: $(self.container).offset().top - 60
+                }, 700);
+            }, 600);
+
         } else {
             window.removeEventListener('click', self.handleDocumentClick)
         }
@@ -69,7 +73,7 @@ class OutsourceContainer extends React.Component {
                                    transitionLeaveTimeout={300}
         >
             {this.props.openOutsource ? (
-                <div className={"outsource-container chunk ui grid " + outsourceContainerClass}>
+                <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
                     <div className=" outsource-header sixteen wide column shadow-1">
                         <div className="job-id" title="Job Id">
                             {"(" + this.props.idJobLabel + ")"}
