@@ -16,6 +16,15 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
     protected static $_query_user_by_email = " SELECT * FROM users WHERE email = :email ";
+    protected static $_query_assignee_by_project_id = "SELECT * FROM users 
+        INNER JOIN projects ON projects.id_assignee = users.uid 
+        WHERE projects.id = :id_project
+        LIMIT 1 " ;
+
+    protected static $_query_owner_by_job_id = "SELECT * FROM users 
+        INNER JOIN jobs ON jobs.owner = users.email
+        WHERE jobs.id = :job_id
+        LIMIT 1 ";
 
     public function getByUids( $uids_array ) {
         $sanitized_array = array();
@@ -190,16 +199,22 @@ class Users_UserDao extends DataAccess_AbstractDao {
     public function getProjectOwner( $job_id ) {
         $job_id = (int) $job_id ;
 
-        $query = "SELECT * FROM users " .
-            " INNER JOIN jobs ON jobs.owner = users.email "  .
-            " WHERE jobs.id = $job_id " .
-            " LIMIT 1 " ;
+        $stmt = $this->_getStatementForCache( self::$_query_owner_by_job_id );
+        return $this->_fetchObject( $stmt,
+            new Users_UserStruct(),
+            [ 'job_id' => $job_id ]
+        )[ 0 ];
+    }
 
-        Log::doLog($query);
+    public function getProjectAssignee( $project_id ) {
+        $project_id = (int) $project_id ;
 
-        $arr_result = $this->_fetch_array( $query );
+        $stmt = $this->_getStatementForCache( self::$_query_assignee_by_project_id );
+        return $this->_fetchObject( $stmt,
+            new Users_UserStruct(),
+            [ 'id_project' => $project_id ]
+        )[ 0 ];
 
-        return $this->_buildResult( $arr_result );
     }
 
     /**
