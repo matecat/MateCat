@@ -4,15 +4,67 @@ class SplitJobModal extends React.Component {
 
     constructor(props) {
         super(props);
-        var arraySplit = this.calculateSplitComputation(2);
+        // var arraySplit = this.calculateSplitComputation(2);
         this.state = {
             numSplit: 2,
-            wordsArray: arraySplit,
+            wordsArray: null,
             splitChecked: false,
             showLoader: false,
-            showError: false
+            showStartLoader: true,
+            showError: false,
+            total: 0
         };
+        this.getSplitData();
     }
+    getSplitData() {
+        let self = this;
+        API.JOB.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
+            .done(function (d) {
+                let arrayChunks = [];
+                if (d.data && d.data.chunks) {
+
+                    //Set total: if eq_word_count is 0 take the raw
+                    let total;
+                    if (!!d.data.eq_word_count && Math.round(d.data.eq_word_count) !== 0) {
+                        total = d.data.eq_word_count;
+                    } else {
+                        total = d.data.raw_word_count;
+                    }
+
+                    d.data.chunks.forEach(function (item, index) {
+                        if( typeof d.data.chunks[index] === 'undefined' ) {
+                            arrayChunks[index] = 0;
+                        } else {
+
+                            if ( d.data.chunks[index].eq_word_count === 0 ) {
+                                arrayChunks[index] = parseInt( d.data.chunks[index].raw_word_count );
+                            }
+                            else {
+                                arrayChunks[index] = parseInt( d.data.chunks[index].eq_word_count );
+                            }
+                        }
+                    });
+                    self.setState({
+                        wordsArray: arrayChunks,
+                        total: total,
+                        showStartLoader: false,
+                        splitChecked: true,
+                        showLoader: false
+                    });
+                }
+                if ((typeof d.errors !== 'undefined') && (d.errors.length) ) {
+                    self.errorMsg = d.errors[0].message;
+                    self.setState({
+                        showError: true,
+                        showLoader: false,
+                        showStartLoader: false,
+                        splitChecked: false
+                    });
+                }
+
+            });
+    }
+
 
     closeModal() {
         APP.ModalWindow.onCloseModal();
@@ -30,7 +82,7 @@ class SplitJobModal extends React.Component {
 
     calculateSplitComputation(numSplit) {
         let numWords, array = [];
-        let total = Math.round(this.props.job.get('stats').get('TOTAL'));
+        let total = Math.round(this.state.total);
 
         let wordsXjob = Math.floor(total / numSplit);
         let diff = total - (wordsXjob * numSplit);
@@ -57,9 +109,11 @@ class SplitJobModal extends React.Component {
     }
 
     checkSplitComputation() {
-
+        if (!this.state.wordsArray) {
+            return null;
+        }
         let sum = this.state.wordsArray.reduce((a, b) => a + b, 0);
-        let diff = sum - Math.round(this.props.job.get('stats').get('TOTAL'));
+        let diff = sum - Math.round(this.state.total);
         if ( diff !== 0 ) {
             return {
                 difference: diff,
@@ -84,7 +138,7 @@ class SplitJobModal extends React.Component {
                             arrayChunks[index] = 0;
                         } else {
 
-                            if ( config.split_based_on_raw_word_count ) {
+                            if ( d.data.chunks[index].eq_word_count === 0 ) {
                                 arrayChunks[index] = parseInt( d.data.chunks[index].raw_word_count );
                             }
                             else {
@@ -139,6 +193,13 @@ class SplitJobModal extends React.Component {
 
     getJobParts() {
         let html = [];
+        if (!this.state.wordsArray) {
+            return <div className="ui segment" style={{height: '126px'}}>
+                <div className="ui active inverted dimmer">
+                    <div className="ui text loader">Loading</div>
+                </div>
+            </div>;
+        }
         for (let i = 0; i < this.state.numSplit; i++) {
             let value = (this.state.wordsArray[i] && parseInt(this.state.wordsArray[i]) != 0) ? this.state.wordsArray[i] : 0;
             let disableClass = (value > 0 ) ? '' : 'void';
@@ -168,7 +229,7 @@ class SplitJobModal extends React.Component {
         let showSplitDiffError =  !!(checkSplit);
         let errorLabel =  (checkSplit && checkSplit.difference < 0) ? 'Words remaining' : 'Words exceeding';
         let errorSplitDisableClass = (checkSplit) ? "disabled" : "";
-        let totalWords = this.props.job.get('stats').get('TOTAL_FORMATTED');
+        let totalWords = Math.round(this.state.total);
 
         return <div className="modal popup-split">
             <div className="popup" id="split-modal-cont">
@@ -253,7 +314,6 @@ class SplitJobModal extends React.Component {
                             </div>
                     ) :('')}
 
-                    <div className="cl"></div>
                     <div className="btnsplit">
 
 
