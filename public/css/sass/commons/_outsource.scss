@@ -14,7 +14,23 @@
     .outsource-header {
         padding: 5px 45px !important;
         z-index: 1;
+        .job-id {
+
+        }
+        .job-payable {
+            display: inline-block;
+            padding: 0 0 0 10px !important;
+            line-height: 30px;
+            position: relative;
+            top: 1px;
+            color: #969696;
+            text-decoration: none !important;
+            font-weight: 700;
+
+        }
     }
+
+
     &.transitionOutsource-enter {
         height: 0px;
     }
@@ -86,18 +102,7 @@
         }
     }
 
-    .outsource-header {
-        .job-payable {
-            display: inline-block;
-            padding: 0 0 0 10px !important;
-            line-height: 30px;
-            position: relative;
-            top: 1px;
-            display: inline-block;
-            color: #969696;
 
-        }
-    }
     .delivery-order, .container-reduced {
         .confirm-delivery-input {
             margin-top: 31px;
