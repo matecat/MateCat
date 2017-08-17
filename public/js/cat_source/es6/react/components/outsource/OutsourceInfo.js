@@ -125,7 +125,7 @@ class OutsourceInfo extends React.Component {
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
-                                <img src="../../public/img/outsource-clients/testimonial-topdutch.png" />
+                                <img src="../../public/img/outsource-clients/testimonial-topdutch2.png" />
                             </div>
                         </div>
                         <div className="customer-box-info">
