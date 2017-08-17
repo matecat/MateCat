@@ -599,7 +599,7 @@ class JobContainer extends React.Component {
         nextState.openOutsource !== this.state.openOutsource)
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         var self = this;
         $(this.iconsButton).dropdown();
         this.initTooltips();
@@ -609,6 +609,11 @@ class JobContainer extends React.Component {
             setTimeout(function () {
                 self.container.classList.remove('updated-job');
             }, 2000)
+        }
+        if (prevState.openOutsource) {
+            this.chunkRow.classList.add('after-open-outsource');
+        } else {
+            $('.after-open-outsource').removeClass('after-open-outsource');
         }
     }
 
@@ -659,7 +664,7 @@ class JobContainer extends React.Component {
         return <div className="sixteen wide column chunk-container">
                 <div className="ui grid" ref={(container) => this.container = container}>
                     {!this.state.openOutsource ? (
-                    <div className="chunk wide column shadow-1 pad-right-10">
+                    <div className="chunk wide column shadow-1 pad-right-10" ref={(chunkRow)=> this.chunkRow = chunkRow}>
                         <div className="job-id" title="Job Id">
                             {"(" + idJobLabel + ")"}
                         </div>
