@@ -75,9 +75,11 @@ class OutsourceContainer extends React.Component {
             {this.props.openOutsource ? (
                 <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
                     <div className=" outsource-header sixteen wide column shadow-1">
-                        <div className="job-id" title="Job Id">
-                            {"(" + this.props.idJobLabel + ")"}
-                        </div>
+                        {this.props.idJobLabel ? (
+                            <div className="job-id" title="Job Id">
+                                {this.props.idJobLabel}
+                            </div>
+                        ) :(null)}
                         <div className="source-target languages-tooltip"
                              ref={(tooltip) => this.languageTooltip = tooltip}
                              data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
