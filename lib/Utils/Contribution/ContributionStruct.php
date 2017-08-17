@@ -90,23 +90,9 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $propagationRequest =true;
 
     /**
-     * @var string
+     * @var integer
      */
-    public $context = "";
-
-    /**
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function __get( $name ) {
-
-        if ( !property_exists( $this, $name ) ) {
-            throw new \DomainException( 'Trying to get an undefined property ' . $name );
-        }
-
-        return $this->$name;
-    }
+    public $id_mt;
 
     /**
      * Global Cached record for jobs metadata

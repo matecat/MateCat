@@ -11,14 +11,17 @@ namespace Features;
 
 
 use Constants_Engines;
+use Contribution\ContributionStruct;
+use Contribution\Set;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
+use Engines_MyMemory;
 use Exception;
-use Jobs\JobStatsStruct;
 use Jobs_JobStruct;
 use Log;
+use Projects_ProjectStruct;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -152,11 +155,60 @@ class Mmt extends BaseFeature {
 
         }
 
+    }
 
-//        if( !empty( $projectRows['id_customer'] ) ){
-//            $uStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectRows['id_customer'] );
-//            $engineEnabled = ( new MetadataDao() )->setCacheTTL( 60 * 60 *24 * 30 )->get( $uStruct->uid, 'mmt' );
-//        }
+    public function performSetContributionMT( $response, ContributionStruct $contributionStruct, Projects_ProjectStruct $projectStruct ){
+
+        /**
+         * When a project is created, it's features and used plugins are stored in project_metadata,
+         * When MMT is disabled at global level, old projects will have this feature enabled in meta_data, but the plugin is not Bootstrapped with the hook @see Mmt::bootstrapCompleted()
+         *
+         * So, the MMT engine is not in the list of available plugins, check and exclude if the Plugin is not enables at global level
+         */
+        if( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) return $response;
+
+        //Project is not anonymous
+        if( !empty( $projectStruct->id_customer ) ){
+
+            //retrieve OWNER MMT License
+            $uStruct        = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectStruct->id_customer );
+            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+
+            try {
+
+                if( !empty( $ownerMmtEngineMetaData ) ){
+
+                    if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){
+
+                        //Execute the normal Set::setContributionMT called from setTranslation controller
+                        $response = $contributionStruct;
+
+                    } else {
+
+                        $mmtContribution = clone $contributionStruct;
+                        //Override the mt_engine id and send the message to MMT also
+                        $mmtContribution->id_mt = $ownerMmtEngineMetaData->value;
+                        //send two contribution, one for the job engine and one for user MMT through the normal Set::contributionMT
+                        Set::contributionMT( $mmtContribution );
+
+                        $job_MtEngine = Engine::getInstance( $contributionStruct->id_mt );
+                        if( $job_MtEngine instanceof Engines_MyMemory ){
+                            $response = null;
+                        } else{
+                            $response = $contributionStruct;
+                        }
+
+                    }
+
+                }
+
+            } catch ( Exception $e ) {
+                //DO Nothing
+            }
+
+        }
+
+        return $response;
 
     }
 

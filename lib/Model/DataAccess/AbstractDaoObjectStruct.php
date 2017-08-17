@@ -66,6 +66,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
         return $this->cached_results[$method_name];
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed
+     */
     public function __get( $name ) {
         if ( !property_exists( $this, $name ) ) {
             throw new DomainException( 'Trying to get an undefined property ' . $name );

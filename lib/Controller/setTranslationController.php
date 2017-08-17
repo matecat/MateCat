@@ -35,7 +35,10 @@ class setTranslationController extends ajaxController {
     protected $status;
     protected $split_statuses;
 
-    protected $jobData = array();
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $jobData;
 
 
 
@@ -164,7 +167,7 @@ class setTranslationController extends ajaxController {
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
-            $this->jobData = getJobData( (int)$this->id_job, $this->password );
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
             if ( empty( $this->jobData ) ) {
                 $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
@@ -823,6 +826,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
         $contributionStruct->propagationRequest   = $this->propagate;
+        $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
 
         $contributionStruct = $this->feature_set->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
@@ -830,6 +834,8 @@ class setTranslationController extends ajaxController {
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
+
+        $contributionStruct = $this->feature_set->filter( 'performSetContributionMT', null, new $contributionStruct, $this->project ) ;
         Set::contributionMT( $contributionStruct );
 
     }

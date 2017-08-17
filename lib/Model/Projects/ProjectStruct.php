@@ -31,11 +31,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @param int $ttl
+     *
      * @return Jobs_JobStruct[]
      */
-    public function getJobs() {
-        return $this->cachable(__function__, $this->id, function($id) {
-            return Jobs_JobDao::getByProjectId( $id );
+    public function getJobs( $ttl = 0 ) {
+        return $this->cachable(__function__, $this->id, function($id) use( $ttl ) {
+            return Jobs_JobDao::getByProjectId( $id, $ttl );
         });
     }
 
@@ -45,7 +47,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public function getTargetLanguages() {
         return array_map(function(Jobs_JobStruct $job) {
             return $job->target ;
-        }, $this->getJobs() );
+        }, $this->getJobs( 60 * 60 * 24 * 30 ) );
     }
 
     /**
@@ -141,6 +143,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return Users_UserStruct
+     */
+    public function getOwner() {
+        return ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $this->id_customer ) ;
+    }
+
+    /**
      * @param $feature_code
      *
      * @return bool
@@ -163,11 +172,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @param int $ttl
+     *
      * @return Chunks_ChunkStruct[]
      */
-    public function getChunks() {
+    public function getChunks( $ttl = 0 ) {
       $dao = new Chunks_ChunkDao( Database::obtain() );
-      return $dao->getByProjectID( $this->id );
+      return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
     }
 
     public function isMarkedComplete() {

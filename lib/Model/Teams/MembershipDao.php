@@ -113,7 +113,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
     /**
      * @param $id_team
      *
-     * @return \DataAccess_IDaoStruct|\DataAccess_IDaoStruct[]|MembershipStruct[]
+     * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
      */
     public function getMemberListByTeamId( $id_team ) {
         $stmt             = $this->_getStatementForCache( self::$_query_member_list );

@@ -84,6 +84,8 @@ class GlossariesController extends KleinController {
             return;
         }
 
+        set_time_limit(600);
+
         $fileInfo = $this->extractCSV( $stdResult );
 
         //load it into MyMemory
