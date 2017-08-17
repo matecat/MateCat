@@ -90,7 +90,7 @@ class OutsourceContainer extends React.Component {
                             </div>
                         </div>
                         <div className="job-payable">
-                            <a href={this.getProjectAnalyzeUrl()} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                            <div><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</div>
                         </div>
                     </div>
                     <div className="sixteen wide column shadow-1">
