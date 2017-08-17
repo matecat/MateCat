@@ -219,6 +219,14 @@ class Analysis_AnalysisModel {
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $fast_wc_time = $this->fast_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
 
+        /**
+         * Chrome Bug: reordering object sorting keys numerically, transform objects in an ordered list
+         */
+        foreach( $this->jobs as $_jid => $job ){
+            $this->jobs[ $_jid ][ 'chunks' ] = array_values( $this->jobs[ $_jid ][ 'chunks' ] );
+        }
+
+
         //CJK count we assume 4000 chars/day
         if ( array_key_exists( explode( "-", $p_jdata[ 'source' ] )[ 0 ], CatUtils::$cjk ) ) {
             $raw_wc_time  = $this->total_raw_word_count / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
