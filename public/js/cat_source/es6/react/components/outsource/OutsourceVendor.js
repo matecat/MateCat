@@ -681,9 +681,9 @@ class OutsourceVendor extends React.Component {
                 }
             });
 
-            // if (this.state.outsourceConfirmed && !!this.props.job.get('outsource')) {
+            if (this.state.extendedView ) {
                 this.revisionCheckbox.checked = (this.state.chunkQuote.get('typeOfService') === "premium") ? true : false;
-            // }
+            }
         }
 
         $(this.rating).rating('disable');
