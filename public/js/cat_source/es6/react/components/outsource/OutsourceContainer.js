@@ -53,7 +53,7 @@ class OutsourceContainer extends React.Component {
             setTimeout(function () {
                 window.addEventListener('click', self.handleDocumentClick);
                 $('html, body').animate({
-                    scrollTop: $(self.container).offset().top - 60
+                    scrollTop: $(self.container).offset().top - 55
                 }, 700);
             }, 600);
 
