@@ -444,6 +444,11 @@ body.analyze{
                         }
                     }
                 }
+                .openOutsource {
+                    .title-job, .titles-compare, .activity-icons {
+                        display: none;
+                    }
+                }
             }
             .analyze-report {
                 text-align: center;

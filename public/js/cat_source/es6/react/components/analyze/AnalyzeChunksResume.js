@@ -110,7 +110,9 @@ class AnalyzeChunksResume extends React.Component {
 
                         self.checkPayableChanged(chunk.jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
-                        return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, chunk.jid)}>
+                        let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
+
+                        return <div key={indexChunk} className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, chunk.jid)}>
                             <div className="title-job">
                                 <div className="job-id" >Chunk {index}</div>
                             </div>
@@ -140,7 +142,7 @@ class AnalyzeChunksResume extends React.Component {
                                                 showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
-                                                idJobLabel={chunk.jid + '-' + index}
+                                                idJobLabel={"Chunk " + index}
                                                 outsourceJobId={self.state.outsourceJobId}/>
                         </div>;
                     });
@@ -180,13 +182,14 @@ class AnalyzeChunksResume extends React.Component {
                     });
 
                     let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === self.props.jobsInfo[indexJob].jid);
+                    let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
 
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
-                            <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
+                            <div className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
                                     {/*<div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>*/}
                                     <div className="source-target" >
@@ -228,7 +231,6 @@ class AnalyzeChunksResume extends React.Component {
                                                 showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
-                                                idJobLabel={self.props.jobsInfo[indexJob].jid}
                                                 outsourceJobId={self.state.outsourceJobId}/>
                         </div>
                     </div>
