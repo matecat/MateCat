@@ -610,7 +610,7 @@ class JobContainer extends React.Component {
                 self.container.classList.remove('updated-job');
             }, 2000)
         }
-        if (prevState.openOutsource) {
+        if (prevState.openOutsourcem && this.chunkRow) {
             this.chunkRow.classList.add('after-open-outsource');
         } else {
             $('.after-open-outsource').removeClass('after-open-outsource');

@@ -4,13 +4,8 @@ $.extend(UI, {
     populateOutsourceForm : function() {
     },
 
-
-    outsourceInit: function() {
-
-    },
-
     sendJobToTranslator: function (email, date, timezone, job, project) {
-        UI.sendTranslatorRequest(email, date, timezone, job).done(function (data) {
+        API.JOB.sendTranslatorRequest(email, date, timezone, job).done(function (data) {
             APP.ModalWindow.onCloseModal();
             if (data.job) {
                 UI.checkShareToTranslatorResponse(data, email, date, job, project);
@@ -21,20 +16,6 @@ $.extend(UI, {
             UI.showShareTranslatorError();
         });
 
-    },
-
-    sendTranslatorRequest: function (email, date, timezone, job) {
-        var data = {
-            email: email,
-            delivery_date: Math.round(date/1000),
-            timezone: timezone
-        };
-        return $.ajax({
-            async: true,
-            data: data,
-            type: "POST",
-            url : "/api/v2/jobs/" + job.id +"/" + job.password + "/translator"
-        });
     },
 
     checkShareToTranslatorResponse: function (response, mail, date, job, project) {
