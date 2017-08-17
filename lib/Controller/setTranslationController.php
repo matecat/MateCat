@@ -835,7 +835,7 @@ class setTranslationController extends ajaxController {
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
-        $contributionStruct = $this->feature_set->filter( 'performSetContributionMT', null, new $contributionStruct, $this->project ) ;
+        $contributionStruct = $this->feature_set->filter( 'performSetContributionMT', null, $contributionStruct, $this->project ) ;
         Set::contributionMT( $contributionStruct );
 
     }

@@ -23,8 +23,9 @@ use INIT;
 
 class SetContributionWorker extends AbstractWorker {
 
-    const ERR_SET_FAILED = 4;
-    const ERR_NO_TM_ENGINE = 5;
+    const ERR_SET_FAILED    = 4;
+    const ERR_UPDATE_FAILED = 6;
+    const ERR_NO_TM_ENGINE  = 5;
 
     const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
@@ -92,18 +93,28 @@ class SetContributionWorker extends AbstractWorker {
         $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
         $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
-        if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
-            $this->_update( $config, $contributionStruct );
-            $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
-        } else {
-            $this->_set( $config, $contributionStruct );
-            $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
-        }
+        try {
 
-        $this->_queueHandler->getRedisClient()->expire(
-                $redisSetKey,
-                60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
-        ); //TTL 3 months, the time for job archivability
+            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
+                $this->_update( $config, $contributionStruct );
+                $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
+            } else {
+                $this->_set( $config, $contributionStruct );
+                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
+            }
+
+            $this->_queueHandler->getRedisClient()->expire(
+                    $redisSetKey,
+                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
+            ); //TTL 3 months, the time for job archivability
+
+        } catch( ReQueueException $e ){
+            $this->_doLog( $e->getMessage() );
+            if( $e->getCode() == self::ERR_SET_FAILED || $isANewSet ){
+                $this->_queueHandler->getRedisClient()->del( [ $redisSetKey ] );
+            }
+            throw $e;
+        }
 
     }
 
@@ -187,7 +198,18 @@ class SetContributionWorker extends AbstractWorker {
         //reset the engine
         $engineName = get_class( $this->_engine );
         $this->_engine = null;
-        throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+
+        $errNum = self::ERR_SET_FAILED;
+        switch( strtolower( $type ) ){
+            case 'set':
+                $errNum = self::ERR_SET_FAILED;
+                break;
+            case 'update':
+                $errNum = self::ERR_UPDATE_FAILED;
+                break;
+        }
+
+        throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), $errNum );
     }
 
 }
