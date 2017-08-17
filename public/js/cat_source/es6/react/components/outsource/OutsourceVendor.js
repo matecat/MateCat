@@ -448,8 +448,6 @@ class OutsourceVendor extends React.Component {
                                                  ref={(select) => this.currencySelect = select}>
                                                 <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
                                                 <i className="dropdown icon"/>
-                                                <div className="header">Select Currency</div>
-                                                <div className="divider"/>
                                                 <div className="menu">
                                                     <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
                                                     <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
