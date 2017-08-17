@@ -101,7 +101,7 @@ class OutsourceInfo extends React.Component {
                                     Kevin Connor
                                 </div>
                                 <div className="customer-role">
-                                    - Freelance professional translator
+                                    - Freelance translator
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
