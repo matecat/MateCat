@@ -535,6 +535,13 @@
                                     font-weight: 100;
                                     margin-left: 10px;
                                 }
+                                i {
+                                    margin-left: 5px;
+                                }
+                                .menu {
+                                    height: 260px;
+                                    left: -5px;
+                                }
                             }
                         }
                     }
@@ -814,6 +821,7 @@
                                 .gmt-select {
                                     position: relative;
                                     top: -3px;
+                                    left: -230px;
                                 }
                             }
                         }
@@ -872,6 +880,15 @@
                                 a {
                                     color: #000000;
                                     font-weight: 100;
+                                    font-size: 14px;
+                                }
+                                i {
+                                    margin-left: 5px !important;
+                                }
+                                .menu {
+                                    top: -5px;
+                                    left: -23px;
+                                    height: 95px;
                                 }
                             }
                         }

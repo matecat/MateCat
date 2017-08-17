@@ -444,7 +444,7 @@ class OutsourceVendor extends React.Component {
                                 <div className="select-value">
                                     <h4 className="ui header">
                                         <div className="content">
-                                            <div className="ui inline dropdown"
+                                            <div className="ui scrolling dropdown"
                                                  ref={(select) => this.currencySelect = select}>
                                                 <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
                                                 <i className="dropdown icon"/>
@@ -574,13 +574,13 @@ class OutsourceVendor extends React.Component {
                             <div className="select-value">
                                 <h4 className="ui header">
                                     <div className="content">
-                                        <div className="ui inline dropdown"
+                                        <div className="ui scrolling dropdown"
                                              ref={(select) => this.currencySelect = select}>
                                             <a className="price-pw">about {priceCurrencySymbol} {pricePWord} / word</a>
                                             <i className="dropdown icon"/>
                                             <div className="menu">
-                                                <div className="header">Select Currency</div>
-                                                <div className="divider"/>
+                                                {/*<div className="header">Select Currency</div>*/}
+                                                {/*<div className="divider"/>*/}
                                                 <div className="item" data-value="EUR" data-symbol="€">Euro (EUR)</div>
                                                 <div className="item" data-value="USD" data-symbol="US$">US dollar (USD)</div>
                                                 <div className="item" data-value="AUD" data-symbol="$">Australian dollar (AUD)</div>
