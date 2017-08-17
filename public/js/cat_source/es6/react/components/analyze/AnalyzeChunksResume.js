@@ -98,7 +98,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
-                                     ref={(container) => self.containers[chunk.jid] = container}>
+                                     ref={(container) => self.containers[chunk.jid + index] = container}>
                                     <div>
                                         {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
@@ -223,7 +223,7 @@ class AnalyzeChunksResume extends React.Component {
         let changedData = _.pick(this.payableValuesChenged, function (item, i, array) {
             return item === true;
         });
-        if (_.size(changedData) > 0) {
+        if (_.size(changedData) > 0 ) {
             _.each(changedData, function (item, i) {
                 self.containers[i].classList.add('updated-count');
                 setTimeout(function () {
@@ -234,6 +234,15 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     componentDidMount() {
+        let self = this;
+        if (this.props.status === 'DONE') {
+            _.each(self.containers, function (item, i) {
+                item.classList.add('updated-count');
+                setTimeout(function () {
+                    self.containers[i].classList.remove('updated-count');
+                }, 400)
+            })
+        }
     }
 
     componentWillUnmount() {
