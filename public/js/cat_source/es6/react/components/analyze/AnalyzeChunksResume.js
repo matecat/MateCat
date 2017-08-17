@@ -89,30 +89,28 @@ class AnalyzeChunksResume extends React.Component {
 
         let buttonsClass = (this.props.status !== "DONE" || this.thereIsChunkOutsourced()) ? 'disabled' : '';
         if (!this.props.jobsAnalysis.isEmpty()) {
-            return this.props.jobsAnalysis.map(function (jobAnalysis, indexJob) {
-                if (_.isUndefined(self.props.jobsInfo[indexJob])) {
-                    return;
-                }
-                if (self.props.jobsInfo[indexJob].splitted !== "" && _.size(self.props.jobsInfo[indexJob].chunks) > 1) {
-                    let index = 0;
+            return _.map(this.props.jobsInfo,function (item, indexJob) {
+                let jobAnalysis = self.props.jobsAnalysis.get(indexJob);
+
+                if (item.splitted !== "" && _.size(item.chunks) > 1) {
                     let thereIsJobOutsourced = false;
-                    let chunksHtml = jobAnalysis.get('totals').reverse().map(function (chunkAnalysis, indexChunk) {
-                        let chunk = self.props.jobsInfo[indexJob].chunks[indexChunk];
+                    let chunksHtml = _.map(item.chunks, function (chunkConfig, index) {
+                        let indexChunk = chunkConfig.jpassword;
+                        let chunkAnalysis = jobAnalysis.get('totals').get(indexChunk);
+                        let chunk = chunkConfig;
                         let chunkJob = self.props.project.get('jobs').find(function (job) {
-                            return job.get('id') == indexJob && job.get('password') == indexChunk;
+                            return job.get('id') == chunk.jid && job.get('password') == chunk.jpasswordd;
                         });
                         index++;
                         if ( !_.isNull(chunkJob.get('outsource')) ) {
                             thereIsJobOutsourced = true;
                         }
 
-                        let idChunk = self.props.jobsInfo[indexJob].jid +'-'+ index;
+                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === (chunk.jid + index));
 
-                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === idChunk);
+                        self.checkPayableChanged(chunk.jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
-                        self.checkPayableChanged(idChunk, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
-
-                        return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
+                        return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, chunk.jid)}>
                             <div className="title-job">
                                 <div className="job-id" >Chunk {index}</div>
                             </div>
@@ -124,7 +122,7 @@ class AnalyzeChunksResume extends React.Component {
                                     <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
                                 </div>
                                 <div className="title-matecat-words tmw"
-                                     ref={(container) => self.containers[self.props.jobsInfo[indexJob].jid] = container}>
+                                     ref={(container) => self.containers[chunk.jid] = container}>
                                     <div>
                                         {chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
                                 </div>
@@ -145,7 +143,7 @@ class AnalyzeChunksResume extends React.Component {
                                                 idJobLabel={chunk.jid + '-' + index}
                                                 outsourceJobId={self.state.outsourceJobId}/>
                         </div>;
-                    }).toList().toJS();
+                    });
 
                     let disableMergeClass = (thereIsJobOutsourced) ? 'disabled' : '';
 
@@ -172,22 +170,10 @@ class AnalyzeChunksResume extends React.Component {
                     </div>;
                 } else {
                     let thereIsJobOutsourcedClass = '';
-                    let obj = self.props.jobsInfo[indexJob].chunks;
-                    let password = Object.keys(obj)[0];
-                    let total_raw = obj[Object.keys(obj)[0]].total_raw_word_count_print;
+                    let obj = self.props.jobsInfo[indexJob].chunks[0];
+                    let password = obj.jpassword;
+                    let total_raw = obj.total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
-
-                    let chunkJob = self.props.project.get('jobs').find(function (job) {
-                        return job.get('id') == indexJob ;
-                    });
-
-                    if ( !_.isNull(chunkJob.get('outsource') ) ) {
-                        thereIsJobOutsourcedClass = 'disabled';
-                    }
-
-                    let idChunk = self.props.jobsInfo[indexJob].jid;
-
-                    let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === idChunk);
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
@@ -241,7 +227,7 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>
                 }
-            }).toList().toJS();
+            });
         } else {
             return this.props.project.get('jobs').map(function (jobInfo, indexJob) {
                 return <div key={jobInfo.get('id') + '-' + indexJob} className="job ui grid">
@@ -312,6 +298,7 @@ class AnalyzeChunksResume extends React.Component {
     render() {
         let showHideText = (this.state.openDetails) ? "Hide Details" : "Show Details";
         let iconClass = (this.state.openDetails) ? "open" : "";
+        let html = this.getResumeJobs()
         return <div className="project-top ui grid">
             <div className="compare-table sixteen wide column">
                 <div className="header-compare-table ui grid shadow-1">
@@ -338,7 +325,7 @@ class AnalyzeChunksResume extends React.Component {
             </div>
             <div className="compare-table jobs sixteen wide column">
 
-                {this.getResumeJobs()}
+                {html}
 
             </div>
             { (!this.props.jobsAnalysis.isEmpty()) ? (

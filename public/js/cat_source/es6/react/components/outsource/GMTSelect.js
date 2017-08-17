@@ -66,7 +66,8 @@ export default class GMTSelect extends React.Component {
                         <div className="gmt-value">(GMT -1:00 )</div>
                         <div className="gmt-description"> Azores, Cape Verde (Praia)</div> </div>
                     <div className="item" data-value="0">
-                        <div className="gmt-value">(GMT) Western European Time (London, Lisbon)</div> </div>
+                        <div className="gmt-value">(GMT)</div>
+                        <div className="gmt-description"> Western European Time (London, Lisbon)</div> </div>
                     <div className="item" data-value="1">
                         <div className="gmt-value">(GMT +1:00 )</div>
                         <div className="gmt-description"> Central European Time (Rome, Paris)</div> </div>

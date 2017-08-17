@@ -188,7 +188,7 @@ class OutsourceModal extends React.Component {
         let isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
 
         var voteToShow = ( isRevisionChecked ) ? this.chunk.r_vote : this.chunk.t_vote;
-        if( this.chunk.show_revisor_data != 1 ) {
+        if( this.chunk.show_revisor_data != 1 && this.chunk.t_name !== '') {
             $(".outsourceto").addClass("revisorNotAvailable");
             voteToShow = this.chunk.t_vote;
         }
@@ -486,24 +486,32 @@ class OutsourceModal extends React.Component {
                                         <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
 
                                         <p className="trustbox1">Translated uses the most qualified translator for your subject (<strong style={{textTransform: 'capitalize'}}>{this.props.job.subject}</strong>) and keeps using the same translator for your next projects. <br />
-                                                {!this.state.showTranslatorInfo ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)
-                                                    : (<a className="show_translator more hide" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)}
+                                                {!this.state.showTranslatorInfo ? (
+                                                    <a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>
+                                                )
+                                                    : (
+                                                        <a className="show_translator more hide" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>
+                                                    )}
 
                                             </p>
 
-                                        {this.state.showTranslatorInfo ? (<p className="trustbox2">
+                                        {this.state.showTranslatorInfo ? (
+                                            <p className="trustbox2">
                                                 Translated has over 15 years' experience as a translation company and offers
                                                 <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank"> two key guarantees on quality and delivery</a>.
                                                 <br />
                                                 <a className="hide_translator more minus"
                                                    onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
-                                            </p>) : (<p className="trustbox2 hide">
+                                            </p>
+                                        ) : (
+                                            <p className="trustbox2 hide">
                                             Translated has over 15 years' experience as a translation company and offers
                                             <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank"> two key guarantees on quality and delivery</a>.
                                             <br />
                                             <a className="hide_translator more minus"
                                             onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
-                                            </p>)}
+                                            </p>
+                                        )}
 
                                     </div>
 
