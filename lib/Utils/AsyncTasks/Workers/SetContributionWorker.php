@@ -80,7 +80,7 @@ class SetContributionWorker extends AbstractWorker {
 //        $userInfoList = $contributionStruct->getUserInfo();
 //        $userInfo = array_pop( $userInfoList );
 
-        $this->_loadEngine( $jobStruct );
+        $this->_loadEngine( $contributionStruct );
 
         $config = $this->_engine->getConfigStruct();
         $config[ 'source' ]      = $jobStruct->source;
@@ -107,10 +107,15 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
-    protected function _loadEngine( Jobs_JobStruct $jobStruct ){
+    protected function _loadEngine( ContributionStruct $contributionStruct ){
+
+        $jobStructList = $contributionStruct->getJobStruct();
+        $jobStruct = array_pop( $jobStructList );
+
         if( empty( $this->_engine ) ){
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
+
     }
 
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
@@ -124,7 +129,8 @@ class SetContributionWorker extends AbstractWorker {
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Set failed on " . get_class( $this->_engine ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            //reset the engine
+            $this->_raiseException( 'Set', $config );
         }
 
     }
@@ -140,7 +146,8 @@ class SetContributionWorker extends AbstractWorker {
 
         $res = $this->_engine->update( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Update failed on " . get_class( $this->_engine ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            //reset the engine
+            $this->_raiseException( 'Update', $config );
         }
 
     }
@@ -168,6 +175,19 @@ class SetContributionWorker extends AbstractWorker {
 
         return $config;
 
+    }
+
+    /**
+     * @param       $type
+     * @param array $config
+     *
+     * @throws ReQueueException
+     */
+    protected function _raiseException( $type, array $config ){
+        //reset the engine
+        $engineName = get_class( $this->_engine );
+        $this->_engine = null;
+        throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
     }
 
 }

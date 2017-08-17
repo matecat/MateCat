@@ -181,6 +181,7 @@ abstract class AbstractWorker implements SplSubject {
      * @param QueueElement $queueElement
      *
      * @return void
+     * @throws EndQueueException
      */
     protected function _checkForReQueueEnd( QueueElement $queueElement ) {
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {

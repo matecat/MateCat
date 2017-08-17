@@ -81,6 +81,10 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     const LanguagePairNotSupportedException = 1;
 
+    protected static $_supportedExceptions = [
+            'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
+    ];
+
 
     public function get( $_config ) {
 
@@ -297,11 +301,19 @@ class Engines_MMT extends Engines_AbstractEngine {
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
         } else {
+
             if ( $rawValue[ 'responseStatus' ] >= 400 ){
-                $rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
-                $rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
+                foreach( self::$_supportedExceptions as $exception => $code ){
+                    if( stripos( $rawValue[ 'error' ][ 'response' ], $exception ) !== false ){
+                        $rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
+                        $rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
+                        break;
+                    }
+                }
             }
+
             $decoded = $rawValue; // already decoded in case of error
+
         }
 
         $result_object = [];

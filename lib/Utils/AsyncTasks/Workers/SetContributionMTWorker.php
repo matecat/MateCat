@@ -21,10 +21,10 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
 
-    protected function _loadEngine( Jobs_JobStruct $jobStruct ){
+    protected function _loadEngine( ContributionStruct $contributionStruct ){
         if( empty( $this->_engine ) ){
             try {
-                $this->_engine = Engine::getInstance( $jobStruct->id_mt_engine ); //Load MT Adaptive Engine
+                $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
             } catch( Exception $e ){
                 throw new EndQueueException( $e->getMessage(), self::ERR_NO_TM_ENGINE );
             }
@@ -38,14 +38,11 @@ class SetContributionMTWorker extends SetContributionWorker {
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
+
         if ( !$res ) {
-            throw new ReQueueException( "Set failed on " . get_class( $this->_engine ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            $this->_raiseException( 'Set', $config );
         }
 
-    }
-
-    protected function _update( Array $config, ContributionStruct $contributionStruct ){
-        parent::_update( $config, $contributionStruct );
     }
 
     protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){

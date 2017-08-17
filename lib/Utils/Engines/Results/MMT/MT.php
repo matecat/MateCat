@@ -24,7 +24,7 @@ class Engines_Results_MMT_MT extends Engines_Results_AbstractResponse {
 
             $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
             $this->error           = new Engines_Results_ErrorMatches( [
-                    'message' => $result[ 'responseDetails' ],
+                    'message' => $this->responseDetails,
                     'code' => $result[ 'responseStatus' ]
             ] );
 
