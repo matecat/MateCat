@@ -90,8 +90,8 @@ class OutsourceInfo extends React.Component {
                         </div>
                         <div className="customer-box-info">
                             <div className="customer-text">
-                                The outsourcing option in Matecat is so straightforward. You simply choose your language pairs,
-                                upload the document, get the price and send it off to the Project Manager. So easy!
+                                The outsourcing option in Matecat is so straightforward.
+                                You choose your language pairs, upload the document, get the price and send it off to the PM. So easy!
                             </div>
                             <div className="customer-info">
                                 <div className="customer-photo">
@@ -101,7 +101,7 @@ class OutsourceInfo extends React.Component {
                                     Kevin Connor
                                 </div>
                                 <div className="customer-role">
-                                    - Freelance professional translator
+                                    - Freelance translator
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
@@ -121,7 +121,7 @@ class OutsourceInfo extends React.Component {
                                     Kenneth van der Vlugt
                                 </div>
                                 <div className="customer-role">
-                                    - Professional Translator
+                                    - Translator
                                 </div>
                             </div>
                             <div className="customer-corporate-logo">
