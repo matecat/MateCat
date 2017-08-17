@@ -99,14 +99,14 @@ class AnalyzeChunksResume extends React.Component {
                         let chunkAnalysis = jobAnalysis.get('totals').get(indexChunk);
                         let chunk = chunkConfig;
                         let chunkJob = self.props.project.get('jobs').find(function (job) {
-                            return job.get('id') == chunk.jid && job.get('password') == chunk.jpasswordd;
+                            return job.get('id') == chunk.jid && job.get('password') === chunk.jpassword;
                         });
                         index++;
                         if ( !_.isNull(chunkJob.get('outsource')) ) {
                             thereIsJobOutsourced = true;
                         }
 
-                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === (chunk.jid + index));
+                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === (chunk.jid +'-'+ index));
 
                         self.checkPayableChanged(chunk.jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
@@ -174,6 +174,12 @@ class AnalyzeChunksResume extends React.Component {
                     let password = obj.jpassword;
                     let total_raw = obj.total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
+
+                    let chunkJob = self.props.project.get('jobs').find(function (job) {
+                        return job.get('id') == self.props.jobsInfo[indexJob].jid ;
+                    });
+
+                    let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === self.props.jobsInfo[indexJob].jid);
 
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
