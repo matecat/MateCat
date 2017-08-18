@@ -68,6 +68,19 @@ API.JOB = {
             }
 
         });
-    }
+    },
+    sendTranslatorRequest: function (email, date, timezone, job) {
+        var data = {
+            email: email,
+            delivery_date: Math.round(date/1000),
+            timezone: timezone
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            url : "/api/v2/jobs/" + job.id +"/" + job.password + "/translator"
+        });
+    },
 
 };

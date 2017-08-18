@@ -23,6 +23,6 @@ let OutsourceActions = {
         UI.sendJobToTranslator(email, date, timezone, job, project);
     }
 
-}
+};
 
 module.exports = OutsourceActions;

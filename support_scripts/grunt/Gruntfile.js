@@ -339,7 +339,6 @@ module.exports = function(grunt) {
             manage: {
                 src: [
                     basePath + 'manage.js',
-                    // basePath + 'forcedelivery.js',
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
@@ -357,7 +356,6 @@ module.exports = function(grunt) {
             analyze_new: {
                 src: [
                     basePath + 'analyze.js',
-                    // basePath + 'forcedelivery.js',
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
