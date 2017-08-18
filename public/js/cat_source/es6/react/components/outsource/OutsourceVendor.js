@@ -330,7 +330,7 @@ class OutsourceVendor extends React.Component {
                             <div className="translator-details-box">
                                 <div className="translator-no-found">
                                     <p>
-                                        Translated.net uses the <b>most qualified translator</b> for your subject (General) and <b>keeps using the same translator for your next projects. </b>
+                                        Translated.net uses the <b>most qualified translator</b> and <b>keeps using the same translator for your next projects. </b>
                                     </p>
                                 </div>
                             </div>
@@ -491,7 +491,7 @@ class OutsourceVendor extends React.Component {
                 </div>
             ))}
             <div className="easy-pay-box">
-                <h4 className="easy-pay">Easy payments <span>Pay a single monthly invoice within 30 days of receipt</span></h4>
+                <h4 className="easy-pay">Easy payments: <span>Pay a single monthly invoice within 30 days of receipt</span></h4>
                 {/*<p>Pay a single monthly invoice within 30 days of receipt</p>*/}
             </div>
             <OutsourceInfo/></div>
