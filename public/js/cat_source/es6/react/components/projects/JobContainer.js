@@ -738,7 +738,7 @@ class JobContainer extends React.Component {
                                 extendedView={this.state.extendedView}
                                 onClickOutside={this.openOutsourceModal.bind(this)}
                                 openOutsource={this.state.openOutsource}
-                                idJobLabel={"(" + idJobLabel + ")"}/>
+                                idJobLabel={ idJobLabel }/>
         </div>
     }
 }
