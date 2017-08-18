@@ -110,6 +110,8 @@ class loadTMXController extends ajaxController {
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->addTmxInMyMemory();
 
+                    ( new \FeatureSet() )->run( 'postPushTMX', $fileInfo, $this->logged_user, $this->TMService->getTMKey() );
+
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key
                      *
@@ -129,10 +131,10 @@ class loadTMXController extends ajaxController {
                         $searchMemoryKey->tm_key = $key;
                         $userMemoryKey           = $mkDao->read( $searchMemoryKey );
 
-                    if ( empty( $userMemoryKey[0]->tm_key->name ) && !empty( $userMemoryKey ) ) {
-                        $userMemoryKey[0]->tm_key->name = $fileInfo->name;
-                        $mkDao->updateList( $userMemoryKey );
-                    }
+                        if ( empty( $userMemoryKey[0]->tm_key->name ) && !empty( $userMemoryKey ) ) {
+                            $userMemoryKey[0]->tm_key->name = $fileInfo->name;
+                            $mkDao->updateList( $userMemoryKey );
+                        }
 
                     }
 

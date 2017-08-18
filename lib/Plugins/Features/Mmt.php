@@ -22,6 +22,8 @@ use Exception;
 use Jobs_JobStruct;
 use Log;
 use Projects_ProjectStruct;
+use RecursiveArrayObject;
+use stdClass;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -157,7 +159,7 @@ class Mmt extends BaseFeature {
 
     }
 
-    public function performSetContributionMT( $response, ContributionStruct $contributionStruct, Projects_ProjectStruct $projectStruct ){
+    public function filterSetContributionMT( $response, ContributionStruct $contributionStruct, Projects_ProjectStruct $projectStruct ){
 
         /**
          * When a project is created, it's features and used plugins are stored in project_metadata,
@@ -209,6 +211,41 @@ class Mmt extends BaseFeature {
         }
 
         return $response;
+
+    }
+
+    public function postPushTMX( stdClass $file, $user, $tm_key ) {
+
+        //Project is not anonymous
+        if ( !empty( $user ) ) {
+
+            $uStruct = $user;
+            if ( !$uStruct instanceof Users_UserStruct ) {
+                $uStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $user );
+            }
+
+            //retrieve OWNER MMT License
+            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+            try {
+
+                if ( !empty( $ownerMmtEngineMetaData ) ) {
+                    /**
+                     * @var Engines_MMT $MMTEngine
+                     */
+                    $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                    $fileName = \FilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                    $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+
+                    if( $result->responseStatus >= 400 ){
+                        throw new Exception( $result->error->message );
+                    }
+
+                }
+
+            } catch ( Exception $e ){
+                Log::doLog( $e->getMessage() );
+            }
+        }
 
     }
 

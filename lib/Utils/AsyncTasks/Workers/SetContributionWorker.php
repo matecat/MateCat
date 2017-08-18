@@ -90,7 +90,7 @@ class SetContributionWorker extends AbstractWorker {
 
         $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-        $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+        $redisSetKey = sprintf( static::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
         $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
         try {

@@ -9,6 +9,8 @@
 namespace API\V2;
 
 use ActivityLog\Activity;
+use API\App\AbstractStatefulKleinController;
+use API\V2\Validators\LoginValidator;
 use DateTime;
 use DirectoryIterator;
 use TMSService, Exception, Log;
@@ -18,7 +20,7 @@ use Utils;
 use ActivityLog\ActivityLogStruct;
 use ZipArchive;
 
-class GlossariesController extends KleinController {
+class GlossariesController extends AbstractStatefulKleinController {
 
     /**
      * @var \Klein\Request
@@ -40,10 +42,13 @@ class GlossariesController extends KleinController {
 
     protected function afterConstruct() {
         $this->TMService = new TMSService();
-        $this->validateRequest();
+        \Bootstrap::sessionClose();
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     protected function validateRequest() {
+
+        parent::validateRequest();
 
         $filterArgs = array(
                 'name'          => array(

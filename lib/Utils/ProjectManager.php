@@ -790,48 +790,36 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-                //load it into MyMemory; we'll check later on how it went
-                $file            = new stdClass();
+            $ext = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+
+            $file = new stdClass();
+            if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
                 $file->file_path = "$this->uploadDir/$fileName";
                 $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( array( $file ) );
+                $this->tmxServiceWrapper->setFile( [ $file ] );
+            }
 
-                try {
+            try {
+
+                if ( 'tmx' == $ext ) {
                     $this->tmxServiceWrapper->addTmxInMyMemory();
-                } catch ( Exception $e ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    throw new Exception( $e );
-                }
-
-                //in any case, skip the rest of the loop, go to the next file
-                continue;
-
-            } elseif ( 'g' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-
-                //{"responseStatus":"202","responseData":{"id":505406}}
-                //load it into MyMemory; we'll check later on how it went
-                $file            = new stdClass();
-                $file->file_path = "$this->uploadDir/$fileName";
-                $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( array( $file ) );
-
-                try {
+                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ], $this->tmxServiceWrapper->getTMKey() );
+                } elseif ( 'g' == $ext ) {
                     $this->tmxServiceWrapper->addGlossaryInMyMemory();
-                } catch ( Exception $e ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    throw new Exception( $e );
+                } else {
+                    //don't call the postPushTMX for normal files
+                    continue;
                 }
 
-                //in any case, skip the rest of the loop, go to the next file
-                continue;
+            } catch ( Exception $e ) {
+
+                $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                        "code"    => $e->getCode(),
+                        "message" => $e->getMessage()
+                ];
+
+                throw new Exception( $e );
+
             }
 
         }
