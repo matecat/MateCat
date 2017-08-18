@@ -211,7 +211,7 @@ class AnalyzeHeader extends React.Component {
 
     componentDidMount() {
         $(this.tooltip).popup({
-            position: 'bottom left'
+            position: 'bottom center'
         });
     }
 
