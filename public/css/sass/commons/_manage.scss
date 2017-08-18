@@ -78,7 +78,6 @@ body.manage {
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
-                margin-right: 3px;
                 margin-left: 20px;
                 display: inline-block;
                 vertical-align: text-bottom;
@@ -343,7 +342,7 @@ body.manage {
                         .chunk {
                             transition: 0.3s ease;
                             background-color: #ffffff;
-                            padding: 8px 15px;
+                            padding: 8px 17px;
                             &.outsource-container {
                             }
                             /*&.after-outsource-container {
