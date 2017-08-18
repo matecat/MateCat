@@ -142,7 +142,7 @@ class AnalyzeChunksResume extends React.Component {
                                                 showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
-                                                idJobLabel={'(' + chunk.jid +'-'+ index + ')'}
+                                                idJobLabel={ chunk.jid +'-'+ index }
                                                 outsourceJobId={self.state.outsourceJobId}/>
                         </div>;
                     });
@@ -232,7 +232,7 @@ class AnalyzeChunksResume extends React.Component {
                                                 showOpenBox={true}
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
-                                                idJobLabel={'(' + self.props.jobsInfo[indexJob].jid + ')'}
+                                                idJobLabel={ self.props.jobsInfo[indexJob].jid }
                                                 outsourceJobId={self.state.outsourceJobId}/>
                         </div>
                     </div>
