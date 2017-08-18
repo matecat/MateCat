@@ -104,10 +104,16 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                             span {
-                                color: green;
+                                background: #1fbd1f;
+                                color: white;
+                                padding: 5px 2px 5px 8px;
+                                margin-left: 4px;
+                                border-radius: 15px;
                             }
                             i {
-                                color: green;
+                                color: white;
+                                position: relative;
+                                top: 2px;
                             }
                         }
                         .complete {
@@ -377,6 +383,16 @@ body.analyze{
                                         margin-top: 9px;
                                     }
                                 }
+                                @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                                    .source-target {
+                                        max-width: 70% !important;
+                                    }
+                                }
+                                @media only screen and (max-width: 991px) and (min-width: 768px) {
+                                    .source-target {
+                                        max-width: 70% !important;
+                                    }
+                                }
                             }
                         }
                     }
@@ -504,8 +520,9 @@ body.analyze{
             text-align: left;
 
         }
+
         .source-target {
-            min-width: 180px;
+            min-width: 167px;
             display: inline-block;
             font-weight: bold;
             max-width: 100%;
@@ -521,7 +538,6 @@ body.analyze{
                     max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
-                    margin-right: 5px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
@@ -552,8 +568,6 @@ body.analyze{
                 }
             }
         }
-
-
         .project-body {
             margin-top: 0;
             background-color: #cdcdcd;
