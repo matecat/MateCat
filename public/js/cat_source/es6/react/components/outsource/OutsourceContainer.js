@@ -47,18 +47,23 @@ class OutsourceContainer extends React.Component {
         window.removeEventListener('click', self.handleDocumentClick)
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         let self = this;
         if (this.props.openOutsource) {
             setTimeout(function () {
                 window.addEventListener('click', self.handleDocumentClick);
                 $('html, body').animate({
                     scrollTop: $(self.container).offset().top - 55
-                }, 700);
-            }, 600);
+                }, 500);
+            }, 500);
 
         } else {
-            window.removeEventListener('click', self.handleDocumentClick)
+            window.removeEventListener('click', self.handleDocumentClick);
+            if (prevProps.openOutsource) {
+                $('html, body').animate({
+                    scrollTop: $(self.container).offset().top - 200
+                }, 200);
+            }
         }
         $(this.languageTooltip).popup();
     }
@@ -69,8 +74,8 @@ class OutsourceContainer extends React.Component {
 
         return <CSSTransitionGroup component="div" className="ui grid"
                                    transitionName="transitionOutsource"
-                                   transitionEnterTimeout={500}
-                                   transitionLeaveTimeout={300}
+                                   transitionEnterTimeout={400}
+                                   transitionLeaveTimeout={100}
         >
             {this.props.openOutsource ? (
                 <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
