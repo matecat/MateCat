@@ -331,7 +331,8 @@ class INIT {
                     'dtd'   => array( '', '', 'extxml' ),
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => array( '', '', 'extxml'),
-                    'yaml'   => array( '', '', 'extxml' )
+                    'yaml'  => array( '', '', 'extxml' ),
+                    'yml'   => array( '', '', 'extxml' )
             ),
             'Scanned Files'                 => array(
                     'pdf'   => array( '', '', 'extpdf' ),
