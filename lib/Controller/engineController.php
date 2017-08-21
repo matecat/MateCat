@@ -282,7 +282,7 @@ class engineController extends ajaxController {
                  */
                 $newEngineStruct = EnginesModel_MMTStruct::getStruct();
 
-                $newEngineStruct->name                                   = $this->name;
+                $newEngineStruct->name                                   = Constants_Engines::MMT;
                 $newEngineStruct->uid                                    = $this->uid;
                 $newEngineStruct->type                                   = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'MyMemory-License' ] = $this->engineData[ 'secret' ];
