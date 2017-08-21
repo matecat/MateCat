@@ -273,6 +273,8 @@ class engineController extends ajaxController {
 
             case strtolower( Constants_Engines::MMT ):
 
+//                $this->feature_set->filter( 'validateNewEngine', $validEngine,  )
+
                 //TODO Move this piece of code in the plugin
 
                 /**
@@ -306,8 +308,8 @@ class engineController extends ajaxController {
             $result = $engineDAO->create( $newEngineStruct );
         }
 
-        if(! $result instanceof EnginesModel_EngineStruct){
-            $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
+        if ( !$result instanceof EnginesModel_EngineStruct ) {
+            $this->result[ 'errors' ][] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
             return;
         }
 
@@ -420,10 +422,12 @@ class engineController extends ajaxController {
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result = $engineDAO->disable( $engineToBeDeleted );
 
-        if(! $result instanceof EnginesModel_EngineStruct){
-            $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
+        if ( !$result instanceof EnginesModel_EngineStruct ) {
+            $this->result[ 'errors' ][] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
             return;
         }
+
+        $this->feature_set->run( 'postEngineDeletion', $result );
 
         $this->result['data']['id'] = $result->id;
 

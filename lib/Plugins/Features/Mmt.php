@@ -18,11 +18,13 @@ use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use Engines_MyMemory;
+use EnginesModel_EngineDAO;
+use EnginesModel_EngineStruct;
+use EnginesModel_MMTStruct;
 use Exception;
 use Jobs_JobStruct;
 use Log;
 use Projects_ProjectStruct;
-use RecursiveArrayObject;
 use stdClass;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
@@ -48,7 +50,7 @@ class Mmt extends BaseFeature {
         $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, 'mmt' );
 
         if( !empty( $engineEnabled ) ){
-            unset( $enginesList[ Constants_Engines::MMT ] );
+            unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
         }
 
         return $enginesList;
@@ -63,6 +65,22 @@ class Mmt extends BaseFeature {
             Database::obtain()->commit();
             $keyList = self::_getKeyringOwnerKeys( $userStruct );
             $engine->activate( $keyList );
+        }
+
+    }
+
+    public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
+
+        $UserMetadataDao = new MetadataDao();
+        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, 'mmt' );
+
+        if( $engineStruct->class_load == Constants_Engines::MMT ){
+
+            if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
+                $UserMetadataDao->delete( $engineStruct->uid, 'mmt' );
+                $UserMetadataDao->destroyCacheKey( $engineStruct->uid, 'mmt' );
+            }
+
         }
 
     }

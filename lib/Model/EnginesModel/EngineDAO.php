@@ -247,6 +247,30 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $this->con->query( $query );
 
         if ( $this->con->affected_rows > 0 ) {
+            $tmpEng = $this->setCacheTTL( 60 * 60 * 5 )->read( $obj )[0];
+            $tmpEng->active = 0; // avoid slave replication delay
+            return $tmpEng;
+        }
+
+        return null;
+    }
+
+    public function enable( EnginesModel_EngineStruct $obj ){
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "UPDATE " . self::TABLE . " SET active = 1 WHERE id = %d and uid = %d";
+
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $obj->uid
+        );
+
+        $this->con->query( $query );
+
+        if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
 
