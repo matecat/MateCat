@@ -44,7 +44,7 @@ class engineController extends ajaxController {
                 ),
                 'name'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                        'flags'   => FILTER_FLAG_STRIP_LOW
                 ),
                 'data'    => array(
                         'filter'  => FILTER_SANITIZE_STRING,

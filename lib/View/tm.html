@@ -354,7 +354,7 @@
                                         </tr>
                                         <tal:block tal:repeat="engine mt_engines">
                                         <tr class="" data-id="${engine/id}">
-                                            <td class="mt-provider">${engine/name}</td>
+                                            <td class="mt-provider" tal:content="structure engine/name"></td>
                                             <td class="engine-name">
                                                 <div class="edit-desc">${engine/description}</div>
                                             </td>
@@ -373,7 +373,7 @@
                                         <tal:block tal:repeat="engine mt_engines">
                                             <tal:block tal:condition="php: mt_id == engine.id">
                                                 <tr class="activemt" data-id="${engine/id}">
-                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
@@ -390,7 +390,7 @@
                                         <tal:block tal:repeat="engine mt_engines">
                                             <tal:block tal:condition="php: mt_id != engine.id">
                                                 <tr class="" data-id="${engine/id}">
-                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
