@@ -19,12 +19,12 @@ class engineController extends ajaxController {
      */
     private $feature_set;
 
-    private static $allowed_actions = array(
+    private static $allowed_actions           = [
             'add', 'delete', 'execute'
-    );
-    private static $allowed_execute_functions = array(
-        'letsmt' => array('getTermList')
-    );
+    ];
+    private static $allowed_execute_functions = [
+            'letsmt' => [ 'getTermList' ]
+    ];
 
     public function __construct() {
 
@@ -34,51 +34,51 @@ class engineController extends ajaxController {
         $this->checkLogin();
         //Session Disabled
 
-        $filterArgs = array(
-                'exec'      => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ),
-                'id' => array(
-                        'filter'  => FILTER_SANITIZE_NUMBER_INT
-                ),
-                'name'      => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'flags'   => FILTER_FLAG_STRIP_LOW
-                ),
-                'data'    => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES
-                ),
-                'provider'  => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                )
-        );
+        $filterArgs = [
+                'exec'     => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'id'       => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
+                ],
+                'name'     => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ],
+                'data'     => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES
+                ],
+                'provider' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ]
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->exec         = $postInput[ 'exec' ];
-        $this->id           = $postInput[ 'id' ];
-        $this->name         = $postInput[ 'name' ];
-        $this->provider     = $postInput[ 'provider' ];
-        $this->engineData   = json_decode( $postInput[ 'data' ], true );
+        $this->exec       = $postInput[ 'exec' ];
+        $this->id         = $postInput[ 'id' ];
+        $this->name       = $postInput[ 'name' ];
+        $this->provider   = $postInput[ 'provider' ];
+        $this->engineData = json_decode( $postInput[ 'data' ], true );
 
         if ( is_null( $this->exec ) ) {
-            $this->result[ 'errors' ][ ] = array( 'code' => -1, 'message' => "Exec field required" );
+            $this->result[ 'errors' ][] = [ 'code' => -1, 'message' => "Exec field required" ];
 
-        }
-
-        else if ( !in_array( $this->exec, self::$allowed_actions ) ) {
-            $this->result[ 'errors' ][ ] = array( 'code' => -2, 'message' => "Exec value not allowed" );
+        } else {
+            if ( !in_array( $this->exec, self::$allowed_actions ) ) {
+                $this->result[ 'errors' ][] = [ 'code' => -2, 'message' => "Exec value not allowed" ];
+            }
         }
 
         //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS
         if ( !$this->userIsLogged ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -3,
                     'message' => "Login is required to perform this action"
-            );
+            ];
         }
 
         $this->feature_set = new FeatureSet();
@@ -117,7 +117,7 @@ class engineController extends ajaxController {
     private function add() {
 
         $newEngineStruct = null;
-        $validEngine = true;
+        $validEngine     = true;
 
         switch ( strtolower( $this->provider ) ) {
             case strtolower( Constants_Engines::MICROSOFT_HUB ):
@@ -130,9 +130,9 @@ class engineController extends ajaxController {
                 $newEngineStruct->name                                = $this->name;
                 $newEngineStruct->uid                                 = $this->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
-                $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData['category'];
+                $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+                $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData[ 'category' ];
 
                 break;
             case strtolower( Constants_Engines::MOSES ):
@@ -214,27 +214,35 @@ class engineController extends ajaxController {
                  */
                 $newEngineStruct = EnginesModel_LetsMTStruct::getStruct();
 
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
-                $newEngineStruct->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
+                $newEngineStruct->name                            = $this->name;
+                $newEngineStruct->uid                             = $this->uid;
+                $newEngineStruct->type                            = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
+                $newEngineStruct->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
                 // return the newly added system's id or the list of available systems
                 // for the user to choose from. the check happens later on
-                $newEngineStruct->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
-                $newEngineStruct->extra_parameters[ 'use_qe' ]        = $this->engineData[ 'use_qe' ];
-                $newEngineStruct->extra_parameters[ 'source_lang' ]   = $this->engineData[ 'source_lang' ];
-                $newEngineStruct->extra_parameters[ 'target_lang' ]   = $this->engineData[ 'target_lang' ];
+                $newEngineStruct->extra_parameters[ 'terms_id' ]    = $this->engineData[ 'terms_id' ];
+                $newEngineStruct->extra_parameters[ 'use_qe' ]      = $this->engineData[ 'use_qe' ];
+                $newEngineStruct->extra_parameters[ 'source_lang' ] = $this->engineData[ 'source_lang' ];
+                $newEngineStruct->extra_parameters[ 'target_lang' ] = $this->engineData[ 'target_lang' ];
 
-                if ($newEngineStruct->extra_parameters[ 'use_qe' ]) {
+                if ( $newEngineStruct->extra_parameters[ 'use_qe' ] ) {
                     $minQEString = $this->engineData[ 'minimum_qe' ];
-                    if (!is_numeric($minQEString)) {
-                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                    if ( !is_numeric( $minQEString ) ) {
+                        $this->result[ 'errors' ][] = [
+                                'code'    => -13,
+                                'message' => "Minimum QE score should be a number between 0 and 1."
+                        ];
+
                         return;
                     }
-                    $minimumQEScore = floatval($minQEString);
-                    if ($minimumQEScore < 0 || $minimumQEScore > 1) {
-                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                    $minimumQEScore = floatval( $minQEString );
+                    if ( $minimumQEScore < 0 || $minimumQEScore > 1 ) {
+                        $this->result[ 'errors' ][] = [
+                                'code'    => -13,
+                                'message' => "Minimum QE score should be a number between 0 and 1."
+                        ];
+
                         return;
                     }
                     $newEngineStruct->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
@@ -273,7 +281,6 @@ class engineController extends ajaxController {
 
             default:
 
-                //TODO Move all engines in the plugin management
                 $validEngine = $newEngineStruct = $this->feature_set->filter( 'buildNewEngineStruct', false, (object)[
                         'providerName' => $this->provider,
                         'logged_user'  => $this->logged_user,
@@ -283,134 +290,143 @@ class engineController extends ajaxController {
 
         }
 
-        if( !$validEngine ){
-            $this->result[ 'errors' ][ ] = array( 'code' => -4, 'message' => "Engine not allowed" );
+        if ( !$validEngine ) {
+            $this->result[ 'errors' ][] = [ 'code' => -4, 'message' => "Engine not allowed" ];
+
             return;
         }
 
         $engineList = $this->feature_set->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
 
-        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
-        $newTestCreatedMT = null;
-        if( array_search( $newEngineStruct->class_load, $engineList ) ){
+        $newTestCreatedMT      = null;
+        if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
         }
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
-            $this->result[ 'errors' ][] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
+            $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Creation failed. Generic error" ];
+
             return;
         }
 
-        if( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ){
+        if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
 
-            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-            $config = $newTestCreatedMT->getConfigStruct();
+            $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
+            $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
 
             $mt_result = $newTestCreatedMT->get( $config );
 
-            if ( isset( $mt_result['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $mt_result['error'];
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+
                 return;
             }
 
-        } elseif ( $newEngineStruct instanceof EnginesModel_IPTranslatorStruct ){
+        } elseif ( $newEngineStruct instanceof EnginesModel_IPTranslatorStruct ) {
 
             $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
             /**
              * @var $newTestCreatedMT Engines_IPTranslator
              */
-            $config = $newTestCreatedMT->getConfigStruct();
-            $config[ 'source' ]  = "en-US";
-            $config[ 'target' ]  = "fr-FR";
+            $config             = $newTestCreatedMT->getConfigStruct();
+            $config[ 'source' ] = "en-US";
+            $config[ 'target' ] = "fr-FR";
 
             $mt_result = $newTestCreatedMT->ping( $config );
 
-            if ( isset( $mt_result['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $mt_result['error'];
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+
                 return;
             }
 
-        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct && empty($this->engineData[ 'system_id' ])){
+        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct && empty( $this->engineData[ 'system_id' ] ) ) {
             // the user has not selected a translation system. only the User ID and the engine's name has been entered
             // get the list of available systems and return it to the user
 
             $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-            $config = $newTestCreatedMT->getConfigStruct();
-            $systemList = $newTestCreatedMT->getSystemList($config);
+            $config           = $newTestCreatedMT->getConfigStruct();
+            $systemList       = $newTestCreatedMT->getSystemList( $config );
 
-            $engineDAO->delete($newCreatedDbRowStruct); // delete the newly added engine. this is the first time in engineController::add()
-                                         // and the user has not yet selected a translation system
-            if ( isset( $systemList['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $systemList['error'];
+            $engineDAO->delete( $newCreatedDbRowStruct ); // delete the newly added engine. this is the first time in engineController::add()
+            // and the user has not yet selected a translation system
+            if ( isset( $systemList[ 'error' ][ 'code' ] ) ) {
+                $this->result[ 'errors' ][] = $systemList[ 'error' ];
+
                 return;
             }
 
-            $uiConfig = array(
-                'client_id' => array('value' => $this->engineData['client_id']),
-                'system_id' => array(),
-                'terms_id' => array()
-            );
-            foreach ($systemList as $systemID => $systemInfo){
-                $uiConfig['system_id'][$systemID] = array('value' => $systemInfo['name'],
-                                                          'data'  => $systemInfo['metadata']
-                                                    );
+            $uiConfig = [
+                    'client_id' => [ 'value' => $this->engineData[ 'client_id' ] ],
+                    'system_id' => [],
+                    'terms_id'  => []
+            ];
+            foreach ( $systemList as $systemID => $systemInfo ) {
+                $uiConfig[ 'system_id' ][ $systemID ] = [
+                        'value' => $systemInfo[ 'name' ],
+                        'data'  => $systemInfo[ 'metadata' ]
+                ];
             }
 
-            $this->result['name'] = $this->name;
-            $this->result['data']['config'] = $uiConfig;
-        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct){
+            $this->result[ 'name' ]             = $this->name;
+            $this->result[ 'data' ][ 'config' ] = $uiConfig;
+        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct ) {
             // The user has added and configured the Tilde MT engine (the System ID has been set)
             // Do a simple translation request so that the system wakes up by the time the user needs it for translating
             $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
             $newTestCreatedMT->wakeUp();
-        } else{
+        } else {
 
-            try{
+            try {
                 $this->feature_set->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->logged_user );
-            } catch( Exception $e ){
+            } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
+
                 return;
             }
 
         }
 
-        $this->result['data']['id'] = $newCreatedDbRowStruct->id;
-        $this->result['data']['name'] = $newCreatedDbRowStruct->name;
+        $this->result[ 'data' ][ 'id' ]   = $newCreatedDbRowStruct->id;
+        $this->result[ 'data' ][ 'name' ] = $newCreatedDbRowStruct->name;
 
     }
 
     /**
      * This method deletes an engine from a user's keyring
      */
-    private function disable(){
+    private function disable() {
 
         if ( empty( $this->id ) ) {
-            $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
+            $this->result[ 'errors' ][] = [ 'code' => -5, 'message' => "Engine id required" ];
+
             return;
         }
 
-        $engineToBeDeleted = EnginesModel_EngineStruct::getStruct();
-        $engineToBeDeleted->id = $this->id;
+        $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
+        $engineToBeDeleted->id  = $this->id;
         $engineToBeDeleted->uid = $this->uid;
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result = $engineDAO->disable( $engineToBeDeleted );
+        $result    = $engineDAO->disable( $engineToBeDeleted );
 
         if ( !$result instanceof EnginesModel_EngineStruct ) {
-            $this->result[ 'errors' ][] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
+            $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Deletion failed. Generic error" ];
+
             return;
         }
 
         $this->feature_set->run( 'postEngineDeletion', $result );
 
-        $this->result['data']['id'] = $result->id;
+        $this->result[ 'data' ][ 'id' ] = $result->id;
 
     }
 
@@ -419,7 +435,7 @@ class engineController extends ajaxController {
      */
     private function execute() {
 
-        $tempEngine = null;
+        $tempEngine  = null;
         $validEngine = true;
 
         switch ( strtolower( $this->provider ) ) {
@@ -430,11 +446,11 @@ class engineController extends ajaxController {
                  */
                 $tempEngineRecord = EnginesModel_LetsMTStruct::getStruct();
 
-                $tempEngineRecord->name                                = $this->name;
-                $tempEngineRecord->uid                                 = $this->uid;
-                $tempEngineRecord->type                                = Constants_Engines::MT;
-                $tempEngineRecord->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
-                $tempEngineRecord->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
+                $tempEngineRecord->name                            = $this->name;
+                $tempEngineRecord->uid                             = $this->uid;
+                $tempEngineRecord->type                            = Constants_Engines::MT;
+                $tempEngineRecord->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
+                $tempEngineRecord->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ];
                 //$tempEngineRecord->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
 
                 break;
@@ -442,34 +458,39 @@ class engineController extends ajaxController {
                 $validEngine = false;
         }
 
-        if( !$validEngine ){
-            $this->result[ 'errors' ][ ] = array( 'code' => -4, 'message' => "Engine not allowed" );
+        if ( !$validEngine ) {
+            $this->result[ 'errors' ][] = [ 'code' => -4, 'message' => "Engine not allowed" ];
+
             return;
         }
 
-        $tempEngine = Engine::createTempInstance($tempEngineRecord);
-        if(! $tempEngine instanceof Engines_AbstractEngine){
-            $this->result[ 'errors' ][ ] = array( 'code' => -12, 'message' => "Creating engine failed. Generic error" );
+        $tempEngine = Engine::createTempInstance( $tempEngineRecord );
+        if ( !$tempEngine instanceof Engines_AbstractEngine ) {
+            $this->result[ 'errors' ][] = [ 'code' => -12, 'message' => "Creating engine failed. Generic error" ];
+
             return;
         }
-        $functionParams = $this->engineData['functionParams'];
+        $functionParams = $this->engineData[ 'functionParams' ];
 
         $function = $this->engineData[ 'function' ];
-        if(empty($function)){
-            $this->result[ 'errors' ][ ] = array( 'code' => -10, 'message' => "No function specified" );
+        if ( empty( $function ) ) {
+            $this->result[ 'errors' ][] = [ 'code' => -10, 'message' => "No function specified" ];
+
             return;
-        } elseif (empty(self::$allowed_execute_functions[strtolower($this->provider)])
-                || !in_array($function, self::$allowed_execute_functions[strtolower($this->provider)])){
-            $this->result[ 'errors' ][ ] = array( 'code' => -11, 'message' => "Function not allowed" );
+        } elseif ( empty( self::$allowed_execute_functions[ strtolower( $this->provider ) ] )
+                || !in_array( $function, self::$allowed_execute_functions[ strtolower( $this->provider ) ] ) ) {
+            $this->result[ 'errors' ][] = [ 'code' => -11, 'message' => "Function not allowed" ];
+
             return;
         }
 
-        $executeResult = $tempEngine->$function($functionParams);
-        if ( isset( $executeResult['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $executeResult['error'];
-                return;
+        $executeResult = $tempEngine->$function( $functionParams );
+        if ( isset( $executeResult[ 'error' ][ 'code' ] ) ) {
+            $this->result[ 'errors' ][] = $executeResult[ 'error' ];
+
+            return;
         }
-        $this->result['data']['result'] = $executeResult;
+        $this->result[ 'data' ][ 'result' ] = $executeResult;
     }
 
 }

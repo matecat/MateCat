@@ -326,8 +326,8 @@
                             <table class="mgmt-mt">
                                 <thead>
                                 <tr>
-                                    <th class="privatekey">MT provider</th>
-                                    <th class="description">Engine name</th>
+                                    <th class="privatekey">Engine Name</th>
+                                    <th class="description">Description</th>
                                     <tal:block tal:condition="php: page == 'home'">
                                         <th class="enable-mt text-center">Use in this project</th>
                                     </tal:block>
@@ -343,7 +343,7 @@
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
                                             <td class="engine-name">
-                                                <div class="edit-desc">Machine translation from Google Translate and Microsoft Translator.</div>
+                                                <div>Machine translation from Google Translate and Microsoft Translator.</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
@@ -375,7 +375,7 @@
                                                 <tr class="activemt" data-id="${engine/id}">
                                                     <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
-                                                        <div class="edit-desc">${engine/description}</div>
+                                                        <div>${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
                                                         <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
