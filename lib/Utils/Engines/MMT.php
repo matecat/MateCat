@@ -303,13 +303,14 @@ class Engines_MMT extends Engines_AbstractEngine {
         } else {
 
             if ( $rawValue[ 'responseStatus' ] >= 400 ){
+                $_rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
                 foreach( self::$_supportedExceptions as $exception => $code ){
                     if( stripos( $rawValue[ 'error' ][ 'response' ], $exception ) !== false ){
-                        $rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
-                        $rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
+                        $_rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
                         break;
                     }
                 }
+                $rawValue = $_rawValue;
             }
 
             $decoded = $rawValue; // already decoded in case of error

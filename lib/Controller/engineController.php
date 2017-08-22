@@ -271,27 +271,16 @@ class engineController extends ajaxController {
 
                 break;
 
-            case strtolower( Constants_Engines::MMT ):
+            default:
 
-//                $this->feature_set->filter( 'validateNewEngine', $validEngine,  )
-
-                //TODO Move this piece of code in the plugin
-
-                /**
-                 * Create a record of type MMT
-                 */
-                $newEngineStruct = EnginesModel_MMTStruct::getStruct();
-
-                $newEngineStruct->name                                   = Constants_Engines::MMT;
-                $newEngineStruct->uid                                    = $this->uid;
-                $newEngineStruct->type                                   = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'MyMemory-License' ] = $this->engineData[ 'secret' ];
-                $newEngineStruct->extra_parameters[ 'User_id' ]          = $this->userMail;
-
+                //TODO Move all engines in the plugin management
+                $validEngine = $newEngineStruct = $this->feature_set->filter( 'buildNewEngineStruct', false, (object)[
+                        'providerName' => $this->provider,
+                        'logged_user'  => $this->logged_user,
+                        'engineData'   => $this->engineData
+                ] );
                 break;
 
-            default:
-                $validEngine = false;
         }
 
         if( !$validEngine ){
@@ -302,20 +291,20 @@ class engineController extends ajaxController {
         $engineList = $this->feature_set->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result = null;
+        $newCreatedDbRowStruct = null;
         $newTestCreatedMT = null;
         if( array_search( $newEngineStruct->class_load, $engineList ) ){
-            $result = $engineDAO->create( $newEngineStruct );
+            $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
         }
 
-        if ( !$result instanceof EnginesModel_EngineStruct ) {
+        if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
             $this->result[ 'errors' ][] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
             return;
         }
 
         if( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ){
 
-            $newTestCreatedMT = Engine::getInstance( $result->id );
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
             $config = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -325,13 +314,13 @@ class engineController extends ajaxController {
 
             if ( isset( $mt_result['error']['code'] ) ) {
                 $this->result[ 'errors' ][ ] = $mt_result['error'];
-                $engineDAO->delete( $result );
+                $engineDAO->delete( $newCreatedDbRowStruct );
                 return;
             }
 
         } elseif ( $newEngineStruct instanceof EnginesModel_IPTranslatorStruct ){
 
-            $newTestCreatedMT = Engine::getInstance( $result->id );
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
             /**
              * @var $newTestCreatedMT Engines_IPTranslator
@@ -344,7 +333,7 @@ class engineController extends ajaxController {
 
             if ( isset( $mt_result['error']['code'] ) ) {
                 $this->result[ 'errors' ][ ] = $mt_result['error'];
-                $engineDAO->delete( $result );
+                $engineDAO->delete( $newCreatedDbRowStruct );
                 return;
             }
 
@@ -352,11 +341,11 @@ class engineController extends ajaxController {
             // the user has not selected a translation system. only the User ID and the engine's name has been entered
             // get the list of available systems and return it to the user
 
-            $newTestCreatedMT = Engine::getInstance( $result->id );
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
             $config = $newTestCreatedMT->getConfigStruct();
             $systemList = $newTestCreatedMT->getSystemList($config);
 
-            $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
+            $engineDAO->delete($newCreatedDbRowStruct); // delete the newly added engine. this is the first time in engineController::add()
                                          // and the user has not yet selected a translation system
             if ( isset( $systemList['error']['code'] ) ) {
                 $this->result[ 'errors' ][ ] = $systemList['error'];
@@ -379,29 +368,21 @@ class engineController extends ajaxController {
         } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct){
             // The user has added and configured the Tilde MT engine (the System ID has been set)
             // Do a simple translation request so that the system wakes up by the time the user needs it for translating
-            $newTestCreatedMT = Engine::getInstance( $result->id );
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
             $newTestCreatedMT->wakeUp();
-        } elseif( $newEngineStruct instanceof EnginesModel_MMTStruct ){
+        } else{
 
-            //TODO Move this piece of code in the plugin
-
-            $newTestCreatedMT = Engine::getInstance( $result->id );
-            /**
-             * @var $newTestCreatedMT Engines_MMT
-             */
-            $mt_result = $newTestCreatedMT->checkAccount()->get_as_array();
-
-            if ( isset( $mt_result['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $mt_result['error'];
-                $engineDAO->delete( $result );
+            try{
+                $this->feature_set->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->logged_user );
+            } catch( Exception $e ){
+                $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
                 return;
             }
 
         }
 
-        $this->feature_set->run( 'postEngineCreation', $newTestCreatedMT, $this->logged_user );
-
-        $this->result['data']['id'] = $result->id;
+        $this->result['data']['id'] = $newCreatedDbRowStruct->id;
+        $this->result['data']['name'] = $newCreatedDbRowStruct->name;
 
     }
 

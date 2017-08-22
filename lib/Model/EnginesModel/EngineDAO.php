@@ -110,7 +110,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         //return the inserted object on success, null otherwise
         if ( $this->con->affected_rows > 0 ) {
-            $obj->id = $this->con->last_insert( self::TABLE );
+            $obj->id = $this->con->last_insert();
             return $obj;
         }
 

@@ -64,7 +64,13 @@ class MetadataDao extends \DataAccess_AbstractDao {
 
       $this->destroyCacheKey( $uid, $key );
 
-      return $this->get( $uid, $key );
+      return new MetadataStruct( [
+              'id'    => $conn->lastInsertId(),
+              'uid'   => $uid,
+              'key'   => $key,
+              'value' => $value
+      ] );
+
   }
 
 
@@ -79,6 +85,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
           'uid' => $uid,
           'key' => $key,
       ) );
+      $this->destroyCacheKey( $uid, $key );
   }
 
   protected function _buildResult($array_result)

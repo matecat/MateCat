@@ -1466,17 +1466,21 @@
                 success: function(d) {
                     if(d.errors.length) {
                         console.log('error');
-                        $('#mt-provider-details .mt-error-key').text("API key not valid").show();
+                        if( d.errors[0].code !== undefined ){
+                            $('#mt-provider-details .mt-error-key').text( d.errors[0].message ).show();
+                        } else {
+                            $('#mt-provider-details .mt-error-key').text("API key not valid").show();
+                        }
                     } else {
                         if(d.data.config && Object.keys(d.data.config).length) {
                             UI.renderMTConfig(provider, d.name, d.data.config);
                         }
                         else {
                             console.log('success');
-                            UI.renderNewMT(this, d.data.id);
+                            UI.renderNewMT(this, d.data);
                             if(!APP.isCattool) {
                                 UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
-                                $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                                $('#mt_engine').append('<option value="' + d.data.id + '">' + d.data.name + '</option>');
                                 $('#mt_engine option:selected').removeAttr('selected');
                                 $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
                             }
@@ -1487,10 +1491,10 @@
                 }
             });
         },
-        renderNewMT: function (data, id) {
-            var newTR =    '<tr data-id="' + id + '">' +
+        renderNewMT: function (data, serverResponse) {
+            var newTR =    '<tr data-id="' + serverResponse.id + '">' +
                 '    <td class="mt-provider">' + data.providerName + '</td>' +
-                '    <td class="engine-name">' + data.name + '</td>' +
+                '    <td class="engine-name">' + serverResponse.name + '</td>' +
                 '    <td class="enable-mt text-center">' +
                 '        <input type="checkbox" checked />' +
                 '    </td>' +

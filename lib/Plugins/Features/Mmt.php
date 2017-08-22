@@ -18,7 +18,9 @@ use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use Engines_MyMemory;
+use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
+use EnginesModel_MMTStruct;
 use Exception;
 use Jobs_JobStruct;
 use Log;
@@ -54,16 +56,29 @@ class Mmt extends BaseFeature {
         return $enginesList;
     }
 
-    public static function postEngineCreation( Engines_AbstractEngine $engine, Users_UserStruct $userStruct ){
+    public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
-        if( $engine instanceof Engines_MMT ) {
-            Database::obtain()->begin();
-            $UserMetadataDao = new MetadataDao();
-            $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $engine->id );
-            Database::obtain()->commit();
-            $keyList = self::_getKeyringOwnerKeys( $userStruct );
-            $engine->activate( $keyList );
+        if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
+            return null;
         }
+
+        $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+
+        /**
+         * @var $newTestCreatedMT Engines_MMT
+         */
+        $mt_result = $newTestCreatedMT->checkAccount()->get_as_array();
+
+        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+            Log::doLog( $mt_result );
+            throw new Exception( $mt_result[ 'error' ][ 'message' ], $mt_result[ 'error' ][ 'code' ] );
+        }
+
+        $UserMetadataDao = new MetadataDao();
+        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
+        $keyList = self::_getKeyringOwnerKeys( $userStruct );
+        $newTestCreatedMT->activate( $keyList );
 
     }
 
@@ -76,7 +91,6 @@ class Mmt extends BaseFeature {
 
             if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
                 $UserMetadataDao->delete( $engineStruct->uid, 'mmt' );
-                $UserMetadataDao->destroyCacheKey( $engineStruct->uid, 'mmt' );
             }
 
         }
@@ -122,7 +136,7 @@ class Mmt extends BaseFeature {
             $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $LoggedUser->uid ] );
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
-            $keyList = array();
+            $keyList = [];
             Log::doLog( $e->getMessage() );
         }
 
@@ -262,6 +276,43 @@ class Mmt extends BaseFeature {
                 Log::doLog( $e->getMessage() );
             }
         }
+
+    }
+
+    /**
+     * @param $isValid
+     * @param $data             (object)[
+     *                          'providerName' => '',
+     *                          'logged_user'  => Users_UserStruct,
+     *                          'engineData'   => []
+     *                          ]
+     *
+     * @return EnginesModel_EngineStruct|bool
+     */
+    public function buildNewEngineStruct( $isValid, $data ){
+
+        if( strtolower( Constants_Engines::MMT ) == $data->providerName ){
+
+            /**
+             * @var $logged_user Users_UserStruct
+             */
+            $logged_user = $data->logged_user;
+
+            /**
+             * Create a record of type MMT
+             */
+            $newEngineStruct = EnginesModel_MMTStruct::getStruct();
+
+            $newEngineStruct->name                                   = Constants_Engines::MMT;
+            $newEngineStruct->uid                                    = $logged_user->uid;
+            $newEngineStruct->type                                   = Constants_Engines::MT;
+            $newEngineStruct->extra_parameters[ 'MyMemory-License' ] = $data->engineData[ 'secret' ];
+            $newEngineStruct->extra_parameters[ 'User_id' ]          = $logged_user->getEmail();
+
+            return $newEngineStruct;
+        }
+
+        return $isValid;
 
     }
 
