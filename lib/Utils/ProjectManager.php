@@ -1022,9 +1022,9 @@ class ProjectManager {
                 //TODO: change this: private tm key field should not be used
                 //set private tm key string to the first tm_key for retro-compatibility
 
-                Log::doLog( $projectStructure[ 'private_tm_key' ] );
-
             }
+
+            Log::doLog( $projectStructure[ 'private_tm_key' ] );
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
@@ -2526,6 +2526,9 @@ class ProjectManager {
             }
             try {
                 $mkDao->createList( $memoryKeysToBeInserted );
+
+                $featuresSet = new FeatureSet();
+                $featuresSet->run( 'postTMKeyCreation', $memoryKeysToBeInserted, $this->projectStructure[ 'uid' ] );
 
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );

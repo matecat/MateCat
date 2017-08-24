@@ -44,6 +44,14 @@ class Mmt extends BaseFeature {
         Constants_Engines::setInEnginesList( Constants_Engines::MMT );
     }
 
+    /**
+     * Only one MMT engine per user can be registered
+     *
+     * @param                  $enginesList
+     * @param Users_UserStruct $userStruct
+     *
+     * @return mixed
+     */
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
@@ -56,6 +64,13 @@ class Mmt extends BaseFeature {
         return $enginesList;
     }
 
+    /**
+     * @param EnginesModel_EngineStruct $newCreatedDbRowStruct
+     * @param Users_UserStruct          $userStruct
+     *
+     * @return null
+     * @throws Exception
+     */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
@@ -82,6 +97,9 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param EnginesModel_EngineStruct $engineStruct
+     */
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
 
         $UserMetadataDao = new MetadataDao();
@@ -126,6 +144,11 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param Users_UserStruct $LoggedUser
+     *
+     * @return TmKeyManagement_MemoryKeyStruct[]
+     */
     protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
 
         /*
@@ -144,6 +167,10 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param array $segments
+     * @param array $projectRows
+     */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
         $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
@@ -189,6 +216,13 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param                        $response
+     * @param ContributionStruct     $contributionStruct
+     * @param Projects_ProjectStruct $projectStruct
+     *
+     * @return ContributionStruct|null
+     */
     public function filterSetContributionMT( $response, ContributionStruct $contributionStruct, Projects_ProjectStruct $projectStruct ){
 
         /**
@@ -244,6 +278,11 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param stdClass $file
+     * @param          $user
+     * @param          $tm_key
+     */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
         //Project is not anonymous
@@ -313,6 +352,33 @@ class Mmt extends BaseFeature {
         }
 
         return $isValid;
+
+    }
+
+    /**
+     * @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
+     * @param                  $uid integer
+     *
+     * @internal param Users_UserStruct $userStruct
+     */
+    public function postTMKeyCreation( $memoryKeyStructs, $uid ){
+
+        if( empty( $memoryKeyStructs ) || empty( $uid ) ){
+            return;
+        }
+
+        //retrieve OWNER MMT License
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, 'mmt' ); // engine_id
+        if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+            /**
+             * @var Engines_MMT $MMTEngine
+             */
+            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+            $MMTEngine->activate( $memoryKeyStructs );
+
+        }
+
 
     }
 

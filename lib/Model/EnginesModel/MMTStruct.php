@@ -23,7 +23,7 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "http://api-test.mymemory.translated.net";
+    public $base_url = "http://api.mymemory.translated.net";
 
     /**
      * @var string
