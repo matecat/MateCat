@@ -14,6 +14,7 @@ class AssignToTranslator extends React.Component {
         let email = this.email.value;
 
         OutsourceActions.sendJobToTranslator(email, date, this.timezone, this.props.job.toJS(), this.props.project.toJS());
+        this.props.closeOutsource();
     }
 
     GmtSelectChanged(value) {
