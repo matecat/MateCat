@@ -306,7 +306,12 @@ class engineController extends ajaxController {
         }
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
-            $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Creation failed. Generic error" ];
+
+            $this->result[ 'errors' ][] = $this->feature_set->filter(
+                    'engineCreationFailed',
+                    [ 'code' => -9, 'message' => "Creation failed. Generic error" ],
+                    $newEngineStruct->class_load
+            );
 
             return;
         }

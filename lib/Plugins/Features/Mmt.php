@@ -97,6 +97,13 @@ class Mmt extends BaseFeature {
 
     }
 
+    public function engineCreationFailed( $errorObject, $class_load ){
+        if( $class_load == Constants_Engines::MMT ){
+            return [ 'code' => 403, 'message' => "Creation failed. Only one MMT engine is allowed." ];
+        }
+        return $errorObject;
+    }
+
     /**
      * @param EnginesModel_EngineStruct $engineStruct
      */
