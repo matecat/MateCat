@@ -766,8 +766,9 @@
             .reduced-boxes {
                 .container-reduced {
                     padding: 0 15px;
-                    width: 85%;
+                    width: 82%;
                     display: inline-block;
+                    vertical-align: top;
                     .job-menu, .open-translate {
                         display: none;
                     }
@@ -777,8 +778,10 @@
                     }
                     .payment-service {
                         display: inline-block;
-                        width: 58%;
-                        vertical-align: -webkit-baseline-middle;
+                        width: 65%;
+                        vertical-align: top;
+                        position: relative;
+                        top: 10px;
                         .service-box {
                             display: inline-block;
                             font-size: 22px;
@@ -799,7 +802,6 @@
                         }
                         .fiducial-logo {
                             display: inline-block;
-                            margin-left: 6px;
                             img {
                                 width: 100px;
                                 position: relative;
@@ -814,9 +816,10 @@
                     }
                     .delivery-order {
                         display: inline-block;
-                        padding: 0 0 0 10px;
-                        width: 42%;
+                        width: 35%;
                         text-align: right;
+                        position: relative;
+                        top: -15px;
                         .delivery-box {
                             display: inline-block;
                             font-size: 18px;
@@ -826,6 +829,7 @@
                                 font-size: 16px;
                                 color: gray;
                                 font-weight: 100;
+                                display: flex;
                             }
                             .delivery-date, .delivery-time{
                                 display: inline-block;
@@ -881,7 +885,7 @@
                     float: right;
                     text-align: center;
                     margin-top: -17px;
-                    width: 15%;
+                    width: 195px;
                     .order-box {
                         background-color: #daeddf;
                         padding: 25px 15px 15px;
@@ -928,6 +932,32 @@
                     display: inline-block;
                     width: 100%;
                     margin-top: 10px;
+                }
+                @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                    .container-reduced {
+                        width: 79%;
+                        .payment-service {
+                            width: 60%;
+                            top: 18px !important;
+                        }
+                        .delivery-order {
+                            width: 35%;
+                            top: -15px;
+                            .delivery-box {
+                                label {
+                                    padding: 5px;
+                                    font-size: 16px;
+                                    color: gray;
+                                    font-weight: 100;
+                                    display: grid;
+                                }
+                                .gmt {
+                                    position: relative;
+                                    top: 15px;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -982,6 +1012,9 @@
     @media only screen and (max-width: 1199px) and (min-width: 992px) {
         .outsource-container {
             width: 105%;
+            .container-reduced {
+                width: 79%;
+            }
         }
     }
 
