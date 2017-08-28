@@ -104,14 +104,13 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                             span {
-                                background: #1fbd1f;
-                                color: white;
-                                padding: 5px 2px 5px 8px;
+                                color: #1fbd1f;
+                                padding: 5px 2px 5px 0;
                                 margin-left: 4px;
                                 border-radius: 15px;
                             }
                             i {
-                                color: white;
+                                color: #1fbd1f;
                                 position: relative;
                                 top: 2px;
                             }
@@ -386,13 +385,22 @@ body.analyze{
                                 @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                     .source-target {
                                         max-width: 70% !important;
+                                        .source-box{
+                                            &.no-split {
+                                                max-width: 41%;
+                                                min-width: 30px;
+                                                vertical-align: middle;
+                                                overflow: hidden;
+                                                text-overflow: ellipsis;
+                                            }
+                                        }
                                     }
                                 }
-                                @media only screen and (max-width: 991px) and (min-width: 768px) {
+                                /*@media only screen and (max-width: 991px) and (min-width: 768px) {
                                     .source-target {
                                         max-width: 70% !important;
                                     }
-                                }
+                                }*/
                             }
                         }
                     }
@@ -525,7 +533,7 @@ body.analyze{
             min-width: 167px;
             display: inline-block;
             font-weight: bold;
-            max-width: 100%;
+            max-width: 70%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;

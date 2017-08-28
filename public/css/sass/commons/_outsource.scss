@@ -272,7 +272,7 @@
     }
 
     .background-outsource-vendor {
-        background: #e9efec;
+        background: #f1f3f2;
         width: 100%;
         padding-bottom: 15px;
         padding-top: 15px;
@@ -555,8 +555,8 @@
             }
             .easy-pay-box {
                 width: 100%;
+                padding: 5px 20px 15px;
                 text-align: right;
-                padding: 5px 15px 15px;
                 .easy-pay {
                     font-weight: 700;
                     margin-bottom: 0;
@@ -626,7 +626,7 @@
                                 line-height: 18px;
                             }
                             .customer-info {
-                                width: 50%;
+                                width: 55%;
                                 display: inline-block;
                                 .customer-photo {
                                     display: inline-block;
@@ -647,7 +647,7 @@
                             }
                             .customer-corporate-logo {
                                 display: inline-block;
-                                width: 50%;
+                                width: 45%;
                                 text-align: right;
                                 vertical-align: middle;
                                 img {
@@ -672,8 +672,9 @@
                         }
                     }
                     .request-info-box {
-                        background-color: #d4e4d8;
+                       /* background-color: #d4e4d8;*/
                         padding: 15px 15px 10px;
+                        color: #909894;
                         .mobile-mail-box {
                             width: 50%;
                             display: inline-block;
@@ -682,10 +683,22 @@
                             .call {
                                 padding-bottom: 10px;
                                 padding-top: 0;
+                                .content {
+                                    .header {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                        color: inherit;
+                                    }
+                                }
                             }
                             .send-email {
                                 padding-bottom: 0;
                                 padding-top: 10px;
+                                .content {
+                                    .header {
+                                        font-family: Calibri, Arial, Helvetica, sans-serif;
+                                        color: inherit;
+                                    }
+                                }
                             }
                         }
                         .account-box {
