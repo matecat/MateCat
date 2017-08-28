@@ -834,7 +834,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 				GROUP BY translation, CONCAT( id_job, '-', password )
 		";
 
-        $query = sprintf( $queryForTranslationMismatch, $db->escape( $jpassword ), $sid, $sid );
+        $query = sprintf( $queryForTranslationMismatch, $sid, $sid );
     } else {
 
         /**
@@ -1144,40 +1144,32 @@ function getCurrentTranslation( $id_job, $id_segment ) {
 function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
     $query = "
-		select
+        select
 		j.id,
 		SUM(
-				IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count)
+				IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count )
 		   ) as TOTAL,
 		SUM(
 				IF(
 					st.status IS NULL OR
 					st.status='NEW',
-					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0)
+					IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as NEW,
 		SUM(
-				IF(
-					st.status IS NULL OR
-					st.status='DRAFT' OR
-					st.status='NEW',
-					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0)
+				IF( 
+					st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',
+					IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as DRAFT,
 		SUM(
-				IF(st.status='REJECTED',
-					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
-				  )
-		   ) as REJECTED,
-		SUM(
-				IF(st.status='TRANSLATED',
-					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
-				  )
+				IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
 		   ) as TRANSLATED,
+           
 		SUM(
-				IF(st.status='APPROVED',
-					IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count),0
-				  )
-		   ) as APPROVED
-
+				IF(st.status='APPROVED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+		   ) as APPROVED,
+		SUM(
+				IF(st.status='REJECTED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+		   ) as REJECTED
 			FROM jobs AS j
 			INNER JOIN files_job as fj on j.id=fj.id_job
 			INNER join segments as s on fj.id_file=s.id_file
@@ -1868,6 +1860,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			AND ( st.eq_word_count != 0  OR s.raw_word_count != 0 )
+			ORDER BY j.id, j.job_last_segment
 			";
 
     $db      = Database::obtain();
