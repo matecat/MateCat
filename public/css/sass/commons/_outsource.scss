@@ -959,6 +959,58 @@
                         }
                     }
                 }
+                @media only screen and (max-width: 991px) and (min-width: 768px) {
+                    .container-reduced {
+                        width: 79%;
+                        .payment-service {
+                            width: 60%;
+                            top: 18px !important;
+                        }
+                        .delivery-order {
+                            width: 35%;
+                            top: -15px;
+                            .delivery-box {
+                                label {
+                                    padding: 5px;
+                                    font-size: 16px;
+                                    color: gray;
+                                    font-weight: 100;
+                                    display: grid;
+                                }
+                                .gmt {
+                                    position: relative;
+                                    top: 15px;
+                                }
+                            }
+                        }
+                    }
+                }
+                @media only screen and (max-width: 767px) {
+                    .container-reduced {
+                        width: 79%;
+                        .payment-service {
+                            width: 60%;
+                            top: 18px !important;
+                        }
+                        .delivery-order {
+                            width: 35%;
+                            top: -15px;
+                            .delivery-box {
+                                label {
+                                    padding: 5px;
+                                    font-size: 16px;
+                                    color: gray;
+                                    font-weight: 100;
+                                    display: grid;
+                                }
+                                .gmt {
+                                    position: relative;
+                                    top: 15px;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         &.compact-background {
