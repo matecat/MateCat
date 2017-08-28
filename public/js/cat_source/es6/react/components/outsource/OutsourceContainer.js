@@ -107,7 +107,8 @@ class OutsourceContainer extends React.Component {
                                     <AssignToTranslator job={this.props.job}
                                                         url={this.props.url}
                                                         project={this.props.project}
-                                                        showOpenBox={this.props.showOpenBox}/>
+                                                        showOpenBox={this.props.showOpenBox}
+                                                        closeOutsource={this.props.onClickOutside}/>
                                 ) : (null)}
 
                                 {(this.props.showOpenBox ) ? (

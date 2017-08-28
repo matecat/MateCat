@@ -608,7 +608,11 @@ class JobContainer extends React.Component {
             this.container.classList.add('updated-job');
             setTimeout(function () {
                 self.container.classList.remove('updated-job');
-            }, 2000)
+                $(self.dropdown).dropdown({
+                    belowOrigin: true
+                });
+            }, 2000);
+            self.updated = false;
         }
         if (prevState.openOutsource && this.chunkRow) {
             this.chunkRow.classList.add('after-open-outsource');
