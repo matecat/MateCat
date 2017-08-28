@@ -486,7 +486,7 @@ body.manage {
                                     margin-left: 30px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 150px;
+                                    width: 140px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -548,7 +548,7 @@ body.manage {
                                     float: right;
                                     cursor: pointer;
                                     @media only screen and (max-width: 1200px) {
-                                        margin-left: 0px;
+                                        margin-left: 5px;
                                     }
                                     .ui.cancel{
                                         padding: 4px;
