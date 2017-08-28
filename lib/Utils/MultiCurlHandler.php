@@ -144,7 +144,7 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
             //TIMING
             $timing = array(
