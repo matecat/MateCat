@@ -118,6 +118,7 @@
         width: 48%;
         display: inline-block;
         padding-left: 25px;
+        vertical-align: text-top;
     }
 
     h4 {
@@ -128,6 +129,8 @@
         display: inline-block;
         text-align: right;
         width: 45%;
+        position: relative;
+        top: 2px;
         .label {
             display: inline-block;
         }
