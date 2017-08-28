@@ -1591,7 +1591,7 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+                            $wordCount = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -1681,7 +1681,7 @@ class ProjectManager {
 
                     } else {
 
-                        $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+                        $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
                         $prec_tags = null;
                         $succ_tags = null;
