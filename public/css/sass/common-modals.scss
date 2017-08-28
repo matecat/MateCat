@@ -138,7 +138,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     margin-bottom: 30px;
     background: #f4f4f4;
     border-bottom: 1px solid #ccc;
-    padding: 20px 20px;
+    padding: 20px 20px 20px 25px;
 }
 
 .preferences-modal .user-gdrive {
@@ -153,7 +153,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .user-name {
-    margin-left: 20px;
+    margin-left: 15px;
     line-height: 25px;
 }
 
@@ -182,7 +182,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .preferences-modal .user-info-attributes {
-    padding: 20px;
+    padding: 20px 25px;
 }
 
 .preferences-modal .user-info-form label {
@@ -524,10 +524,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
-    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
-    padding: 10px 10px 7px 58px;
+    background: #4D4D4D url(../img/logo-ico.png) 25px 13px no-repeat;
+    padding: 10px 10px 7px 70px;
     background-size: 35px;
-    /* border-bottom: 1px solid #000; */
     color: #fff;
     margin: 0 !important;
     text-align: left;
@@ -610,7 +609,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     float: left;
     clear: both;
     font-size: 16px;
-    margin-left: 73px;
+    margin-left: 66px;
     height: 20px;
     margin-top: 4px;
 }
@@ -661,7 +660,8 @@ div#matecat-modal p {
     border-radius: 20px;
     height: 30px !important;
     padding-left: initial !important;
-    margin-right: -1px;
+    margin-right: -2px;
+    box-sizing: content-box;
 }
 
 .onoffswitch-label:before,
