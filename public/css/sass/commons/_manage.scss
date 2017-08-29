@@ -342,7 +342,7 @@ body.manage {
                         .chunk {
                             transition: 0.3s ease;
                             background-color: #ffffff;
-                            padding: 8px 17px;
+                            padding: 8px 19px;
                             &.outsource-container {
                             }
                             /*&.after-outsource-container {
@@ -384,8 +384,12 @@ body.manage {
                                     float: left;
                                     top: 4px;
                                     color: #5a5a5a;
-                                    line-height: 28px;
+                                    line-height: 26px;
                                     position: relative;
+                                    font-size: 12px;
+                                    i {
+                                        margin-right: 0;
+                                    }
                                 }
                                 .target-box {
                                     float: left;
@@ -467,9 +471,9 @@ body.manage {
                                     position: relative;
                                     text-align: left;
                                     .outsource-logo-box {
-                                        min-width: 150px;
+                                        min-width: 140px;
                                         display: inherit;
-                                        margin-left: 30px;
+                                        margin-left: 20px;
                                         img.outsource-logo {
                                             width: 100px;
                                             margin: -5px 10px 0 0;
@@ -483,7 +487,7 @@ body.manage {
                                 .job-to-translator {
                                     display: inline-block;
                                     margin-right: 0px;
-                                    margin-left: 30px;
+                                    margin-left: 20px;
                                     vertical-align: text-bottom;
                                     color: #969696;
                                     width: 140px;
