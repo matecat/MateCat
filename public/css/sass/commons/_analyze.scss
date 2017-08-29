@@ -1118,8 +1118,8 @@ body.analyze{
 .project-body {
     .jobs {
         position: relative;
-        overflow-y: hidden;
-        max-height: 3000px;
+        overflow-y: scroll;
+        max-height: 2500px;
         opacity: 1;
         &.transition-enter {
             max-height: 0px;
