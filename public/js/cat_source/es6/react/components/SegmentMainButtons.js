@@ -1,8 +1,10 @@
 
 
 class SegmentMainButtons extends React.Component{
-    getInitialState() {
-        return {
+
+    constructor(props) {
+        super(props);
+        this.state = {
             status : this.props.status.toUpperCase(),
             anyRebuttedIssue : this.anyRebuttedIssue(),
             buttonDisabled : true,
@@ -33,11 +35,11 @@ class SegmentMainButtons extends React.Component{
     }
 
     componentDidMount() {
-        MateCat.db.addListener('segments', ['insert', 'update'], this.handleSegmentUpdate );
-        MateCat.db.addListener('segment_translation_issues', ['insert', 'update', 'delete'], this.updateButtonToShow );
+        MateCat.db.addListener('segments', ['insert', 'update'], this.handleSegmentUpdate.bind(this) );
+        MateCat.db.addListener('segment_translation_issues', ['insert', 'update', 'delete'], this.updateButtonToShow.bind(this) );
 
         var el = UI.Segment.findEl(this.props.sid);
-        el.on( 'modified', this.segmentModifiedChanged ) ;
+        el.on( 'modified', this.segmentModifiedChanged.bind(this) ) ;
     }
 
     segmentModifiedChanged (event) {

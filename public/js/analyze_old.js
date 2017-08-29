@@ -348,7 +348,6 @@ UI = {
 				job_id: jid
 			},
 			complete: function(d) {
-//				console.log('location.reload');
 				location.reload();
 			}
 		});		

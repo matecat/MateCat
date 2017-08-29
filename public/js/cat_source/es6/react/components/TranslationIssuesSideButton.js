@@ -1,5 +1,10 @@
-
 class TranslationIssuesSideButton extends React.Component{
+
+    constructor(props) {
+        super(props);
+        this.state = this.readDatabaseAndReturnState();
+    }
+
     readDatabaseAndReturnState () {
         var segment = MateCat.db.segments.by('sid', this.props.sid);
         var issues = MateCat.db.segment_translation_issues
@@ -26,9 +31,9 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     componentDidMount() {
-        MateCat.db.addListener('segments', ['update'], this.setStateOnSegmentsChange );
+        MateCat.db.addListener('segments', ['update'], this.setStateOnSegmentsChange.bind(this) );
         MateCat.db.addListener('segment_translation_issues', ['insert', 'update', 'delete'],
-            this.setStateOnIssueChange );
+            this.setStateOnIssueChange.bind(this) );
 
     }
 
@@ -38,9 +43,6 @@ class TranslationIssuesSideButton extends React.Component{
             this.setStateOnIssueChange );
     }
 
-    getInitialState () {
-        return this.readDatabaseAndReturnState();
-    }
     handleClick (e) {
         ReviewImproved.openPanel({sid: this.props.sid});
     }
@@ -52,9 +54,9 @@ class TranslationIssuesSideButton extends React.Component{
     render() {
         var plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
-            return (<div onClick={this.handleClick}><div className="review-triangle"></div><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><div className="review-triangle"></div><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
         } else  {
-            return (<div onClick={this.handleClick}><div className="review-triangle"></div><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><div className="review-triangle"></div><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
         }
 
     }
