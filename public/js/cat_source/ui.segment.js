@@ -344,6 +344,63 @@
                 });
             }
             return returnArray;
+        },
+        getContextBefore(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentBefore = (function  findBefore(segment) {
+                var before = segment.prev('section');
+                if (before.size() === 0 ) {
+                    return undefined;
+                }
+                else if (before.attr('data-split-original-id') !== originalId) {
+                    return before;
+                } else {
+                    return findBefore(before);
+                }
+
+            })(segment);
+            // var segmentBefore = findSegmentBefore();
+            if (_.isUndefined(segmentBefore)) {
+                return null;
+            }
+            var segmentBeforeId = UI.getSegmentId(segmentBefore);
+            var isSplitted = segmentBeforeId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentBeforeId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentBefore, '.source');
+            } else {
+                return $('.source', segmentBefore ).text();
+            }
+        },
+        getContextAfter(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentAfter = (function findAfter(segment) {
+                var after = segment.next('section');
+                if (after.size() === 0 ) {
+                    return undefined;
+                }
+                else if (after.attr('data-split-original-id') !== originalId) {
+                    return after;
+                } else {
+                    return findAfter(after);
+                }
+
+            })(segment);
+            if (_.isUndefined(segmentAfter)) {
+                return null;
+            }
+            var segmentAfterId = UI.getSegmentId(segmentAfter);
+            var isSplitted = segmentAfterId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentAfterId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentAfter, '.source');
+            } else {
+                return $('.source', segmentAfter ).text();
+            }
         }
     }); 
 })(jQuery); 
