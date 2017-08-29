@@ -172,7 +172,7 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let thereIsJobOutsourcedClass = '';
+                    let thereIsJobOutsourced = false;
                     let obj = self.props.jobsInfo[indexJob].chunks[0];
                     let password = obj.jpassword;
                     let total_raw = obj.total_raw_word_count_print;
@@ -181,6 +181,11 @@ class AnalyzeChunksResume extends React.Component {
                     let chunkJob = self.props.project.get('jobs').find(function (job) {
                         return job.get('id') == self.props.jobsInfo[indexJob].jid ;
                     });
+
+                    if ( !_.isNull(chunkJob.get('outsource')) ) {
+                        thereIsJobOutsourced = true;
+                    }
+                    let thereIsJobOutsourcedClass = (thereIsJobOutsourced) ? 'disabled' : '';
 
                     let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === self.props.jobsInfo[indexJob].jid);
                     let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
