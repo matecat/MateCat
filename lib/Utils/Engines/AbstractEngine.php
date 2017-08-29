@@ -167,6 +167,10 @@ abstract class Engines_AbstractEngine {
         $mh->multiCurlCloseAll();
 
         if( $this->doLog ){
+            $curl_parameters = $this->curl_additional_params + $curl_options;
+            if( isset( $curl_parameters[ CURLOPT_POSTFIELDS ] ) ){
+                Log::doLog( $uniq_uid . " ... Post Parameters ... \n" . var_export( $curl_parameters[ CURLOPT_POSTFIELDS ], true ) );
+            }
             Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
         }
 

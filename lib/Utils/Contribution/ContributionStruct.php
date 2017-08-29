@@ -58,6 +58,16 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $oldTranslation = "";
 
     /**
+     * @var string
+     */
+    public $context_before = "";
+
+    /**
+     * @var string
+     */
+    public $context_after = "";
+
+    /**
      * \INIT::$MYMEMORY_API_KEY
      * @var string
      */

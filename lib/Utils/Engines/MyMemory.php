@@ -125,7 +125,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
 
 
-        $this->call( $function, $parameters );
+        $this->call( $function, $parameters, true );
 
         return $this->result;
 
@@ -155,7 +155,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         ( !$_config[ 'isGlossary' ] ? $function = "contribute_relative_url" : $function = "gloss_set_relative_url" );
 
-        $this->call( $function, $parameters );
+        $this->call( $function, $parameters, true );
 
         if ( $this->result->responseStatus != "200" ) {
             return false;
