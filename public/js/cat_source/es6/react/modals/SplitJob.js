@@ -240,7 +240,7 @@ class SplitJobModal extends React.Component {
                     </h3>
 
                     <div className="container-split-select">
-                        <div className="label left">Split in</div>
+                        <div className="label left">Split job in:</div>
                         <select name="popup-splitselect" className="splitselect left"
                                 ref={(select) => this.splitSelect = select} onChange={this.changeSplitNumber.bind(this)}>
                             <option value="2">2</option>
@@ -293,7 +293,7 @@ class SplitJobModal extends React.Component {
                             <option value="49">49</option>
                             <option value="50">50</option>
                         </select>
-                        <div className="label left">Jobs</div>
+                        <div className="label left">Chunks</div>
                     </div>
                 </div>
                 <div className="popup-box split-box3">

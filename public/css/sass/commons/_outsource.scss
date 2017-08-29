@@ -1,6 +1,6 @@
 .after-open-outsource {
     border-left: 2px solid;
-    padding-left: 13px !important;
+    padding-left: 17px !important;
 }
 .outsource-container {
     padding: 0px !important;
@@ -17,6 +17,13 @@
         .job-id {
 
         }
+        .source-target {
+            .source-box, .target-box {
+                width: unset !important;
+                max-width: unset !important;
+                font-size: 18px;
+            }
+        }
         .job-payable {
             display: inline-block;
             padding: 0 0 0 10px !important;
@@ -26,7 +33,6 @@
             color: #969696;
             text-decoration: none !important;
             font-weight: 700;
-
         }
     }
 
@@ -139,7 +145,7 @@
 
     .assign-job-translator {
         background-color: #d5d8dc;
-        padding: 20px 15px 25px;
+        padding: 0px 15px 25px;
         width: 100%;
         .title {
             display: inline-block;
@@ -323,7 +329,7 @@
                 .translator-job-details {
                     padding-bottom: 10px;
                     .translator-details-box {
-                        width: 40%;
+                        width: 38%;
                         border-right: 1px solid black;
                         display: inline-block;
                         vertical-align: middle;
@@ -358,21 +364,21 @@
                     }
                     .job-details-box {
                         display: inline-block;
-                        width: 46% !important;
+                        width: 48% !important;
                         vertical-align: middle;
                         padding: 0 15px;
                         position: relative;
                         .source-target-outsource {
                             display: inline-block;
-                            width: 65%;
-                            font-size: 20px;
+                            width: 67%;
+                            font-size: 19px;
                             font-weight: 700;
                             .source-box {
                                 display: inline-block;
                             }
                             .in-to {
                                 display: inline-block;
-                                font-size: 18px;
+                                font-size: 16px;
                                 i {
                                     position: relative;
                                     top: 2px;
@@ -380,6 +386,12 @@
                             }
                             .target-box {
                                 display: inline-block;
+                            }
+                            @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                                font-size: 16px;
+                                .in-to {
+                                    font-size: 13px
+                                }
                             }
                         }
                         .job-payment {
