@@ -2,6 +2,7 @@
 namespace Analysis\Workers;
 
 use Constants_ProjectStatus;
+use FeatureSet;
 use FilesStorage;
 use PDO;
 use \TaskRunner\Commons\AbstractDaemon,
@@ -221,6 +222,9 @@ class FastAnalysis extends AbstractDaemon {
                     self::_TimeStampMsg( "Try next cycle...." );
                     continue;
                 }
+
+                $featureSet = new FeatureSet();
+                $featureSet->run( 'fastAnalysisComplete', $this->segments, $this->actual_project_row );
 
                 self::_TimeStampMsg( "done" );
                 // INSERT DATA

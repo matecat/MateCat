@@ -270,6 +270,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
+
+            /**
+             * @var $chunk TmKeyManagement_MemoryKeyStruct[]
+             */
             foreach ( $chunk as $obj ) {
 
                 //fill values array

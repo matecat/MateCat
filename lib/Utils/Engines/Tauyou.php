@@ -9,6 +9,6 @@
  * 
  */
 
-class Engines_Tauyou extends Engines_Moses implements Engines_EngineInterface {
+class Engines_Tauyou extends Engines_Moses {
 
 }

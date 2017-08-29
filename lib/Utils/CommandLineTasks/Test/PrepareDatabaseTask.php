@@ -60,9 +60,9 @@ class PrepareDatabaseTask extends Command
         $testDatabase->createDatabase();
 
         $tables = $devDatabase->getTablesStatements();
-        foreach($tables as $k => $v) {
-            $command = $v[0][1];
-            $testDatabase->execSql($command);
+
+        foreach($tables as $k => $statement) {
+            $testDatabase->execSql($statement);
         }
     }
 

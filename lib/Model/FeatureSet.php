@@ -1,4 +1,8 @@
 <?php
+use Exceptions\ValidationError;
+use Features\BaseFeature;
+use Features\Dqf;
+use Features\IBaseFeature;
 use Teams\TeamStruct;
 
 /**
@@ -16,13 +20,12 @@ class FeatureSet {
      */
     public function __construct( array $features = array() ) {
         $this->features = $features;
-        $this->loadFromMandatory();
+
+        $this->__loadFromMandatory();
     }
 
     public function getCodes() {
-        return array_map( function( $feature ) {
-            return $feature->feature_code ;
-        }, $this->features);
+        return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
 
     public function loadFromString( $string ) {
@@ -47,12 +50,59 @@ class FeatureSet {
     }
 
     /**
+     * @param $metadata
+     */
+    public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
+        $project_dependencies = [];
+        $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
+        $features = [] ;
+        foreach( $project_dependencies as $dependency ) {
+            $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
+        }
+        $this->features = static::merge( $this->features, $features );
+    }
+
+    /**
      *
      * @param $id_customer
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->features = static::merge( $this->features, $features );
+    }
+
+    /**
+     * Loads features that can be activated automatically on proejct, i.e. those that
+     * don't require a parameter to be passed from the UI.
+     *
+     * This functions does some transformation in order to leverage `autoActivateOnProject()` function
+     * which is defined on the concrete feature class.
+     *
+     * So it does the following:
+     *
+     * 1. find all owner_features for the given user
+     * 2. instantiate a concrete feature class for each record
+     * 3. filter the list based on the return of autoActivateOnProject()
+     * 4. populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
+     *
+     *
+     * @param $id_customer
+     *
+     * @return array
+     */
+    public function loadAutoActivablesOnProject( $id_customer ) {
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $objs = array_map( function( $feature ) {
+            return self::getObj( $feature );
+        }, $features ) ;
+
+        $returnable =  array_filter($objs, function( BaseFeature $obj ) {
+            return $obj->autoActivateOnProject();
+        }) ;
+
+        $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
+            return $feature->getFeatureStruct();
+        }, $returnable ) ) ;
     }
 
     /**
@@ -77,27 +127,23 @@ class FeatureSet {
      * FIXME: this is not a real filter since the input params are not passed
      * modified in cascade to the next function in the queue.
      * @throws Exceptions_RecordNotFound
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
      * @internal param $id_customer
      */
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
 
-        foreach( $this->features as $feature ) {
-            $name = "Features\\" . $feature->toClassName() ;
-            // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
-            // here, so the feature initializer should not need the project strucutre at all.
-            // The `id_customer` should be enough. XXX
-            if ( class_exists( $name ) ) {
-                $obj = new $name( $feature );
+        foreach( $this->sortFeatures()->features as $feature ) {
+            $obj = self::getObj( $feature );
 
+            if ( !is_null( $obj ) ) {
                 if ( method_exists( $obj, $method ) ) {
                     array_shift( $args );
                     array_unshift( $args, $filterable );
 
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
-                    } catch ( \Exceptions\ValidationError $e ) {
+                    } catch ( ValidationError $e ) {
                         throw $e ;
                     } catch ( Exceptions_RecordNotFound $e ) {
                         throw $e ;
@@ -111,13 +157,24 @@ class FeatureSet {
         return $filterable ;
     }
 
+    public static function getObj( $feature ) {
+        /* @var $feature BasicFeatureStruct */
+        $name = "Features\\" . $feature->toClassName() ;
+
+        if ( class_exists( $name ) ) {
+            return new $name( $feature );
+        } else {
+            return null ;
+        }
+    }
+
     /**
      * @param $method
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
 
-        foreach ( $this->features as $feature ) {
+        foreach ( $this->sortFeatures()->features as $feature ) {
             $this->runOnFeature($method, $feature, $args);
         }
     }
@@ -136,7 +193,7 @@ class FeatureSet {
      *
      */
     public function appendDecorators($name, viewController $controller, PHPTAL $template) {
-        foreach( $this->features as $feature ) {
+        foreach( $this->sortFeatures()->features as $feature ) {
 
             $baseClass = "Features\\" . $feature->toClassName()  ;
 
@@ -153,6 +210,42 @@ class FeatureSet {
         }
     }
 
+
+    /**
+     * This function ensures that whenever DQF is present, dependent features always come before.
+     * TODO: conver into something abstract.
+     */
+    public function sortFeatures() {
+        $codes = $this->getCodes() ;
+
+        if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
+            $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+            if ( !empty( $missing_dependencies ) ) {
+                throw new Exception('Missing dependencies for DQF: ' . implode(',', $missing_dependencies ) ) ;
+            }
+
+           usort( $this->features, function( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
+               if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
+                   return 0 ;
+               }
+               else {
+                   return 1 ;
+               }
+           });
+        }
+
+        return $this ;
+    }
+
+    /**
+     * Returns an array of feature object instances, merging two input array,
+     * ensuring no duplicates are present.
+     *
+     * @param $left
+     * @param $right
+     *
+     * @return array
+     */
     public static function merge( $left, $right ) {
         $returnable = array();
 
@@ -176,13 +269,15 @@ class FeatureSet {
     /**
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
-    private function loadFromMandatory() {
-        if ( empty( INIT::$MANDATORY_PLUGINS ) ) return ;
-
+    private function __loadFromMandatory() {
         $features = [] ;
-        foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
+
+        if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
+            foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
+                $features[] = new BasicFeatureStruct(['feature_code' => $plugin ] );
+            }
         }
+
         $this->features = static::merge($this->features, $features);
     }
 
@@ -193,16 +288,25 @@ class FeatureSet {
      * @param $feature
      * @param $args
      */
-    private function runOnFeature($method, BasicFeatureStruct $feature, $args)
-    {
-        $name = "Features\\" . $feature->toClassName();
+    private function runOnFeature($method, BasicFeatureStruct $feature, $args) {
+        $name = self::getClassName( $feature->feature_code );
 
-        if (class_exists($name)) {
+        if ( $name ) {
             $obj = new $name($feature);
 
             if (method_exists($obj, $method)) {
                 call_user_func_array(array($obj, $method), $args);
             }
+        }
+    }
+
+    public static function getClassName( $code ) {
+        $className = '\Features\\' . Utils::underscoreToCamelCase( $code );
+        if ( class_exists( $className ) ) {
+            return $className;
+        }
+        else {
+            return false ;
         }
     }
 

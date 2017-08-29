@@ -73,6 +73,15 @@ let ModalsActions = {
         APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
     },
 
+    openDQFModal: function () {
+        var props = {
+            metadata: (APP.USER.STORE.metadata) ? APP.USER.STORE.metadata : {}
+        };
+        var style = {width: '670px',maxWidth: '670px'};
+        APP.ModalWindow.showModalComponent(DQFModal, props, "DQF Preferences", style);
+    },
+
+
 };
 
 module.exports = ModalsActions;

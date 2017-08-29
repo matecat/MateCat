@@ -45,8 +45,22 @@ class Set {
 
     }
 
-    public static function contributionMT( ContributionStruct $contribution ){
+    public static function contributionMT( ContributionStruct $contribution = null ){
+        try{
 
+            if ( empty( $contribution ) ) return;
+
+            WorkerClient::enqueue( 'CONTRIBUTION_MT', '\AsyncTasks\Workers\SetContributionMTWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        } catch ( Exception $e ){
+
+            # Handle the error, logging, ...
+            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $contribution, true );
+            Log::doLog( $output );
+            throw $e;
+
+        }
     }
 
 }

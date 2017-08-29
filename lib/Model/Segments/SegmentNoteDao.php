@@ -23,7 +23,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
 
         foreach( $chunked as $chunk ) {
-            $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ?  ) " ) ;
+            $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ? ) " ) ;
             $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
             $flattened_values = array_reduce( $chunk, 'array_merge', array() );
             $stmt->execute( $flattened_values ) ;

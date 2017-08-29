@@ -39,6 +39,16 @@ LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
 
+; Config params for DQF
+DQF_BASE_URL = 'http://dqf-api.ta-us.net/'
+DQF_API_KEY = XXX
+DQF_ENCRYPTION_KEY = XXX
+DQF_ENCRYPTION_IV = XXX
+
+; Segments partition rule, leave unset to write to `segments` table.
+; Format of configuration string is: "{id_project}:{table_name};...".
+; Project ids must be sorted in ascecnding order. Match on `id_project` is "less than" ( < ).
+; SEGMENTS_PARTITION_RULE="71:segments;9999999999999:segments2"
 
 ;----------------------------------------
 [staging]
@@ -48,7 +58,6 @@ DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
 DB_PASS = "matecat_user"
 
-MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
@@ -80,7 +89,6 @@ DB_DATABASE = "matecat"
 DB_USER = "matecat"
 DB_PASS = "matecat01"
 
-MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"

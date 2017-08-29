@@ -5,8 +5,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     const TABLE       = "jobs";
     const STRUCT_TYPE = "Jobs_JobStruct";
 
-    protected static $auto_increment_fields = array( 'id' );
-    protected static $primary_keys          = array( 'id', 'password' );
+    protected static $auto_increment_fields = [ 'id' ];
+    protected static $primary_keys          = [ 'id', 'password' ];
 
     protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
 
@@ -109,10 +109,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
-     * @param                    $requestedWordsPerSplit
+     * @param int $id
+     * @param string $password
+     * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]|LoudArray[]
+     * @internal param Chunks_ChunkStruct $chunk
+     * @internal param $requestedWordsPerSplit
+     *
      */
 
     public function getSplitData( $id, $password, $ttl = 0 ) {

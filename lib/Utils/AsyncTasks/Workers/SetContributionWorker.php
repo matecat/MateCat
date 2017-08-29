@@ -9,38 +9,38 @@
 
 namespace AsyncTasks\Workers;
 
-use CatUtils,
-        Contribution\ContributionStruct,
+use Contribution\ContributionStruct,
         Engine,
-        Engines_MyMemory,
         TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException,
         TaskRunner\Exceptions\ReQueueException,
         TmKeyManagement_Filter,
         TmKeyManagement_TmKeyManagement,
-        TaskRunner\Commons\AbstractElement;
+        TaskRunner\Commons\AbstractElement,
+        Jobs_JobStruct;
 use INIT;
 
 class SetContributionWorker extends AbstractWorker {
 
-    const ERR_SET_FAILED = 4;
-    const ERR_NO_TM_ENGINE = 5;
+    const ERR_SET_FAILED    = 4;
+    const ERR_UPDATE_FAILED = 6;
+    const ERR_NO_TM_ENGINE  = 5;
 
     const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
     /**
-     * @var Engines_MyMemory
+     * @var \Engines_EngineInterface
      */
-    protected $_tms;
+    protected $_engine;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
-     * @param \Engines_AbstractEngine $_tms
+     * @param \Engines_EngineInterface $_tms
      */
     public function setEngine( $_tms ){
-        $this->_tms = $_tms;
+        $this->_engine = $_tms;
     }
 
     /**
@@ -67,32 +67,6 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
-     *
-     * @param QueueElement $queueElement
-     *
-     * @throws EndQueueException
-     */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ){
-
-        /**
-         *
-         * check for loop re-queuing
-         */
-        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
-
-            $msg = "\n\n Error Set Contribution  \n\n " . var_export( $queueElement, true );
-            \Utils::sendErrMailReport( $msg );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
-            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
-
-        } elseif ( isset( $queueElement->reQueueNum ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
-        }
-
-    }
-
-    /**
      * @param ContributionStruct $contributionStruct
      *
      * @throws EndQueueException
@@ -107,23 +81,19 @@ class SetContributionWorker extends AbstractWorker {
 //        $userInfoList = $contributionStruct->getUserInfo();
 //        $userInfo = array_pop( $userInfoList );
 
-        $id_tms  = $jobStruct->id_tms;
+        $this->_loadEngine( $contributionStruct );
 
-        if ( $id_tms != 0 ) {
+        $config = $this->_engine->getConfigStruct();
+        $config[ 'source' ]      = $jobStruct->source;
+        $config[ 'target' ]      = $jobStruct->target;
+        $config[ 'email' ]       = $contributionStruct->api_key;
 
-            if( empty( $this->_tms ) ){
-                $this->_tms = Engine::getInstance( 1 ); //Load MyMemory
-            }
+        $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-            $config = $this->_tms->getConfigStruct();
-            $config[ 'source' ]      = $jobStruct->source;
-            $config[ 'target' ]      = $jobStruct->target;
-            $config[ 'email' ]       = $contributionStruct->api_key;
+        $redisSetKey = sprintf( static::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+        $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
-            $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
-
-            $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-            $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
+        try {
 
             if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
                 $this->_update( $config, $contributionStruct );
@@ -138,10 +108,23 @@ class SetContributionWorker extends AbstractWorker {
                     60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
             ); //TTL 3 months, the time for job archivability
 
-        } else {
+        } catch( ReQueueException $e ){
+            $this->_doLog( $e->getMessage() );
+            if( $e->getCode() == self::ERR_SET_FAILED || $isANewSet ){
+                $this->_queueHandler->getRedisClient()->del( [ $redisSetKey ] );
+            }
+            throw $e;
+        }
 
-            throw new EndQueueException( "No TM engine configured for the job. Skip, OK", self::ERR_NO_TM_ENGINE );
-            
+    }
+
+    protected function _loadEngine( ContributionStruct $contributionStruct ){
+
+        $jobStructList = $contributionStruct->getJobStruct();
+        $jobStruct = array_pop( $jobStructList );
+
+        if( empty( $this->_engine ) ){
+            $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
     }
@@ -155,9 +138,10 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_tms->set( $config );
+        $res = $this->_engine->set( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            //reset the engine
+            $this->_raiseException( 'Set', $config );
         }
 
     }
@@ -171,14 +155,15 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
 
-        $res = $this->_tms->update( $config );
+        $res = $this->_engine->update( $config );
         if ( !$res ) {
-            throw new ReQueueException( "Update failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            //reset the engine
+            $this->_raiseException( 'Update', $config );
         }
 
     }
 
-    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -192,7 +177,7 @@ class SetContributionWorker extends AbstractWorker {
         $config = [];
         if ( !empty( $tm_keys ) ) {
 
-            $config[ 'id_user' ] = array();
+            $config[ 'keys' ] = array();
             foreach ( $tm_keys as $i => $tm_info ) {
                 $config[ 'id_user' ][] = $tm_info->key;
             }
@@ -201,6 +186,30 @@ class SetContributionWorker extends AbstractWorker {
 
         return $config;
 
+    }
+
+    /**
+     * @param       $type
+     * @param array $config
+     *
+     * @throws ReQueueException
+     */
+    protected function _raiseException( $type, array $config ){
+        //reset the engine
+        $engineName = get_class( $this->_engine );
+        $this->_engine = null;
+
+        $errNum = self::ERR_SET_FAILED;
+        switch( strtolower( $type ) ){
+            case 'set':
+                $errNum = self::ERR_SET_FAILED;
+                break;
+            case 'update':
+                $errNum = self::ERR_UPDATE_FAILED;
+                break;
+        }
+
+        throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), $errNum );
     }
 
 }

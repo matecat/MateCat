@@ -153,7 +153,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
 
     }
 

@@ -49,7 +49,12 @@ class WorkerClient {
      * @throws Exception
      *
      */
-    public static function enqueue( $queue, $class_name, $data, $options ) {
+    public static function enqueue( $queue, $class_name, $data, $options = [] ) {
+
+        if ( !isset( $options['persistent'] ) ) {
+            $options['persistent'] = self::$_HANDLER->persistent ;
+        }
+
         $element            = new QueueElement();
         $element->params    = $data;
         $element->classLoad = $class_name;

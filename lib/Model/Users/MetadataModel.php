@@ -9,6 +9,8 @@
 namespace Users;
 
 
+use FeatureSet;
+
 class MetadataModel {
 
     /**
@@ -29,9 +31,11 @@ class MetadataModel {
 
     public function save() {
         // validate
-        $features = new \FeatureSet() ;
+        $features = new FeatureSet() ;
+        $features->loadSystemWideFeatures();
+        $features->loadFromUserEmail( $this->user->email ) ;
 
-        $metadataFilters = $features->filter('filterUserMetadataFilters', array() ) ;
+        $metadataFilters = $features->filter('filterUserMetadataFilters', array(), $this->metadata ) ;
         $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;
 
         $this->metadata = $features->filter('filterValidateUserMetadata', $this->metadata, array('user' => $this->user ) ) ;

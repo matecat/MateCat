@@ -7,7 +7,7 @@
  * Time: 11.59
  *
  */
-abstract class Engines_AbstractEngine {
+abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @var EnginesModel_EngineStruct
@@ -26,6 +26,9 @@ abstract class Engines_AbstractEngine {
 
     public $doLog = true;
 
+    protected $_isAnalysis   = false;
+    protected $_skipAnalysis = false;
+
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
         $this->className    = get_class( $this );
@@ -39,6 +42,16 @@ abstract class Engines_AbstractEngine {
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
+    }
+
+    /**
+     * @param bool $bool
+     *
+     * @return $this
+     */
+    public function setAnalysis( $bool = true ){
+        $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
+        return $this;
     }
 
     /**
@@ -178,7 +191,12 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    public function call( $function, Array $parameters = array(), $isPostRequest = false ) {
+    public function call( $function, Array $parameters = array(), $isPostRequest = false, $isJsonRequest = false ) {
+
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            $this->result = [];
+            return;
+        }
 
         $this->error = array(); // reset last error
         if ( !$this->$function ) {
@@ -186,7 +204,7 @@ abstract class Engines_AbstractEngine {
             $this->result = array(
                     'error' => array(
                             'code'    => -43,
-                            'message' => " Bad Method Call. Requested method ' . $function . ' not Found."
+                            'message' => " Bad Method Call. Requested method '$function' not Found."
                     )
             ); //return negative number
             return;
@@ -196,7 +214,7 @@ abstract class Engines_AbstractEngine {
             $function = strtolower( trim( $function ) );
             $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
-                    CURLOPT_POSTFIELDS => $parameters,
+                    CURLOPT_POSTFIELDS => ( !$isJsonRequest ? $parameters : json_encode( $parameters ) ),
                     CURLINFO_HEADER_OUT => true,
                     CURLOPT_TIMEOUT    => 120
             );

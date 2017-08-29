@@ -274,6 +274,7 @@
                                        
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
+                                                <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">MMT</option>
                                                 <option value="altlang">AltLang</option>
                                                 <option value="apertium">Apertium</option>
                                                 <option value="deeplingo" >DeepLingo</option>
@@ -325,8 +326,8 @@
                             <table class="mgmt-mt">
                                 <thead>
                                 <tr>
-                                    <th class="privatekey">MT provider</th>
-                                    <th class="description">Engine name</th>
+                                    <th class="privatekey">Engine Name</th>
+                                    <th class="description">Description</th>
                                     <tal:block tal:condition="php: page == 'home'">
                                         <th class="enable-mt text-center">Use in this project</th>
                                     </tal:block>
@@ -342,7 +343,7 @@
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
                                             <td class="engine-name">
-                                                <div class="edit-desc">Machine translation from Google Translate and Microsoft Translator.</div>
+                                                <div>Machine translation from Google Translate and Microsoft Translator.</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
@@ -374,7 +375,7 @@
                                                 <tr class="activemt" data-id="${engine/id}">
                                                     <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
-                                                        <div class="edit-desc">${engine/description}</div>
+                                                        <div>${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
                                                         <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
@@ -433,13 +434,6 @@
                                     </label>
 
                                 </div>
-                            </div>
-
-                            <!-- <div tal:condition="true:DQF_enabled" class="options-box"> -->
-                            <div class="options-box dqf_options_box">
-                                <h3>DQF key</h3>
-                                <p>Connect your TAUS DQF account to measure productivity.</p>
-                                <input name="dqf_key" type="text" class="upload-input" id="dqf_key"/>
                             </div>
 
                             <div class="options-box tagp">
@@ -506,14 +500,74 @@
                                 </select>
                             </div>
 
-                            <!-- div class="translate-checkbox">
-                                <span class="tms-checkbox" id="disable_tms_checkbox">
-                                    <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
-                                    <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
-                                </span>
-                            </div -->
+                            <div tal:condition="dqf_enabled" class="options-box dqf-box">
+                                <h3>DQF  </h3>
+                                <p tal:condition="php: !empty(logged_user)">
+                                    Enable this option to use DQF in MateCat.
+                                    <span class="dqf-settings">Open Settings</span>
+                                </p>
+                                <p tal:condition="php: empty(logged_user)" >
+                                    Login and set your DQF credentials to use DQF in MateCat.
+                                </p>
 
-                            <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
+                                <div class="onoffswitch-container">
+                                    <div class="onoffswitch">
+                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="dqf_switch" />
+                                        <label class="onoffswitch-label" for="dqf_switch">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                            <span class="onoffswitch-label-status-active">Active</span>
+                                            <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!--<div class="dqf-options-container closed-options">-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Content Type</h4>-->
+
+                                        <!--<select name="contentType" id="contentType">-->
+                                            <!--<option value="">Choose</option>-->
+                                            <!--<tal:block tal:repeat="entry dqf_content_types">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+                                        <!--</select>-->
+
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Industry</h4>-->
+                                        <!--<select name="industry" id="industry">-->
+                                            <!--<option value="">Choose</option>-->
+
+                                            <!--<tal:block tal:repeat="entry dqf_industry">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Process</h4>-->
+                                        <!--<select name="process" id="process">-->
+                                            <!--<option value="">Choose</option>-->
+
+                                            <!--<tal:block tal:repeat="entry dqf_process">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                    <!--<div class="dqf-option">-->
+                                        <!--<h4>Quality level</h4>-->
+                                        <!--<select name="qualityLevel" id="qualityLevel">-->
+                                            <!--<option value="">Choose</option>-->
+
+                                            <!--<tal:block tal:repeat="entry dqf_quality_level">-->
+                                                <!--<option tal:attributes="value entry/id" tal:content="entry/name" ></option>-->
+                                            <!--</tal:block>-->
+
+                                        <!--</select>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            </div>
 
                         </div>
                     </div>
@@ -526,6 +580,7 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
+    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="mt_engines.html/template-mmt" />
     <div metal:use-macro="mt_engines.html/template-microsofthub" />
     <div metal:use-macro="mt_engines.html/template-iptranslator" />
     <div metal:use-macro="mt_engines.html/template-deeplingo" />
