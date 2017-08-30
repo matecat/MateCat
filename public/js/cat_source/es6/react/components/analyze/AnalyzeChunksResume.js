@@ -93,7 +93,6 @@ class AnalyzeChunksResume extends React.Component {
                 let jobAnalysis = self.props.jobsAnalysis.get(indexJob);
 
                 if (item.splitted !== "" && _.size(item.chunks) > 1) {
-                    let thereIsJobOutsourced = false;
                     let chunksHtml = _.map(item.chunks, function (chunkConfig, index) {
                         let indexChunk = chunkConfig.jpassword;
                         let chunkAnalysis = jobAnalysis.get('totals').get(indexChunk);
@@ -102,9 +101,6 @@ class AnalyzeChunksResume extends React.Component {
                             return job.get('id') == chunk.jid && job.get('password') === chunk.jpassword;
                         });
                         index++;
-                        if ( !_.isNull(chunkJob.get('outsource')) ) {
-                            thereIsJobOutsourced = true;
-                        }
 
                         let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === (chunk.jid +'-'+ index));
 
@@ -147,8 +143,6 @@ class AnalyzeChunksResume extends React.Component {
                         </div>;
                     });
 
-                    let disableMergeClass = (thereIsJobOutsourced) ? 'disabled' : '';
-
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
 
@@ -164,7 +158,7 @@ class AnalyzeChunksResume extends React.Component {
                                 <div className="titles-compare">
                                 </div>
                                 <div className="activity-icons">
-                                    <div className={"merge ui blue basic button " + disableMergeClass}
+                                    <div className="merge ui blue basic button"
                                          onClick={self.openMergeModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-compress icon"/>Merge</div>
                                 </div>
                             </div>
@@ -172,7 +166,6 @@ class AnalyzeChunksResume extends React.Component {
                         </div>
                     </div>;
                 } else {
-                    let thereIsJobOutsourced = false;
                     let obj = self.props.jobsInfo[indexJob].chunks[0];
                     let password = obj.jpassword;
                     let total_raw = obj.total_raw_word_count_print;
@@ -181,11 +174,6 @@ class AnalyzeChunksResume extends React.Component {
                     let chunkJob = self.props.project.get('jobs').find(function (job) {
                         return job.get('id') == self.props.jobsInfo[indexJob].jid ;
                     });
-
-                    if ( !_.isNull(chunkJob.get('outsource')) ) {
-                        thereIsJobOutsourced = true;
-                    }
-                    let thereIsJobOutsourcedClass = (thereIsJobOutsourced) ? 'disabled' : '';
 
                     let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === self.props.jobsInfo[indexJob].jid);
                     let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
@@ -222,7 +210,7 @@ class AnalyzeChunksResume extends React.Component {
                                     </div>
                                 </div>
                                 <div className="activity-icons">
-                                    <div className={"split ui blue basic button " + buttonsClass + ' ' + thereIsJobOutsourcedClass}
+                                    <div className={"split ui blue basic button " + buttonsClass + ' '}
                                          onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     <div className="open-translate ui primary button open"
                                          onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
