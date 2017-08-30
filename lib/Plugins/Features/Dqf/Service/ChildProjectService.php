@@ -16,7 +16,7 @@ use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\Struct\Request\ProjectTargetLanguageRequestStruct;
-use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
 use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use Features\Dqf\Utils\Functions;
 
@@ -74,7 +74,7 @@ class ChildProjectService {
         $resource =  $client->createResource('/project/child/%s/status', 'put', [
                 'headers'    =>  $requestStruct->getHeaders(),
                 'pathParams' =>  $requestStruct->getPathParams(),
-                'formData'   =>  ['status' => '']
+                'formData'   =>  ['status' => 'completed']
         ] );
 
         $client->execRequests();
@@ -148,7 +148,12 @@ class ChildProjectService {
     /**
      * Creates a translation child for the given input parent project.
      *
-     * @param remoteFiles MasterFileResponseStruct[]
+     * @param CreateProjectResponseStruct       $parent
+     * @param MaserFileCreationResponseStruct[] $remoteFiles
+     *
+     * @return CreateProjectResponseStruct
+     * @throws Exception
+     * @internal param MaserFileCreationResponseStruct[] $remoteFiles
      *
      */
     public function createTranslationChild(CreateProjectResponseStruct $parent, $remoteFiles ) {

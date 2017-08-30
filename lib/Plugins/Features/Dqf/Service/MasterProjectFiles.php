@@ -10,11 +10,16 @@ namespace Features\Dqf\Service;
 
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\MasterFileRequestStruct;
+use Features\Dqf\Service\Struct\ProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\FileTargetLanguageRequestStruct;
-use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Struct\Response\FileResponseStruct;
+use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
+use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use Features\Dqf\Utils\Functions;
 use Files_FileStruct;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use INIT;
+use Log;
+use Exception ;
 
 
 class MasterProjectFiles {
@@ -30,12 +35,12 @@ class MasterProjectFiles {
     protected $session ;
 
     /**
-     * @var CreateProjectResponseStruct
+     * @var ProjectResponseStruct
      */
     protected $remoteProject ;
 
     /**
-     * @var MasterFileResponseStruct[]
+     * @var MaserFileCreationResponseStruct[]
      */
     protected $remoteFiles ;
 
@@ -44,9 +49,41 @@ class MasterProjectFiles {
      */
     protected $_targetLanguages ;
 
-    public function __construct( Session $session, CreateProjectResponseStruct $remoteProject ) {
+    public function __construct( Session $session, ProjectResponseStruct $remoteProject ) {
         $this->session = $session ;
         $this->remoteProject = $remoteProject ;
+    }
+
+    public function getFiles() {
+        $requestStruct             = new ProjectRequestStruct();
+        $requestStruct->projectId  = $this->remoteProject->id ;
+        $requestStruct->projectKey = $this->remoteProject->uuid ;
+
+        $requestStruct->sessionId = $this->session->getSessionId() ;
+        $requestStruct->apiKey    = INIT::$DQF_API_KEY ;
+
+        $client = new Client();
+        $client->setSession( $this->session );
+
+        $request = $client->createResource( '/project/master/%s/file', 'get', [
+                'headers'    => $requestStruct->getHeaders(),
+                'pathParams' => $requestStruct->getPathParams()
+        ] );
+
+        $client->curl()->multiExec();
+
+        $content = json_decode( $client->curl()->getSingleContent( $request ), true );
+
+        Log::doLog( var_export( $content, true ) ) ;
+
+        if ( $client->curl()->hasError( $request ) ) {
+            throw new Exception('Error while fetching files: ' . json_encode( $client->curl()->getErrors() ) ) ;
+        }
+
+        return array_map( function( $element ) {
+            return new FileResponseStruct( $element );
+        }, $content['modelList'] );
+
     }
 
     public function setFile( Files_FileStruct $file, $numberOfSegments ) {
@@ -63,9 +100,9 @@ class MasterProjectFiles {
     }
 
     /**
-     * @return MasterFileResponseStruct[]
+     * @return MaserFileCreationResponseStruct[]
      */
-    public function getRemoteFiles() {
+    public function submitFiles() {
         $this->_submitFiles();
         $this->_submitTargetLanguages();
 
@@ -127,7 +164,7 @@ class MasterProjectFiles {
         }
 
         foreach( $this->files as $file ) {
-            $this->remoteFiles[ $file->clientId ] = new MasterFileResponseStruct(
+            $this->remoteFiles[ $file->clientId ] = new MaserFileCreationResponseStruct(
                     json_decode( $client->curl()->getSingleContent( $file->clientId ), true )
             );
         }

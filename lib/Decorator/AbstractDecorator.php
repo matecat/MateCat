@@ -6,6 +6,7 @@
  * Date: 05/11/15
  * Time: 11.56
  */
+use AbstractControllers\IController;
 
 /**
  * Class AbstractDecorator
@@ -27,7 +28,7 @@ abstract class AbstractDecorator {
      */
     protected $template;
 
-    public function __construct( controller $controller, PHPTAL $template ) {
+    public function __construct( IController $controller, PHPTAL $template ) {
         $this->controller = $controller;
         $this->template   = $template;
     }

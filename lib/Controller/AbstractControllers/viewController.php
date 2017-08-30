@@ -2,7 +2,7 @@
 /**
  * Created by PhpStorm.
  */
-use ConnectedServices\GDrive;
+use AbstractControllers\IController;
 
 
 /**
@@ -12,7 +12,7 @@ use ConnectedServices\GDrive;
  * Time: 18.56
  *
  */
-abstract class viewController extends controller {
+abstract class viewController extends controller implements IController {
 
     /**
      * Template Engine Instance

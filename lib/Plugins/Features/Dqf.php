@@ -2,6 +2,7 @@
 
 namespace Features;
 
+use AbstractControllers\IController;
 use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
@@ -9,6 +10,7 @@ use catController;
 use Chunks_ChunkStruct;
 use Exceptions\ValidationError;
 use Features;
+use Features\Dqf\Model\RevisionChildProject;
 use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
@@ -17,6 +19,7 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use INIT;
 use Log;
 use Monolog\Logger;
+use PHPTALWithAppend;
 use Users_UserDao;
 use Utils;
 use WorkerClient;
@@ -47,6 +50,13 @@ class Dqf extends BaseFeature {
         return self::$logger ;
     }
 
+    /**
+     * @param PHPTALWithAppend $template
+     * @param IController      $controller
+     */
+    public function decorateTemplate( PHPTALWithAppend $template, IController $controller ) {
+        Features\Dqf\Utils\Functions::commonVarsForDecorator($template);
+    }
 
     public function filterUserMetadataFilters($filters, $metadata) {
         if ( isset( $metadata['dqf_username'] ) || isset( $metadata['dqf_password'] ) ) {
@@ -119,8 +129,11 @@ class Dqf extends BaseFeature {
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $params, $lastId ) {
         // at this point we have to enqueue delivery to DQF of the translated or reviewed segments
+        // TODO: put this in a queue.
         if ( $params->is_review ) {
             // enqueue task for review
+            $revisionChildProject = new RevisionChildProject( $chunk );
+            $revisionChildProject->submitRevisionData();
         }
         else {
             $translationChildProject = new TranslationChildProject( $chunk ) ;

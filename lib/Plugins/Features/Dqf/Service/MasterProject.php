@@ -7,8 +7,10 @@ namespace Features\Dqf\Service;
 use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct ;
+use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use INIT;
 use Log;
+use Projects_ProjectStruct;
 
 class MasterProject {
 
@@ -44,6 +46,36 @@ class MasterProject {
         }
 
         return new CreateProjectResponseStruct( $content );
+    }
+
+    public function getByDqfId( $mappingResponse ) {
+
+        $requestStruct             = new ProjectRequestStruct();
+        $requestStruct->projectId  = $mappingResponse['dqfId'] ;
+        $requestStruct->projectKey = $mappingResponse['dqfUUID'];
+
+        $requestStruct->sessionId = $this->session->getSessionId() ;
+        $requestStruct->apiKey    = INIT::$DQF_API_KEY ;
+
+        $client = new Client();
+        $client->setSession( $this->session );
+
+        $request = $client->createResource( '/project/master/%s', 'get', [
+                'headers'  => $requestStruct->getHeaders(),
+                'pathParams' => $requestStruct->getPathParams()
+        ] );
+
+        $client->curl()->multiExec();
+
+        $content = json_decode( $client->curl()->getSingleContent( $request ), true );
+
+        Log::doLog( var_export( $content, true ) ) ;
+
+        if ( $client->curl()->hasError( $request ) ) {
+            throw new Exception('Error while fetching project: ' . json_encode( $client->curl()->getErrors() ) ) ;
+        }
+
+        return new ProjectResponseStruct( $content['model'] );
 
     }
 

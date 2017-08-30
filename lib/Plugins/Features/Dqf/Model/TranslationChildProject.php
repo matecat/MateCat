@@ -110,11 +110,6 @@ class TranslationChildProject {
         }
     }
 
-    public function setUncompleted() {
-        $service = new ChildProjectService( $this->userSession, $this->chunk ) ;
-
-    }
-
     public function submitTranslationBatch() {
         $this->_assignToTranslator() ;
         $this->_submitSegmentPairs() ;

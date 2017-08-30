@@ -951,3 +951,25 @@ top: 25%;
 .contact_box p {
 	line-height: 23px !important;
 }
+
+.bluebtn {
+	background: #09beec;
+	font-weight: bold;
+	width: 88px;
+	-webkit-transition: all 100ms ease-in;
+	-moz-transition: all 100ms ease-in;
+	font-size: 20px !important;
+	cursor: pointer;
+	color: #fff;
+	-moz-box-shadow: 0 1px 2px #ccc;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
+	border: 1px solid #666;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	text-decoration: none;
+	opacity: 0.9;
+	text-align: center;
+	padding: 5px 10px !important;
+	margin: 0 0 -3px 10px !important;
+}

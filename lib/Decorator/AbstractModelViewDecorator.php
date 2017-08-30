@@ -21,5 +21,5 @@ abstract class AbstractModelViewDecorator {
      *
      * @return mixed
      */
-    abstract public function decorate( $template ) ;
+    abstract public function decorate( PHPTALWithAppend $template ) ;
 }

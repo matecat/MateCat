@@ -80,7 +80,8 @@ SELECT
   st.time_to_edit  as time_to_edit,
 
   s.id AS segment_id,
-  s.segment AS segment_source,
+  s.segment AS segment_source
+  ,
 
   comments.id as comment_id,
   comments.comment as comment_comment,

@@ -1,4 +1,5 @@
 <?php
+use AbstractControllers\IController;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Features\Dqf;
@@ -198,12 +199,13 @@ class FeatureSet {
      * Also, gives a last chance to plugins to define a custom decorator class to be
      * added to any call.
      *
-     * @param $name name of the decorator to activate
-     * @param viewController $controller the controller to work on
+     * @param string $name name of the decorator to activate
+     * @param IController $controller the controller to work on
      * @param PHPTAL $template the PHPTAL view to add properties to
      *
      */
-    public function appendDecorators($name, viewController $controller, PHPTAL $template) {
+    public function appendDecorators($name, IController $controller, PHPTAL $template) {
+        /** @var BasicFeatureStruct $feature */
         foreach( $this->sortFeatures()->features as $feature ) {
 
             $baseClass = "Features\\" . $feature->toClassName()  ;
@@ -215,6 +217,7 @@ class FeatureSet {
             Log::doLog('loading Decorator ' . $cls );
 
             if ( class_exists( $cls ) ) {
+                /** @var AbstractDecorator $obj */
                 $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }
