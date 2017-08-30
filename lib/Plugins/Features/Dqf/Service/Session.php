@@ -18,7 +18,7 @@ class Session {
 
     protected $email ;
     protected $password ;
-    protected $sessonId ;
+    protected $sessionId ;
     protected $expires ;
 
     public function __construct( $email, $password ) {
@@ -50,7 +50,7 @@ class Session {
 
         Log::doLog(" SessionId " . $response->sessionId );
 
-        $this->sessonId = $response->sessionId ;
+        $this->sessionId = $response->sessionId ;
         $this->expires = $response->expires ;
 
         return $this;
@@ -61,10 +61,10 @@ class Session {
      * @throws Exception
      */
     public function getSessionId() {
-        if ( is_null($this->sessonId) ) {
+        if ( is_null($this->sessionId) ) {
             throw new Exception('sessionId is null, try to login first');
         }
-        return $this->sessonId ;
+        return $this->sessionId ;
     }
 
     public function getExpires() {

@@ -4,6 +4,7 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use Features\Dqf;
 use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\ChildProjectTranslationBatchService;
 use Features\Dqf\Service\FileIdMapping;
@@ -43,7 +44,7 @@ class TranslationChildProject {
     protected $userSession ;
 
     /**
-     * @var ChildProjectsMapStruct[]
+     * @var DqfProjectMapStruct[]
      */
     protected $remoteDqfProjects ;
 
@@ -64,7 +65,7 @@ class TranslationChildProject {
 
 
     /**
-     * @var ChildProjectsMapStruct[]
+     * @var DqfProjectMapStruct[]
      */
     protected $dqfChildProjects ;
 
@@ -79,19 +80,36 @@ class TranslationChildProject {
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk ;
 
-        $uid = ( new MetadataDao() )->get( $chunk->id, $chunk->password, 'dqf_translate_user' )->value ;
-        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
-
-        $ownerUser = ( new Users_UserDao() )->getByEmail( $this->chunk->getProject()->id_customer );
-        $this->ownerSession = ( new UserModel( $ownerUser ) )->getSession();
-        $this->ownerSession->login();
-
-        $this->userSession = $this->dqfTranslateUser->getSession();
-        $this->userSession->login();
+        $this->_initDqfTranslateUserAndSession() ;
+        $this->_initDqfOwnerSession() ;
 
         $this->translationBatchService = new ChildProjectTranslationBatchService($this->userSession) ;
+        $this->dqfChildProjects = ( new DqfProjectMapDao() )->getByChunk( $this->chunk ) ;
+    }
 
-        $this->dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
+    protected function _initDqfTranslateUserAndSession() {
+        $uid = ( new MetadataDao() )
+                ->get( $this->chunk->id, $this->chunk->password, 'dqf_translate_user' )
+                ->value ;
+
+        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
+        $this->userSession      = $this->dqfTranslateUser->getSession()->login();
+    }
+
+    /**
+     * This method initializes the correct ownerSession for this translationJob to create.
+     */
+    protected function _initDqfOwnerSession() {
+        $intermediateUid = $this->chunk->getProject()->getMetadataValue(Dqf::INTERMEDIATE_USER_METADATA_KEY);
+
+        if ( !is_null( $intermediateUid ) ) {
+            $user = ( new Users_UserDao() )->getByUid( $intermediateUid );
+        }
+        else {
+            $user = $this->chunk->getProject()->getOwner();
+        }
+
+        $this->ownerSession = ( new UserModel( $user ) )->getSession()->login() ;
     }
 
     /**
@@ -119,7 +137,6 @@ class TranslationChildProject {
         $this->_findRemoteDqfChildProjects() ;
 
         $updateRequests = array_filter( array_map( function( ProjectResponseStruct $project ) {
-
             if ( !is_null($project->user->email ) ) {
                 return null ;
             }
@@ -141,8 +158,10 @@ class TranslationChildProject {
     }
 
     protected function _findRemoteDqfChildProjects() {
+
         $childProjectService = new ChildProjectService( $this->ownerSession, $this->chunk );
-        $this->remoteDqfProjects = $childProjectService->getRemoteResources( array_map( function( ChildProjectsMapStruct $item ) {
+
+        $this->remoteDqfProjects = $childProjectService->getRemoteResources( array_map( function( DqfProjectMapStruct $item ) {
             return new ChildProjectRequestStruct([
                     'projectId'  =>  $item->dqf_project_id,
                     'projectKey' =>  $item->dqf_project_uuid,
@@ -202,7 +221,7 @@ class TranslationChildProject {
         foreach( $this->files as $file ) {
             list ( $min, $max ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
 
-            $dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunkAndSegmentsInterval( $this->chunk, $min, $max ) ;
+            $dqfChildProjects = ( new DqfProjectMapDao() )->getByChunkAndSegmentsInterval( $this->chunk, $min, $max ) ;
             $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $min, $max ) ;
 
             // DQF child project
@@ -259,11 +278,13 @@ class TranslationChildProject {
     }
 
     protected function _findRemoteFileId( Files_FileStruct $file ) {
-        $service = new FileIdMapping( $this->userSession, $file ) ;
+        $projectOwner = new UserModel ( $this->chunk->getProject()->getOwner()  ) ;
+        $service = new FileIdMapping( $projectOwner->getSession()->login(), $file ) ;
+
         return $service->getRemoteId() ;
     }
 
-    protected function getLimitDate(ChildProjectsMapStruct $dqfChildProject) {
+    protected function getLimitDate( DqfProjectMapStruct $dqfChildProject) {
         $lastEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $this->chunk, ['is_review' => false ] );
         if ( $lastEvent ) {
             return $dqfChildProject->create_date ;

@@ -68,4 +68,11 @@ class UserModel {
         $user = ( new Users_UserDao() )->getByEmail( $email ) ;
         return new UserModel( $user );
     }
+
+    /**
+     * @return Users_UserStruct
+     */
+    public function getMateCatUser() {
+        return $this->user ;
+    }
 }

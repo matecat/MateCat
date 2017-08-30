@@ -10,7 +10,7 @@ namespace Features\Dqf\Service;
 
 use Chunks_ChunkStruct;
 use Exception;
-use Features\Dqf\Model\ChildProjectsMapStruct;
+use Features\Dqf\Model\DqfProjectMapStruct;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
@@ -36,9 +36,14 @@ class ChildProjectService {
 
     protected $remoteProjects;
 
-    public function __construct(Session $session, Chunks_ChunkStruct $chunk ) {
+    public function __construct(Session $session, Chunks_ChunkStruct $chunk, $splittedIndex = null ) {
         $this->chunk   = $chunk  ;
         $this->session = $session ;
+        $this->clientId = $this->chunk->getIdentifier();
+
+        if ( !is_null( $splittedIndex ) ) {
+            $this->clientId .= '-' . $splittedIndex ;
+        }
     }
 
     public function updateChildProjects( $requestStructs ) {
@@ -110,7 +115,7 @@ class ChildProjectService {
         $responses = $client->curl()->getAllContents();
 
         if ( count($client->curl()->getErrors() ) > 0 ) {
-            throw  new Exception('Error while fetching remote child project' );
+            throw  new Exception('Error while fetching remote child project: ' . var_export( $responses, true ) );
         }
 
         $returnable =  array_values( array_map( function( $item ) {
@@ -121,14 +126,14 @@ class ChildProjectService {
     }
 
     /***
-     * @param ChildProjectsMapStruct    $dqfChildProject
+     * @param DqfProjectMapStruct       $dqfChildProject
      * @param ChildProjectRequestStruct $request
      *
      * @return array
      *
      * Find back the remote project, merge data and update the resource again.
      */
-    public function updateTranslationChild(ChildProjectsMapStruct $dqfChildProject, ChildProjectRequestStruct $request) {
+    public function updateTranslationChild( DqfProjectMapStruct $dqfChildProject, ChildProjectRequestStruct $request) {
         $client = new Client();
         $client ->setSession( $this->session ) ;
 
@@ -151,17 +156,23 @@ class ChildProjectService {
      * @param CreateProjectResponseStruct       $parent
      * @param MaserFileCreationResponseStruct[] $remoteFiles
      *
+     * @param UserModel                         $assignee
+     *
      * @return CreateProjectResponseStruct
      * @throws Exception
      * @internal param MaserFileCreationResponseStruct[] $remoteFiles
-     *
      */
-    public function createTranslationChild(CreateProjectResponseStruct $parent, $remoteFiles ) {
+    public function createTranslationChild(CreateProjectResponseStruct $parent, $remoteFiles, UserModel $assignee = null ) {
+
         $projectStruct            = new ChildProjectRequestStruct() ;
         $projectStruct->sessionId = $this->session->getSessionId();
-        $projectStruct->clientId  = Functions::scopeId( $this->chunk->getIdentifier() );
+        $projectStruct->clientId  = Functions::scopeId( $this->clientId );
         $projectStruct->parentKey = $parent->dqfUUID ;
         $projectStruct->type      = self::TRANSLATION ;
+
+        if ( $assignee ) {
+            $projectStruct->assignee = $assignee->getDqfUsername() ;
+        }
 
         $client = new Client() ;
         $client->setSession( $this->session );
@@ -178,31 +189,54 @@ class ChildProjectService {
 
         $childProject = new CreateProjectResponseStruct( json_decode( $client->curl()->getSingleContent( $resource ), true ) );
 
+        $this->_setFilesTargetLanguage( $remoteFiles, $childProject, $this->getSessionForFiles( $assignee ) ) ;
+
+        return $childProject ;
+    }
+
+    /**
+     *  What session to use for files.
+     */
+    protected function getSessionForFiles( UserModel $assignee = null ) {
+        if ( $assignee ) {
+            return $assignee->getSession()->login();
+        }
+        else {
+            return $this->session ;
+        }
+    }
+
+    /**
+     * @param $remoteFiles
+     * @param $childProject
+     *
+     * @throws Exception
+     */
+    protected function _setFilesTargetLanguage( $remoteFiles, $childProject, Session $session ) {
+
         $client = new Client() ;
-        $client->setSession( $this->session );
+        $client->setSession( $session );
 
-        foreach( $this->chunk->getFiles() as $file ) {
+        foreach ( $this->chunk->getFiles() as $file ) {
             // for each file in the chunk create a
-            $languageStruct = new ProjectTargetLanguageRequestStruct();
-            $languageStruct->fileId = $remoteFiles[ Functions::scopeId($file->id) ]->dqfId ;
-            $languageStruct->projectKey = $childProject->dqfUUID ;
-            $languageStruct->projectId = $childProject->dqfId ;
-            $languageStruct->targetLanguageCode = $this->chunk->target ;
+            $languageStruct                     = new ProjectTargetLanguageRequestStruct();
+            $languageStruct->fileId             = $remoteFiles[ Functions::scopeId( $file->id ) ]->dqfId;
+            $languageStruct->projectKey         = $childProject->dqfUUID;
+            $languageStruct->projectId          = $childProject->dqfId;
+            $languageStruct->targetLanguageCode = $this->chunk->target;
 
-            $client->createResource('/project/child/%s/file/%s/targetLang', 'post', [
+            $client->createResource( '/project/child/%s/file/%s/targetLang', 'post', [
                     'formData'   => $languageStruct->getParams(),
                     'headers'    => $languageStruct->getHeaders(),
                     'pathParams' => $languageStruct->getPathParams()
-            ]);
+            ] );
         }
 
         $client->curl()->multiExec();
 
         if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
+            throw new Exception( 'Error in creation of target langauge for files: ' . implode( $client->curl()->getAllContents() ) );
         }
-
-        return $childProject ;
     }
-
 }
+

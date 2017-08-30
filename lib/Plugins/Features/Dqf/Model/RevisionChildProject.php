@@ -34,7 +34,7 @@ class RevisionChildProject {
 
         $this->revisionBatchService = new ChildProjectRevisionBatchService($this->userSession) ;
 
-        $this->dqfChildProjects = ( new ChildProjectsMapDao() )->getByChunk( $this->chunk ) ;
+        $this->dqfChildProjects = ( new DqfProjectMapDao() )->getByChunk( $this->chunk ) ;
     }
 
     public function submitRevisionData() {

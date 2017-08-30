@@ -32,7 +32,7 @@ class ChildProjectRequestStruct extends BaseRequestStruct {
     }
 
     public function getHeaders() {
-        return array_filter( $this->toArray(['sessonId', 'apiKey', 'projectKey']) ) ;
+        return array_filter( $this->toArray(['sessionId', 'apiKey', 'projectKey']) ) ;
     }
 
 }

@@ -8,10 +8,11 @@
 
 namespace Features\Dqf\Model;
 
+use Chunks_ChunkDao;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 
-class ChildProjectsMapStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class DqfProjectMapStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id ;
     public $id_job ;
 
@@ -25,4 +26,13 @@ class ChildProjectsMapStruct extends DataAccess_AbstractDaoSilentStruct implemen
 
     public $archive_date ;
     public $create_date ;
+
+    /**
+     * @return \Chunks_ChunkStruct
+     */
+    public function getChunk() {
+        return $this->cachable(__METHOD__, $this, function($obj) {
+            return Chunks_ChunkDao::getByIdAndPassword($obj->id_job, $obj->password );
+        });
+    }
 }
