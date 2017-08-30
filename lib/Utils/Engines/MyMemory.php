@@ -115,6 +115,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
         ( @$_config[ 'mt_only' ] ? $parameters[ 'mtonly' ] = '1' : null );
 
+        if( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ){
+            $parameters[ 'context_after' ]  = $_config[ 'context_after' ];
+            $parameters[ 'context_before' ] = $_config[ 'context_before' ];
+        }
+
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
                 $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
@@ -138,13 +143,18 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function set( $_config ) {
 
-        $parameters               = array();
-        $parameters[ 'seg' ]      = $_config[ 'segment' ];
-        $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
+        $parameters                     = [];
+        $parameters[ 'seg' ]            = $_config[ 'segment' ];
+        $parameters[ 'tra' ]            = $_config[ 'translation' ];
+        $parameters[ 'tnote' ]          = $_config[ 'tnote' ];
+        $parameters[ 'langpair' ]       = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]             = $_config[ 'email' ];
+        $parameters[ 'prop' ]           = $_config[ 'prop' ];
+
+        if( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ){
+            $parameters[ 'context_after' ]  = $_config[ 'context_after' ];
+            $parameters[ 'context_before' ] = $_config[ 'context_before' ];
+        }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
@@ -167,12 +177,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function update( $_config ){
 
-        $parameters               = array();
-        $parameters[ 'seg' ]      = $_config[ 'segment' ];
-        $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
-        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters                     = [];
+        $parameters[ 'seg' ]            = $_config[ 'segment' ];
+        $parameters[ 'tra' ]            = $_config[ 'translation' ];
+        $parameters[ 'newseg' ]         = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]         = $_config[ 'newtranslation' ];
+        $parameters[ 'langpair' ]       = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+
+        if( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ){
+            $parameters[ 'context_after' ]  = $_config[ 'context_after' ];
+            $parameters[ 'context_before' ] = $_config[ 'context_before' ];
+        }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {

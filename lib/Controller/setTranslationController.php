@@ -53,6 +53,11 @@ class setTranslationController extends ajaxController {
      * @var Projects_ProjectStruct
      */
     protected $project ;
+    protected $id_segment;
+
+    protected $context_before;
+
+    protected $context_after;
 
     /**
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
@@ -91,6 +96,8 @@ class setTranslationController extends ajaxController {
                 'splitStatuses'           => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
+                'context_before'                 => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'context_after'                  => array( 'filter' => FILTER_UNSAFE_RAW ),
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -112,6 +119,9 @@ class setTranslationController extends ajaxController {
 
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
         list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
+
+        $this->context_before = CatUtils::view2rawxliff( $this->__postInput[ 'context_before' ] );
+        $this->context_after = CatUtils::view2rawxliff( $this->__postInput[ 'context_after' ] );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
 
@@ -827,6 +837,9 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
         $contributionStruct->propagationRequest   = $this->propagate;
         $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
+
+        $contributionStruct->context_after        = $this->context_after;
+        $contributionStruct->context_before       = $this->context_before;
 
         $contributionStruct = $this->feature_set->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );

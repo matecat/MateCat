@@ -349,6 +349,9 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'target' ]  = $queueElement->params->target;
         $_config[ 'email' ]   = \INIT::$MYMEMORY_TM_API_KEY;
 
+        $_config[ 'context_before' ] = $queueElement->params->context_before;
+        $_config[ 'context_after' ]  = $queueElement->params->context_after;
+
         $tm_keys = \TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {

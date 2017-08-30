@@ -131,8 +131,10 @@ class SetContributionWorker extends AbstractWorker {
 
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
 
-        $config[ 'segment' ]     = $contributionStruct->segment;
-        $config[ 'translation' ] = $contributionStruct->translation;
+        $config[ 'segment' ]        = $contributionStruct->segment;
+        $config[ 'translation' ]    = $contributionStruct->translation;
+        $config[ 'context_after' ]  = $contributionStruct->context_after;
+        $config[ 'context_before' ] = $contributionStruct->context_before;
 
         //get the Props
         $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
@@ -149,8 +151,10 @@ class SetContributionWorker extends AbstractWorker {
     protected function _update( Array $config, ContributionStruct $contributionStruct ){
 
         // update the contribution for every key in the job belonging to the user
-        $config[ 'segment' ]     = $contributionStruct->oldSegment;
-        $config[ 'translation' ] = $contributionStruct->oldTranslation;
+        $config[ 'segment' ]        = $contributionStruct->oldSegment;
+        $config[ 'translation' ]    = $contributionStruct->oldTranslation;
+        $config[ 'context_after' ]  = $contributionStruct->context_after;
+        $config[ 'context_before' ] = $contributionStruct->context_before;
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;

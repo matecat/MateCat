@@ -548,6 +548,11 @@ class FastAnalysis extends AbstractDaemon {
             }
 
             $time_start = microtime( true );
+
+            /**
+             * Reset the indexes of the list to get the context easily
+             */
+            $this->segments  = array_values( $this->segments );
             foreach ( $this->segments as $k => $queue_element ) {
 
                 $queue_element[ 'id_segment' ]       = $queue_element[ 'id' ];
@@ -555,6 +560,9 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'tm_keys' ]          = $this->actual_project_row[ 'tm_keys' ];
                 $queue_element[ 'id_tms' ]           = $this->actual_project_row[ 'id_tms' ];
                 $queue_element[ 'id_mt_engine' ]     = $this->actual_project_row[ 'id_mt_engine' ];
+
+                $queue_element[ 'context_before' ] = @$this->segments[ $k -1 ][ 'segment' ];
+                $queue_element[ 'context_after' ]  = @$this->segments[ $k +1 ][ 'segment' ];
 
                 /**
                  * remove some unuseful fields
