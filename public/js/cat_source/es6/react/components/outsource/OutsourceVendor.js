@@ -61,13 +61,13 @@ class OutsourceVendor extends React.Component {
             .done(function (quoteData) {
                 if (quoteData.data) {
 
-                    if (quoteData.data[0][0].quote_available !== '1') {
+                    if (quoteData.data[0][0].quote_available !== '1' && quoteData.data[0][0].outsourced !== '1') {
                         self.setState({
                             outsource: true,
                             quoteNotAvailable: true
                         });
                         return;
-                    } else if (quoteData.data[0][0].quote_result !== '1') {
+                    } else if (quoteData.data[0][0].quote_result !== '1' && quoteData.data[0][0].outsourced !== '1') {
                         self.setState({
                             outsource: true,
                             errorQuote: true
@@ -89,7 +89,9 @@ class OutsourceVendor extends React.Component {
                         quoteNotAvailable: false,
                         errorQuote: false,
                         chunkQuote: chunk,
-                        revision: (chunk.get('typeOfService') === "premium") ? true : false
+                        revision: (chunk.get('typeOfService') === "premium") ? true : false,
+                        jobOutsourced: chunk.get('outsourced') === '1',
+                        outsourceConfirmed: chunk.get('outsourced') === '1'
                     });
 
                     // Intercom
@@ -211,7 +213,7 @@ class OutsourceVendor extends React.Component {
         } else if (this.state.outsource) {
             // let timeZone = this.getTimeZone();
             // let dateString =  this.getDateString(deliveryToShow, timeZone);
-            if (this.state.revision) {
+            if (this.state.revision && this.state.chunkQuote.get('r_delivery')) {
                 return APP.getGMTDate( this.state.chunkQuote.get('r_delivery'), this.state.chunkQuote.get('timezone'));
             } else {
                 return APP.getGMTDate(  this.state.chunkQuote.get('delivery'), this.state.chunkQuote.get('timezone'));
@@ -222,7 +224,7 @@ class OutsourceVendor extends React.Component {
 
     checkChosenDateIsAfter() {
         if (this.state.outsource && this.selectedDate) {
-            if (this.state.revision) {
+            if (this.state.revision && this.state.chunkQuote.get('r_delivery')) {
                 return this.selectedDate > new Date(this.state.chunkQuote.get('r_delivery')).getTime();
             } else {
                 return this.selectedDate > new Date(this.state.chunkQuote.get('delivery')).getTime();
