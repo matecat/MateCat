@@ -1,5 +1,5 @@
 .after-open-outsource {
-    border-left: 2px solid;
+    border-left: 2px solid #09beec;
     padding-left: 17px !important;
 }
 .outsource-container {
@@ -137,14 +137,18 @@
         background: #daeddf;
         padding: 9px 15px 3px;
         text-align: right;
+        line-height: 20px;
         .confirm-title {
             font-size: 18px;
             font-weight: 700;
         }
+        p {
+            line-height: 16px;
+        }
     }
 
     .assign-job-translator {
-        background-color: #d5d8dc;
+        background-color: #d7d8dc;
         padding: 0px 15px 25px;
         width: 100%;
         .title {
@@ -216,7 +220,7 @@
         }
     }
     .open-job-box {
-        background-color: #d5d8dc;
+        background-color: #d7d8dc;
         padding: 25px 35px 20px 45px;
         width: 100%;
         cursor: auto;
