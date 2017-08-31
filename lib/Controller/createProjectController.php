@@ -4,21 +4,19 @@ use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
 
-    private   $file_name;
-    private   $project_name;
-    private   $source_language;
-    private   $target_language;
-    private   $job_subject;
-    private   $mt_engine;
-    private   $tms_engine = 1;  //1 default MyMemory
-    private   $private_tm_key;
-    private   $private_tm_user;
-    private   $private_tm_pass;
-    private   $lang_detect_files;
+    private $file_name;
+    private $project_name;
+    private $source_language;
+    private $target_language;
+    private $job_subject;
+    private $mt_engine;
+    private $tms_engine = 1;  //1 default MyMemory
+    private $private_tm_key;
+    private $private_tm_user;
+    private $private_tm_pass;
+    private $lang_detect_files;
     private $disable_tms_engine_flag;
-
     private $pretranslate_100;
-    private $dqf_key;
 
     private $metadata;
     private $lang_handler ;
@@ -31,9 +29,12 @@ class createProjectController extends ajaxController {
     /**
      * @var FeatureSet
      */
-    private $featureSet ;
+    private $systemWideFeatures ;
 
-    private $project_features;
+    /**
+     * @var FeatureSet
+     */
+    private $projectFeatures ;
 
     public function __construct() {
 
@@ -58,17 +59,14 @@ class createProjectController extends ajaxController {
                 ],
                 'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
-                'dqf_key'            => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
-                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
 
         );
 
         $this->checkLogin( false );
-        $this->__setupFeatureSet();
+        $this->setupSystemWideFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
 
@@ -134,7 +132,6 @@ class createProjectController extends ajaxController {
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
-        $this->dqf_key                 = $__postInput[ 'dqf_key' ];
 
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
@@ -166,15 +163,24 @@ class createProjectController extends ajaxController {
 
     }
 
-    private function setProjectFeatures( $__postInput ){
+    /**
+     * setProjectFeatures
+     *
+     * @param $__postInput
+     */
 
-        //change project features
+    private function setProjectFeatures( $__postInput ){
+        // change project features
+
         if( !empty( $__postInput[ 'project_completion' ] ) ){
-            $feature = new BasicFeatureStruct();
-            $feature->feature_code = 'project_completion';
-            $this->project_features[] = $feature;
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = 'project_completion';
+            $this->projectFeatures[] = $feature;
         }
 
+        $this->projectFeatures = $this->systemWideFeatures->filter(
+                'filterCreateProjectFeatures', $this->projectFeatures, $__postInput
+        ) ;
     }
 
     public function doAction() {
@@ -327,10 +333,6 @@ class createProjectController extends ajaxController {
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ]             = $this->metadata;
 
-        if ( INIT::$DQF_ENABLED ) {
-            $projectStructure[ 'dqf_key' ] = $this->dqf_key;
-        }
-
         if ( $this->userIsLogged ) {
             $projectStructure[ 'userIsLogged' ]  = true;
             $projectStructure[ 'uid' ]           = $this->uid;
@@ -340,7 +342,7 @@ class createProjectController extends ajaxController {
         }
 
         //set features override
-        $projectStructure[ 'project_features' ] = $this->project_features;
+        $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
@@ -358,11 +360,14 @@ class createProjectController extends ajaxController {
 
     }
 
-    private function __setupFeatureSet() {
-        $this->featureSet = new FeatureSet() ;
+    /**
+     * Loads current features from current logged user.
+     */
+    private function setupSystemWideFeatures() {
+        $this->systemWideFeatures = new FeatureSet() ;
 
         if ( $this->userIsLogged ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+            $this->systemWideFeatures->loadFromUserEmail( $this->logged_user->email ) ;
         }
     }
 
@@ -376,7 +381,7 @@ class createProjectController extends ajaxController {
             ],
         ));
 
-        $filterArgs = $this->featureSet->filter('filterCreateProjectInputFilters', $filterArgs );
+        $filterArgs = $this->systemWideFeatures->filter( 'filterCreateProjectInputFilters', $filterArgs );
 
         return $filterArgs ;
     }
@@ -435,7 +440,12 @@ class createProjectController extends ajaxController {
         return $elem->toArray();
 
     }
-    
+
+    /**
+     * This function sets metadata property from input params.
+     *
+     * @param $__postInput
+     */
     private function __setMetadataFromPostInput( $__postInput ) {
         $options = array() ;
 
@@ -446,7 +456,7 @@ class createProjectController extends ajaxController {
 
         $this->metadata = $options ;
 
-        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
+        $this->metadata = $this->systemWideFeatures->filter('createProjectAssignInputMetadata', $this->metadata, array(
             'input' => $__postInput
         ));
     }

@@ -52,8 +52,6 @@ class EditLogDecorator extends AbstractDecorator {
         $job_stats[ 'ANALYSIS_COMPLETE' ]     = ( @$project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats            = $job_stats;
 
-        $this->template->showDQF = ( INIT::$DQF_ENABLED && !empty( $jobData[ 'dqf_key' ] ) );
-
         $loggedUser = $controller->getLoggedUser();
 
         $this->template->extended_user = "";

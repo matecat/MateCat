@@ -10,4 +10,8 @@ class OwnerFeatures_OwnerFeatureStruct extends BasicFeatureStruct {
     public $create_date ;
     public $enabled ;
 
+    public function getOptions() {
+        return json_decode( $this->options, true );
+    }
+
 }

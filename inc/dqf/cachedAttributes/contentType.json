@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "User Interface Text"
+    },
+    {
+        "id": 2,
+        "name": "Technical Specifications"
+    },
+    {
+        "id": 3,
+        "name": "User Manual"
+    },
+    {
+        "id": 4,
+        "name": "Online Help"
+    },
+    {
+        "id": 5,
+        "name": "Training Material"
+    },
+    {
+        "id": 6,
+        "name": "Audiovisual"
+    },
+    {
+        "id": 7,
+        "name": "Knowledge Base\/Glossary"
+    },
+    {
+        "id": 8,
+        "name": "Marketing Material"
+    },
+    {
+        "id": 9,
+        "name": "Informative content"
+    },
+    {
+        "id": 10,
+        "name": "User-generated Content"
+    },
+    {
+        "id": 11,
+        "name": "Keywords\/SEO"
+    },
+    {
+        "id": 12,
+        "name": "Legal"
+    },
+    {
+        "id": 13,
+        "name": "Administrative"
+    },
+    {
+        "id": 14,
+        "name": "R&D\/Patents"
+    },
+    {
+        "id": 15,
+        "name": "Other"
+    }
+]

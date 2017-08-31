@@ -35,6 +35,13 @@ class MultiCurlHandler {
     protected $curl_headers_requests = array();
 
     /**
+     * Array to store the options passed when creating the resource, for debug purpose
+     *
+     * @var array
+     */
+    protected $curl_options_requests = array();
+
+    /**
      * Container for the curl results
      *
      * @var array
@@ -48,12 +55,13 @@ class MultiCurlHandler {
      */
     protected $multi_curl_info = array();
 
+    public $verbose = false ;
+
     /**
      * Class Constructor, init the multi curl handler
      *
      */
     public function __construct() {
-
         $this->multi_handler = curl_multi_init();
 
         Utils::getPHPVersion();
@@ -163,11 +171,12 @@ class MultiCurlHandler {
                 $this->curl_headers_requests[ $tokenHash ] = $header;
             }
 
-            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
-//            Log::doLog( " $tokenHash ... Called: " . print_r( $this->multi_curl_info[ $tokenHash ], true ) );
+            Log::doLog( "$tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
 
+            if ( $this->verbose ) {
+                Log::doLog("$tokenHash options: " . var_export( $this->curl_options_requests[ $tokenHash ], true ) ) ;
+            }
         }
-
     }
 
     /**
@@ -225,6 +234,8 @@ class MultiCurlHandler {
 
         curl_setopt( $curl_resource, CURLOPT_URL, $url );
         curl_setopt_array( $curl_resource, $options );
+
+        $this->curl_options_requests[ $tokenHash ] = $options ;
 
         return $this->addResource( $curl_resource, $tokenHash );
 
@@ -327,6 +338,21 @@ class MultiCurlHandler {
      */
     public function hasError( $tokenHash ) {
         return ( !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0 ) || (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ] >= 400;
+    }
+
+    /**
+     * Returns an array with errors on each resource. Returns empty array in case of no errors.
+     *
+     * @return array
+     */
+    public function getErrors() {
+        $map = array_map( function( $tokenHash ) {
+            if ( $this->hasError( $tokenHash ) ) {
+                return $this->getError( $tokenHash );
+            }
+        }, array_keys( $this->multi_curl_info ) ) ;
+
+        return array_filter( $map );  // <- remove null array entries
     }
 
 } 

@@ -1,0 +1,37 @@
+simple_project:
+  id: @EVER_INCREMENT
+  password: 441ad0a84b52
+  id_customer: foo@example.org
+  name: testXLif.xlf
+  create_date: 2017-03-23 15:05:53
+  id_engine_tm: NULL
+  id_engine_mt: NULL
+  status_analysis: DONE
+  fast_analysis_wc: 0.00
+  tm_analysis_wc: 0.00
+  standard_analysis_wc: 22305.00
+  remote_ip_address: 172.17.0.1
+  instance_id: 0
+  pretranslate_100: 0
+  id_qa_model: NULL
+  id_team: 32786
+  id_assignee: 18052
+
+dqf_project_1:
+  id: @EVER_INCREMENT
+  password: 598ac0472a5b
+  id_customer: fabrizio@translated.net
+  name: sample.xlf
+  create_date: 2017-06-09 17:58:16
+  id_engine_tm: NULL
+  id_engine_mt: NULL
+  status_analysis: FAST_OK
+  fast_analysis_wc: 10.80
+  tm_analysis_wc: 0.00
+  standard_analysis_wc: 13.00
+  remote_ip_address: 172.17.0.1
+  instance_id: 0
+  pretranslate_100: 0
+  id_qa_model: @REF:qa_models:qa_model_1:id
+  id_team: NULL
+  id_assignee: NULL

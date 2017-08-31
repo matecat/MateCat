@@ -159,46 +159,6 @@ UI = {
         return checkAnalyzability();
     },
 
-    checkDQFKey: function () {
-        setTimeout(function() {
-            $( '.error-message' ).find('p').text('');
-            $( '.error-message' ).hide();
-
-            $('#dqf_key').removeClass('error valid').addClass('disabled').attr('disabled', 'disabled');
-
-            APP.doRequest({
-                data: {
-                    action				: "checkTausPMKey",
-                    DQF_PMANAGER_KEY  : $('#dqf_key' ).val()
-                },
-                success: function(d){
-                    console.log('d: ', d);
-                    $('#dqf_key').removeClass('disabled').removeAttr('disabled');
-                    if (d.errors.length) {
-
-                        $( '.error-message' ).find('p').text(d.errors[0].message);
-                        $( '.error-message' ).show();
-                        $('#dqf_key').addClass('error');
-                    } else {
-                        $('#dqf_key').addClass('valid');
-                    }
-                    if ( checkAnalyzability( 'checkDQF' ) ) {
-                        enableAnalyze();
-                    } else {
-                        disableAnalyze();
-                    }
-                },
-                error: function(d) {
-                    $('#dqf_key').addClass('error').removeClass('disabled').removeAttr('disabled');
-                    $( '.error-message' ).find('p').text(d.errors[0].message);
-                    $( '.error-message' ).show();
-                    disableAnalyze();
-                }
-            });
-
-        }, 100);
-    },
-
     TMXloaded: function () {
         // $( '#disable_tms_engine' ).trigger( 'click' );
         this.createKeyByTMX();
@@ -863,13 +823,6 @@ checkAnalyzability = function ( who ) {
         if ( $( '.upload-table tr.failed' ).length ) res = false;
         if ( UI.uploadingTMX() ) {
             res = false;
-        }
-        if($('#dqf_key').length) {
-            if($('#dqf_key').val().length) {
-                if(!$('#dqf_key').hasClass('valid')) {
-                    res = false;
-                }
-            }
         }
         return res;
     } else {

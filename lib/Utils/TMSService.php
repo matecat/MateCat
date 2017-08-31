@@ -314,6 +314,10 @@ class TMSService {
         return $this;
     }
 
+    public function getTMKey(){
+        return $this->tm_key;
+    }
+
     /**
      * Set a cyclic barrier to get response about status succes to call the download
      *

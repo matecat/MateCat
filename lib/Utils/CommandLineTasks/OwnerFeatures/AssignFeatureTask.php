@@ -8,11 +8,16 @@
 
 namespace CommandLineTasks\OwnerFeatures;
 
+use Exception;
+use Features;
+use OwnerFeatures_OwnerFeatureDao;
+use OwnerFeatures_OwnerFeatureStruct;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teams\TeamDao;
+use Users_UserDao;
 
 class AssignFeatureTask extends Command {
 
@@ -22,8 +27,9 @@ class AssignFeatureTask extends Command {
                 ->setName( 'features:assign' )
                 ->setDescription( 'Adds feature to a user or a team.' )
                 ->addArgument( 'user_or_team_id', InputArgument::REQUIRED, 'Id of the user to assign the feature to. Default is user id.' )
-                ->addArgument( 'features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ', \Features::$VALID_CODES ) )
-                ->addOption( 'org', 'o', null, 'Take the input id as a team id' )
+                ->addArgument( 'features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ', Features::$VALID_CODES ) )
+                ->addOption( 'email', 'e', null, 'Find user by email instead of uid' )
+                ->addOption( 'team', 't', null, 'Take the input id as a team id' )
                 ->addOption( 'force', 'f', null, 'Force the name of a feature even if validation fails' );
     }
 
@@ -37,7 +43,7 @@ class AssignFeatureTask extends Command {
             $valid_features = $this->__validateFeatures( $input->getArgument( 'features' ) );
         }
 
-        $featureDao = new \OwnerFeatures_OwnerFeatureDao();
+        $featureDao = new OwnerFeatures_OwnerFeatureDao();
 
         foreach ( $valid_features as $feature ) {
             $values = array(
@@ -48,28 +54,32 @@ class AssignFeatureTask extends Command {
                     'enabled'      => true
             );
 
-            $insert = $featureDao->create( new \OwnerFeatures_OwnerFeatureStruct( $values ) );
+            $insert = $featureDao->create( new OwnerFeatures_OwnerFeatureStruct( $values ) );
         }
-
     }
 
     private function __getReference( InputInterface $input ) {
-        if ( $input->getOption( 'org' ) ) {
+        if ( $input->getOption( 'team' ) ) {
             $dao  = new TeamDao();
             $team = $dao->findById( $input->getArgument( 'user_or_team_id' ) );
 
             if ( !$team ) {
-                throw  new \Exception( 'team not found' );
+                throw  new Exception( 'team not found' );
             }
 
             return array( 'uid' => null, 'id_team' => $team->id );
         } else {
 
-            $dao  = new \Users_UserDao();
-            $user = $dao->getByUid( $input->getArgument( 'user_or_team_id' ) );
+            $dao  = new Users_UserDao();
+            if ( $input->getOption( 'email' ) ) {
+                $user = $dao->getByEmail( $input->getArgument( 'user_or_team_id' ) );
+            }
+            else {
+                $user = $dao->getByUid( $input->getArgument( 'user_or_team_id' ) );
+            }
 
             if ( !$user ) {
-                throw new \Exception( 'user not found' );
+                throw new Exception( 'user not found' );
             }
 
             return array( 'uid' => $user->uid, 'id_team' => null );
@@ -78,8 +88,8 @@ class AssignFeatureTask extends Command {
 
     private function __validateFeatures( $features ) {
         foreach ( $features as $k ) {
-            if ( !in_array( $k, \Features::$VALID_CODES ) ) {
-                throw  new \Exception( 'feature ' . $k . ' is not valid' );
+            if ( !in_array( $k, Features::$VALID_CODES ) ) {
+                throw  new Exception( 'feature ' . $k . ' is not valid' );
             }
         }
 

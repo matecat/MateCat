@@ -1,12 +1,91 @@
 <?php
 
+use Features\Dqf\Model\ExtendedTranslationStruct;
+
 class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
+    const TABLE = 'segment_translation_versions';
+
     public $source_page ;
     public $uid ;
 
     protected function _buildResult( $array_result ) {
     }
 
+    /**
+     * @param $file
+     * @param $since
+     * @param $min
+     * @param $max
+     *
+     * @return ExtendedTranslationStruct[]
+     */
+    public function getExtendedTranslationByFile( $file, $since, $min, $max ) {
+
+        Log::doLog('getExtendedTranslationByFile', func_get_args() ) ;
+
+        $sql = "SELECT
+
+                s.id_file,
+                st.id_job,
+                s.id,
+
+                st.autopropagated_from,
+                st.time_to_edit,
+                st.translation,
+                st.version_number AS current_version,
+
+                stv.creation_date,
+                stv.translation AS versioned_translation,
+                stv.time_to_edit AS versioned_time_to_edit,
+                stv.version_number
+
+                FROM segment_translations st JOIN segments s ON s.id = st.id_segment
+                  LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
+                  AND stv.creation_date >= :since
+
+              WHERE id_file = :id_file
+              AND s.id >= :min AND s.id <= :max
+
+                ORDER BY s.id, stv.id
+                " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute([
+                'id_file' => $file->id,
+                'since'   => $since,
+                'min'     => $min,
+                'max'     => $max
+        ]) ;
+
+        /** @var ExtendedTranslationStruct[] $result */
+        $result = [] ;
+
+        while( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ) {
+            if ( isset( $result[ $row['id'] ] ) ) {
+                continue ;
+            }
+            else {
+                $result[ $row['id'] ] = new ExtendedTranslationStruct([
+                        'id_job'             => $row['id_job'],
+                        'id_segment'         => $row['id'],
+                        'translation_before' => is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'],
+                        'translation_after'  => $row['translation'],
+                        'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 ),
+                        'suggestion_match'   => null, // $row['suggestion_match']
+                ]) ;
+            }
+        }
+
+        return $result ;
+    }
+
+    /**
+     * @param $id_job
+     *
+     * @return array
+     */
     public static function getVersionsForJob($id_job) {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job " .
@@ -143,9 +222,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     public function saveVersion($old_translation) {
         $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number ) " .
+            " ( id_job, id_segment, translation, version_number, time_to_edit ) " .
             " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number )";
+            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit )";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql );
@@ -154,7 +233,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             'id_job'         => $old_translation['id_job'],
             'id_segment'     => $old_translation['id_segment'] ,
             'translation'    => $old_translation['translation'],
-            'version_number' => $old_translation['version_number']
+            'version_number' => $old_translation['version_number'],
+            'time_to_edit'   => $old_translation['time_to_edit']
         ));
     }
 

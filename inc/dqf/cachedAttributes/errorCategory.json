@@ -1,0 +1,405 @@
+[
+    {
+        "id": 1,
+        "code": 1,
+        "definition": "The target text does not accurately reflect the source text, allowing for any differences authorized by specifications.",
+        "example": "Translating the Italian word 'canali' into English as 'canals' instead of 'channels'.",
+        "name": "Accuracy",
+        "errorCategories": [
+            {
+                "id": 9,
+                "code": 11,
+                "definition": "The target text includes text not present in the source.",
+                "example": "A translation includes portions of another translation that were inadvertently pasted into the document.",
+                "name": "Addition",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 10,
+                "code": 12,
+                "definition": "Content is missing from the translation that is present in the source.",
+                "example": "A paragraph present in the source is missing in the translation.",
+                "name": "Omission",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 11,
+                "code": 13,
+                "definition": "The target content does not accurately represent the source content.",
+                "example": "A source text states that a medicine should not be administered in doses greater than 200 mg, but the translation states that it should be administered in doses greater than 200 mg (i.e., negation has been omitted).",
+                "name": "Mistranslation",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 12,
+                "code": 14,
+                "definition": "The target text is more specific than the source text",
+                "example": "The source text refers to a \u201cboy\u201d but is translated with a word that applies only to young boys rather than the more general term.",
+                "name": "Over-translation",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 13,
+                "code": 15,
+                "definition": "The target text is less specific than the source text",
+                "example": "The source text uses words that refer to a specific type of miltary officer but the target text refers to military officers in general.",
+                "name": "Under-translation",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 14,
+                "code": 16,
+                "definition": "Content that should have been translated has been left untranslated.",
+                "example": "A sentence in a Japanese document translated into English is left in Japanese.",
+                "name": "Untranslated",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 15,
+                "code": 17,
+                "definition": "An translation is provided as an exact match from a translation memory (TM) system, but is actually incorrect.",
+                "example": "A TM system returns \u201cPress the Start button\u201d as an exact (100%) match, when the proper translation should be \u201cPress the Begin button\u201d.",
+                "name": "Improper exact TM match",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "code": 2,
+        "definition": "Issues related to the form or content of a text, irrespective as to whether it is a translation or not.",
+        "example": "A text has errors in it that prevent it from being understood.",
+        "name": "Fluency",
+        "errorCategories": [
+            {
+                "id": 16,
+                "code": 21,
+                "definition": "Punctuation is used incorrectly (for the locale or style)",
+                "example": "An English text uses a semicolon where a comma should be used.",
+                "name": "Punctuation",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 17,
+                "code": 22,
+                "definition": "Issues related to spelling of words",
+                "example": "The German word Zustellung is spelled Zustetlugn.",
+                "name": "Spelling",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 18,
+                "code": 23,
+                "definition": "Issues related to the grammar or syntax of the text, other than spelling and orthography.",
+                "example": "An English text reads \u201cThe man was seeing the his wife.\u201d",
+                "name": "Grammar",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 19,
+                "code": 24,
+                "definition": "The content uses the wrong grammatical register, such as using informal pronouns or verb forms when their formal counterparts are required.",
+                "example": "A text used for a highly formal announcement uses the Norwegian du form instead of the expected De.",
+                "name": "Grammatical register",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 20,
+                "code": 25,
+                "definition": "The text shows internal inconsistency.",
+                "example": "A text uses both \u201capp.\u201d and \u201capprox.\u201d for approximately.",
+                "name": "Inconsistency",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 21,
+                "code": 26,
+                "definition": "Links are inconsistent in the text",
+                "example": "An HTML file contains numerous links to other HTML files; some have been updated to reflect the appropriate language version while some point to the source language version.",
+                "name": "Link\/cross-reference",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 22,
+                "code": 27,
+                "definition": "Characters are garbled due to incorrect application of an encoding.",
+                "example": "A text document in UTF-8 encoding is opened as ISO Latin-1, resulting in all \u201cupper ASCII\u201d characters being garbled.",
+                "name": "Character encoding",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "code": 3,
+        "definition": "A term (domain-specific word) is translated with a term other than the one expected for the domain or otherwise specified.",
+        "example": "A French text translates English e-mail as e-mail but terminology guidelines mandated that courriel be used.",
+        "name": "Terminology",
+        "errorCategories": [
+            {
+                "id": 23,
+                "code": 31,
+                "definition": "A term is used inconsistently with a specified termbase",
+                "example": "A termbase specifies that the term USB memory stick should be used, but the text uses USB flash drive.",
+                "name": "Inconsistent with termbase",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 24,
+                "code": 32,
+                "definition": "Terminology is used in an inconsistent manner within the text.",
+                "example": "The text refers to a component as the \u201cbrake release lever\u201d, \u201cbrake disengagement lever\u201d, \u201cmanual brake release\u201d, and \u201cmanual disengagement release\u201d.",
+                "name": "Inconsistent use of terminology",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "code": 4,
+        "definition": "The text has stylistic problems.",
+        "example": "The translation of a light-hearted and humorous advertising campaign is in a serious and \u201cheavy\u201d style even though specifications said it should match the style of the source text.",
+        "name": "Style",
+        "errorCategories": [
+            {
+                "id": 25,
+                "code": 41,
+                "definition": "A text is written with an awkward style.",
+                "example": "A text is written with many embedded clauses and an excessively wordy style. While the meaning can be understood, the text is very awkward and difficult to follow.",
+                "name": "Awkward",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 26,
+                "code": 42,
+                "definition": "The text violates company\/organization-specific style guidelines.",
+                "example": "Company style states that passive sentences may not be used but the text uses passive sentences.",
+                "name": "Company style",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 27,
+                "code": 43,
+                "definition": "Style is inconsistent within a text",
+                "example": "One part of a text is written in a light and \u201cterse\u201d style while other sections are written in a more wordy style.",
+                "name": "Inconsistent style",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 28,
+                "code": 44,
+                "definition": "The text violates a third-party style guide",
+                "example": "Specifications stated that English text was to be formatted according to the Chicago Manual of Style, but the text delivered followed the American Psychological Association style guide.",
+                "name": "Third-party style",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 29,
+                "code": 45,
+                "definition": "The content is grammatical, but not idiomatic.",
+                "example": "The following text appears in an English translation of a German letter: \u201cWe thanked him with heart\u201d where \u201cwith heart\u201d is an understandable, but non-idiomatic rendering, better stated as \u201cheartily\u201d.",
+                "name": "Unidiomatic",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "code": 5,
+        "definition": "There is a problem relating to design aspects (vs. linguistic aspects) of the content.",
+        "example": "A document is formatted incorrectly",
+        "name": "Design",
+        "errorCategories": [
+            {
+                "id": 30,
+                "code": 51,
+                "definition": "There is a significant discrepancy between the source and the target text lengths.",
+                "example": "An English sentence is 253 characters long but its German translation is 51 characters long.",
+                "name": "Length",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 31,
+                "code": 52,
+                "definition": "Issues related to local formatting (rather than to overall layout concerns)",
+                "example": "A portion of the text displays a (non-systematic) formatting problem (e.g., a single heading is formatted incorrectly, even though other headings appear properly).",
+                "name": "Local formatting",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 32,
+                "code": 53,
+                "definition": "Issues related to \u201cmarkup\u201d (codes used to represent structure or formatting of text, also known as \u201ctags\u201d).",
+                "example": "Markup is used incorrectly, resulting in incorrect formatting.",
+                "name": "Markup",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 33,
+                "code": 54,
+                "definition": "Existing text is missing in the final laid-out version",
+                "example": "A translation is complete, but during DTP a text box was inadvertently moved off the page and so the translated text does not appear in a rendered PDF version.",
+                "name": "Missing text",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 34,
+                "code": 55,
+                "definition": "truncation-text-expansion",
+                "example": "The German translation of an English string in a user interface runs off the edge of a dialogue box and cannot be read.",
+                "name": "Truncation\/ text expansion",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "code": 6,
+        "definition": "The text does not adhere to locale-specific mechanical conventions and violates requirements for the presentation of content in the target locale.",
+        "example": "An incorrect format for currency is used for a German text, with a period (.) instead of a comma (,) as a thousands separator.",
+        "name": "Locale convention",
+        "errorCategories": [
+            {
+                "id": 35,
+                "code": 61,
+                "definition": "Content uses the wrong format for addresses.",
+                "example": "An online form translated from English to Hindi requires a street number even though many addresses in India do not include a house number.",
+                "name": "Address format",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 36,
+                "code": 62,
+                "definition": "A text uses a date format inappropriate for its locale.",
+                "example": "An English text has \u201c2012-06-07\u201d instead of the expected \u201c06\/07\/2012.\u201d",
+                "name": "Date format",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 37,
+                "code": 63,
+                "definition": "Content uses the wrong format for currency.",
+                "example": "A text dealing with business transactions from English into Hindi assumes that all currencies will be expressed in simple units, while the convention in India is to give such prices in lakh rupees (100,000 rupees)",
+                "name": "Currency format",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 38,
+                "code": 64,
+                "definition": "A text uses a measurement format inappropriate for its locale.",
+                "example": "A text in France uses feet and inches and Fahrenheit temperatures.",
+                "name": "Measurement format",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 39,
+                "code": 65,
+                "definition": "A translated software product uses shortcuts that do not conform to locale expectations or that make no sense for the locale",
+                "example": "A software product uses CTRL-S to save a file in Hungarian, rather than the appropriate CTRL-M (for menteni).",
+                "name": "Shortcut key",
+                "errorCategories": [
+
+                ]
+            },
+            {
+                "id": 40,
+                "code": 66,
+                "definition": "Content uses the wrong form for telephone numbers",
+                "example": "A German text presents a telephone number in the format (xxx) xxx - xxxx instead of the expected 0xx followed by a group of digits separated into groups by spaces.",
+                "name": "Telephone format",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "code": 7,
+        "definition": "The text makes statements that contradict the world of the text",
+        "example": "The text states that a feature is present on a certain model of automobile when in fact it is not available.",
+        "name": "Verity",
+        "errorCategories": [
+            {
+                "id": 41,
+                "code": 71,
+                "definition": "Content inappropriately uses a culture-specific reference that will not be understandable to the intended audience",
+                "example": "An English text refers to steps in a process as \u201cFirst base\u201d, \u201cSecond base\u201d, and \u201cThird base\u201d, and to successful completion as a \u201cHome run\u201d and uses other metaphors from baseball. These prove difficult to translate and confuse the target audience in Germany.",
+                "name": "Culture-specific reference",
+                "errorCategories": [
+
+                ]
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "code": 8,
+        "definition": "Any other issues",
+        "example": "A quality process checks for errors generated from speech-to-text generated during conference interpretation. Because this error type is highly specific to the specific situation, it is not included in any predefined issue type elsewhere.",
+        "name": "Other",
+        "errorCategories": [
+
+        ]
+    }
+]

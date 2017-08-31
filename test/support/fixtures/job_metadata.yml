@@ -1,0 +1,6 @@
+jm1:
+  id: @EVER_INCREMENT
+  id_job: @REF:jobs:job2:id
+  password: @REF:jobs:job2:password
+  key: dqf_translate_user
+  value: @REF:users:user1:uid

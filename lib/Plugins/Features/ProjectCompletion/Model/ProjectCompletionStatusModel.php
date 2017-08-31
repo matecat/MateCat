@@ -12,6 +12,7 @@ namespace Features\ProjectCompletion\Model;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Features;
+use FeatureSet;
 use Utils;
 
 class ProjectCompletionStatusModel {
@@ -48,9 +49,10 @@ class ProjectCompletionStatusModel {
             $translate = $this->dataForChunkStatus($chunk, false) ;
             $revise    = $this->dataForChunkStatus($chunk, true) ;
 
-            $revise['password'] = Features::filter(
-                    'filter_job_password_to_review_password',
-                    $this->project->id_customer,
+            $featureSet = new FeatureSet();
+            $featureSet->loadFromUserEmail( $this->project->id_customer );
+
+            $revise['password'] = $featureSet->filter('filter_job_password_to_review_password',
                     $chunk->password,
                     $chunk->id
             );

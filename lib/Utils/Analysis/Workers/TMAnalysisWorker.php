@@ -349,6 +349,9 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'target' ]  = $queueElement->params->target;
         $_config[ 'email' ]   = \INIT::$MYMEMORY_TM_API_KEY;
 
+        $_config[ 'context_before' ] = $queueElement->params->context_before;
+        $_config[ 'context_after' ]  = $queueElement->params->context_after;
+
         $tm_keys = \TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
@@ -440,6 +443,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
             try {
                 $mt     = \Engine::getInstance( $id_mt_engine );
+
+                //tell to the engine that this is the analysis phase ( some engines want to skip the analysis )
+                $mt->setAnalysis();
+
                 $config = $mt->getConfigStruct();
                 $config = array_merge( $config, $_config );
 
@@ -557,31 +564,6 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_forceSetSegmentAnalyzed( $queueElement );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : empty word count segment. acknowledge and continue." );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT );
-        }
-
-    }
-
-    /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
-     *
-     * @param QueueElement $queueElement
-     *
-     * @throws EndQueueException
-     */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ){
-
-        /**
-         *
-         * check for loop re-queuing
-         */
-        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
-
-            $this->_forceSetSegmentAnalyzed( $queueElement );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
-            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
-
-        } elseif ( isset( $queueElement->reQueueNum ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
 
     }

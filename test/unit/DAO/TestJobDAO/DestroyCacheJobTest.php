@@ -85,7 +85,6 @@ class DestroyCacheJobTest extends AbstractTest
                 'revision_stats_terminology_maj' => "0",
                 'revision_stats_language_quality_maj' => "0",
                 'revision_stats_style_maj' => "0",
-                'dqf_key' => "",
                 'total_raw_wc' => "1",
                 'validator' => "xxxx"
             )

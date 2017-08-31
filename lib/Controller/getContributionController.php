@@ -2,6 +2,9 @@
 
 class getContributionController extends ajaxController {
 
+    protected $id_segment;
+    private $concordance_search;
+    private $switch_languages;
     private $id_job;
     private $num_results;
     private $text;
@@ -13,7 +16,12 @@ class getContributionController extends ajaxController {
     private $password;
     private $tm_keys;
 
+    /**
+     * @var Jobs_JobStruct
+     */
     private $jobData;
+
+    private $feature_set;
 
     private $__postInput = array();
 
@@ -50,6 +58,9 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
+
+        $this->feature_set = new FeatureSet();
+
     }
 
     public function doAction() {
@@ -79,8 +90,8 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
-        //get Job Infos, we need only a row of jobs ( split )
-        $this->jobData = getJobData( $this->id_job, $this->password );
+        //get Job Info, we need only a row of jobs ( split )
+        $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
@@ -211,18 +222,21 @@ class getContributionController extends ajaxController {
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
             /**
-             * @var $mt Engines_Moses
+             * @var $mt_engine Engines_MMT
              */
-            $mt        = Engine::getInstance( $this->id_mt_engine );
+            $mt_engine        = Engine::getInstance( $this->id_mt_engine );
+            $config = $mt_engine->getConfigStruct();
 
-            $config = $mt->getConfigStruct();
+            //if a callback is not set only the first argument is returned, get the config params from the callback
+            $config = $this->feature_set->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
             $config[ 'target' ]  = $this->target;
-            $config[ 'id_user' ] = INIT::$MYMEMORY_API_KEY;
+            $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
             $config[ 'segid' ]   = $this->id_segment;
 
-            $mt_result = $mt->get( $config );
+            $mt_result = $mt_engine->get( $config );
 
             if ( isset( $mt_result['error']['code'] ) ) {
                 $mt_result['error']['created_by_type'] = 'MT';

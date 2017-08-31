@@ -196,6 +196,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
 
+    /***
+     * @param $job_id
+     *
+     * @return Users_UserStruct[]
+     */
     public function getProjectOwner( $job_id ) {
         $job_id = (int) $job_id ;
 
@@ -257,7 +262,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param $array_result array
      *
-     * @return Users_UserStruct|Users_UserStruct[]
+     * @return Users_UserStruct[]
      */
     protected function _buildResult( $array_result ) {
         $result = array();

@@ -35,7 +35,10 @@ class setTranslationController extends ajaxController {
     protected $status;
     protected $split_statuses;
 
-    protected $jobData = array();
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $jobData;
 
 
 
@@ -50,6 +53,11 @@ class setTranslationController extends ajaxController {
      * @var Projects_ProjectStruct
      */
     protected $project ;
+    protected $id_segment;
+
+    protected $context_before;
+
+    protected $context_after;
 
     /**
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
@@ -88,6 +96,8 @@ class setTranslationController extends ajaxController {
                 'splitStatuses'           => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
+                'context_before'                 => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'context_after'                  => array( 'filter' => FILTER_UNSAFE_RAW ),
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -109,6 +119,9 @@ class setTranslationController extends ajaxController {
 
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
         list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
+
+        $this->context_before = CatUtils::view2rawxliff( $this->__postInput[ 'context_before' ] );
+        $this->context_after = CatUtils::view2rawxliff( $this->__postInput[ 'context_after' ] );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
 
@@ -164,7 +177,7 @@ class setTranslationController extends ajaxController {
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
-            $this->jobData = getJobData( (int)$this->id_job, $this->password );
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
             if ( empty( $this->jobData ) ) {
                 $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
@@ -394,37 +407,6 @@ class setTranslationController extends ajaxController {
             'is_review' => $this->isRevision(),
             'logged_user' => $this->logged_user
         ));
-
-        if ( INIT::$DQF_ENABLED && !empty( $this->jobData[ 'dqf_key' ] ) &&
-                $_Translation[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED
-        ) {
-            $dqfSegmentStruct = DQF_DqfSegmentStruct::getStruct();
-
-            if ( $old_translation[ 'suggestion' ] == null ) {
-                $dqfSegmentStruct->target_segment = "";
-                $dqfSegmentStruct->tm_match       = 0;
-            } else {
-                $dqfSegmentStruct->target_segment = $old_translation[ 'suggestion' ];
-                $dqfSegmentStruct->tm_match       = $old_translation[ 'suggestion_match' ];
-            }
-
-            $dqfSegmentStruct->task_id            = $this->id_job;
-            $dqfSegmentStruct->segment_id         = $this->id_segment;
-            $dqfSegmentStruct->source_segment     = $this->segment[ 'segment' ];
-            $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
-
-            $dqfSegmentStruct->time = $_Translation[ 'time_to_edit' ];
-            $dqfSegmentStruct->mt_engine_version = 1;
-
-            try {
-                $dqfQueueHandler = new DqfQueueHandler();
-                $dqfQueueHandler->createSegment( $dqfSegmentStruct );
-            } catch ( Exception $exn ) {
-                $msg = $exn->getMessage() . "\n\n" . $exn->getTraceAsString();
-                Log::doLog( $msg );
-                Utils::sendErrMailReport( $msg );
-            }
-        }
 
         //propagate translations
         $TPropagation = array();
@@ -854,6 +836,10 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
         $contributionStruct->propagationRequest   = $this->propagate;
+        $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
+
+        $contributionStruct->context_after        = $this->context_after;
+        $contributionStruct->context_before       = $this->context_before;
 
         $contributionStruct = $this->feature_set->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
@@ -861,5 +847,9 @@ class setTranslationController extends ajaxController {
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
+
+        $contributionStruct = $this->feature_set->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project ) ;
+        Set::contributionMT( $contributionStruct );
+
     }
 }

@@ -1,19 +1,23 @@
 <?php
 
 namespace Features ;
+use BasicFeatureStruct;
+use INIT;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 
 use ReflectionClass ;
 
-class BaseFeature {
+abstract class BaseFeature  {
 
     protected $feature;
 
     private $log ;
 
     private $logger_name ;
+
+    protected $autoActivateOnProject = true ;
 
     /**
      * Warning: passing a $projectStructure prevents the possibility to pass
@@ -23,11 +27,15 @@ class BaseFeature {
      * The ideal solution would be to use a ProjectStruct for both persisted and
      * unpersisted scenarios, so to work with the same input structure every time.
      *
-     * @param \BasicFeatureStruct $feature
+     * @param BasicFeatureStruct $feature
      */
-    public function __construct( \BasicFeatureStruct $feature ) {
+    public function __construct( BasicFeatureStruct $feature ) {
         $this->feature = $feature ;
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
+    }
+
+    public function autoActivateOnProject() {
+        return $this->autoActivateOnProject ;
     }
 
     // gets a feature specific logger
@@ -40,7 +48,7 @@ class BaseFeature {
     }
 
     private function logFilePath() {
-       return \INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+       return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
@@ -55,5 +63,9 @@ class BaseFeature {
 
     public static function getTemplatesPath() {
         return static::getClassPath() . '/View' ;
+    }
+
+    public function getFeatureStruct() {
+        return $this->feature ;
     }
 }

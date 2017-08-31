@@ -36,6 +36,10 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         return new Jobs_JobStruct( $this->attributes() );
     }
 
+    public function getIdentifier() {
+        return $this->id . '-' . $this->password ;
+    }
+
     public function getQualityOverall() {
         return CatUtils::getQualityOverallFromJobStruct( $this ) ;
     }

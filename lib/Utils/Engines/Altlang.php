@@ -9,7 +9,7 @@
  *
  */
 
-class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_Altlang extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,
