@@ -229,15 +229,9 @@ $.extend(UI, {
           suggestion_info = '';
         }
 
+        percentClass = UI.getPercentuageClass(this.match);
+        percentText = this.match;
 
-        if (typeof d.data.fieldTest == 'undefined') {
-            percentClass = UI.getPercentuageClass(this.match);
-            percentText = this.match;
-        } else {
-            quality = parseInt(this.quality);
-            percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
-            percentText = 'MT';
-        }
 
 				if (!$('.sub-editor.matches', segment).length) {
 					UI.createFooter(segment);
