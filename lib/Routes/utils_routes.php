@@ -6,7 +6,7 @@
  * Time: 10:17
  */
 
-$klein->respond('GET', '/utils/pee', function() {
+$klein->respond('/utils/pee', function() {
     $reflect  = new ReflectionClass('peeViewController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->doAction();
@@ -34,3 +34,8 @@ route( '/api/app/connected_services/[:id_service]',                             
 route( '/api/app/teams/members/invite/[:jwt]',                                      'GET',  '\API\App\TeamsInvitationsController', 'collectBackInvitation' ) ;
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
+
+route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeData', 'getPeePlots' ) ;
+route( '/api/app/utils/pee/table',                                                  'POST', '\API\App\PeeData', 'getPeeTableData' ) ;
+
+route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',        'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' ) ;

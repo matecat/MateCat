@@ -15,7 +15,6 @@ module.exports = function(grunt) {
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
         basePath + '../css/editlog.css',
-	    basePath + '../css/jquery.powertip.min.css',
 	    basePath + '../css/lxq-style.css',
 	    basePath + '../css/lexiqa.css',
     ];
@@ -101,8 +100,8 @@ module.exports = function(grunt) {
          * = Browseriry
          *
          * This is the new build process based on browserify
-         * to take advantage of transforms, plubins and import
-         * and require syntax to declare dependecies.
+         * to take advantage of transforms, plugins and import
+         * and require syntax to declare dependencies.
          * Use this for current / future development.
          *
          * All imports to be attached to window should be defined in
@@ -140,6 +139,20 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'cat-react.js'
             },
+            qaReportsVersions: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react/components/review_improved/review_improved.qa_report.js',
+                ],
+                dest: buildPath + 'qa-report-improved.js'
+            },
             test: {
                 options: {
                     external: [
@@ -160,6 +173,8 @@ module.exports = function(grunt) {
                 dest: buildPath + '/tests/test-react.js'
             },
         },
+
+        //
 
 
         /**
@@ -187,7 +202,7 @@ module.exports = function(grunt) {
                         } );
 
                         return buildPath + '/app.' + s4() + '.source-map.js';
-                    },
+                    }
                 },
                 src: [
                     basePath + 'build/templates.js',
@@ -265,6 +280,41 @@ module.exports = function(grunt) {
                 dest: buildPath + 'libs.js'
             },
 
+            libs_upload: {
+                src: [
+                    basePath + 'lib/jquery-1.11.0.min.js',
+                    basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
+
+                    basePath + 'lib/jquery.cookie.js',
+                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
+                    basePath + 'lib/jquery.powertip.min.js',
+                    // <!-- The Templates plugin is included to render the upload/download listings -->
+                    basePath + 'lib/fileupload/tmpl.min.js',
+                    // <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+                    basePath + 'lib/fileupload/load-image.min.js',
+                    // <!-- The Canvas to Blob plugin is included for image resizing functionality -->
+                    basePath + 'lib/fileupload/canvas-to-blob.min.js',
+                    <!-- jQuery Image Gallery -->
+                    basePath + 'lib/fileupload/jquery.image-gallery.min.js',
+                    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+                    basePath + 'lib/fileupload/jquery.iframe-transport.js',
+                    <!-- The basic File Upload plugin -->
+                    basePath + 'lib/fileupload/jquery.fileupload.js',
+                    <!-- The File Upload file processing plugin -->
+                    basePath + 'lib/fileupload/jquery.fileupload-fp.js',
+                    <!-- The File Upload user interface plugin -->
+                    basePath + 'lib/fileupload/jquery.fileupload-ui.js',
+                    <!-- The File Upload jQuery UI plugin -->
+                    basePath + 'lib/fileupload/jquery.fileupload-jui.js',
+                    <!-- The localization script -->
+                    basePath + 'lib/fileupload/locale.js',
+                    <!-- The main application script -->
+                    basePath + 'lib/fileupload/main.js',
+                    gruntDir + 'semantic/dist/semantic.min.js'
+                ],
+                dest: buildPath + 'libs_upload.js'
+            },
+
             semantic: {
                 src: [
                     gruntDir + 'semantic/dist/semantic.min.js'
@@ -287,17 +337,39 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'manage.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
             },
             analyze: {
                 src: [
+                    basePath + 'analyze_old.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                ],
+                dest: buildPath + 'analyze_old.js'
+            },
+            analyze_new: {
+                src: [
                     basePath + 'analyze.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js'
+                    basePath + 'outsource.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
-                dest: buildPath + 'analyze.js'
+                dest: buildPath + 'analyze-build.js'
+            },
+            upload: {
+                src: [
+                    basePath + 'gdrive.upload.js',
+                    basePath + 'gdrive.picker.js',
+                    basePath + 'upload.js',
+                    basePath + 'new-project.js',
+                    basePath + 'tm.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                ],
+                dest: buildPath + 'upload.js'
             }
 
         },
@@ -352,15 +424,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
+            },
+            cssAnalyze: {
+                files:  cssWatchManage,
+                tasks: ['sass:distAnalyze', 'replace'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
             }
-            // cssManage: {
-            //     files:  cssWatchManage,
-            //     tasks: ['sass:distManage', 'replace'],
-            //     options: {
-            //         interrupt: true,
-            //         livereload : true
-            //     }
-            // }
         },
         sass: {
             distCommon: {
@@ -402,6 +474,16 @@ module.exports = function(grunt) {
                     cssBase + 'sass/manage_main.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
+            },
+            distAnalyze: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/analyze_main.scss'
+                ],
+                dest: cssBase + 'build/analyze-build.css'
             },
             distSemantic: {
                 options : {
@@ -472,6 +554,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -488,12 +571,16 @@ module.exports = function(grunt) {
         'handlebars',
         'browserify:libs',
         'browserify:components',
+        'browserify:qaReportsVersions',
         'concat:libs',
+        'concat:libs_upload',
         'concat:semantic',
         'concat:app',
         'concat:common',
         'concat:manage',
         'concat:analyze',
+        'concat:analyze_new',
+        'concat:upload',
         'replace:version'
     ]);
 

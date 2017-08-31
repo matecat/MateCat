@@ -7,20 +7,97 @@
     <meta name="viewport" content="width=device-width"/>
     <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
     <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/build/semantic.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/legacy-misc.css?build=${build_number}"/>
 
     <script type="text/javascript">
         var config = {
-            basepath: '${basepath | string:/}'
+            basepath: '${basepath | string:/}',
+            id_job: '${job/id}',
+            password: '${job/password}',
+            version_number: ${version_number | string: null},
+            is_pass : ${is_pass},
+            score : '${score}'
         };
     </script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/qa-report-improved.js?build=${build_number}"></script>
+    <style>
+        header {
+            box-sizing: initial;
+        }
 
+        #quality-report-select {
+            float: right;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        #report-versions-select {
+            min-width: 500px;
+            background-color: #d7d7d7;
+        }
+
+        #report-versions-select > .text {
+            background: none !important;
+            box-shadow: none !important;
+            position: initial !important;
+        }
+
+        #report-versions-select .report-item,
+        #report-versions-select > .text {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 15px;
+            min-height: 37px;
+        }
+
+        .report-item .version-green,
+        .report-item .version-red,
+        #report-versions-select > .text .version-green,
+        #report-versions-select > .text .version-red{
+            position: absolute;
+            width: 10px;
+            top: -1px;
+            height: 37px;
+            left: -1px;
+            background-color: green;
+        }
+
+        .report-item .version-red,
+        #report-versions-select > .text .version-red{
+            background-color: red;
+        }
+
+        #report-versions-select .report-date {
+            float: right !important;
+            color: grey;
+            font-size: 13px;
+            float: right;
+            margin-top: 0px;
+        }
+
+        #report-versions-select .report-text {
+            float: left;
+        }
+
+        .onoffswitch-drive {
+            zoom: 0.65;
+        }
+
+        .project_name_subtitle {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .quality_report_header {
+            margin: 0 0 20px 0 ;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -34,11 +111,20 @@
     </div>
 </header>
 
-<div class="wrapper">
+<div class="wrapper" style="margin-top: 38px; margin-bottom: 50px;">
 
-    <h1>Quality Report - Project: <span id="pname" tal:content="project/name"></span>
+    <div class="quality_report_header">
 
-    </h1>
+        <div style="float: left;">
+            <h1 >Quality Report </h1>
+            <div class="project_name_subtitle">Project: <span id="pname" tal:content="project/name"></span></div>
+        </div>
+
+        <div id="quality-report-select"></div>
+
+        <div class="clear"></div>
+    </div>
+
 
     <table class="tablestats left-aligned" border="0" cellpadding="0" cellspacing="0">
         <tr>

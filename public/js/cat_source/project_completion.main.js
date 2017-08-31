@@ -43,14 +43,16 @@ if ( ProjectCompletion.enabled() ) {
         button.val( sendingLabel );
 
         var request = APP.doRequest( {
-            data : data ,
+            data    : data ,
             success : success,
-            error : error
+            error   : error
         });
 
-        request.done( function() {
+        request.done( function( data ) {
             config.job_completion_current_phase = ( config.isReview ? 'translate' : 'revise' ) ;
             config.job_marked_complete = true;
+            config.last_completion_event_id = data.data.event.id ;
+
             UI.render( false );
         });
 
@@ -138,18 +140,61 @@ if ( ProjectCompletion.enabled() ) {
     var original_isReadonlySegment = UI.isReadonlySegment ;
     var original_messageForClickOnReadonly = UI.messageForClickOnReadonly ;
 
+    var original_handleClickOnReadOnly = UI.handleClickOnReadOnly ;
+
+    var translateWarningMessage ;
+
+    var handleClickOnReadOnly = function() {
+        if ( !config.isReview && config.job_completion_current_phase == 'revise' ) {
+            if ( !translateWarningMessage || translateWarningMessage.dismissed ) {
+                showTranslateWarningMessage();
+            }
+        }
+        else {
+            original_handleClickOnReadOnly.apply( undefined, arguments );
+        }
+    }
+
     $.extend( UI, {
         // This is necessary because of the way APP.popup works
-        markAsCompleteSubmit : markAsCompleteSubmit,
-        isReadonlySegment : isReadonlySegment,
-        messageForClickOnReadonly : messageForClickOnReadonly
+        markAsCompleteSubmit      : markAsCompleteSubmit,
+        isReadonlySegment         : isReadonlySegment,
+        messageForClickOnReadonly : messageForClickOnReadonly,
+        handleClickOnReadOnly     : handleClickOnReadOnly
     });
 
-    var showWarningModalWindow = function() {
-        APP.alert({
-            msg: messageForClickOnReadonly()
+
+    var showTranslateWarningMessage = function() {
+
+        var message = "This job is currently under review. Segments are in read-only mode." ;
+
+        if ( config.chunk_completion_undoable && config.last_completion_event_id ) {
+            message = message + " To undo this action <a href=\"javascript:void(0);\" id=\"showTranslateWarningMessageUndoLink\" >click here</a>.";
+        }
+
+        translateWarningMessage = window.intercomErrorNotification = APP.addNotification({
+            autoDismiss: false,
+            dismissable: true,
+            position : "tc",
+            text : message,
+            title : "Warning",
+            type : "warning",
+            allowHtml : true
         });
     };
+
+    $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            type: 'DELETE',
+            url: sprintf('/api/app/jobs/%s/%s/completion-events/%s', config.id_job, config.password, config.last_completion_event_id )
+        }).done( function() {
+            UI.reloadPage();
+        }).fail( function() {
+            console.error('Error undoing completion event');
+        });
+    });
 
     var evalReviseNotice = function() {
         if ( config.isReview && config.job_completion_current_phase == 'translate' ) {
@@ -182,7 +227,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).on('ready',  function() {
-        translateAndReadonly() && showWarningModalWindow();
+        translateAndReadonly() && showTranslateWarningMessage();
         evalReviseNotice();
     });
 

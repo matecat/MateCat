@@ -110,7 +110,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             var parsed = JSON.parse( context );
             var issue_path = sprintf(
                 '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
-                config.id_job, config.password,
+                config.id_job, config.review_password,
                 parsed.id_segment,
                 parsed.id_issue
             );
@@ -120,7 +120,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 type: 'DELETE'
             }).done( function( data ) {
                 var record = MateCat.db.segment_translation_issues
-                    .by('id', parsed.id_issue);
+                    .by('id', parseInt(parsed.id_issue));
                 MateCat.db.segment_translation_issues.remove( record );
                 root.ReviewImproved.reloadQualityReport();
             });

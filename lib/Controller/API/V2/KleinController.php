@@ -95,6 +95,10 @@ abstract class KleinController {
         $this->api_key    = $headers[ 'x-matecat-key' ];
         $this->api_secret = $headers[ 'x-matecat-secret' ];
 
+        if ( FALSE !== strpos( $this->api_key, '-' ) ) {
+            list( $this->api_key, $this->api_secret ) = explode('-', $this->api_key ) ;
+        }
+
         if ( !$this->validKeys() ) {
             throw new AuthenticationError();
         }
@@ -143,9 +147,6 @@ abstract class KleinController {
      *
      */
     protected function validKeys() {
-        if ( FALSE !== strpos( $this->api_key, '-' ) ) {
-            list( $this->api_key, $this->api_secret ) = explode('-', $this->api_key ) ;
-        }
 
         if ( $this->api_key && $this->api_secret ) {
             $this->api_record = \ApiKeys_ApiKeyDao::findByKey( $this->api_key );

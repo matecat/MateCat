@@ -4,3 +4,7 @@ Options -Indexes
     Order Deny,Allow
     Deny from all
 </Files>
+
+<Files offline.html>
+    Allow from all
+</Files>

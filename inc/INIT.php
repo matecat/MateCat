@@ -32,12 +32,12 @@ class INIT {
     public static $HTTPHOST;
     public static $PROTOCOL;
     public static $DEBUG               = true;
-    public static $EXCEPTION_DEBUG     = false;
+    public static $PRINT_ERRORS        = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $INSTANCE_ID = 0;
+    public static $INSTANCE_ID         = 0;
     public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
@@ -105,7 +105,7 @@ class INIT {
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
     public static $AUTHCOOKIENAME = 'matecat_login_v4';
-    public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
+    public static $SUPPORT_MAIL = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
@@ -261,6 +261,9 @@ class INIT {
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
 
+    public static $SKIP_SQL_CACHE = false ;
+
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
@@ -328,7 +331,8 @@ class INIT {
                     'dtd'   => array( '', '', 'extxml' ),
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => array( '', '', 'extxml'),
-                    'yaml'   => array( '', '', 'extxml' )
+                    'yaml'  => array( '', '', 'extxml' ),
+                    'yml'   => array( '', '', 'extxml' )
             ),
             'Scanned Files'                 => array(
                     'pdf'   => array( '', '', 'extpdf' ),
@@ -364,7 +368,8 @@ class INIT {
                     'srt'         => array( '', '', 'extsrt' ),
                     'wix'         => array( '', '', 'extwix' ),
                     'po'          => array( '', '', 'extpo'  ),
-                    'g'           => array( '', '', 'extg' )
+                    'g'           => array( '', '', 'extg' ),
+                    'ts'          => array( '', '', 'exts' ),
             )
     );
 

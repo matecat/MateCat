@@ -50,6 +50,7 @@
             },
             progressall: function (e, data) {
                 var $this = $(this);
+                var upload = $( this ).data('fileupload') || $( this ).data('blueimpJUIFileupload');
                 $this.find('.fileupload-progress')
                     .find('.progress').progressbar(
                         'option',
@@ -58,7 +59,7 @@
                     ).end()
                     .find('.progress-extended').each(function () {
                         $(this).html(
-                            $this.data('fileupload')
+                            upload
                                 ._renderExtendedProgress(data)
                         );
                     });

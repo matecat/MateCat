@@ -75,7 +75,8 @@ class SegmentTranslationIssueController extends KleinController {
         $issue = null;
 
         $postParams = $this->request->paramsPost() ;
-        if (  $postParams['rebutted_at'] == null ) {
+
+        if ( $postParams['rebutted_at'] == null ) {
             $entryDao = new EntryDao( Database::obtain()->getConnection() );
             $issue = $entryDao->updateRebutted(
                 $this->validator->issue->id, false
@@ -89,11 +90,10 @@ class SegmentTranslationIssueController extends KleinController {
     }
 
     public function delete() {
-        $this->validateAdditionalPassword();
 
         $model = new ReviewImproved\TranslationIssueModel(
             $this->request->id_job,
-            $this->request->password,
+            $this->validator->getChunkReview()->password,
             $this->validator->issue
         );
 
@@ -117,10 +117,6 @@ class SegmentTranslationIssueController extends KleinController {
         else {
             return $this->validator->translation->version_number ;
         }
-    }
-
-    private function validateAdditionalPassword() {
-        // TODO: check password is good for deletion
     }
 
     private function findCategories() {

@@ -37,19 +37,18 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
     }
 
     public function getQualityOverall() {
-        $job_array = array(
-                'new_words'         => $this->new_words,
-                'draft_words'       => $this->draft_words,
-                'translated_words'  => $this->translated_words,
-                'approved_words'    => $this->approved_words,
-                'rejected_words'    => $this->rejected_words,
-                'status_analysis'   => $this->getProject()->status_analysis,
-                'jid'               => $this->id,
-                'jpassword'         => $this->password,
-                'features'          => $this->getProject()->getMetadataValue('features')
-        );
-
         return CatUtils::getQualityOverallFromJobStruct( $this ) ;
+    }
+
+    public function getQualityInfo(){
+        $qClass = CatUtils::getQualityInfoFromJobStruct( $this );
+
+        if ( 'LQA\ChunkReviewStruct' === get_class( $qClass ) ) {
+            return null ;
+        }
+        else {
+            return ( isset( $qClass[ 'equivalent_class' ] ) ? $qClass[ 'equivalent_class' ] : null );
+        }
     }
 
     public function getErrorsCount() {

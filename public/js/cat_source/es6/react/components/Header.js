@@ -1,5 +1,6 @@
 
 var SubHeader = require("./SubHeader").default;
+var TeamConstants = require('../constants/TeamConstants');
 
 class Header extends React.Component {
     constructor (props) {
@@ -17,16 +18,16 @@ class Header extends React.Component {
 
     componentDidMount () {
 
-        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup.bind(this));
     }
 
     componentWillUnmount() {
-        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
-        TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.removeListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup);
     }
 
@@ -36,7 +37,7 @@ class Header extends React.Component {
 
     initDropdown() {
         let self = this;
-        if (this.state.teams.size > 0){
+        if (this.state.teams.size > 0 && !_.isUndefined(this.dropdownTeams)){
             if (this.state.teams.size == 1) {
                 this.dropdownTeams.classList.add("only-one-team");
             } else {
@@ -100,14 +101,14 @@ class Header extends React.Component {
                 window.scrollTo(0, 0);
                 ManageActions.changeTeam(selectedTeam.toJS());
             } else {
-                ManageActions.changeTeamFromUploadPage(selectedTeam.toJS());
+                TeamsActions.changeTeamFromUploadPage(selectedTeam.toJS());
             }
         }
 
     }
 
     openCreateTeams () {
-        ManageActions.openCreateTeamModal();
+        ModalsActions.openCreateTeamModal();
     }
 
     openModifyTeam (event, team) {
@@ -166,7 +167,7 @@ class Header extends React.Component {
         let dropdownIcon = (this.state.teams.size > 1)? <i className="dropdown icon"/> : '';
         let dontShowCursorClass = (this.state.teams.size == 1)? 'disable-dropdown-team' : '';
         let personalTeam='';
-        if (this.state.teams.size > 0) {
+        if (this.state.teams.size > 0 && this.props.changeTeam) {
             let items = this.state.teams.map(function(team, i) {
                 let iconModal = '';
                 if (team.get('type') == 'personal') {
@@ -221,6 +222,11 @@ class Header extends React.Component {
                     </div>
                 </div>
             </div>;
+        } else if (this.state.teams.size > 0 && self.state.selectedTeamId) {
+            let team = this.state.teams.find(function (team) {
+                return team.get('id') === self.state.selectedTeamId;
+            });
+            return <div className="organization-name">{team.get("name")}</div>;
         }
         return result;
     }
@@ -258,7 +264,7 @@ class Header extends React.Component {
 
                                 {teamsSelect}
 
-                                { (this.props.showLinks && !this.props.loggedUser) ? (
+                                { (this.props.showLinks ) ? (
                                         <ul id="menu-site">
                                             <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
                                             <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
@@ -266,7 +272,7 @@ class Header extends React.Component {
                                             <li><a href="https://www.matecat.com/about/">About</a></li>
                                             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
                                             <li><a href="https://www.matecat.com/support/">Support</a></li>
-                                            {/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
+                                            <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
                                         </ul>
 
                                     ) : ('')}
@@ -282,7 +288,8 @@ Header.defaultProps = {
     showSubHeader: true,
     showModals: true,
     showLinks: false,
-    loggedUser: true
+    loggedUser: true,
+    changeTeam: true
 };
 
 export default Header ;

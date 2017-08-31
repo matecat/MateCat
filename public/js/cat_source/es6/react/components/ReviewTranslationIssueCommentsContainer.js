@@ -77,7 +77,7 @@ export default React.createClass({
                                ['insert', 'delete'], this.commentsChanged);
         ReviewImproved.loadComments(this.props.sid, this.props.issueId);
 
-        var issue = MateCat.db.segment_translation_issues.by( 'id', this.props.issueId );
+        var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
         this.checkIssue( issue );
 
         MateCat.db.addListener('segment_translation_issues',

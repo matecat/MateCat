@@ -1,5 +1,6 @@
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 let ManageConstants = require('../constants/ManageConstants');
+let TeamConstants = require('../constants/TeamConstants');
 
 
 let ManageActions = {
@@ -22,7 +23,7 @@ let ManageActions = {
         });
         if (teams) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.RENDER_TEAMS,
+                actionType: TeamConstants.RENDER_TEAMS,
                 teams: teams,
             });
         }
@@ -70,7 +71,7 @@ let ManageActions = {
     },
 
     updateStatusProject: function (project, status) {
-        UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(function () {
+        API.PROJECTS.changeJobsOrProjectStatus('prj', project.toJS(), status).done(function () {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.HIDE_PROJECT,
                 project: project
@@ -85,7 +86,7 @@ let ManageActions = {
     },
 
     changeJobStatus: function (project, job, status) {
-        UI.changeJobsOrProjectStatus('job', job.toJS(), status).done(
+        API.PROJECTS.changeJobsOrProjectStatus('job', job.toJS(), status).done(
             function () {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.REMOVE_JOB,
@@ -97,13 +98,14 @@ let ManageActions = {
 
     },
 
-    changeJobPassword: function (project, job, password, oldPassword) {
+    changeJobPassword: function (project, job, password, oldPassword, translator) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_JOB_PASS,
             projectId: project.get('id'),
             jobId: job.get('id'),
             password: password,
-            oldPassword: oldPassword
+            oldPassword: oldPassword,
+            oldTranslator: translator
         });
     },
 
@@ -153,7 +155,7 @@ let ManageActions = {
         } else {
             uid = user.get("uid")
         }
-        UI.changeProjectAssignee(team.get("id"), project.get("id"), uid).done(
+        API.PROJECTS.changeProjectAssignee(team.get("id"), project.get("id"), uid).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
@@ -185,11 +187,11 @@ let ManageActions = {
                     };
                     let boxUndo = APP.addNotification(notification);
                 }
-                UI.getTeamMembers(team.get("id")).done(function (data) {
+                API.TEAM.getTeamMembers(team.get("id")).done(function (data) {
                     team = team.set('members', data.members);
                     team = team.set('pending_invitations', data.pending_invitations);
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: team.toJS()
                     });
                 });
@@ -204,7 +206,7 @@ let ManageActions = {
     },
 
     changeProjectName: function (team, project, newName) {
-        UI.changeProjectName(team.get("id"), project.get("id"), newName).done(
+        API.PROJECTS.changeProjectName(team.get("id"), project.get("id"), newName).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_NAME,
@@ -217,18 +219,18 @@ let ManageActions = {
     },
 
     changeProjectTeam: function (teamId, project) {
-        UI.changeProjectTeam(teamId, project.toJS()).done(function () {
+        API.PROJECTS.changeProjectTeam(teamId, project.toJS()).done(function () {
             var team =  TeamsStore.teams.find(function (team) {
                 return team.get('id') == teamId
             });
             team = team.toJS();
             if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
 
-                UI.getTeamMembers(teamId).then(function (data) {
+                API.TEAM.getTeamMembers(teamId).then(function (data) {
                     team.members = data.members;
                     team.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: team
                     });
                     setTimeout(function () {
@@ -261,11 +263,11 @@ let ManageActions = {
                     timer: 3000
                 };
                 let boxUndo = APP.addNotification(notification);
-                UI.getTeamMembers(UI.selectedTeam.id).then(function (data) {
+                API.TEAM.getTeamMembers(UI.selectedTeam.id).then(function (data) {
                     UI.selectedTeam.members = data.members;
                     UI.selectedTeam.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
+                        actionType: TeamConstants.UPDATE_TEAM,
                         team: UI.selectedTeam
                     });
                     setTimeout(function () {
@@ -293,12 +295,13 @@ let ManageActions = {
         });
     },
 
-    assignTranslator: function (projectId, jobId, translator) {
+    assignTranslator: function (projectId, jobId, jobPassword, translator) {
         if ($('body').hasClass('manage')) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.ASSIGN_TRANSLATOR,
                 projectId: projectId,
                 jobId: jobId,
+                jobPassword: jobPassword,
                 translator: translator
             });
         } else {
@@ -306,24 +309,28 @@ let ManageActions = {
         }
     },
 
+    enableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    disableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    setPopupTeamsCookie: function () {
+        UI.setPopupTeamsCookie();
+    },
 
     /********* Modals *********/
 
-    openCreateTeamModal: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
-        });
-    },
-
-    openChangeTeamModal: function (project) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-            project: project
-        });
-    },
-
     openModifyTeamModal: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
+        API.TEAM.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -335,7 +342,7 @@ let ManageActions = {
     },
 
     openAddTeamMemberModal: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
+        API.TEAM.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -346,38 +353,32 @@ let ManageActions = {
         });
     },
 
-    openOutsourceModal: function (project, job, url) {
-        UI.openOutsourceModal(project.toJS(), job.toJS(), url);
-    },
-
-    /********* teams *********/
-
-    renderTeams: function (teams, defaultTeam) {
+    openPopupTeams: function () {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_TEAMS,
-            teams: teams,
-            defaultTeam: defaultTeam
+            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
         });
     },
 
+    /********* Teams: actions from modals *********/
+
+    /**
+     * Called from manage modal
+     * @param teamName
+     * @param members
+     */
     createTeam: function (teamName, members) {
         let team;
         let self = this;
-        UI.createTeam(teamName, members).then(function (response) {
+        TeamsActions.createTeam(teamName, members).then(function (response) {
             UI.teams.push(response.team);
-            team = response.team;
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.ADD_TEAM,
-                team: team
-            });
             self.showReloadSpinner();
-            UI.changeTeam(team).then(function (response) {
+            UI.changeTeam(response.team).then(function (response) {
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.UPDATE_TEAM,
+                    actionType: TeamConstants.UPDATE_TEAM,
                     team: UI.selectedTeam
                 });
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.CHOOSE_TEAM,
+                    actionType: TeamConstants.CHOOSE_TEAM,
                     teamId: UI.selectedTeam.id
                 });
                 AppDispatcher.dispatch({
@@ -392,53 +393,15 @@ let ManageActions = {
         });
     },
 
-    updateTeam: function (team) {
-        UI.getTeamMembers(team.id).then(function (data) {
-            team.members = data.members;
-            team.pending_invitations = data.pending_invitations;
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_TEAM,
-                team: team
-            });
-        });
-    },
-
-    updateTeams: function (teams) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAMS,
-            teams: teams
-        });
-    },
-
-    getAllTeams: function () {
-        UI.getAllTeams(true).done(function (data) {
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.RENDER_TEAMS,
-                teams: data.teams,
-            });
-        });
-    },
-
-    selectTeam: function (team) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAM,
-            team: team
-        });
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHOOSE_TEAM,
-            teamId: team.id
-        });
-    },
-
     changeTeam: function (team) {
         this.showReloadSpinner();
         UI.changeTeam(team).then(function (response) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_TEAM,
+                actionType: TeamConstants.UPDATE_TEAM,
                 team: UI.selectedTeam
             });
             AppDispatcher.dispatch({
-                actionType: ManageConstants.CHOOSE_TEAM,
+                actionType: TeamConstants.CHOOSE_TEAM,
                 teamId: UI.selectedTeam.id
             });
             AppDispatcher.dispatch({
@@ -452,7 +415,7 @@ let ManageActions = {
     },
 
     addUserToTeam: function (team, userEmail) {
-        UI.addUserToTeam(team.toJS(), userEmail).done(function (data) {
+        API.TEAM.addUserToTeam(team.toJS(), userEmail).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_TEAM_MEMBERS,
                 team: team,
@@ -465,12 +428,12 @@ let ManageActions = {
     removeUserFromTeam: function (team, user) {
         var self = this;
         var userId = user.get('uid');
-        UI.removeUserFromTeam(team.toJS(), userId).done(function (data) {
+        API.TEAM.removeUserFromTeam(team.toJS(), userId).done(function (data) {
             if (userId === APP.USER.STORE.user.uid ) {
                 if ( UI.selectedTeam.id === team.get('id')) {
-                    UI.getAllTeams(true).done(function (data) {
+                    API.TEAM.getAllTeams(true).done(function (data) {
                         AppDispatcher.dispatch({
-                            actionType: ManageConstants.RENDER_TEAMS,
+                            actionType: TeamConstants.RENDER_TEAMS,
                             teams: data.teams,
                         });
                         self.changeTeam(data.teams[0]);
@@ -500,71 +463,13 @@ let ManageActions = {
     },
 
     changeTeamName: function(team, newName) {
-        UI.changeTeamName(team, newName).done(function (data) {
+        API.TEAM.changeTeamName(team, newName).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_TEAM_NAME,
                 oldTeam: team,
                 team: data.team[0],
             });
         });
-    },
-
-    changeTeamFromUploadPage: function (team) {
-        $('.reloading-upload-page').show();
-        APP.setTeamInStorage(team.id);
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHOOSE_TEAM,
-            teamId: team.id
-        });
-        setTimeout(function () {
-            $('.reloading-upload-page').hide();
-        }, 1000)
-    },
-
-    enableDownloadButton: function (id) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
-            idProject: id
-        });
-    },
-
-    disableDownloadButton: function (id) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
-            idProject: id
-        });
-    },
-
-    openPopupTeams: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
-        });
-    },
-
-    setPopupTeamsCookie: function () {
-        UI.setPopupTeamsCookie();
-    },
-
-    // Move To Outsource Actions
-    outsourceCloseTranslatorInfo: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CLOSE_TRANSLATOR,
-        });
-    },
-
-    getOutsourceQuote: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
-        });
-    },
-
-    // Analyze Actions
-    openSplitModal: function (job, project) {
-        UI.openSplitJobModal(job, project);
-    },
-
-    openMergeModal: function (project, job) {
-        UI.openMergeModal(project.toJS(), job.toJS());
     }
 
 };

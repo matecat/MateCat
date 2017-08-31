@@ -344,7 +344,8 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/[ ]{2}/', " &nbsp;", $segment);
+        $segment = preg_replace('/[ ]{2}/', "&nbsp; ", $segment);
+        $segment = preg_replace('/[ ]$/', "&nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
@@ -377,212 +378,6 @@ class CatUtils {
         $segment = htmlspecialchars( $segment, ENT_NOQUOTES, 'UTF-8', false );
         $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
-    }
-
-    //TODO: used only by editLogDownloadController. Move it to editLogModel
-    public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
-
-        $data = getEditLog($jid, $password);
-
-        $slow_cut = 30;
-        $fast_cut = 0.25;
-
-        $stat_too_slow = array();
-        $stat_too_fast = array();
-
-
-        if (!$data) {
-            return false;
-        }
-
-        $stats['total-word-count'] = 0;
-        $stat_mt = array();
-
-
-        foreach ($data as &$seg) {
-
-            $seg['sm'].="%";
-            $seg['jid'] = $jid;
-            $tte = self::parse_time_to_edit($seg['tte']);
-            $seg['time_to_edit'] = "$tte[1]m:$tte[2]s";
-
-            $stat_rwc[] = $seg['rwc'];
-
-            // by definition we cannot have a 0 word sentence. It is probably a - or a tag, so we want to consider at least a word.
-            if ($seg['rwc'] < 1) {
-                $seg['rwc'] = 1;
-            }
-
-            $seg['secs-per-word'] = round($seg['tte'] / 1000 / $seg['rwc'], 1);
-
-            if (($seg['secs-per-word'] < $slow_cut) AND ($seg['secs-per-word'] > $fast_cut)) {
-                $seg['stats-valid'] = 'Yes';
-                $seg['stats-valid-color'] = '';
-                $seg['stats-valid-style'] = '';
-
-                $stat_valid_rwc[] = $seg['rwc'];
-                $stat_valid_tte[] = $seg['tte'];
-                $stat_spw[] = $seg['secs-per-word'];
-            } else {
-                $seg['stats-valid'] = 'No';
-                $seg['stats-valid-color'] = '#ee6633';
-                $seg['stats-valid-style'] = 'border:2px solid #EE6633';
-            }
-
-
-            // Stats
-            if ($seg['secs-per-word'] >= $slow_cut) {
-                $stat_too_slow[] = $seg['rwc'];
-            }
-            if ($seg['secs-per-word'] <= $fast_cut) {
-                $stat_too_fast[] = $seg['rwc'];
-            }
-
-
-            $seg['pe_effort_perc'] = round((1 - MyMemory::TMS_MATCH($seg['sug'], $seg['translation'])) * 100);
-
-
-            if ($seg['pe_effort_perc'] < 0) {
-                $seg['pe_effort_perc'] = 0;
-            }
-            if ($seg['pe_effort_perc'] > 100) {
-                $seg['pe_effort_perc'] = 100;
-            }
-
-            $stat_pee[] = $seg['pe_effort_perc'] * $seg['rwc'];
-
-            $seg['pe_effort_perc'] .= "%";
-
-            $lh = Langs_Languages::getInstance();
-            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
-
-            $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );
-            $tra_for_diff = self::placehold_xliff_tags( $seg[ 'translation' ] );
-
-//            possible patch
-//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
-//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
-
-            //with this patch we have warnings when accessing indexes
-            if( $use_ter_diff  ){
-                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-            } else {
-                $ter = array();
-            }
-
-//            Log::doLog( $sug_for_diff );
-//            Log::doLog( $tra_for_diff );
-//            Log::doLog( $ter );
-
-            $seg[ 'ter' ] = @$ter[ 1 ] * 100;
-            $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
-            $seg[ 'ter' ] = round( @$ter[ 1 ] * 100 ) . "%";
-            $diff_ter     = @$ter[ 0 ];
-
-            if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
-
-                //force use of third party ter diff
-                if( $use_ter_diff ){
-                    $seg[ 'diff' ] = $diff_ter;
-                } else {
-                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
-                    // we will use diff_PE until ter_diff will not work properly
-                    $seg[ 'diff' ]     = $diff_PE;
-                }
-
-                //$seg[ 'diff_ter' ] = $diff_ter;
-
-            } else {
-                $seg[ 'diff' ]     = '';
-                //$seg[ 'diff_ter' ] = '';
-            }
-
-            $seg['diff']     = self::restore_xliff_tags_for_view($seg['diff']);
-            //$seg['diff_ter'] = self::restore_xliff_tags_for_view($seg['diff_ter']);
-
-            // BUG: While suggestions source is not correctly set
-            if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
-                $seg['ss'] = 'Machine Translation';
-                $stat_mt[] = $seg['rwc'];
-            } else {
-                $seg['ss'] = 'Translation Memory';
-            }
-
-            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
-            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
-            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
-
-            $array_patterns     = array(
-                    rtrim( self::lfPlaceholderRegex, 'g' ) ,
-                    rtrim( self::crPlaceholderRegex, 'g' ),
-                    rtrim( self::crlfPlaceholderRegex, 'g' ),
-                    rtrim( self::tabPlaceholderRegex, 'g' ),
-                    rtrim( self::nbspPlaceholderRegex, 'g' ),
-            );
-
-
-            $array_replacements_csv = array(
-                    '\n',
-                    '\r',
-                    '\r\n',
-                    '\t',
-                    Utils::unicode2chr(0Xa0),
-            );
-            $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
-            $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
-            $seg['sug_csv'] =  preg_replace( $array_patterns, $array_replacements_csv, $seg['sug_view'] );
-            $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
-
-
-            $array_replacements = array(
-                    '<span class="_0A"></span><br />',
-                    '<span class="_0D"></span><br />',
-                    '<span class="_0D0A"></span><br />',
-                    '<span class="_tab">&#9;</span>',
-                    '<span class="_nbsp">&nbsp;</span>',
-            );
-            $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
-            $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
-            $seg['sug_view'] =  preg_replace( $array_patterns, $array_replacements, $seg['sug_view'] );
-            $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
-
-            if( $seg['mt_qe'] == 0 ){
-                $seg['mt_qe'] = 'N/A';
-            }
-
-        }
-
-        $stats['edited-word-count'] = array_sum($stat_rwc);
-        $stats['valid-word-count'] = array_sum($stat_valid_rwc);
-
-        if ($stats['edited-word-count'] > 0) {
-            $stats['too-slow-words'] = round(array_sum($stat_too_slow) / $stats['edited-word-count'], 2) * 100;
-            $stats['too-fast-words'] = round(array_sum($stat_too_fast) / $stats['edited-word-count'], 2) * 100;
-            $stats['avg-pee'] = round(array_sum($stat_pee) / array_sum($stat_rwc)) . "%";
-            $stats['avg-ter'] = round(array_sum($stat_ter) / array_sum($stat_rwc)) . "%";
-        }
-//        echo array_sum($stat_ter);
-//        echo "@@@";
-//        echo array_sum($stat_rwc);
-//        exit;
-
-        $stats['mt-words'] = round(array_sum($stat_mt) / $stats['edited-word-count'], 2) * 100;
-        $stats['tm-words'] = 100 - $stats['mt-words'];
-        $stats['total-valid-tte'] = round(array_sum($stat_valid_tte) / 1000);
-
-        // Non weighted...
-        // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
-        // Weighted
-        $stats['avg-secs-per-word'] = round($stats['total-valid-tte'] / $stats['valid-word-count'], 1);
-        $stats['est-words-per-day'] = number_format(round(3600 * 8 / $stats['avg-secs-per-word']), 0, '.', ',');
-
-        // Last minute formatting (after calculations)
-        $temp = self::parse_time_to_edit(round(array_sum($stat_valid_tte)));
-        $stats['total-valid-tte'] = "$temp[0]h:$temp[1]m:$temp[2]s";
-
-        $stats['total-tte-seconds'] = $temp[0] * 3600 + $temp[1] * 60 + $temp[2];
-
-        return array($data, $stats);
     }
 
     public static function addSegmentTranslation( array $_Translation, array &$errors ) {
@@ -699,8 +494,10 @@ class CatUtils {
         $todo = $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
         if( $todo < 1 && $todo > 0 ){
             $job_stats[ 'TODO_FORMATTED' ] = 1;
+            $job_stats[ 'TODO' ] = 1;
         } else {
             $job_stats[ 'TODO_FORMATTED' ] = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+            $job_stats[ 'TODO' ] = (float)number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "" );
         }
 
         $t = 'approved';
@@ -760,7 +557,7 @@ class CatUtils {
      *
      * @return array
      */
-    public static function getFastStatsForJob( WordCount_Struct $wCount ){
+    public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ){
 
         $job_stats = array();
         $job_stats[ 'id' ]         = $wCount->getIdJob();
@@ -779,6 +576,11 @@ class CatUtils {
         $total = $wCount->getTotal();
         $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
         $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
+
+        if( !$performanceEstimation ){
+            return $job_stats;
+        }
+
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -1086,25 +888,43 @@ class CatUtils {
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
 
+        $values = self::getQualityInfoFromJobStruct( $job );
+
+        $result = null ;
+
+        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+            $result = @$values->is_pass ? 'excellent' : 'fail' ;
+        } else {
+            $result = strtolower( $values['minText'] ) ;
+        }
+
+        return $result ;
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     *
+     * @return array|\LQA\ChunkReviewStruct|null
+     *
+     */
+    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job ){
+
         $result = null ;
 
         if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
-            $result = @$review->is_pass ? 'excellent' : 'fail' ;
-        }
-        else {
+            $result = $review;
+        } else {
             $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
             $jobQA = new Revise_JobQA(
                     $job->id, $job->password, $struct->getTotal()
             );
-
             $jobQA->retrieveJobErrorTotals();
-            $overall = $jobQA->evalJobVote();
-
-            $result = strtolower( $overall['minText'] ) ;
+            $result = $jobQA->evalJobVote();
         }
 
         return $result ;
+
     }
 
     /**

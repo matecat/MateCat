@@ -182,11 +182,8 @@ class Xliff_Parser {
 
 
 						unset($temp);
-						preg_match('|<target.*?>(.+?)</target>|si', $trans_unit, $temp);
-						if (isset($temp[1])) {
-							$temp[1] = self::fix_non_well_formed_xml($temp[1]);
-							$xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] = $temp[1];
-						}
+
+						self::getTarget( $xliff, $i, $j, $trans_unit );
 
                         self::evalNotes($xliff, $i, $j, $trans_unit);
 
@@ -367,6 +364,23 @@ class Xliff_Parser {
                 $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
             }
         }
+    }
+
+    private static function getTarget( &$xliff, $i, $j, $trans_unit ) {
+
+        preg_match( '|<target.*?>(.+?)</target>|si', $trans_unit, $temp );
+        if ( isset( $temp[ 1 ] ) ) {
+            $temp[ 1 ] = self::fix_non_well_formed_xml( $temp[ 1 ] );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = $temp[ 1 ];
+        }
+
+        //['attr']['translate']
+        //<sdl:seg id="4" locked="true"
+        preg_match( '|<sdl:seg.*?(locked).*?>.+?</sdl:seg>|si', $trans_unit, $temp );
+        if ( isset( $temp[ 1 ] ) ) {
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'locked' ] = true;
+        }
+
     }
 
 }

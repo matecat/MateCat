@@ -2,9 +2,9 @@
 
 namespace Features ;
 
+use Contribution\ContributionStruct;
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
-use Log ;
 use FilesStorage ;
 use LQA\ChunkReviewDao;
 use LQA\ModelDao;
@@ -14,12 +14,43 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
-use Projects_MetadataDao;
-use ChunkOptionsModel;
+use Projects_ProjectStruct ;
+use Jobs_JobStruct ;
+
+use Features\ProjectCompletion\Model\EventStruct ;
+
+use Features ;
+use Chunks_ChunkStruct ;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
+use Features\ReviewImproved\Model\QualityReportModel ;
 
 class ReviewImproved extends BaseFeature {
 
     private $feature_options ;
+
+
+    /**
+     * In ReviewImproved, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
+     * revision status changes.
+     *
+     * This param must be reset to default value `true` when contribution is evaluted, otherwise the
+     * TM won't receive UPDATE when a segment is updated.
+     *
+     * XXX: not sure this was the best way to solve this problem.
+     *
+     * @param ContributionStruct     $contributionStruct
+     * @param Projects_ProjectStruct $project
+     *
+     * @return ContributionStruct
+     */
+    public function filterContributionStructOnSetTranslation( ContributionStruct $contributionStruct, Projects_ProjectStruct $project ) {
+
+        if ( $contributionStruct->fromRevision ) {
+            $contributionStruct->propagationRequest = true ;
+        }
+
+        return $contributionStruct ;
+    }
 
     /**
      * filter_review_password
@@ -222,6 +253,31 @@ class ReviewImproved extends BaseFeature {
     }
 
     /**
+     * project_completion_event_saved
+     *
+     * @param Chunks_ChunkStruct $chunk
+     * @param EventStruct $event
+     * @param $completion_event_id
+     */
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $completion_event_id ) {
+        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) ) {
+            if ( $event->is_review ) {
+                $model = new ArchivedQualityReportModel( $chunk );
+                $model->saveWithUID( $event->uid );
+            }
+            else {
+                $model = new QualityReportModel( $chunk ) ;
+                $model->resetScore( $completion_event_id );
+            }
+        }
+    }
+
+    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
+        $dao = new ChunkReviewDao();
+        $dao->updatePassword( $job->id, $job->password, $new_password );
+    }
+
+    /**
      * @param $array_jobs The jobs array coming from the project_structure
      *
      */
@@ -342,19 +398,22 @@ class ReviewImproved extends BaseFeature {
 
     }
 
+
     /**
      * Install routes for this plugin
      *
      * @param \Klein\Klein $klein
      */
-
     public static function loadRoutes( \Klein\Klein $klein ) {
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]', function ($request, $response, $service, $app) {
-            $controller = new Controller\QualityReportController( $request, $response, $service, $app);
-            $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
-            $controller->setView( $template_path );
-            $controller->respond();
-        });
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]',                    array(__CLASS__, 'callbackQualityReport')  );
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/versions/[:version]', array(__CLASS__, 'callbackQualityReport')  );
+    }
+
+    public static function callbackQualityReport($request, $response, $service, $app) {
+        $controller = new Controller\QualityReportController( $request, $response, $service, $app);
+        $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
+        $controller->setView( $template_path );
+        $controller->respond();
     }
 
 }

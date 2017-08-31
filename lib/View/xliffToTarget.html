@@ -19,19 +19,17 @@
     <link rel="stylesheet" href="/public/js/lib/dropzone/dropzone.css"/>
 -->
     <link rel="stylesheet" href="${basepath}public/css/build/upload-build.css?build=${build_number}"/>
-    <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-    <script src="${basepath}public/js/lib/jquery.js"></script>
-    <script src="${basepath}public/js/build/common.js"></script>
-    <script src="${basepath}public/js/upload.js"></script>
-
-    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/libs_upload.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/upload.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
     <script type="text/javascript">
         var config = {
@@ -440,7 +438,7 @@
 
 </script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>-->
 <script src="/public/js/lib/dropzone/dropzone.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
 
@@ -477,41 +475,39 @@
     //-->
 </script>
 
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
-<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
+<!--<script src="${basepath}public/js/lib/jquery-ui.js"></script>-->
 
-<!-- The Templates plugin is included to render the upload/download listings -->
-<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
+<!--&lt;!&ndash; The Templates plugin is included to render the upload/download listings &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>-->
 
-<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>
+<!--&lt;!&ndash; The Load Image plugin is included for the preview images and image resizing functionality &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>-->
 
-<!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<!--<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>-->
+<!--&lt;!&ndash; The Canvas to Blob plugin is included for image resizing functionality &ndash;&gt;-->
+<!--&lt;!&ndash;<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>&ndash;&gt;-->
 
-<!-- jQuery Image Gallery -->
-<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+<!--&lt;!&ndash; jQuery Image Gallery &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>-->
 
-<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>
-<!-- The basic File Upload plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>
-<!-- The File Upload file processing plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
-<!-- The File Upload user interface plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
-<!-- The File Upload jQuery UI plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
-<!-- The localization script -->
-<script src="${basepath}public/js/lib/fileupload/locale.js"></script>
-<!-- The main application script -->
-<script src="${basepath}public/js/lib/fileupload/main.js"></script>
+<!--&lt;!&ndash; The Iframe Transport is required for browsers without support for XHR file uploads &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>-->
+<!--&lt;!&ndash; The basic File Upload plugin &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>-->
+<!--&lt;!&ndash; The File Upload file processing plugin &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>-->
+<!--&lt;!&ndash; The File Upload user interface plugin &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>-->
+<!--&lt;!&ndash; The File Upload jQuery UI plugin &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>-->
+<!--&lt;!&ndash; The localization script &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/locale.js"></script>-->
+<!--&lt;!&ndash; The main application script &ndash;&gt;-->
+<!--<script src="${basepath}public/js/lib/fileupload/main.js"></script>-->
+
+
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]>
 <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
-
-<script src="${basepath}public/js/lib/jquery.cookie.js"></script>
-<script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
 
 <script>
     <!--//
@@ -525,7 +521,7 @@
 
             add: function ( e, data ) {
                 conversionFailed = {};
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         options = that.options,
                         files = data.files;
                 $( this ).fileupload( 'process', data ).done( function () {
@@ -553,7 +549,7 @@
 
             // Callback for the start of each file upload request:
             send: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( !data.isValidated ) {
                     if ( !data.isAdjusted ) {
                         that._adjustMaxNumberOfFiles( -data.files.length );
@@ -581,7 +577,7 @@
             },
             // Callback for successful uploads:
             done: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 if ( data.context ) {
 
@@ -632,7 +628,7 @@
             fail: function ( e, data ) {
                 conversionFailed = true;
                 conversionInfo = data.originalFiles[0];
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
@@ -720,13 +716,14 @@
             // Callback for global upload progress events:
             progressall: function ( e, data ) {
                 var $this = $( this ),
+                    upload = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         progress = parseInt( data.loaded / data.total * 100, 10 ),
                         globalProgressNode = $this.find( '.fileupload-progress' ),
                         extendedProgressNode = globalProgressNode
                                 .find( '.progress-extended' );
                 if ( extendedProgressNode.length ) {
                     extendedProgressNode.html(
-                            $this.data( 'fileupload' )._renderExtendedProgress( data )
+                        upload._renderExtendedProgress( data )
                     );
                 }
                 globalProgressNode
@@ -739,7 +736,7 @@
             },
             // Callback for uploads start, equivalent to the global ajaxStart event:
             start: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             that._trigger( 'started', e );
@@ -748,7 +745,7 @@
             },
             // Callback for uploads stop, equivalent to the global ajaxStop event:
             stop: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             $( this ).find( '.progress' )
@@ -762,7 +759,7 @@
             // Callback for file deletion:
             destroy: function ( e, data ) {
 
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( data.url ) {
                     $.ajax( data );
                     that._adjustMaxNumberOfFiles( 1 );

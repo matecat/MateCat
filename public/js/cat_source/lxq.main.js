@@ -1319,8 +1319,10 @@ LXQ.init  = function () {
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
                             //do something here -- enable qa errors
                             if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
-                                LXQ.addSegmentWaring(id_segment);
+                                LXQ.lexiqaData.segments.push( id_segment );
+                                LXQ.updateWarningsUI();
                             }
+
                             //highlight the segments
                             var source_val = $( ".source", segment ).html();
                             var highlights = {
@@ -1438,12 +1440,12 @@ LXQ.init  = function () {
                         //only do something if there are errors in lexiqa server
                         LXQ.lexiqaData.lexiqaWarnings = {};
 
-
                         results.segments.forEach( function ( element ) {
                             if ( element.errornum === 0 ) {
                                 return;
                             }
-                            LXQ.addSegmentWaring(element.segid);
+
+                            LXQ.lexiqaData.segments.push(element.segid);
 
                             //highlight the respective segments here
                             var highlights = {
@@ -1509,9 +1511,13 @@ LXQ.init  = function () {
                             QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(seg);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));
                         } );
+
+                        LXQ.updateWarningsUI();
+
                         if ( LXQ.enabled() ) {
                             LXQ.reloadPowertip();
                         }
+
                     }
                     else {
                         results.qaurl = "#";
@@ -1527,8 +1533,7 @@ LXQ.init  = function () {
                 }
             } );
         },
-        addSegmentWaring: function (idSegment) {
-            LXQ.lexiqaData.segments.push(idSegment);
+        updateWarningsUI: function () {
             LXQ.lexiqaData.segments.sort();
             if ( !UI.QAComponent ) {
                 var mountPoint = $(".qa-wrapper")[0];

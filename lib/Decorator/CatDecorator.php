@@ -1,5 +1,6 @@
 <?php
 
+use Jobs\JobStatsStruct;
 use LexiQA\LexiQADecorator;
 
 class CatDecorator {
@@ -90,8 +91,9 @@ class CatDecorator {
 
         $this->decorateForCJK();
 
-        $this->assignOptions(); 
-        
+        $this->assignOptions();
+
+        $this->template->chunk_completion_undoable = true ;
     }
 
     /**

@@ -113,8 +113,8 @@ class UpdateDBTest extends AbstractTest
          * Segment initialization
          */
         $sql_insert_first_segment = "INSERT INTO ".INIT::$DB_DATABASE.".`segments` 
-    ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values
-    ( '21922356366' , ".$this->job_id." , null , '- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.' , 'e0170a2e381f1969056a7eb5e5bd0ac9', '".$this->number_of_words_changed."' , null, '', '' , '1' , null , null )";
+    ( internal_id, id_file, id_project, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values
+    ( '21922356366' , ".$this->job_id.", {$this->job_struct->id_project} , '- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.' , 'e0170a2e381f1969056a7eb5e5bd0ac9', '".$this->number_of_words_changed."' , null, '', '' , '1' , null , null )";
 
         $this->database_instance->query($sql_insert_first_segment);
         $this->first_segment_id= $this->database_instance->last_insert();

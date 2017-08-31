@@ -8,7 +8,7 @@
  */
 class Analysis_AnalysisModel {
 
-    public $pid ;
+    public $pid;
     public $pname                      = "";
     public $total_raw_word_count       = 0;
     public $total_raw_word_count_print = "";
@@ -34,9 +34,9 @@ class Analysis_AnalysisModel {
     public $proj_payable_rates;
     public $subject;
 
-    public $project_data ;
-    public $reference_files ;
-    
+    public $project_data;
+    public $reference_files;
+
     /**
      * @var Projects_ProjectStruct
      */
@@ -65,21 +65,21 @@ class Analysis_AnalysisModel {
         $zip = new ZipArchive();
         $zip->open( $this->getProject()->getFirstOriginalZipPath() );
 
-        $this->reference_files = array() ;
-        $folder = ZipArchiveExtended::REFERENCE_FOLDER ;
+        $this->reference_files = array();
+        $folder                = ZipArchiveExtended::REFERENCE_FOLDER;
 
         for ( $i = 0; $i < $zip->numFiles; $i++ ) {
-            if ( preg_match( "/$folder\/(\w+)/",$zip->getNameIndex( $i ) )) {
-                $path = preg_replace( "/$folder\/(\w+)/", '${1}', $zip->getNameIndex( $i ));
+            if ( preg_match( "/$folder\/(\w+)/", $zip->getNameIndex( $i ) ) ) {
+                $path = preg_replace( "/$folder\/(\w+)/", '${1}', $zip->getNameIndex( $i ) );
 
-                $this->reference_files[] = array( 'index' => $i, 'name' => $path ) ;
+                $this->reference_files[] = array( 'index' => $i, 'name' => $path );
             }
         }
     }
 
     /**
-     * This method is basically copied from the analyzeController in
-     * MateCat default. A future refactoring of analyzeController should
+     * This method is basically copied from the analyzeOldController in
+     * MateCat default. A future refactoring of analyzeOldController should
      * make use of this model if possible.
      */
     public function loadData() {
@@ -91,7 +91,7 @@ class Analysis_AnalysisModel {
 
         $this->subject = $this->project_data[ 0 ][ 'subject' ];
 
-        $this->pid = $this->project->id ;
+        $this->pid = $this->project->id;
 
         foreach ( $this->project_data as $p_jdata ) {
 
@@ -169,6 +169,7 @@ class Analysis_AnalysisModel {
             unset( $p_jdata[ 'standard_analysis_wc' ] );
 
 
+            //initialize the job/chunk bucket
             if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ] ) ) {
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ]                   = array();
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jid' ]          = $p_jdata[ 'jid' ];
@@ -187,18 +188,26 @@ class Analysis_AnalysisModel {
                     $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] = 0;
                 }
 
+                if ( !array_key_exists( "total_st_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
+                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_st_word_count' ] = 0;
+                }
+
             }
 
             //calculate total word counts per job (summing different files)
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] += $p_jdata[ 'file_raw_word_count' ];
             //format the total (yeah, it's ugly doing it every cycle)
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ]       += $p_jdata[ 'file_raw_word_count' ];
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ], 0, ".", "," );
 
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] += $p_jdata[ 'file_eq_word_count' ];
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ]       += $p_jdata[ 'file_eq_word_count' ];
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ], 0, ".", "," );
+
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_st_word_count' ]       += $p_jdata[ 'file_st_word_count' ];
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_st_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_st_word_count' ], 0, ".", "," );
 
             $p_jdata[ 'file_eq_word_count' ]  = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
             $p_jdata[ 'file_raw_word_count' ] = number_format( $p_jdata[ 'file_raw_word_count' ], 0, ".", "," );
+            $p_jdata[ 'file_st_word_count' ]  = number_format( $p_jdata[ 'file_st_word_count' ], 0, ".", "," );
 
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'files' ][ $p_jdata[ 'id_file' ] ] = $p_jdata;
 
@@ -210,8 +219,16 @@ class Analysis_AnalysisModel {
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $fast_wc_time = $this->fast_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
 
+        /**
+         * Chrome Bug: reordering object sorting keys numerically, transform objects in an ordered list
+         */
+        foreach( $this->jobs as $_jid => $job ){
+            $this->jobs[ $_jid ][ 'chunks' ] = array_values( $this->jobs[ $_jid ][ 'chunks' ] );
+        }
+
+
         //CJK count we assume 4000 chars/day
-        if ( array_key_exists( explode( "-" , $p_jdata[ 'source' ] )[0], CatUtils::$cjk ) ) {
+        if ( array_key_exists( explode( "-", $p_jdata[ 'source' ] )[ 0 ], CatUtils::$cjk ) ) {
             $raw_wc_time  = $this->total_raw_word_count / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
             $tm_wc_time   = $this->tm_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
             $fast_wc_time = $this->fast_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
@@ -302,7 +319,7 @@ class Analysis_AnalysisModel {
 
     private function loadProjectData() {
 
-        if( !empty( $this->project_data ) ){
+        if ( !empty( $this->project_data ) ) {
             return $this->project_data;
         }
 
@@ -316,7 +333,7 @@ class Analysis_AnalysisModel {
         return $this->project_data;
     }
 
-    public function getProjectData(){
+    public function getProjectData() {
         return $this->loadProjectData();
     }
 

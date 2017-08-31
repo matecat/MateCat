@@ -38,7 +38,7 @@
 	font-family: 'Open Sans', sans-serif;*/
 	/*font-weight: 100;
 	font-size: 0.8rem;*/
-    background-color: #4D4D4D;
+    /*background-color: #4D4D4D;*/
 	line-height: 1.5rem;
 	padding: 0;
     /*border: 1px solid #046380;*/
@@ -50,10 +50,6 @@
     transition-property: transform, -webkit-transform;
     -webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
             transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);*/
-}
-
-#powerTip.sw::before, #powerTip.se::before {
-    border-bottom: 10px solid #4D4D4D;
 }
 
 #powerTip .tooltip-error-wrapper {
@@ -101,7 +97,7 @@
 }
 
 #powerTip .tooltip-error-ignore {
-    color: rgb(206, 199, 199);
+    color: #757575;
     text-decoration: none;
     cursor: pointer;
     border-radius: 0 4px 4px 0;
@@ -110,7 +106,7 @@
 }
 
 #powerTip .tooltip-error-ignore:hover {
-    color: #fff;
+    color: #525252;
 }
 .tooltip-error-container:not(:first-child) {
     border-top: 1px solid rgba(255, 255, 255, 0.36);

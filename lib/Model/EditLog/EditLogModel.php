@@ -9,12 +9,11 @@
 class EditLog_EditLogModel {
     //number of percentage point under which the post editing effor evaluation is still accepted;
     const PEE_THRESHOLD = 1;
-    const MAX_SEGMENTS_PER_PAGE = 50;
     const CACHETIME = 108000;
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;
 
-    private static $segments_per_page = 10;
+    private static $segments_per_page = 50;
     private static $start_id = -1;
     private static $sort_by = "sid";
 
@@ -132,9 +131,10 @@ class EditLog_EditLogModel {
         return CatUtils::getFastStatsForJob( $wStruct );
     }
 
-    private function getEditLogData( $use_ter_diff = false ) {
+    public function getEditLogData( $use_ter_diff = false ) {
+
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
-        $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
+        $data       = $editLogDao->setNumSegs( self::$segments_per_page )->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
 
         //get translation mismatches and convert the array in a hashmap
         $translationMismatchList = $editLogDao->getTranslationMismatches( $this->getJid() );
@@ -269,6 +269,8 @@ class EditLog_EditLogModel {
             if ( ( $displaySeg->suggestion_match == "85%" ) || ( $displaySeg->suggestion_match == "86%" ) ) {
                 $displaySeg->suggestion_source = 'Machine Translation';
                 $stat_mt[]                     = $seg->raw_word_count;
+            } elseif( $displaySeg->match_type == 'NO_MATCH' ) {
+                $displaySeg->suggestion_source = 'NO_MATCH';
             } else {
                 $displaySeg->suggestion_source = 'TM';
             }
@@ -291,7 +293,7 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source_csv      = preg_replace( $array_patterns, $array_replacements_csv, $seg->source );
             $displaySeg->translation_csv = preg_replace( $array_patterns, $array_replacements_csv, $seg->translation );
-            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->suggestion_view );
+            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $seg->suggestion );
             $displaySeg->diff_csv        = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->diff );
 
 
@@ -304,7 +306,7 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source          = preg_replace( $array_patterns, $array_replacements, $seg->source );
             $displaySeg->translation     = preg_replace( $array_patterns, $array_replacements, $seg->translation );
-            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->suggestion_view );
+            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $seg->suggestion );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
 
             $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
@@ -335,7 +337,6 @@ class EditLog_EditLogModel {
             $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
             $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
-
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
         $stats[ 'tm-words' ]        = 100 - $stats[ 'mt-words' ];
         $stats[ 'total-valid-tte' ] = round( $globalStats[ 'tot_tte' ] );

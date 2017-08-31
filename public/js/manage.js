@@ -6,9 +6,8 @@ UI = {
         this.Search.filter = {};
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
         this.openJobSettings = this.openJobSettings.bind(this);
-        this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
-        this.changeJobPassword = this.changeJobPassword.bind(this);
         this.changeTeam = this.changeTeam.bind(this);
+        this.reloadProjects = this.reloadProjects.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
         this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail;
@@ -24,8 +23,8 @@ UI = {
     },
 
     render: function () {
-        let self = this;
-        let headerMountPoint = $("header")[0];
+        var self = this;
+        var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
         ReactDOM.render(React.createElement(Header), headerMountPoint);
@@ -36,7 +35,7 @@ UI = {
         window.addEventListener('scroll', this.scrollDebounceFn());
 
         $(window).on("blur focus", function(e) {
-            let prevType = $(this).data("prevType");
+            var prevType = $(this).data("prevType");
 
             if (prevType != e.type) {   //  reduce double fire issues
                 switch (e.type) {
@@ -62,16 +61,23 @@ UI = {
             $(this).data("prevType", e.type);
         });
 
-        this.getAllTeams().done(function (data) {
-
+        API.TEAM.getAllTeams().done(function (data) {
             self.teams = data.teams;
-            ManageActions.renderTeams(self.teams);
+            TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
-                ManageActions.selectTeam(self.selectedTeam);
+                TeamsActions.selectTeam(self.selectedTeam);
                 self.checkPopupInfoTeams();
-                self.getProjects(self.selectedTeam).done(function(response){
-                    self.renderProjects(response.data);
+                API.PROJECTS.getProjects(self.selectedTeam, UI.Search).done(function(response){
+                    if (typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 401   ) { //Not Logged or not in the team
+                        window.location.reload();
+                    } else if( typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 404){
+                        UI.selectPersonalTeam();
+                    } else if( typeof response.errors != 'undefined' && response.errors.length ){
+                        window.location = '/';
+                    } else {
+                        self.renderProjects(response.data);
+                    }
                 });
             });
         });
@@ -79,34 +85,42 @@ UI = {
     },
 
     reloadProjects: function () {
-        let self = this;
+        var self = this;
         if ( UI.Search.currentPage === 1) {
-            this.getProjects(self.selectedTeam).done(function (response) {
-                let projects = response.data;
-                ManageActions.updateProjects(projects);
+            API.PROJECTS.getProjects(self.selectedTeam, UI.Search).done(function (response) {
+                if (typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 401   ) { //Not Logged or not in the team
+                    window.location.reload();
+                } else if( typeof response.errors != 'undefined' && response.errors.length && response.errors[0].code === 404){
+                    UI.selectPersonalTeam();
+                } else if( typeof response.errors != 'undefined' && response.errors.length ){
+                    window.location = '/';
+                } else {
+                    var projects = response.data;
+                    ManageActions.updateProjects(projects);
+                }
             });
         } else {
             // ManageActions.showReloadSpinner();
-            let total_projects = [];
-            let requests = [];
-            let onDone = function (response) {
-                        let projects = response.data;
+            var total_projects = [];
+            var requests = [];
+            var onDone = function (response) {
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
-            for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(self.selectedTeam, i));
+            for (var i=1; i<= UI.Search.currentPage; i++ ) {
+                requests.push(API.PROJECTS.getProjects(self.selectedTeam, UI.Search, i));
             }
             $.when.apply(this, requests).done(function() {
-                let results = requests.length > 1 ? arguments : [arguments];
-                for( let i = 0; i < results.length; i++ ){
+                var results = requests.length > 1 ? arguments : [arguments];
+                for( var i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
                 ManageActions.updateProjects(total_projects);
             });
         }
-        this.getAllTeams(true).done(function (data) {
+        API.TEAM.getAllTeams(true).done(function (data) {
             self.teams = data.teams;
-            ManageActions.updateTeams(self.teams);
+            TeamsActions.updateTeams(self.teams);
         });
 
     },
@@ -114,10 +128,10 @@ UI = {
     renderProjects: function (projects) {
         APP.beforeRenderProjects = new Date();
         if ( !this.ProjectsContainer ) {
-            let mountPoint = $("#manage-container")[0];
+            var mountPoint = $("#manage-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                getLastActivity: this.getLastProjectActivityLogAction,
-                changeJobPasswordFn: this.changeJobPassword,
+                getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
+                changeJobPasswordFn: API.JOB.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation
             }), mountPoint);
         }
@@ -127,8 +141,8 @@ UI = {
 
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.getProjects(this.selectedTeam).done(function (response) {
-            let projects = response.data;
+        API.PROJECTS.getProjects(this.selectedTeam, UI.Search).done(function (response) {
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -147,7 +161,7 @@ UI = {
      * Open the settings for the job
      */
     openJobSettings: function (job, prName) {
-        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -157,89 +171,42 @@ UI = {
      * Open the tm panel for the job
      */
     openJobTMPanel: function (job, prName) {
-        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
         }, 2000);
     },
 
-    /**
-     *
-     * @param type Job or Project: obj, prj
-     * @param object
-     * @param status
-     * @param only_if
-     */
-     changeJobsOrProjectStatus: function(type,object,status,only_if) {
-        // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
 
-        if(typeof only_if == 'undefined') only_if = 0;
-
-        let id = object.id;
-        let password = object.password;
-
-        let data = {
-            action:		"changeJobsStatus",
-            new_status: status,
-            res: 		type,            //Project or Job:
-            id:			id,             // Job or Project Id
-            password:   password,          // Job or Project Password
-            page:		UI.Search.currentPage,        //The pagination ??
-            only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
-            undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
-        };
-
-        // Filters
-        data = $.extend(data,UI.Search.filter);
-
-        return APP.doRequest({
-            data: data,
-            success: function(d){},
-            error: function(d){}
-        });
-    },
-
-    getAllTeams: function (force) {
-        if ( APP.USER.STORE.teams && !force) {
-            let data = {
-                teams: APP.USER.STORE.teams
-            };
-            let deferred = $.Deferred().resolve(data);
-            return deferred.promise();
-        } else {
-            return APP.USER.loadUserData();
-        }
-
-    },
 
     changeTeam: function (team) {
 
-        let self = this;
+        var self = this;
         this.selectedTeam = team;
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
         APP.setTeamInStorage(team.id);
         return this.getTeamStructure(team).then(function () {
-                return self.getProjects(self.selectedTeam);
+                return API.PROJECTS.getProjects(self.selectedTeam, UI.Search);
             }
         );
     },
 
     getTeamStructure: function (team) {
-        let self = this;
-        return this.getTeamMembers(team.id).then(function (data) {
+        var self = this;
+        return API.TEAM.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
         });
     },
 
     filterProjects: function(userUid, name, status) {
-        let self = this;
+        var self = this;
         this.Search.filter = {};
         this.Search.currentPage = 1;
-        let filter = {};
+        var filter = {};
         if (typeof userUid != "undefined") {
              if (userUid === ManageConstants.NOT_ASSIGNED_FILTER) {
                 filter.no_assignee = true;
@@ -258,11 +225,11 @@ UI = {
         if (!_.isEmpty(this.Search.filter)) {
             UI.Search.currentPage = 1;
         }
-        return this.getProjects(this.selectedTeam);
+        return API.PROJECTS.getProjects(this.selectedTeam, UI.Search);
     },
 
     scrollDebounceFn: function() {
-        let self = this;
+        var self = this;
         return _.debounce(function() {
             self.handleScroll();
         }, 300)
@@ -276,7 +243,7 @@ UI = {
     },
 
     checkPopupInfoTeams: function () {
-        let openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
+        var openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
         if (!openPopup) {
             ManageActions.openPopupTeams();
         }
@@ -287,7 +254,7 @@ UI = {
     },
 
     showNotificationProjectsChanged: function () {
-        let notification = {
+        var notification = {
             title: 'Ooops...',
             text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
             type: 'warning',
@@ -295,7 +262,7 @@ UI = {
             allowHtml: true,
             autoDismiss: false,
         };
-        let boxUndo = APP.addNotification(notification);
+        var boxUndo = APP.addNotification(notification);
     },
 
     selectPersonalTeam: function () {
@@ -303,75 +270,6 @@ UI = {
             return team.type == 'personal';
         });
         ManageActions.changeTeam(personalTeam);
-    },
-
-    //********** REQUESTS *********************//
-
-    /**
-     * Retrieve Projects. Passing filters is possible to retrieve projects
-     */
-    getProjects: function(team, page) {
-        let pageNumber = (page) ? page : UI.Search.currentPage;
-        let data = {};
-        // if (team.type == 'personal') {
-        //     this.Search.filter.id_assignee = APP.USER.STORE.user.uid;
-        //     data = {
-        //         action: 'getProjects',
-        //         page:	pageNumber,
-        //         filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        //     };
-        // } else {
-            data = {
-                action: 'getProjects',
-                id_team: team.id,
-                page:	pageNumber,
-                filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-            };
-        // }
-
-        // Filters
-        data = $.extend(data,UI.Search.filter);
-
-        return APP.doRequest({
-            data: data,
-            success: function(d){
-
-                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401   ) { //Not Logged or not in the team
-                    window.location.reload();
-                } else if( typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 404){
-                    UI.selectPersonalTeam();
-                    // UI.reloadProjects();
-                } else if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/';
-                }
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
-    },
-
-    createTeam: function (teamName, members) {
-        let data = {
-            type: 'general',
-            name: teamName,
-            members: members
-        };
-        return $.ajax({
-            async: true,
-            data: data,
-            type: "POST",
-            url : "/api/v2/teams"
-        });
-
-    },
-
-    getTeamMembers: function (teamId) {
-        return $.ajax({
-            async: true,
-            type: "get",
-            url : "/api/v2/teams/" + teamId + "/members"
-        });
     },
 
     downloadTranslation: function(project, job, urlWarnings) {
@@ -402,12 +300,12 @@ UI = {
 
         //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
         if ( job.warnings_count > 0 ) {
-            let props = {
-                text: 'Potential errors (e.g. tag mismatches, inconsistencies etc.) found in the text. ' +
-                'If you continue, your download may fail or part of the content be untranslated - search ' +
-                'the string "UNTRANSLATED_CONTENT" in the downloaded file(s).<br><br>Continue downloading ' +
-                'or fix the error in MateCat:',
-                successText: "Continue",
+            var props = {
+                text: 'Unresolved tag issues may prevent downloading your translation. <br>Please fix the issues. ' +
+                '<a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br />'+
+                'If you continue downloading, part of the content may be untranslated - ' +
+                'look for the string UNTRANSLATED_CONTENT in the downloaded files.',
+                successText: "Donload anyway",
                 successCallback: continueDownloadFunction,
                 warningText: "Fix errors",
                 warningCallback: openUrl
@@ -420,217 +318,19 @@ UI = {
 
     },
 
-
-
-    getLastProjectActivityLogAction: function (id, pass) {
-        return $.ajax({
-            async: true,
-            type: "get",
-            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
-        });
-    },
-
-    changeProjectName: function (idOrg, idProject, newName) {
-        let data = {
-            name: newName
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
-        });
-    },
-
-    changeProjectAssignee: function (idOrg, idProject, newUserId) {
-        //Pass null to unassign a Project
-        var idAssignee = (newUserId == '-1') ? null : newUserId;
-        let data = {
-            id_assignee: idAssignee
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "put",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
-        });
-    },
-
-    /**
-     * Change the password for the job
-     * @param job
-     * @param undo
-     * @param old_pass
-     */
-    changeJobPassword: function(job, undo, old_pass) {
-        let id = job.id;
-        let password = job.password;
-
-        return APP.doRequest({
-            data: {
-                action:		    "changePassword",
-                res: 		    'obj',
-                id: 		    id,
-                password: 	    password,
-                old_password: 	old_pass,
-                undo:           undo
-            },
-            success: function(d){}
-        });
-    },
-
-    addUserToTeam: function (team, userEmail) {
-        var email = (typeof userEmail === "string") ? [userEmail] : userEmail;
-        let data = {
-            members: email
-        };
-        return $.ajax({
-            data: data,
-            type: "post",
-            url : "/api/v2/teams/"+ team.id +"/members",
-        });
-    },
-
-    removeUserFromTeam: function (team, userId) {
-        return $.ajax({id_team: team.id,
-            type: "delete",
-            url : "/api/v2/teams/"+ team.id +"/members/" + userId,
-        });
-    },
-
-    changeTeamName: function (team, newName) {
-        let data = {
-            name: newName
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + team.id,
-        });
-    },
-
-    changeProjectTeam: function (newTeamId, project) {
-        let data = {
-            id_team: newTeamId
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/teams/" + project.id_team + "/projects/" + project.id
-        });
-    },
-
-    //*******************************//
-
     //********* Modals **************//
 
     openCreateTeamModal: function () {
-        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create New Team");
+        ModalsActions.openCreateTeamModal()
     },
 
     openModifyTeamModal: function (team, hideChangeName) {
-        let props = {
-            team: team,
-            hideChangeName: hideChangeName
-        };
-        APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
+        ModalsActions.openModifyTeamModal(team, hideChangeName);
     },
 
     openChangeTeamModal: function (teams, project) {
-        let props = {
-            teams: teams,
-            project: project,
-            selectedTeam: this.selectedTeam.id
-        };
-        APP.ModalWindow.showModalComponent(ChangeTeamModal, props, "Move project");
-    },
-
-    openOutsourceModal: function (project, job, url) {
-        let props = {
-            project: project,
-            job: job,
-            url: url,
-            fromManage: true,
-            translatorOpen: true,
-            onCloseCallback: function () {
-                
-            }
-        };
-        let style = {width: '970px',maxWidth: '970px', top: '45%'};
-        APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
-    },
-
-    openSplitJobModal: function (job, project) {
-        let props = {
-            job: job,
-            project: project
-        };
-        let style = {width: '670px',maxWidth: '670px'};
-        APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
-    },
-
-    /****** Analyze *******/
-    checkSplitRequest: function (job, project, numsplit, arrayValues) {
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "check",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id,
-                job_pass: job.password,
-                num_split: numsplit,
-                split_values: arrayValues
-            },
-            success: function(d) {}
-        });
-    },
-
-    confirmSplitRequest: function(job, project, numsplit, arrayValues) {
-
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "apply",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id,
-                job_pass: job.password,
-                num_split: numsplit,
-                split_values: arrayValues
-            }
-        });
-    },
-    openMergeModal: function (project, job) {
-        let props = {
-            text: 'This will cause the merging of all chunks in only one job. ' +
-            'This operation cannot be canceled.',
-            successText: "Continue",
-            successCallback: function () {
-                UI.confirmMerge(project, job);
-                UI.reloadProjects();
-                APP.ModalWindow.onCloseModal();
-            },
-            cancelText: "Cancel",
-            cancelCallback: function () {
-                APP.ModalWindow.onCloseModal();
-            }
-
-        };
-        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
-    },
-    confirmMerge: function(project, job) {
-
-        return APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "merge",
-                project_id: project.id,
-                project_pass: project.password,
-                job_id: job.id
-            }
-
-        });
+        ModalsActions.openChangeTeamModal(teams, project,  this.selectedTeam.id);
     }
-    /**********************/
 };
 
 

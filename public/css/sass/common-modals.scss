@@ -356,7 +356,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
-    margin-bottom: 20px;
+    padding-bottom: 25px;
     p {
         line-height: 5px !important;
     }
@@ -579,7 +579,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     max-width: 600px;
     min-width: 400px;
     -webkit-box-shadow: 0 1px 20px #000;
-    box-shadow: 0 1px 20px #000;
+    box-shadow: 0 1px 20px #6f6e6e;
 }
 
 .matecat-modal-body h1 {
@@ -642,7 +642,7 @@ div#matecat-modal p {
     position: relative;
     width: 60px;
     zoom: 0.7;
-    margin-top: 8px;
+    margin-top: 1px;
     float: left;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -661,6 +661,7 @@ div#matecat-modal p {
     border-radius: 20px;
     height: 30px !important;
     padding-left: initial !important;
+    margin-right: -1px;
 }
 
 .onoffswitch-label:before,
@@ -838,6 +839,7 @@ div#matecat-modal p {
     margin-left: 0;
     margin-top: 5px;
     margin-bottom: 0;
+    box-sizing: content-box;
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {
@@ -1267,3 +1269,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 .dropdown > .menu {
     z-index: 100000000;
 }
+
+/*.primary {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    !* padding: 6px 15px; *!
+    vertical-align: top;
+    font-size: 16px;
+    border: 1px solid #797979;
+    border-radius: 2px;
+}*/

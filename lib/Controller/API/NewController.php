@@ -62,7 +62,7 @@ class NewController extends ajaxController {
     private $private_tm_user = null;
     private $private_tm_pass = null;
 
-    private $new_keys = array();
+    protected $new_keys = array();
 
     private $owner = "";
     /**
@@ -95,6 +95,13 @@ class NewController extends ajaxController {
     protected $team;
 
     protected $id_team ;
+
+    protected $projectStructure ;
+
+    /**
+     * @var ProjectManager
+     */
+    protected $projectManager ;
 
     public function __construct() {
 
@@ -558,8 +565,8 @@ class NewController extends ajaxController {
 
         $arFiles = $newArFiles;
 
-        $projectManager   = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
+        $this->projectManager   = new ProjectManager();
+        $projectStructure = $this->projectManager->getProjectStructure();
 
         $projectStructure[ 'sanitize_project_options' ] = false;
 
@@ -589,7 +596,7 @@ class NewController extends ajaxController {
             $projectStructure[ 'uid' ]           = $this->current_user->getUid();
             $projectStructure[ 'id_customer' ]   = $this->current_user->getEmail();
             $projectStructure[ 'owner' ]         = $this->current_user->getEmail();
-            $projectManager->setTeam( $this->team ) ;
+            $this->projectManager->setTeam( $this->team ) ;
         }
 
         //set features override
@@ -599,19 +606,20 @@ class NewController extends ajaxController {
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
-        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
+        $projectStructure[ 'ppassword' ]  = $this->projectManager->generatePassword();
+
+        $this->projectStructure = $projectStructure ;
+
+        $this->projectManager->sanitizeProjectStructure();
 
         Queue::sendProject( $projectStructure );
 
-        $time = time();
-        do {
-            $this->result = Queue::getPublishedResults( $projectStructure['id_project'] ); //LOOP for 290 seconds **** UGLY **** Deprecate in API V2
-            if ( $this->result != null ){
-                break;
-            }
-            sleep(2);
-        } while( time() - $time <= 290 );
+        $this->_pollForCreationResult();
 
+        $this->_outputResult() ;
+    }
+
+    protected function _outputResult() {
         if( $this->result == null ){
             $this->api_output[ 'status' ]  = 504;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
@@ -624,14 +632,28 @@ class NewController extends ajaxController {
 
         } else {
             //everything ok
-            $this->api_output[ 'status' ]       = 'OK';
-            $this->api_output[ 'message' ]      = 'Success';
-            $this->api_output[ 'id_project' ]   = $this->result[ 'id_project' ];
-            $this->api_output[ 'project_pass' ] = $this->result[ 'ppassword' ];
-            $this->api_output[ 'new_keys' ] = $this->new_keys;
-            $this->api_output[ 'analyze_url' ] = $this->result[ 'analyze_url' ];
+            $this->_outputForSuccess();
         }
+    }
 
+    protected function _outputForSuccess() {
+        $this->api_output[ 'status' ]       = 'OK';
+        $this->api_output[ 'message' ]      = 'Success';
+        $this->api_output[ 'id_project' ]   = $this->projectStructure[ 'id_project' ];
+        $this->api_output[ 'project_pass' ] = $this->projectStructure[ 'ppassword' ];
+        $this->api_output[ 'new_keys' ]     = $this->new_keys;
+        $this->api_output[ 'analyze_url' ]  = $this->projectManager->getAnalyzeURL();
+    }
+
+    protected function _pollForCreationResult() {
+        $time = time();
+        do {
+            $this->result = Queue::getPublishedResults( $this->projectStructure['id_project'] ); //LOOP for 290 seconds **** UGLY **** Deprecate in API V2
+            if ( $this->result != null ){
+                break;
+            }
+            sleep(2);
+        } while( time() - $time <= 290 );
     }
 
     private function validateSourceLang() {

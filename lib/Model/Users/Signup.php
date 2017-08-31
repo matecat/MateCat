@@ -2,6 +2,7 @@
 
 namespace Users ;
 
+use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
@@ -63,11 +64,14 @@ class Signup {
 
         if ( isset( $this->user->uid ) ) {
             $this->__updatePersistedUser() ;
-            \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
+            Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
         } else {
             $this->__prepareNewUser() ;
-            $this->user->uid = \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+            $this->user->uid = Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
 
+            Database::obtain()->begin();
+            ( new TeamDao() )->createPersonalTeam( $this->user ) ;
+            Database::obtain()->commit();
         }
 
         $this->__saveWantedUrl();
@@ -140,15 +144,14 @@ class Signup {
             throw new ValidationError('Confirmation token is too old, please contact support.') ;
         }
 
-        $user->email_confirmed_at = Utils::mysqlTimestamp( time() ) ;
-        $user->confirmation_token = null ;
+        $ever_signed_in = $user->everSignedIn() ;
 
-        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+        $user = self::__updateUserFields( $user ) ;
 
-        ( new TeamDao() )->createPersonalTeam( $user ) ;
-
-        $email = new WelcomeEmail( $user ) ;
-        $email->send() ;
+        if ( !$ever_signed_in ) {
+            $email = new WelcomeEmail( $user ) ;
+            $email->send() ;
+        }
 
         AuthCookie::setCredentials($user->email, $user->uid);
 
@@ -189,6 +192,20 @@ class Signup {
             $delivery->send();
         }
 
+    }
+
+    /**
+     * @param Users_UserStruct $user
+     *
+     * @return Users_UserStruct
+     */
+    private static function __updateUserFields(Users_UserStruct $user) {
+        $user->email_confirmed_at = Utils::mysqlTimestamp( time() ) ;
+        $user->confirmation_token = null ;
+
+        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+
+        return $user ;
     }
 
 }

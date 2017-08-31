@@ -12,7 +12,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EditLog_EditLogSegmentStruct";
 
-    const NUM_SEGS = 10;
+    protected static $NUM_SEGS = 10;
+
+    /**
+     * @param int $NUM_SEGS
+     *
+     * @return $this
+     */
+    public function setNumSegs( $NUM_SEGS = 10 ) {
+        self::$NUM_SEGS = $NUM_SEGS;
+        return $this;
+    }
 
     /**
      * This method returns a set of 2*NUM_SEGS segments
@@ -74,6 +84,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             st.suggestion_match,
             st.suggestion_position,
             st.mt_qe,
+            st.match_type,
             j.id_translator,
             j.source AS job_source,
             j.target AS job_target,
@@ -94,7 +105,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 translation IS NOT NULL AND
                 st.status not in( '%s', '%s' )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                ORDER BY time_to_edit DESC";
+                ORDER BY id_segment ASC";
 
         $querySegments = sprintf(
                 $querySegments,
@@ -103,13 +114,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS,
+                self::$NUM_SEGS,
                 $job_id,
                 $password,
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS
+                self::$NUM_SEGS
         );
 
         $result = $this->_fetch_array(
@@ -229,7 +240,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -270,7 +281,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -311,7 +322,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $result = $this->_fetch_array(
                 sprintf(
                         $queryBefore,
-                        self::NUM_SEGS,
+                        self::$NUM_SEGS,
                         $job_id,
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
@@ -348,6 +359,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         join segments s on s.id = st.id_segment
         join jobs j on j.id = st.id_job
         where id_job = %d
+            AND show_in_cattool = 1
             and  password = '%s'
             and st.status not in( '%s', '%s' )
             and time_to_edit/raw_word_count between %d and %d";

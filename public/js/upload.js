@@ -1,16 +1,6 @@
 
 $(document).ready(function(){
 
-    //set 
-    if (!$('#source-lang option.custom').length) {
-    //					$('#source-lang').val('en-US').attr('selected',true);
-    $('#source-lang option.separator').remove();
-    }
-    if (!$('#target-lang option.custom').length) {
-    //					$('#target-lang').val('fr-FR').attr('selected',true);
-    $('#target-lang option.separator').remove();
-    }
-
     if(!config.isLoggedIn) $('body').addClass('isAnonymous');
 
     $(".supported-file-formats").click(function(e){
@@ -28,14 +18,14 @@ $(document).ready(function(){
     });
     $("#swaplang").click(function(e){
         e.preventDefault();
-        var src = $('#source-lang').val();
-        var trg = $('#target-lang').val();
-        if($('#target-lang').val().split(',').length > 1) {
+        var src = $('#source-lang').dropdown('get value');
+        var trg = $('#target-lang').dropdown('get value');
+        if(trg.split(',').length > 1) {
             APP.alert({msg: 'Cannot swap languages when <br>multiple target languages are selected!'});
             return false;
         }
-        $('#source-lang').val(trg);
-        $('#target-lang').val(src);
+        $('#source-lang').dropdown('set selected', trg);
+        $('#target-lang').dropdown('set selected', src);
 
         APP.changeTargetLang( src );
 
@@ -69,18 +59,16 @@ $(document).ready(function(){
             direction = UI.checkMultilangRTL();
             str = str.substring(0, str.length - 1);
             vals = vals.substring(0, vals.length - 1);
-            var op = '<option id="extraTarget" selected="selected" data-direction="' + direction + '" value="' + vals + '">' + str + '</option>';
+            var op = '<div id="extraTarget" class="item" data-selected="selected" data-direction="' + direction + '" data-value="' + vals + '">' + str + '</div>';
             $('#extraTarget').remove();
-            if ($('#target-lang .separator').length) {
-                ob = $('#target-lang .separator').next();
-            } else {
-                ob = $('#target-lang option').first();
-            }
-            ob.before(op);
+            $('#target-lang div.item').first().before(op);
+            setTimeout(function () {
+                $('#target-lang').dropdown('set selected', vals);
+            });
+
 
             $('.translate-box.target h2 .extra').remove();
             $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
-            UI.checkRTL();
         }
     });
     $("#cancelMultilang").click(function(e){

@@ -57,10 +57,15 @@ class oauthResponseHandlerController extends viewController{
         $existingUser = $userDao->getByEmail( $this->user->email ) ;
 
         if ( $existingUser ) {
+            $welcome_new_user = !$existingUser->everSignedIn();
             $this->_updateExistingUser($existingUser) ;
 
         } else {
+            $welcome_new_user = true ;
             $this->_createNewUser();
+        }
+
+        if ( $welcome_new_user ) {
             $this->_welcomeNewUser();
         }
 
@@ -103,7 +108,9 @@ class oauthResponseHandlerController extends viewController{
         $this->user->uid = Users_UserDao::insertStruct($this->user);
 
         $dao = new TeamDao();
+        $dao->getConnection()->begin();
         $dao->createPersonalTeam($this->user);
+        $dao->getConnection()->commit();
     }
 
     protected function _updateExistingUser(Users_UserStruct $existing_user) {

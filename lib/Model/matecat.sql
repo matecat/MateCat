@@ -411,13 +411,14 @@ CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `source` varchar(255) NOT NULL,
   `target` varchar(255) NOT NULL,
+  `fuzzy_band` varchar(20) NOT NULL,
   `total_word_count` float(255,0) DEFAULT NULL,
   `total_post_editing_effort` float(255,0) DEFAULT NULL,
   `total_time_to_edit` float(255,0) DEFAULT NULL,
   `job_count` int(255) DEFAULT NULL,
-  `pee_sigma` int(11) DEFAULT '0',
-  PRIMARY KEY (`date`,`source`,`target`),
+  PRIMARY KEY (`date`,`source`,`target`,`fuzzy_band`),
   KEY `source_idx` (`source`),
+  KEY `fuzzy_idx` (`fuzzy_band`),
   KEY `target_idx` (`target`),
   KEY `date_idx` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -860,10 +861,10 @@ DROP TABLE IF EXISTS `segments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segments` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL DEFAULT '0',
   `id_file` bigint(20) NOT NULL,
-  `id_file_part` bigint(20) DEFAULT NULL,
-  `internal_id` varchar(100) DEFAULT NULL,
+  `id_project` bigint(20) NOT NULL DEFAULT '0',
+  `internal_id` varchar(1024) DEFAULT NULL,
   `xliff_mrk_id` varchar(70) DEFAULT NULL,
   `xliff_ext_prec_tags` text,
   `xliff_mrk_ext_prec_tags` text,
@@ -873,7 +874,7 @@ CREATE TABLE `segments` (
   `xliff_ext_succ_tags` text,
   `raw_word_count` double(20,2) DEFAULT NULL,
   `show_in_cattool` tinyint(4) DEFAULT '1',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`id_project`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `internal_id` (`internal_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
@@ -1082,7 +1083,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-15 18:26:09
+-- Dump completed on 2017-06-23 13:52:12
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1144,6 +1145,8 @@ CREATE TABLE IF NOT EXISTS conversions_log (
 #Create the user 'matecat'@'%' ( even if already created )
 # Grants for 'matecat'@'%'
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat_conversions_log`.* TO 'matecat'@'%' IDENTIFIED BY 'matecat01';
+
+GRANT DROP ON `matecat`.`jobs_stats` TO 'PEEWorker'@'%' IDENTIFIED BY 'matecat02';
 
 USE `matecat`;
 
@@ -1239,4 +1242,4 @@ INSERT INTO `phinxlog` VALUES (20170504163201,'2017-05-04 18:38:49','2017-05-04 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-15 18:26:09
+-- Dump completed on 2017-06-23 13:52:12

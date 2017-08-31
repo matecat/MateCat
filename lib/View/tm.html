@@ -10,9 +10,9 @@
 
     <div class="popup-outer outer-tm hide"></div>
     <!-- inizio popup tm mgmt -->
-    <div class="popup-tm slide-panel hide" data-type="view">
+    <div class="popup-tm slide-panel hide" data-type="view" style="box-sizing: content-box;">
 
-        <h1>
+        <h1 style="height: 30px;">
 
             <a href="#" class="btn-ok right">Close</a>
             Settings
@@ -23,7 +23,7 @@
             <div class="mgmt-panel mgmt-panel-tm">
                 <div class="mgmt-wrapper">
                     <ul class="nav nav-tabs hide" role="tablist">
-                        <li class="mgmt-tm"><a href="#tm">Translation Memory and Terminology</a></li>
+                        <li class="mgmt-tm"><a href="#tm">Translation Memory and Glossary</a></li>
                         <li class="mgmt-mt"><a href="#mt">Machine Translation</a></li>
                         <li class="mgmt-opt active"><a href="#options">Advanced Options</a></li>
                     </ul>
@@ -40,7 +40,7 @@
                             </tal:block>
 
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm">Add a resource</a>
+                                <a class="btn-ok clear add-tm">Create resource</a>
                             </div>
                             <div class="active-tm-container">
                                 <h3 class="pull-left">Active Resources</h3>
@@ -353,7 +353,7 @@
                                         </tr>
                                         <tal:block tal:repeat="engine mt_engines">
                                         <tr class="" data-id="${engine/id}">
-                                            <td class="mt-provider">${engine/name}</td>
+                                            <td class="mt-provider" tal:content="structure engine/name"></td>
                                             <td class="engine-name">
                                                 <div class="edit-desc">${engine/description}</div>
                                             </td>
@@ -372,7 +372,7 @@
                                         <tal:block tal:repeat="engine mt_engines">
                                             <tal:block tal:condition="php: mt_id == engine.id">
                                                 <tr class="activemt" data-id="${engine/id}">
-                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
@@ -389,7 +389,7 @@
                                         <tal:block tal:repeat="engine mt_engines">
                                             <tal:block tal:condition="php: mt_id != engine.id">
                                                 <tr class="" data-id="${engine/id}">
-                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
@@ -477,7 +477,7 @@
                                         <br/>
                                     </span>
                                     Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.
-                                    <span class="tooltip-lexiqa" powertip="">Supported languages</span>
+                                    <span class="tooltip-lexiqa">Supported languages</span>
                                 </p>
                                 <p tal:condition="php: !INIT::$LXQ_LICENSE">
                                     Request your license key at <a href="https://www.lexiqa.net">https://www.lexiqa.net</a>

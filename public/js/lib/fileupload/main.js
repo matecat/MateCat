@@ -27,7 +27,9 @@ UI = {
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
-        this.initTM();
+        if (this.initTM) {
+            this.initTM();
+        }
         if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
@@ -49,20 +51,10 @@ UI = {
     disableAnalyze: function () {
         disableAnalyze();
     },
-    checkRTL: function () {
-        if(!this.RTLCheckDone) {
-            sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
-            targetDirection = $('#target-lang option[value="' + $('#target-lang').val() + '"]').attr('data-direction');
-            if((sourceDirection == 'rtl') || (targetDirection == 'rtl')) {
-                //APP.alert("Support for RTL languages is in beta. <br />Before starting your translation, download the Preview from the Translate page and check the target file.");
-                this.RTLCheckDone = true;
-            }
-        }
-    },
     checkMultilangRTL: function () {
         var direction = "ltr";
         $('.popup-languages li.on input').each(function(){
-            if($('#target-lang option[value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
+            if($('#target-lang div[data-value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
         });
         return direction;
     },
@@ -169,7 +161,8 @@ UI = {
 
     checkDQFKey: function () {
         setTimeout(function() {
-            $('.error-message').text('').hide();
+            $( '.error-message' ).find('p').text('');
+            $( '.error-message' ).hide();
 
             $('#dqf_key').removeClass('error valid').addClass('disabled').attr('disabled', 'disabled');
 
@@ -182,7 +175,9 @@ UI = {
                     console.log('d: ', d);
                     $('#dqf_key').removeClass('disabled').removeAttr('disabled');
                     if (d.errors.length) {
-                        $('.error-message').text(d.errors[0].message).show();
+
+                        $( '.error-message' ).find('p').text(d.errors[0].message);
+                        $( '.error-message' ).show();
                         $('#dqf_key').addClass('error');
                     } else {
                         $('#dqf_key').addClass('valid');
@@ -195,7 +190,8 @@ UI = {
                 },
                 error: function(d) {
                     $('#dqf_key').addClass('error').removeClass('disabled').removeAttr('disabled');
-                    $('.error-message').text(d.errors[0].message).show();
+                    $( '.error-message' ).find('p').text(d.errors[0].message);
+                    $( '.error-message' ).show();
                     disableAnalyze();
                 }
             });
@@ -214,9 +210,9 @@ UI = {
         if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
         APP.createTMKey();
-        var textToDisplay = '<span>A Private TM Key has been generated for the TMX you uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
+        var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         if (extension && extension === "g") {
-            textToDisplay = '<span>A Private TM Key has been generated for the Glossary uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
+            textToDisplay = '<span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         }
 
 
@@ -368,7 +364,10 @@ $( function () {
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -393,7 +392,10 @@ $( function () {
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -422,7 +424,8 @@ $( function () {
         var maxnum = config.maxNumberFiles;
         if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
             console.log( '10 files loaded' );
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
+            $( '.wrapper-upload .error-message' ).show()
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -438,14 +441,22 @@ $( function () {
          *      fname: data.result[0].name,
          *
          **/
-        var fileSpecs = {
-            fname: data.result[0].name,
-            filesize: data.result[0].size,
-            filerow: data.context,
-            extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
-            error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
-            enforceConversion: data.result[0].convert
-        };
+        var fileSpecs;
+        if (data.result[0]) {
+
+            fileSpecs = {
+                fname: data.result[0].name,
+                filesize: data.result[0].size,
+                filerow: data.context,
+                extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
+                error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
+                enforceConversion: data.result[0].convert
+            };
+        } else {
+            fileSpecs = {
+                error: ( typeof data.result.errors !== 'undefined' ? data.result.errors[0] : false ),
+            };
+        }
 
         if ( !fileSpecs.enforceConversion ) {
             if ( checkAnalyzability( 'file upload completed' ) ) {
@@ -490,7 +501,8 @@ $( function () {
 
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
+            $( '.wrapper-upload .error-message' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -608,8 +620,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         data: {
             action: 'convertFile',
             file_name: fname,
-            source_lang: $( '#source-lang' ).val(),
-            target_lang: $( '#target-lang' ).val(),
+            source_lang: $( '#source-lang' ).dropdown('get value'),
+            target_lang: $( '#target-lang' ).dropdown('get value'),
             segmentation_rule: $( '#segm_rule' ).val()
         },
         type: 'POST',

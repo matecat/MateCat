@@ -590,7 +590,7 @@ UI = {
         var node = document.createElement("span");
         var br = document.createElement("br");
         node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-        // node.setAttribute('contenteditable', 'false');
+        node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
         this.unnestMarkers();
@@ -1714,9 +1714,13 @@ UI = {
         if ( UI.globalWarnings.tag_issues ) {
             this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
         }
+
+        var mismatches = [];
         if ( UI.globalWarnings.translation_mismatches ) {
-            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+            mismatches = UI.globalWarnings.translation_mismatches;
         }
+        this.QAComponent.setTranslationConflitcts( mismatches );
+
     },
 	displayMessage: function(messages) {
         var self = this;
@@ -2736,7 +2740,7 @@ UI = {
         if ( UI.someUserSelection )           return;
 
         UI.selectingReadonly = setTimeout(function() {
-            APP.alert({msg: UI.messageForClickOnReadonly() });
+            APP.alert({ msg: UI.messageForClickOnReadonly() });
         }, 200);
     },
 
@@ -2752,7 +2756,7 @@ UI = {
         }
         var tab = 'opt';
         $('body').addClass('side-popup');
-        $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
+        $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         // $.cookie('tmpanel-open', 1, { path: '/' });

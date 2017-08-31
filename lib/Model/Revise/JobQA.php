@@ -69,20 +69,29 @@ class Revise_JobQA {
      * NB: It must be explicitly invoked after class initialization.
      * @throws Exception Throws exception on DB fail
      */
-    public function retrieveJobErrorTotals() {
+    public function retrieveJobErrorTotals( $ttl = 900 ) {
         $errorCountDao = new ErrorCount_ErrorCountDAO( Database::obtain() );
 
         $searchErrorCountStruct = new ErrorCount_Struct();
         $searchErrorCountStruct->setIdJob( $this->job_id );
         $searchErrorCountStruct->setJobPassword( $this->job_password );
 
-        $jobErrorTotals = $errorCountDao->read( $searchErrorCountStruct );
+        $jobErrorTotals = $errorCountDao->setCacheTTL( $ttl )->read( $searchErrorCountStruct );
+
         /**
          * @var $jobErrorTotals ErrorCount_Struct
          */
         $jobErrorTotals = $jobErrorTotals[ 0 ];
 
         $this->job_error_totals = $jobErrorTotals;
+    }
+
+    public function cleanErrorCache(){
+        $errorCountDao = new ErrorCount_ErrorCountDAO( Database::obtain() );
+        $searchErrorCountStruct = new ErrorCount_Struct();
+        $searchErrorCountStruct->setIdJob( $this->job_id );
+        $searchErrorCountStruct->setJobPassword( $this->job_password );
+        $errorCountDao->cleanErrorCache( $searchErrorCountStruct );
     }
 
     /**
@@ -151,7 +160,7 @@ class Revise_JobQA {
     }
 
     /**
-     * @return float
+     * @return array
      */
     public function evalJobVote() {
         foreach ( self::$error_info as $field => $info ) {

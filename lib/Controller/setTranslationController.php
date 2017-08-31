@@ -331,7 +331,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'id_job' ]                 = $this->id_job;
         $_Translation[ 'status' ]                 = $this->status;
         $_Translation[ 'time_to_edit' ]           = $this->time_to_edit;
-        $_Translation[ 'translation' ]            = preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $translation );
+        $_Translation[ 'translation' ]            = preg_replace( '/[\0]+$/u', '', $translation );
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
@@ -684,13 +684,13 @@ class setTranslationController extends ajaxController {
         $oldSegment               = clone $segment;
         $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
 
-        $oldPEE          = $segment->getPeePerc();
+        $oldPEE          = $segment->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
         $segment->translation    = $new_translation[ 'translation' ];
         $segment->pe_effort_perc = null;
 
-        $newPEE          = $segment->getPeePerc();
+        $newPEE          = $segment->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
 
         if ( $segment->isValidForEditLog() ) {
@@ -800,7 +800,7 @@ class setTranslationController extends ajaxController {
         if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $old_count = $segment['raw_word_count'];
         } else {
-            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation['status'] == 'ICE' ) {
+            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation[ 'match_type' ] == 'ICE' ) {
                 $old_count = $segment[ 'raw_word_count' ] ;
             } else {
                 $old_count = $old_translation[ 'eq_word_count' ] ;
@@ -854,6 +854,9 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
         $contributionStruct->propagationRequest   = $this->propagate;
+
+        $contributionStruct = $this->feature_set->filter(
+                'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
 
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );

@@ -266,7 +266,6 @@ abstract class viewController extends controller {
 
         $this->setTemplateFinalVars();
 
-        try {
 
             $buffer = ob_get_contents();
             ob_get_clean();
@@ -279,15 +278,6 @@ abstract class viewController extends controller {
              * Execute Template Rendering
              */
             echo $this->template->execute();
-
-        } catch ( Exception $e ) {
-            echo "<pre>";
-            print_r( $e );
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
-
     }
 
 
@@ -380,6 +370,11 @@ abstract class viewController extends controller {
         $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
         return $is_revision_url;
+    }
+
+    protected function render404() {
+        $this->makeTemplate('404.html');
+        $this->finalize();
     }
 
     /**

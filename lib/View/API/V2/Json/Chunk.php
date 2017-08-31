@@ -42,9 +42,11 @@ class Chunk {
             'open_threads_count' => (int) $chunk->getOpenThreadsCount(),
             'urls'               => $urls,
             'quality_summary'    => [
+                    'equivalent_class' => $chunk->getQualityInfo(),
                     'quality_overall'  => $chunk->getQualityOverall(),
                     'errors_count'     => (int) $chunk->getErrorsCount()
-            ]
+            ],
+            'pee'                => $chunk->getPeeForTranslatedSegments()
         ];
     }
 

@@ -4,6 +4,21 @@ class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
 
     protected function _buildResult( $array_result ) { }
 
+    public function updatePassword($id_job, $password, $old_password) {
+        $sql = "UPDATE chunk_completion_updates SET password = :new_password
+               WHERE id_job = :id_job AND password = :password " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array(
+                'id_job'       => $id_job,
+                'password'     => $old_password,
+                'new_password' => $password
+        ));
+
+        return $stmt->rowCount();
+    }
+
     public static function validSources() {
         return array(
             'user' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,

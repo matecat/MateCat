@@ -6,7 +6,7 @@
     border-radius: 0 0 4px 4px;
     -webkit-box-shadow: 0 1px 20px #000;
     box-shadow: 0 1px 20px #000;
-    min-width:500px;
+    min-width:600px;
     background:#fff;
     margin:-200px 0 0 -250px;
     padding:0 0px 20px 0px;
@@ -14,12 +14,39 @@
     left:46%;
     z-index:999999999999999999999999999;
 }
-.popup p{font-size:18px}
-.popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
-.popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
 
-.popup a.anonymous{font-size:12px;}
-.popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
+.modal .popup p {
+    font-size: 18px;
+    margin-top: 20px;
+    padding: 0 0px;
+}
+
+.popup h1 {
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    padding: 10px 10px 7px 58px;
+    border-bottom: 1px solid #000;
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
+}
+
+.popup h2 {
+    font-weight: normal;
+    font-size: 16px;
+    color: black;
+    display: block;
+    margin: 20px 0 20px 0;
+}
+
+.popup a.anonymous {
+    font-size: 12px;
+}
+
+.popup a.anonymous:visited, .popup a.anonymous:active {
+    color: black;
+}
 
 .popup h1 {
     overflow: visible;
@@ -181,14 +208,14 @@ box-shadow: inset 0 0 1px 1px #888;
     outline: none;
 }
 
-select:focus {
+.modal select:focus {
     border-color: #85B7D9 !important;
     background: #FFFFFF;
     color: rgba(0, 0, 0, 0.8);
     outline: none;
 }
 
-select:active {
+.modal select:active {
     border-color: #85B7D9;
     background: #FFFFFF;
     color: rgba(0, 0, 0, 0.8);
@@ -476,6 +503,10 @@ body.showingOutsourceTo {
 .modal.outsource a:hover {
     text-decoration: none !important;
     /*color: red;*/
+}
+
+.contact_box h3 {
+    font-size: 18px;
 }
 
 .contact_box p {
@@ -1162,6 +1193,7 @@ cursor: pointer;
 .outsource.modal .popup p {
     background-size: 200px;
     background-position: 300px 35px;
+    padding: 0 !important;
 }
 .pricebox .total {
     margin-top:-40px;
@@ -1177,7 +1209,7 @@ cursor: pointer;
     position: fixed;
     z-index: 10000000000000;
     top: 0;
-    right: 0;
+    right: -1100px;
     background: #fff;
     box-shadow: -2px 5px 7px #7B7B7B;
 }
@@ -1871,4 +1903,19 @@ div#open-translator:hover {
 
 span.title-source {
     margin-left: 5px;
+}
+
+
+.popup.popup-confirm.confirm_checkbox {
+    text-align: right;
+    padding: 0;
+}
+
+.popup.popup-confirm.confirm_checkbox p{
+    text-align: left;
+    padding: 20px;
+}
+
+.popup.popup-confirm.confirm_checkbox .btn-ok{
+    margin-right: 20px;
 }

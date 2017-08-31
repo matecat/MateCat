@@ -34,7 +34,7 @@ function waitforpastedata(elem, savedcontent) {
 		processpaste(elem, savedcontent);
 	}
 	else {
-		that = {
+		var that = {
 			e: elem,
 			s: savedcontent
 		};
@@ -46,7 +46,7 @@ function waitforpastedata(elem, savedcontent) {
 }
 
 function processpaste(elem, savedcontent) {
-	pasteddata = elem.innerHTML;
+	var pasteddata = elem.innerHTML;
 
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
@@ -212,6 +212,7 @@ function removeSelectedText() {
 				$(ss).remove();
 			} else {
 				oSelection.deleteFromDocument();
+				oSelection.collapseToStart();
 			}
 		}
 	} else {
@@ -352,14 +353,14 @@ function runDownload() {
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-    if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
+    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.tag_issues.length ) {
         APP.confirm({
             name: 'confirmDownload', // <-- this is the name of the funciton that gets invoked?
             cancelTxt: 'Fix errors',
             onCancel: 'goToFirstError',
             callback: continueDownloadFunction,
-            okTxt: 'Continue',
-            msg: 'Potential errors (e.g. tag mismatches, inconsistencies etc.) found in the text. If you continue, your download may fail or part of the content be untranslated - search the string "UNTRANSLATED_CONTENT" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:'
+            okTxt: 'Download anyway',
+            msg: 'Unresolved tag issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
         });
     } else {
         UI[ continueDownloadFunction ]();
@@ -811,8 +812,9 @@ function capitaliseFirstLetter(string)
 }
 function toTitleCase(str)
 {
-    return str.replace(/[\wÀ-ÿ]\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-//    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    return str.replace(/[\wwÀ-ÿЀ-џ]\S*/g, function(txt){
+    	return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
 }
 
 function getRangeObject(selectionObject) {

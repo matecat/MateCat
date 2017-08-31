@@ -184,10 +184,17 @@ class PreferencesModal extends React.Component {
             </div>
         }
 
+        let avatar = <div className="avatar-user pull-left">{config.userShortName}</div>;
+        if (this.props.metadata.gplus_picture) {
+            avatar = <div className="avatar-user pull-left">
+                <img src={this.props.metadata.gplus_picture} style={{width: '48px'}}/>
+            </div>;
+        }
+
         return <div className="preferences-modal">
 
                      <div className="user-info-form">
-                        <div className="avatar-user pull-left">{config.userShortName}</div>
+                         {avatar}
                         <div className="user-name pull-left">
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
                         <span className="grey-txt">{this.props.user.email}</span><br/>

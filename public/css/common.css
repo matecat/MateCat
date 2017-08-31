@@ -839,7 +839,7 @@ color:#333;}
     {
 	    overflow: hidden;
 	    line-height: 30px;
-	    border-radius: 7px;
+	    border-radius: 0 0 4px 4px;
 	    color: #000 !important;
 	    -webkit-box-shadow: 0 1px 20px #000;
 	    box-shadow: 0 1px 20px #000;
@@ -875,7 +875,7 @@ color:#333;}
     position: fixed;
     z-index: 10000000000000;
     top: 0;
-    right: 0;
+    right: -1100px;
     background: #fff;
     box-shadow: -2px 5px 7px #7B7B7B;
 }
@@ -911,6 +911,7 @@ color:#333;}
     font-size: 30px;
     text-align: left;
     margin-bottom: 15px;
+    margin-top: 0px;
 }
 
 
@@ -1345,7 +1346,7 @@ text-align: right;
 	    font-size: 12px;
     }
     .popup a.anonymous:visited,
-    .popup a.anonymous:active 
+    .popup a.anonymous:active
     {
 	    color: black;
     }
@@ -1362,14 +1363,6 @@ text-align: right;
     /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
 /*float: left;*/
 margin-left: 10px;
-}
-
-.modal p,
-.modal p
-{
-    padding: 0 20px;
-    margin: 0;
-    margin-top: 20px;
 }
 
 .popup .outer:hover
@@ -1529,7 +1522,7 @@ float: none!important;
 
 .mgmt-panel-tm .btn-ok:hover,
 .mgmt-panel-gl .btn-ok:hover,
-.popup .btn-ok:hover, 
+.popup .btn-ok:hover,
 .popup .btn-cancel:hover,
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover
@@ -3324,6 +3317,7 @@ font-weight: normal !important;
 .extsrt {background: url(../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
 .extpo {background: url(../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
 .extg {background: url(../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
+.exts {background: url(../img/matecat_file_icons_ts.png) 6px -0px no-repeat !important;} /* .ts */
 .extgsli {background: url(../img/matecat_file_icons.png) 6px -1033px no-repeat !important;} /* Google Slides */
 .extgdoc {background: url(../img/matecat_file_icons.png) 6px -1070px no-repeat !important;} /* Google Document */
 .extgsheet {background: url(../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
@@ -3420,6 +3414,7 @@ only screen and (in-resolution: 2dppx) {
     .extsrt {background: url(../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
     .extpo {background: url(../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
     .extg {background: url(../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
+    .exts {background: url(../img/matecat_file_icons_ts2x.png) 6px 0px no-repeat !important;} /* .ts */
     .extgsli {background: url(../img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;} /* Google Slides */
     .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
     .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
@@ -3429,8 +3424,6 @@ only screen and (in-resolution: 2dppx) {
 .fileinput-button {
 	background: #09beec;
 }
-
-
 
 }
 
@@ -3623,7 +3616,6 @@ a.resume-project:after,
 .mbc-warnings:before,
 /* mbc chat */
 .tab-switcher-al a:before,
-.error-message p:before,
 .text .alternatives:before,
 .autofillTag:before,
 input.downloadtr-button:before,
@@ -3818,10 +3810,6 @@ float: left;
     content: "\f058";
       font-size: 25px;
 }
-.error-message p:before {
-     content: "\f071";
-     margin-right: 10px;
-}
 
 .tab-switcher-al a:before,
 .warnings:before,
@@ -3911,6 +3899,7 @@ float: left;
     content: "Clear Archive";
     font-size: 12px;
     font-weight: bold;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 .more.minus:before {
@@ -4385,7 +4374,7 @@ body.side-popup {
 
 #menu-site li {
     display: inline-block;
-    padding-top: 8px;
+    /*padding-top: 8px;*/
 }
 
 #menu-site li a {
@@ -4399,17 +4388,17 @@ body.side-popup {
 }
 
 #menu-site li a.bigred {
-	font-size: 18px!important;
-background: #3aa9dd;
-border: none!important;
-color: #fff!important;
-border-radius: 4px;
-background-color: #cf3d2b;
-border-bottom: 2px solid #343434!important;
-padding: 10px;
-font-weight: bold;
-margin-left: 5px;
-margin-top: 6px;
+    font-size: 18px !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 4px;
+    background-color: #cf3d2b;
+    border-bottom: 2px solid #343434 !important;
+    padding: 10px;
+    font-weight: bold;
+    margin-left: 5px;
+    margin-top: 6px;
+    margin-right: 23px;
 }
 
 #menu-site li a.bigred:hover {
@@ -4595,6 +4584,9 @@ table.activitylog th .th-inner:after {
 }
 
 /*** Share Key Popup ***/
+.share-popup-container {
+    margin: 20px;
+}
 .share-popup-top {
     position: relative;
     width: 100%;
@@ -4668,13 +4660,13 @@ font-weight: bold;
     margin-top: 4px;
 }
 .share-popup-container-list {
-    width: 100%;
+    width: 91%;
     max-height: 300px;
     position: relative;
     float: left;
-    margin-top: 10px;
     border: 1px solid #d5d5d5;
     border-radius: 4px;
+    margin: 20px;
 }
 
 .share-popup-list {

@@ -42,7 +42,7 @@ ForceDelivery = {
 
         $('.modal.outsource .cancelForceDelivery').click(function (e) {
             e.preventDefault();
-            ManageActions.outsourceCloseTranslatorInfo();
+            OutsourceActions.outsourceCloseTranslatorInfo();
             prepareAndSubmitQuote(0, true);
         });
 
@@ -176,7 +176,7 @@ function getChosenDeliveryDate() {
     var time 	 = $( "#whenTime" ).val();
     var timezone = $( "#whenTimezone" ).val();
 
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
+    return new Date ( year, month, day, time, 0 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
 function getChosenOutsourceDate() {
@@ -187,18 +187,7 @@ function getChosenOutsourceDate() {
     var time 	 = $( "#outsource-assign-date").val();
     var timezone = $( "#outsource-assign-timezone").val();
 
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
-}
-
-function getChosenOutsourceDateUTC() {
-    var $elem =     $( "#date-trans" );
-    var day 	 = $elem.DatePickerGetDate().getDate();
-    var month 	 = $elem.DatePickerGetDate().getMonth();
-    var year 	 = $elem.DatePickerGetDate().getFullYear();
-    var time 	 = $( "#outsource-assign-date").val();
-    var timezone = $( "#outsource-assign-timezone").val();
-
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 );
+    return new Date ( year, month, day, time, 0 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
 function getChosenOutsourceDateToString() {
@@ -237,13 +226,8 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         $( "#changeTimezone").removeClass( "hide" );
     }
 
-    var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
-    if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
-        $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
-    } else {
-        UI.restartOutsourceModal()
-    }
-    // $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+
+    UI.restartOutsourceModal();
 }
 
 function setOutsourceDate(chosenDate) {
@@ -272,27 +256,23 @@ function setOutsourceDate(chosenDate) {
     this.tmpl = function tmpl(str, data) {
         var fn = !/\W/.test(str) ?
             cache[str] = cache[str] ||
-            tmpl(document.getElementById(str).innerHTML) :
+                tmpl(document.getElementById(str).innerHTML) :
 
             new Function("obj",
                 "var p=[],print=function(){p.push.apply(p,arguments);};" +
                 "with(obj){p.push('" +
                 str
-	                .replace(/[\r\t\n]/g, " ")
-	                .split("<%").join("\t")
-	                .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-	                .replace(/\t=(.*?)%>/g, "',$1,'")
-	                .split("\t").join("');")
-	                .split("%>").join("p.push('")
-	                .split("\r").join("\\'") + "');}return p.join('');");
+                    .replace(/[\r\t\n]/g, " ")
+                    .split("<%").join("\t")
+                    .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                    .replace(/\t=(.*?)%>/g, "',$1,'")
+                    .split("\t").join("');")
+                    .split("%>").join("p.push('")
+                    .split("\r").join("\\'") + "');}return p.join('');");
 
         return data ? fn(data) : fn;
     };
 })();
-
-// var EYE = window.EYE = (function() {
-//
-// })();
 
 var EYE = {
     _registered : {
@@ -1224,7 +1204,7 @@ var EYE = {
             return false;
         }
 
-        ManageActions.outsourceCloseTranslatorInfo();
+        OutsourceActions.outsourceCloseTranslatorInfo();
         if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
             $( "#delivery_manual_error").removeClass( "hide" );
             $('.delivery_before_time,.delivery_not_available,.modal.outsource .tooltip').addClass('hide');

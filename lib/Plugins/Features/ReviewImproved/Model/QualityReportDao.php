@@ -8,8 +8,7 @@
 
 namespace Features\ReviewImproved\Model;
 
-use Database,
-        PDO;
+use Database ;
 
 class QualityReportDao extends \DataAccess_AbstractDao {
 
