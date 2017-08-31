@@ -124,6 +124,9 @@ $.extend(UI, {
 			return false;
 		}
 
+        var contextBefore = UI.getContextBefore(id_segment);
+        var contextAfter = UI.getContextAfter(id_segment);
+
 		APP.doRequest({
 			data: {
 				action: 'getContribution',
@@ -133,7 +136,9 @@ $.extend(UI, {
 				text: txt,
 				id_job: config.id_job,
 				num_results: this.numContributionMatchesResults,
-				id_translator: config.id_translator
+				id_translator: config.id_translator,
+                context_before: contextBefore,
+                context_after: contextAfter
 			},
 			context: $('#' + id),
 			error: function() {
