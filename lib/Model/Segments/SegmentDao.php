@@ -168,4 +168,73 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Segments_SegmentStruct[] $obj_arr
+     *
+     * @throws Exception
+     */
+    public function createList( Array $obj_arr ) {
+
+        $obj_arr = array_chunk( $obj_arr, 100 );
+
+        $baseQuery = "INSERT INTO segments ( 
+                            id, 
+                            internal_id, 
+                            id_file,
+                            /* id_project, */ 
+                            segment, 
+                            segment_hash, 
+                            raw_word_count, 
+                            xliff_mrk_id, 
+                            xliff_ext_prec_tags, 
+                            xliff_ext_succ_tags, 
+                            show_in_cattool,
+                            xliff_mrk_ext_prec_tags,
+                            xliff_mrk_ext_succ_tags
+                            ) VALUES ";
+
+
+        Log::doLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
+
+        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 12 ), ", " ) . " )";  //set to 13 when implements id_project
+
+        foreach ( $obj_arr as $i => $chunk ) {
+
+            $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
+
+            $values = [];
+            foreach( $chunk as $segStruct ){
+
+                $values[] =$segStruct->id;
+                $values[] =$segStruct->internal_id;
+                $values[] =$segStruct->id_file;
+                /* $values[] = $segStruct->id_project */
+                $values[] = $segStruct->segment;
+                $values[] = $segStruct->segment_hash;
+                $values[] = $segStruct->raw_word_count;
+                $values[] = $segStruct->xliff_mrk_id;
+                $values[] = $segStruct->xliff_ext_prec_tags;
+                $values[] = $segStruct->xliff_ext_succ_tags;
+                $values[] = $segStruct->show_in_cattool;
+                $values[] = $segStruct->xliff_mrk_ext_prec_tags;
+                $values[] = $segStruct->xliff_mrk_ext_succ_tags;
+
+            }
+
+            try {
+
+                $stm = $this->con->getConnection()->prepare( $query );
+                $stm->execute( $values );
+                Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
+
+            } catch ( PDOException $e ) {
+                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+            }
+
+        }
+
+
+    }
+
 }

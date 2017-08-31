@@ -1641,34 +1641,22 @@ class ProjectManager {
 
                             }
 
-                            //Log::doLog( $xliff_trans_unit ); die();
-
-                            // $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
-
-                            $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
-                            $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
-                            $source            = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ) );
-                            $source_hash       = $this->dbHandler->escape( md5( $seg_source[ 'raw-content' ] ) );
-                            $ext_succ_tags     = $this->dbHandler->escape( $seg_source[ 'ext-succ-tags' ] );
-                            $num_words         = $wordCount;
-                            $trans_unit_id     = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
-                            $mrk_ext_prec_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-prec-tags' ] );
-                            $mrk_ext_succ_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-succ-tags' ] );
-
-                            $this->projectStructure[ 'segments' ][ $fid ]->append( [
-                                    $trans_unit_id,
-                                    $fid,
-                                    $this->projectStructure[ 'id_project' ],
-                                    $source,
-                                    $source_hash,
-                                    $num_words,
-                                    $mid,
-                                    $ext_tags,
-                                    $ext_succ_tags,
-                                    $show_in_cattool,
-                                    $mrk_ext_prec_tags,
-                                    $mrk_ext_succ_tags
+                            $segStruct = new Segments_SegmentStruct( [
+                                    'id_file'                 => $fid,
+                                    'id_project'              => $this->projectStructure[ 'id_project' ],
+                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                    'segment'                 => CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ),
+                                    'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
+                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                    'raw_word_count'          => $wordCount,
+                                    'show_in_cattool'         => $show_in_cattool
                             ] );
+
+                            $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
                             //increment counter for word count
                             $this->files_word_count += $num_words;
@@ -1719,42 +1707,22 @@ class ProjectManager {
                             $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                        $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
-
-                        //we do the word count after the place-holding with <x id="nbsp"/>
-                        //so &nbsp; are now not recognized as word and not counted as payable
-                        $num_words = $wordCount;
-
-                        //applying escaping after raw count
-                        $source      = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $source ) );
-                        $source_hash = $this->dbHandler->escape( md5( $source ) );
-
-                        $trans_unit_id = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
-
-                        if ( !is_null( $prec_tags ) ) {
-                            $prec_tags = $this->dbHandler->escape( $prec_tags );
-                        }
-                        if ( !is_null( $succ_tags ) ) {
-                            $succ_tags = $this->dbHandler->escape( $succ_tags );
-                        }
-
-                        $this->projectStructure[ 'segments' ][ $fid ]->append( [
-                                $trans_unit_id,
-                                $fid,
-                                $this->projectStructure[ 'id_project' ],
-                                $source,
-                                $source_hash,
-                                $num_words,
-                                null,
-                                $prec_tags,
-                                $succ_tags,
-                                $show_in_cattool,
-                                null,
-                                null
+                        $segStruct = new Segments_SegmentStruct( [
+                                'id_file'                 => $fid,
+                                'id_project'              => $this->projectStructure[ 'id_project' ],
+                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                'xliff_ext_prec_tags'     => ( !is_null( $prec_tags ) ? $prec_tags : null ),
+                                'segment'                 => CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'segment_hash'            => md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'xliff_ext_succ_tags'     => ( !is_null( $succ_tags ) ? $succ_tags : null ),
+                                'raw_word_count'          => $num_words,
+                                'show_in_cattool'         => $show_in_cattool
                         ] );
 
+                        $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
                         //increment counter for word count
-                        $this->files_word_count += $num_words;
+                        $this->files_word_count += $wordCount;
 
                     }
                 }
@@ -1822,8 +1790,6 @@ class ProjectManager {
 
     protected function _storeSegments( $fid ){
 
-        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file,/* id_project, */ segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
-
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         Log::doLog( "Id sequence reserved." );
@@ -1841,24 +1807,9 @@ class ProjectManager {
         foreach ( $sequenceIds as $position => $id_segment ){
 
             /**
-             *  $trans_unit_id,
-             *  $fid,
-             *  $id_project,
-             *  $source,
-             *  $source_hash,
-             *  $num_words,
-             *  $mid,
-             *  $ext_tags,
-             *  $ext_succ_tags,
-             *  $show_in_cattool,
-             *  $mrk_ext_prec_tags,
-             *  $mrk_ext_succ_tags
+             * @var $this->projectStructure[ 'segments' ][ $fid ][ $position ] Segments_SegmentStruct
              */
-            $tuple = $this->projectStructure[ 'segments' ][ $fid ][ $position ];
-//            $tuple_string = "'{$tuple[0]}',{$tuple[1]},{$tuple[2]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
-            $tuple_string = "'{$tuple[0]}',{$tuple[1]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
-
-            $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
+            $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] )  ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
@@ -1868,32 +1819,22 @@ class ProjectManager {
             // TODO: continue here to find the count of segments per project
             $segments_metadata[] = [
                     'id'              => $id_segment,
-                    'internal_id'     => self::sanitizedUnitId( $tuple[ 0 ], $fid ),
-                    'segment'         => $tuple[ 3 ],
-                    'segment_hash'    => $tuple[ 4 ],
-                    'raw_word_count'  => $tuple[ 5 ],
-                    'xliff_mrk_id'    => $tuple[ 6 ],
-                    'show_in_cattool' => $tuple[ 9 ],
+                    'internal_id'     => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
+                    'segment'         => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                    'segment_hash'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
+                    'raw_word_count'  => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
+                    'xliff_mrk_id'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
+                    'show_in_cattool' => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
             ];
 
         }
 
+        $segmentsDao = new Segments_SegmentDao();
         //split the query in to chunks if there are too much segments
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 100 ) );
+        $segmentsDao->createList( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy() );
 
-        Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
-
-        foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
-
-            try {
-                $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
-                Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
-            } catch ( PDOException $e ) {
-                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
-                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
-            }
-
-        }
+        //free memory
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
 
         // Here we make a query for the last inserted segments. This is the point where we
         // can read the id of the segments table to reference it in other inserts in other tables.
@@ -1962,10 +1903,8 @@ class ProjectManager {
 
         }
 
+        //merge segments_metadata for every files in the project
         $this->projectStructure[ 'segments_metadata' ]->exchangeArray( array_merge( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), $segments_metadata ) );
-
-        //free memory
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
 
     }
 

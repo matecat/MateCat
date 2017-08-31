@@ -8,6 +8,7 @@
  */
 
 namespace Analysis\Workers;
+use Engine;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -18,6 +19,7 @@ use TaskRunner\Exceptions\ReQueueException;
 use Analysis\Queue\RedisKeys;
 use \Exception;
 use \Database, \PDOException;
+use Translations_SegmentTranslationDao;
 
 include \INIT::$MODEL_ROOT . "/queries.php";
 
@@ -148,7 +150,8 @@ class TMAnalysisWorker extends AbstractWorker {
                 $queueElement->params->match_type,
                 $equivalentWordMapping,
                 /* is Public TM */
-                empty( $this->_matches[ 0 ][ 'memory_key' ] )
+                empty( $this->_matches[ 0 ][ 'memory_key' ] ),
+                isset( $this->_matches[ 0 ][ 'ICE' ] )
         );
 
         $eq_words       = $equivalentWordMapping[ $new_match_type ] * $queueElement->params->raw_word_count / 100;
@@ -195,12 +198,12 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data                             = array();
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
         $tm_data[ 'id_segment' ]             = $queueElement->params->id_segment;
-        $tm_data[ 'suggestions_array' ]      = $suggestion_json;
+        $tm_data[ 'translation' ]            = $suggestion;
         $tm_data[ 'suggestion' ]             = $suggestion;
+        $tm_data[ 'suggestions_array' ]      = $suggestion_json;
         $tm_data[ 'match_type' ]             = $new_match_type;
         $tm_data[ 'eq_word_count' ]          = $eq_words;
         $tm_data[ 'standard_word_count' ]    = $standard_words;
-        $tm_data[ 'translation' ]            = $suggestion;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $err_json;
@@ -218,11 +221,18 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //check the value of suggestion_match
         $tm_data[ 'suggestion_match' ]       = $suggestion_match;
-        if( $tm_data[ 'suggestion_match' ] == "100%" && $queueElement->params->pretranslate_100 ){
-            $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
+
+        //Separates the if to make the conditions more readable
+        if( stripos( $tm_data[ 'suggestion_match' ], "100%" ) !== false ){
+
+            if( $queueElement->params->pretranslate_100 || $tm_data[ 'match_type' ] == "ICE" ){
+                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'locked' ] = true;
+            }
+
         }
 
-        $updateRes = setSuggestionUpdate( $tm_data );
+        $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
         if ( $updateRes < 0 ) {
 
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
@@ -260,10 +270,11 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param string $fast_match_type
      * @param array  $equivalentWordMapping
      * @param bool   $publicTM
+     * @param bool   $isICE
      *
      * @return string
      */
-    protected function _getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, $publicTM = false ) {
+    protected function _getNewMatchType( $tm_match_type, $fast_match_type, &$equivalentWordMapping, $publicTM = false, $isICE = false ) {
 
         // RATIO : i change the value only if the new match is strictly better
         // ( in terms of percent payed per word )
@@ -285,8 +296,15 @@ class TMAnalysisWorker extends AbstractWorker {
             $ind = intval( $tm_match_type );
 
             if ( $ind == "100" ) {
-                $tm_match_cat = ($publicTM) ? "100%_PUBLIC" : "100%";
-                $tm_rate_paid = $equivalentWordMapping[ $tm_match_cat ];
+
+                if( $isICE ){
+                    $tm_match_cat  = "ICE";
+                    $tm_rate_paid = 0;
+                    $equivalentWordMapping[ "ICE" ] = 0;
+                } else {
+                    $tm_match_cat = ($publicTM) ? "100%_PUBLIC" : "100%";
+                    $tm_rate_paid = $equivalentWordMapping[ $tm_match_cat ];
+                }
 
             }
 
@@ -412,8 +430,8 @@ class TMAnalysisWorker extends AbstractWorker {
             /**
              * @var $tms \Engines_MyMemory
              */
-            $tms        = \Engine::getInstance( $_TMS );
-            $tms->doLog = false;
+            $tms        = Engine::getInstance( $_TMS );
+            $tms->doLog = true;
 
             $config = $tms->getConfigStruct();
             $config = array_merge( $config, $_config );
@@ -728,21 +746,21 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @param $elementQueue QueueElement
      */
-    protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ){
+    protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
         $where                        = " id_segment = {$elementQueue->params->id_segment} and id_job = {$elementQueue->params->id_job} ";
 
-        $db = \Database::obtain();
+        $db = Database::obtain();
         try {
-            $affectedRows = $db->update('segment_translations', $data, $where);
-        } catch( \PDOException $e ) {
+            $affectedRows = $db->update( 'segment_translations', $data, $where );
+        } catch ( PDOException $e ) {
             $this->_doLog( $e->getMessage() );
         }
 
         $this->_incrementAnalyzedCount( $elementQueue->params->pid, 0, 0 );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $elementQueue->params->pid );
-        $this->_tryToCloseProject(  $elementQueue->params->pid );
+        $this->_tryToCloseProject( $elementQueue->params->pid );
 
     }
 

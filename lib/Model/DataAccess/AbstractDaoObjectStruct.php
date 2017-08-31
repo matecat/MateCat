@@ -7,7 +7,7 @@
  * 
  */
 
-abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
+abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Countable {
 
     protected $validator;
     protected $cached_results = array();
@@ -180,5 +180,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
     public function getArrayCopy(){
         return $this->toArray();
     }
+
+    public function count() {
+        $reflectionClass = new ReflectionClass( $this );
+        return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
+    }
+
 
 } 
