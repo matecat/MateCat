@@ -121,7 +121,7 @@ class Editarea extends React.Component {
     }
     render() {
         if (this.props.segment){
-            var lang = config.target_lang.toLowerCase();
+            var lang = config.target_rfc.toLowerCase();
             var readonly = ((this.props.segment.readonly == 'true')) ? true : false;
         }
         return (
