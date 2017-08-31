@@ -83,6 +83,12 @@
 .powerTip-options-tm ul {
   list-style-type: initial !important;
   margin: 8px 15px 4px 27px !important;
+  -moz-column-count: 2;
+  -moz-column-gap: 35px;
+  -webkit-column-count: 2;
+  -webkit-column-gap: 35px;
+  column-count: 2;
+  column-gap: 35px;
 }
 
 .powerTip-options-tm-title {

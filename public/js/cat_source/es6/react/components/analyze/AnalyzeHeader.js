@@ -23,10 +23,10 @@ class AnalyzeHeader extends React.Component {
             </div>
         </div>;
         let status = this.props.data.get('STATUS');
-        let in_queue_before = this.props.data.get('IN_QUEUE_BEFORE');
+        let in_queue_before = parseInt(this.props.data.get('IN_QUEUE_BEFORE'));
         if( status === 'DONE' ) {
              html = <div className="analysis-create">
-                <div className="search-tm-matches">
+                <div className="search-tm-matches hide" ref={(container) => this.containerAnalysisComplete = container}>
                     <h5 className="complete">Analysis:
                         <span>complete <i className="icon-checkmark icon" /></span>
                     </h5>
@@ -207,12 +207,28 @@ class AnalyzeHeader extends React.Component {
                 self.containerSavingWords.classList.remove('updated-count');
             }, 400)
         }
+        let status = this.props.data.get('STATUS');
+        if (status === 'DONE') {
+            setTimeout(function () {
+                self.containerAnalysisComplete.classList.remove('hide');
+            }, 600)
+        }
+
     }
 
     componentDidMount() {
         $(this.tooltip).popup({
             position: 'bottom center'
         });
+        let self = this;
+        let status = this.props.data.get('STATUS');
+        if (status === 'DONE') {
+            this.containerSavingWords.classList.add('updated-count');
+            setTimeout(function () {
+                self.containerSavingWords.classList.remove('updated-count');
+                self.containerAnalysisComplete.classList.remove('hide');
+            }, 400)
+        }
     }
 
     componentWillUnmount() {

@@ -19,7 +19,7 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
     const LanguagePairNotSupportedException = 1;
 
     public function get( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+        return [];
     }
 
     public function set( $_config ) {
