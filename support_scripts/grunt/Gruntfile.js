@@ -359,7 +359,7 @@ module.exports = function(grunt) {
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
-                dest: buildPath + 'analyze.js'
+                dest: buildPath + 'analyze-build.js'
             },
             upload: {
                 src: [

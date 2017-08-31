@@ -2131,9 +2131,13 @@ UI = {
         if ( UI.globalWarnings.tag_issues ) {
             this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
         }
+
+        var mismatches = [];
         if ( UI.globalWarnings.translation_mismatches ) {
-            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+            mismatches = UI.globalWarnings.translation_mismatches;
         }
+        this.QAComponent.setTranslationConflitcts( mismatches );
+
     },
 	displayMessage: function(messages) {
         var self = this;

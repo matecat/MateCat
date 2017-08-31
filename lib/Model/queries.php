@@ -835,7 +835,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 				GROUP BY translation, CONCAT( id_job, '-', password )
 		";
 
-        $query = sprintf( $queryForTranslationMismatch, $db->escape( $jpassword ), $sid, $sid );
+        $query = sprintf( $queryForTranslationMismatch, $sid, $sid );
     } else {
 
         /**

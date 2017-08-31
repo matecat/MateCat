@@ -331,7 +331,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'id_job' ]                 = $this->id_job;
         $_Translation[ 'status' ]                 = $this->status;
         $_Translation[ 'time_to_edit' ]           = $this->time_to_edit;
-        $_Translation[ 'translation' ]            = preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $translation );
+        $_Translation[ 'translation' ]            = preg_replace( '/[\0]+$/u', '', $translation );
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();

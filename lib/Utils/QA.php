@@ -1300,21 +1300,20 @@ class QA {
         }
 
         //get All special chars after LAST tag at the end of line if there are
-        preg_match_all( '/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->source_seg, $source_tags );
-        preg_match_all( '/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->target_seg, $target_tags );
-        $source_tags = $source_tags[ 0 ];
-        $target_tags = $target_tags[ 0 ];
+        preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->source_seg, $source_tags );
+        preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->target_seg, $target_tags );
 
         //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
-        if ( ( count( $source_tags ) != count( $target_tags ) ) && !empty( $source_tags ) ) {
+        if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             //Append a space to target for normalization.
-            $this->target_seg .= " ";
+            $this->target_seg = rtrim( $this->target_seg );
+            $this->target_seg .= $source_tags[ 1 ][ 0 ];
 
             //Suppress Warning
             //$this->_addError(self::ERR_BOUNDARY_TAIL);
 
-        } else {
+        } elseif( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && empty( $source_tags[ 0 ] ) ) {
             $this->target_seg = rtrim( $this->target_seg );
         }
 
