@@ -92,6 +92,7 @@ body.analyze{
                 .project-create {
                     top: 10px;
                     position: relative;
+                    font-size: 18px;
                 }
                 .analysis-create {
                     margin-top: 35px;
@@ -117,7 +118,7 @@ body.analyze{
                         }
                         .complete {
                             display: inline-block;
-                            font-size: 16px;
+                            font-size: 18px;
                             .number {
                                 font-weight: 700;
                             }
@@ -280,6 +281,10 @@ body.analyze{
                     text-align: left;
                     font-size: 17px;
                     padding: 0 0 0 20px;
+                    &.splitted {
+                        width: 78%;
+                    }
+
                 }
                 .titles-compare {
                     display: inline-block;

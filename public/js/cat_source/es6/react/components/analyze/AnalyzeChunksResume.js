@@ -147,7 +147,7 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunks sixteen wide column">
 
                             <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
-                                <div className="title-job">
+                                <div className="title-job splitted">
                                     <div className="job-id" >ID: {self.props.jobsInfo[indexJob].jid}</div>
                                     <div className="source-target" >
                                         <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
@@ -155,8 +155,7 @@ class AnalyzeChunksResume extends React.Component {
                                         <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                     </div>
                                 </div>
-                                <div className="titles-compare">
-                                </div>
+
                                 <div className="activity-icons">
                                     <div className="merge ui blue basic button"
                                          onClick={self.openMergeModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-compress icon"/>Merge</div>
@@ -236,7 +235,7 @@ class AnalyzeChunksResume extends React.Component {
                 return <div key={jobInfo.get('id') + '-' + indexJob} className="job ui grid">
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
-                            <div className="title-job">
+                            <div className="title-job no-split">
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
