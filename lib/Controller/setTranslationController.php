@@ -73,32 +73,32 @@ class setTranslationController extends ajaxController {
 
         parent::__construct();
 
-        $filterArgs = array(
-                'id_job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password'                => array(
+        $filterArgs = [
+                'id_job'                  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'                => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'propagate'               => array(
+                ],
+                'propagate'               => [
                         'filter' => FILTER_VALIDATE_BOOLEAN, 'flags' => FILTER_NULL_ON_FAILURE
-                ),
-                'id_segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'time_to_edit'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'id_translator'           => array(
+                ],
+                'id_segment'              => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'time_to_edit'            => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_translator'           => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'segment'                 => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'version'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'status'                  => array(
+                ],
+                'translation'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'segment'                 => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'version'                 => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'chosen_suggestion_index' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'status'                  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'splitStatuses'           => array(
+                ],
+                'splitStatuses'           => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'context_before'                 => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'context_after'                  => array( 'filter' => FILTER_UNSAFE_RAW ),
-        );
+                ],
+                'context_before'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'context_after'           => [ 'filter' => FILTER_UNSAFE_RAW ],
+        ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 

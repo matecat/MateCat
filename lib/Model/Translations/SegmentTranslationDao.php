@@ -186,4 +186,24 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
+    public static function setAnalysisValue( $data ) {
+
+        $id_segment = (int)$data[ 'id_segment' ];
+        $id_job     = (int)$data[ 'id_job' ];
+
+        $where = " id_segment = $id_segment and id_job = $id_job";
+
+        $db = Database::obtain();
+        try {
+            $affectedRows = $db->update( 'segment_translations', $data, $where );
+        } catch ( PDOException $e ) {
+            Log::doLog( $e->getMessage() );
+
+            return $e->getCode() * -1;
+        }
+
+        return $affectedRows;
+
+    }
+
 }

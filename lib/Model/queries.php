@@ -1060,54 +1060,6 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     return array( 'totals' => $totals, 'propagated_ids' => $propagated_ids );
 }
 
-function setSuggestionUpdate( $data ) {
-
-    $id_segment = (int)$data[ 'id_segment' ];
-    $id_job     = (int)$data[ 'id_job' ];
-
-    $where = " id_segment = $id_segment and id_job = $id_job";
-
-    $db = Database::obtain();
-    try {
-        $affectedRows = $db->update('segment_translations', $data, $where);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $affectedRows;
-}
-
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = 'NEW' ) {
-    $data                          = array();
-    $data[ 'id_job' ]              = $id_job;
-    $data[ 'id_segment' ]          = $id_segment;
-    $data[ 'suggestions_array' ]   = $suggestions_json_array;
-    $data[ 'suggestion' ]          = $suggestion;
-    $data[ 'suggestion_match' ]    = $suggestion_match;
-    $data[ 'suggestion_source' ]   = $suggestion_source;
-    $data[ 'match_type' ]          = $match_type;
-    $data[ 'eq_word_count' ]       = $eq_words;
-    $data[ 'standard_word_count' ] = $standard_words;
-    $data[ 'translation' ]         = $translation;
-    $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
-    $data[ 'status' ]              = $segment_status;
-
-    $data[ 'warning' ]                = $warning;
-    $data[ 'serialized_errors_list' ] = $err_json_list;
-
-    $data[ 'mt_qe' ] = $mt_qe;
-
-    $db = Database::obtain();
-
-    try {
-        $db->insert('segment_translations', $data);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $db->affected_rows;
-}
-
 function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     $data                          = array();
     $data[ 'last_opened_segment' ] = $id_segment;
