@@ -10,6 +10,8 @@ namespace Features\Dqf\Model;
 
 use API\V2\Exceptions\AuthenticationError;
 use Exception;
+use Features\Dqf\Service\GenericSession;
+use Features\Dqf\Service\ISession;
 use Features\Dqf\Service\Session;
 use Users_UserDao;
 use Users_UserStruct;
@@ -19,6 +21,9 @@ class UserModel {
     protected $user ;
     protected $metadata ;
 
+    /**
+     * @var ISession
+     */
     protected $session ;
 
     public function __construct( Users_UserStruct $user ) {
@@ -31,12 +36,17 @@ class UserModel {
         $this->metadata = $this->user->getMetadataAsKeyValue();
     }
 
+    /**
+     * @return GenericSession|ISession|Session
+     */
     public function getSession() {
         if ( ! isset( $this->session ) ) {
-            if ( ! $this->hasCredentials() ) {
-                throw  new Exception('Credentials are not set' );
+            if ( $this->hasCredentials() ) {
+                $this->session = new Session( $this->metadata['dqf_username'], $this->metadata['dqf_password'] ) ;
             }
-            $this->session = new Session( $this->metadata['dqf_username'], $this->metadata['dqf_password'] ) ;
+            else {
+                $this->session = new GenericSession( $this->user->email ) ;
+            }
         }
         return $this->session ;
     }
@@ -62,11 +72,6 @@ class UserModel {
             return false ;
         }
         return true ;
-    }
-
-    public static function createByEmail( $email ) {
-        $user = ( new Users_UserDao() )->getByEmail( $email ) ;
-        return new UserModel( $user );
     }
 
     /**

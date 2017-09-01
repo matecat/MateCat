@@ -12,13 +12,13 @@ use Exception;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Log;
 
-class ChildProjectTranslationBatchService {
+class ChildProjectTranslationBatchService extends AbstractService {
 
     protected $resources = [] ;
     protected $client;
     protected $structs = []  ;
 
-    public function __construct( Session $session ) {
+    public function __construct( ISession $session ) {
         $this->session = $session ;
         $this->client = new Client();
         $this->client->setSession( $this->session );
@@ -50,13 +50,11 @@ class ChildProjectTranslationBatchService {
         $url = "/project/child/%s/file/%s/targetLang/%s/sourceSegment/translation/batch" ;
 
         Log::doLog( $struct->getParams() ) ;
-        Log::doLog( $struct->getHeaders() ) ;
-        Log::doLog( $struct->getPathParams() ) ;
-        Log::doLog( json_encode( $struct->getBody() ) ) ;
+        Log::doLog( $this->session->filterHeaders( $struct) ) ;
 
         $resource = $this->client->createResource( $url, 'post', [
                 // 'formData'   => $struct->getParams(),
-                'headers'    => $struct->getHeaders(),
+                'headers'    => $this->session->filterHeaders( $struct ),
                 'pathParams' => $struct->getPathParams(),
                 'json'       => $struct->getBody()
         ] );

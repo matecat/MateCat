@@ -10,6 +10,7 @@ namespace Features\Dqf\Service;
 
 
 use Exception;
+use Features\Dqf\Model\DqfProjectMapStruct;
 use Features\Dqf\Utils\Functions;
 use INIT;
 use Projects_ProjectStruct;
@@ -17,9 +18,12 @@ use Projects_ProjectStruct;
 class ProjectMapping {
 
     protected $session ;
+    /**
+     * @var DqfProjectMapStruct
+     */
     protected $project ;
 
-    public function __construct(Session $session, Projects_ProjectStruct $project ) {
+    public function __construct( ISession $session, DqfProjectMapStruct $project ) {
         $this->session = $session ;
         $this->project = $project ;
     }

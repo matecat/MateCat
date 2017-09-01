@@ -1,16 +1,13 @@
 <?php
 
-
-
 namespace Features\Dqf\Service;
 
 use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\ProjectRequestStruct ;
+use Features\Dqf\Service\Struct\ProjectRequestStruct;
 use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;
 use INIT;
 use Log;
-use Projects_ProjectStruct;
 
 class MasterProject {
 
@@ -18,7 +15,7 @@ class MasterProject {
     protected $params;
     protected $request;
 
-    public function __construct( Session $session ) {
+    public function __construct( ISession $session ) {
         $this->session = $session ;
     }
 
@@ -32,7 +29,7 @@ class MasterProject {
 
         $request = $client->createResource( '/project/master', 'post', [
                 'formData' => $projectRequestData->getParams(),
-                'headers'  => $projectRequestData->getHeaders()
+                'headers'  => $this->session->filterHeaders( $projectRequestData )
         ] );
 
         $client->curl()->multiExec();
@@ -61,7 +58,7 @@ class MasterProject {
         $client->setSession( $this->session );
 
         $request = $client->createResource( '/project/master/%s', 'get', [
-                'headers'  => $requestStruct->getHeaders(),
+                'headers'  => $this->session->filterHeaders( $requestStruct ),
                 'pathParams' => $requestStruct->getPathParams()
         ] );
 

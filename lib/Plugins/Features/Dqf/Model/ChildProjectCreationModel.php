@@ -10,13 +10,21 @@ namespace Features\Dqf\Model;
 
 
 use Chunks_ChunkStruct;
+use Database;
 use Exception;
 use Features\Dqf\Service\ChildProjectService;
+use Features\Dqf\Service\ISession;
 use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
+use Features\Dqf\Utils\Functions;
 use Utils;
 
 class ChildProjectCreationModel {
+
+    /**
+     * @var DqfProjectMapStruct
+     */
+    protected $savedDqfChildProjectMap ;
 
     protected $childProjectRecordId ;
 
@@ -38,24 +46,28 @@ class ChildProjectCreationModel {
     protected $files ;
 
     /**
-     * @var Session
+     * @var UserModel
      */
-    protected $ownerSession ;
+    protected $user ;
 
     /**
      * @var Chunks_ChunkStruct
      */
     protected $chunk ;
 
-    protected $splittedIndex = null;
+    protected $project_type ;
 
-    public function __construct( CreateProjectResponseStruct $parentProject, Chunks_ChunkStruct $chunk ) {
-        $this->chunk = $chunk ;
+    public function __construct( CreateProjectResponseStruct $parentProject, Chunks_ChunkStruct $chunk, $project_type ) {
+        $this->chunk         = $chunk ;
         $this->parentProject = $parentProject ;
-    }
 
-    public function setSplittedIndex( $k ) {
-        $this->splittedIndex = $k ;
+        $this->id_project = Database::obtain()->nextSequence('id_dqf_project') [ 0 ] ;
+
+        if ( !in_array( $project_type, [ 'master', 'vendor_root', 'translate', 'revise' ] )) {
+            throw  new Exception('type not supported: ' . $project_type ) ;
+        }
+
+        $this->project_type = $project_type ;
     }
 
     public function setFiles( $files ) {
@@ -70,31 +82,37 @@ class ChildProjectCreationModel {
         $this->files = $files ;
     }
 
-    public function setAssignee(UserModel $user) {
-        $this->assignee = $user ;
+    public function setUser( UserModel $user ) {
+        $this->user = $user  ;
     }
 
-    public function setOwnerSession( Session $session ) {
-        $this->ownerSession = $session  ;
-    }
+    public function create() {
+        if ( $this->project_type == DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) {
+            $this->createForTranslation();
+        }
 
+        else {
+            throw new Exception('not implemented') ;
+        }
+    }
     /**
      * @return CreateProjectResponseStruct
      * @throws Exception
      */
     public function createForTranslation() {
+
         if ( empty( $this->files ) ) {
             throw new Exception("Files are not set");
         }
 
-        if ( is_null( $this->ownerSession ) ) {
-            throw new Exception('Session is not set') ;
+        if ( is_null( $this->user ) ) {
+            throw new Exception('User is not set') ;
         }
 
-        $projectService  = new ChildProjectService( $this->ownerSession, $this->chunk, $this->splittedIndex ) ;
+        $projectService = new ChildProjectService( $this->user->getSession()->login(), $this->chunk, $this->id_project ) ;
 
         $remoteProject = $projectService->createTranslationChild(
-                $this->parentProject, $this->files, $this->assignee
+                $this->parentProject, $this->files
         );
 
         $this->_saveDqfChildProjectMap( $this->chunk, $remoteProject ) ;
@@ -102,12 +120,8 @@ class ChildProjectCreationModel {
         return $remoteProject ;
     }
 
-    protected function getAssigneeEmail() {
-        return isset( $this->assignee ) ? $this->assignee->getDqfUsername() : null ;
-    }
-
-    public function getChildProjectRecordId() {
-        return $this->childProjectRecordId ;
+    public function getSavedRecord() {
+        return $this->savedDqfChildProjectMap ;
     }
 
     /**
@@ -118,6 +132,7 @@ class ChildProjectCreationModel {
     protected function _saveDqfChildProjectMap( Chunks_ChunkStruct $chunk, CreateProjectResponseStruct $remoteProject ) {
         $struct = new DqfProjectMapStruct() ;
 
+        $struct->id               = $this->id_project ;
         $struct->id_job           = $chunk->id ;
         $struct->first_segment    = $chunk->job_first_segment ;
         $struct->last_segment     = $chunk->job_last_segment ;
@@ -126,8 +141,13 @@ class ChildProjectCreationModel {
         $struct->dqf_project_uuid = $remoteProject->dqfUUID ;
         $struct->dqf_parent_uuid  = $this->parentProject->dqfUUID ;
         $struct->create_date      = Utils::mysqlTimestamp(time()) ;
+        $struct->project_type     = $this->project_type ;
+        $struct->uid              = $this->user->getMateCatUser()->uid ;
 
-        $this->childProjectRecordId = DqfProjectMapDao::insertStruct( $struct ) ;
+        $struct->id = DqfProjectMapDao::insertStructWithAutoIncrements( $struct ) ;
+
+        $this->savedDqfChildProjectMap = $struct ;
+
     }
 
 }

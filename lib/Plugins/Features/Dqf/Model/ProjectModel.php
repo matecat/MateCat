@@ -14,6 +14,7 @@ use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\ChildProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
+use Jobs\MetadataDao;
 use Users_UserDao;
 
 class ProjectModel {
@@ -47,6 +48,13 @@ class ProjectModel {
             $user = $this->getMateCatProject()->getOwner();
         }
         return new UserModel( $user ) ;
+    }
+
+    /**
+     * @return UserModel the DQF user assigend to the job
+     */
+    public function getUser() {
+        return $this->project->getUser();
     }
 
     public function getResponseStruct() {

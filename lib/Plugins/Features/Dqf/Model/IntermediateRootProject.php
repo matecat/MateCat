@@ -9,6 +9,7 @@
 namespace Features\Dqf\Model;
 
 use Features\Dqf;
+use Features\Dqf\Service\ISession;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
@@ -24,19 +25,22 @@ class IntermediateRootProject {
      */
     protected $project ;
 
-    public function __construct( Projects_ProjectStruct $project ) {
+    /** @var UserModel  */
+    protected $user ;
+
+    public function __construct( UserModel $user, Projects_ProjectStruct $project ) {
         $this->project = $project ;
+        $this->user = $user ;
     }
 
     /**
-     * @param UserModel $assignee
-     *
      * @return CreateProjectResponseStruct[]
      */
-    public function createWithAssignment( UserModel $assignee ) {
+    public function create( ) {
         $ownerSession = ( new UserModel($this->project->getOwner() ) )->getSession()->login() ;
+        $dqfProjectMap = ( new DqfProjectMapDao() )->getMasterByChunk( $this->project->getChunks()[0] );
 
-        $mapping              = new ProjectMapping( $ownerSession, $this->project ) ;
+        $mapping              = new ProjectMapping( $ownerSession, $dqfProjectMap ) ;
         $mappingResponse      = $mapping->getRemoteId();
         $masterProjectService = new MasterProject($ownerSession) ;
         $masterProject        = $masterProjectService->getByDqfId( $mappingResponse ) ;
@@ -53,19 +57,18 @@ class IntermediateRootProject {
         $ids      = [] ;
 
         foreach( $this->project->getChunks() as $chunk ) {
-            $childProject = new ChildProjectCreationModel( $createProjectResponseStruct, $chunk );
+            $childProject = new ChildProjectCreationModel( $createProjectResponseStruct, $chunk, 'vendor_root' );
 
-            $childProject->setOwnerSession( $ownerSession ) ;
+            $childProject->setUser( $this->user ) ;
             $childProject->setFiles( $files ) ;
-            $childProject->setAssignee( $assignee ) ;
 
             $projects[] = $childProject->createForTranslation();
-            $ids[]      = $childProject->getChildProjectRecordId() ;
+            $ids[]      = $childProject->getSavedRecord()->id ;
         }
 
         // save into projects metadata the ids of the projects we just created
         $this->project->setMetadata(Dqf::INTERMEDIATE_PROJECT_METADATA_KEY, implode(',', $ids) );
-        $this->project->setMetadata(Dqf::INTERMEDIATE_USER_METADATA_KEY, $assignee->getMateCatUser()->uid );
+        $this->project->setMetadata(Dqf::INTERMEDIATE_USER_METADATA_KEY, $this->user->getMateCatUser()->uid );
 
         return $projects ;
     }

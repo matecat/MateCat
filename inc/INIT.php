@@ -116,6 +116,9 @@ class INIT {
     public static $DQF_ENCRYPTION_KEY;
     public static $DQF_ENCRYPTION_IV ;
 
+    public static $DQF_GENERIC_USERNAME ;
+    public static $DQF_GENERIC_PASSWORD ;
+
     /**
      * We proose that lxq_server is in a configuration file
      * lxq_license: ${lxq_license},

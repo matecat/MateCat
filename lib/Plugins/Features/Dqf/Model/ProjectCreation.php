@@ -4,6 +4,7 @@
 
 namespace Features\Dqf\Model ;
 
+use Database;
 use Exception;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\AbstractProjectFiles;
@@ -67,6 +68,9 @@ class ProjectCreation {
      */
     protected $reviewSettings ;
 
+    /** @var  UserModel */
+    protected $user ;
+
     public function __construct( ProjectCreationStruct $struct ) {
         $this->inputStruct = $struct  ;
         $this->project = Projects_ProjectDao::findById( $struct->id_project );
@@ -85,23 +89,17 @@ class ProjectCreation {
         $this->_submitProjectFiles();
         $this->_submitSourceSegments();
         $this->_submitReviewSettings();
-
-        $intermediateRootProjectRequired = $this->project->getFeatures()->filter(
-                'filterDqfIntermediateProjectRequired', false
-        );
-
-        if ( !$intermediateRootProjectRequired ) {
-            $this->_submitChildProjects();
-        }
     }
 
     protected function _createProject() {
         $projectInputParams = ProjectMetadata::extractProjectParameters( $this->project->getMetadataAsKeyValue() );
 
+        $id_project = Database::obtain()->nextSequence('id_dqf_project')[ 0 ] ;
+
         $params = new ProjectRequestStruct(array_merge( array(
                 'name'               => $this->project->name,
                 'sourceLanguageCode' => $this->inputStruct->source_language,
-                'clientId'           => Functions::scopeId( $this->project->id ),
+                'clientId'           => Functions::scopeId( $id_project ),
                 'templateName'       => '',
                 'tmsProjectKey'      => ''
         ), $projectInputParams ) );
@@ -111,16 +109,19 @@ class ProjectCreation {
 
         foreach( $this->project->getChunks() as $chunk ) {
             $struct = new DqfProjectMapStruct([
+                    'id'               => $id_project,
                     'id_job'           => $chunk->id,
                     'password'         => $chunk->password,
                     'first_segment'    => $chunk->job_first_segment,
                     'last_segment'     => $chunk->job_last_segment,
                     'dqf_project_id'   => $this->remoteMasterProject->dqfId,
                     'dqf_project_uuid' => $this->remoteMasterProject->dqfUUID,
-                    'create_date'      => Utils::mysqlTimestamp( time() )
+                    'create_date'      => Utils::mysqlTimestamp( time() ),
+                    'project_type'     => 'master',
+                    'uid'              => $this->project->getOwner()->uid
             ]);
 
-            DqfProjectMapDao::insertStruct( $struct ) ;
+            DqfProjectMapDao::insertStructWithAutoIncrements( $struct ) ;
         }
     }
 
@@ -151,8 +152,8 @@ class ProjectCreation {
     }
 
     protected function _initSession() {
-        $user               = ( new UserModel( $this->project->getOwner() ) );
-        $this->ownerSession = $user->getSession()->login() ;
+        $this->user = ( new UserModel( $this->project->getOwner() ) );
+        $this->ownerSession = $this->user->getSession()->login() ;
     }
 
     protected function _submitSourceSegments() {
@@ -181,14 +182,5 @@ class ProjectCreation {
                     null
             ];
         }, $segmentList ) ) ;
-    }
-
-    protected function _submitChildProjects() {
-        foreach( $this->project->getChunks() as $chunk ) {
-            $project = new ChildProjectCreationModel( $this->remoteMasterProject, $chunk ) ;
-            $project->setOwnerSession( $this->ownerSession );
-            $project->setFiles( $this->remoteFiles ) ;
-            $project->createForTranslation() ;
-        }
     }
 }

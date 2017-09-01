@@ -36,7 +36,7 @@ class Client {
         $this->curl()->multiExec();
     }
 
-    public function setSession( Session $session ) {
+    public function setSession( ISession $session ) {
         $this->session = $session ;
     }
 

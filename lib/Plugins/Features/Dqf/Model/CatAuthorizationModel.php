@@ -44,7 +44,9 @@ class CatAuthorizationModel {
         if ( $status == self::STATUS_NOT_ASSIGNED ) {
             $invalidCredentialsStatus = $this->dqfUserCredentialsInvalidStatus( $user );
             if ( is_null( $invalidCredentialsStatus ) ) {
-                $insertDone = $this->dao->set( $this->job->id, $this->job->password, $this->key, $user->uid );
+
+                $insertDone = $this->setAuthorizedUser( $user ) ;
+
                 if ( $insertDone ) {
                     $status = $user->uid ;
                 }
@@ -71,16 +73,12 @@ class CatAuthorizationModel {
         }
     }
 
-    public function isAuthorized( Users_UserStruct $user ) {
-        $status = $this->getStatus($user) ;
-    }
-
     protected function dqfUserCredentialsInvalidStatus( $user ) {
         $dqfUser = new UserModel( $user );
 
-        if (!$dqfUser->hasCredentials() ) {
-            return self::STATUS_USER_NO_CREDENTIALS ;
-        }
+        // if (!$dqfUser->hasCredentials() ) {
+        //     return self::STATUS_USER_NO_CREDENTIALS ;
+        // }
 
         if ( !$dqfUser->validCredentials() ) {
             return self::STATUS_USER_INVALID_CREDENTIALS ;
@@ -90,7 +88,7 @@ class CatAuthorizationModel {
     }
 
     protected function setAuthorizedUser( Users_UserStruct $user ) {
-        $this->dao->set($this->job->id, $this->job->password, $this->key, $user->uid );
+        return $this->dao->set($this->job->id, $this->job->password, $this->key, $user->uid );
     }
 
 }

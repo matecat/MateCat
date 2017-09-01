@@ -39,7 +39,7 @@ class MasterProjectSegmentsBatch {
      */
     protected $batchRequests ;
 
-    public function __construct(Session $session, CreateProjectResponseStruct $remoteProject, $remoteFiles) {
+    public function __construct(ISession $session, CreateProjectResponseStruct $remoteProject, $remoteFiles) {
         $this->remoteProject = $remoteProject ;
         $this->session       = $session ;
         $this->remoteFiles   = $remoteFiles ;
@@ -90,7 +90,7 @@ class MasterProjectSegmentsBatch {
                     '/project/master/%s/file/%s/sourceSegment/batch', 'post', [
                             'json'       => $request->getBody(),
                             'pathParams' => $request->getPathParams(),
-                            'headers'    => $request->getHeaders()
+                            'headers'    => $this->session->filterHeaders( $request )
                     ]
             );
         }

@@ -10,11 +10,12 @@ namespace Features\Dqf\Service;
 
 use API\V2\Exceptions\AuthenticationError;
 use Exception;
+use Features\Dqf\Service\Struct\IBaseStruct;
 use Features\Dqf\Service\Struct\LoginRequestStruct;
 Use Features\Dqf\Service\Struct\LoginResponseStruct ;
 use Log;
 
-class Session {
+class Session implements ISession {
 
     protected $email ;
     protected $password ;
@@ -26,6 +27,14 @@ class Session {
         $this->password = $password ;
     }
 
+    protected function getHeaders( $headers ) {
+        return $headers;
+    }
+
+    public function filterHeaders( IBaseStruct $struct ) {
+        return $struct->getHeaders();
+    }
+
     public function login() {
         $struct           = new LoginRequestStruct() ;
         $struct->email    = $this->encrypt( $this->email );
@@ -35,7 +44,7 @@ class Session {
 
         $request = $client->createResource('/login', 'post', [
                 'formData' => $struct->getParams(),
-                'headers'  => $struct->getHeaders()
+                'headers'  => $this->getHeaders( $struct->getHeaders() )
         ] );
 
         $client->curl()->multiExec();

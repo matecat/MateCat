@@ -31,7 +31,7 @@ abstract class AbstractProjectFiles {
     protected $files = [];
 
     /**
-     * @var Session
+     * @var ISession
      */
     protected $session ;
 
@@ -52,7 +52,13 @@ abstract class AbstractProjectFiles {
 
     abstract protected function getFilesPath();
 
-    public function __construct( Session $session, CreateProjectResponseStruct $remoteProject ) {
+    /**
+     * AbstractProjectFiles constructor.
+     *
+     * @param ISession                    $session
+     * @param CreateProjectResponseStruct $remoteProject
+     */
+    public function __construct( ISession $session, CreateProjectResponseStruct $remoteProject ) {
         $this->session = $session ;
         $this->remoteProject = $remoteProject ;
     }
@@ -69,7 +75,7 @@ abstract class AbstractProjectFiles {
         $client->setSession( $this->session );
 
         $request = $client->createResource( $this->getFilesPath(), 'get', [
-                'headers'    => $requestStruct->getHeaders(),
+                'headers'    => $this->session->filterHeaders( $requestStruct ),
                 'pathParams' => $requestStruct->getPathParams()
         ] );
 
@@ -144,7 +150,7 @@ abstract class AbstractProjectFiles {
                 $client->createResource('/project/master/%s/file/%s/targetLang', 'post', [
                         'formData' => $requestStruct->getParams(),
                         'pathParams' => $requestStruct->getPathParams(),
-                        'headers' => $requestStruct->getHeaders()
+                        'headers' => $this->session->filterHeaders( $requestStruct ),
                 ] );
             }
         }
@@ -166,7 +172,7 @@ abstract class AbstractProjectFiles {
 
         foreach( $this->files as $file ) {
             $client->createResource( $url, 'post', [
-                    'headers'  => $file->getHeaders(),
+                    'headers'  => $this->session->filterHeaders( $file ),
                     'formData' => $file->getParams()
             ], $file->clientId );
         }

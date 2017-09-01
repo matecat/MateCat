@@ -238,44 +238,6 @@ class Dqf extends BaseFeature {
      */
     public function postJobSplitted( $projectStructure ) {
 
-        $id_job     = $projectStructure[ 'job_to_split' ];
-        $allChunks  = Chunks_ChunkDao::getByJobID( $id_job ) ;
-        $firstChunk =  $allChunks [ 0 ] ;
-
-        /**
-         * Here we can have two cases:
-         * we find two records in DQF project map -> this means that there's an intermediate vendor root
-         * we find one record in DQF project map -> meaning there's no intermediate vendor root
-         *
-         * In any case we start the split from the last we find in the array ( records are ordered by id );
-         */
-
-        $dqfMapRecords  = ( new DqfProjectMapDao() )->getByChunk($firstChunk) ;
-        $previousDqfChildProjectRecord = end( $dqfMapRecords );
-
-        $previousDqfChildProjectRecord->archive_date = Utils::mysqlTimestamp(time());
-
-        DqfProjectMapDao::updateStruct( $previousDqfChildProjectRecord, [ 'fields' => ['archive_date'] ] );
-
-        $projectModel = new ProjectModel( $previousDqfChildProjectRecord ) ;
-
-        foreach( $allChunks as $k => $chunk ) {
-            $parentProjectId = new Features\Dqf\Service\Struct\CreateProjectResponseStruct([
-                    'dqfId'   => $previousDqfChildProjectRecord->dqf_project_id,
-                    'dqfUUID' => $previousDqfChildProjectRecord->dqf_project_uuid
-            ]);
-
-            $session = $projectModel
-                    ->getUserWithIntermediate()
-                    ->getSession()
-                    ->login();
-
-            $childProject = new ChildProjectCreationModel( $parentProjectId, $chunk );
-            $childProject->setSplittedIndex( $k + 1 );
-            $childProject->setOwnerSession( $session );
-            $childProject->setFiles( $projectModel->getFilesResponseStruct() ) ;
-            $childProject->createForTranslation();
-        }
     }
 
     public function postJobMerged( $projectStructure ) {
