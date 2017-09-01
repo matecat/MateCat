@@ -29,7 +29,7 @@
         padding-left: 10px;
         font-size: 16px;
         margin: 0 0 5px 0;
-        font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
+        font-family: Calibri, Arial, Helvetica, system-ui, sans-serif;
         border-radius: 2px;
         min-height: initial;
     }
@@ -54,6 +54,7 @@
     }
     #tmx-select {
         width: 260px;
+        font-family: Calibri, Arial, Helvetica, system-ui, sans-serif;
     }
     .menu-dropdown {
         max-height: none !important;
