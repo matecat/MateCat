@@ -146,7 +146,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     padding: 10px 0 0 10px;
     border-radius: 4px;
     background: #f8f6f6;
-    width: 98%;
+    width: 100%;
     min-height: 40px;
     margin-bottom: 25px;
     margin-top: 10px;
@@ -201,7 +201,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     position: relative;
     width: 60px;
     zoom: 0.7;
-    margin-top: 6px;
+    margin-top: 3px;
     float: left;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -219,7 +219,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 .user-gdrive > label {
     line-height: 20px;
     float: left;
-    margin: 4px 10px 10px 65px;
+    margin: 2px 10px 12px 65px;
     font-size: 15px;
     max-width: 75%;
     text-align: left;
@@ -256,7 +256,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .login-container-right {
     width: 61%;
-    padding: 3% 20% 3% 2%;
+    padding: 3% 20% 3% 25px;
     font-size: 17px;
     display: inline-block;
     float: left;
@@ -265,6 +265,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     background-size: 84%;
     background-position: 370% center;
     padding-top: 30px;
+    &.manage-bg {
+        background: url(../../img/matecat-manage-call.png) no-repeat;
+        background-size: 84%;
+        background-position: 350% 90px;
+    }
 }
 
 .login-container-left {
@@ -282,6 +287,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 .login-container-right p,
 .login-container-right ul {
     text-align: left;
+}
+
+.add-project-manage {
+    padding-left: 0px !important;
+    margin-left: 20px !important;
 }
 
 .login-container-right ul {
@@ -303,7 +313,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 .google-login-button:hover {
     background: url(../img/btn_gg_sprite.png) no-repeat;
     background-position: 0 -101px;
-    box-shadow: none;
+    box-shadow: none !important;
 
 }
 
@@ -319,6 +329,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     background-size: 100%;
     border: none;
     height: 30px;
+    box-shadow: none !important;
 }
 
 .forgot-password {
@@ -370,16 +381,23 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         text-decoration: underline;
         font-weight: bold;
         cursor: pointer;
-        margin-right: 50px;
+        &:hover {
+            text-decoration: none;
+        }
     }
     &.coupon-success input#user-coupon {
         float: none;
     }
     input#user-coupon {
-
+        padding-left: 15px;
         width: 76%;
         float: left;
         box-sizing: border-box;
+        &:focus {
+            border-color: #96C8DA;
+            box-shadow: none;
+            outline: none;
+        }
     }
     .btn-confirm-medium {
         margin: 6px 0% 0 3%;
@@ -395,6 +413,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         font-size: 15px;
         margin-bottom: 5px;
         margin-top: 5px;
+        padding-left: 15px;
     }
     .coupon-message {
         position: relative;
@@ -600,7 +619,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .preferences-modal h2 {
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 15px;
     font-size: 22px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
@@ -799,10 +818,12 @@ div#matecat-modal p {
 .matecat-modal-content .btn-confirm-medium:hover,
 .matecat-modal-content .btn-confirm-small:hover {
     cursor: pointer;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
-    border: 1px solid #000;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
     color: #ffffff;
+}
+
+.matecat-modal-content .btn-confirm-medium:active {
+    box-shadow: none !important;
 }
 
 .matecat-modal-content .btn-confirm-medium {
@@ -814,9 +835,6 @@ div#matecat-modal p {
     padding: 8px 18px;
     border-radius: 2px;
     font-size: 18px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-    background: -moz-linear-gradient(top, #09beec, #119ec4);
-    background: linear-gradient(top, #09beec, #119ec4);
     margin: 16px 0 16px 0px;
     display: inline-block;
     text-align: center;
@@ -846,7 +864,7 @@ div#matecat-modal p {
     background: url(../img/btn_gg_sprite.png) no-repeat;
     background-position: 0 -101px;
     background-size: cover;
-    box-shadow: none;
+    box-shadow: none !important;
 }
 
 .matecat-modal-content .btn-confirm-medium.sing-in {

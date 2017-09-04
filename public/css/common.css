@@ -903,7 +903,6 @@ color:#333;}
     top: 0;
     right: -1100px;
     background: #fff;
-    box-shadow: -2px 5px 7px #7B7B7B;
 }
 
 .advanced-options-box {
@@ -3817,8 +3816,8 @@ float: left;
 
 .fileupload-buttonbar .fileinput-button:before, #add-files:before {
     content: "\f067";
-      font-size: 14px;
-  margin-right: 20px;
+    font-size: 14px;
+    margin-right: 5px;
 }
 .close:before {
      content: "\ea0d";
@@ -3876,7 +3875,7 @@ float: left;
 #clear-all-files:before {
     content: "\f00d";
       font-size: 14px;
-  margin-right: 20px;
+  margin-right: 5px;
 }
 
 #swaplang:after {

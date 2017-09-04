@@ -1446,7 +1446,6 @@ h2.payoff {
 
 .uploadbtn {
     background: #09beec;
-    width: 240px;
     font-weight: bold;
     padding: 6px 30px 6px 30px;
     width: auto !important;
@@ -1457,25 +1456,18 @@ h2.payoff {
     font-size: 26px !important;
     cursor: pointer;
     color: #fff;
-    -moz-box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
-    border: 1px solid #666;
-    -moz-border-radius: 2px;
+    border: 1px solid #797979;
     border-radius: 2px;
 }
 
 .uploadbtn:hover {
-    -moz-box-shadow: 0 1px 2px #666;
-    -webkit-box-shadow: 0 1px 2px #666;
-    box-shadow: 0 1px 2px #666;
     background: #12b4df;
-    color: #fff
+    color: #ffffff;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .uploadbtn:active {
-    -moz-box-shadow: inset 0 1px 1px #888;
-    -webkit-box-shadow: inset 0 1px 1px #888;
+    box-shadow: none;
 }
 
 .disabled, .disabled:hover, .disabled:active {
@@ -1601,7 +1593,15 @@ h2.payoff {
 }
 
 .fileinput-button:hover {
-    background-color: #12b4df
+    background-color: #12b4df;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+.fileinput-button:active {
+    box-shadow: none !important;
+}
+
+.fileinput-button:focus {
+    box-shadow: none !important;
 }
 
 .delete .ui-button-text, .cancel .ui-button-text {

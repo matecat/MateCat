@@ -368,7 +368,7 @@
                     }
                     .job-details-box {
                         display: inline-block;
-                        width: 48% !important;
+                        width: 46% !important;
                         vertical-align: middle;
                         padding: 0 15px;
                         position: relative;
@@ -400,14 +400,14 @@
                         }
                         .job-payment {
                             display: inline-block;
-                            width: 30%;
+                            width: 33%;
                             text-align: center;
                             .not-payable {
                                 text-decoration: line-through;
                                 font-size: 16px;
                                 position: absolute;
                                 top: -17px;
-                                width: 28%;
+                                width: 30%;
                             }
                             .payable {
                                 font-size: 18px;
@@ -418,11 +418,11 @@
                     .job-price {
                         display: inline-block;
                         vertical-align: middle;
-                        width: 10%;
+                        width: 16%;
                         text-align: right;
-                        padding-right: 15px;
                         font-size: 20px;
                         font-weight: 700;
+                        text-align: center;
                     }
                 }
                 .revision-box {
