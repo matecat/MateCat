@@ -34,6 +34,8 @@ body.manage {
     left: -99999px;
 }
 
+
+
 // Closing Shadow - Transitions for buttons
 
 .project-list {
@@ -110,6 +112,7 @@ body.manage {
                         max-height: 21.7em;
                     }
                     .ui.icon.input input {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
                         padding-right: 2.67142857em !important;
                         box-shadow: inset 0 1px 3px #ddd;
                     }
