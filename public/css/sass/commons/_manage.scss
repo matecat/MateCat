@@ -34,6 +34,8 @@ body.manage {
     left: -99999px;
 }
 
+
+
 // Closing Shadow - Transitions for buttons
 
 .project-list {
@@ -110,6 +112,7 @@ body.manage {
                         max-height: 21.7em;
                     }
                     .ui.icon.input input {
+                        font-family: Calibri, Arial, Helvetica, sans-serif;
                         padding-right: 2.67142857em !important;
                         box-shadow: inset 0 1px 3px #ddd;
                     }
@@ -135,7 +138,7 @@ body.manage {
                     }
                     &.project-team {
                         margin-right: 8px;
-                        background-color: #8c97b9;
+                        background-color: #92a3b5;
                         vertical-align: top;
                         height: 30px;
                         .text {
@@ -173,12 +176,11 @@ body.manage {
                             }
                         }
                         &:hover .text {
-                            background-color: #838dad !important
+                            background-color: #7e8d9c !important;
                         }
                     }
                     &.project-assignee {
                         margin-right: 8px;
-                        /*background-color: #59467a !important;*/
                         background-color: #ffffff !important;
                         vertical-align: top;
                         .text {
@@ -246,7 +248,7 @@ body.manage {
                             transition: 0.3s ease;
                         }
                         &:hover {
-                            border: .1em solid deepskyblue;
+                            border: 1px solid deepskyblue;
                             color: deepskyblue;
                             .icon-user22 {
                                 color: deepskyblue;
