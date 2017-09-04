@@ -132,8 +132,8 @@ class LoginModal extends React.Component {
 
         if ( this.props.redeemMessage )  {
             htmlMessage = <div className="login-container-right">
-                <h3 style={{fontSize: "21px"}}>Sign up or sign in to add the project to your management panel and:</h3>
-                <ul className="">
+                <h2 style={{fontSize: "21px"}}>Sign up or sign in to add the project to your management panel and:</h2>
+                <ul className="add-project-manage">
                     <li>Track the progress of your translations</li>
                     <li>Monitor the activity for increased security</li>
                     <li>Manage TMs, MT and glossaries</li>

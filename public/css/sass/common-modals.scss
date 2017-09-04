@@ -256,7 +256,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .login-container-right {
     width: 61%;
-    padding: 3% 20% 3% 2%;
+    padding: 3% 20% 3% 25px;
     font-size: 17px;
     display: inline-block;
     float: left;
@@ -284,6 +284,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     text-align: left;
 }
 
+.add-project-manage {
+    padding-left: 0px !important;
+    margin-left: 20px !important;
+}
+
 .login-container-right ul {
     margin-left: 30px;
     margin-top: 25px;
@@ -303,7 +308,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 .google-login-button:hover {
     background: url(../img/btn_gg_sprite.png) no-repeat;
     background-position: 0 -101px;
-    box-shadow: none;
+    box-shadow: none !important;
 
 }
 
@@ -319,6 +324,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     background-size: 100%;
     border: none;
     height: 30px;
+    box-shadow: none !important;
 }
 
 .forgot-password {
@@ -811,6 +817,10 @@ div#matecat-modal p {
     color: #ffffff;
 }
 
+.matecat-modal-content .btn-confirm-medium:active {
+    box-shadow: none !important;
+}
+
 .matecat-modal-content .btn-confirm-medium {
     color: #fff;
     background: #09beec;
@@ -849,7 +859,7 @@ div#matecat-modal p {
     background: url(../img/btn_gg_sprite.png) no-repeat;
     background-position: 0 -101px;
     background-size: cover;
-    box-shadow: none;
+    box-shadow: none !important;
 }
 
 .matecat-modal-content .btn-confirm-medium.sing-in {
