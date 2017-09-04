@@ -51,7 +51,7 @@ $.extend(UI, {
             title: 'Job sent',
             text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
             '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + job.id +')</div> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">' + job.id +'</div> ' +
             '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
             '<div class="source-box" style="display: inherit;">' + job.sourceTxt + '</div> ' +
             '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +

@@ -376,7 +376,17 @@
         width: 120px;
     }
 
-
+    input.input-small {
+        outline: none !important;
+        &:hover {
+            border-color: rgba(34, 36, 38, 0.35);
+            box-shadow: none;
+        }
+        &:focus {
+            border-color: #96C8DA;
+            box-shadow: none;
+        }
+    }
 
 
 }
