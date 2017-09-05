@@ -902,40 +902,33 @@ UI = {
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
-		$.each(d.data.files, function() {
-			startSegmentId = this.segments[0].sid;
-            //Tag Projection: check if is enable the Tag Projection
-            UI.setGlobalTagProjection(this);
-		});
+        // Why here?? Investigate
+        UI.setGlobalTagProjection();
 
-		if (typeof this.startSegmentId == 'undefined')
-			this.startSegmentId = startSegmentId;
+		if (!this.startSegmentId){
+            var firstFile = d.data.files[Object.keys(d.data.files)[0]];
+            this.startSegmentId = firstFile.segments[0].sid;
+        }
 
 		this.body.addClass('loaded');
 
-		if (typeof d.data.files != 'undefined') {
+		if (typeof d.data.files !== 'undefined') {
+
 			this.renderFiles(d.data.files, where, UI.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
-                seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
+                var seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
 
-			if (options.segmentToScroll) {
-				this.scrollSegment($('#segment-' + options.segmentToScroll), options.highlight );
-			}
-
-			if (options.segmentToOpen) {
-				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
-			}
-
-			if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
-				UI.openSegment(UI.editarea);
-			}
-			if (options.caller == 'link2file') {
-				if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-					UI.openSegment(UI.editarea);
-				}
-			}
+			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
+			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
+				this.scrollSegment(segToScrollElem, options.highlight );
+				UI.openSegment(segToScrollElem);
+			} else if (options.segmentToOpen) {
+                $('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
+            } else if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
+                UI.openSegment(UI.editarea);
+            }
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
                 this.scrollSegment($('#segment-' + UI.startSegmentId), options.highlight );
@@ -1151,8 +1144,10 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-
+            console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
+            console.timeEnd("Time: RenderSegments"+fid);
+            console.timeEnd("Time: from start()");
 
 		});
 
@@ -2348,7 +2343,9 @@ UI = {
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
-                $('.editarea', $(this)).html( $('.editarea', segment).html() );
+                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
+                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId($(this)), UI.getSegmentFileId($(this)), $('.editarea', segment).html());
+
 
                 //Tag Projection: disable it if enable
                 UI.disableTPOnSegment($(this));
@@ -2660,7 +2657,7 @@ UI = {
         }
 
         if (UI.editarea != '') {
-            UI.lockTags(UI.editarea);
+            // UI.lockTags(UI.editarea);
             UI.checkTagProximity();
         }
 
@@ -2777,6 +2774,7 @@ UI = {
 };
 
 $(document).ready(function() {
+    console.time("Time: from start()");
     UI.start();
 });
 

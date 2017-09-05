@@ -166,6 +166,8 @@ $.extend(UI, {
 			this.surveyDisplayed = true;
 		}
 		this.checkQueryParams();
+
+        UI.firstLoad = false;
 	},
     checkQueryParams: function () {
         var action = APP.getParameterByName("action");

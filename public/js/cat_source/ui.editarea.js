@@ -282,7 +282,9 @@ $.extend( UI, {
             if (operation != 'moving') {
                 var segment = $('#segment-' + $(target).data('sid'));
                 if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                    UI.scrollSegment($('#segment-' + $(target).data('sid')));
+                    setTimeout(function () {
+                        UI.scrollSegment($('#segment-' + $(target).data('sid')));
+                    }, 50);
                 }
             }
         }

@@ -96,7 +96,7 @@ class SegmentTarget extends React.Component {
                     <div className="micBg2">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20"
                              viewBox="0 0 20 20">
-                            <g class="svgMic" transform="matrix(0.05555509,0,0,0.05555509,-3.1790007,-3.1109739)"
+                            <g className="svgMic" transform="matrix(0.05555509,0,0,0.05555509,-3.1790007,-3.1109739)"
                                fill="#737373">
                                 <path
                                     d="m 290.991,240.991 c 0,26.392 -21.602,47.999 -48.002,47.999 l -11.529,0 c -26.4,0 -48.002,-21.607 -48.002,-47.999 l 0,-136.989 c 0,-26.4 21.602,-48.004 48.002,-48.004 l 11.529,0 c 26.4,0 48.002,21.604 48.002,48.004 l 0,136.989 z"/>

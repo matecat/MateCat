@@ -43,15 +43,6 @@ var SegmentActions = {
             where: where
         });
     },
-    /* TODO
-     */
-    propagateTranslation: function (sid, status) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.PROPAGATE_TRANSLATION,
-            id: sid,
-            status: status
-        });
-    },
 
     updateAllSegments: function () {
         AppDispatcher.dispatch({

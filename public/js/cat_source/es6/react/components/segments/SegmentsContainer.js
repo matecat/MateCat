@@ -10,6 +10,7 @@ class SegmentsContainer extends React.Component {
 
     constructor(props) {
         super(props);
+        console.time("Time: SegmentsContainer Mount/Update"+this.props.fid);
         this.state = {
             segments : [],
             splitGroup: [],
@@ -57,6 +58,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         // SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
+        console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
     }
 
     componentWillUnmount() {
@@ -66,11 +68,16 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     componentWillUpdate() {
         saveSelection();
     }
     componentDidUpdate() {
         restoreSelection();
+        console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
     }
 
     render() {

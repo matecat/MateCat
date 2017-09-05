@@ -309,7 +309,7 @@ $.extend(UI, {
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
-			UI.lockTags(UI.editarea);
+			// UI.lockTags(UI.editarea);
 			UI.segmentQA(UI.currentSegment);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;

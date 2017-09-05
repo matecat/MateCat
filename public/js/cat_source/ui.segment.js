@@ -21,24 +21,23 @@
             }
             return currentContribution;
         },
-        setGlobalTagProjection: function (file) {
-            UI.enableTagProjection = UI.checkTPEnabled(file);
+        setGlobalTagProjection: function () {
+            UI.enableTagProjection = UI.checkTPEnabled();
         },
         /**
          * Tag Projection: check if is enable the Tag Projection
          * @param file
          */
-        checkTPEnabled: function (file) {
+        checkTPEnabled: function () {
             return (this.checkTpCanActivate() && !!config.tag_projection_enabled);
         },
         /**
          * Tag Projection: check if is possible to enable tag projection:
          * Condition: Languages it-IT en-GB en-US, not review
-         * @param file
          */
         checkTpCanActivate: function () {
             if (_.isUndefined(this.tpCanActivate)) {
-                var acceptedLanguages = config.tag_projection_languages
+                var acceptedLanguages = config.tag_projection_languages;
                 var elemST = config.source_rfc.split("-")[0] + "-" + config.target_rfc.split("-")[0];
                 var elemTS = config.target_rfc.split("-")[0] + "-" + config.source_rfc.split("-")[0];
                 var supportedPair = (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');

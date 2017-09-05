@@ -141,6 +141,10 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
     }
 
+    componentDidUpdate() {
+        console.log("Udate Segment" + this.props.segment.sid);
+    }
+
     allowHTML(string) {
         return { __html: string };
     }

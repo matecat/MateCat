@@ -18,9 +18,9 @@ class SegmentFooterTabMatches extends React.Component {
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
     }
 
-    setContributions(sid, matches){
+    setContributions(sid, matches, fieldTest){
         if ( this.props.id_segment == sid ) {
-            var matchesProcessed = this.processContributions(matches);
+            var matchesProcessed = this.processContributions(matches, fieldTest);
             this.setState({
                 matches: matchesProcessed
             });

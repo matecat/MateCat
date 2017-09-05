@@ -49,6 +49,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * Update all
      */
     updateAll: function(segments, fid, where) {
+        console.time("Time: updateAll segments"+fid);
         if ( this._segments[fid] && where === "before" ) {
             Array.prototype.unshift.apply( this._segments[fid], this.normalizeSplittedSegments(segments));
         } else if( this._segments[fid] && where === "after" ) {
@@ -56,6 +57,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         } else {
             this._segments[fid] = this.normalizeSplittedSegments(segments);
         }
+        console.timeEnd("Time: updateAll segments"+fid);
     },
 
     normalizeSplittedSegments: function(segments) {
@@ -225,9 +227,6 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.SET_SEGMENT_PROPAGATION:
             SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
-            break;
-        case SegmentConstants.PROPAGATE_TRANSLATION:
-            SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
             var trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
