@@ -255,7 +255,7 @@
 
         <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
             <!-- <p class="progress">Progress:</p> -->
-            <div class="meter" style="width:10%">
+            <div class="meter" style="width: 10%">
 
                 <a href="#" class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
                 <a href="#" class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
