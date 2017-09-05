@@ -58,6 +58,17 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
         return $result ;
     }
 
+    public function insertBulkMapForTranslationId( array $structs ) {
+        $sql = " INSERT INTO dqf_segments (id_segment, dqf_translation_id) VALUES " ;
+        $sql .= implode(', ', array_fill( 0, count( $structs ), " ( ?, ? ) " ) ) ;
+        $sql .= " ON DUPLICATE KEY UPDATE dqf_segments.dqf_translation_id = VALUES(dqf_segments.dqf_translation_id) " ;
+
+        $conn = $this->getConnection()->getConnection() ;
+
+        $stmt = $conn->prepare( $sql );
+        $flattened_values = array_reduce( $structs, 'array_merge', array() );
+        $stmt->execute( $flattened_values );
+    }
 
     /**
      * @param array $structs

@@ -205,7 +205,10 @@ class TranslationChildProject {
                     // input array.
                     $segmentPairs[] = ( new SegmentPairStruct([
                             "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ]['dqf_segment_id'],
-                            "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
+                            // TODO: the corect form of this key should be the following, to so to get back the
+                            // id_job for multi-language projects.
+                            // "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
+                            "clientId"          => $translation->id_segment,
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $translation->time,
@@ -235,7 +238,24 @@ class TranslationChildProject {
             }
         }
 
-        $translationBatchService->process() ;
+        $results = $translationBatchService->process() ;
+
+        $this->_saveResults( $results ) ;
+    }
+
+    protected function _saveResults( $results ) {
+        $results = array_map( function( $item ) {
+            $translations = json_decode( $item, true )['translations'];
+            return array_map( function($item) {
+                return [ $item['clientId'], $item['dqfId'] ] ;
+            }, $translations );
+        }, $results );
+
+        $dao = new DqfSegmentsDao() ;
+
+        foreach( $results as $batch ) {
+            $dao->insertBulkMapForTranslationId( $batch ) ;
+        }
     }
 
     protected function _findRemoteFileId( Files_FileStruct $file ) {

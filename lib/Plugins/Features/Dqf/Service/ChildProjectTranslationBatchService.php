@@ -41,9 +41,9 @@ class ChildProjectTranslationBatchService extends AbstractService {
                         var_export( $this->client->curl()->getAllContents(), true )
                 ) ;
             }
-            $result = $this->client->curl()->getSingleContent( $resource );
-            Log::doLog( var_export( $result, true ) ) ;
         }
+
+        return $this->client->curl()->getAllContents() ;
     }
 
     protected function _createCurlResource( ChildProjectTranslationRequestStruct $struct ) {
@@ -53,7 +53,6 @@ class ChildProjectTranslationBatchService extends AbstractService {
         Log::doLog( $this->session->filterHeaders( $struct) ) ;
 
         $resource = $this->client->createResource( $url, 'post', [
-                // 'formData'   => $struct->getParams(),
                 'headers'    => $this->session->filterHeaders( $struct ),
                 'pathParams' => $struct->getPathParams(),
                 'json'       => $struct->getBody()
