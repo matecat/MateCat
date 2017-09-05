@@ -118,7 +118,7 @@
          */
         setSegmentAsTagged: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            currentSegment.removeClass('enableTP');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(currentSegment), 'enableTP');
             currentSegment.data('tagprojection', 'tagged');
         },
         /**
@@ -145,7 +145,7 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment)  && currentSegment.hasClass('enableTP');
             if (this.enableTagProjection && tagProjectionEnabled) {
-                currentSegment.removeClass('enableTP');
+                SegmentActions.removeClassToSegment(UI.getSegmentId(currentSegment), 'enableTP');
                 currentSegment.data('tagprojection', 'tagged');
                 this.copySourcefromDataAttribute(segment);
                 UI.createButtons();
@@ -444,7 +444,7 @@
                 status: this.getStatusForAutoSave( segment ) ,
                 caller: 'autosave'
             });
-            segment.addClass('saved');
+            SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
         },
         setCurrentSegment: function(closed) {
             reqArguments = arguments;

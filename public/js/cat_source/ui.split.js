@@ -15,7 +15,7 @@ if(config.splitSegmentEnabled) {
         segment = $(this).parents('section');
         $('.editor .split-shortcut').html('CTRL + W');
         console.log('split');
-        UI.currentSegment.addClass('split-action');
+        SegmentActions.addClassToSegment(UI.getSegmentId( UI.currentSegment ), 'split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea(segment);
@@ -283,7 +283,7 @@ if(config.splitSegmentEnabled) {
             $('.sid .actions .split').removeClass('cancel');
             source = $(segment).find('.source');
             $(source).removeAttr('style');
-            UI.currentSegment.removeClass('split-action');
+            SegmentActions.removeClassToSegment(UI.getSegmentId( UI.currentSegment ), 'split-action');
             $('.split-shortcut').html('CTRL + S');
             UI.currentSegment.find('.splitBar, .splitArea').remove();
             UI.currentSegment.find('.sid .actions').hide();
@@ -291,7 +291,7 @@ if(config.splitSegmentEnabled) {
         openSegmentSplit: function () {
             $('.sid .actions .split').addClass('cancel');
             $('.split-shortcut').html('CTRL + W');
-            UI.currentSegment.addClass('split-action');
+            SegmentActions.addClassToSegment(UI.getSegmentId( UI.currentSegment ), 'split-action');
             actions = UI.currentSegment.find('.actions');
             actions.show();
             UI.createSplitArea(UI.currentSegment);

@@ -206,8 +206,7 @@ UI = {
             byStatus: byStatus,
             propagate: !noPropagation
         });
-
-        segment.el.removeClass('saved');
+        SegmentActions.removeClassToSegment(options.segment_id, 'saved');
 
         $(document).trigger('segment:status:change', [segment, options]);
     },
@@ -305,7 +304,10 @@ UI = {
             $('.sid .actions .split').removeClass('cancel');
             source = $(segment).find('.source');
             $(source).removeAttr('style');
+
+            // TODO: this line remove the class from all the segments???
             $('section').removeClass('split-action');
+
             $('.split-shortcut').html('CTRL + S');
             $('.splitBar, .splitArea').remove();
             $('.sid .actions').hide();
@@ -1118,12 +1120,6 @@ UI = {
                         '</article>';
 			}
 
-            // Todo Why we dont close the tag Article??
-            // newFile += newSegments;
-            /*if (articleToAdd) {
-				newFile += '</article>';
-			}*/
-
 			if (articleToAdd) {
 				if (where == 'before') {
 					if (typeof lastArticleAdded != 'undefined') {
@@ -1182,15 +1178,6 @@ UI = {
             UI.registerFooterTabs();
         }
     },
-
-    saveSegment: function(segment) {
-		this.setTranslation({
-            id_segment: this.getSegmentId(segment),
-            status: this.getStatusForAutoSave( segment ) ,
-            caller: 'autosave'
-        });
-		segment.addClass('saved');
-	},
 
 	renderAndScrollToSegment: function(sid) {
         UI.unmountSegments();
@@ -1897,11 +1884,11 @@ UI = {
     },
 
     addToSetTranslationTail: function (item) {
-        $('#segment-' + item.id_segment).addClass('setTranslationPending');
+        SegmentActions.addClassToSegment(item.id_segment, 'setTranslationPending');
         this.setTranslationTail.push(item);
     },
     updateToSetTranslationTail: function (item) {
-        $('#segment-' + item.id_segment).addClass('setTranslationPending');
+        SegmentActions.addClassToSegment(item.id_segment, 'setTranslationPending');
 
         $.each( UI.setTranslationTail, function (index) {
             if( this.id_segment == item.id_segment ) {
@@ -2300,7 +2287,7 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
-            $( segment ).removeClass( 'setTranslationPending' );
+            SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);

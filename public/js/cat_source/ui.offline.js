@@ -218,10 +218,15 @@ $.extend(UI, {
     },
     changeStatusOffline: function (sid) {
         if($('#segment-' + sid + ' .editarea').text() != '') {
-            $('#segment-' + sid).removeClass('status-draft status-approved ' +
-                'status-new status-rejected ' +
-                'status-fixed status-rebutted'
-            ).addClass('status-translated');
+
+            SegmentActions.removeClassToSegment(sid, 'status-draft');
+            SegmentActions.removeClassToSegment(sid, 'status-approved');
+            SegmentActions.removeClassToSegment(sid, 'status-new');
+            SegmentActions.removeClassToSegment(sid, 'status-rejected');
+            SegmentActions.removeClassToSegment(sid, 'status-fixed');
+            SegmentActions.removeClassToSegment(sid, 'status-rebutted');
+
+            SegmentActions.addClassToSegment(sid, 'status-translated');
         }
     },
 });
