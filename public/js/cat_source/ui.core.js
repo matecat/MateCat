@@ -282,7 +282,7 @@ UI = {
                     saveBehaviour = false;
             }
 
-            if ((segment.hasClass('modified')) && (saveBehaviour) && (!config.isReview)) {
+            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton, segment);
