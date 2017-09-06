@@ -928,7 +928,6 @@ button.ui-button::-moz-focus-inner {
 }
 
 .ui-progressbar .ui-progressbar-value {
-    margin: -1px;
     height: 100%;
 }
 
@@ -941,7 +940,6 @@ button.ui-button::-moz-focus-inner {
 
 .converting .ui-progressbar-value {
     background: url(../../img/progressbar-green.gif) !important;
-    border-right: 1px solid #58B551 !important;
 }
 
 /*jquery.image-gallery.min.css*/
@@ -1105,20 +1103,18 @@ button.ui-button::-moz-focus-inner {
 }
 
 .files .progress {
-    border: 1px solid #ccc;
     background: #fff;
 }
 
 .files .progress,
 .fileupload-buttonbar .progress {
     height: 15px;
+    border-radius: 10px;
 }
 
 .files .ui-progressbar-value,
 .fileupload-buttonbar .ui-progressbar-value {
     background: url(../../img/progressbar.gif);
-    border-right: 1px solid #09BEEC;
-    height: 30px !important;
 }
 
 .fileupload-buttonbar .fade,
