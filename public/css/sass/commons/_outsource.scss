@@ -368,13 +368,13 @@
                     }
                     .job-details-box {
                         display: inline-block;
-                        width: 46% !important;
+                        width: 44% !important;
                         vertical-align: middle;
-                        padding: 0 15px;
+                        padding: 0 0 0 15px;
                         position: relative;
                         .source-target-outsource {
                             display: inline-block;
-                            width: 67%;
+                            width: 69%;
                             font-size: 19px;
                             font-weight: 700;
                             .source-box {
@@ -400,8 +400,9 @@
                         }
                         .job-payment {
                             display: inline-block;
-                            width: 33%;
-                            text-align: center;
+                            width: 31%;
+                            text-align: right;
+                            padding-right: 28px;
                             .not-payable {
                                 text-decoration: line-through;
                                 font-size: 16px;
@@ -418,22 +419,22 @@
                     .job-price {
                         display: inline-block;
                         vertical-align: middle;
-                        width: 16%;
-                        text-align: right;
+                        width: 18%;
                         font-size: 20px;
                         font-weight: 700;
                         text-align: center;
                     }
                 }
                 .revision-box {
-                    padding: 4px 15px;
+                    padding: 4px 0px;
                     background-color: #e4e6e8;
                     margin-bottom: 10px;
                     height: 28px;
                     .add-revision {
                         display: inline-block;
-                        width: 81%;
+                        width: 82%;
                         text-align: right;
+                        padding-right: 28px;
                         .checkbox {
 
                         }
@@ -441,9 +442,10 @@
                     .job-price {
                         display: inline-block;
                         font-size: 18px;
-                        text-align: right;
+                        text-align: center;
                         font-weight: 700;
-                        width: 15%;
+                        width: 18%;
+                        padding-right: 0px;
                     }
 
                 }
