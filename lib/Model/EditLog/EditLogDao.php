@@ -349,32 +349,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         if ( empty( $password ) ) {
             throw new Exception( "Job password required" );
         }
-        $queryValidSegments = "
-        select
-            sum(time_to_edit) as tot_tte,
-            sum(raw_word_count) as raw_words,
-            sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
-            avg_post_editing_effort / sum(raw_word_count) as avg_pee
-        from segment_translations st
-        join segments s on s.id = st.id_segment
-        join jobs j on j.id = st.id_job
-        where id_job = %d
-            AND show_in_cattool = 1
-            and  password = '%s'
-            and st.status not in( '%s', '%s' )
-            and time_to_edit/raw_word_count between %d and %d";
 
-        $resultValidSegs = $this->_fetch_array(
-                sprintf(
-                        $queryValidSegments,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT,
-                        1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
-                        1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
-                )
-        );
+        $resultValidSegs = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $job_id, $password );
 
         $queryAllSegments = "
           select
@@ -399,7 +375,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 'tot_tte'       => $resultAllSegs[0][ 'tot_tte' ],
                 'raw_words'     => $resultAllSegs[0][ 'raw_words' ],
                 'secs_per_word' => $resultAllSegs[0][ 'secs_per_word' ],
-                'avg_pee'       => $resultValidSegs[0][ 'avg_pee' ]
+                'avg_pee'       => $resultValidSegs->avg_pee
         );
 
         return $result;
