@@ -5,14 +5,16 @@ if ( ReviewImproved.enabled() ) {
     $(document).on('files:appended', function initReactComponents() {
 
         loadDataPromise.done(function() {
-            $('section [data-mount=translation-issues-button]').each(function() {
-                var segment = new UI.Segment( this )  ;
-                if ( issuesPanelSideButtonEnabled( segment ) ) {
-                    ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
-                        sid : segment.absoluteId
-                    } ), this );
-                }
-            });
+            SegmentActions.mountTranslationIssues();
+
+            // $('section [data-mount=translation-issues-button]').each(function() {
+            //     var segment = new UI.Segment( this )  ;
+            //     if ( issuesPanelSideButtonEnabled( segment ) ) {
+            //         ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
+            //             sid : segment.absoluteId
+            //         } ), this );
+            //     }
+            // });
         });
     });
 

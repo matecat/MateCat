@@ -50,6 +50,12 @@ var SegmentActions = {
         });
     },
 
+    mountTranslationIssues: function () {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
+        });
+    },
+
     /********** Segment **********/
 
     addClassToSegment: function (sid, newClass) {

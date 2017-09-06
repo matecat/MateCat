@@ -25,5 +25,6 @@ module.exports = keyMirror({
     REGISTER_TAB: null,
     SET_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
-    RENDER_GLOSSARY: null
+    RENDER_GLOSSARY: null,
+    MOUNT_TRANSLATIONS_ISSUES: null
 });

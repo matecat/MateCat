@@ -8,6 +8,7 @@ var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentHeader = require('./SegmentHeader').default;
 var SegmentFooter = require('./SegmentFooter').default;
 var SegmentBody = require('./SegmentBody').default;
+var TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
 
 class Segment extends React.Component {
 
@@ -20,12 +21,14 @@ class Segment extends React.Component {
         this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
+        this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
 
         this.state = {
             segment_classes : [],
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
-            status: this.props.segment.status
+            status: this.props.segment.status,
+            showTranslationIssues: false
         };
     }
 
@@ -121,6 +124,28 @@ class Segment extends React.Component {
         }
     }
 
+    isSplitted() {
+        return (!_.isUndefined(this.props.segment.split_group));
+    }
+
+    isFirstOfSplit() {
+        return (!_.isUndefined(this.props.split_group) &&
+        this.props.segmane.split_group.indexOf(this.props.segment.sid) === 0);
+    }
+
+    addTranslationsIssues() {
+        this.setState({
+            showTranslationIssues: true
+        });
+    }
+
+    getTranslationIssues() {
+        if (this.state.showTranslationIssues &&
+            (!(this.props.segment.readonly === 'true')  && !this.isSplitted()  ) ) {
+            return <TranslationIssuesSideButtons sid={this.props.segment.sid.split('-')[0]} />;
+        }
+        return null;
+    }
 
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
@@ -129,6 +154,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
+        SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
     }
 
 
@@ -139,6 +165,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
+        SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
     }
 
     componentDidUpdate() {
@@ -175,6 +202,8 @@ class Segment extends React.Component {
         if (this.props.timeToEdit) {
             timeToEdit = <span className="edit-min">{this.segment_edit_min}</span> + 'm' + <span className="edit-sec">{this.segment_edit_sec}</span> + 's';
         }
+
+        var translationIssues = this.getTranslationIssues();
 
         return (
             <section
@@ -222,7 +251,9 @@ class Segment extends React.Component {
 
                 {/*//!-- TODO: place this element here only if it's not a split --*/}
                 <div className="segment-side-buttons">
-                    <div data-mount="translation-issues-button" className="translation-issues-button" data-sid={this.props.segment.sid}></div>
+                    <div data-mount="translation-issues-button" className="translation-issues-button" data-sid={this.props.segment.sid}>
+                        {translationIssues}
+                    </div>
                 </div>
             </section>
         );

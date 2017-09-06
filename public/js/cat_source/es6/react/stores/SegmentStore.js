@@ -254,6 +254,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.matches);
             break;
+        case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
+            SegmentStore.emitChange(action.actionType);
+            break;
         default:
     }
 });
