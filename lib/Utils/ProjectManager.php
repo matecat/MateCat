@@ -68,6 +68,8 @@ class ProjectManager {
      */
     protected $user ;
 
+    protected $features ;
+
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
