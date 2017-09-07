@@ -651,6 +651,7 @@ class OutsourceVendor extends React.Component {
                 allowTimes: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
                 disabledWeekDays: [0,6],
                 onSelectDateButton: function (newDateTime) {
+                    newDateTime.setMinutes(newDateTime.getMinutes() + (2 - parseFloat(self.state.timezone)) * 60);
                     let timestamp = (new Date(newDateTime)).getTime();
                     let now = new Date().getTime();
                     if (timestamp < now) {
