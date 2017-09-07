@@ -23,6 +23,7 @@ use EnginesModel_EngineStruct;
 use EnginesModel_MMTStruct;
 use Exception;
 use Jobs_JobStruct;
+use Klein\Klein;
 use Log;
 use Projects_ProjectStruct;
 use stdClass;
@@ -36,6 +37,10 @@ use Users_UserStruct;
 class Mmt extends BaseFeature {
 
     protected $autoActivateOnProject = false;
+
+    public static function loadRoutes(  Klein $klein  ){
+        route( '/me', 'GET', '\Features\Mmt\Controller\RedirectMeController', 'redirect' );
+    }
 
     /**
      *

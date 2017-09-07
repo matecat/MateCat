@@ -1,5 +1,8 @@
 <?php
 
+use Features\BaseFeature;
+use Klein\Klein;
+
 
 /**
  * Class Features
@@ -29,8 +32,9 @@ class Features {
     /**
      * Give your plugins the possibilty to install routes
      *
+     * @param Klein $klein
      */
-    public static function loadRoutes( \Klein\Klein $klein ) {
+    public static function loadRoutes( Klein $klein ) {
         list( $null, $prefix, $class_name) = explode('/', $_SERVER['REQUEST_URI']);
 
         if ( $prefix  == 'plugins' ) {
@@ -38,6 +42,9 @@ class Features {
 
             if ( class_exists( $cls ) ) {
                 $klein->with("/$prefix/$class_name", function() use ($cls, $klein) {
+                    /**
+                     * @var $cls BaseFeature
+                     */
                     $cls::loadRoutes( $klein );
                 });
             }

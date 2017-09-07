@@ -17,7 +17,7 @@ abstract class viewController extends controller {
     /**
      * Template Engine Instance
      *
-     * @var PHPTAL
+     * @var PHPTALWithAppend
      */
     protected $template = null;
 

@@ -12,7 +12,7 @@ class PHPTALWithAppend extends PHPTAL {
 
     /**
      *
-     * This method popolates an array of arrays that can be used
+     * This method populates an array of arrays that can be used
      * to push values on the template so that plugins can append
      * their own javascripts or assets.
      *

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MMT</title>
+    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script>
+        var config = {
+            license: '${structure php: license}',
+            url: '${structure php: url}',
+        };
+        $( document ).ready( function () {
+            var form = $( '#redirectForm' );
+            form.attr( 'action', config.url );
+            $( '#license' ).val( config.license );
+            form.submit();
+        } );
+
+    </script>
+</head>
+<body>
+<form style="visibility: hidden; display: none;" id="redirectForm" action="" method="POST">
+    <input type="hidden" id="license" name="license" value=""/>
+</form>
+</body>
+
+</html>

@@ -146,7 +146,7 @@ class Routes {
     }
 
     public static function manage( ) {
-        $host = self::httpHost( $options );
+        $host = self::httpHost( null );
 
         return "$host/manage";
     }

@@ -356,11 +356,11 @@
                                         <tr class="" data-id="${engine/id}">
                                             <td class="mt-provider" tal:content="structure engine/name"></td>
                                             <td class="engine-name">
-                                                <div class="edit-desc">${engine/description}</div>
+                                                <div class="">${engine/description}</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" />
-                                                <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
+                                                <!--<input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />-->
                                             </td>
                                             <td class="action">
                                                 <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -392,7 +392,7 @@
                                                 <tr class="" data-id="${engine/id}">
                                                     <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
-                                                        <div class="edit-desc">${engine/description}</div>
+                                                        <div class="">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
                                                     </td>
