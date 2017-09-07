@@ -1394,6 +1394,7 @@ class ProjectManager {
                 $jobInfo[ 'password' ]    = $this->generatePassword();
                 $jobInfo[ 'create_date' ] = date( 'Y-m-d H:i:s' );
                 $jobInfo[ 'avg_post_editing_effort' ] = 0;
+                $jobInfo[ 'total_time_to_edit' ] = 0;
             }
 
             $jobInfo[ 'last_opened_segment' ] = $contents[ 'last_opened_segment' ];
@@ -1493,10 +1494,13 @@ class ProjectManager {
         }
 
         $totalAvgPee = 0;
+        $totalTimeToEdit = 0;
         foreach( $jobStructs as $_jStruct ){
             $totalAvgPee += $_jStruct->avg_post_editing_effort;
+            $totalTimeToEdit += $_jStruct->total_time_to_edit;
         }
         $first_job[ 'avg_post_editing_effort' ] = $totalAvgPee;
+        $first_job[ 'total_time_to_edit' ] = $totalTimeToEdit;
 
         \Database::obtain()->begin();
 
