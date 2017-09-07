@@ -615,12 +615,10 @@ class JobContainer extends React.Component {
             self.updated = false;
         }
         if (prevState.openOutsource && this.chunkRow) {
-            this.chunkRow.classList.add('after-open-outsource');
-        } else {
             setTimeout(function () {
                 $('.after-open-outsource').removeClass('after-open-outsource');
-            }, 600);
-
+                self.chunkRow.classList.add('after-open-outsource');
+            }, 400);
         }
     }
 
