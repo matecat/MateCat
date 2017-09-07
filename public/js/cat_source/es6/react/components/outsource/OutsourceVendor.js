@@ -209,14 +209,14 @@ class OutsourceVendor extends React.Component {
 
     getDeliveryDate() {
         if ( !_.isNull(this.props.job.get('outsource')) ) {
-            return APP.getGMTDate( this.props.job.get('outsource').get('delivery_date'), this.props.job.get('outsource').get('timezone'));
+            return APP.getGMTDate( this.props.job.get('outsource').get('delivery_date'), 2);
         } else if (this.state.outsource) {
             // let timeZone = this.getTimeZone();
             // let dateString =  this.getDateString(deliveryToShow, timeZone);
             if (this.state.revision && this.state.chunkQuote.get('r_delivery')) {
-                return APP.getGMTDate( this.state.chunkQuote.get('r_delivery'), this.state.chunkQuote.get('timezone'));
+                return APP.getGMTDate( this.state.chunkQuote.get('r_delivery'), 2);
             } else {
-                return APP.getGMTDate(  this.state.chunkQuote.get('delivery'), this.state.chunkQuote.get('timezone'));
+                return APP.getGMTDate(  this.state.chunkQuote.get('delivery'), 2);
             }
         }
 
