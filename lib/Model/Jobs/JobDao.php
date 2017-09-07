@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
+
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
     const TABLE       = "jobs";
@@ -24,7 +26,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
-    public function read( \Jobs_JobStruct $jobQuery ){
+    public function read( Jobs_JobStruct $jobQuery ){
 
         $stmt = $this->_getStatementForCache();
         return $this->_fetchObject( $stmt,
@@ -67,7 +69,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( \Jobs_JobStruct $jobQuery ){
+    public function destroyCache( Jobs_JobStruct $jobQuery ){
         /*
         * build the query
         */
@@ -86,16 +88,19 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * @return Jobs_JobStruct
      */
-    public static function getByIdAndPassword( $id_job, $password ) {
+    public static function getByIdAndPassword( $id_job, $password, $ttl = 0 ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM jobs WHERE " .
                 " id = :id_job AND password = :password "
         );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( 'id_job' => $id_job, 'password' => $password ) );
 
-        return $stmt->fetch();
+        $thisDao = new self();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [
+                'id_job' => $id_job,
+                'password' => $password
+        ] )[ 0 ];
+
     }
 
     public static function getByProjectId( $id_project, $ttl = 0 ) {
@@ -118,7 +123,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @internal param $requestedWordsPerSplit
      *
      */
-
     public function getSplitData( $id, $password, $ttl = 0 ) {
         $conn = $this->getConnection()->getConnection();
 
@@ -255,6 +259,113 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $jStruct->password = $new_password;
 
         return $jStruct;
+
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return ShapelessConcreteStruct
+     */
+    public function getPeeStats( $id_job, $password ){
+
+        $query = "
+            SELECT
+                -- SUM( time_to_edit ) AS tot_tte,
+                -- SUM( raw_word_count ) AS raw_words,
+                -- SUM( time_to_edit )/SUM( raw_word_count ) AS secs_per_word,
+                avg_post_editing_effort / SUM( raw_word_count ) AS avg_pee
+            FROM segment_translations st
+            JOIN segments s ON s.id = st.id_segment
+            JOIN jobs j ON j.id = st.id_job
+            WHERE id_job = :id_job 
+                AND show_in_cattool = 1
+                AND  password = :password
+                AND st.status NOT IN( :status_new , :status_draft )
+                AND time_to_edit/raw_word_count BETWEEN :edit_time_fast_cut AND :edit_time_slow_cut
+                AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+        ";
+
+        $stmt = $this->con->getConnection()->prepare( $query );
+
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'             => $id_job,
+                'password'           => $password,
+                'status_new'         => Constants_TranslationStatus::STATUS_NEW,
+                'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
+                'edit_time_fast_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
+                'edit_time_slow_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+        ] )[ 0 ];
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jobStruct
+     *
+     * @return PDOStatement
+     */
+    public function getSplitJobPreparedStatement( Jobs_JobStruct $jobStruct ){
+
+        $jobCopy = $jobStruct->getArrayCopy();
+
+        $columns      = implode( ", ", array_keys( $jobCopy ) );
+        $values       = array_values( $jobCopy );
+        $placeHolders = implode( ',', array_fill( 0, count( $values ), '?' ) );
+
+        $values[] = $jobStruct->last_opened_segment;
+        $values[] = $jobStruct->job_first_segment;
+        $values[] = $jobStruct->job_last_segment;
+        $values[] = $jobStruct->avg_post_editing_effort;
+
+        $query = "INSERT INTO jobs ( $columns ) VALUES ( $placeHolders )
+                        ON DUPLICATE KEY UPDATE
+                        last_opened_segment = ?,
+                        job_first_segment = ?,
+                        job_last_segment = ?,
+                        avg_post_editing_effort = ?
+                ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        foreach( $values as $k => $v ){
+            $stmt->bindValue( $k +1, $v ); //Columns/Parameters are 1-based
+        }
+
+        return $stmt;
+
+    }
+
+    public static function updateForMerge( Jobs_JobStruct $first_job, $newPass ){
+
+        static::updateStruct( $first_job );
+
+        if( $newPass ){
+            $sql = " UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
+            $stmt = Database::obtain()->getConnection()->prepare( $sql ) ;
+            $stmt->execute( [
+                    'new_password' => $newPass,
+                    'id'           => $first_job->id,
+                    'old_password' => $first_job->password
+            ] );
+            $first_job->password = $newPass;
+        }
+
+        return $first_job;
+
+    }
+
+    public static function deleteOnMerge( Jobs_JobStruct $first_job ){
+
+        $conn = Database::obtain()->getConnection();
+        $query = "DELETE FROM jobs WHERE id = :id AND password != :first_job_password "; //use new password
+        $stmt = $conn->prepare( $query );
+
+        return $stmt->execute( [
+                'id' => $first_job->id,
+                'first_job_password' => $first_job->password
+        ] );
 
     }
 

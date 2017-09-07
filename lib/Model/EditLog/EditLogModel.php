@@ -331,10 +331,9 @@ class EditLog_EditLogModel {
 
         //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
-        if ( $stats[ 'edited-word-count' ] > 0 ) {
+        if ( $stats[ 'edited-word-count' ] > 0 ) { //FIXME [ BUG ] this is calculated on 50 segments, slow and fast segments are only related to the 50 selected segments
             $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
-            $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
             $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
