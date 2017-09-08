@@ -603,7 +603,8 @@ class OutsourceVendor extends React.Component {
                         </div>
                         <div className="order-button-outsource">
                             {!this.state.outsourceConfirmed ? (
-                                <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
+                                <button className="open-order ui green button" onClick={this.sendOutsource.bind(this)}>Order now</button>
+                                // <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
                             ):((!this.state.jobOutsourced) ? (
                                     <button className="confirm-order ui green button"
                                             onClick={this.sendOutsource.bind(this)}>Confirm</button>
