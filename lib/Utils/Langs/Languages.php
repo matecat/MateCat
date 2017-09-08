@@ -233,6 +233,13 @@ class Langs_Languages {
         return $acc;
     }
 
+    public function validateLanguage( $code = null ){
+        if ( empty( $code ) ) {
+            throw new Lang_InvalidLanguageException( "Missing language.", -3 );
+        }
+        $this->getLocalizedNameRFC( $code ) ;
+        if( !$this->isEnabled( $code ) ) throw new Lang_InvalidLanguageException( 'Language not enabled: ' . $code );
+    }
 
 }
 

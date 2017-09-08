@@ -657,14 +657,8 @@ class NewController extends ajaxController {
     }
 
     private function validateSourceLang() {
-        if ( empty( $this->source_lang ) ) {
-            $this->api_output[ 'message' ] = "Missing source language.";
-            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
-        }
-
         try {
-            $this->lang_handler->getLocalizedNameRFC( $this->source_lang ) ;
-
+            $this->lang_handler->validateLanguage( $this->source_lang ) ;
         } catch ( Exception $e ) {
             $this->api_output['message'] = $e->getMessage();
             $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
@@ -682,9 +676,11 @@ class NewController extends ajaxController {
         }
 
         try {
+
             foreach ( $targets as $target ) {
-               $this->lang_handler->getLocalizedNameRFC( $target );
+                $this->lang_handler->validateLanguage( $target ) ;
             }
+
         } catch ( Exception $e ) {
             $this->api_output['message'] = $e->getMessage();
             $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
