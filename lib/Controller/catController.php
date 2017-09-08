@@ -183,6 +183,7 @@ class catController extends viewController {
             if ( $lastTranslationInJob < $oneMonthAgo ) {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
+                //FIXME use Dao
                 updateJobsStatus( $res, $this->jid, $new_status, null, $this->password );
                 $this->job_archived = true;
             }
@@ -430,8 +431,34 @@ class catController extends viewController {
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
             $this->template->fileCounter         = 0;
-            $this->template->owner_email         = $this->job_owner;
-            $this->template->jobOwnerIsMe        = ( $this->logged_user->email == $this->job_owner );
+
+            $team = $this->project->getTeam();
+            $teamModel = new TeamModel( $team );
+            $teamModel->updateMembersProjectsCount();
+
+            $membersIdList = [];
+            $ownerMail = null;
+            if( $team->type == Constants_Teams::PERSONAL ){
+                $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
+            } else {
+
+                $ownerMail = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee )->getEmail();
+                $membersIdList = array_map( function( $memberStruct ){
+                    /**
+                     * @var $memberStruct \Teams\MembershipStruct
+                     */
+                    return $memberStruct->uid;
+                }, $team->getMembers() );
+
+            }
+            $this->template->owner_email = $ownerMail;
+
+            if( $this->logged_user->email == $ownerMail || in_array( $this->logged_user->uid, $membersIdList ) ){
+                $this->template->jobOwnerIsMe        = true;
+            } else {
+                $this->template->jobOwnerIsMe        = false;
+            }
+
             $this->template->job_not_found       = $this->job_not_found;
             $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
             $this->template->job_cancelled       = $this->job_cancelled;
