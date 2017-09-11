@@ -359,7 +359,7 @@ class getContributionController extends ajaxController {
                 );
             }
 
-            if( isset( $match[ 'ICE' ] ) && $match[ 'match' ] == '100%' ){
+            if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && $match[ 'match' ] == '100%' ){
                 $match[ 'match' ] = '101%';
             }
 
