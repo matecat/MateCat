@@ -203,7 +203,10 @@ class OutsourceVendor extends React.Component {
         this.setState({
             revision: this.revisionCheckbox.checked
         });
-        this.getOutsourceQuote(this.selectedDate, service);
+        let self = this;
+        setTimeout(function () {
+            self.getOutsourceQuote(self.selectedDate, service);
+        });
 
     }
 
@@ -363,7 +366,7 @@ class OutsourceVendor extends React.Component {
                     <div className="revision-box">
                         <div className="add-revision">
                             <div className={"ui checkbox " + checkboxDisabledClass}>
-                                <input type="checkbox" defaultChecked
+                                <input type="checkbox" checked={this.state.revision}
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
                                        onClick={this.clickRevision.bind(this)}/>
                                 <label>Add Revision</label>
