@@ -911,7 +911,7 @@ APP = {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
         var dd = new Date( date );
-        var timeZoneFrom = (timeZoneFrom) ? timeZoneFrom : 0; //TODO UTC0 ? Why the browser gmt
+        var timeZoneFrom = (timeZoneFrom) ? timeZoneFrom : (-1 * ( new Date().getTimezoneOffset() / 60) ); //TODO UTC0 ? Why the browser gmt
         dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
         var timeZone = this.getGMTZoneString();
         return {
