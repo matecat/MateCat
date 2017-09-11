@@ -151,7 +151,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 $equivalentWordMapping,
                 /* is Public TM */
                 empty( $this->_matches[ 0 ][ 'memory_key' ] ),
-                isset( $this->_matches[ 0 ][ 'ICE' ] )
+                isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
         );
 
         $eq_words       = $equivalentWordMapping[ $new_match_type ] * $queueElement->params->raw_word_count / 100;
