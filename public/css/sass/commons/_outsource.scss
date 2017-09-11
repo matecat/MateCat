@@ -81,7 +81,7 @@
         float: none;
         display: inline-block;
         .ui.selection.dropdown {
-            min-width: 40px !important;
+            min-width: 101px !important;
             width: auto;
             background: transparent;
             .text {
@@ -207,9 +207,10 @@
                                     font-size: 16px;
                                     border: 1px solid #797979;
                                     border-radius: 2px;
-                                    padding: 9px 15px;
+                                    padding: 9px 17px;
                                     margin: 0;
                                     float: right;
+                                    width: 197px;
                                 }
                             }
 
@@ -311,7 +312,7 @@
                     width: 30%;
                     display: inline-block;
                     text-align: right;
-                    padding: 0 15px;
+                    padding: 0;
                     vertical-align: text-bottom;
                     .translated-logo {
                         display: inline-block;
@@ -862,6 +863,11 @@
                                 .gmt-select {
                                     position: relative;
                                     top: -3px;
+                                    padding-right: 8px;
+                                    padding-left: 8px;
+                                    .dropdown.icon {
+                                        padding: 10px 3px 0 0px;
+                                    }
                                 }
                             }
                         }
