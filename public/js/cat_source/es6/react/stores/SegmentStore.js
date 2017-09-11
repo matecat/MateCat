@@ -35,11 +35,9 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var SegmentConstants = require('../constants/SegmentConstants');
 var assign = require('object-assign');
+let Immutable = require('immutable');
 
 EventEmitter.prototype.setMaxListeners(0);
-
-
-
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
@@ -51,11 +49,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     updateAll: function(segments, fid, where) {
         console.time("Time: updateAll segments"+fid);
         if ( this._segments[fid] && where === "before" ) {
-            Array.prototype.unshift.apply( this._segments[fid], this.normalizeSplittedSegments(segments));
+            this._segments[fid] = this._segments[fid].unshift(Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if( this._segments[fid] && where === "after" ) {
-            Array.prototype.push.apply( this._segments[fid], this.normalizeSplittedSegments(segments));
+            this._segments[fid] = this._segments[fid].push(Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
-            this._segments[fid] = this.normalizeSplittedSegments(segments);
+            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
         console.timeEnd("Time: updateAll segments"+fid);
     },
@@ -102,31 +100,42 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getSegmentById(sid, fid) {
         return this._segments[fid].find(function (seg) {
-            return seg.sid == sid;
+            return seg.get('sid') == sid;
+        });
+
+    },
+
+    getSegmentIndex(sid, fid) {
+        return this._segments[fid].findIndex(function (segment, index) {
+            return (segment.get('sid') === sid);
         });
 
     },
 
     splitSegment(oldSid, newSegments, fid, splitGroup) {
-        var currentSegments = this._segments[fid];
-        var index = currentSegments.findIndex(function (segment, index) {
-            return (segment.sid == oldSid);
+        var index = this._segments[fid].findIndex(function (segment, index) {
+            return (segment.get('sid') == oldSid);
         });
         if (index > -1) {
+
             newSegments.forEach(function (element) {
                 element.split_group = splitGroup;
             });
-            Array.prototype.splice.apply(currentSegments, [index, 1].concat(newSegments));
+
+            newSegments = Immutable.fromJS(newSegments);
+            this._segments[fid] = this._segments[fid].splice(index, 1, ...newSegments);
         } else {
-            this.removeSplit(oldSid, newSegments, currentSegments);
+            this.removeSplit(oldSid, newSegments, fid);
         }
     },
 
-    removeSplit(oldSid, newSegments, currentSegments) {
+    removeSplit(oldSid, newSegments, fid) {
+        var self = this;
         var elementsToRemove = [];
+        newSegments = Immutable.fromJS(newSegments);
         var indexes = [];
-        currentSegments.map(function (segment, index) {
-            if (segment.sid.split('-').length && segment.sid.split('-')[0] == oldSid){
+        this._segments[fid].map(function (segment, index) {
+            if (segment.get('sid').split('-').length && segment.get('sid').split('-')[0] == oldSid){
                 elementsToRemove.push(segment);
                 indexes.push(index);
                 return index;
@@ -134,37 +143,43 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         if (elementsToRemove.length) {
             elementsToRemove.forEach(function (seg) {
-                currentSegments.splice(currentSegments.indexOf(seg), 1)
+                self._segments[fid] = self._segments[fid].splice(self._segments[fid].indexOf(seg), 1)
             });
-            Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
+            this._segments[fid] = this._segments[fid].splice(indexes[0], 0, ...newSegments);
+
+            // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
     },
 
     setStatus(sid, fid, status) {
-        var segment = this.getSegmentById(sid, fid);
-        segment.status = status;
+        var index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'status'], status);
     },
 
     setSuggestionMatch(sid, fid, perc) {
-        var segment = this.getSegmentById(sid, fid);
-        segment.suggestion_match = perc.replace('%', '');
+        var index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
-        var segment = this.getSegmentById(sid, fid);
+        var index = this.getSegmentIndex(sid, fid);
         if (propagation) {
-            segment.autopropagated_from = from;
+            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], from);
         } else {
-            segment.autopropagated_from = "0";
+            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], "0");
         }
     },
     replaceTranslation(sid, fid, translation) {
-        var segment = this.getSegmentById(sid, fid);
-        return segment.translation = this.removeLockTagsFromString(translation);
+        var index = this.getSegmentIndex(sid, fid);
+        var trans = this.removeLockTagsFromString(translation);
+        this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
+        return trans;
     },
     replaceSource(sid, fid, source) {
-        var segment = this.getSegmentById(sid, fid);
-        return segment.translation = this.removeLockTagsFromString(source);
+        var index = this.getSegmentIndex(sid, fid);
+        var trans = this.removeLockTagsFromString(source);
+        this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
+        return trans;
     },
     removeLockTagsFromString(str) {
         return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
@@ -173,7 +188,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     getAllSegments: function () {
         var result = [];
         $.each(this._segments, function(key, value) {
-            result = result.concat(value);
+            result = result.concat(value.toJS());
         });
         return result;
     },
@@ -193,7 +208,7 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid, action.where);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid].toJS(), action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);

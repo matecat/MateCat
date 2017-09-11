@@ -44,7 +44,7 @@ class SegmentsContainer extends React.Component {
 
     renderSegments(segments, fid) {
         if (fid !== this.props.fid) return;
-        var splitGroup =  [];
+        let splitGroup =  [];
         this.setState({
             segments: segments,
             splitGroup: splitGroup,
@@ -81,10 +81,11 @@ class SegmentsContainer extends React.Component {
     }
 
     render() {
-        var items = [];
-        var self = this;
-        var isReviewImproved = !!(this.props.isReviewImproved);
-        this.state.segments.forEach(function (segment) {
+        let items = [];
+        let self = this;
+        let isReviewImproved = !!(this.props.isReviewImproved);
+        this.state.segments.forEach(function (segImmutable) {
+            let segment = segImmutable.toJS();
             var item = <Segment
                 key={segment.sid}
                 segment={segment}
