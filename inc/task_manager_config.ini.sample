@@ -80,3 +80,12 @@ ACTIVITYLOG[pid_set_name]  = "ch_pid_activity_log"
 ACTIVITYLOG[max_executors] = 1
 ACTIVITYLOG[redis_key]     = "activity_log_list"
 ACTIVITYLOG[loggerName]    = "activity_log.log"
+
+;;##############################
+;;##### Key Name jobs      #####
+;;##############################
+JOBS[queue_name]    = "jobs"
+JOBS[pid_set_name]  = "ch_pid_jobs"
+JOBS[max_executors] = 1
+JOBS[redis_key]     = "jobs_list"
+JOBS[loggerName]    = "jobs.log"

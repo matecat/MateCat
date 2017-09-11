@@ -263,6 +263,68 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * Job Worker gets segments to recount the Job Total weighted PEE
+     *
+     * @param Jobs_JobStruct $jStruct
+     *
+     * @return EditLog_EditLogSegmentStruct[]|DataAccess_IDaoStruct[]
+     */
+    public function getAllModifiedSegmentsForPee( Jobs_JobStruct $jStruct ){
+
+        $query = "
+            SELECT
+              s.id,
+              suggestion, 
+              translation,
+              raw_word_count,
+              time_to_edit
+            FROM segment_translations st
+            JOIN segments s ON s.id = st.id_segment
+            JOIN jobs j ON j.id = st.id_job
+            WHERE id_job = :id_job 
+                AND show_in_cattool = 1
+                AND  password = :password
+                AND st.status NOT IN( :status_new , :status_draft )
+                AND time_to_edit/raw_word_count BETWEEN :edit_time_fast_cut AND :edit_time_slow_cut
+                AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+        ";
+
+        $stmt = $this->con->getConnection()->prepare( $query );
+
+        return $this->_fetchObject( $stmt, new EditLog_EditLogSegmentStruct(), [
+                'id_job'             => $jStruct->id,
+                'password'           => $jStruct->password,
+                'status_new'         => Constants_TranslationStatus::STATUS_NEW,
+                'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
+                'edit_time_fast_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
+                'edit_time_slow_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+        ] );
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jStruct
+     */
+    public function updateJobWeightedPeeAndTTE( Jobs_JobStruct $jStruct ){
+
+        $sql  = " UPDATE jobs 
+                    SET avg_post_editing_effort = :avg_post_editing_effort, 
+                        total_time_to_edit = :total_time_to_edit 
+                    WHERE id = :id 
+                    AND password = :password ";
+
+        $stmt = Database::obtain()->getConnection()->prepare( $sql );
+        $stmt->execute( [
+                'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
+                'total_time_to_edit'      => $jStruct->total_time_to_edit,
+                'id'                      => $jStruct->id,
+                'password'                => $jStruct->password
+        ] );
+        $stmt->closeCursor();
+
+    }
+
+    /**
      * @param $id_job
      * @param $password
      *
@@ -272,9 +334,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $query = "
             SELECT
-                -- SUM( time_to_edit ) AS tot_tte,
-                -- SUM( raw_word_count ) AS raw_words,
-                -- SUM( time_to_edit )/SUM( raw_word_count ) AS secs_per_word,
                 avg_post_editing_effort / SUM( raw_word_count ) AS avg_pee
             FROM segment_translations st
             JOIN segments s ON s.id = st.id_segment
@@ -296,6 +355,36 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
                 'edit_time_fast_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
                 'edit_time_slow_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+        ] )[ 0 ];
+
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return ShapelessConcreteStruct
+     */
+    public function getJobRawStats( $id_job, $password ){
+
+        $queryAllSegments = "
+          SELECT
+            SUM(time_to_edit) AS tot_tte,
+            SUM(raw_word_count) AS raw_words,
+            SUM(time_to_edit)/SUM(raw_word_count) AS secs_per_word
+          FROM segment_translations st
+            JOIN segments s ON s.id = st.id_segment
+            JOIN jobs j ON j.id = st.id_job
+          WHERE id_job = :id_job 
+            AND  password = :password
+            AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+            ";
+
+        $stmt = $this->con->getConnection()->prepare( $queryAllSegments );
+
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'             => $id_job,
+                'password'           => $password
         ] )[ 0 ];
 
     }

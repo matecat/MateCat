@@ -11,6 +11,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive  ;
+use Jobs\SplitQueue;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -1418,6 +1419,11 @@ class ProjectManager {
 
             $stmt->closeCursor();
             unset( $stmt );
+
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for splitted jobs
+             */
+            SplitQueue::recount( $jobInfo );
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
