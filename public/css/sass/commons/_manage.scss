@@ -488,11 +488,11 @@ body.manage {
                                 }
                                 .job-to-translator {
                                     display: inline-block;
-                                    margin-right: 0px;
-                                    margin-left: 20px;
+                                    margin-right: 0;
+                                    margin-left: 10px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 140px;
+                                    width: 139px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -517,7 +517,7 @@ body.manage {
                                 .job-delivery {
                                     display: inline-block;
                                     margin-right: 10px;
-                                    margin-left: 10px;
+                                    margin-left: 5px;
                                     vertical-align: text-bottom;
                                     line-height: 20px;
                                     .outsource-day-text {
