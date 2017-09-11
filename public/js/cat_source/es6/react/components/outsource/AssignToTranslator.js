@@ -10,7 +10,7 @@ class AssignToTranslator extends React.Component {
 
     shareJob() {
         //Check email and validations errors
-        let date = $(this.date).data('timestamp');
+        let date = $(this.dateInput).data('timestamp');
         let email = this.email.value;
 
         OutsourceActions.sendJobToTranslator(email, date, this.timezone, this.props.job.toJS(), this.props.project.toJS());
