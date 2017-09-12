@@ -426,7 +426,12 @@ class OutsourceVendor extends React.Component {
                                         <div className="fields">
                                             <div className="field">
                                                 <label>Delivery Date</label>
-                                                <input type="date"/>
+                                                <div className="ui calendar" ref={(calendar)=> this.calendar = calendar}>
+                                                    <div className="ui input left icon">
+                                                        <i className="calendar icon"/>
+                                                        <input type="text" placeholder="Date"/>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div className="field">
                                                 <label>Time</label>
@@ -688,6 +693,9 @@ class OutsourceVendor extends React.Component {
     componentDidUpdate() {
         let self = this;
         if (this.state.outsource ) {
+            $(this.calendar).calendar({
+                type: 'date'
+            });
             // $(this.dateFaster).datetimepicker({
             //     validateOnBlur: false,
             //     defaultTime: '09:00',

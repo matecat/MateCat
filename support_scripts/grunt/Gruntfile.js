@@ -277,7 +277,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
-                    basePath + 'lib/jquery.datetimepicker.full.js',
+                    basePath + 'lib/calendar.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'

@@ -35,20 +35,9 @@ class AssignToTranslator extends React.Component {
     }
 
     componentDidMount () {
-        // let self = this;
-        // $(this.dateInput).datetimepicker({
-        //     step:30,
-        //     validateOnBlur: false,
-        //     defaultTime: '09:00',
-        //     minDate:0,
-        //     onChangeDateTime: function (newDateTime, $input) {
-        //         let date = APP.fromDateToString(newDateTime);
-        //         let dateString = date.day + ' ' + date.month + ' ' + date.year + ' at ' + date.time ;
-        //         $input.val(dateString);
-        //         $input.data('timestamp', new Date(newDateTime).getTime());
-        //         self.checkSendToTranslatorButton();
-        //     }
-        // });
+        $(this.dateInput).calendar({
+            type: 'date'
+        });
     }
 
     componentWillUnmount() {
@@ -82,9 +71,13 @@ class AssignToTranslator extends React.Component {
                                     </div>
                                     <div className="field">
                                         <label>Delivery date</label>
-                                        <input id="date-picker-translator" type="date" placeholder="Date" defaultValue={date}
-                                               ref={(date) => this.dateInput = date}
-                                               onChange={this.checkSendToTranslatorButton.bind(this)}/>
+                                        <div className="ui calendar" ref={(date) => this.dateInput = date}>
+                                            <div className="ui input left icon">
+                                                <i className="calendar icon"/>
+                                                <input type="text" placeholder="Date"
+                                                       onChange={this.checkSendToTranslatorButton.bind(this)}/>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="field">
                                         <label>Time</label>
