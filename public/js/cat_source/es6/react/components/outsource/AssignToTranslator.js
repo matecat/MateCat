@@ -35,24 +35,24 @@ class AssignToTranslator extends React.Component {
     }
 
     componentDidMount () {
-        let self = this;
-        $(this.dateInput).datetimepicker({
-            step:30,
-            validateOnBlur: false,
-            defaultTime: '09:00',
-            minDate:0,
-            onChangeDateTime: function (newDateTime, $input) {
-                let date = APP.fromDateToString(newDateTime);
-                let dateString = date.day + ' ' + date.month + ' ' + date.year + ' at ' + date.time ;
-                $input.val(dateString);
-                $input.data('timestamp', new Date(newDateTime).getTime());
-                self.checkSendToTranslatorButton();
-            }
-        });
+        // let self = this;
+        // $(this.dateInput).datetimepicker({
+        //     step:30,
+        //     validateOnBlur: false,
+        //     defaultTime: '09:00',
+        //     minDate:0,
+        //     onChangeDateTime: function (newDateTime, $input) {
+        //         let date = APP.fromDateToString(newDateTime);
+        //         let dateString = date.day + ' ' + date.month + ' ' + date.year + ' at ' + date.time ;
+        //         $input.val(dateString);
+        //         $input.data('timestamp', new Date(newDateTime).getTime());
+        //         self.checkSendToTranslatorButton();
+        //     }
+        // });
     }
 
     componentWillUnmount() {
-        $(this.dateInput).datetimepicker('destroy');
+        // $(this.dateInput).datetimepicker('destroy');
     }
 
     componentDidUpdate() {}
@@ -82,9 +82,22 @@ class AssignToTranslator extends React.Component {
                                     </div>
                                     <div className="field">
                                         <label>Delivery date</label>
-                                        <input id="date-picker-translator" type="text" placeholder="Date" defaultValue={date}
+                                        <input id="date-picker-translator" type="date" placeholder="Date" defaultValue={date}
                                                ref={(date) => this.dateInput = date}
                                                onChange={this.checkSendToTranslatorButton.bind(this)}/>
+                                    </div>
+                                    <div className="field">
+                                        <label>Time</label>
+                                        <select className="ui fluid search dropdown">
+                                            <option value="7">7:00 AM</option>
+                                            <option value="9">9:00 AM</option>
+                                            <option value="11">11:00 AM</option>
+                                            <option value="13">01:00 PM</option>
+                                            <option value="15">15:00 PM</option>
+                                            <option value="17">17:00 PM</option>
+                                            <option value="19">19:00 PM</option>
+                                            <option value="21">21:00 PM</option>
+                                        </select>
                                     </div>
                                     <div className="field gmt">
                                         <GMTSelect changeValue={this.GmtSelectChanged.bind(this)}/>

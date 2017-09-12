@@ -36,7 +36,9 @@ class OutsourceContainer extends React.Component {
 
         if (this.container && !area.contains(evt.target) &&
             !$(evt.target).hasClass('open-view-more') &&
-            !$(evt.target).hasClass('outsource-goBack')) {
+            !$(evt.target).hasClass('outsource-goBack') &&
+            !$(evt.target).hasClass('faster') &&
+            !$(evt.target).hasClass('need-it-faster-close')) {
             this.props.onClickOutside(evt)
         }
     }
