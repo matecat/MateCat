@@ -3274,7 +3274,7 @@ UI = {
         if ( qa_cont.hasClass('qa-open') && !fromQA) {
             QAComponent.togglePanel();
         }
-        if (SegmentFilter) {
+        if (SegmentFilter && SegmentFilter.closeFilter) {
             SegmentFilter.closeFilter();
         }
     }
