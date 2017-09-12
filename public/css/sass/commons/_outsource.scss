@@ -35,10 +35,8 @@
             font-size: 16px;
         }
     }
-
-
     &.transitionOutsource-enter {
-        height: 0px;
+        height: 0;
     }
 
     &.showTranslator.transitionOutsource-enter.transitionOutsource-enter-active {
@@ -62,7 +60,7 @@
     }
 
     &.transitionOutsource-leave.transitionOutsource-leave-active {
-        height: 0px !important;
+        height: 0 !important;
         margin: 0 !important;
         -webkit-transition: all .3s ease;
     }
@@ -245,7 +243,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 font-size: 16px;
-
                 a {
                     font-size: 16px;
                 }
@@ -372,7 +369,7 @@
                         .source-target-outsource {
                             display: inline-block;
                             width: 68%;
-                            font-size: 19px;
+                            font-size: 18px;
                             font-weight: 700;
                             .source-box {
                                 display: inline-block;
@@ -457,7 +454,7 @@
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
-                        font-size: 24px;
+                        font-size: 23px;
                         font-weight: 700;
                         label {
                             font-size: 16px;
@@ -485,7 +482,7 @@
                             }
                         }
                         .need-it-faster {
-                            font-size: 19px;
+                            font-size: 17px;
                         }
                         .need-it-faster-message {
                             font-size: 15px;
@@ -583,7 +580,7 @@
             }
             .customer-request {
                 .customer-box {
-                    padding: 15px;
+                    padding: 0 15px 15px;
                     position: relative;
                     overflow: hidden;
                     width: 55%;
@@ -710,6 +707,9 @@
                                         font-family: Calibri, Arial, Helvetica, sans-serif;
                                         color: inherit;
                                     }
+                                    a {
+                                        color: #000000;
+                                    }
                                 }
                             }
                             .call {
@@ -726,17 +726,6 @@
                                     font-size: 16px;
                                 }
                                 .content {
-                                    /*.header, .description {
-                                        font-family: Calibri, Arial, Helvetica, sans-serif;
-                                    }
-                                    .header {
-                                        .online {
-                                            color: #09beec;
-                                        }
-                                        .offline {
-                                            color: gray;
-                                        }
-                                    }*/
                                     .button {
                                         font-family: Calibri, Arial, Helvetica, sans-serif;
                                         border: 1px solid #c1c1c1;

@@ -172,7 +172,7 @@ class OutsourceInfo extends React.Component {
                 </div>
                 <div className="request-box">
                     <div className="title-request">
-                        <h3>Have an specific request?</h3>
+                        <h3>Have a specific request?</h3>
                     </div>
                     <div className="request-info-box">
                         <div className="mobile-mail-box account-box">
