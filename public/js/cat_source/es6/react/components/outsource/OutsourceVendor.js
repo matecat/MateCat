@@ -351,10 +351,10 @@ class OutsourceVendor extends React.Component {
                                 <div className="target-box">{this.props.job.get('targetTxt')}</div>
                             </div>
                             <div className="job-payment">
-                                {this.props.standardWC ? (
-                                    <div className="not-payable">{this.props.standardWC} words</div>
-                                ) : (null)}
-                                <div className="payable">{this.state.chunkQuote.get('words')} words</div>
+                                {/*{this.props.standardWC ? (*/}
+                                    {/*<div className="not-payable">{this.props.standardWC} words</div>*/}
+                                {/*) : (null)}*/}
+                                <div className="payable">{APP.numberWithCommas(this.state.chunkQuote.get('words'))} words</div>
                             </div>
                         </div>
                         {this.state.outsourceConfirmed ? ('') : (

@@ -73,7 +73,7 @@ export default class GMTSelect extends React.Component {
                         <div className="gmt-description"> Central European Time (Rome, Paris)</div> </div>
                     <div className="item" data-value="2">
                         <div className="gmt-value">(GMT +2:00 )</div>
-                        <div className="gmt-description"> Eastern European Time, CAT </div> </div>
+                        <div className="gmt-description"> Eastern European Time, CAT, CEST</div> </div>
                     <div className="item" data-value="3">
                         <div className="gmt-value">(GMT +3:00 )</div>
                         <div className="gmt-description"> Arabia Standard Time (Baghdad, Riyadh)</div> </div>
