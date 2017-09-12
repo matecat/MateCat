@@ -149,7 +149,7 @@
 
     .assign-job-translator {
         background-color: #d7d8dc;
-        padding: 0px 15px 25px;
+        padding: 0 15px 25px;
         width: 100%;
         .title {
             display: inline-block;
@@ -161,7 +161,7 @@
             top: 33px;
         }
         .title-url {
-            padding: 15px;
+            padding: 15px 0;
             width: 75%;
             display: inline-block;
             .job-url {
@@ -210,7 +210,8 @@
                                     padding: 9px 17px;
                                     margin: 0;
                                     float: right;
-                                    width: 197px;
+                                    width: 93%;
+                                    min-width: 203px;
                                 }
                             }
 
@@ -222,19 +223,19 @@
     }
     .open-job-box {
         background-color: #d7d8dc;
-        padding: 25px 35px 20px 45px;
+        padding: 25px 30px 20px 45px;
         width: 100%;
         cursor: auto;
         .title {
             display: inline-block;
-            font-size: 20px;
+            font-size: 26px;
             font-weight: 700;
-            width: 10%;
+            width: 12%;
             position: relative;
             top: -5px;
         }
         .title-url {
-            width: 90%;
+            width: 88%;
             display: inline-block;
             .job-url {
                 display: inline-block;
@@ -243,7 +244,6 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                font-weight: 700;
                 font-size: 16px;
 
                 a {
@@ -259,6 +259,7 @@
                 margin: 0;
                 float: right;
                 margin-top: -10px;
+                width: 20%;
             }
         }
     }
@@ -278,7 +279,8 @@
             border-radius: 50%;
             color: #ffffff;
             position: absolute;
-            top: -15px;
+            top: -14px;
+            left: 90px;
         }
     }
 
@@ -292,26 +294,20 @@
             .payment-service {
                 padding: 5px 15px 15px;
                 .service-box {
-                    width: 70%;
                     display: inline-block;
-                    padding: 0 15px;
-                    vertical-align: text-bottom;
+                    padding: 0 10px 0 15px;
                     font-size: 26px;
                     font-weight: 700;
-                    font-family: Calibri, Arial, Helvetica, sans-serif;
                     .service {
                         display: inline-block;
                         &.project-management {  }
                         &.translation, &.revision {
                             margin-left: 8px;
                         }
-
                     }
                 }
                 .fiducial-logo {
-                    width: 30%;
                     display: inline-block;
-                    text-align: right;
                     padding: 0;
                     vertical-align: text-bottom;
                     .translated-logo {
@@ -461,7 +457,7 @@
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
-                        font-size: 26px;
+                        font-size: 24px;
                         font-weight: 700;
                         label {
                             font-size: 16px;
@@ -910,7 +906,8 @@
                     float: right;
                     text-align: center;
                     margin-top: -17px;
-                    width: 195px;
+                    width: 18%;
+                    min-width: 200px;
                     .order-box {
                         background-color: #daeddf;
                         padding: 25px 15px 15px;

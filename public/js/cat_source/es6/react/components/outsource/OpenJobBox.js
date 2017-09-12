@@ -20,7 +20,7 @@ class OpenJobBox extends React.Component {
 
         return <div className="open-job-box">
             <div className="title">
-                Open job
+                Open job:
             </div>
             <div className="title-url">
                 <div className="job-url">
