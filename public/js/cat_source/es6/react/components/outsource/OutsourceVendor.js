@@ -21,7 +21,8 @@ class OutsourceVendor extends React.Component {
             jobOutsourced: (!!this.props.job.get('outsource')),
             errorPastDate: false,
             quoteNotAvailable: false,
-            errorQuote: false
+            errorQuote: false,
+            needItFaster: false
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
         if ( config.enable_outsource ) {
@@ -290,6 +291,12 @@ class OutsourceVendor extends React.Component {
         });
     }
 
+    needItFaster() {
+        this.setState({
+            needItFaster: !this.state.needItFaster
+        });
+    }
+
     getExtendedView() {
         let checkboxDisabledClass = (this.state.outsourceConfirmed) ? "disabled" : "";
         let delivery = this.getDeliveryDate();
@@ -366,7 +373,7 @@ class OutsourceVendor extends React.Component {
                     <div className="revision-box">
                         <div className="add-revision">
                             <div className={"ui checkbox " + checkboxDisabledClass}>
-                                <input type="checkbox" checked={this.state.revision}
+                                <input type="checkbox" defaultChecked={this.state.revision}
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
                                        onClick={this.clickRevision.bind(this)}/>
                                 <label>Add Revision</label>
@@ -380,37 +387,78 @@ class OutsourceVendor extends React.Component {
                     </div>
                     {!this.state.errorQuote ? (
                         <div className="delivery-order">
-                            <div className="delivery-box">
-                                <label>Delivery date:</label>
-                                <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                <span>at</span>
-                                <div className="delivery-time">{delivery.time}</div>
-                                <div className="gmt">
-                                    <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
-                                    {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
-                                </div>
-                                {!this.state.outsourceConfirmed ? (
-                                    <div className="need-it-faster">
-                                        {this.state.errorPastDate ? (
-                                            <div className="errors-date past-date">* Chosen delivery date is in the past</div>
-                                        ) : (null)}
-                                        {this.state.quoteNotAvailable ? (
-                                            <div className="errors-date generic-error">* Deadline too close, pick another one.</div>
-                                        ) : (null)}
-
-                                        {(showDateMessage) ? (
-                                            <div className="errors-date too-far-date" >We will delivery before the selected date
-                                                <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
-                                                     data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
-                                            </div>
-                                        ):('')}
-                                        <a className="faster"
-                                           ref={(faster) => this.dateFaster = faster}
-                                        >Need it faster?</a>
+                            {!this.state.needItFaster ? (
+                                <div className="delivery-box">
+                                    <label>Delivery date:</label>
+                                    <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                                    <span>at</span>
+                                    <div className="delivery-time">{delivery.time}</div>
+                                    <div className="gmt">
+                                        <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                                        {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                                     </div>
-                                ):('')}
+                                    {!this.state.outsourceConfirmed ? (
+                                        <div className="need-it-faster">
+                                            {this.state.errorPastDate ? (
+                                                <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+                                            ) : (null)}
+                                            {this.state.quoteNotAvailable ? (
+                                                <div className="errors-date generic-error">* Deadline too close, pick another one.</div>
+                                            ) : (null)}
 
-                            </div>
+                                            {(showDateMessage) ? (
+                                                <div className="errors-date too-far-date" >We will delivery before the selected date
+                                                    <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                         data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
+                                                </div>
+                                            ):('')}
+                                            <a className="faster"
+                                               ref={(faster) => this.dateFaster = faster}
+                                               onClick={this.needItFaster.bind(this)}
+                                            >Need it faster?</a>
+                                        </div>
+                                    ):('')}
+
+                                </div>
+                            ) : (
+                                <div className="delivery-box need-if-faster">
+                                    <div className="ui form">
+                                        <div className="fields">
+                                            <div className="field">
+                                                <label>Delivery Date</label>
+                                                <div className="ui calendar" ref={(calendar)=> this.calendar = calendar}>
+                                                    <div className="ui input left icon">
+                                                        <i className="calendar icon"/>
+                                                        <input type="text" placeholder="Date"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="field">
+                                                <label>Time</label>
+                                                <select className="ui fluid search dropdown">
+                                                    <option value="7">7:00 AM</option>
+                                                    <option value="9">9:00 AM</option>
+                                                    <option value="11">11:00 AM</option>
+                                                    <option value="13">01:00 PM</option>
+                                                    <option value="15">15:00 PM</option>
+                                                    <option value="17">17:00 PM</option>
+                                                    <option value="19">19:00 PM</option>
+                                                    <option value="21">21:00 PM</option>
+                                                </select>
+                                            </div>
+                                            <div className="field gmt">
+                                                <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                                            </div>
+                                            <div className="field">
+                                                <button className="ui primary button">Get Price</button>
+                                            </div>
+                                            <a className="need-it-faster-close" onClick={this.needItFaster.bind(this)}
+                                            >Close</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
                                 <div className="confirm-delivery-input">
                                     <div className="back" onClick={this.goBack.bind(this)}>
@@ -639,44 +687,47 @@ class OutsourceVendor extends React.Component {
     componentDidMount () {}
 
     componentWillUnmount() {
-        $(this.dateFaster).datetimepicker('destroy');
+        // $(this.dateFaster).datetimepicker('destroy');
     }
 
     componentDidUpdate() {
         let self = this;
         if (this.state.outsource ) {
-            $(this.dateFaster).datetimepicker({
-                validateOnBlur: false,
-                defaultTime: '09:00',
-                minDate:0,
-                showApplyButton: true,
-                closeOnTimeSelect:false,
-                selectButtonLabel: "Get Price",
-                allowTimes: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
-                disabledWeekDays: [0,6],
-                onSelectDateButton: function (newDateTime) {
-                    newDateTime.setMinutes(newDateTime.getMinutes() + (2 - parseFloat(self.state.timezone)) * 60);
-                    let timestamp = (new Date(newDateTime)).getTime();
-                    let now = new Date().getTime();
-                    if (timestamp < now) {
-                        self.selectedDate = null;
-                        self.setState({
-                            errorPastDate: true
-                        });
-                    } else {
-                        self.selectedDate = timestamp;
-                        self.setState({
-                            outsource: false,
-                            errorPastDate: false
-                        });
-                        self.getOutsourceQuote(timestamp);
-                    }
-
-                },
-                onChangeDateTime: function (newDateTime, $input) {
-                    console.log("onChangeDateTime");
-                }
+            $(this.calendar).calendar({
+                type: 'date'
             });
+            // $(this.dateFaster).datetimepicker({
+            //     validateOnBlur: false,
+            //     defaultTime: '09:00',
+            //     minDate:0,
+            //     showApplyButton: true,
+            //     closeOnTimeSelect:false,
+            //     selectButtonLabel: "Get Price",
+            //     allowTimes: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
+            //     disabledWeekDays: [0,6],
+            //     onSelectDateButton: function (newDateTime) {
+            //         newDateTime.setMinutes(newDateTime.getMinutes() + (2 - parseFloat(self.state.timezone)) * 60);
+            //         let timestamp = (new Date(newDateTime)).getTime();
+            //         let now = new Date().getTime();
+            //         if (timestamp < now) {
+            //             self.selectedDate = null;
+            //             self.setState({
+            //                 errorPastDate: true
+            //             });
+            //         } else {
+            //             self.selectedDate = timestamp;
+            //             self.setState({
+            //                 outsource: false,
+            //                 errorPastDate: false
+            //             });
+            //             self.getOutsourceQuote(timestamp);
+            //         }
+            //
+            //     },
+            //     onChangeDateTime: function (newDateTime, $input) {
+            //         console.log("onChangeDateTime");
+            //     }
+            // });
 
             let currencyToShow = $.cookie( "matecat_currency" );
             $(this.currencySelect).dropdown('set selected', currencyToShow);
@@ -705,7 +756,8 @@ class OutsourceVendor extends React.Component {
         || nextState.outsourceConfirmed !== this.state.outsourceConfirmed
         || nextState.jobOutsourced !== this.state.jobOutsourced
         || nextState.errorPastDate !== this.state.errorPastDate
-        || nextState.quoteNotAvailable !== this.state.quoteNotAvailable);
+        || nextState.quoteNotAvailable !== this.state.quoteNotAvailable
+        || nextState.needItFaster !== this.state.needItFaster);
     }
 
     render() {
