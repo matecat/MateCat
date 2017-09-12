@@ -99,7 +99,8 @@ class SplitJobModal extends React.Component {
 
     changeInputWordsCount(indexChanged , e) {
         let arraySplit = this.state.wordsArray;
-        arraySplit[indexChanged] = parseInt(e.target.value);
+        let value = (e.target.value !== "") ? e.target.value : 0;
+        arraySplit[indexChanged] = parseInt(value);
         this.setState({
             wordsArray: arraySplit,
             splitChecked: false,
