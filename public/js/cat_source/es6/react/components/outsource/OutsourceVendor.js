@@ -203,7 +203,10 @@ class OutsourceVendor extends React.Component {
         this.setState({
             revision: this.revisionCheckbox.checked
         });
-        this.getOutsourceQuote(this.selectedDate, service);
+        let self = this;
+        setTimeout(function () {
+            self.getOutsourceQuote(self.selectedDate, service);
+        });
 
     }
 
@@ -348,10 +351,10 @@ class OutsourceVendor extends React.Component {
                                 <div className="target-box">{this.props.job.get('targetTxt')}</div>
                             </div>
                             <div className="job-payment">
-                                {this.props.standardWC ? (
-                                    <div className="not-payable">{this.props.standardWC} words</div>
-                                ) : (null)}
-                                <div className="payable">{this.state.chunkQuote.get('words')} words</div>
+                                {/*{this.props.standardWC ? (*/}
+                                    {/*<div className="not-payable">{this.props.standardWC} words</div>*/}
+                                {/*) : (null)}*/}
+                                <div className="payable">{APP.numberWithCommas(this.state.chunkQuote.get('words'))} words</div>
                             </div>
                         </div>
                         {this.state.outsourceConfirmed ? ('') : (
@@ -363,7 +366,7 @@ class OutsourceVendor extends React.Component {
                     <div className="revision-box">
                         <div className="add-revision">
                             <div className={"ui checkbox " + checkboxDisabledClass}>
-                                <input type="checkbox" defaultChecked
+                                <input type="checkbox" checked={this.state.revision}
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
                                        onClick={this.clickRevision.bind(this)}/>
                                 <label>Add Revision</label>

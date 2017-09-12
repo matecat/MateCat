@@ -523,6 +523,9 @@ APP = {
         }
         return x1 + x2;
     },
+    numberWithCommas: function(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
     zerofill: function ( i, l, s ) {
         var o = i.toString();
         if ( !s ) {
