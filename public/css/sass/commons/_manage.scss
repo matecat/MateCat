@@ -481,6 +481,9 @@ body.manage {
                                             margin: -5px 10px 0 0;
                                             vertical-align: middle;
                                         }
+                                        @media only screens and (max-width: 1199px) and (min-width: 992px) {
+                                            min-width: 113px;
+                                        }
                                     }
                                     &.outsource {
                                         margin-top: 6px;
@@ -538,6 +541,7 @@ body.manage {
                                         color: #969696;
                                         display: inherit;
                                         margin-left: 5px;
+                                        font-size: 13px;
                                     }
                                     @media only screen and (max-width: 1200px) {
                                         display: none;

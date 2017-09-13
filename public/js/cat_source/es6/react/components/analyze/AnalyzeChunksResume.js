@@ -209,8 +209,10 @@ class AnalyzeChunksResume extends React.Component {
                                     </div>
                                 </div>
                                 <div className="activity-icons">
-                                    <div className={"split ui blue basic button " + buttonsClass + ' '}
-                                         onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
+                                    {!config.jobAnalysis ? (
+                                        <div className={"split ui blue basic button " + buttonsClass + ' '}
+                                             onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
+                                    ) : (null)}
                                     <div className="open-translate ui primary button open"
                                          onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
                                 </div>
