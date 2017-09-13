@@ -59,9 +59,9 @@ class TranslationChildProject {
     protected $dqfTranslateUser ;
 
     /**
-     * @var DqfProjectMapStruct
+     * @var DqfProjectMapStruct[]
      */
-    protected $dqfChildProject ;
+    protected $dqfChildProjects = [];
 
     protected $parentKeysMap = [] ;
 
@@ -71,12 +71,19 @@ class TranslationChildProject {
      * @param Chunks_ChunkStruct $chunk
      */
 
+    /**
+     * @var ProjectMapResolverModel
+     */
+    protected $dqfProjectMapResolver  ;
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk ;
 
         $this->_initDqfTranslateUserAndSession() ;
 
-        $this->dqfChildProject = ( new DqfProjectMapDao() )->getLatestTranslation( $this->chunk ) ;
+        $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, 'translate' );
+
+        $this->dqfChildProjects = $this->dqfProjectMapResolver->getMappedProjects();
     }
 
     protected function _initDqfTranslateUserAndSession() {
@@ -93,44 +100,52 @@ class TranslationChildProject {
     }
 
     public function setCompleted() {
-        $service = new ChildProjectService( $this->userSession, $this->chunk, $this->dqfChildProject->id ) ;
+        /** @var DqfProjectMapStruct $project */
+        foreach( $this->dqfChildProjects as $project ) {
+            $service = new ChildProjectService(
+                    $this->userSession, $this->chunk, $project->id ) ;
 
-        $struct = new ChildProjectRequestStruct([
-                'projectId' => $this->dqfChildProject->dqf_project_id,
-                'projectKey' => $this->dqfChildProject->dqf_project_uuid
-        ]);
+            $struct = new ChildProjectRequestStruct([
+                    'projectId' => $project->dqf_project_id,
+                    'projectKey' => $project->dqf_project_uuid
+            ]);
 
-        $service->setCompleted( $struct );
+            $service->setCompleted( $struct );
+        }
     }
 
     public function submitTranslationBatch() {
         if ( $this->projectCreationRequired() ) {
-            $this->createRemoteProject();
-
+            $this->createRemoteProjects();
         }
         $this->_submitSegmentPairs() ;
     }
 
-    protected function createRemoteProject() {
-        $dao = new DqfProjectMapDao();
-        $parent = $dao->findTranslationParent( $this->chunk ) ;
+    protected function createRemoteProjects() {
+        $parents = $this->dqfProjectMapResolver->getParents();
 
-        $struct = new CreateProjectResponseStruct();
-        $struct->dqfUUID = $parent->dqf_project_uuid ;
-        $struct->dqfId = $parent->dqf_project_id ;
+        $this->dqfChildProjects = [] ;
 
-        $project = new ChildProjectCreationModel($struct, $this->chunk, 'translate' );
+        foreach( $parents as $parent ) {
+            $struct = new CreateProjectResponseStruct();
+            $struct->dqfUUID = $parent->dqf_project_uuid ;
+            $struct->dqfId = $parent->dqf_project_id ;
 
-        $model = new ProjectModel( $parent );
+            $project = new ChildProjectCreationModel($struct, $this->chunk, 'translate' );
 
-        $project->setUser( $model->getUser() );
-        $project->setFiles( $model->getFilesResponseStruct() ) ;
+            $model = new ProjectModel( $parent );
 
-        $project->create();
+            $project->setUser( $model->getUser() );
+            $project->setFiles( $model->getFilesResponseStruct() ) ;
+
+            $project->create();
+
+            $this->dqfChildProjects[]  = $project->getSavedRecord() ;
+        }
     }
 
     public function projectCreationRequired() {
-        return is_null( $this->dqfChildProject ) || $this->dqfChildProject == false ;
+        return empty( $this->dqfChildProjects ) ;
     }
 
     protected function _submitSegmentPairs() {
@@ -180,14 +195,17 @@ class TranslationChildProject {
         $translationBatchService = new ChildProjectTranslationBatchService( $this->userSession ) ;
 
         foreach( $this->files as $file ) {
-            list ( $min, $max ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
+            list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
 
-            $dqfChildProjects = ( new DqfProjectMapDao() )->getByChunkAndSegmentsInterval( $this->chunk, 'translate', $min, $max ) ;
-            $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $min, $max ) ;
+            $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $fileMinIdSegment, $fileMaxIdSegment ) ;
 
             // DQF child project
 
             $remoteFileId = $this->_findRemoteFileId( $file );
+
+            $dqfChildProjects = $this->dqfProjectMapResolver->getCurrentInSegmentIdBoundaries(
+                    $fileMinIdSegment, $fileMaxIdSegment
+            );
 
             foreach ( $dqfChildProjects as $dqfChildProject ) {
                 $dao = new Translations_TranslationVersionDao();

@@ -33,11 +33,12 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      *
      * @return \Features\Dqf\Model\DqfProjectMapStruct|null
      */
-    public function findTranslationParent(Chunks_ChunkStruct $chunk) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
-                 AND password = :password AND archive_date IS NULL
-                 AND project_type in ('master', 'vendor_root', 'translate')
-                 ORDER BY project_type is NULL DESC,
+    public function findRootProject( Chunks_ChunkStruct $chunk) {
+        $sql = "SELECT * FROM dqf_child_projects_map
+                WHERE id_job = :id_job
+                 AND archive_date IS NULL
+                 AND project_type in ('master', 'vendor_root')
+                 ORDER BY
                     project_type = 'vendor_root' DESC,
                     project_type = 'master' DESC
                 " ;
@@ -49,23 +50,15 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
 
         $stmt->execute([
                 'id_job'   => $chunk->id,
-                'password' => $chunk->password,
         ]);
 
         return $stmt->fetch() ;
     }
 
-    /**
-     * Lastest translation should return just one record, because for each chunk there can be
-     * only one current translation dqf_child_projects_map record.
-     *
-     * @param Chunks_ChunkStruct $chunk
-     *
-     * @return DqfProjectMapStruct[]
-     */
-    public function getLatestTranslation(Chunks_ChunkStruct $chunk) {
+
+    public function getCurrentByType( Chunks_ChunkStruct $chunk, $type ) {
         $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
-                  AND password = :password  AND archive_date IS NULL
+                  AND archive_date IS NULL
                   AND dqf_parent_uuid IS NOT NULL 
                   AND project_type = :project_type
                   ORDER BY id " ;
@@ -77,11 +70,23 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
 
         $stmt->execute([
                 'id_job'   => $chunk->id,
-                'password' => $chunk->password,
-                'project_type' => self::PROJECT_TYPE_TRANSLATE
+                'project_type' => $type
         ]);
 
-        return $stmt->fetch() ;
+        return $stmt->fetchAll() ;
+    }
+
+
+    /**
+     * Lastest translation should return just one record, because for each chunk there can be
+     * only one current translation dqf_child_projects_map record.
+     *
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return DqfProjectMapStruct[]
+     */
+    public function getCurrentRemoteTranslationsProjectsForChunk( Chunks_ChunkStruct $chunk ) {
+        return $this->getCurrentByType( $chunk, self::PROJECT_TYPE_TRANSLATE ) ;
     }
 
     /**
@@ -143,39 +148,6 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
         $stmt->execute([
                 'id_job'   => $chunk->id,
                 'password' => $chunk->password,
-        ]);
-
-        return $stmt->fetchAll() ;
-    }
-
-    /**
-     * @param Chunks_ChunkStruct $chunk
-     * @param                    $min
-     * @param                    $max
-     *
-     * @return DqfProjectMapStruct[]
-     */
-    public function getByChunkAndSegmentsInterval( Chunks_ChunkStruct $chunk, $type, $min, $max) {
-        $sql = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job AND  " .
-                " password = :password AND archive_date IS NULL AND " .
-                " dqf_parent_uuid IS NOT NULL AND " .
-                " (
-                ( first_segment BETWEEN :min AND :max ) OR ( last_segment BETWEEN :min AND :max )
-                   )
-             AND project_type = :type
-             " ;
-
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
-
-        $stmt->execute([
-                'id_job'   => $chunk->id,
-                'password' => $chunk->password,
-                'min'      => $min,
-                'max'      => $max,
-                'type'     => $type
         ]);
 
         return $stmt->fetchAll() ;
