@@ -84,7 +84,7 @@ class OutsourceContainer extends React.Component {
                     <div className=" outsource-header sixteen wide column shadow-1">
                         {this.props.idJobLabel ? (
                             <div className="job-id" title="Job Id">
-                                {this.props.idJobLabel}
+                                ID: {this.props.idJobLabel}
                             </div>
                         ) :(null)}
                         <div className="source-target languages-tooltip"

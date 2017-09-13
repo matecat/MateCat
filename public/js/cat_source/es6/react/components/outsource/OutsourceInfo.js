@@ -53,9 +53,9 @@ class OutsourceInfo extends React.Component {
     render() {
         return <div className="customer-request sixteen wide column">
             <div className="ui grid">
-                <div className="customer-box nine wide column" ref={(slider)=> this.slider = slider}>
+                <div className="customer-box" ref={(slider)=> this.slider = slider}>
                     <div className="title-pointer">
-                        <h3>Our customer said</h3>
+                        {/*<h3>Our customer said</h3>*/}
                         <div className="pointers">
                             <div className="pointer active" onClick={this.slideItem.bind(this, 1)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 2)}/>
@@ -170,13 +170,13 @@ class OutsourceInfo extends React.Component {
                     </div>
 
                 </div>
-                <div className="request-box seven wide column">
+                <div className="request-box">
                     <div className="title-request">
-                        <h3>Have an specific request?</h3>
+                        <h3>Have a specific request?</h3>
                     </div>
                     <div className="request-info-box">
-                        <div className="mobile-mail-box">
-                            <div className="ui relaxed divided list">
+                        <div className="mobile-mail-box account-box">
+                            <div className="ui relaxed horizontal list">
                                 <div className="item call">
                                     <i className="big icon-phone2 middle aligned icon" />
                                     <div className="content">
@@ -191,27 +191,21 @@ class OutsourceInfo extends React.Component {
                                         <a className="description">info@matecat.com</a>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="account-box">
-
-                            <div className="ui relaxed divided list">
                                 <div className="item open-chat">
-                                    <i className="big icon-uniE970 middle aligned icon" />
                                     <div className="content">
-                                        <div className="header">Talk with us
+                                       {/* <div className="header">Talk with us
                                             <span className="online"> (On line)</span>
-                                            {/*<span className="offline"> (Off line)</span>*/}
-                                        </div>
+                                            <span className="offline"> (Off line)</span>
+                                        </div>*/}
                                         <div className="ui button intercom-button">
-                                            <div className="sign online-item"/>
+                                            {/*<div className="sign online-item"/>*/}
+                                            <i className="big icon-uniE970 middle aligned icon" />
                                             Open chat
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
