@@ -809,9 +809,9 @@
                 "en":"Kinyarwanda"
             }],
             "isocode":"rw",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"rw-RW"
+            "rfc3066code":"rw-KIN"
         }
     ,
         {

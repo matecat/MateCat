@@ -17,7 +17,6 @@ class MyMemory {
         $ts1 = $seg1;
         $ts2 = $seg2;
 
-        $penalty = 0;
         switch ( $penalty_id ) {
             case "1": //mt!
                 $penalty = 0.15;

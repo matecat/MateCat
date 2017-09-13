@@ -68,8 +68,8 @@ $.extend(APP, {
             APP.openLoginModal(param);
         });
 
-        $('.link-manage-page').on('click', function () {
-            APP.openManagePage();
+        $('.link-manage-page').on('click', function (e) {
+            APP.openManagePage(e);
         });
 
         //Link footer
@@ -142,11 +142,11 @@ $.extend(APP, {
         }
     },
 
-    openManagePage: function () {
+    openManagePage: function (e) {
         if (!config.isLoggedIn) {
+            e.preventDefault();
+            e.stopPropagation();
             $('#modal').trigger('openlogin', [{goToManage: true}]);
-        } else {
-            window.location = '/manage/';
         }
     },
 
