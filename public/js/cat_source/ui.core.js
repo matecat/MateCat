@@ -3245,6 +3245,7 @@ UI = {
     handleClickOnReadOnly : function(section) {
         if ( UI.justSelecting('readonly') )   return;
         if ( UI.someUserSelection )           return;
+        if ( section.hasClass('ice-locked') )           return;
 
         UI.selectingReadonly = setTimeout(function() {
             APP.alert({ msg: UI.messageForClickOnReadonly() });

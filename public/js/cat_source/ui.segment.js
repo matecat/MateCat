@@ -14,6 +14,11 @@
                 classes.push('readonly');
             }
 
+            if ( segment.ice_locked === "1" ) {
+                classes.push('readonly');
+                classes.push('ice-locked');
+            }
+
             if ( segment.status ) {
                 classes.push( 'status-' + segment.status.toLowerCase() );
             }
@@ -36,7 +41,7 @@
             }
 
             var editarea_classes = ['targetarea', 'invisible'];
-            if ( readonly ) {
+            if ( readonly || segment.ice_locked === "1") {
                 editarea_classes.push( 'area' );
             } else {
                 editarea_classes.push( 'editarea' );
