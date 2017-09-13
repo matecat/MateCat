@@ -932,7 +932,7 @@ UI = {
      * selectorForNextSegment
      */
     selectorForNextSegment : function() {
-        return 'section';
+        return 'section:not(.ice-locked)';
     },
 
     /**
@@ -1065,7 +1065,8 @@ UI = {
 			}
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-                this.scrollSegment($('#segment-' + UI.startSegmentId), options.highlight );
+			    var next = UI.findNextSegment(UI.startSegmentId);
+                this.gotoSegment(next.attr('data-split-original-id'));
 			}
 
 			if (options.applySearch) {
@@ -1145,9 +1146,10 @@ UI = {
      *
      * Finds next segment or returns null if next segment does not exist.
      */
-    findNextSegment : function() {
+    findNextSegment : function(segmentId) {
         var selector = UI.selectorForNextSegment() ;
-        var next = $('.editor').nextAll( selector ).first();
+        var currentElem = (_.isUndefined(segmentId)) ? $('.editor') : $('#segment-' + segmentId);
+        var next = currentElem.nextAll( selector ).first();
 
         if ( next.is('section') ) {
             return next ;

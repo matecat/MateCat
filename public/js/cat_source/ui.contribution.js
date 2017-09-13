@@ -81,6 +81,10 @@ $.extend(UI, {
         var txt;
 		var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 
+		if ($(current).hasClass('readonly')) {
+		    return false;
+        }
+
 		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length) {
             if (!next) {
                 this.currentIsLoaded = true;
