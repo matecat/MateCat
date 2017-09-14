@@ -637,6 +637,7 @@ class FastAnalysis extends AbstractDaemon {
             LEFT JOIN segment_translations AS st ON st.id_segment = s.id
                 WHERE j.id_project = '$pid'
                 AND IFNULL( st.locked, 0 ) = 0
+                AND IFNULL( st.match_type, 'NO_MATCH' ) != 'ICE'
                 AND show_in_cattool != 0
             GROUP BY s.id
             ORDER BY s.id
