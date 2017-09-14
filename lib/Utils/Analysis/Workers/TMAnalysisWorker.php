@@ -226,7 +226,7 @@ class TMAnalysisWorker extends AbstractWorker {
         if( stripos( $tm_data[ 'suggestion_match' ], "100%" ) !== false ){
 
             if( $queueElement->params->pretranslate_100 || $tm_data[ 'match_type' ] == "ICE" ){
-                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_APPROVED;
                 $tm_data[ 'locked' ] = true;
             }
 
