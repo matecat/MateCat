@@ -2641,16 +2641,17 @@ section.readonly {
 }
 
 section.ice-locked .text {
-    zoom: 0.8;
-    width: 94%;
-    margin: 0 3%!important;
-    background-color: rgba(7, 152, 188, 0.13) !important;
+    /*zoom: 0.8;*/
+    /*width: 94%;*/
+    /*margin: 0 3%!important;*/
+    background-color: rgba(7, 152, 188, 0.03) !important;
     -webkit-box-shadow: none !important;
     border-top: 0 !important;
     box-shadow: none !important;
+    cursor: no-drop !important;
 }
 body.cattool.editing section.ice-locked:not(.editor) .text:hover {
-    background-color: rgba(7, 152, 188, 0.13) !important;
+    background-color: rgba(7, 152, 188, 0.01) !important;
 }
 body.cattool.editing section.ice-locked:not(.editor) .text .textarea-container .area:hover {
     color: black !important;
