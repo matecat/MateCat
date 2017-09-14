@@ -83,7 +83,30 @@ APP.changeSourceLang = function( lang ) {
 };
 
 APP.displayCurrentTargetLang = function() {
-    $( '#target-lang' ).dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
+    var currentLangs = localStorage.getItem( 'currentTargetLang' );
+    if (currentLangs.indexOf(',') === -1) {
+        $('#target-lang').dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
+    } else {
+        var labels = '';
+        if ($('#target-lang div.item[data-value="'+ currentLangs +'"]').size() === 0) {
+            currentLangs.split(',').forEach(function (item) {
+                var elem = $('.popup-languages li input[value="'+ item +'"]');
+                labels += elem.parent().find('label').attr('for') + ',';
+                // elem.
+            });
+            direction = UI.checkMultilangRTL();
+            labels = labels.substring(0, labels.length - 1);
+            var op = '<div id="extraTarget" class="item active selected" data-selected="selected" data-direction="' + direction + '" data-value="' + currentLangs + '">' + labels + '</div>';
+            $('#extraTarget').remove();
+            $('#target-lang div.item').first().before(op);
+        }
+        setTimeout(function () {
+            $('#target-lang').dropdown('set selected', currentLangs);
+        });
+
+
+    }
+
 };
 
 APP.displayCurrentSourceLang = function() {
@@ -99,7 +122,7 @@ APP.checkForLexiQALangs = function(){
 	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
     var notAcceptedLanguages = [];
-	var targetLanguages = $( '#target-lang' ).dropdown('get value').split(',');
+	var targetLanguages = localStorage.getItem( 'currentTargetLang' ).split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).dropdown('get value') ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
                             if (acceptedLanguages.indexOf(n) === -1) {
@@ -146,7 +169,7 @@ APP.checkForTagProjectionLangs = function(){
     var languageCombinations = [];
     var notSupportedCouples = [];
 
-    $( '#target-lang' ).dropdown('get value').split(',').forEach(function (value) {
+    localStorage.getItem( 'currentTargetLang' ).split(',').forEach(function (value) {
         var elem = {};
         elem.targetCode = value;
         elem.sourceCode = sourceLanguageCode;
@@ -394,7 +417,7 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     checkLanguagesCookie: function () {
-        if( !localStorage.getItem( 'currentTargetLang' ) || localStorage.getItem( 'currentTargetLang' ).indexOf(',') > -1) {
+        if( !localStorage.getItem( 'currentTargetLang' ) ) {
             APP.changeTargetLang(config.currentSourceLang);
         }
 
@@ -504,9 +527,9 @@ $.extend(UI.UPLOAD_PAGE, {
             selectOnKeydown: false,
             fullTextSearch: 'exact',
             onChange: function () {
+                UI.UPLOAD_PAGE.targetLanguageChangedCallback();
                 APP.checkForLexiQALangs();
                 APP.checkForTagProjectionLangs();
-                UI.UPLOAD_PAGE.targetLanguageChangedCallback();
 
             }
         });
@@ -515,9 +538,9 @@ $.extend(UI.UPLOAD_PAGE, {
             selectOnKeydown: false,
             fullTextSearch: 'exact',
             onChange: function () {
+                UI.UPLOAD_PAGE.sourceLangChangedCallback();
                 APP.checkForLexiQALangs();
                 APP.checkForTagProjectionLangs();
-                UI.UPLOAD_PAGE.sourceLangChangedCallback();
             }
         });
 
@@ -580,7 +603,8 @@ $.extend(UI.UPLOAD_PAGE, {
             $.each(tlAr, function() {
                 var ll = $('.popup-languages.slide .listlang li #' + this);
                 ll.parent().addClass('on');
-                ll.attr('checked','checked');
+                ll.attr('checked','true');
+                ll.prop('checked','true');
             });
             $(".popup-outer.lang-slide").show();
             $('body').addClass('side-popup');

@@ -454,13 +454,16 @@ body.manage {
                                     position: relative;
                                     text-align: left;
                                     .outsource-logo-box {
-                                        min-width: 150px;
+                                        min-width: 120px;
                                         display: inherit;
-                                        margin-left: 30px;
+                                        margin-left: 20px;
                                         img.outsource-logo {
                                             width: 100px;
                                             margin: -5px 10px 0 0;
                                             vertical-align: middle;
+                                        }
+                                        @media only screens and (max-width: 1199px) and (min-width: 992px) {
+                                            min-width: 113px;
                                         }
                                     }
                                     &.outsource {
@@ -470,10 +473,10 @@ body.manage {
                                 .job-to-translator {
                                     display: inline-block;
                                     margin-right: 0px;
-                                    margin-left: 30px;
+                                    margin-left: 20px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 150px;
+                                    width: 120px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -481,6 +484,7 @@ body.manage {
                                     margin-top: 5px;
                                     @media only screen and (max-width: 1200px) {
                                         max-width: 180px;
+                                        width: 200px;
                                     }
                                 }
                                 &:hover .job-to-translator{
@@ -511,6 +515,7 @@ body.manage {
                                         color: #969696;
                                         display: inherit;
                                         margin-left: 5px;
+                                        font-size: 13px;
                                     }
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
@@ -528,7 +533,7 @@ body.manage {
                                     float: right;
                                     cursor: pointer;
                                     @media only screen and (max-width: 1200px) {
-                                        margin-left: 0px;
+                                        margin-left: 5px;
                                     }
                                     .ui.cancel{
                                         padding: 4px;

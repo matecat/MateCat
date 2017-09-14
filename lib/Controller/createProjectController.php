@@ -403,7 +403,7 @@ class createProjectController extends ajaxController {
 
         try {
             foreach ( $targets as $target ) {
-                $this->lang_handler->getLocalizedNameRFC( $target );
+                $this->lang_handler->validateLanguage( $target ) ;
             }
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
@@ -413,13 +413,8 @@ class createProjectController extends ajaxController {
     }
 
     private function __validateSourceLang() {
-        if ( empty( $this->source_language ) ) {
-            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
-        }
-
         try {
-            $this->lang_handler->getLocalizedNameRFC( $this->source_language ) ;
-
+            $this->lang_handler->validateLanguage( $this->source_language ) ;
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
         }
