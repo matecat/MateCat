@@ -506,9 +506,9 @@ UI = {
 
         UI.currentSegment.trigger('buttonsCreation');
         //Ice match segments
-        // if (this.currentSegment.hasClass('ice-unlocked')) {
-        //     UI.overrideButtonsForRevision();
-        // }
+        if (this.currentSegment.hasClass('ice-unlocked')) {
+            UI.overrideButtonsForRevision();
+        }
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
 
@@ -1074,7 +1074,9 @@ UI = {
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
 			    var next = UI.findNextSegment(UI.startSegmentId);
-                this.gotoSegment(next.attr('data-split-original-id'));
+			    if (next) {
+                    this.gotoSegment(next.attr('data-split-original-id'));
+                }
 			}
 
 			if (options.applySearch) {
