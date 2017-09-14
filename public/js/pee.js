@@ -149,6 +149,7 @@
             ;
 
             $('#create-button').on('click', PEE.createGraph);
+            $('#reset-button').on('click', PEE.resetGraphFilterToUrl);
 
             $( '#date-select' ).on( 'change', function(){
                 var value  = $(this).dropdown('get value')[0];
@@ -562,6 +563,21 @@
                 window.history.pushState({path:newurl},'',newurl);
             }
         },
+
+        resetGraphFilterToUrl: function (fields) {
+            if (history.pushState) {
+                var newurl;
+                newurl = PEE.removeParam('gs');
+                newurl =PEE.removeParam('gt', newurl);
+                newurl =PEE.removeParam('gf', newurl);
+                newurl =PEE.removeParam('gfrom', newurl);
+                newurl =PEE.removeParam('gend', newurl);
+                newurl =PEE.removeParam('gfilter', newurl);
+                window.history.pushState({path:newurl},'',newurl);
+                PEE.drawDefaultChart()
+            }
+        },
+
         checkQueryStringFilterForGraph: function () {
             var gFilters = APP.getParameterByName("gfilter");
             var fields;
@@ -591,8 +607,8 @@
                 return uri + separator + key + "=" + value;
             }
         },
-        removeParam: function(key, sourceURl) {
-            if (!sourceURl) {
+        removeParam: function(key, sourceURL) {
+            if (!sourceURL) {
                 sourceURL = document.location.href;
             }
             var rtn = sourceURL.split("?")[0],
