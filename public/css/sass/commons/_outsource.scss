@@ -89,13 +89,12 @@
         position: relative;
         top: 4px;
         .gmt-select {
-            padding-right: 8px;
-            padding-left: 8px;
             min-width: 101px !important;
             width: auto;
             background: transparent;
+            padding: 12px 8px;
             .dropdown.icon {
-                padding: 10px 3px 0 0px;
+                padding: 10px 3px 0 0;
             }
             .text {
                 .gmt-description {
@@ -245,7 +244,7 @@
     }
     .open-job-box {
         background-color: #d7d8dc;
-        padding: 25px 30px 20px 45px;
+        padding: 35px 30px 25px 45px;
         width: 100%;
         cursor: auto;
         .title {
@@ -334,9 +333,9 @@
                     .translated-logo {
                         display: inline-block;
                         .logo-t {
-                            width: 125px;
+                            width: 100px;
                             position: relative;
-                            top: 11px;
+                            top: 9px;
                             padding: 0;
                             margin: 0 0 0 5px;
                         }
@@ -441,7 +440,8 @@
                         width: 18%;
                         font-size: 20px;
                         font-weight: 700;
-                        text-align: center;
+                        text-align: right;
+                        padding-right: 40px;
                     }
                 }
                 .revision-box {
@@ -460,11 +460,11 @@
                     }
                     .job-price {
                         display: inline-block;
-                        font-size: 18px;
-                        text-align: center;
+                        font-size: 20px;
+                        text-align: right;
                         font-weight: 700;
                         width: 18%;
-                        padding-right: 0px;
+                        padding-right: 40px;
                     }
 
                 }

@@ -342,7 +342,7 @@ class OutsourceVendor extends React.Component {
                             <div className="translator-details-box">
                                 <div className="translator-no-found">
                                     <p>
-                                        Translated.net uses the <b>most qualified translator</b> and <b>keeps using the same translator for your next projects. </b>
+                                        Translated.net uses the <b>most qualified translator</b> <br /> and <b>keeps using the same translator for your next projects. </b>
                                     </p>
                                 </div>
                             </div>
@@ -470,9 +470,9 @@ class OutsourceVendor extends React.Component {
                                                         <option value="21">9:00 PM</option>
                                                     </select>
                                                 </div>
-                                                {/*<div className="field gmt">
+                                                <div className="field gmt">
                                                     <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
-                                                </div>*/}
+                                                </div>
                                                 <div className="field">
                                                     <button className="get-price ui blue basic button">Get Price</button>
                                                 </div>
