@@ -9,7 +9,15 @@ Review = {
     type : config.reviewType
 };
 
+//This is needed in translate page for ICE locked segments
+$('html').on('click', 'a.approved, a.next-unapproved', function(e) {
+    // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+    // because of the event is triggered even on download button
+    UI.clickOnApprovedButton(e, this)
+});
+
 $.extend( UI, {
+
     clenaupTextFromPleaceholders : function(text) {
         text = text
             .replace( config.lfPlaceholderRegex, "\n" )
@@ -18,7 +26,83 @@ $.extend( UI, {
             .replace( config.tabPlaceholderRegex, "\t" )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
         return text;
-    }
+    },
+    //This is needed in translate page for ICE locked segments
+    overrideButtonsForRevision: function () {
+        var div = $('<ul>' + UI.segmentButtons + '</ul>');
+
+        div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
+        var nextSegment = UI.currentSegment.next();
+        var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+        div.find('.next-untranslated').parent().remove();
+        if (goToNextApprovedButton) {
+            var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            div.find('.approved').parent().prepend(htmlButton);
+        }
+        UI.segmentButtons = div.html();
+    },
+    //This is needed in translate page for ICE locked segments
+    clickOnApprovedButton: function (e, button) {
+        // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+        // because of the event is triggered even on download button
+        e.preventDefault();
+        var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
+        UI.tempDisablingReadonlyAlert = true;
+        UI.hideEditToolbar();
+        UI.currentSegment.removeClass('modified');
+        UI.currentSegment.data('modified', false);
+
+
+        $('.sub-editor.review .error-type').removeClass('error');
+
+        UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
+
+        var original = UI.currentSegment.find('.original-translation').text();
+        var sid = UI.currentSegmentId;
+        var err = $('.sub-editor.review .error-type');
+        var err_typing = $(err).find('input[name=t1]:checked').val();
+        var err_translation = $(err).find('input[name=t2]:checked').val();
+        var err_terminology = $(err).find('input[name=t3]:checked').val();
+        var err_language = $(err).find('input[name=t4]:checked').val();
+        var err_style = $(err).find('input[name=t5]:checked').val();
+
+        if (goToNextNotApproved) {
+            UI.openNextTranslated();
+        } else {
+            UI.gotoNextSegment();
+        }
+
+        var data = {
+            action: 'setRevision',
+            job: config.job_id,
+            jpassword: config.password,
+            segment: sid,
+            original: original,
+            err_typing: err_typing,
+            err_translation: err_translation,
+            err_terminology: err_terminology,
+            err_language: err_language,
+            err_style: err_style
+        };
+
+        UI.setRevision(data);
+    },
+    setRevision: function( data ){
+        APP.doRequest({
+            data: data,
+            error: function() {
+                UI.failedConnection( data, 'setRevision' );
+            },
+            success: function(d) {
+                window.quality_report_btn_component.setState({
+                    vote: d.data.overall_quality_class
+                });
+            }
+        });
+    },
 });
 
 if ( Review.enabled() )
@@ -217,10 +301,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);
-    }).on('click', 'a.approved, a.next-unapproved', function(e) {
-        // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-        // because of the event is triggered even on download button
-        UI.clickOnApprovedButton(e, this)
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
@@ -233,19 +313,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
     });
 
     $.extend(UI, {
-        setRevision: function( data ){
-            APP.doRequest({
-                data: data,
-                error: function() {
-                    UI.failedConnection( data, 'setRevision' );
-                },
-                success: function(d) {
-                    window.quality_report_btn_component.setState({
-                        vote: d.data.overall_quality_class
-                    });
-                }
-            });
-        },
         trackChanges: function (editarea) {
             var diff = UI.dmp.diff_main(UI.currentSegment
                 .find('.original-translation').text()
@@ -297,68 +364,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             this.render({
                 segmentToOpen: nextId
             });
-        },
-        clickOnApprovedButton: function (e, button) {
-            // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-            // because of the event is triggered even on download button
-            e.preventDefault();
-            var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
-            UI.tempDisablingReadonlyAlert = true;
-            UI.hideEditToolbar();
-            UI.currentSegment.removeClass('modified');
-            UI.currentSegment.data('modified', false);
-
-
-            $('.sub-editor.review .error-type').removeClass('error');
-
-            UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
-
-            var original = UI.currentSegment.find('.original-translation').text();
-            var sid = UI.currentSegmentId;
-            var err = $('.sub-editor.review .error-type');
-            var err_typing = $(err).find('input[name=t1]:checked').val();
-            var err_translation = $(err).find('input[name=t2]:checked').val();
-            var err_terminology = $(err).find('input[name=t3]:checked').val();
-            var err_language = $(err).find('input[name=t4]:checked').val();
-            var err_style = $(err).find('input[name=t5]:checked').val();
-
-            if (goToNextNotApproved) {
-                UI.openNextTranslated();
-            } else {
-                UI.gotoNextSegment();
-            }
-
-            var data = {
-                action: 'setRevision',
-                job: config.job_id,
-                jpassword: config.password,
-                segment: sid,
-                original: original,
-                err_typing: err_typing,
-                err_translation: err_translation,
-                err_terminology: err_terminology,
-                err_language: err_language,
-                err_style: err_style
-            };
-
-            UI.setRevision(data);
-        },
-        overrideButtonsForRevision: function () {
-            var div = $('<ul>' + UI.segmentButtons + '</ul>');
-
-            div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
-            var nextSegment = UI.currentSegment.next();
-            var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
-            div.find('.next-untranslated').parent().remove();
-            if (goToNextApprovedButton) {
-                var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-                    '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-                    ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-                div.find('.approved').parent().prepend(htmlButton);
-            }
-            UI.segmentButtons = div.html();
         }
-
     });
 }

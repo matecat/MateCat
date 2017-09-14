@@ -407,6 +407,19 @@
             } else {
                 return $('.source', segmentAfter ).text();
             }
+        },
+        unlockIceSegment: function (elem) {
+            elem.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
+            var section = elem.closest('section');
+            section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
+            section.find('.targetarea').removeClass('area').addClass('editarea').click();
+        },
+        lockIceSegment: function (elem) {
+            elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
+            var section = elem.closest('section');
+            section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
+            section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
+            UI.closeSegment(section);
         }
     }); 
 })(jQuery); 

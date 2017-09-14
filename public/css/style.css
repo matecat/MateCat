@@ -2644,17 +2644,20 @@ section.ice-locked .text {
     /*zoom: 0.8;*/
     /*width: 94%;*/
     /*margin: 0 3%!important;*/
-    background-color: rgba(7, 152, 188, 0.03) !important;
+    background-color: rgba(99, 157, 94, 0.2) !important;
     -webkit-box-shadow: none !important;
     border-top: 0 !important;
     box-shadow: none !important;
     cursor: no-drop !important;
 }
 body.cattool.editing section.ice-locked:not(.editor) .text:hover {
-    background-color: rgba(7, 152, 188, 0.01) !important;
+    background-color: rgba(99, 157, 94, 0.1) !important;
 }
-body.cattool.editing section.ice-locked:not(.editor) .text .textarea-container .area:hover {
-    color: black !important;
+
+.ice-locked-icon i.icon-lock,
+.ice-locked-icon i.icon-unlocked3{
+    font-size: 20px;
+    cursor: pointer;
 }
 
 body.archived section {
@@ -3226,13 +3229,20 @@ body.rtl-target .editor .editarea span {
     margin: 0 0px;
     padding: 2px 5px 0px 5px;
     background-color: #0798bc;
-    width: 26px;
+    width: 35px;
     height: 16px;
     position: absolute;
     color: white;
-    right: 13px;
-    bottom: 1px;
+    right: 50.5%;
+    top: 1px;
     line-height: 14px;
+    visibility: hidden;
+    transition: all 100ms ease-in;
+}
+
+
+section.readonly:hover .ice-locked-label {
+    visibility: visible;
 }
 
 /*status*/
