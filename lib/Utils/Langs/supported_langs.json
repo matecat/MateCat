@@ -1284,6 +1284,16 @@
     ,
         {
             "localized":[{
+                "en":"Rohingya"
+            }],
+            "isocode":"rhg",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"rhg-MM"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Romanian"
             }],
             "isocode":"ro",
