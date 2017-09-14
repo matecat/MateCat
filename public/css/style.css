@@ -3221,6 +3221,20 @@ body.rtl-target .editor .editarea span {
     float: left;
 }
 
+.ice-locked-label {
+    font-size: 11px;
+    margin: 0 0px;
+    padding: 2px 5px 0px 5px;
+    background-color: #0798bc;
+    width: 26px;
+    height: 16px;
+    position: absolute;
+    color: white;
+    right: 13px;
+    bottom: 1px;
+    line-height: 14px;
+}
+
 /*status*/
 .status-container .status {
     width: 11px;

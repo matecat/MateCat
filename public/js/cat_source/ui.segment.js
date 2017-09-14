@@ -94,6 +94,7 @@
                 escapedSegment          : escapedSegment,
                 segment                 : segment,
                 readonly                : readonly,
+                ice_locked              : parseInt(segment.ice_locked),
                 splitGroup              : splitGroup ,
                 segment_classes         : classes.join(' '),
                 shortened_sid           : UI.shortenId( segment.sid ),
