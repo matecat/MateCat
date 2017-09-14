@@ -718,7 +718,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.internal_id,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
-                st.locked AS original_target_provied,
+                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
                 st.status,
                 COALESCE(time_to_edit, 0) AS time_to_edit,
                 s.xliff_ext_prec_tags,
@@ -2111,6 +2111,7 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         INNER JOIN jobs j ON j.id=st.id_job
         WHERE j.id_project = $pid
         AND st.locked = 0
+        AND match_type != 'ICE'
         GROUP BY id_job WITH ROLLUP";
     try {
         //Needed to address the query to the master database if exists
