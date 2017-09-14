@@ -18,6 +18,22 @@ $.extend( UI, {
             .replace( config.tabPlaceholderRegex, "\t" )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
         return text;
+    },
+    overrideButtonsForRevision: function () {
+        var div = $('<ul>' + UI.segmentButtons + '</ul>');
+
+        div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
+        var nextSegment = UI.currentSegment.next();
+        var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+        div.find('.next-untranslated').parent().remove();
+        if (goToNextApprovedButton) {
+            var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            div.find('.approved').parent().prepend(htmlButton);
+        }
+        UI.segmentButtons = div.html();
     }
 });
 
@@ -343,22 +359,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
 
             UI.setRevision(data);
         },
-        overrideButtonsForRevision: function () {
-            var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
-            div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
-            var nextSegment = UI.currentSegment.next();
-            var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
-            div.find('.next-untranslated').parent().remove();
-            if (goToNextApprovedButton) {
-                var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-                    '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-                    ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-                div.find('.approved').parent().prepend(htmlButton);
-            }
-            UI.segmentButtons = div.html();
-        }
 
     });
 }

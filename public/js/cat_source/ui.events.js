@@ -523,7 +523,15 @@ $.extend(UI, {
             UI.copyGlossaryItemInEditarea($(this));
 		}).on('click', '.glossary .switch-editing', function() {
 			UI.updateGlossary($(this).closest(".graysmall"));
-		});
+		}).on('click', '.ice-locked-icon .unlock-button', function (e) {
+		    e.preventDefault();
+            e.stopPropagation();
+            if ($(e.target).hasClass('locked')) {
+                UI.unlockIceSegment($(this));
+            } else {
+                UI.lockIceSegment($(this));
+            }
+        });
 
 		$(".joblink").click(function(e) {
 			e.preventDefault();

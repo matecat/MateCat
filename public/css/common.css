@@ -4275,8 +4275,8 @@ td.align-left {
 .icon-lock:before {
     content: "\e98f";
 }
-.icon-unlocked:before {
-    content: "\e990";
+.icon-unlocked3:before {
+    content: "\ea89";
 }
 .icon-earth:before {
     content: "\e9ca";
