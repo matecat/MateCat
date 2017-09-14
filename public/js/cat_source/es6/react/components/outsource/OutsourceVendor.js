@@ -386,99 +386,104 @@ class OutsourceVendor extends React.Component {
                         )}
                     </div>
                     {!this.state.errorQuote ? (
-                        <div className="delivery-order">
-                            {!this.state.needItFaster ? (
-                                <div className="delivery-box">
-                                    <label>Delivery date:</label>
-                                    <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                    <span>at</span>
-                                    <div className="delivery-time">{delivery.time}</div>
-                                    <div className="gmt">
-                                        <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
-                                        {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
-                                    </div>
-                                    {!this.state.outsourceConfirmed ? (
-                                        <div className="need-it-faster">
-                                            {this.state.errorPastDate ? (
-                                                <div className="errors-date past-date">* Chosen delivery date is in the past</div>
-                                            ) : (null)}
-                                            {this.state.quoteNotAvailable ? (
-                                                <div className="errors-date generic-error">* Deadline too close, pick another one.</div>
-                                            ) : (null)}
-
-                                            {(showDateMessage) ? (
-                                                <div className="errors-date too-far-date" >We will delivery before the selected date
-                                                    <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
-                                                         data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
-                                                </div>
-                                            ):('')}
-                                            <a className="faster"
-                                               ref={(faster) => this.dateFaster = faster}
-                                               onClick={this.needItFaster.bind(this)}
-                                            >Need it faster?</a>
+                            !this.state.needItFaster ? (
+                                <div className="delivery-order">
+                                    <div className="delivery-box">
+                                        <label>Delivery date:</label>
+                                        <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
+                                        <span>at</span>
+                                        <div className="delivery-time">{delivery.time}</div>
+                                        <div className="gmt">
+                                            <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                                            {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                                         </div>
-                                    ):('')}
+                                        {!this.state.outsourceConfirmed ? (
+                                            <div className="need-it-faster">
+                                                {this.state.errorPastDate ? (
+                                                    <div className="errors-date past-date">* Chosen delivery date is in the past</div>
+                                                ) : (null)}
+                                                {this.state.quoteNotAvailable ? (
+                                                    <div className="errors-date generic-error">* Deadline too close, pick another one.</div>
+                                                ) : (null)}
 
-                                </div>
+                                                {(showDateMessage) ? (
+                                                    <div className="errors-date too-far-date" >We will delivery before the selected date
+                                                        <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                             data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
+                                                    </div>
+                                                ):('')}
+                                                <a className="faster"
+                                                   ref={(faster) => this.dateFaster = faster}
+                                                   onClick={this.needItFaster.bind(this)}
+                                                >Need it faster?</a>
+                                            </div>
+                                        ):('')}
+
+                                    </div>
+                                    {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
+                                        <div className="confirm-delivery-input">
+                                            <div className="back" onClick={this.goBack.bind(this)}>
+                                                <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
+                                            </div>
+                                            <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
+                                            <div className="ui input">
+                                                <input type="text" placeholder="Insert email" defaultValue={email} />
+                                            </div>
+
+                                        </div>
+                                    ) :('')}
+                                    {this.state.outsourceConfirmed && this.state.jobOutsourced ? (
+                                        <div className="confirm-delivery-box">
+                                            <div className="confirm-title">Order sent correctly</div>
+                                            <p>Thank you for choosing our Outsource service<br />
+                                                You will soon be contacted by a Account Manager to send you an invoice</p>
+                                        </div>
+                                    ) :('')}
+                            </div>
                             ) : (
-                                <div className="delivery-box need-if-faster">
-                                    <div className="ui form">
-                                        <div className="fields">
-                                            <div className="field">
-                                                <label>Delivery Date</label>
-                                                <div className="ui calendar" ref={(calendar)=> this.calendar = calendar}>
-                                                    <div className="ui input left icon">
-                                                        <i className="calendar icon"/>
-                                                        <input type="text" placeholder="Date"/>
+                                <div className="delivery-order need-it-faster-box">
+                                    <a className="need-it-faster-close shadow-1" onClick={this.needItFaster.bind(this)}>
+                                        <i className="icon-cancel3 icon"/>
+                                    </a>
+                                    <div className="delivery-box shadow-1">
+                                        <div className="ui form">
+                                            <div className="fields">
+                                                <div className="field">
+                                                    <label>Delivery Date</label>
+                                                    <div className="ui calendar" ref={(calendar)=> this.calendar = calendar}>
+                                                        <div className="ui input">
+                                                            <input type="text" placeholder="Date"/>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="field input-time">
+                                                    <label>Time</label>
+                                                    <select className="ui fluid search dropdown"
+                                                    ref={(dropdown)=> this.dropdownTime = dropdown }>
+                                                        <option value="7">7:00 AM</option>
+                                                        <option value="9">9:00 AM</option>
+                                                        <option value="11">11:00 AM</option>
+                                                        <option value="13">01:00 PM</option>
+                                                        <option value="15">3:00 PM</option>
+                                                        <option value="17">5:00 PM</option>
+                                                        <option value="19">7:00 PM</option>
+                                                        <option value="21">9:00 PM</option>
+                                                    </select>
+                                                </div>
+                                                {/*<div className="field gmt">
+                                                    <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
+                                                </div>*/}
+                                                <div className="field">
+                                                    <button className="get-price ui blue basic button">Get Price</button>
+                                                </div>
+
                                             </div>
-                                            <div className="field">
-                                                <label>Time</label>
-                                                <select className="ui fluid search dropdown">
-                                                    <option value="7">7:00 AM</option>
-                                                    <option value="9">9:00 AM</option>
-                                                    <option value="11">11:00 AM</option>
-                                                    <option value="13">01:00 PM</option>
-                                                    <option value="15">15:00 PM</option>
-                                                    <option value="17">17:00 PM</option>
-                                                    <option value="19">19:00 PM</option>
-                                                    <option value="21">21:00 PM</option>
-                                                </select>
-                                            </div>
-                                            <div className="field gmt">
-                                                <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
-                                            </div>
-                                            <div className="field">
-                                                <button className="ui primary button">Get Price</button>
-                                            </div>
-                                            <a className="need-it-faster-close" onClick={this.needItFaster.bind(this)}
-                                            >Close</a>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            )
 
-                            {this.state.outsourceConfirmed && !this.state.jobOutsourced ? (
-                                <div className="confirm-delivery-input">
-                                    <div className="back" onClick={this.goBack.bind(this)}>
-                                        <a className="outsource-goBack"><i className="icon-chevron-left icon"/>Back</a>
-                                    </div>
-                                    <div className="email-confirm">Insert your email and we’ll start working on your project instantly.</div>
-                                    <div className="ui input">
-                                        <input type="text" placeholder="Insert email" defaultValue={email} />
-                                    </div>
 
-                                </div>
-                            ) :('')}
-                            {this.state.outsourceConfirmed && this.state.jobOutsourced ? (
-                                <div className="confirm-delivery-box">
-                                    <div className="confirm-title">Order sent correctly</div>
-                                    <p>Thank you for choosing our Outsource service<br />
-                                        You will soon be contacted by a Account Manager to send you an invoice</p>
-                                </div>
-                            ) :('')}
-                        </div>
                     ) : (
                         <div className="delivery-order-not-available">
                             <div className="quote-not-available-message">
@@ -684,7 +689,9 @@ class OutsourceVendor extends React.Component {
         return { __html: string };
     }
 
-    componentDidMount () {}
+    componentDidMount () {
+        $(this.dropdownTime).dropdown();
+    }
 
     componentWillUnmount() {
         // $(this.dateFaster).datetimepicker('destroy');
@@ -693,6 +700,7 @@ class OutsourceVendor extends React.Component {
     componentDidUpdate() {
         let self = this;
         if (this.state.outsource ) {
+            $(this.dropdownTime).dropdown();
             $(this.calendar).calendar({
                 type: 'date'
             });

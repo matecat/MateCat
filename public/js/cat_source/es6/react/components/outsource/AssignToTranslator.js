@@ -38,11 +38,10 @@ class AssignToTranslator extends React.Component {
         $(this.dateInput).calendar({
             type: 'date'
         });
+        $(this.dropdownTime).dropdown();
     }
 
-    componentWillUnmount() {
-        // $(this.dateInput).datetimepicker('destroy');
-    }
+    componentWillUnmount() {}
 
     componentDidUpdate() {}
 
@@ -55,33 +54,33 @@ class AssignToTranslator extends React.Component {
             date =  delivery.day + ' ' + delivery.month + ' ' + delivery.year + ' at ' + delivery.time;
             translatorEmail = this.props.job.get('translator').get('email');
         }
-        return <div className="assign-job-translator">
+        return <div className="assign-job-translator sixteen wide column">
                     <div className="title">
                         Assign Job to translator
                     </div>
-                    <div className="title-url ui grid">
+                    <div className="title-url">
                         <div className="translator-assignee">
                             <div className="ui form">
                                 <div className="fields">
-                                    <div className="field">
+                                    <div className="field translator-email">
                                         <label>Translator email</label>
                                         <input type="email" placeholder="translator@email.com" defaultValue={translatorEmail}
                                                ref={(email) => this.email = email}
                                                 onKeyUp={this.checkSendToTranslatorButton.bind(this)}/>
                                     </div>
-                                    <div className="field">
+                                    <div className="field translator-delivery ">
                                         <label>Delivery date</label>
                                         <div className="ui calendar" ref={(date) => this.dateInput = date}>
-                                            <div className="ui input left icon">
-                                                <i className="calendar icon"/>
+                                            <div className="ui input">
                                                 <input type="text" placeholder="Date"
                                                        onChange={this.checkSendToTranslatorButton.bind(this)}/>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="field">
+                                    <div className="field translator-time">
                                         <label>Time</label>
-                                        <select className="ui fluid search dropdown">
+                                        <select className="ui dropdown"
+                                        ref={(dropdown)=> this.dropdownTime = dropdown}>
                                             <option value="7">7:00 AM</option>
                                             <option value="9">9:00 AM</option>
                                             <option value="11">11:00 AM</option>
