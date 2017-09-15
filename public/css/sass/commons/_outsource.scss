@@ -75,13 +75,28 @@
     }
 
     .gmt {
-        padding-top: 23px;
-        float: none;
-        display: inline-block;
-        .ui.selection.dropdown {
+        .gmt-outsourced {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+    }
+
+    .gmt {
+        font-size: 14px;
+        font-weight: normal;
+        float: right;
+        clear: both;
+        position: relative;
+        top: 4px;
+        .gmt-select {
+            padding-right: 8px;
+            padding-left: 8px;
             min-width: 101px !important;
             width: auto;
             background: transparent;
+            .dropdown.icon {
+                padding: 10px 3px 0 0px;
+            }
             .text {
                 .gmt-description {
                     display: none;
@@ -99,10 +114,6 @@
                     }
                 }
             }
-        }
-        .gmt-outsourced {
-            display: inline-block;
-            margin-bottom: 10px;
         }
     }
 
@@ -147,7 +158,7 @@
 
     .assign-job-translator {
         background-color: #d7d8dc;
-        padding: 0 15px 25px;
+        padding: 10px 15px 35px;
         width: 100%;
         .title {
             display: inline-block;
@@ -155,8 +166,7 @@
             font-size: 20px;
             font-weight: 700;
             width: 25%;
-            position: relative;
-            top: 33px;
+            vertical-align: top;
         }
         .title-url {
             padding: 15px 0;
@@ -170,19 +180,11 @@
             }
             .translator-assignee {
                 width: 100%;
-                display: inline-block;
-                padding: 0;
                 .ui.form {
-                    margin: 0;
-                    display: inline-block;
-                    width: 100%;
+                    /*width: 100%;*/
                     .fields {
                         margin: 0;
                         .field {
-                            width: 25%;
-                            display: inline-block;
-                            vertical-align: bottom;
-                            float: none;
                             label {
                                 padding-left: 15px;
                             }
@@ -198,19 +200,41 @@
                                 }
                             }
                             &.send-job-box {
-                                padding: 0;
-                                padding-top: 23px;
+                                padding: 0 15px 0 0;
+                                padding-top: 22px;
+                                width: 28%;
                                 .send-job {
                                     font-family: Calibri, Arial, Helvetica, sans-serif;
                                     font-size: 16px;
                                     border: 1px solid #797979;
                                     border-radius: 2px;
-                                    padding: 9px 17px;
+                                    padding: 11px 17px;
                                     margin: 0;
                                     float: right;
-                                    width: 93%;
-                                    min-width: 203px;
+                                    width: 97%;
+                                    min-width: 199px;
                                 }
+                            }
+                            &.translator-email {
+                                width: 31%;
+                            }
+                            &.translator-delivery {
+                                width: 21%;
+                            }
+                            &.translator-time {
+                                 width: 111px;
+                                 .selection.dropdown {
+                                     width: 100%;
+                                     min-width: 101px !important;
+                                     border: 1px solid #ccc;
+                                     box-shadow: inset 0 1px 3px #ddd;
+                                 }
+                             }
+                            &.gmt {
+                                position: relative;
+                                top: 23px;
+                                width: 100px;
+                                margin-right: 20px;
                             }
 
                         }
@@ -445,12 +469,12 @@
 
                 }
                 .delivery-order {
-                    width: 82%;
+                    width: 81%;
                     text-align: right;
                     display: inline-block;
                     vertical-align: top;
                     margin-top: 15px;
-                    padding-right: 25px;
+                    padding-right: 5px;
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
@@ -475,14 +499,10 @@
                             display: inline-block;
                             padding: 5px;
                         }
-                        .gmt {
-                            padding-top: 0;
-                            .gmt-select {
-                                top: -5px;
-                            }
-                        }
+
                         .need-it-faster {
                             font-size: 17px;
+                            margin-top: 5px;
                         }
                         .need-it-faster-message {
                             font-size: 15px;
@@ -518,6 +538,95 @@
                             }
                         }
                     }
+                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                        width: 79%;
+                    }
+                    @media only screen and (max-width: 991px) and (min-width: 768px) {
+                        width: 79%;
+                    }
+                }
+                .need-it-faster-box {
+                    margin-top: 0 !important;
+                    .need-it-faster-close {
+                        position: relative;
+                        top: -29px;
+                        left: 12px;
+                        text-align: center;
+                        padding: 5px;
+                        margin: 0;
+                        width: 115px;
+                        height: 115px;
+                        border-radius: 15px;
+                        background: white;
+                        i {
+                            margin: 0;
+                            position: relative;
+                            top: 2px;
+                            font-size: 15px;
+                            color: #000000;
+                        }
+                    }
+                    .delivery-box {
+                        padding: 14px 15px;
+                        text-align: left;
+                        .fields {
+                            .field {
+                                label {
+                                    font-weight: unset;
+                                    font-size: unset;
+                                }
+                                input[type="text"], input[type="email"] {
+                                    box-shadow: inset 0 1px 3px #ddd;
+                                    border: 1px solid #ccc;
+                                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                                    border-radius: 2px
+                                    &:focus {
+                                        border-color: #85B7D9;
+                                    }
+                                    &:active {
+                                        border-color: #85B7D9;
+                                    }
+                                }
+                                &.input-time {
+                                    width: 111px;
+                                    .selection.dropdown {
+                                        width: 100%;
+                                        min-width: 101px !important;
+                                        border: 1px solid #ccc;
+                                        box-shadow: inset 0 1px 3px #ddd;
+                                        border-radius: 2px
+                                    }
+                                }
+                                &.gmt {
+                                    position: relative;
+                                    top: 32px;
+                                    width: 100px;
+                                    margin-right: 20px;
+                                }
+                                .get-price {
+                                    font-family: Calibri, Arial, Helvetica, sans-serif;
+                                    padding: 9px 11px;
+                                    vertical-align: top;
+                                    font-size: 18px;
+                                    border: 1px solid #09beec;
+                                    border-radius: 2px;
+                                    box-shadow: none !important;
+                                    background-color: #ffffff !important;
+                                    font-weight: 700;
+                                    margin-top: 32px;
+                                    &:hover {
+                                        text-decoration: none;
+                                        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                        border: 1px solid #09beec;
+                                    }
+                                    &:focus {
+                                        box-shadow: none !important;
+                                        background-color: #f2f2f2 !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 .delivery-order-not-available {
                     margin-top: 24px;
@@ -533,8 +642,9 @@
                 }
                 .order-box-outsource {
                     display: inline-block;
+                    float: right;
                     width: 18%;
-                    text-align: right;
+                    min-width: 199px;
                     .order-box {
                         background-color: #daeddf;
                         height: 70px;
@@ -708,7 +818,7 @@
                                         color: inherit;
                                     }
                                     a {
-                                        color: #000000;
+                                        color: #000000 !important;
                                     }
                                 }
                             }
@@ -843,16 +953,7 @@
                                 display: inline-block;
                             }
                             .gmt {
-                                padding: 0;
-                                .gmt-select {
-                                    position: relative;
-                                    top: -3px;
-                                    padding-right: 8px;
-                                    padding-left: 8px;
-                                    .dropdown.icon {
-                                        padding: 10px 3px 0 0px;
-                                    }
-                                }
+
                             }
                         }
                     }
@@ -898,7 +999,7 @@
                     min-width: 200px;
                     .order-box {
                         background-color: #daeddf;
-                        padding: 25px 15px 15px;
+                        padding: 25px 5px 15px;
                         margin-bottom: 5px;
                         .outsource-price {
                             font-size: 28px;
@@ -1025,6 +1126,8 @@
         }
         &.compact-background {
             background: #ffffff;
+            padding-bottom: 25px;
+            padding-top: 25px;
         }
     }
 

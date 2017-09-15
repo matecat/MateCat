@@ -63,7 +63,7 @@
 }
 .ui.calendar .ui.table tr th,
 .ui.calendar .ui.table tr td {
-  padding: 0.5em;
+  padding: 0.25em;
   white-space: nowrap;
 }
 .ui.calendar .ui.table tr th {
