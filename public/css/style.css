@@ -2655,7 +2655,7 @@ body.cattool.editing section.ice-locked:not(.editor) .text:hover {
 }
 
 .ice-locked-icon > button {
-    padding: 8px 5px 9px 13px;
+    padding: 8px 3px 9px 11px;
     font-size: 18px;
     background-color: transparent;
     border: 1px solid transparent;
@@ -2665,7 +2665,7 @@ body.cattool.editing section.ice-locked:not(.editor) .text:hover {
 }
 .ice-locked-icon > button:hover {
     background-color: #9E9E9E;
-    border: 1px solid #5F5F5F;
+    border: 1px solid #5F5F5F;;
     color: white;
 }
 
