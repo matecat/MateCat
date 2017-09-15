@@ -15,7 +15,7 @@
         padding: 5px 45px !important;
         z-index: 1;
         .job-id {
-            margin-right: 10px;
+            margin-right: 0;
         }
         .source-target {
             .source-box, .target-box {
@@ -667,8 +667,8 @@
                                     margin-left: 5px;
                                 }
                                 .menu {
-                                    height: 260px;
-                                    left: -5px;
+                                    height: 236px;
+                                    left: -10px;
                                 }
                             }
                         }
