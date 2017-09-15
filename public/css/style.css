@@ -2660,8 +2660,8 @@ body.cattool.editing section.ice-locked:not(.editor) .text:hover {
 }
 
 .ice-locked-icon > button {
-    padding: 8px 3px 9px 11px;
-    font-size: 18px;
+    padding: 6px 3px 9px 11px;
+    font-size: 19px;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 2px;
@@ -4624,7 +4624,7 @@ section .toolbar .autofillTag {
     background: #9E9E9E;
     color: #fff;
     text-decoration: none;
-    padding: 8px 1px 2px 2px;
+    padding: 7px 1px 3px 2px;
     border: 1px solid #5F5F5F;
     border-radius: 4px;
     width: 31px;
