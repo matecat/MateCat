@@ -18,6 +18,9 @@
 
       </div>
     </div> <!-- .wrap -->
+      {{#if ice_locked}}
+          <div class="ice-locked-label"> 101% </div>
+      {{/if}}
     <div class="status-container">
       <a href="#" title="{{status_change_title}}"
                 class="status" id="segment-{{segment.sid}}-changestatus"></a>
