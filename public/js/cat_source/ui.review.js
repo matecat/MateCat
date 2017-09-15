@@ -8,13 +8,14 @@ Review = {
     },
     type : config.reviewType
 };
-
-//This is needed in translate page for ICE locked segments
-$('html').on('click', 'a.approved, a.next-unapproved', function(e) {
-    // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-    // because of the event is triggered even on download button
-    UI.clickOnApprovedButton(e, this)
-});
+if ( !Review.enabled() || Review.type === 'simple' ) {
+    //This is needed in translate page for ICE locked segments
+    $('html').on('click', 'a.approved, a.next-unapproved', function (e) {
+        // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+        // because of the event is triggered even on download button
+        UI.clickOnApprovedButton(e, this)
+    });
+}
 
 $.extend( UI, {
 

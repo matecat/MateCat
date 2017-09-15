@@ -82,7 +82,7 @@ $.extend(UI, {
 		var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 
 		if ($(current).hasClass('readonly')) {
-		    return false;
+		    return $.Deferred().resolve();
         }
 
 		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length) {
@@ -93,11 +93,11 @@ $.extend(UI, {
             }
             if (this.currentSegmentId == this.nextUntranslatedSegmentId)
                 this.blockButtons = false;
-            return false;
+            return $.Deferred().resolve();
 		}
 
 		if ((!current.length) && (next)) {
-			return false;
+			return $.Deferred().resolve();
 		}
 
         var id = current.attr('id');
@@ -125,7 +125,7 @@ $.extend(UI, {
 
         // `next` and `untranslated next` are the same
 		if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
-			return false;
+			return $.Deferred().resolve();
 		}
 
         var contextBefore = UI.getContextBefore(id_segment);
