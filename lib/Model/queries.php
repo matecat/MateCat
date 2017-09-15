@@ -963,6 +963,15 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     }
 
     /**
+     * We want to avoid that a translation overrides a propagation,
+     * so we have to set an additional status when the requested status to propagate is TRANSLATE
+     */
+    if( $params['status'] == Constants_TranslationStatus::STATUS_TRANSLATED ){
+        $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+";
+    }
+
+    /**
      * Sum the word count grouped by status, so that we can later update the count on jobs table.
      * We only count segments with status different than the current, because we don't need to update
      * the count for the same status.
@@ -972,16 +981,14 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
            SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
 
            FROM segment_translations
-              -- JOIN for raw_word_count and ICE matches
               INNER JOIN  segments
               ON segments.id = segment_translations.id_segment
-              -- JOIN for raw_word_count and ICE matches
-
            WHERE id_job = {$params['id_job']}
            AND segment_translations.segment_hash = '" . $params[ 'segment_hash' ] . "'
            AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
            AND id_segment != $_idSegment
            AND status != '{$params['status']}'
+           $additional_status
            GROUP BY status
     ";
 
@@ -1002,7 +1009,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
                 'job_last_segment'  => $job_data[ 'job_last_segment' ],
                 'segment_hash'      => $params[ 'segment_hash' ],
                 'id_job'            => $params[ 'id_job' ]
-        ) );
+        ), $params['status'] );
     } catch( PDOException $e ) {
         throw new Exception(
                 sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(),  $e->getMessage() ),

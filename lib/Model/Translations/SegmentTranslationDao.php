@@ -68,12 +68,22 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
       return $stmt->fetch();
     }
 
-    public function getSegmentsForPropagation( $params ) {
+    public function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
+
+        /**
+         * We want to avoid that a translation overrides a propagation,
+         * so we have to set an additional status when the requested status to propagate is TRANSLATE
+         */
+        if( $status == Constants_TranslationStatus::STATUS_TRANSLATED ){
+            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+";
+        }
+
         $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
                 " WHERE id_job = :id_job " .
                 " AND segment_hash = :segment_hash " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment " ;
+                " AND id_segment <> :id_segment $additional_status;";
 
         $conn =  $this->con->getConnection() ;
         $stmt = $conn->prepare( $selectSegmentsToPropagate );
