@@ -2471,7 +2471,7 @@ body.cattool .searchbox .block.right {
     width: 25px;
     top: -9px;
     position: absolute;
-    left: 46.8%;
+    left: 47.4%;
     color: #fff;
     font-size: 11px;
     text-decoration: none;
@@ -3248,11 +3248,10 @@ body.rtl-target .editor .editarea span {
     height: 16px;
     position: absolute;
     color: white;
-    right: 50.5%;
     top: 1px;
     line-height: 14px;
-    visibility: hidden;
     transition: all 100ms ease-in;
+    left: 47.4%;
 }
 
 
@@ -4627,7 +4626,7 @@ section .toolbar .autofillTag {
     padding: 7px 1px 3px 2px;
     border: 1px solid #5F5F5F;
     border-radius: 4px;
-    width: 31px;
+    width: 32px;
     font-size: 20px;
     margin: 0 auto;
     display: block;
