@@ -131,7 +131,7 @@ $.extend(UI, {
         var contextBefore = UI.getContextBefore(id_segment);
         var contextAfter = UI.getContextAfter(id_segment);
 
-		APP.doRequest({
+		return APP.doRequest({
 			data: {
 				action: 'getContribution',
 				password: config.password,
