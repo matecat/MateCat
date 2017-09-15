@@ -7,24 +7,20 @@ use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use catController;
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Exceptions\ValidationError;
 use Features;
-use Features\Dqf\Model\ChildProjectCreationModel;
-use Features\Dqf\Model\DqfProjectMapDao;
-use Features\Dqf\Model\ProjectModel;
 use Features\Dqf\Model\RevisionChildProject;
 use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel;
 use INIT;
 use Log;
 use Monolog\Logger;
 use PHPTALWithAppend;
-use Exception;
 use Users_UserDao;
 use Utils;
 use WorkerClient;
@@ -136,18 +132,22 @@ class Dqf extends BaseFeature {
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $params, $lastId ) {
         // at this point we have to enqueue delivery to DQF of the translated or reviewed segments
-        // TODO: put this in a queue.
-        if ( $params->is_review ) {
-            // enqueue task for review
-            $revisionChildProject = new RevisionChildProject( $chunk );
-            $revisionChildProject->submitRevisionData();
-        }
-        else {
+        // TODO: put this in a queue for background processing
+        if ( ! $params->is_review ) {
             $translationChildProject = new TranslationChildProject( $chunk ) ;
             $translationChildProject->submitTranslationBatch();
             $translationChildProject->setCompleted();
         }
     }
+
+//    public function archivedQualityReportSaved( ArchivedQualityReportModel $archivedQRModel ) {
+//       $qrModel = $archivedQRModel->getQualityReport();
+//
+//       $segments = $qrModel->getAllSegments() ;
+//
+//       $revisionChildModel = new RevisionChildProject( $archivedQRModel->getChunk() ) ;
+//       $revisionChildModel->submitRevisionData() ;
+//    }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
         if ( isset( $postInput[ 'dqf' ] ) && $postInput[ 'dqf' ] == true ) {

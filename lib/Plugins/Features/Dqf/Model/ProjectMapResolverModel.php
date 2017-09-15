@@ -37,8 +37,13 @@ class ProjectMapResolverModel {
 
         $this->type = $type;
         $this->mappedProjectsDao = new DqfProjectMapDao();
-        $this->records = $this->mappedProjectsDao
-                ->getCurrentByType( $this->chunk, $this->type ) ;
+
+        $this->reload();
+    }
+
+    public function reload() {
+        $this->records = $this->mappedProjectsDao->getCurrentByType( $this->chunk, $this->type ) ;
+        return $this ;
     }
 
     /**

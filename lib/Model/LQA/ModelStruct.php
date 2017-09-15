@@ -37,7 +37,7 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
      * @throws Exception
      */
     public function getLimit() {
-        $options = json_decode( $this->pass_options, TRUE);
+        $options = json_decode( $this->pass_options, true);
         if ( ! array_key_exists('limit', $options) ) {
             throw new Exception( 'limit is not defined in JSON options');
         }

@@ -6,7 +6,7 @@ use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\Dqf\Service\ChildProjectService;
-use Features\Dqf\Service\ChildProjectTranslationBatchService;
+use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
@@ -18,85 +18,44 @@ use Jobs\MetadataDao;
 use Translations_TranslationVersionDao;
 use Users_UserDao;
 
-/**
- * Created by PhpStorm.
- * User: fregini
- * Date: 10/07/2017
- * Time: 17:09
- */
 class TranslationChildProject {
 
     const SEGMENT_PAIRS_CHUNK_SIZE = 80 ;
 
-    /**
-     * @var Chunks_ChunkStruct
-     */
+    /** * @var Chunks_ChunkStruct */
     protected $chunk ;
 
-    /**
-     * @var Session
-     */
+    /** * @var Session */
     protected $userSession ;
 
-    /**
-     * @var DqfProjectMapStruct[]
-     */
+    /** * @var DqfProjectMapStruct[] */
     protected $remoteDqfProjects ;
 
-    /**
-     * @var Files_FileStruct[]
-     */
+    /** * @var Files_FileStruct[] */
     protected $files ;
 
-    /**
-     * @var ChildProjectTranslationBatchService
-     */
+    /** * @var TranslationBatchService */
     protected $translationBatchService ;
 
-    /**
-     * @var UserModel
-     */
+    /** * @var UserModel */
     protected $dqfTranslateUser ;
 
-    /**
-     * @var DqfProjectMapStruct[]
-     */
+    /** * @var DqfProjectMapStruct[] */
     protected $dqfChildProjects = [];
 
     protected $parentKeysMap = [] ;
 
-    /**
-     * ChildProjectTranslationBatch constructor.
-     *
-     * @param Chunks_ChunkStruct $chunk
-     */
-
-    /**
-     * @var ProjectMapResolverModel
-     */
+    /** * @var ProjectMapResolverModel */
     protected $dqfProjectMapResolver  ;
 
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk ;
 
-        $this->_initDqfTranslateUserAndSession() ;
+        $this->_initUserAndSession() ;
 
         $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, 'translate' );
 
         $this->dqfChildProjects = $this->dqfProjectMapResolver->getMappedProjects();
-    }
-
-    protected function _initDqfTranslateUserAndSession() {
-        $uid = ( new MetadataDao() )
-                ->get( $this->chunk->id, $this->chunk->password, 'dqf_translate_user' )
-                ->value ;
-
-        if ( !$uid ) {
-            throw new Exception('dqf_translate_user must be set') ;
-        }
-
-        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
-        $this->userSession      = $this->dqfTranslateUser->getSession()->login();
     }
 
     public function setCompleted() {
@@ -121,6 +80,10 @@ class TranslationChildProject {
         $this->_submitSegmentPairs() ;
     }
 
+    protected function projectCreationRequired() {
+        return empty( $this->dqfChildProjects ) ;
+    }
+
     protected function createRemoteProjects() {
         $parents = $this->dqfProjectMapResolver->getParents();
 
@@ -142,10 +105,6 @@ class TranslationChildProject {
 
             $this->dqfChildProjects[]  = $project->getSavedRecord() ;
         }
-    }
-
-    public function projectCreationRequired() {
-        return empty( $this->dqfChildProjects ) ;
     }
 
     protected function _submitSegmentPairs() {
@@ -192,14 +151,12 @@ class TranslationChildProject {
 
         $this->files = $this->chunk->getFiles() ;
 
-        $translationBatchService = new ChildProjectTranslationBatchService( $this->userSession ) ;
+        $service = new TranslationBatchService( $this->userSession ) ;
 
         foreach( $this->files as $file ) {
             list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
 
             $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $fileMinIdSegment, $fileMaxIdSegment ) ;
-
-            // DQF child project
 
             $remoteFileId = $this->_findRemoteFileId( $file );
 
@@ -251,12 +208,13 @@ class TranslationChildProject {
 
                     $requestStruct->setSegments( $segmentParisChunk ) ;
 
-                    $translationBatchService->addRequestStruct( $requestStruct ) ;
+                    $service->addRequestStruct( $requestStruct ) ;
                 }
             }
         }
 
-        $results = $translationBatchService->process() ;
+        // TODO: fix this this is likely to break at 50 requests. Create a further chunked array to limit.
+        $results = $service->process() ;
 
         $this->_saveResults( $results ) ;
     }
@@ -292,5 +250,19 @@ class TranslationChildProject {
             return $lastEvent['create_date'];
         }
     }
+
+    protected function _initUserAndSession() {
+        $uid = ( new MetadataDao() )
+                ->get( $this->chunk->id, $this->chunk->password, 'dqf_translate_user' )
+                ->value ;
+
+        if ( !$uid ) {
+            throw new Exception('dqf_translate_user must be set') ;
+        }
+
+        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
+        $this->userSession      = $this->dqfTranslateUser->getSession()->login();
+    }
+
 
 }

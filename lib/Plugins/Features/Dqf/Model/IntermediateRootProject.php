@@ -62,7 +62,7 @@ class IntermediateRootProject {
             $childProject->setUser( $this->user ) ;
             $childProject->setFiles( $files ) ;
 
-            $projects[] = $childProject->createForTranslation();
+            $projects[] = $childProject->create();
             $ids[]      = $childProject->getSavedRecord()->id ;
         }
 

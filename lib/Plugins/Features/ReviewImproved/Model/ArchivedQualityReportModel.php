@@ -8,19 +8,40 @@
 
 namespace Features\ReviewImproved\Model;
 
+use Chunks_ChunkStruct;
+
 class ArchivedQualityReportModel {
 
+    /** * @var Chunks_ChunkStruct */
     protected $chunk ;
 
-    public function __construct( \Chunks_ChunkStruct $chunk ) {
+    /** @var  QualityReportModel */
+    protected $report ;
+
+    public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk  ;
     }
 
-    public function saveWithUID( $uid ) {
-        $report = new QualityReportModel( $this->chunk );
+    /**
+     * @return QualityReportModel
+     */
+    public function getQualityReport() {
+        if ( is_null( $this->report ) ) {
+            $this->report = new QualityReportModel( $this->chunk );
+        }
+        return $this->report ;
+    }
 
+    /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk() {
+        return $this->chunk ;
+    }
+
+    public function saveWithUID( $uid ) {
         $struct = new ArchivedQualityReportStruct();
-        $struct->quality_report = json_encode( $report->getStructure() ) ;
+        $struct->quality_report = json_encode( $this->getQualityReport()->getStructure() ) ;
 
         $struct->password          = $this->chunk->password ;
         $struct->id_job            = $this->chunk->id ;
@@ -31,7 +52,11 @@ class ArchivedQualityReportModel {
 
         $dao = new ArchivedQualityReportDao() ;
         $struct->version = $dao->getLastVersionNumber( $this->chunk ) + 1 ;
-        $dao->archiveQualityReport( $struct );
+        $result = $dao->archiveQualityReport( $struct );
+
+        if ( $result ) {
+            $this->chunk->getProject()->getFeatures()->run('archivedQualityReportSaved', $this);
+        }
     }
 
 }

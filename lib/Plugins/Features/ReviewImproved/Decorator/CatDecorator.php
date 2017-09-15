@@ -56,11 +56,12 @@ class CatDecorator extends \AbstractDecorator {
         $out = array();
 
         foreach($categories as $category) {
-            $out[] = $category->toArray();
+            $out[] = $category->toArrayWithJsonDecoded();
         }
 
         return json_encode( $out );
     }
+
     private function getOverallQualityClass() {
         $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(
             array(

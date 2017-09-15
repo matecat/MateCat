@@ -12,7 +12,7 @@ use Exception;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Log;
 
-class ChildProjectTranslationBatchService extends AbstractService {
+class TranslationBatchService extends AbstractService {
 
     protected $resources = [] ;
     protected $client;

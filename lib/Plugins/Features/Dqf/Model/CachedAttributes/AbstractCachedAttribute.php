@@ -19,9 +19,18 @@ abstract class AbstractCachedAttribute {
      */
     protected $resource_json ;
 
+    static $instance ;
+
     public function __construct() {
         $path = INIT::$ROOT . '/inc/dqf/cachedAttributes/' . $this->resource_name . '.json' ;
         $this->resource_json = json_decode( file_get_contents( $path ), true );
+    }
+
+    public static function obtain() {
+        if ( !isset( self::$instance ) ) {
+            self::$instance = new static() ;
+        }
+        return self::$instance ;
     }
 
     public function getArray() {

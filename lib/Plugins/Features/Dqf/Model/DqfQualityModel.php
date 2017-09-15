@@ -33,6 +33,7 @@ class DqfQualityModel {
     protected $severities ;
 
     public function __construct( Projects_ProjectStruct $project ) {
+
         $this->qaModelStruct = $project->getLqaModel() ;
         $this->matecat_categories = $this->qaModelStruct->getCategories();
     }

@@ -63,7 +63,7 @@ class ChildProjectCreationModel {
 
         $this->id_project = Database::obtain()->nextSequence('id_dqf_project') [ 0 ] ;
 
-        if ( !in_array( $project_type, [ 'master', 'vendor_root', 'translate', 'revise' ] )) {
+        if ( !in_array( $project_type, [ 'vendor_root', 'translate', 'revise' ] )) {
             throw  new Exception('type not supported: ' . $project_type ) ;
         }
 
@@ -86,21 +86,11 @@ class ChildProjectCreationModel {
         $this->user = $user  ;
     }
 
-    public function create() {
-        if ( $this->project_type == DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) {
-            $this->createForTranslation();
-        }
-
-        else {
-            throw new Exception('not implemented') ;
-        }
-    }
     /**
      * @return CreateProjectResponseStruct
      * @throws Exception
      */
-    public function createForTranslation() {
-
+    public function create() {
         if ( empty( $this->files ) ) {
             throw new Exception("Files are not set");
         }
@@ -109,15 +99,36 @@ class ChildProjectCreationModel {
             throw new Exception('User is not set') ;
         }
 
-        $projectService = new ChildProjectService( $this->user->getSession()->login(), $this->chunk, $this->id_project ) ;
-
-        $remoteProject = $projectService->createTranslationChild(
-                $this->parentProject, $this->files
-        );
+        if ( in_array( $this->project_type, [ 'translate', 'vendor_root' ] ) ) {
+            $remoteProject = $this->createForTranslation();
+        }
+        else  {
+            $remoteProject = $this->createForRevision() ;
+        }
 
         $this->_saveDqfChildProjectMap( $this->chunk, $remoteProject ) ;
 
         return $remoteProject ;
+    }
+
+    protected function createForRevision() {
+        $projectService = new ChildProjectService( $this->user->getSession()->login(), $this->chunk, $this->id_project ) ;
+
+        return $projectService->createRevisionChild(
+                $this->parentProject, $this->files
+        );
+    }
+
+    /**
+     * @return CreateProjectResponseStruct
+     * @throws Exception
+     */
+    protected function createForTranslation() {
+        $projectService = new ChildProjectService( $this->user->getSession()->login(), $this->chunk, $this->id_project ) ;
+
+        return $projectService->createTranslationChild(
+                $this->parentProject, $this->files
+        );
     }
 
     public function getSavedRecord() {

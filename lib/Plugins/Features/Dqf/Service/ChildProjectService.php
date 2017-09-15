@@ -153,40 +153,22 @@ class ChildProjectService {
      * @param CreateProjectResponseStruct       $parent
      * @param MaserFileCreationResponseStruct[] $remoteFiles
      *
-     * @param UserModel                         $assignee
-     *
      * @return CreateProjectResponseStruct
      * @throws Exception
      * @internal param MaserFileCreationResponseStruct[] $remoteFiles
      */
-    public function createTranslationChild(CreateProjectResponseStruct $parent, $remoteFiles ) {
-
+    public function createTranslationChild( CreateProjectResponseStruct $parent, $remoteFiles ) {
         $projectStruct            = new ChildProjectRequestStruct() ;
-        $projectStruct->sessionId = $this->session->getSessionId();
-
-        $projectStruct->clientId  = Functions::scopeId( $this->clientId );
-
-        $projectStruct->parentKey = $parent->dqfUUID ;
         $projectStruct->type      = self::TRANSLATION ;
 
-        $client = new Client() ;
-        $client->setSession( $this->session );
-        $resource = $client->createResource('/project/child', 'post', [
-                'formData' => $projectStruct->getParams(),
-                'headers'  => $this->session->filterHeaders( $projectStruct ),
-        ]);
+        return $this->createChild( $parent, $remoteFiles, $projectStruct );
+    }
 
-        $client->execRequests();
+    public function createRevisionChild( CreateProjectResponseStruct $parent, $remoteFiles ) {
+        $projectStruct            = new ChildProjectRequestStruct() ;
+        $projectStruct->type      = self::REVIEW ;
 
-        if ( count( $client->curl()->getErrors() ) > 0 ) {
-            throw new Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) ) ;
-        }
-
-        $childProject = new CreateProjectResponseStruct( json_decode( $client->curl()->getSingleContent( $resource ), true ) );
-
-        $this->_setFilesTargetLanguage( $remoteFiles, $childProject, $this->getSessionForFiles( $assignee ) ) ;
-
-        return $childProject ;
+        return $this->createChild( $parent, $remoteFiles, $projectStruct );
     }
 
     /**
@@ -234,6 +216,40 @@ class ChildProjectService {
         if ( count( $client->curl()->getErrors() ) > 0 ) {
             throw new Exception( 'Error in creation of target langauge for files: ' . implode( $client->curl()->getAllContents() ) );
         }
+    }
+
+    /**
+     * @param $remoteFiles
+     * @param $projectStruct
+     *
+     * @return CreateProjectResponseStruct
+     * @throws Exception
+     */
+    protected function createChild( $parent, $remoteFiles, $projectStruct ) {
+
+        $projectStruct->sessionId = $this->session->getSessionId();
+
+        $projectStruct->clientId  = Functions::scopeId( $this->clientId );
+
+        $projectStruct->parentKey = $parent->dqfUUID ;
+        $client = new Client();
+        $client->setSession( $this->session );
+        $resource = $client->createResource( '/project/child', 'post', [
+                'formData' => $projectStruct->getParams(),
+                'headers'  => $this->session->filterHeaders( $projectStruct ),
+        ] );
+
+        $client->execRequests();
+
+        if ( count( $client->curl()->getErrors() ) > 0 ) {
+            throw new Exception( 'Error in creation of child project: ' . implode( $client->curl()->getAllContents() ) );
+        }
+
+        $childProject = new CreateProjectResponseStruct( json_decode( $client->curl()->getSingleContent( $resource ), true ) );
+
+        $this->_setFilesTargetLanguage( $remoteFiles, $childProject, $this->getSessionForFiles() );
+
+        return $childProject;
     }
 }
 
