@@ -921,6 +921,8 @@ APP = {
             day: $.format.date(dd, "d") ,
             month: $.format.date(dd, "MMMM"),
             time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+            time2: $.format.date(dd, "HH") + ":" + $.format.date(dd, "mm"),
+            year: $.format.date(dd, "yyyy"),
             gmt: timeZone
         };
     },

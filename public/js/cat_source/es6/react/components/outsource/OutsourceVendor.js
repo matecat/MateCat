@@ -297,6 +297,30 @@ class OutsourceVendor extends React.Component {
         });
     }
 
+    getNewRates() {
+        let date = $(this.calendar).calendar('get date');
+        let time = $(this.dropdownTime).dropdown('get value');
+        date.setHours(time[0]);
+        date.setMinutes(date.getMinutes() + (2 - parseFloat(this.state.timezone)) * 60);
+        let timestamp = (new Date(date)).getTime();
+        let now = new Date().getTime();
+        if (timestamp < now) {
+            this.selectedDate = null;
+            this.setState({
+                errorPastDate: true,
+                needItFaster: false
+            });
+        } else {
+            this.selectedDate = timestamp;
+            this.setState({
+                outsource: false,
+                errorPastDate: false,
+                needItFaster: false
+            });
+            this.getOutsourceQuote(timestamp);
+        }
+    }
+
     getExtendedView() {
         let checkboxDisabledClass = (this.state.outsourceConfirmed) ? "disabled" : "";
         let delivery = this.getDeliveryDate();
@@ -443,7 +467,7 @@ class OutsourceVendor extends React.Component {
                             ) : (
                                 <div className="delivery-order need-it-faster-box">
                                     <a className="need-it-faster-close shadow-1" onClick={this.needItFaster.bind(this)}>
-                                        <i className="icon-cancel3 icon"/>
+                                        <i className="icon-cancel3 icon need-it-faster-close-icon"/>
                                     </a>
                                     <div className="delivery-box shadow-1">
                                         <div className="ui form">
@@ -452,14 +476,14 @@ class OutsourceVendor extends React.Component {
                                                     <label>Delivery Date</label>
                                                     <div className="ui calendar" ref={(calendar)=> this.calendar = calendar}>
                                                         <div className="ui input">
-                                                            <input type="text" placeholder="Date"/>
+                                                            <input type="text" placeholder="Date" defaultValue={delivery.day + '/' + delivery.month + '/' + delivery.year}/>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="field input-time">
                                                     <label>Time</label>
                                                     <select className="ui fluid search dropdown"
-                                                    ref={(dropdown)=> this.dropdownTime = dropdown }>
+                                                    ref={(dropdown)=> this.dropdownTime = dropdown } >
                                                         <option value="7">7:00 AM</option>
                                                         <option value="9">9:00 AM</option>
                                                         <option value="11">11:00 AM</option>
@@ -474,7 +498,8 @@ class OutsourceVendor extends React.Component {
                                                     <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
                                                 </div>
                                                 <div className="field">
-                                                    <button className="get-price ui blue basic button">Get Price</button>
+                                                    <button className="get-price ui blue basic button"
+                                                    onClick={this.getNewRates.bind(this)}>Get Price</button>
                                                 </div>
 
                                             </div>
@@ -689,9 +714,7 @@ class OutsourceVendor extends React.Component {
         return { __html: string };
     }
 
-    componentDidMount () {
-        $(this.dropdownTime).dropdown();
-    }
+    componentDidMount () {}
 
     componentWillUnmount() {
         // $(this.dateFaster).datetimepicker('destroy');
@@ -700,42 +723,19 @@ class OutsourceVendor extends React.Component {
     componentDidUpdate() {
         let self = this;
         if (this.state.outsource ) {
-            $(this.dropdownTime).dropdown();
+            var date = this.getDeliveryDate();
+            $(this.dropdownTime).dropdown('set selected', date.time2.split(':')[0]);
+            var today = new Date();
             $(this.calendar).calendar({
-                type: 'date'
+                type: 'date',
+                minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+                className: {
+                    calendar: 'calendar-outsource'
+                },
+                onVisible: function () {
+                    $(this).find('table tbody tr td:first-child').addClass('disabled');
+                },
             });
-            // $(this.dateFaster).datetimepicker({
-            //     validateOnBlur: false,
-            //     defaultTime: '09:00',
-            //     minDate:0,
-            //     showApplyButton: true,
-            //     closeOnTimeSelect:false,
-            //     selectButtonLabel: "Get Price",
-            //     allowTimes: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00'],
-            //     disabledWeekDays: [0,6],
-            //     onSelectDateButton: function (newDateTime) {
-            //         newDateTime.setMinutes(newDateTime.getMinutes() + (2 - parseFloat(self.state.timezone)) * 60);
-            //         let timestamp = (new Date(newDateTime)).getTime();
-            //         let now = new Date().getTime();
-            //         if (timestamp < now) {
-            //             self.selectedDate = null;
-            //             self.setState({
-            //                 errorPastDate: true
-            //             });
-            //         } else {
-            //             self.selectedDate = timestamp;
-            //             self.setState({
-            //                 outsource: false,
-            //                 errorPastDate: false
-            //             });
-            //             self.getOutsourceQuote(timestamp);
-            //         }
-            //
-            //     },
-            //     onChangeDateTime: function (newDateTime, $input) {
-            //         console.log("onChangeDateTime");
-            //     }
-            // });
 
             let currencyToShow = $.cookie( "matecat_currency" );
             $(this.currencySelect).dropdown('set selected', currencyToShow);

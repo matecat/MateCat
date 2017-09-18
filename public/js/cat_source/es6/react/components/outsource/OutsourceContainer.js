@@ -38,7 +38,9 @@ class OutsourceContainer extends React.Component {
             !$(evt.target).hasClass('open-view-more') &&
             !$(evt.target).hasClass('outsource-goBack') &&
             !$(evt.target).hasClass('faster') &&
-            !$(evt.target).hasClass('need-it-faster-close')) {
+            !$(evt.target).hasClass('need-it-faster-close') &&
+            !$(evt.target).hasClass('need-it-faster-close-icon') &&
+            !$(evt.target).hasClass('get-price')) {
             this.props.onClickOutside(evt)
         }
     }
