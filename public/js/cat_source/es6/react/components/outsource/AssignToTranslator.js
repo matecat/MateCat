@@ -5,28 +5,35 @@ class AssignToTranslator extends React.Component {
 
     constructor(props) {
         super(props);
-        this.timezone = APP.getDefaultTimeZone();
+        this.state = {
+            timezone: $.cookie( "matecat_timezone")
+        };
     }
 
     shareJob() {
         //Check email and validations errors
-        let date = $(this.dateInput).data('timestamp');
+
+        let date = $(this.dateInput).calendar('get date');
+        let time = $(this.dropdownTime).dropdown('get value');
+        date.setHours(time[0]);
+        date.setMinutes(date.getMinutes() + (2 - parseFloat(this.state.timezone)) * 60);
+        let timestamp = (new Date(date)).getTime();
+
         let email = this.email.value;
 
-        OutsourceActions.sendJobToTranslator(email, date, this.timezone, this.props.job.toJS(), this.props.project.toJS());
+        OutsourceActions.sendJobToTranslator(email, date, this.state.timezone, this.props.job.toJS(), this.props.project.toJS());
         this.props.closeOutsource();
     }
 
     GmtSelectChanged(value) {
-        this.timezone = value;
-        console.log("GMT Changed : ", value);
+        $.cookie( "matecat_timezone" , value);
+        this.setState({
+            timezone: value
+        });
     }
 
     checkSendToTranslatorButton() {
-        // if ($(this.email).hasClass('error')) {
-        //     $(this.email).removeClass('error');
-        // }
-        if (this.email.value.length > 0 && this.dateInput.value.length > 0 && APP.checkEmail(this.email.value)) {
+        if (this.email.value.length > 0 && APP.checkEmail(this.email.value)) {
             $(this.sendButton).removeClass('disabled');
             return true;
         } else {
@@ -35,8 +42,13 @@ class AssignToTranslator extends React.Component {
     }
 
     componentDidMount () {
+        let today = new Date();
         $(this.dateInput).calendar({
-            type: 'date'
+            type: 'date',
+            minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            className: {
+                calendar: 'calendar-outsource'
+            }
         });
         $(this.dropdownTime).dropdown();
     }
@@ -72,7 +84,7 @@ class AssignToTranslator extends React.Component {
                                         <label>Delivery date</label>
                                         <div className="ui calendar" ref={(date) => this.dateInput = date}>
                                             <div className="ui input">
-                                                <input type="text" placeholder="Date"
+                                                <input type="text" placeholder="Date" defaultValue={new Date()}
                                                        onChange={this.checkSendToTranslatorButton.bind(this)}/>
                                             </div>
                                         </div>
