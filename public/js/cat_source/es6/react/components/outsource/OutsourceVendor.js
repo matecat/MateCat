@@ -391,7 +391,7 @@ class OutsourceVendor extends React.Component {
                                     <div className="delivery-box">
                                         <label>Delivery date:</label>
                                         <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                        <span>at</span>
+                                        <div className="atdd">at</div>
                                         <div className="delivery-time">{delivery.time}</div>
                                         <div className="gmt">
                                             <GMTSelect changeValue={this.changeTimezone.bind(this)}/>
@@ -588,7 +588,7 @@ class OutsourceVendor extends React.Component {
                                 <div className="delivery-box">
                                     <label>Delivery date:</label>{/*<br />*/}
                                     <div className="delivery-date">{delivery.day + ' ' + delivery.month}</div>
-                                    <span>at</span>
+                                    <div className="atdd">at</div>
                                     <div className="delivery-time">{delivery.time}</div>
                                     <div className="gmt">
                                         <GMTSelect direction="up" changeValue={this.changeTimezone.bind(this)}/>

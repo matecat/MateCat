@@ -92,7 +92,7 @@
             min-width: 101px !important;
             width: auto;
             background: transparent;
-            padding: 12px 8px;
+            padding: 12px 8px 10px;
             .dropdown.icon {
                 padding: 10px 3px 0 0;
             }
@@ -102,8 +102,13 @@
                 }
             }
             .menu {
-                min-width: 350px;
+                min-width: 330px;
+                height: 210px;
                 .item {
+                    border-top: 1px solid #FAFAFA;
+                    padding: 15px 5px 15px 10px !important;
+                    white-space: normal;
+                    word-wrap: normal;
                     .gmt-value {
                         display: inline-block;
                         margin-right: 5px;
@@ -199,7 +204,7 @@
                                 }
                             }
                             &.send-job-box {
-                                padding: 0 15px 0 0;
+                                padding: 0 15px 0 10px;
                                 padding-top: 22px;
                                 width: 28%;
                                 .send-job {
@@ -207,11 +212,13 @@
                                     font-size: 16px;
                                     border: 1px solid #797979;
                                     border-radius: 2px;
-                                    padding: 11px 17px;
+                                    padding: 10px 17px;
                                     margin: 0;
                                     float: right;
                                     width: 97%;
                                     min-width: 199px;
+                                    top: 1px;
+                                    position: relative;
                                 }
                             }
                             &.translator-email {
@@ -354,7 +361,7 @@
                         border-right: 1px solid black;
                         display: inline-block;
                         vertical-align: middle;
-                        padding: 0px 15px;
+                        padding: 0 0 0 15px;
                         .left, .right {
                             display: inline-block;
                             margin: 0;
@@ -377,6 +384,7 @@
                             float: right;
                             width: 58%;
                             text-align: right;
+                            padding-right: 15px;
                         }
                         .translator-no-found {
                             p {
@@ -487,8 +495,8 @@
                             font-weight: 100;
                             padding: 5px;
                         }
-                        span {
-                            font-size: 22px;
+                        .atdd {
+                            display: inline-block;
                             font-weight: 100;
                         }
                         .delivery-date {
@@ -552,7 +560,7 @@
                         top: -29px;
                         left: 12px;
                         text-align: center;
-                        padding: 5px;
+                        padding: 5px 4px;
                         margin: 0;
                         width: 115px;
                         height: 115px;
@@ -599,7 +607,7 @@
                                 }
                                 &.gmt {
                                     position: relative;
-                                    top: 32px;
+                                    top: 33px;
                                     width: 100px;
                                     margin-right: 20px;
                                 }
@@ -613,7 +621,7 @@
                                     box-shadow: none !important;
                                     background-color: #ffffff !important;
                                     font-weight: 700;
-                                    margin-top: 32px;
+                                    margin-top: 33px;
                                     &:hover {
                                         text-decoration: none;
                                         box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -725,22 +733,25 @@
                         min-height: 110px;
                         position: relative;
                         border: 1px solid #a8bbb2;
-                        padding: 15px;
+                        padding: 15px 0px;
                         .appendix {
                             display: inline-block;
                             width: 8%;
                             vertical-align: top;
                             font-size: 28px;
                             position: relative;
-                            top: 5px;
+                            top: -3px;
                             color: #a8bbb2;
+                            right: 13px;
+                            background: #f1f3f2;
+                            padding: 6px 2px;
+                            text-align: center;
                         }
                         .customer-box-info {
                             width: 90%;
                             display: inline-block;
                             position: absolute;
                             opacity: 0;
-                            padding: 0 15px 0 0px;
                             &.fade-in {
                                 transition: 1.5s;
                                 opacity: 1;
@@ -949,8 +960,9 @@
                                 display: inline-block;
                                 padding: 5px;
                             }
-                            span {
+                            .atdd {
                                 display: inline-block;
+                                font-weight: 100;
                             }
                             .gmt {
 
