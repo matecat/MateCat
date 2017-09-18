@@ -140,3 +140,6 @@
          Theme Overrides
 *******************************/
 
+.calendar-outsource {
+  top: 30px !important;
+}
