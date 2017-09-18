@@ -180,14 +180,14 @@ class OutsourceInfo extends React.Component {
                                 <div className="item call">
                                     <i className="big icon-phone2 middle aligned icon" />
                                     <div className="content">
-                                        <div className="header">Call us</div>
+                                        <div className="header">Call us:</div>
                                         <a className="description" href="tel:+390690254001">+39 06 90 254 001</a>
                                     </div>
                                 </div>
                                 <div className="item send-email">
                                     <i className="big icon-envelope-o middle aligned icon" />
                                     <div className="content">
-                                        <div className="header">Sent an e-mail at</div>
+                                        <div className="header">Send us an email:</div>
                                         <a className="description">info@matecat.com</a>
                                     </div>
                                 </div>

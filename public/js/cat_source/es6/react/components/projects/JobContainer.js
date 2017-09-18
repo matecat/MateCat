@@ -671,7 +671,7 @@ class JobContainer extends React.Component {
                     {!this.state.openOutsource ? (
                     <div className="chunk wide column shadow-1 pad-right-10" ref={(chunkRow)=> this.chunkRow = chunkRow}>
                         <div className="job-id" title="Job Id">
-                            {idJobLabel}
+                            ID: {idJobLabel}
                         </div>
                         <div className="source-target languages-tooltip"
                              ref={(tooltip) => this.languageTooltip = tooltip}
