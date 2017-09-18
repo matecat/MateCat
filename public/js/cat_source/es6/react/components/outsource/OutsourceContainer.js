@@ -11,6 +11,7 @@ class OutsourceContainer extends React.Component {
     constructor(props) {
         super(props);
         this.handleDocumentClick = this.handleDocumentClick.bind(this);
+        this._handleEscKey = this._handleEscKey.bind(this);
         this.checkTimezone();
     }
 
@@ -45,10 +46,20 @@ class OutsourceContainer extends React.Component {
         }
     }
 
+    _handleEscKey(event){
+        console.log(event);
+        event.preventDefault();
+        event.stopPropagation();
+        if(event.keyCode === 27){
+            this.props.onClickOutside();
+        }
+    }
+
     componentDidMount () {}
 
     componentWillUnmount() {
-        window.removeEventListener('click', self.handleDocumentClick)
+        window.removeEventListener('click', this.handleDocumentClick);
+        window.removeEventListener("keydown", this._handleEscKey);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -56,6 +67,7 @@ class OutsourceContainer extends React.Component {
         if (this.props.openOutsource) {
             setTimeout(function () {
                 window.addEventListener('click', self.handleDocumentClick);
+                window.addEventListener("keydown", self._handleEscKey);
                 $('html, body').animate({
                     scrollTop: $(self.container).offset().top - 55
                 }, 500);
@@ -63,6 +75,7 @@ class OutsourceContainer extends React.Component {
 
         } else {
             window.removeEventListener('click', self.handleDocumentClick);
+            window.removeEventListener("keydown", self._handleEscKey);
             if (prevProps.openOutsource) {
                 $('html, body').animate({
                     scrollTop: $(self.container).offset().top - 200
