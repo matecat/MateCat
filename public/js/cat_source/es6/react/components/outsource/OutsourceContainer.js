@@ -47,10 +47,9 @@ class OutsourceContainer extends React.Component {
     }
 
     _handleEscKey(event){
-        console.log(event);
-        event.preventDefault();
-        event.stopPropagation();
         if(event.keyCode === 27){
+            event.preventDefault();
+            event.stopPropagation();
             this.props.onClickOutside();
         }
     }

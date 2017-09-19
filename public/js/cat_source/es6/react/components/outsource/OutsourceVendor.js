@@ -397,9 +397,9 @@ class OutsourceVendor extends React.Component {
                     <div className="revision-box">
                         <div className="add-revision">
                             <div className={"ui checkbox " + checkboxDisabledClass}>
-                                <input type="checkbox" defaultChecked={this.state.revision}
+                                <input type="checkbox" checked={this.state.revision}
                                        ref={(checkbox) => this.revisionCheckbox = checkbox}
-                                       onClick={this.clickRevision.bind(this)}/>
+                                       onChange={this.clickRevision.bind(this)}/>
                                 <label>Add Revision</label>
                             </div>
                         </div>
@@ -723,9 +723,9 @@ class OutsourceVendor extends React.Component {
     componentDidUpdate() {
         let self = this;
         if (this.state.outsource ) {
-            var date = this.getDeliveryDate();
+            let date = this.getDeliveryDate();
             $(this.dropdownTime).dropdown('set selected', date.time2.split(':')[0]);
-            var today = new Date();
+            let today = new Date();
             $(this.calendar).calendar({
                 type: 'date',
                 minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
