@@ -89,7 +89,7 @@
         position: relative;
         top: 4px;
         .gmt-select {
-            min-width: 101px !important;
+            min-width: 107px !important;
             width: auto;
             background: transparent;
             padding: 12px 8px 10px;
@@ -231,9 +231,10 @@
                                  width: 111px;
                                  .selection.dropdown {
                                      width: 100%;
-                                     min-width: 101px !important;
+                                     min-width: 91px !important;
                                      border: 1px solid #ccc;
                                      box-shadow: inset 0 1px 3px #ddd;
+                                     padding: 12px 0 0px 9px;
                                      .menu {
                                          height:205px;
                                      }
@@ -243,7 +244,7 @@
                                 position: relative;
                                 top: 23px;
                                 width: 100px;
-                                margin-right: 20px;
+                                margin-right: 29px;
                             }
 
                         }
@@ -404,7 +405,6 @@
                             display: inline-block;
                             width: 68%;
                             font-size: 18px;
-                            font-weight: 700;
                             .source-box {
                                 display: inline-block;
                             }
@@ -441,7 +441,6 @@
                             }
                             .payable {
                                 font-size: 18px;
-                                font-weight: 700;
                             }
                         }
                     }
@@ -450,9 +449,7 @@
                         vertical-align: middle;
                         width: 18%;
                         font-size: 20px;
-                        font-weight: 700;
-                        text-align: right;
-                        padding-right: 40px;
+                        text-align: center;
                     }
                 }
                 .revision-box {
@@ -472,20 +469,18 @@
                     .job-price {
                         display: inline-block;
                         font-size: 20px;
-                        text-align: right;
-                        font-weight: 700;
+                        text-align: center;
                         width: 18%;
-                        padding-right: 40px;
                     }
 
                 }
                 .delivery-order {
-                    width: 81%;
+                    width: 82%;
                     text-align: right;
                     display: inline-block;
                     vertical-align: top;
                     margin-top: 15px;
-                    padding-right: 5px;
+                    padding-right: 25px;
                     .delivery-box {
                         text-align: right;
                         display: inline-block;
@@ -606,6 +601,9 @@
                                         border: 1px solid #ccc;
                                         box-shadow: inset 0 1px 3px #ddd;
                                         border-radius: 2px;
+                                        .text {
+                                            font-weight: 100 !important;
+                                        }
                                         .menu {
                                             height: 210px;
                                         }
@@ -656,7 +654,6 @@
                 }
                 .order-box-outsource {
                     display: inline-block;
-                    float: right;
                     width: 18%;
                     min-width: 199px;
                     .order-box {
@@ -687,7 +684,12 @@
                             }
                         }
                     }
-
+                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                        width: 21%;
+                    }
+                    @media only screen and (max-width: 991px) and (min-width: 768px) {
+                        width: 21%;
+                    }
                 }
             }
             .easy-pay-box {
@@ -909,7 +911,7 @@
                     }
                     .payment-service {
                         display: inline-block;
-                        width: 65%;
+                        width: 64%;
                         vertical-align: top;
                         position: relative;
                         top: 10px;
@@ -947,7 +949,7 @@
                     }
                     .delivery-order {
                         display: inline-block;
-                        width: 35%;
+                        width: 36%;
                         text-align: right;
                         position: relative;
                         top: -15px;
