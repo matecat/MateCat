@@ -69,11 +69,7 @@ class newProjectController extends viewController {
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
 
-        if ( @(bool)$_GET[ 'amt' ] == true ) {
-            $engineQuery->uid    = 'all';
-        } else {
-            $engineQuery->uid    = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
-        }
+        $engineQuery->uid    = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
 
         $engineQuery->active = 1;
         $this->mt_engines = $engine->read( $engineQuery );
