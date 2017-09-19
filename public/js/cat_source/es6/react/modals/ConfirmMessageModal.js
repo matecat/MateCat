@@ -25,7 +25,7 @@ class ConfirmMessageModal extends React.Component {
                                 <div className="ui button-modal orange margin left-10 right-10" onClick={this.props.warningCallback}>{this.props.warningText}</div>
                             ) : ('') }
                         {this.props.successCallback ? (
-                                <div className="ui primary button right floated" style={{fontSize: "18px", padding: "10px 20px"}} onClick={this.props.successCallback}>{this.props.successText}</div>
+                                <div className="ui primary button right floated" onClick={this.props.successCallback}>{this.props.successText}</div>
                             ) : ('') }
                     </div>
                 </div>
