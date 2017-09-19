@@ -351,7 +351,7 @@ class OutsourceVendor extends React.Component {
                         <div className="translator-details-box">
 
                             <div className="ui list left">
-                                <div className="item">{this.state.chunkQuote.get('t_name')}<b> by Translated</b></div>
+                                <div className="item"><b>{this.state.chunkQuote.get('t_name')}</b> by Translated</div>
                                 <div className="item">
                                 <div className="ui mini star rating" data-rating={Number(((parseFloat(this.state.chunkQuote.get('t_vote'))/2)/10).toFixed(0))} data-max-rating="5"
                                 ref={(rating) => this.rating = rating}/></div>
@@ -431,7 +431,7 @@ class OutsourceVendor extends React.Component {
                                                 ) : (null)}
 
                                                 {(showDateMessage) ? (
-                                                    <div className="errors-date too-far-date" >We will delivery before the selected date
+                                                    <div className="errors-date too-far-date" >We will deliver before the selected date
                                                         <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
                                                              data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
                                                     </div>
@@ -485,12 +485,19 @@ class OutsourceVendor extends React.Component {
                                                     <select className="ui fluid search dropdown"
                                                     ref={(dropdown)=> this.dropdownTime = dropdown } >
                                                         <option value="7">7:00 AM</option>
+                                                        <option value="8">8:00 AM</option>
                                                         <option value="9">9:00 AM</option>
+                                                        <option value="10">10:00 AM</option>
                                                         <option value="11">11:00 AM</option>
+                                                        <option value="12">12:00 AM</option>
                                                         <option value="13">1:00 PM</option>
+                                                        <option value="14">2:00 PM</option>
                                                         <option value="15">3:00 PM</option>
+                                                        <option value="16">4:00 PM</option>
                                                         <option value="17">5:00 PM</option>
+                                                        <option value="18">6:00 PM</option>
                                                         <option value="19">7:00 PM</option>
+                                                        <option value="20">8:00 PM</option>
                                                         <option value="21">9:00 PM</option>
                                                     </select>
                                                 </div>
@@ -598,11 +605,11 @@ class OutsourceVendor extends React.Component {
                                 <div className="service translation"> + Translation </div>
                                 <div className="service revision"> + Revision</div>
                             </div>
-                            <div className="fiducial-logo">
+                            {/*<div className="fiducial-logo">
                                 <div className="translated-logo">Guaranteed by
                                     <img className="logo-t" src="/public/img/logo_translated.png" />
                                 </div>
-                            </div>
+                            </div>*/}
                             <div className="view-more">
                                 <a className="open-view-more"
                                    onClick={this.viewMoreClick.bind(this)}>+ view more</a>
