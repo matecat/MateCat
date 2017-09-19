@@ -451,7 +451,7 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 0 10px !important;
+                                padding: 0 5px 0 10px !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
@@ -495,14 +495,17 @@ body.manage {
                                     margin-left: 10px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 139px;
+                                    width: 125px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
                                     line-height: 20px;
                                     margin-top: 5px;
-                                    @media only screen and (max-width: 1200px) {
-                                        max-width: 180px;
+                                    transition: 0.3s ease;
+                                   /* @media only screen and (max-width: 1200px) {
+                                        width: 125px;
+                                    }*/
+                                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         width: 200px;
                                     }
                                     a {
@@ -511,6 +514,9 @@ body.manage {
                                         &:hover {
                                             text-decoration: none;
                                         }
+                                    }
+                                    &.not-assigned {
+                                        width: 140px;
                                     }
                                 }
                                 &:hover .job-to-translator{
@@ -543,7 +549,10 @@ body.manage {
                                         margin-left: 5px;
                                         font-size: 13px;
                                     }
-                                    @media only screen and (max-width: 1200px) {
+                                    /*@media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }*/
+                                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         display: none;
                                     }
                                 }
