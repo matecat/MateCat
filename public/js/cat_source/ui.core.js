@@ -505,10 +505,7 @@ UI = {
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
         UI.currentSegment.trigger('buttonsCreation');
-        //Ice match segments
-        if (this.currentSegment.hasClass('ice-unlocked')) {
-            UI.overrideButtonsForRevision();
-        }
+
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
 

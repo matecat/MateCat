@@ -3252,6 +3252,7 @@ body.rtl-target .editor .editarea span {
     line-height: 14px;
     transition: all 100ms ease-in;
     left: 47.4%;
+    visibility: hidden;
 }
 
 

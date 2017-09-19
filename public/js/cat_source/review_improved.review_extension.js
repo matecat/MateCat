@@ -212,7 +212,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
             var section = elem.closest('section');
             section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
-            UI.closeSegment(section);
+            UI.closeSegment(section, 1);
         }
     });
 
