@@ -451,7 +451,7 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 0 10px !important;
+                                padding: 0 5px 0 10px !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
@@ -502,8 +502,10 @@ body.manage {
                                     line-height: 20px;
                                     margin-top: 5px;
                                     transition: 0.3s ease;
-                                    @media only screen and (max-width: 1200px) {
-                                        max-width: 180px;
+                                   /* @media only screen and (max-width: 1200px) {
+                                        width: 125px;
+                                    }*/
+                                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         width: 200px;
                                     }
                                     a {
@@ -547,7 +549,10 @@ body.manage {
                                         margin-left: 5px;
                                         font-size: 13px;
                                     }
-                                    @media only screen and (max-width: 1200px) {
+                                    /*@media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }*/
+                                    @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         display: none;
                                     }
                                 }
