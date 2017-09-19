@@ -2029,7 +2029,7 @@ class ProjectManager {
             foreach ( $struct as $pos => $translation_row ) {
 
                 $sql_values = sprintf(
-                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE', '%s' )",
+                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 0, 'ICE', '%s' )",
                     $translation_row [ 0 ],
                     $jid,
                     $translation_row [ 3 ],
