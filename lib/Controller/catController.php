@@ -136,6 +136,7 @@ class catController extends viewController {
 
     public function doAction() {
         $this->projectFeatures->run('catControllerDoActionStart', $this);
+        $this->checkLoginRequiredAndRedirect() ;
 
         try {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
