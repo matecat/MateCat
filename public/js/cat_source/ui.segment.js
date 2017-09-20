@@ -357,7 +357,7 @@
             }
             return returnArray;
         },
-        getContextBefore(segmentId) {
+        getContextBefore: function(segmentId) {
             var segment = $('#segment-' + segmentId);
             var originalId = segment.attr('data-split-original-id');
             var segmentBefore = (function  findBefore(segment) {
@@ -386,7 +386,7 @@
                 return $('.source', segmentBefore ).text();
             }
         },
-        getContextAfter(segmentId) {
+        getContextAfter: function(segmentId) {
             var segment = $('#segment-' + segmentId);
             var originalId = segment.attr('data-split-original-id');
             var segmentAfter = (function findAfter(segment) {
