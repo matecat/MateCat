@@ -1,14 +1,15 @@
 <?php
 namespace AsyncTasks\Workers;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use Database;
-use PDOException;
+use INIT;
+use Jobs_JobDao;
+use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement,
         TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException;
+
+include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
 /**
  * Created by PhpStorm.
@@ -16,7 +17,7 @@ use TaskRunner\Commons\AbstractElement,
  * Date: 13/06/16
  * Time: 11:49
  */
-class ActivityLogWorker extends AbstractWorker {
+class JobsWorker extends AbstractWorker {
 
     public function process( AbstractElement $queueElement ) {
 
@@ -25,12 +26,12 @@ class ActivityLogWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $logEvent = new ActivityLogStruct( $queueElement->params->toArray() );
+        $jobStruct = new Jobs_JobStruct( $queueElement->params->toArray() );
 
         //re initialize DB if socked is closed
         $this->_checkDatabaseConnection();
 
-        $this->_writeLog( $logEvent );
+        $this->_recountAvgPee( $jobStruct );
 
     }
 
@@ -60,10 +61,28 @@ class ActivityLogWorker extends AbstractWorker {
 
     }
 
-    protected function _writeLog( ActivityLogStruct $logEvent ){
+    protected function _recountAvgPee( Jobs_JobStruct $jobStruct ){
 
-        $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create( $logEvent );
+        $jDao = new Jobs_JobDao();
+
+        /**
+         * @var $segments \EditLog_EditLogSegmentStruct[]
+         */
+        $segments = $jDao->getAllModifiedSegmentsForPee( $jobStruct );
+
+        $Pee_weighted = 0;
+        $total_time_to_edit = 0;
+        foreach( $segments as $segment ){
+            $Pee_weighted += $segment->getPEE() * $segment->raw_word_count;
+            $total_time_to_edit += $segment->time_to_edit;
+        }
+
+        $jobStruct->avg_post_editing_effort = $Pee_weighted;
+        $jobStruct->total_time_to_edit = $total_time_to_edit;
+
+        $this->_doLog( "***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: ". $Pee_weighted . " ***** ");
+
+        $jDao->updateJobWeightedPeeAndTTE( $jobStruct );
 
     }
 

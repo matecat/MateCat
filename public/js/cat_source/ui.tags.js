@@ -76,16 +76,16 @@ $.extend(UI, {
 
 
     transformTextForLockTags : function( tx ) {
-        var brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+        var brTx1 = (UI.isFirefox)? "<_plh_ class=\"locked\" contenteditable=\"false\">$1</_plh_>" : "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
         var brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 
-        tx = tx.replace(/<span/gi, "<pl")
-            .replace(/<\/span/gi, "</pl")
+        tx = tx.replace(/<span/gi, "<_plh_")
+            .replace(/<\/span/gi, "</_plh_")
             .replace(/&lt;/gi, "<")
             .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
-            .replace(/\&lt;pl/gi, "<span")
-            .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;_plh_/gi, "<span")
+            .replace(/\&lt;\/_plh_/gi, "</span")
             .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
             .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
             .replace(/\&lt;div\>/gi, "<div>")

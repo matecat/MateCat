@@ -2747,13 +2747,16 @@ UI = {
     },
     closeAllMenus: function (e, fromQA) {
         if ($('.searchbox').is(':visible')) {
-            UI.toggleSearch(e);
+            UI.closeSearch();
         }
         $('.mbc-history-balloon-outer').removeClass('mbc-visible');
 
         var qa_cont = $('.qa-container');
         if ( qa_cont.hasClass('qa-open') && !fromQA) {
             QAComponent.togglePanel();
+        }
+        if (SegmentFilter && SegmentFilter.closeFilter) {
+            SegmentFilter.closeFilter();
         }
     }
 

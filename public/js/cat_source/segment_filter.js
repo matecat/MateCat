@@ -252,6 +252,7 @@ if (SegmentFilter.enabled())
         if ( UI.body.hasClass('filtering') ) {
             SF.closeFilter();
         } else {
+            UI.closeAllMenus(e);
             SF.openFilter();
         }
     });

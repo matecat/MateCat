@@ -25,8 +25,8 @@
                 date: "2017-04",
                 text: "Introduzione Neural</br> 6 Aprile 2017",
                 langsPairs: [
-                    {l1: "ar-SA",  l2: "en-GB"},
-                    {l1: "zh-CN",  l2: "en-GB"},
+                    {l1: "en-GB",  l2: "ar-SA"},
+                    {l1: "en-GB",  l2: "zh-CN"},
                     {l1: "en-GB",  l2: "fr-FR"},
                     {l1: "en-GB",  l2: "de-DE"},
                     {l1: "en-GB",  l2: "hi-IN"},
@@ -38,7 +38,8 @@
                     {l1: "en-GB",  l2: "es-ES"},
                     {l1: "en-GB",  l2: "th-TH"},
                     {l1: "en-GB",  l2: "tr-TR"},
-                    {l1: "en-GB",  l2: "vi-VN"}
+                    {l1: "en-GB",  l2: "vi-VN"},
+                    {l1: "en-GB",  l2: "he-IL"}
                 ]
             },
             {
@@ -48,6 +49,104 @@
                 text: "Introduzione Neural</br> 16 Aprile 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "it-IT"},
+                ]
+            },
+            {
+                id: 3,
+                name: "Neural",
+                date: "2017-04",
+                text: "Introduzione Neural</br> 27 Aprile 2017",
+                langsPairs: [
+                    {l1: "en-GB",  l2: "sv-SE"},
+                    {l1: "en-GB",  l2: "da-DK"},
+                    {l1: "en-GB",  l2: "is-IS"},
+                    {l1: "en-GB",  l2: "nl-NL"},
+                    {l1: "en-GB",  l2: "no-NO"},
+                    {l1: "en-GB",  l2: "af-ZA"},
+                    {l1: "en-GB",  l2: "bg-BG"},
+                    {l1: "en-GB",  l2: "cs-CZ"},
+                    {l1: "en-GB",  l2: "el-GR"},
+                    {l1: "en-GB",  l2: "ro-RO"},
+                    {l1: "en-GB",  l2: "sk-SK"},
+                    {l1: "en-GB",  l2: "it-IT"},
+                    {l1: "en-GB",  l2: "hr-HR"},
+                    {l1: "en-GB",  l2: "id-ID"}
+                ]
+            },
+            {
+                id: 4,
+                name: "Neural",
+                date: "2017-07",
+                text: "Introduzione Neural</br> 14 Luglio 2017",
+                langsPairs: [
+                    {l1: "en-GB",  l2: "fi-FI"},
+                    {l1: "en-GB",  l2: "hu-HU"},
+                    {l1: "en-GB",  l2: "sq-AL"},
+                    {l1: "en-GB",  l2: "ka-GE"},
+                    {l1: "en-GB",  l2: "bn-IN"},
+                    {l1: "en-GB",  l2: "mr-IN"},
+                    {l1: "en-GB",  l2: "ta-IN"},
+                    {l1: "en-GB",  l2: "te-IN"},
+                    {l1: "en-GB",  l2: "gu-IN"},
+                    {l1: "en-GB",  l2: "pa-IN"},
+                    {l1: "en-GB",  l2: "ml-IN"},
+                    {l1: "en-GB",  l2: "kn-IN"},
+                    {l1: "en-GB",  l2: "az-Latn-AZ"},
+                    {l1: "en-GB",  l2: "hy-AM"},
+                    {l1: "en-GB",  l2: "kk-KZ"},
+                    {l1: "en-GB",  l2: "uz-Latn-UZ"},
+                    {l1: "en-GB",  l2: "sw-KE"},
+                    {l1: "en-GB",  l2: "zu-ZA"},
+                    {l1: "en-GB",  l2: "sn-SN"},
+                    {l1: "en-GB",  l2: "nso-ZA"},
+                    {l1: "en-GB",  l2: "xh-ZA"},
+                    {l1: "en-GB",  l2: "ms-MY"},
+                    {l1: "en-GB",  l2: "fil-PH"},
+                    {l1: "en-GB",  l2: "jv-ID"},
+                    {l1: "en-GB",  l2: "mn-MN"},
+                    {l1: "en-GB",  l2: "et-EE"},
+                    {l1: "en-GB",  l2: "lt-LT"},
+                    {l1: "en-GB",  l2: "lv-LV"},
+                    {l1: "en-GB",  l2: "fa-IR"},
+                    {l1: "en-GB",  l2: "uk-UA"},
+                    {l1: "en-GB",  l2: "ca-ES"},
+                    {l1: "en-GB",  l2: "eu-ES"},
+                    {l1: "en-GB",  l2: "gl-ES"},
+                    {l1: "en-GB",  l2: "bs-Latn-BA"},
+                    {l1: "en-GB",  l2: "mk-MK"},
+                    {l1: "en-GB",  l2: "sl-SI"},
+                    {l1: "en-GB",  l2: "sr-Latn-RS"},
+                    {l1: "en-GB",  l2: "si-LK"},
+                    {l1: "en-GB",  l2: "ku-CKB"},
+                    {l1: "en-GB",  l2: "ku-KMR"},
+                    {l1: "en-GB",  l2: "ps-AF"},
+                    {l1: "en-GB",  l2: "ur-PK"},
+                    {l1: "en-GB",  l2: "am-AM"},
+                    {l1: "en-GB",  l2: "km-KH"}
+                ]
+            },
+            {
+                id: 5,
+                name: "Neural",
+                date: "2017-04",
+                text: "Introduzione Neural</br> 6 Settembre 2017",
+                langsPairs: [
+                    {l1: "en-GB",  l2: "eo-XN"},
+                    {l1: "en-GB",  l2: "cy-GB"},
+                    {l1: "en-GB",  l2: "ga-IE"},
+                    {l1: "en-GB",  l2: "gd-GB"},
+                    {l1: "en-GB",  l2: "ht-HT"},
+                    {l1: "en-GB",  l2: "lb-LU"},
+                    {l1: "en-GB",  l2: "yi-YD"},
+                    {l1: "en-GB",  l2: "mg-MLG"},
+                    {l1: "en-GB",  l2: "mi-NZ"},
+                    {l1: "en-GB",  l2: "US-HI"},
+                    {l1: "en-GB",  l2: "sm-SM"},
+                    {l1: "en-GB",  l2: "ha-HAU"},
+                    {l1: "en-GB",  l2: "tg-TJ"},
+                    {l1: "en-GB",  l2: "so-SO"},
+                    {l1: "en-GB",  l2: "ne-NP"},
+                    {l1: "en-GB",  l2: "lo-LA"}
                 ]
             }
             // ,
@@ -149,6 +248,7 @@
             ;
 
             $('#create-button').on('click', PEE.createGraph);
+            $('#reset-button').on('click', PEE.resetGraphFilterToUrl);
 
             $( '#date-select' ).on( 'change', function(){
                 var value  = $(this).dropdown('get value')[0];
@@ -562,6 +662,21 @@
                 window.history.pushState({path:newurl},'',newurl);
             }
         },
+
+        resetGraphFilterToUrl: function (fields) {
+            if (history.pushState) {
+                var newurl;
+                newurl = PEE.removeParam('gs');
+                newurl =PEE.removeParam('gt', newurl);
+                newurl =PEE.removeParam('gf', newurl);
+                newurl =PEE.removeParam('gfrom', newurl);
+                newurl =PEE.removeParam('gend', newurl);
+                newurl =PEE.removeParam('gfilter', newurl);
+                window.history.pushState({path:newurl},'',newurl);
+                PEE.drawDefaultChart()
+            }
+        },
+
         checkQueryStringFilterForGraph: function () {
             var gFilters = APP.getParameterByName("gfilter");
             var fields;
@@ -591,8 +706,8 @@
                 return uri + separator + key + "=" + value;
             }
         },
-        removeParam: function(key, sourceURl) {
-            if (!sourceURl) {
+        removeParam: function(key, sourceURL) {
+            if (!sourceURL) {
                 sourceURL = document.location.href;
             }
             var rtn = sourceURL.split("?")[0],

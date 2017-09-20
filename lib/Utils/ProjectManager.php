@@ -11,6 +11,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive  ;
+use Jobs\SplitQueue;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -1369,19 +1370,9 @@ class ProjectManager {
      */
     protected function _splitJob( ArrayObject $projectStructure ) {
 
-        $query_job = "SELECT * FROM jobs WHERE id = %u AND password = '%s'";
-        $query_job = sprintf( $query_job, $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
-        //$projectStructure[ 'job_to_split' ]
+        $jobInfo = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
 
-        $jobInfo = $this->dbHandler->fetch_array( $query_job );
-        $jobInfo = $jobInfo[ 0 ];
-
-
-        /*
-         * If a translator is assigned to the job, we must send an email to inform that job is changed
-         */
-        $jStruct = new Jobs_JobStruct( $jobInfo );
-        $translatorModel = new TranslatorsModel( $jStruct );
+        $translatorModel = new TranslatorsModel( $jobInfo );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
 
@@ -1393,37 +1384,46 @@ class ProjectManager {
                     ->setNewJobPassword( CatUtils::generate_password() );
 
             $translatorModel->update();
-            $jobInfo[ 'password'] = $jStruct->password;
 
         }
 
-        $data = array();
-        $jobs = array();
-
         foreach ( $projectStructure[ 'split_result' ][ 'chunks' ] as $chunk => $contents ) {
 
-            //            Log::doLog( $projectStructure['split_result']['chunks'] );
-
-            //IF THIS IS NOT the original job, DELETE relevant fields
+            //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
                 $jobInfo[ 'password' ]    = $this->generatePassword();
                 $jobInfo[ 'create_date' ] = date( 'Y-m-d H:i:s' );
+                $jobInfo[ 'avg_post_editing_effort' ] = 0;
+                $jobInfo[ 'total_time_to_edit' ] = 0;
             }
 
             $jobInfo[ 'last_opened_segment' ] = $contents[ 'last_opened_segment' ];
             $jobInfo[ 'job_first_segment' ]   = $contents[ 'segment_start' ];
             $jobInfo[ 'job_last_segment' ]    = $contents[ 'segment_end' ];
 
-            $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
-                VALUES ( '" . implode( "', '", array_values( array_map( array(
-                            $this->dbHandler, 'escape'
-                    ), $jobInfo ) ) ) . "' )
-                ON DUPLICATE KEY UPDATE
-                last_opened_segment = {$jobInfo['last_opened_segment']},
-                job_first_segment = '{$jobInfo['job_first_segment']}',
-                job_last_segment = '{$jobInfo['job_last_segment']}'";
+            $stmt = ( new Jobs_JobDao() )->getSplitJobPreparedStatement( $jobInfo );
+            $stmt->execute();
 
+            $wCountManager = new WordCount_Counter();
+            $wCountManager->initializeJobWordCount( $jobInfo->id, $jobInfo->password );
+
+            if ( $this->dbHandler->affected_rows == 0 ) {
+                $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
+                $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
+                $msg .= "Failed Statement is: \n" . print_r( $jobInfo, true ) . "\n";
+//                Utils::sendErrMailReport( $msg );
+                Log::doLog( $msg );
+                throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
+            }
+
+            $stmt->closeCursor();
+            unset( $stmt );
+
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for splitted jobs
+             */
+            SplitQueue::recount( $jobInfo );
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
@@ -1434,28 +1434,9 @@ class ProjectManager {
                     $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ) ) );
 
-            $data[] = $query;
-            $jobs[] = $jobInfo;
         }
 
-        foreach ( $data as $position => $query ) {
-
-            $res = $this->dbHandler->query( $query );
-
-            $wCountManager = new WordCount_Counter();
-            $wCountManager->initializeJobWordCount( $jobs[ $position ][ 'id' ], $jobs[ $position ][ 'password' ] );
-
-            if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
-                $msg .= "Tried to perform SQL: \n" . print_r( $data, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                Utils::sendErrMailReport( $msg );
-                throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
-            }
-
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
-
-        }
+        Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
 
@@ -1474,6 +1455,12 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param ArrayObject $projectStructure
+     * @param Jobs_JobStruct[]       $jobStructs
+     *
+     * @throws Exception
+     */
     public function mergeALL( ArrayObject $projectStructure, array $jobStructs ) {
 
         $metadata_dao = new Projects_MetadataDao();
@@ -1512,40 +1499,26 @@ class ProjectManager {
             Log::doLog( __METHOD__ . " -> Merge Jobs error - TM key problem: " . $e->getMessage() );
         }
 
-        $oldPassword = $first_job[ 'password' ];
-        if( $first_job->getTranslator() ){
-            $first_job[ 'password' ] = self::generatePassword();
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        $totalAvgPee = 0;
+        $totalTimeToEdit = 0;
+        foreach( $jobStructs as $_jStruct ){
+            $totalAvgPee += $_jStruct->avg_post_editing_effort;
+            $totalTimeToEdit += $_jStruct->total_time_to_edit;
         }
-
-        $_data = array();
-        foreach ( $first_job as $field => $value ) {
-            $_data[] = "`$field`='" . $this->dbHandler->escape( $value ) . "'";
-        }
-
-        //----------------------------------------------------
-
-        $queries = array();
-
-        $queries[] = "UPDATE jobs SET " . implode( ", \n", $_data ) .
-                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //use old password
-
-        //delete all old jobs
-        $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
+        $first_job[ 'avg_post_editing_effort' ] = $totalAvgPee;
+        $first_job[ 'total_time_to_edit' ] = $totalTimeToEdit;
 
         \Database::obtain()->begin();
 
-        foreach ( $queries as $query ) {
-            $res = $this->dbHandler->query( $query );
-            if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to merge job  " . $first_job[ 'id' ] . " from " . count( $jobStructs ) . " chunks\n";
-                $msg .= "Tried to perform SQL: \n" . print_r( $queries, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $jobStructs, true ) . "\n";
-                Utils::sendErrMailReport( $msg );
-                throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
-            }
+        if( $first_job->getTranslator() ){
+            //Update the password in the struct and in the database for the first job
+            Jobs_JobDao::updateForMerge( $first_job, self::generatePassword() );
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        } else {
+            Jobs_JobDao::updateForMerge( $first_job, false );
         }
+
+        Jobs_JobDao::deleteOnMerge( $first_job );
 
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
@@ -2056,7 +2029,7 @@ class ProjectManager {
             foreach ( $struct as $pos => $translation_row ) {
 
                 $sql_values = sprintf(
-                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE', '%s' )",
+                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 0, 'ICE', '%s' )",
                     $translation_row [ 0 ],
                     $jid,
                     $translation_row [ 3 ],
