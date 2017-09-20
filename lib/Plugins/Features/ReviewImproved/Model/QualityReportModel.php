@@ -33,6 +33,9 @@ class QualityReportModel {
 
     private $chunk_review;
 
+    /**
+     * @var ChunkReviewModel
+     */
     private $chunk_review_model;
 
     private $all_segments = array();

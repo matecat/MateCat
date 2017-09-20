@@ -6,7 +6,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param $id
      * @param $password
      *
-     * @return mixed
+     * @return Chunks_ChunkStruct
      * @throws \Exceptions\NotFoundError
      */
     public static function getByIdAndPassword( $id, $password ) {

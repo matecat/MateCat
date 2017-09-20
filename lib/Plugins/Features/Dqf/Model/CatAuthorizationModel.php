@@ -8,6 +8,7 @@
 
 namespace Features\Dqf\Model;
 
+use Features\Dqf\Service\Struct\Response\UserResponseStruct;
 use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Users_UserDao;
@@ -41,6 +42,7 @@ class CatAuthorizationModel {
 
     public function getStatusWithImplicitAssignment( Users_UserStruct $user ) {
         $status = $this->getStatus( $user );
+
         if ( $status == self::STATUS_NOT_ASSIGNED ) {
             $invalidCredentialsStatus = $this->dqfUserCredentialsInvalidStatus( $user );
             if ( is_null( $invalidCredentialsStatus ) ) {
@@ -73,7 +75,7 @@ class CatAuthorizationModel {
         }
     }
 
-    protected function dqfUserCredentialsInvalidStatus( $user ) {
+    protected function dqfUserCredentialsInvalidStatus( Users_UserStruct $user ) {
         $dqfUser = new UserModel( $user );
 
         // if (!$dqfUser->hasCredentials() ) {
@@ -88,7 +90,7 @@ class CatAuthorizationModel {
     }
 
     protected function setAuthorizedUser( Users_UserStruct $user ) {
-        return $this->dao->set($this->job->id, $this->job->password, $this->key, $user->uid );
+        return $this->dao->set( $this->job->id, $this->job->password, $this->key, $user->uid );
     }
 
 }
