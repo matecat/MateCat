@@ -48,6 +48,10 @@ class Dqf extends BaseFeature {
     }
 
 
+    public function catControllerDoActionStart( catController $controller ) {
+        $controller->setLoginRequired( true ) ;
+    }
+
     public function filterUserMetadataFilters($filters, $metadata) {
         if ( isset( $metadata['dqf_username'] ) || isset( $metadata['dqf_password'] ) ) {
             $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
@@ -89,12 +93,6 @@ class Dqf extends BaseFeature {
      */
     public function filterCreateProjectInputFilters( $inputFilter ) {
         return array_merge( $inputFilter, ProjectMetadata::getInputFilter() ) ;
-    }
-
-    /**
-     * @param catController $controller
-     */
-    public function catControllerDoActionStart( catController $controller ) {
     }
 
     /**
