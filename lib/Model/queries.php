@@ -288,6 +288,14 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
     return $results[ 'suggestions_array' ];
 }
 
+/**
+ * @param      $id_job
+ * @param null $password
+ *
+ * @return array
+ *
+ * @deprecated Substitute this with Jobs_JobDao
+ */
 function getJobData( $id_job, $password = null ) {
 
     $fields = array(
@@ -312,8 +320,7 @@ function getJobData( $id_job, $password = null ) {
         'approved_words',
         'rejected_words',
         'subject',
-        'dqf_key', 
-        'payable_rates', 
+        'payable_rates',
         'total_time_to_edit', 
         'avg_post_editing_effort'
     );
@@ -802,12 +809,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
     $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
-    $jobDao = new Jobs_JobDao();
-    $jobStruct = new Jobs_JobStruct();
-    $jobStruct->id = (int)$jid;
-    $jobStruct->password = $jpassword;
-    $jobDao->setCacheTTL( 60 * 60 * 2 ); //2 hours cache on jobs metadata
-    $jobStruct = $jobDao->read( $jobStruct );
+    $jStructs = Jobs_JobDao::getById( $jid );
+    $currentJob = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
+        return $item->password == $jpassword;
+    } )[ 0 ];
 
     if ( $sid != null ) {
 
@@ -821,18 +826,18 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
         $queryForTranslationMismatch = "
 			SELECT
 			translation,
-			COUNT(1) as TOT,
-			GROUP_CONCAT( id_segment ) AS involved_id,
-			IF( password = '{$jobStruct[0]->password}', 1, 0 ) AS editable
+			COUNT( distinct id_segment ) as TOT,
+			GROUP_CONCAT( distinct id_segment ) AS involved_id,
+			IF( password = '{$currentJob->password}' AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
 				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jobStruct[0]->job_first_segment} AND {$jobStruct[0]->job_last_segment}
+				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end($jStructs)->job_last_segment . "
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
 				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
-				AND id_job = {$jobStruct[0]->id}
+				AND id_job = {$jStructs[0]->id}
 				AND id_segment != %u
-				GROUP BY translation, CONCAT( id_job, '-', password )
+				GROUP BY translation, id_job
 		";
 
         $query = sprintf( $queryForTranslationMismatch, $sid, $sid );
@@ -852,10 +857,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 			SELECT
 			COUNT( segment_hash ) AS total_sources,
 			COUNT( DISTINCT translation ) AS translations_available,
-			IF( password = '{$jobStruct[0]->password}', MIN( id_segment ), NULL ) AS first_of_my_job
+			IF( password = '{$currentJob->password}', MIN( id_segment ), NULL ) AS first_of_my_job
 				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jobStruct[0]->job_first_segment} AND {$jobStruct[0]->job_last_segment}
-				WHERE id_job = {$jobStruct[0]->id}
+				JOIN jobs ON id_job = id AND id_segment between {$currentJob->job_first_segment} AND {$currentJob->job_last_segment}
+				WHERE id_job = {$currentJob->id}
 				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available > 1
@@ -956,6 +961,15 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     }
 
     /**
+     * We want to avoid that a translation overrides a propagation,
+     * so we have to set an additional status when the requested status to propagate is TRANSLATE
+     */
+    if( $params['status'] == Constants_TranslationStatus::STATUS_TRANSLATED ){
+        $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+";
+    }
+
+    /**
      * Sum the word count grouped by status, so that we can later update the count on jobs table.
      * We only count segments with status different than the current, because we don't need to update
      * the count for the same status.
@@ -965,16 +979,14 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
            SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
 
            FROM segment_translations
-              -- JOIN for raw_word_count and ICE matches
               INNER JOIN  segments
               ON segments.id = segment_translations.id_segment
-              -- JOIN for raw_word_count and ICE matches
-
            WHERE id_job = {$params['id_job']}
            AND segment_translations.segment_hash = '" . $params[ 'segment_hash' ] . "'
            AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
            AND id_segment != $_idSegment
            AND status != '{$params['status']}'
+           $additional_status
            GROUP BY status
     ";
 
@@ -995,7 +1007,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
                 'job_last_segment'  => $job_data[ 'job_last_segment' ],
                 'segment_hash'      => $params[ 'segment_hash' ],
                 'id_job'            => $params[ 'id_job' ]
-        ) );
+        ), $params['status'] );
     } catch( PDOException $e ) {
         throw new Exception(
                 sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(),  $e->getMessage() ),
@@ -1051,54 +1063,6 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     }
 
     return array( 'totals' => $totals, 'propagated_ids' => $propagated_ids );
-}
-
-function setSuggestionUpdate( $data ) {
-
-    $id_segment = (int)$data[ 'id_segment' ];
-    $id_job     = (int)$data[ 'id_job' ];
-
-    $where = " id_segment = $id_segment and id_job = $id_job";
-
-    $db = Database::obtain();
-    try {
-        $affectedRows = $db->update('segment_translations', $data, $where);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $affectedRows;
-}
-
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = 'NEW' ) {
-    $data                          = array();
-    $data[ 'id_job' ]              = $id_job;
-    $data[ 'id_segment' ]          = $id_segment;
-    $data[ 'suggestions_array' ]   = $suggestions_json_array;
-    $data[ 'suggestion' ]          = $suggestion;
-    $data[ 'suggestion_match' ]    = $suggestion_match;
-    $data[ 'suggestion_source' ]   = $suggestion_source;
-    $data[ 'match_type' ]          = $match_type;
-    $data[ 'eq_word_count' ]       = $eq_words;
-    $data[ 'standard_word_count' ] = $standard_words;
-    $data[ 'translation' ]         = $translation;
-    $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
-    $data[ 'status' ]              = $segment_status;
-
-    $data[ 'warning' ]                = $warning;
-    $data[ 'serialized_errors_list' ] = $err_json_list;
-
-    $data[ 'mt_qe' ] = $mt_qe;
-
-    $db = Database::obtain();
-
-    try {
-        $db->insert('segment_translations', $data);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $db->affected_rows;
 }
 
 function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {

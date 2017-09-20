@@ -1,6 +1,6 @@
 <?php
 
-class Engines_YandexTranslate extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_YandexTranslate extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,

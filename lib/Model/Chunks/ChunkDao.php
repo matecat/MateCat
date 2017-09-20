@@ -81,8 +81,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     public function getByProjectID( $id_project ) {
 
         $conn = $this->con->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM " .
-            "jobs WHERE id_project = ? ORDER BY job_first_segment ");
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id_project = ? ORDER BY job_first_segment ");
         return $this->_fetchObject( $stmt, new Chunks_ChunkStruct(), [ $id_project ] );
 
     }
@@ -91,16 +90,12 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param $id_project
      * @param $id_job
      *
-     * @return Chunks_ChunkStruct[]
+     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
      */
     public static function getByJobIdProjectAndIdJob( $id_project, $id_job ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM " .
-            "jobs WHERE id_project = :id_project AND id = :id_job");
-
-        $stmt->execute(array( 'id_project' => $id_project, 'id_job' => $id_job ));
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
-        return $stmt->fetchAll( ) ;
+        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job" );
+        return ( new self() )->_fetchObject( $stmt, new Chunks_ChunkStruct(), [ 'id_project' => $id_project, 'id_job' => $id_job ] );
     }
 
     protected function _buildResult( $array_result ) {

@@ -453,7 +453,7 @@ $.extend(UI, {
 		}).on('click', 'a.status', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('click', 'section:not(.readonly) a.status', function() {
+		}).on('click', 'section:not(.readonly, .ice-unlocked) a.status', function() {
 			var section = $(this).closest("section");
 			var statusMenu = $("ul.statusmenu", section);
 
@@ -481,7 +481,15 @@ $.extend(UI, {
             UI.copyGlossaryItemInEditarea($(this));
 		}).on('click', '.glossary .switch-editing', function() {
 			UI.updateGlossary($(this).closest(".graysmall"));
-		});
+		}).on('click', '.ice-locked-icon .unlock-button', function (e) {
+		    e.preventDefault();
+            e.stopPropagation();
+            if ($(e.target).hasClass('locked')) {
+                UI.unlockIceSegment($(this));
+            } else {
+                UI.lockIceSegment($(this));
+            }
+        });
 
 		$(".joblink").click(function(e) {
 			e.preventDefault();

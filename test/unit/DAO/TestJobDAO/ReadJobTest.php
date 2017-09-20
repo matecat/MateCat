@@ -87,7 +87,6 @@ class ReadJobTest extends AbstractTest
                 'revision_stats_terminology_maj' => "0",
                 'revision_stats_language_quality_maj' => "0",
                 'revision_stats_style_maj' => "0",
-                'dqf_key' => "",
                 'total_raw_wc' => "1",
                 'validator' => "xxxx"
             )
@@ -171,7 +170,6 @@ class ReadJobTest extends AbstractTest
         $this->assertEquals("0", $result->revision_stats_terminology_maj);
         $this->assertEquals("0", $result->revision_stats_language_quality_maj);
         $this->assertEquals("0", $result->revision_stats_style_maj);
-        $this->assertEquals("", $result->dqf_key);
         $this->assertEquals("1", $result->total_raw_wc);
         $this->assertNull($result->validator);
 

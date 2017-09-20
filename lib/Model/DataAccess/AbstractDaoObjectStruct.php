@@ -7,7 +7,7 @@
  * 
  */
 
-abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
+abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Countable {
 
     protected $validator;
     protected $cached_results = array();
@@ -66,6 +66,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
         return $this->cached_results[$method_name];
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed
+     */
     public function __get( $name ) {
         if ( !property_exists( $this, $name ) ) {
             throw new DomainException( 'Trying to get an undefined property ' . $name );
@@ -175,5 +180,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
     public function getArrayCopy(){
         return $this->toArray();
     }
+
+    public function count() {
+        $reflectionClass = new ReflectionClass( $this );
+        return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
+    }
+
 
 } 

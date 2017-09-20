@@ -391,7 +391,7 @@ LXQ.init  = function () {
         var cleanUpHighLighting = function (text) {
         //var cleanUpHighLighting = function (segment, isSource) {
             //var regex = /<span id="lexiqahighlight".*?>(.+?)<\/span>/g;
-
+            if (!text) return text;
             var regex = /<lxqwarning id="lexiqahighlight".*?>(.*?)<\/lxqwarning>/g;
             text = text.replace(regex, '$1');
             //clean up spurious highlighting that come when you select all text and delete...

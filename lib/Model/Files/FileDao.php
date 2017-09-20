@@ -1,6 +1,9 @@
 <?php
 
 class Files_FileDao extends DataAccess_AbstractDao {
+    const TABLE = "files";
+
+    protected static $auto_increment_fields = ['id'] ;
 
     /**
      * @param $id_job

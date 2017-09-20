@@ -56,9 +56,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
       $stmt = $conn->prepare( $query );
 
       $array = array(
-        'id_job' => $chunk->id,
+        'id_job'            => $chunk->id,
         'job_first_segment' => $chunk->job_first_segment ,
-        'job_last_segment' => $chunk->job_last_segment
+        'job_last_segment'  => $chunk->job_last_segment
       ) ;
 
       $stmt->execute( $array );
@@ -68,12 +68,22 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
       return $stmt->fetch();
     }
 
-    public function getSegmentsForPropagation( $params ) {
+    public function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
+
+        /**
+         * We want to avoid that a translation overrides a propagation,
+         * so we have to set an additional status when the requested status to propagate is TRANSLATE
+         */
+        if( $status == Constants_TranslationStatus::STATUS_TRANSLATED ){
+            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+";
+        }
+
         $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
                 " WHERE id_job = :id_job " .
                 " AND segment_hash = :segment_hash " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment " ;
+                " AND id_segment <> :id_segment $additional_status;";
 
         $conn =  $this->con->getConnection() ;
         $stmt = $conn->prepare( $selectSegmentsToPropagate );
@@ -97,6 +107,24 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct');
 
         return $stmt->fetchAll( );
+    }
+
+    /**
+     * @param Files_FileStruct $file
+     *
+     * @return Translations_SegmentTranslationStruct[]
+     */
+    public function getByFile( Files_FileStruct $file ) {
+        $sql = "SELECT * FROM segment_translations st " .
+               " JOIN segments s on s.id  = st.id_segment AND s.id_file = :id_file " .
+               " WHERE s.show_in_cattool = 1 " ;
+
+        $conn = $this->con->getConnection();
+
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( ['id_file' => $file->id ] ) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct');
+        return $stmt->fetchAll() ;
     }
 
     protected function _buildResult( $array_result ) {
@@ -166,6 +194,26 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         ) );
 
         return $stmt->rowCount();
+    }
+
+    public static function setAnalysisValue( $data ) {
+
+        $id_segment = (int)$data[ 'id_segment' ];
+        $id_job     = (int)$data[ 'id_job' ];
+
+        $where = " id_segment = $id_segment and id_job = $id_job";
+
+        $db = Database::obtain();
+        try {
+            $affectedRows = $db->update( 'segment_translations', $data, $where );
+        } catch ( PDOException $e ) {
+            Log::doLog( $e->getMessage() );
+
+            return $e->getCode() * -1;
+        }
+
+        return $affectedRows;
+
     }
 
 }

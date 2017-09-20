@@ -190,6 +190,18 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             this.render({
                 segmentToOpen: nextId
             });
+        },
+        unlockIceSegment: function (elem) {
+            elem.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
+            var section = elem.closest('section');
+            section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
+            section.find('.targetarea').click();
+        },
+        lockIceSegment: function (elem) {
+            elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
+            var section = elem.closest('section');
+            section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
+            UI.closeSegment(section, 1);
         }
     });
 

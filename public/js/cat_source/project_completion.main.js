@@ -16,11 +16,24 @@ if ( ProjectCompletion.enabled() ) {
         button = $('#markAsCompleteButton');
     });
 
+    var previousButtonState ;
+
+    var revertButtonState = function() {
+        button.addClass("isMarkableAsComplete");
+        button.addClass("notMarkedComplete");
+        button.removeClass('isMarkedComplete');
+        button.removeAttr('disabled');
+
+        button.val( previousButtonState ) ;
+        previousButtonState = null ;
+    }
+
     var disableButtonToSentState = function() {
         button.removeClass("isMarkableAsComplete");
         button.removeClass("notMarkedComplete");
         button.addClass('isMarkedComplete');
         button.attr('disabled', 'disabled');
+
         button.val( sentLabel );
     }
 
@@ -32,30 +45,34 @@ if ( ProjectCompletion.enabled() ) {
             password : config.password
         }
 
-        var success = function( resp ) {
-            disableButtonToSentState();
-        }
-
-        var error = function( error ) {
-            console.log(error);
-        }
-
+        previousButtonState = button.val() ;
         button.val( sendingLabel );
 
         var request = APP.doRequest( {
-            data    : data ,
-            success : success,
-            error   : error
-        });
+            data    : data
+       });
 
         request.done( function( data ) {
-            config.job_completion_current_phase = ( config.isReview ? 'translate' : 'revise' ) ;
-            config.job_marked_complete = true;
-            config.last_completion_event_id = data.data.event.id ;
+            // check for errors in 200 response.
+            if ( data.errors.length > 0 ) {
+                APP.alert({
+                    msg: 'An error occurred while marking this job as complete. Please contact support at ' +
+                    '<a href="support@matecat.com">support@matecat.com</a>.'
+                });
+                console.log( data.errors );
+                revertButtonState();
+            }
+            else {
+                disableButtonToSentState();
 
-            UI.render( false );
+                config.job_completion_current_phase = ( config.isReview ? 'translate' : 'revise' ) ;
+                config.job_marked_complete = true;
+                config.last_completion_event_id = data.data.event.id ;
+
+                UI.render( false );
+
+            }
         });
-
     }
 
     var evalSendButtonStatus = function( stats ) {

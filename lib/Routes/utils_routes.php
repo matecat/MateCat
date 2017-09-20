@@ -35,7 +35,12 @@ route( '/api/app/teams/members/invite/[:jwt]',                                  
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
 
+$klein->with('/api/app/dqf', function() {
+    route('/login/check', 'GET', 'Features\Dqf\Controller\API\LoginCheckController', 'check');
+    route('/login',       'GET', 'Features\Dqf\Controller\API\LoginController', 'login');
+});
+
+
 route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeData', 'getPeePlots' ) ;
 route( '/api/app/utils/pee/table',                                                  'POST', '\API\App\PeeData', 'getPeeTableData' ) ;
-
 route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',        'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' ) ;

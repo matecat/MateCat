@@ -483,10 +483,15 @@ UI = {
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
         UI.currentSegment.trigger('buttonsCreation');
+
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
 
+
+
         UI.segmentButtons = null;
+
+
 
 	},
 
@@ -933,7 +938,10 @@ UI = {
             }
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-                this.scrollSegment($('#segment-' + UI.startSegmentId), options.highlight );
+			    var next = UI.findNextSegment(UI.startSegmentId);
+			    if (next) {
+                    this.gotoSegment(next.attr('data-split-original-id'));
+                }
 			}
 
 			if (options.applySearch) {
@@ -1246,7 +1254,9 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) sameContentIndex1 = ind;
+            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+                sameContentIndex1 = ind;
+            }
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 
@@ -1919,6 +1929,8 @@ UI = {
         this.executingSetTranslation = true;
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
+		var contextBefore = UI.getContextBefore(id_segment);
+		var contextAfter = UI.getContextAfter(id_segment);
 
 		this.lastTranslatedSegmentId = id_segment;
 
@@ -1941,11 +1953,11 @@ UI = {
         }
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
-		var errors = '';
-		errors = this.collectSegmentErrors(segment);
+		var errors = this.collectSegmentErrors(segment);
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-		autosave = (caller == 'autosave') ? true : false;
-        isSplitted = (id_segment.split('-').length > 1) ? true : false;
+		var autosave = (caller == 'autosave');
+
+        var isSplitted = (id_segment.split('-').length > 1);
         if(isSplitted) {
             translation = this.collectSplittedTranslations(id_segment);
             sourceSegment = this.collectSplittedTranslations(id_segment, ".source");
@@ -1964,7 +1976,9 @@ UI = {
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
             version: segment.attr('data-version'),
-            propagate: propagate
+            propagate: propagate,
+            context_before: contextBefore,
+            context_after: contextAfter
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -2722,6 +2736,7 @@ UI = {
     handleClickOnReadOnly : function(section) {
         if ( UI.justSelecting('readonly') )   return;
         if ( UI.someUserSelection )           return;
+        if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) return;
 
         UI.selectingReadonly = setTimeout(function() {
             APP.alert({ msg: UI.messageForClickOnReadonly() });

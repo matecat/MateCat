@@ -551,5 +551,5 @@
         segmentIsLoaded: function(segmentId) {
             return UI.getSegmentById(segmentId).length > 0 ;
         }
-    }); 
+    });
 })(jQuery); 

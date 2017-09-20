@@ -12,12 +12,27 @@
     <a tabindex="-1" href="#{{segment.sid}}"></a>
     <div class="sid" title="{{segment.sid}}">
         <div class="txt">{{{shortened_sid}}}</div>
-        <div class="actions">
-            <a class="split" href="#" title="Click to split segment">
-                <span class="icon-split"></span>
-            </a>
-            <p class="split-shortcut">CTRL + S</p>
-        </div>
+        {{#unless ice_locked}}
+            <div class="actions">
+                <a class="split" href="#" title="Click to split segment">
+                    <span class="icon-split"></span>
+                </a>
+                <p class="split-shortcut">CTRL + S</p>
+            </div>
+        {{/unless}}
+        {{#if ice_locked}}
+            {{#unless readonly}}
+                {{#if unlocked}}
+                    <div class="ice-locked-icon">
+                        <button class="unlock-button unlocked icon-unlocked3"></button>
+                    </div>
+                {{else}}
+                    <div class="ice-locked-icon">
+                        <button class="icon-lock unlock-button locked"></button>
+                    </div>
+                {{/if}}
+            {{/unless}}
+        {{/if}}
     </div>
     {{#if start_job_marker}}
     <span class="start-job-marker"></span>

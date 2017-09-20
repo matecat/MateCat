@@ -80,11 +80,11 @@ $.extend(UI, {
             }
             if (this.currentSegmentId == this.nextUntranslatedSegmentId)
                 this.blockButtons = false;
-            return false;
+            return $.Deferred().resolve();
 		}
         $(".loader", current).addClass('loader_on');
 		if ((!current.length) && (next)) {
-			return false;
+			return $.Deferred().resolve();
 		}
 
         var id = current.attr('id');
@@ -112,10 +112,13 @@ $.extend(UI, {
 
         // `next` and `untranslated next` are the same
 		if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
-			return false;
+			return $.Deferred().resolve();
 		}
 
-		APP.doRequest({
+        var contextBefore = UI.getContextBefore(id_segment);
+        var contextAfter = UI.getContextAfter(id_segment);
+
+		return APP.doRequest({
 			data: {
 				action: 'getContribution',
 				password: config.password,
@@ -124,7 +127,9 @@ $.extend(UI, {
 				text: txt,
 				id_job: config.id_job,
 				num_results: this.numContributionMatchesResults,
-				id_translator: config.id_translator
+				id_translator: config.id_translator,
+                context_before: contextBefore,
+                context_after: contextAfter
 			},
 			context: $('#' + id),
 			error: function() {

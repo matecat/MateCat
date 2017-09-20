@@ -217,13 +217,6 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc = $displaySeg->getPEE();
 
-            if ( $displaySeg->pe_effort_perc < 0 ) {
-                $displaySeg->pe_effort_perc = 0;
-            }
-            if ( $displaySeg->pe_effort_perc > 100 ) {
-                $displaySeg->pe_effort_perc = 100;
-            }
-
             $stat_pee[] = $displaySeg->pe_effort_perc * $seg->raw_word_count;
 
             $displaySeg->pe_effort_perc .= "%";

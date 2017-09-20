@@ -202,25 +202,28 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function update($table, $data, $where='1') {
+    public function update( $table, $data, $where = '1' ) {
 
         // Prepare the statement
-        $valuesToBind = array();
-        $query = "UPDATE $table SET ";
+        $valuesToBind = [];
+        $query        = "UPDATE $table SET ";
         $currentIndex = 0;
-        foreach($data as $key => $value) {
-            $query.= "$key = :value{$currentIndex}, ";
-            $valuesToBind[":value{$currentIndex}"] = $value;
+
+        foreach ( $data as $key => $value ) {
+            $query                                   .= "$key = :value{$currentIndex}, ";
+            $valuesToBind[ ":value{$currentIndex}" ] = $value;
             ++$currentIndex;
         }
-        $query = rtrim($query,', ');
-        $query .= " WHERE $where;";
-        $preparedStatement = $this->getConnection()->prepare($query);
+
+        $query             = rtrim( $query, ', ' );
+        $query             .= " WHERE $where;";
+        $preparedStatement = $this->getConnection()->prepare( $query );
 
         // Execute it
-        $preparedStatement->execute($valuesToBind);
-        $affected = $preparedStatement->rowCount();
+        $preparedStatement->execute( $valuesToBind );
+        $affected            = $preparedStatement->rowCount();
         $this->affected_rows = $affected;
+
         return $affected;
     }
 

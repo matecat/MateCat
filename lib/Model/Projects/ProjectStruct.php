@@ -15,7 +15,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $fast_analysis_wc ;
     public $standard_analysis_wc ;
     public $remote_ip_address ;
-    public $instance_number ;
+    public $instance_id ;
     public $pretranslate_100 ;
     public $id_qa_model ;
     public $id_assignee ;
@@ -31,12 +31,23 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @param int $ttl
+     *
      * @return Jobs_JobStruct[]
      */
-    public function getJobs() {
-        return $this->cachable(__function__, $this->id, function($id) {
-            return Jobs_JobDao::getByProjectId( $id );
+    public function getJobs( $ttl = 0 ) {
+        return $this->cachable(__function__, $this->id, function($id) use( $ttl ) {
+            return Jobs_JobDao::getByProjectId( $id, $ttl );
         });
+    }
+
+    /**
+     * @return array
+     */
+    public function getTargetLanguages() {
+        return array_map(function(Jobs_JobStruct $job) {
+            return $job->target ;
+        }, $this->getJobs( 60 * 60 * 24 * 30 ) );
     }
 
     /**
@@ -82,12 +93,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return null|Projects_MetadataStruct[]
      */
     public function getMetadata(){
-
         return $this->cachable( __function__, $this, function ( $project ) {
             $mDao = new Projects_MetadataDao();
             return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
         } );
-
     }
 
     /**
@@ -134,6 +143,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return Users_UserStruct
+     */
+    public function getOwner() {
+        return ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $this->id_customer ) ;
+    }
+
+    /**
      * @param $feature_code
      *
      * @return bool
@@ -156,11 +172,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @param int $ttl
+     *
      * @return Chunks_ChunkStruct[]
      */
-    public function getChunks() {
+    public function getChunks( $ttl = 0 ) {
       $dao = new Chunks_ChunkDao( Database::obtain() );
-      return $dao->getByProjectID( $this->id );
+      return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
     }
 
     public function isMarkedComplete() {

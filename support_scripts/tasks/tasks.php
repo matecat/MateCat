@@ -5,14 +5,22 @@ require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 
 Bootstrap::start();
 
+use CommandLineTasks\CreateTeamMembershipTask;
+use CommandLineTasks\CreateTeamTask;
+use CommandLineTasks\DumpSchemaTask;
+use CommandLineTasks\OwnerFeatures\AssignFeatureTask;
+use CommandLineTasks\Test\PrepareDatabaseTask;
+use Features\Dqf\Task\DqfAttributesDumpTask;
 use Symfony\Component\Console\Application;
 
 $app = new Application("Tasks for instantquote", "1.0");
 
-$app->add( new \CommandLineTasks\CreateTeamTask() ) ;
-$app->add( new \CommandLineTasks\CreateTeamMembershipTask() ) ;
-$app->add( new \CommandLineTasks\OwnerFeatures\AssignFeatureTask() ) ;
-$app->add( new  \CommandLineTasks\Test\PrepareDatabaseTask() ) ;
-$app->add( new \CommandLineTasks\DumpSchemaTask()) ;
+$app->add( new CreateTeamTask() ) ;
+$app->add( new CreateTeamMembershipTask() ) ;
+$app->add( new AssignFeatureTask() ) ;
+$app->add( new PrepareDatabaseTask() ) ;
+$app->add( new DumpSchemaTask() ) ;
+$app->add( new DqfAttributesDumpTask() ) ;
+
 $app->run();
 

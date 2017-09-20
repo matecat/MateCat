@@ -204,7 +204,27 @@ APP.checkForTagProjectionLangs = function(){
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
 
+APP.getDQFParameters = function () {
+    var dqf = {
+        dqfEnabled: false
+    };
+    if (!config.dqf_enabled) {
+        return dqf;
+    }
+
+    dqf.dqfEnabled = !!( $("#dqf_switch").prop("checked") && !$("#dqf_switch").prop("disabled") );
+
+    if (dqf.dqfEnabled) {
+        dqf.dqf_content_type     = APP.USER.STORE.metadata.dqf_options.contentType;
+        dqf.dqf_industry        = APP.USER.STORE.metadata.dqf_options.industry;
+        dqf.dqf_process         = APP.USER.STORE.metadata.dqf_options.process;
+        dqf.dqf_quality_level   = APP.USER.STORE.metadata.dqf_options.qualityLevel;
+    }
+    return dqf;
+};
+
 APP.getCreateProjectParams = function() {
+    var dqf = APP.getDQFParameters();
 	return {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
@@ -218,12 +238,16 @@ APP.getCreateProjectParams = function() {
 		private_keys_list			: UI.extractTMdataFromTable(),
 		lang_detect_files  			: UI.skipLangDetectArr,
 		pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-		dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
 		lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
-        id_team             : UI.UPLOAD_PAGE.getSelectedTeam()
+        id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
+        dqf                         : dqf.dqfEnabled,
+        dqf_content_type            : dqf.dqf_content_type,
+        dqf_industry                : dqf.dqf_industry,
+        dqf_process                 : dqf.dqf_process,
+        dqf_quality_level           : dqf.dqf_quality_level
 	} ;
 };
 
@@ -262,6 +286,42 @@ APP.checkForSpeechToText = function(){
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
 };
 
+APP.checkForDqf = function() {
+    var dqfCheck = $('.dqf-box #dqf_switch');
+    dqfCheck.prop("disabled", false);
+    dqfCheck.prop("checked", false);
+    $('.dqf-box .dqf-settings').on('click', function () {
+        ModalsActions.openDQFModal();
+    });
+
+    dqfCheck.off('click').on('click', function (e) {
+        if ( dqfCheck.prop('checked')) {
+            if (!_.isUndefined(APP.USER.STORE.metadata) &&
+                (_.isUndefined(APP.USER.STORE.metadata.dqf_username) ||
+                _.isUndefined(APP.USER.STORE.metadata.dqf_options))) {
+                e.stopPropagation();
+                e.preventDefault();
+                ModalsActions.openDQFModal();
+            } else if( _.isUndefined(APP.USER.STORE.metadata) ) {
+                e.stopPropagation();
+                e.preventDefault();
+                $('#modal').trigger('openlogin');
+            }
+        }
+
+    });
+
+    dqfCheck.on('dqfEnable', function (e) {
+        dqfCheck.attr('checked', true);
+        dqfCheck.prop('checked', true);
+    });
+
+    dqfCheck.on('dqfDisable', function (e) {
+        dqfCheck.attr('checked', false);
+        dqfCheck.prop('checked', false);
+    });
+};
+
 UI.UPLOAD_PAGE = {};
 
 $.extend(UI.UPLOAD_PAGE, {
@@ -280,6 +340,7 @@ $.extend(UI.UPLOAD_PAGE, {
          * SpeechToText language Enable/Disable
          */
         APP.checkForSpeechToText();
+        APP.checkForDqf();
         this.render();
         this.addEvents();
         $("#activetm").on("update", this.checkTmKeys);
@@ -576,6 +637,7 @@ $.extend(UI.UPLOAD_PAGE, {
         $("#disable_tms_engine").change(function(e){
             if(this.checked){
                 $("input[id^='private-tm-']").prop("disabled", true);
+
                 // $("#create_private_tm_btn").addClass("disabled", true);
             } else {
                 if(!$('#create_private_tm_btn[data-key]').length) {

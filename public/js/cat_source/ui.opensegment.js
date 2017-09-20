@@ -47,7 +47,6 @@
             // if ((!this.readonly)&&(!getNormally)) {
             //     $('#segment-' + segment.id + ' .alternatives .overflow').hide();
             // }
-            this.setCurrentSegment();
 
             if (!this.readonly) {
                 this.getContribution(segment.el, 0);

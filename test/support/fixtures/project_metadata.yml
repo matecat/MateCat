@@ -1,0 +1,17 @@
+pm1:
+  id: @EVER_INCREMENT
+  id_project: @REF:projects:dqf_project_1:id
+  key: features
+  value: review_improved,translation_versions,project_completion,qa_check_glossary,translated,dqf,qa_check_blacklist
+
+pm2:
+  id: @EVER_INCREMENT
+  id_project: @REF:projects:dqf_project_1:id
+  key: project_type
+  value: HT
+
+pm3:
+  id: @EVER_INCREMENT
+  id_project: @REF:projects:dqf_project_1:id
+  key: word_count_type
+  value: raw

@@ -31,7 +31,7 @@ if ( Review.enabled() )
             callback: 'openNextTranslated',
             okTxt: 'Open next translated segment',
             context: sid,
-            msg: UI.alertNotTranslatedMessage 
+            msg: UI.alertNotTranslatedMessage
         });
     }
 

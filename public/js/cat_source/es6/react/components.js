@@ -60,6 +60,7 @@ window.RegisterModal = require('./modals/RegisterModal').default;
 window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
 window.OutsourceModal = require('./modals/OutsourceModal').default;
 window.SplitJobModal = require('./modals/SplitJob').default;
+window.DQFModal = require('./modals/DQFModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;

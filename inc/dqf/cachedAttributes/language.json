@@ -1,0 +1,1647 @@
+[
+    {
+        "id": 1,
+        "localeCode": "af-ZA",
+        "name": "Afrikaans(South Africa)"
+    },
+    {
+        "id": 2,
+        "localeCode": "sq-AL",
+        "name": "Albanian(Albania)"
+    },
+    {
+        "id": 3,
+        "localeCode": "gsw-FR",
+        "name": "Alsacian(France)"
+    },
+    {
+        "id": 4,
+        "localeCode": "am-ET",
+        "name": "Amharic(Ethiopia)"
+    },
+    {
+        "id": 5,
+        "localeCode": "ar-001",
+        "name": "Arabic(World)"
+    },
+    {
+        "id": 6,
+        "localeCode": "ar-DZ",
+        "name": "Arabic(Algeria)"
+    },
+    {
+        "id": 7,
+        "localeCode": "ar-BH",
+        "name": "Arabic(Bahrain)"
+    },
+    {
+        "id": 8,
+        "localeCode": "ar-EG",
+        "name": "Arabic(Egypt)"
+    },
+    {
+        "id": 9,
+        "localeCode": "ar-IQ",
+        "name": "Arabic(Iraq)"
+    },
+    {
+        "id": 10,
+        "localeCode": "ar-JO",
+        "name": "Arabic(Jordan)"
+    },
+    {
+        "id": 11,
+        "localeCode": "ar-KW",
+        "name": "Arabic(Kuweit)"
+    },
+    {
+        "id": 12,
+        "localeCode": "ar-LB",
+        "name": "Arabic(Lebanon)"
+    },
+    {
+        "id": 13,
+        "localeCode": "ar-LY",
+        "name": "Arabic(Libya)"
+    },
+    {
+        "id": 14,
+        "localeCode": "ar-MA",
+        "name": "Arabic(Morocco)"
+    },
+    {
+        "id": 15,
+        "localeCode": "ar-OM",
+        "name": "Arabic(Oman)"
+    },
+    {
+        "id": 16,
+        "localeCode": "ar-QA",
+        "name": "Arabic(Qatar)"
+    },
+    {
+        "id": 17,
+        "localeCode": "ar-SA",
+        "name": "Arabic(Saudi Arabia)"
+    },
+    {
+        "id": 18,
+        "localeCode": "ar-SY",
+        "name": "Arabic(Syria)"
+    },
+    {
+        "id": 19,
+        "localeCode": "ar-TN",
+        "name": "Arabic(Tunisia)"
+    },
+    {
+        "id": 20,
+        "localeCode": "ar-AE",
+        "name": "Arabic(U.A.E)"
+    },
+    {
+        "id": 21,
+        "localeCode": "ar-YE",
+        "name": "Arabic(Yemen)"
+    },
+    {
+        "id": 22,
+        "localeCode": "hy-AM",
+        "name": "Armenian(Armenia)"
+    },
+    {
+        "id": 23,
+        "localeCode": "as-IN",
+        "name": "Assamese(India)"
+    },
+    {
+        "id": 25,
+        "localeCode": "az-Cyrl-AZ",
+        "name": "Azeri(Cyrillic, Azerbaijan)"
+    },
+    {
+        "id": 26,
+        "localeCode": "az-Latn-AZ",
+        "name": "Azeri(Latin, Azerbaijan)"
+    },
+    {
+        "id": 27,
+        "localeCode": "ba-RU",
+        "name": "Bashkir(Russia)"
+    },
+    {
+        "id": 28,
+        "localeCode": "eu-ES",
+        "name": "Basque(Basque)"
+    },
+    {
+        "id": 29,
+        "localeCode": "be-BY",
+        "name": "Belarusian(Belarus)"
+    },
+    {
+        "id": 30,
+        "localeCode": "bn-BD",
+        "name": "Bengali(Bangladesh)"
+    },
+    {
+        "id": 31,
+        "localeCode": "bn-IN",
+        "name": "Bengali(India)"
+    },
+    {
+        "id": 32,
+        "localeCode": "bs-Cyrl-BA",
+        "name": "Bosnian(Cyrillic, Bosnia and Herzegovina)"
+    },
+    {
+        "id": 33,
+        "localeCode": "bs-Latn-BA",
+        "name": "Bosnian(Latin, Bosnia and Herzegovina)"
+    },
+    {
+        "id": 34,
+        "localeCode": "br-FR",
+        "name": "Breton(France)"
+    },
+    {
+        "id": 35,
+        "localeCode": "bg-BG",
+        "name": "Bulgarian(Bulgaria)"
+    },
+    {
+        "id": 36,
+        "localeCode": "my-MM",
+        "name": "Burmese(Myanmar)"
+    },
+    {
+        "id": 37,
+        "localeCode": "ca-ES",
+        "name": "Catalan"
+    },
+    {
+        "id": 39,
+        "localeCode": "tzm-Tfng-MA",
+        "name": "Central Atlas Tamazight(Tifinagh, Morocco)"
+    },
+    {
+        "id": 40,
+        "localeCode": "ku-Arab-IQ",
+        "name": "Central Kurdish(Iraq)"
+    },
+    {
+        "id": 41,
+        "localeCode": "chr-Cher-US",
+        "name": "Cherokee(Cherokee)"
+    },
+    {
+        "id": 42,
+        "localeCode": "zh-CN",
+        "name": "Chinese(Simplified, PRC)"
+    },
+    {
+        "id": 43,
+        "localeCode": "zh-SG",
+        "name": "Chinese(Simplified, Singapore)"
+    },
+    {
+        "id": 44,
+        "localeCode": "zh-HK",
+        "name": "Chinese(Traditional, Hong Kong)"
+    },
+    {
+        "id": 45,
+        "localeCode": "zh-MO",
+        "name": "Chinese(Traditional, Macao S.A.R.)"
+    },
+    {
+        "id": 46,
+        "localeCode": "zh-TW",
+        "name": "Chinese(Traditional, Taiwan)"
+    },
+    {
+        "id": 47,
+        "localeCode": "co-FR",
+        "name": "Corsican(France)"
+    },
+    {
+        "id": 48,
+        "localeCode": "hr-HR",
+        "name": "Croatian(Croatia)"
+    },
+    {
+        "id": 49,
+        "localeCode": "hr-BA",
+        "name": "Croatian(Latin, Bosnia and Herzegovina)"
+    },
+    {
+        "id": 50,
+        "localeCode": "cs-CZ",
+        "name": "Czech(Czech Republic)"
+    },
+    {
+        "id": 51,
+        "localeCode": "da-DK",
+        "name": "Danish(Denmark)"
+    },
+    {
+        "id": 52,
+        "localeCode": "prs-AF",
+        "name": "Dari(Afghanistan)"
+    },
+    {
+        "id": 53,
+        "localeCode": "dv-MV",
+        "name": "Divehi(Maldives)"
+    },
+    {
+        "id": 54,
+        "localeCode": "nl-BE",
+        "name": "Dutch(Belgium)"
+    },
+    {
+        "id": 55,
+        "localeCode": "nl-NL",
+        "name": "Dutch(Netherlands)"
+    },
+    {
+        "id": 56,
+        "localeCode": "en-AU",
+        "name": "English(Australia)"
+    },
+    {
+        "id": 57,
+        "localeCode": "en-BZ",
+        "name": "English(Belize)"
+    },
+    {
+        "id": 58,
+        "localeCode": "en-CA",
+        "name": "English(Canada)"
+    },
+    {
+        "id": 59,
+        "localeCode": "en-029",
+        "name": "English(Caribbean)"
+    },
+    {
+        "id": 60,
+        "localeCode": "en-GI",
+        "name": "English(Gibraltar)"
+    },
+    {
+        "id": 61,
+        "localeCode": "en-HK",
+        "name": "English(Hong Kong)"
+    },
+    {
+        "id": 62,
+        "localeCode": "en-IN",
+        "name": "English(India)"
+    },
+    {
+        "id": 63,
+        "localeCode": "en-IE",
+        "name": "English(Ireland)"
+    },
+    {
+        "id": 64,
+        "localeCode": "en-JM",
+        "name": "English(Jamaica)"
+    },
+    {
+        "id": 65,
+        "localeCode": "en-MY",
+        "name": "English(Malaysia)"
+    },
+    {
+        "id": 66,
+        "localeCode": "en-NZ",
+        "name": "English(New Zealand)"
+    },
+    {
+        "id": 67,
+        "localeCode": "en-PH",
+        "name": "English(Republic of the Philippines)"
+    },
+    {
+        "id": 68,
+        "localeCode": "en-SG",
+        "name": "English(Singapore)"
+    },
+    {
+        "id": 69,
+        "localeCode": "en-ZA",
+        "name": "English(South Africa)"
+    },
+    {
+        "id": 70,
+        "localeCode": "en-TT",
+        "name": "English(Trinidad and Tobago)"
+    },
+    {
+        "id": 71,
+        "localeCode": "en-GB",
+        "name": "English(United Kingdom)"
+    },
+    {
+        "id": 72,
+        "localeCode": "en-US",
+        "name": "English(United States)"
+    },
+    {
+        "id": 73,
+        "localeCode": "en-ZW",
+        "name": "English(Zimbabwe)"
+    },
+    {
+        "id": 74,
+        "localeCode": "et-EE",
+        "name": "Estonian(Estonia)"
+    },
+    {
+        "id": 75,
+        "localeCode": "fo-FO",
+        "name": "Faroese(Faroe Islands)"
+    },
+    {
+        "id": 76,
+        "localeCode": "fa-IR",
+        "name": "Farsi"
+    },
+    {
+        "id": 78,
+        "localeCode": "fil-PH",
+        "name": "Filipino(Philippines)"
+    },
+    {
+        "id": 79,
+        "localeCode": "fi-FI",
+        "name": "Finnish(Finland)"
+    },
+    {
+        "id": 80,
+        "localeCode": "fr-BE",
+        "name": "French(Belgium)"
+    },
+    {
+        "id": 81,
+        "localeCode": "fr-CM",
+        "name": "French(Cameroon)"
+    },
+    {
+        "id": 82,
+        "localeCode": "fr-CA",
+        "name": "French(Canada)"
+    },
+    {
+        "id": 83,
+        "localeCode": "fr-CD",
+        "name": "French(Congo[DRC])"
+    },
+    {
+        "id": 84,
+        "localeCode": "fr-FR",
+        "name": "French(France)"
+    },
+    {
+        "id": 85,
+        "localeCode": "fr-HAT",
+        "name": "French(Haiti)"
+    },
+    {
+        "id": 86,
+        "localeCode": "fr-CI",
+        "name": "French(Ivory Coast)"
+    },
+    {
+        "id": 87,
+        "localeCode": "fr-LU",
+        "name": "French(Luxembourg)"
+    },
+    {
+        "id": 88,
+        "localeCode": "fr-ML",
+        "name": "French(Mali)"
+    },
+    {
+        "id": 89,
+        "localeCode": "fr-MC",
+        "name": "French(Monaco)"
+    },
+    {
+        "id": 90,
+        "localeCode": "fr-MA",
+        "name": "French(Morocco)"
+    },
+    {
+        "id": 91,
+        "localeCode": "fr-RE",
+        "name": "French(R\u00e9union)"
+    },
+    {
+        "id": 92,
+        "localeCode": "fr-SN",
+        "name": "French(Senegal)"
+    },
+    {
+        "id": 93,
+        "localeCode": "fr-CH",
+        "name": "French(Switzerland)"
+    },
+    {
+        "id": 94,
+        "localeCode": "fr-US",
+        "name": "French(United States)"
+    },
+    {
+        "id": 95,
+        "localeCode": "fy-NL",
+        "name": "Frisian(Netherlands)"
+    },
+    {
+        "id": 96,
+        "localeCode": "ff-Latn-SN",
+        "name": "Fulah(Latin,Senegal)"
+    },
+    {
+        "id": 97,
+        "localeCode": "gl-ES",
+        "name": "Galician(Galician)"
+    },
+    {
+        "id": 98,
+        "localeCode": "ka-GE",
+        "name": "Georgian(Georgia)"
+    },
+    {
+        "id": 99,
+        "localeCode": "de-AT",
+        "name": "German(Austria)"
+    },
+    {
+        "id": 100,
+        "localeCode": "de-DE",
+        "name": "German(Germany)"
+    },
+    {
+        "id": 101,
+        "localeCode": "de-LI",
+        "name": "German(Liechtenstein)"
+    },
+    {
+        "id": 102,
+        "localeCode": "de-LU",
+        "name": "German(Luxembourg)"
+    },
+    {
+        "id": 103,
+        "localeCode": "de-CH",
+        "name": "German(Switzerland)"
+    },
+    {
+        "id": 104,
+        "localeCode": "gil-KI",
+        "name": "Gilbertese(Kiribati)"
+    },
+    {
+        "id": 105,
+        "localeCode": "el-GR",
+        "name": "Greek(Greece)"
+    },
+    {
+        "id": 106,
+        "localeCode": "kl-GL",
+        "name": "Greenlandic(Greenland)"
+    },
+    {
+        "id": 107,
+        "localeCode": "gn-PY",
+        "name": "Guarani(Paraguay)"
+    },
+    {
+        "id": 108,
+        "localeCode": "gu-IN",
+        "name": "Gujarati(India)"
+    },
+    {
+        "id": 109,
+        "localeCode": "ht-HT",
+        "name": "Haitian(Haiti)"
+    },
+    {
+        "id": 110,
+        "localeCode": "ha-Latn-NG",
+        "name": "Hausa(Latin,Nigeria)"
+    },
+    {
+        "id": 111,
+        "localeCode": "haw-US",
+        "name": "Hawaiian(United States)"
+    },
+    {
+        "id": 112,
+        "localeCode": "he-IL",
+        "name": "Hebrew(Israel)"
+    },
+    {
+        "id": 113,
+        "localeCode": "hi-IN",
+        "name": "Hindi(India)"
+    },
+    {
+        "id": 114,
+        "localeCode": "mww-CN",
+        "name": "Hmong Daw(China)"
+    },
+    {
+        "id": 115,
+        "localeCode": "hu-HU",
+        "name": "Hungarian(Hungary)"
+    },
+    {
+        "id": 116,
+        "localeCode": "is-IS",
+        "name": "Icelandic(Iceland)"
+    },
+    {
+        "id": 117,
+        "localeCode": "ig-NG",
+        "name": "Igbo(Nigeria)"
+    },
+    {
+        "id": 118,
+        "localeCode": "ilo-PH",
+        "name": "Ilokano(Philippines)"
+    },
+    {
+        "id": 119,
+        "localeCode": "id-ID",
+        "name": "Indonesian(Indonesia)"
+    },
+    {
+        "id": 120,
+        "localeCode": "iu-Latn-CA",
+        "name": "Inuktitut(Latin, Canada)"
+    },
+    {
+        "id": 121,
+        "localeCode": "iu-Cans-CA",
+        "name": "Inuktitut(Syllabics, Canada)"
+    },
+    {
+        "id": 122,
+        "localeCode": "ga-IE",
+        "name": "Irish(Ireland)"
+    },
+    {
+        "id": 123,
+        "localeCode": "xh-ZA",
+        "name": "isiXhosa(South Africa)"
+    },
+    {
+        "id": 124,
+        "localeCode": "zu-ZA",
+        "name": "isiZulu(South Africa)"
+    },
+    {
+        "id": 125,
+        "localeCode": "it-IT",
+        "name": "Italian(Italy)"
+    },
+    {
+        "id": 126,
+        "localeCode": "it-SM",
+        "name": "Italian(San Marino)"
+    },
+    {
+        "id": 127,
+        "localeCode": "it-CH",
+        "name": "Italian(Switzerland)"
+    },
+    {
+        "id": 128,
+        "localeCode": "ja-JP",
+        "name": "Japanese(Japan)"
+    },
+    {
+        "id": 129,
+        "localeCode": "jv-Latn-ID",
+        "name": "Javanese(Indonesia)"
+    },
+    {
+        "id": 130,
+        "localeCode": "qut-GT",
+        "name": "K'iche(Guatemala)"
+    },
+    {
+        "id": 131,
+        "localeCode": "kn-IN",
+        "name": "Kannada(India)"
+    },
+    {
+        "id": 132,
+        "localeCode": "kk-KZ",
+        "name": "Kazakh(Kazakhstan)"
+    },
+    {
+        "id": 133,
+        "localeCode": "km-KH",
+        "name": "Khmer(Cambodia)"
+    },
+    {
+        "id": 134,
+        "localeCode": "rw-RW",
+        "name": "Kinyarwanda(Rwanda)"
+    },
+    {
+        "id": 135,
+        "localeCode": "sw-KE",
+        "name": "Kiswahili(Kenya)"
+    },
+    {
+        "id": 136,
+        "localeCode": "kok-IN",
+        "name": "Konkani(India)"
+    },
+    {
+        "id": 137,
+        "localeCode": "ko-KR",
+        "name": "Korean(Korea)"
+    },
+    {
+        "id": 138,
+        "localeCode": "ky-KG",
+        "name": "Kyrgyz(Kyrgyzstan)"
+    },
+    {
+        "id": 139,
+        "localeCode": "lo-LA",
+        "name": "Lao(Lao P.D.R.)"
+    },
+    {
+        "id": 140,
+        "localeCode": "lv-LV",
+        "name": "Latvian(Latvia)"
+    },
+    {
+        "id": 141,
+        "localeCode": "lt-LT",
+        "name": "Lithuanian(Lithuania)"
+    },
+    {
+        "id": 142,
+        "localeCode": "dsb-DE",
+        "name": "Lower Sorbian(Germany)"
+    },
+    {
+        "id": 143,
+        "localeCode": "lb-LU",
+        "name": "Luxembourgish(Luxembourg)"
+    },
+    {
+        "id": 144,
+        "localeCode": "mk-MK",
+        "name": "Macedonian(Republic of Macedonia)"
+    },
+    {
+        "id": 145,
+        "localeCode": "mg-MG",
+        "name": "Malagasy(Madagascar)"
+    },
+    {
+        "id": 146,
+        "localeCode": "ms-BN",
+        "name": "Malay(Brunei Darussalam)"
+    },
+    {
+        "id": 147,
+        "localeCode": "ms-MY",
+        "name": "Malay(Malaysia)"
+    },
+    {
+        "id": 148,
+        "localeCode": "ml-IN",
+        "name": "Malayalam(India)"
+    },
+    {
+        "id": 149,
+        "localeCode": "mt-MT",
+        "name": "Maltese(Malta)"
+    },
+    {
+        "id": 150,
+        "localeCode": "mi-NZ",
+        "name": "Maori(New Zealand)"
+    },
+    {
+        "id": 151,
+        "localeCode": "arn-CL",
+        "name": "Mapudungun(Chile)"
+    },
+    {
+        "id": 152,
+        "localeCode": "mr-IN",
+        "name": "Marathi(India)"
+    },
+    {
+        "id": 153,
+        "localeCode": "mh-MH",
+        "name": "Marshallese(Marshall Islands)"
+    },
+    {
+        "id": 154,
+        "localeCode": "moh-CA",
+        "name": "Mohawk(Mohawk)"
+    },
+    {
+        "id": 155,
+        "localeCode": "mn-MN",
+        "name": "Mongolian(Cyrillic, Mongolia)"
+    },
+    {
+        "id": 156,
+        "localeCode": "mn-Mong-CN",
+        "name": "Mongolian(Traditional Mongolian,PRC)"
+    },
+    {
+        "id": 157,
+        "localeCode": "ngo-GN",
+        "name": "N'ko(Guinea)"
+    },
+    {
+        "id": 158,
+        "localeCode": "ne-IN",
+        "name": "Nepali(India)"
+    },
+    {
+        "id": 159,
+        "localeCode": "ne-NP",
+        "name": "Nepali(Nepal)"
+    },
+    {
+        "id": 161,
+        "localeCode": "nn-NO",
+        "name": "Norwegian, Nynorsk(Norway)"
+    },
+    {
+        "id": 162,
+        "localeCode": "nb-NO",
+        "name": "Norwegian,Bokm\u00e5l(Norway)"
+    },
+    {
+        "id": 163,
+        "localeCode": "oc-FR",
+        "name": "Occitan(France)"
+    },
+    {
+        "id": 164,
+        "localeCode": "or-IN",
+        "name": "Oriya(India)"
+    },
+    {
+        "id": 165,
+        "localeCode": "om-ET",
+        "name": "Oromo(Ethiopia)"
+    },
+    {
+        "id": 166,
+        "localeCode": "ps-AF",
+        "name": "Pashto(Afghanistan)"
+    },
+    {
+        "id": 167,
+        "localeCode": "fa-IR",
+        "name": "Persian"
+    },
+    {
+        "id": 168,
+        "localeCode": "pl-PL",
+        "name": "Polish(Poland)"
+    },
+    {
+        "id": 169,
+        "localeCode": "pt-AO",
+        "name": "Portuguese(Angola)"
+    },
+    {
+        "id": 170,
+        "localeCode": "pt-BR",
+        "name": "Portuguese(Brazil)"
+    },
+    {
+        "id": 171,
+        "localeCode": "pt-PT",
+        "name": "Portuguese(Portugal)"
+    },
+    {
+        "id": 172,
+        "localeCode": "pa-IN",
+        "name": "Punjabi(India)"
+    },
+    {
+        "id": 173,
+        "localeCode": "pa-Arab-PK",
+        "name": "Punjabi(Islamic Republic of Pakistan)"
+    },
+    {
+        "id": 174,
+        "localeCode": "quz-BO",
+        "name": "Quechua(Bolivia)"
+    },
+    {
+        "id": 175,
+        "localeCode": "quz-EC",
+        "name": "Quechua(Ecuador)"
+    },
+    {
+        "id": 176,
+        "localeCode": "quz-PE",
+        "name": "Quechua(Peru)"
+    },
+    {
+        "id": 177,
+        "localeCode": "ro-MD",
+        "name": "Romanian(Moldova)"
+    },
+    {
+        "id": 178,
+        "localeCode": "ro-RO",
+        "name": "Romanian(Romania)"
+    },
+    {
+        "id": 179,
+        "localeCode": "rm-CH",
+        "name": "Romansh(Switzerland)"
+    },
+    {
+        "id": 180,
+        "localeCode": "ru-RU",
+        "name": "Russian(Russia)"
+    },
+    {
+        "id": 181,
+        "localeCode": "sah-RU",
+        "name": "Sakha(Russia)"
+    },
+    {
+        "id": 182,
+        "localeCode": "smn-FI",
+        "name": "Sami, Inari(Finland)"
+    },
+    {
+        "id": 183,
+        "localeCode": "smj-NO",
+        "name": "Sami, Lule(Norway)"
+    },
+    {
+        "id": 184,
+        "localeCode": "smj-SE",
+        "name": "Sami, Lule(Sweden)"
+    },
+    {
+        "id": 185,
+        "localeCode": "se-FI",
+        "name": "Sami, Northern(Finland)"
+    },
+    {
+        "id": 186,
+        "localeCode": "se-NO",
+        "name": "Sami, Northern(Norway)"
+    },
+    {
+        "id": 187,
+        "localeCode": "se-SE",
+        "name": "Sami, Northern(Sweden)"
+    },
+    {
+        "id": 188,
+        "localeCode": "sms-FI",
+        "name": "Sami, Skolt(Finland)"
+    },
+    {
+        "id": 189,
+        "localeCode": "sma-NO",
+        "name": "Sami, Southern(Norway)"
+    },
+    {
+        "id": 190,
+        "localeCode": "sma-SE",
+        "name": "Sami, Southern(Sweden)"
+    },
+    {
+        "id": 191,
+        "localeCode": "sm-WS",
+        "name": "Samoan"
+    },
+    {
+        "id": 192,
+        "localeCode": "sa-IN",
+        "name": "Sanskrit(India)"
+    },
+    {
+        "id": 193,
+        "localeCode": "gd-GB",
+        "name": "Scottish Gaelic(United Kingdom)"
+    },
+    {
+        "id": 194,
+        "localeCode": "sr-Cyrl-BA",
+        "name": "Serbian(Cyrillic, Bosnia and Herzegovina)"
+    },
+    {
+        "id": 195,
+        "localeCode": "sr-Cyrl-ME",
+        "name": "Serbian(Cyrillic, Montenegro)"
+    },
+    {
+        "id": 196,
+        "localeCode": "sr-Cyrl-CS",
+        "name": "Serbian(Cyrillic, Serbia and Montenegro(Former))"
+    },
+    {
+        "id": 197,
+        "localeCode": "sr-Cyrl-RS",
+        "name": "Serbian(Cyrillic, Serbia)"
+    },
+    {
+        "id": 198,
+        "localeCode": "sr-Latn-BA",
+        "name": "Serbian(Latin,Bosnia and Herzegovina)"
+    },
+    {
+        "id": 199,
+        "localeCode": "sr-Latn-ME",
+        "name": "Serbian(Latin,Montenegro)"
+    },
+    {
+        "id": 200,
+        "localeCode": "sr-Latn-CS",
+        "name": "Serbian(Latin,Serbia and Montenegro(Former))"
+    },
+    {
+        "id": 201,
+        "localeCode": "sr-Latn-RS",
+        "name": "Serbian(Latin,Serbia)"
+    },
+    {
+        "id": 202,
+        "localeCode": "nso-ZA",
+        "name": "Sesotho sa Leboa(South Africa)"
+    },
+    {
+        "id": 203,
+        "localeCode": "tn-BW",
+        "name": "Setswana(Botswana)"
+    },
+    {
+        "id": 204,
+        "localeCode": "tn-ZA",
+        "name": "Setswana(South Africa)"
+    },
+    {
+        "id": 205,
+        "localeCode": "sn-Latn-ZW",
+        "name": "Shona(Latin,Zimbawe)"
+    },
+    {
+        "id": 206,
+        "localeCode": "sd-Arab-PK",
+        "name": "Sindhi(Islamic Republic of Pakistan)"
+    },
+    {
+        "id": 207,
+        "localeCode": "si-LK",
+        "name": "Sinhala(Sri Lanka)"
+    },
+    {
+        "id": 208,
+        "localeCode": "sk-SK",
+        "name": "Slovak(Slovakia)"
+    },
+    {
+        "id": 209,
+        "localeCode": "sl-SI",
+        "name": "Slovenian(Slovenia)"
+    },
+    {
+        "id": 210,
+        "localeCode": "so-SO",
+        "name": "Somali(Somalia)"
+    },
+    {
+        "id": 211,
+        "localeCode": "st-ZA",
+        "name": "Southern Sotho(South Africa)"
+    },
+    {
+        "id": 212,
+        "localeCode": "es-AR",
+        "name": "Spanish(Argentina)"
+    },
+    {
+        "id": 213,
+        "localeCode": "es-VE",
+        "name": "Spanish(Bolivarian Republic of Venezuela)"
+    },
+    {
+        "id": 214,
+        "localeCode": "es-BO",
+        "name": "Spanish(Bolivia)"
+    },
+    {
+        "id": 215,
+        "localeCode": "es-CL",
+        "name": "Spanish(Chile)"
+    },
+    {
+        "id": 216,
+        "localeCode": "es-CO",
+        "name": "Spanish(Colombia)"
+    },
+    {
+        "id": 217,
+        "localeCode": "es-CR",
+        "name": "Spanish(Costa Rica)"
+    },
+    {
+        "id": 218,
+        "localeCode": "es-DO",
+        "name": "Spanish(Dominican Republic)"
+    },
+    {
+        "id": 219,
+        "localeCode": "es-EC",
+        "name": "Spanish(Ecuador)"
+    },
+    {
+        "id": 220,
+        "localeCode": "es-SV",
+        "name": "Spanish(El Salvador)"
+    },
+    {
+        "id": 221,
+        "localeCode": "es-GT",
+        "name": "Spanish(Guatemala)"
+    },
+    {
+        "id": 222,
+        "localeCode": "es-HN",
+        "name": "Spanish(Honduras)"
+    },
+    {
+        "id": 225,
+        "localeCode": "es-419",
+        "name": "Spanish(Latin America)"
+    },
+    {
+        "id": 226,
+        "localeCode": "es-MX",
+        "name": "Spanish(Mexico)"
+    },
+    {
+        "id": 227,
+        "localeCode": "es-NI",
+        "name": "Spanish(Nicaragua)"
+    },
+    {
+        "id": 228,
+        "localeCode": "es-PA",
+        "name": "Spanish(Panama)"
+    },
+    {
+        "id": 229,
+        "localeCode": "es-PY",
+        "name": "Spanish(Paraguay)"
+    },
+    {
+        "id": 230,
+        "localeCode": "es-PE",
+        "name": "Spanish(Peru)"
+    },
+    {
+        "id": 231,
+        "localeCode": "es-PR",
+        "name": "Spanish(Puerto Rico)"
+    },
+    {
+        "id": 232,
+        "localeCode": "es-ES",
+        "name": "Spanish(Spain)"
+    },
+    {
+        "id": 233,
+        "localeCode": "es-US",
+        "name": "Spanish(United States)"
+    },
+    {
+        "id": 234,
+        "localeCode": "es-UY",
+        "name": "Spanish(Uruguay)"
+    },
+    {
+        "id": 235,
+        "localeCode": "zgh-Tfng-MA",
+        "name": "Standard Morrocam Tamazight(Tifnagh, Morocco)"
+    },
+    {
+        "id": 236,
+        "localeCode": "sw-SW",
+        "name": "Swahili"
+    },
+    {
+        "id": 237,
+        "localeCode": "sv-FI",
+        "name": "Swedish(Finland)"
+    },
+    {
+        "id": 238,
+        "localeCode": "sv-SE",
+        "name": "Swedish(Sweden)"
+    },
+    {
+        "id": 239,
+        "localeCode": "syr-SY",
+        "name": "Syriac(Syria)"
+    },
+    {
+        "id": 240,
+        "localeCode": "tl-PH",
+        "name": "Tagalog(Philippines)"
+    },
+    {
+        "id": 241,
+        "localeCode": "ty-TY",
+        "name": "Tahitian"
+    },
+    {
+        "id": 242,
+        "localeCode": "tg-Cyrl-TJ",
+        "name": "Tajik(Cyrillic, Tajikistan)"
+    },
+    {
+        "id": 243,
+        "localeCode": "tzm-Latn-DZ",
+        "name": "Tamazight(Latin, Algeria)"
+    },
+    {
+        "id": 244,
+        "localeCode": "ta-IN",
+        "name": "Tamil(India)"
+    },
+    {
+        "id": 245,
+        "localeCode": "ta-LK",
+        "name": "Tamil(Sri Lanka)"
+    },
+    {
+        "id": 246,
+        "localeCode": "tt-RU",
+        "name": "Tatar(Russia)"
+    },
+    {
+        "id": 247,
+        "localeCode": "te-IN",
+        "name": "Telugu(India)"
+    },
+    {
+        "id": 248,
+        "localeCode": "th-TH",
+        "name": "Thai(Thailand)"
+    },
+    {
+        "id": 249,
+        "localeCode": "bo-CN",
+        "name": "Tibetan(PRC)"
+    },
+    {
+        "id": 250,
+        "localeCode": "ti-ER",
+        "name": "Tigrinya(Eritrea)"
+    },
+    {
+        "id": 251,
+        "localeCode": "ti-ET",
+        "name": "Tigrinya(Ethiopia)"
+    },
+    {
+        "id": 252,
+        "localeCode": "to-TO",
+        "name": "Tongan(Tonga)"
+    },
+    {
+        "id": 253,
+        "localeCode": "ts-ZA",
+        "name": "Tsonga(South Africa)"
+    },
+    {
+        "id": 254,
+        "localeCode": "tr-TR",
+        "name": "Turkish(Turkey)"
+    },
+    {
+        "id": 255,
+        "localeCode": "tk-TM",
+        "name": "Turkmen(Turkmenistan)"
+    },
+    {
+        "id": 256,
+        "localeCode": "uk-UA",
+        "name": "Ukrainian(Ukraine)"
+    },
+    {
+        "id": 257,
+        "localeCode": "hsb-DE",
+        "name": "Upper Sorbian(Germany)"
+    },
+    {
+        "id": 258,
+        "localeCode": "ur-IN",
+        "name": "Urdu(India)"
+    },
+    {
+        "id": 259,
+        "localeCode": "ur-PK",
+        "name": "Urdu(Islamic Republic of Pakistan)"
+    },
+    {
+        "id": 260,
+        "localeCode": "ug-CN",
+        "name": "Uyghur(PRC)"
+    },
+    {
+        "id": 261,
+        "localeCode": "uz-Cyrl-UZ",
+        "name": "Uzbek(Cyrillic, Uzbekistan)"
+    },
+    {
+        "id": 262,
+        "localeCode": "uz-Latn-UZ",
+        "name": "Uzbek(Latin, Uzbekistan)"
+    },
+    {
+        "id": 263,
+        "localeCode": "ca-ES-valencia",
+        "name": "Valencian(Spain)"
+    },
+    {
+        "id": 264,
+        "localeCode": "vi-VN",
+        "name": "Vietnamese(Vietnam)"
+    },
+    {
+        "id": 265,
+        "localeCode": "cy-GB",
+        "name": "Welsh(United Kingdom)"
+    },
+    {
+        "id": 266,
+        "localeCode": "wo-SN",
+        "name": "Wolof(Senegal)"
+    },
+    {
+        "id": 267,
+        "localeCode": "ii-CN",
+        "name": "Yi(PRC)"
+    },
+    {
+        "id": 268,
+        "localeCode": "yo-NG",
+        "name": "Yoruba(Nigeria)"
+    },
+    {
+        "id": 269,
+        "localeCode": "en-AE",
+        "name": "English (United Arab Emirates)"
+    },
+    {
+        "id": 270,
+        "localeCode": "en-142",
+        "name": "English (Asia)"
+    },
+    {
+        "id": 271,
+        "localeCode": "ar-AA",
+        "name": "Arabic (Private use)"
+    },
+    {
+        "id": 272,
+        "localeCode": "ak",
+        "name": "Akan"
+    },
+    {
+        "id": 273,
+        "localeCode": "ak-GH",
+        "name": "Akan (Ghana)"
+    },
+    {
+        "id": 274,
+        "localeCode": "grc-GR",
+        "name": "Ancient Greek (to 1453) (Greece)"
+    },
+    {
+        "id": 275,
+        "localeCode": "aa-ET",
+        "name": "Afar (Ethiopia)"
+    },
+    {
+        "id": 276,
+        "localeCode": "ps",
+        "name": "Pashto"
+    },
+    {
+        "id": 277,
+        "localeCode": "ca-AD",
+        "name": "Valencian (Andorra)"
+    },
+    {
+        "id": 278,
+        "localeCode": "ku-IQ",
+        "name": "Kurdish (Iraq)"
+    },
+    {
+        "id": 279,
+        "localeCode": "hmn",
+        "name": "Mong"
+    },
+    {
+        "id": 280,
+        "localeCode": "en-CY",
+        "name": "English (Cyprus)"
+    },
+    {
+        "id": 281,
+        "localeCode": "en-DE",
+        "name": "English (Germany)"
+    },
+    {
+        "id": 282,
+        "localeCode": "bi-VU",
+        "name": "Bislama (Vanuatu)"
+    },
+    {
+        "id": 283,
+        "localeCode": "ab",
+        "name": "Abkhazian"
+    },
+    {
+        "id": 284,
+        "localeCode": "sd-PK",
+        "name": "Sindhi (Pakistan)"
+    },
+    {
+        "id": 285,
+        "localeCode": "bh-IN",
+        "name": "Bihari languages (India)"
+    },
+    {
+        "id": 286,
+        "localeCode": "kg-CG",
+        "name": "Kongo (Congo)"
+    },
+    {
+        "id": 287,
+        "localeCode": "ay-BO",
+        "name": "Aymara (Bolivia)"
+    },
+    {
+        "id": 288,
+        "localeCode": "rn",
+        "name": "Rundi"
+    },
+    {
+        "id": 289,
+        "localeCode": "ceb",
+        "name": "Cebuano"
+    },
+    {
+        "id": 290,
+        "localeCode": "dv-IN",
+        "name": "Maldivian (India)"
+    },
+    {
+        "id": 291,
+        "localeCode": "en-AT",
+        "name": "English (Austria)"
+    },
+    {
+        "id": 292,
+        "localeCode": "bo",
+        "name": "Tibetan"
+    },
+    {
+        "id": 293,
+        "localeCode": "ar-",
+        "name": "Arabic"
+    },
+    {
+        "id": 294,
+        "localeCode": "it-",
+        "name": "Italian"
+    },
+    {
+        "id": 295,
+        "localeCode": "en-NT",
+        "name": "English (Neutral Zone)"
+    },
+    {
+        "id": 296,
+        "localeCode": "en-NL",
+        "name": "English (Netherlands)"
+    },
+    {
+        "id": 297,
+        "localeCode": "cal",
+        "name": "Carolinian"
+    },
+    {
+        "id": 298,
+        "localeCode": "sla-ME",
+        "name": "Slavic languages (Montenegro)"
+    },
+    {
+        "id": 299,
+        "localeCode": "en-CH",
+        "name": "English (Switzerland)"
+    },
+    {
+        "id": 300,
+        "localeCode": "czt",
+        "name": "Zotung Chin"
+    },
+    {
+        "id": 301,
+        "localeCode": "la",
+        "name": "Latin"
+    },
+    {
+        "id": 302,
+        "localeCode": "ksf-CM",
+        "name": "Bafia (Cameroon)"
+    },
+    {
+        "id": 303,
+        "localeCode": "ig",
+        "name": "Igbo"
+    },
+    {
+        "id": 304,
+        "localeCode": "af-NA",
+        "name": "Afrikaans (Namibia)"
+    },
+    {
+        "id": 305,
+        "localeCode": "sr-RS",
+        "name": "Serbian (Serbia)"
+    },
+    {
+        "id": 306,
+        "localeCode": "el-us",
+        "name": "Modern Greek (1453-) (United States)"
+    },
+    {
+        "id": 307,
+        "localeCode": "nl-as",
+        "name": "Flemish (American Samoa)"
+    },
+    {
+        "id": 308,
+        "localeCode": "DE",
+        "name": "German"
+    },
+    {
+        "id": 309,
+        "localeCode": "no-",
+        "name": "Norwegian"
+    },
+    {
+        "id": 310,
+        "localeCode": "mk-",
+        "name": "Macedonian"
+    },
+    {
+        "id": 311,
+        "localeCode": "ES",
+        "name": "Castilian"
+    },
+    {
+        "id": 312,
+        "localeCode": "IT",
+        "name": "Italian"
+    },
+    {
+        "id": 313,
+        "localeCode": "FR",
+        "name": "French"
+    },
+    {
+        "id": 314,
+        "localeCode": "RO",
+        "name": "Moldovan"
+    },
+    {
+        "id": 315,
+        "localeCode": "AM",
+        "name": "Amharic"
+    },
+    {
+        "id": 316,
+        "localeCode": "SMA",
+        "name": "Southern Sami"
+    },
+    {
+        "id": 317,
+        "localeCode": "mis",
+        "name": "Uncoded languages"
+    },
+    {
+        "id": 318,
+        "localeCode": "EN",
+        "name": "English"
+    },
+    {
+        "id": 319,
+        "localeCode": "sq-MK",
+        "name": "Albanian (The Former Yugoslav Republic of Macedonia)"
+    },
+    {
+        "id": 320,
+        "localeCode": "cs-cs",
+        "name": "Czech (Serbia and Montenegro)"
+    },
+    {
+        "id": 321,
+        "localeCode": "cs",
+        "name": "Czech"
+    },
+    {
+        "id": 322,
+        "localeCode": "sk",
+        "name": "Slovak"
+    },
+    {
+        "id": 323,
+        "localeCode": "sq",
+        "name": "Albanian"
+    },
+    {
+        "id": 324,
+        "localeCode": "tlh",
+        "name": "tlhIngan-Hol"
+    },
+    {
+        "id": 325,
+        "localeCode": "ar-TD",
+        "name": "Arabic (Chad)"
+    },
+    {
+        "id": 326,
+        "localeCode": "am-ER",
+        "name": "Amharic (Eritrea)"
+    },
+    {
+        "id": 327,
+        "localeCode": "ar",
+        "name": "Arabic"
+    },
+    {
+        "id": 328,
+        "localeCode": "uz-UZ",
+        "name": "Uzbek (Uzbekistan)"
+    },
+    {
+        "id": 329,
+        "localeCode": "nl",
+        "name": "Flemish"
+    },
+    {
+        "id": 330,
+        "localeCode": "zh",
+        "name": "Chinese"
+    },
+    {
+        "id": 331,
+        "localeCode": "en-mt",
+        "name": "English (Malta)"
+    },
+    {
+        "id": 332,
+        "localeCode": "de-be",
+        "name": "German (Belgium)"
+    },
+    {
+        "id": 333,
+        "localeCode": "es-001",
+        "name": "Castilian (World)"
+    },
+    {
+        "id": 334,
+        "localeCode": "lv",
+        "name": "Latvian"
+    },
+    {
+        "id": 335,
+        "localeCode": "da",
+        "name": "Danish"
+    }
+]

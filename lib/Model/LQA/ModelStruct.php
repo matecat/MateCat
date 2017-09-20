@@ -2,7 +2,13 @@
 
 namespace LQA;
 
+use Exception;
+
 class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+
+    protected static $auto_increment_fields = ['id'];
+    protected static $primary_keys = ['id'];
+
     public $id;
     public $label ;
 
@@ -28,12 +34,12 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
     /**
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getLimit() {
         $options = json_decode( $this->pass_options, TRUE);
         if ( ! array_key_exists('limit', $options) ) {
-            throw new \Exception( 'limit is not defined in JSON options');
+            throw new Exception( 'limit is not defined in JSON options');
         }
         return $options['limit'];
 

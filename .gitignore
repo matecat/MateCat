@@ -56,4 +56,4 @@ plugins/*
 .lastjobprocessed_jpeer
 .maxJobToProcess_jpeer
 
-test.php
+inc/dqf/dqf_test_secret.ini
