@@ -809,12 +809,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
     $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
-    $jobDao = new Jobs_JobDao();
-    $jobStruct = new Jobs_JobStruct();
-    $jobStruct->id = (int)$jid;
-    $jobStruct->password = $jpassword;
-    $jobDao->setCacheTTL( 60 * 60 * 2 ); //2 hours cache on jobs metadata
-    $jobStruct = $jobDao->read( $jobStruct );
+    $jStructs = Jobs_JobDao::getById( $jid );
+    $currentJob = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
+        return $item->password == $jpassword;
+    } )[ 0 ];
 
     if ( $sid != null ) {
 
@@ -828,18 +826,18 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
         $queryForTranslationMismatch = "
 			SELECT
 			translation,
-			COUNT(1) as TOT,
-			GROUP_CONCAT( id_segment ) AS involved_id,
-			IF( password = '{$jobStruct[0]->password}', 1, 0 ) AS editable
+			COUNT( distinct id_segment ) as TOT,
+			GROUP_CONCAT( distinct id_segment ) AS involved_id,
+			IF( password = '{$currentJob->password}' AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
 				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jobStruct[0]->job_first_segment} AND {$jobStruct[0]->job_last_segment}
+				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end($jStructs)->job_last_segment . "
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
 				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
-				AND id_job = {$jobStruct[0]->id}
+				AND id_job = {$jStructs[0]->id}
 				AND id_segment != %u
-				GROUP BY translation, CONCAT( id_job, '-', password )
+				GROUP BY translation, id_job
 		";
 
         $query = sprintf( $queryForTranslationMismatch, $sid, $sid );
@@ -859,10 +857,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 			SELECT
 			COUNT( segment_hash ) AS total_sources,
 			COUNT( DISTINCT translation ) AS translations_available,
-			IF( password = '{$jobStruct[0]->password}', MIN( id_segment ), NULL ) AS first_of_my_job
+			IF( password = '{$currentJob->password}', MIN( id_segment ), NULL ) AS first_of_my_job
 				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jobStruct[0]->job_first_segment} AND {$jobStruct[0]->job_last_segment}
-				WHERE id_job = {$jobStruct[0]->id}
+				JOIN jobs ON id_job = id AND id_segment between {$currentJob->job_first_segment} AND {$currentJob->job_last_segment}
+				WHERE id_job = {$currentJob->id}
 				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available > 1

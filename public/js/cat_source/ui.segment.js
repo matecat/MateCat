@@ -14,7 +14,7 @@
                 classes.push('readonly');
             }
 
-            if ( segment.ice_locked === "1" ) {
+            if ( segment.ice_locked === "1" && !readonly) {
                 if (UI.getFromStorage('locked-' + originalId)) {
                     classes.push('ice-unlocked');
                     unlocked = true;

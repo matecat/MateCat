@@ -1662,7 +1662,9 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) sameContentIndex1 = ind;
+            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+                sameContentIndex1 = ind;
+            }
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 

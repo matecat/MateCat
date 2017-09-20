@@ -20,9 +20,17 @@
             </div>
         {{/unless}}
         {{#if ice_locked}}
-            <div class="ice-locked-icon">
-                <button class="icon-lock unlock-button locked"></button>
-            </div>
+            {{#unless readonly}}
+                {{#if unlocked}}
+                    <div class="ice-locked-icon">
+                        <button class="unlock-button unlocked icon-unlocked3"></button>
+                    </div>
+                {{else}}
+                    <div class="ice-locked-icon">
+                        <button class="icon-lock unlock-button locked"></button>
+                    </div>
+                {{/if}}
+            {{/unless}}
         {{/if}}
     </div>
     {{#if start_job_marker}}
