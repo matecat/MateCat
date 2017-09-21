@@ -9,18 +9,23 @@
 
 namespace API\App;
 
-use Analysis_PayableRates;
 use API\App\Json\PeeTableData;
 use API\V2\KleinController;
+use API\V2\Validators\LoginValidator;
+use API\V2\Validators\WhitelistAccessValidator;
 use DataAccess\ShapelessConcreteStruct;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Langs_Languages;
 use LanguageStats_LanguageStatsDAO;
 use API\App\Json\PeeGraphData;
 
 class PeeData extends KleinController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator( new WhitelistAccessValidator( $this ) );
+    }
 
     public function getPeePlots(){
 
