@@ -32,7 +32,7 @@ class CatDecorator {
 
         $this->controller     = $controller;
         $this->template       = $template;
-        $this->job            = $this->controller->getJob();
+        $this->job            = $this->controller->getChunk();
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();

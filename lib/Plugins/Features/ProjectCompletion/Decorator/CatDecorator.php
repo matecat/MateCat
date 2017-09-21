@@ -15,7 +15,7 @@ class CatDecorator extends AbstractDecorator {
     private $current_phase  ;
     
     public function decorate() {
-        $job = $this->controller->getJob();
+        $job = $this->controller->getChunk();
 
         $this->stats = $this->controller->getJobStats();
         $completed = $job->isMarkedComplete( array('is_review' => $this->controller->isRevision() ) ) ;
@@ -25,7 +25,7 @@ class CatDecorator extends AbstractDecorator {
         );
 
         $dao = new \Chunks_ChunkCompletionEventDao();
-        $this->current_phase = $dao->currentPhase( $this->controller->getJob() );
+        $this->current_phase = $dao->currentPhase( $this->controller->getChunk() );
 
         $this->template->project_completion_feature_enabled = true ;
         $this->template->header_main_button_id  = 'markAsCompleteButton' ;
