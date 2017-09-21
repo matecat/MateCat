@@ -262,7 +262,7 @@
     <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
         <a class="supported-file-formats" href="#">${formats_number} file formats</a>
         <span style="float: right;">.</span>
-        <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent() AND Bootstrap::areGDriveConfigured()">
+        <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent() AND Bootstrap::isGDriveConfigured()">
             <span class="gdrive-addlink-container">
                 and
                 <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>

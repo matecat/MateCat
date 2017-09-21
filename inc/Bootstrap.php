@@ -416,7 +416,7 @@ class Bootstrap {
         return true;
     }
 
-    public static function areGDriveConfigured(){
+    public static function isGDriveConfigured(){
         if( empty( INIT::$OAUTH_BROWSER_API_KEY ) ) {
             return false;
         }
