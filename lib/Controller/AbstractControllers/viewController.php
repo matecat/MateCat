@@ -373,6 +373,7 @@ abstract class viewController extends controller {
     }
 
     protected function render404() {
+        header( "HTTP/1.0 404 Not Found" );
         $this->makeTemplate('404.html');
         $this->finalize();
     }
