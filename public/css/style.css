@@ -2641,13 +2641,6 @@ section.readonly {
 }
 
 section.ice-locked .text {
-    /*zoom: 0.8;*/
-    /*width: 94%;*/
-    /*margin: 0 3%!important;*/
-    background-color: rgba(99, 157, 94, 0.2) !important;
-    -webkit-box-shadow: none !important;
-    border-top: 0 !important;
-    box-shadow: none !important;
     cursor: no-drop !important;
 }
 
@@ -2655,9 +2648,9 @@ section.ice-unlocked .next-unapproved {
     display: none;
 }
 
-body.cattool.editing section.ice-locked:not(.editor) .text:hover {
-    background-color: rgba(99, 157, 94, 0.1) !important;
-}
+/*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
+    /*background-color: rgba(99, 157, 94, 0.1) !important;*/
+/*}*/
 
 .ice-locked-icon > button {
     padding: 6px 3px 9px 11px;
@@ -2666,14 +2659,18 @@ body.cattool.editing section.ice-locked:not(.editor) .text:hover {
     border: 1px solid transparent;
     border-radius: 2px;
     cursor: pointer;
-    color: grey;
+    color: #aaa;
 }
+
+section:hover  .ice-locked-icon > button{
+    color: #6d6e71;
+}
+
 .ice-locked-icon > button:hover {
     background-color: #9E9E9E;
     border: 1px solid #5F5F5F;
-    color: white;
+    color: white !important;
 }
-
 
 body.archived section {
     z-index: 9998;
@@ -3252,6 +3249,7 @@ body.rtl-target .editor .editarea span {
     line-height: 14px;
     transition: all 100ms ease-in;
     left: 47.4%;
+    visibility: hidden;
 }
 
 

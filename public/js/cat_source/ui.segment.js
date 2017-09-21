@@ -8,15 +8,20 @@
             escapedSegment, splitAr, splitGroup, originalId
         ) {
             var splitGroup = segment.split_group || splitGroup || '';
-
+            var unlocked = false;
             var classes = new Array();
             if ( readonly ) {
                 classes.push('readonly');
             }
 
-            if ( segment.ice_locked === "1" ) {
-                classes.push('readonly');
-                classes.push('ice-locked');
+            if ( segment.ice_locked === "1" && !readonly) {
+                if (UI.getFromStorage('locked-' + originalId)) {
+                    classes.push('ice-unlocked');
+                    unlocked = true;
+                } else {
+                    classes.push('readonly');
+                    classes.push('ice-locked');
+                }
             }
 
             if ( segment.status ) {
@@ -41,7 +46,7 @@
             }
 
             var editarea_classes = ['targetarea', 'invisible'];
-            if ( readonly || segment.ice_locked === "1") {
+            if ( readonly || (segment.ice_locked === "1" && !UI.getFromStorage('locked-' + originalId))) {
                 editarea_classes.push( 'area' );
             } else {
                 editarea_classes.push( 'editarea' );
@@ -95,6 +100,7 @@
                 segment                 : segment,
                 readonly                : readonly,
                 ice_locked              : parseInt(segment.ice_locked),
+                unlocked                : unlocked,
                 splitGroup              : splitGroup ,
                 segment_classes         : classes.join(' '),
                 shortened_sid           : UI.shortenId( segment.sid ),
@@ -351,7 +357,7 @@
             }
             return returnArray;
         },
-        getContextBefore(segmentId) {
+        getContextBefore: function(segmentId) {
             var segment = $('#segment-' + segmentId);
             var originalId = segment.attr('data-split-original-id');
             var segmentBefore = (function  findBefore(segment) {
@@ -380,7 +386,7 @@
                 return $('.source', segmentBefore ).text();
             }
         },
-        getContextAfter(segmentId) {
+        getContextAfter: function(segmentId) {
             var segment = $('#segment-' + segmentId);
             var originalId = segment.attr('data-split-original-id');
             var segmentAfter = (function findAfter(segment) {
@@ -413,13 +419,15 @@
             var section = elem.closest('section');
             section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
             section.find('.targetarea').removeClass('area').addClass('editarea').click();
+            UI.addInStorage('locked-'+ UI.getSegmentId(section), true);
         },
         lockIceSegment: function (elem) {
             elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
             var section = elem.closest('section');
             section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
             section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
-            UI.closeSegment(section);
+            UI.closeSegment(section, 1);
+            UI.removeFromStorage('locked-' + UI.getSegmentId(section));
         }
-    }); 
+    });
 })(jQuery); 
