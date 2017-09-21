@@ -7,6 +7,7 @@ use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use catController;
+use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Exceptions\ValidationError;
 use Features;
@@ -18,7 +19,11 @@ use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportModel;
 use INIT;
+use Klein\Klein;
+use Klein\Request;
+use Klein\ServiceProvider;
 use Log;
+use LQA\ChunkReviewDao;
 use Monolog\Logger;
 use PHPTALWithAppend;
 use Users_UserDao;
@@ -168,6 +173,11 @@ class Dqf extends BaseFeature {
 
         WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'DQF', '\Features\Dqf\Worker\CreateProjectWorker', $struct->toArray() );
+    }
+
+    public static function loadRoutes( Klein $klein ) {
+
+
     }
 
     /**

@@ -40,7 +40,7 @@ class CatAuthorizationModel {
         $this->dao = new MetadataDao() ;
     }
 
-    public function assingJobToUser( Users_UserStruct $user ) {
+    public function assignJobToUser( Users_UserStruct $user ) {
         $status = $this->getStatus( $user );
 
         if ( $status == self::STATUS_NOT_ASSIGNED ) {

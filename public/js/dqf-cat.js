@@ -87,6 +87,12 @@
 
     function dqfConfirmAssignment() {
         console.log('confirmed');
+        var id_job = config.id_job ;
+        var password = config.review_password ? config.review_password : config.password ;
+        $.post( sprintf('/api/app/dqf/jobs/%s/%s/assign', id_job, password ), {})
+            .done( function( data ) {
+                UI.reloadPage();
+            });
     }
 
     $.extend( UI, {
