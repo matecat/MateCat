@@ -280,10 +280,10 @@ $.extend( UI, {
             UI.openSegment(target, operation);
 
             if (operation != 'moving') {
-                var segment = $('#segment-' + $(target).data('sid'));
+                var segment = $(target).closest('section');
                 if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
                     setTimeout(function () {
-                        UI.scrollSegment($('#segment-' + $(target).data('sid')));
+                        UI.scrollSegment(segment);
                     }, 50);
                 }
             }

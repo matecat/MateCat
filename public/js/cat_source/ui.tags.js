@@ -228,26 +228,28 @@ $.extend(UI, {
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         var htmlEditarea = $.parseHTML(UI.editarea.html());
-        $.each(htmlEditarea, function (index) {
-            if($(this).hasClass('test-invisible')) {
-                UI.numCharsUntilTagRight = 0;
-                UI.numCharsUntilTagLeft = 0;
-                var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
-                var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
+        if (htmlEditarea) {
+            $.each(htmlEditarea, function (index) {
+                if($(this).hasClass('test-invisible')) {
+                    UI.numCharsUntilTagRight = 0;
+                    UI.numCharsUntilTagLeft = 0;
+                    var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
+                    var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
-                    (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
-                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                    if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
+                        (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
+                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                    }
+                    UI.removeHighlightCorrespondingTags();
+
+                    UI.numCharsUntilTagRight = null;
+                    UI.numCharsUntilTagLeft = null;
+                    UI.editarea.find('.test-invisible').remove();
+                    UI.editarea.get(0).normalize();
+                    return false;
                 }
-                UI.removeHighlightCorrespondingTags();
-
-                UI.numCharsUntilTagRight = null;
-                UI.numCharsUntilTagLeft = null;
-                UI.editarea.find('.test-invisible').remove();
-                UI.editarea.get(0).normalize();
-                return false;
-            }
-        });
+            });
+        }
         // TODO test.inivisible break some doms with text
         $('body').find('.test-invisible').remove();
 

@@ -49,7 +49,12 @@
             // }
 
             if (!this.readonly) {
-                this.getContribution(segment.el, 0);
+                var self = this;
+                this.getContribution(segment.el, 0).done(function() {
+                    self.setCurrentSegment();
+                });
+            } else {
+                this.setCurrentSegment();
             }
 
             SegmentActions.addClassToSegment(UI.getSegmentId(this.currentSegment), 'opened');

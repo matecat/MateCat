@@ -169,7 +169,7 @@ class Segment extends React.Component {
             UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
         } else {
             UI.addInStorage('locked-'+ this.props.segment.sid, true);
-            UI.editAreaClick(UI.getEditAreaBySegmentId(this.props.segment.sid));
+            UI.editAreaClick(this.section);
         }
         this.setState({
             unlocked: !this.state.unlocked
@@ -237,6 +237,7 @@ class Segment extends React.Component {
 
         return (
             <section
+                ref={(section)=>this.section=section}
                 id={"segment-" + this.props.segment.sid}
                 className={segment_classes.join(' ')}
                 data-hash={this.props.segment.segment_hash}
