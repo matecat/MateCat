@@ -51,8 +51,10 @@ class UserModel {
         return $this->session ;
     }
 
-    public function getDqfUsername() {
-        return $this->metadata['dqf_username'];
+    public function getDqfUsernameOrMateCatEmail() {
+        return is_null( $this->metadata['dqf_username'] ) ?
+                $this->getMateCatUser()->email :
+                $this->metadata['dqf_username'] ;
     }
 
     /**
