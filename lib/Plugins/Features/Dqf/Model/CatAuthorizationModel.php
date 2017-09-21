@@ -21,8 +21,8 @@ class CatAuthorizationModel {
 
     const STATUS_NOT_ASSIGNED             = 'not_assigned' ;
     const STATUS_USER_NOT_MATCHING        = 'not_matching' ;
-    const STATUS_USER_NO_CREDENTIALS      = 'no_credentials'  ;
     const STATUS_USER_INVALID_CREDENTIALS = 'invalid_credentials' ;
+    const STATUS_USER_ANONYMOUS           = 'anonymous' ;
 
     /**
      * @var Jobs_JobStruct
@@ -40,25 +40,28 @@ class CatAuthorizationModel {
         $this->dao = new MetadataDao() ;
     }
 
-    public function getStatusWithImplicitAssignment( Users_UserStruct $user ) {
+    public function assingJobToUser( Users_UserStruct $user ) {
         $status = $this->getStatus( $user );
 
         if ( $status == self::STATUS_NOT_ASSIGNED ) {
             $invalidCredentialsStatus = $this->dqfUserCredentialsInvalidStatus( $user );
             if ( is_null( $invalidCredentialsStatus ) ) {
-
                 $insertDone = $this->setAuthorizedUser( $user ) ;
 
                 if ( $insertDone ) {
-                    $status = $user->uid ;
+                    return true;
                 }
             }
         }
-        return $status ;
+        return false ;
     }
 
     public function getStatus( Users_UserStruct $user ) {
         $record = $this->dao->get($this->job->id, $this->job->password, $this->key) ;
+
+        if ( $user->isAnonymous() ) {
+            return self::STATUS_USER_ANONYMOUS ;
+        }
 
         if ( ! $record ) {
             return self::STATUS_NOT_ASSIGNED ;
@@ -77,10 +80,6 @@ class CatAuthorizationModel {
 
     protected function dqfUserCredentialsInvalidStatus( Users_UserStruct $user ) {
         $dqfUser = new UserModel( $user );
-
-        // if (!$dqfUser->hasCredentials() ) {
-        //     return self::STATUS_USER_NO_CREDENTIALS ;
-        // }
 
         if ( !$dqfUser->validCredentials() ) {
             return self::STATUS_USER_INVALID_CREDENTIALS ;
