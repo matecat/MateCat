@@ -210,7 +210,6 @@ class Segment extends React.Component {
         let timeToEdit = "";
 
         let readonly = this.state.readonly;
-        let unlocked = false;
         let segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
@@ -286,7 +285,7 @@ class Segment extends React.Component {
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection}
-                        locked={!this.state.unlocked}
+                        locked={!this.state.unlocked && this.props.segment.ice_locked === '1'}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
