@@ -303,7 +303,7 @@
          * selectorForNextSegment
          */
         selectorForNextSegment : function() {
-            return 'section';
+            return 'section:not(.ice-locked)';
         },
 
         /**
@@ -545,11 +545,103 @@
         },
 
         getEditAreaBySegmentId: function(id) {
-            return $('#segment-' + id + ' .editarea');
+            return $('#segment-' + id + ' .targetarea');
         },
 
         segmentIsLoaded: function(segmentId) {
             return UI.getSegmentById(segmentId).length > 0 ;
-        }
+        },
+        getContextBefore: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentBefore = (function  findBefore(segment) {
+                var before = segment.prev('section');
+                if (before.size() === 0 ) {
+                    return undefined;
+                }
+                else if (before.attr('data-split-original-id') !== originalId) {
+                    return before;
+                } else {
+                    return findBefore(before);
+                }
+
+            })(segment);
+            // var segmentBefore = findSegmentBefore();
+            if (_.isUndefined(segmentBefore)) {
+                return null;
+            }
+            var segmentBeforeId = UI.getSegmentId(segmentBefore);
+            var isSplitted = segmentBeforeId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentBeforeId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentBefore, '.source');
+            } else {
+                return $('.source', segmentBefore ).text();
+            }
+        },
+        getContextAfter: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentAfter = (function findAfter(segment) {
+                var after = segment.next('section');
+                if (after.size() === 0 ) {
+                    return undefined;
+                }
+                else if (after.attr('data-split-original-id') !== originalId) {
+                    return after;
+                } else {
+                    return findAfter(after);
+                }
+
+            })(segment);
+            if (_.isUndefined(segmentAfter)) {
+                return null;
+            }
+            var segmentAfterId = UI.getSegmentId(segmentAfter);
+            var isSplitted = segmentAfterId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentAfterId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentAfter, '.source');
+            } else {
+                return $('.source', segmentAfter ).text();
+            }
+        },
+        /**
+         * findNextSegment
+         *
+         * Finds next segment or returns null if next segment does not exist.
+         */
+        findNextSegment : function(segmentId) {
+            var selector = UI.selectorForNextSegment() ;
+            var currentElem = (_.isUndefined(segmentId)) ? $('.editor') : $('#segment-' + segmentId);
+            var next = currentElem.nextAll( selector ).first();
+
+            if ( next.is('section') ) {
+                return next ;
+            } else if ( UI.currentFile ) {
+                next = UI.currentFile.next().find( selector ).first();
+                if ( next.length ) {
+                    return next ;
+                }
+            }
+            return false ;
+        },
+        // unlockIceSegment: function (elem) {
+        //     elem.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
+        //     var section = elem.closest('section');
+        //     section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
+        //     section.find('.targetarea').removeClass('area').addClass('editarea').click();
+        //     UI.addInStorage('locked-'+ UI.getSegmentId(section), true);
+        // },
+        // lockIceSegment: function (elem) {
+        //     elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
+        //     var section = elem.closest('section');
+        //     section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
+        //     section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
+        //     UI.closeSegment(section, 1);
+        //     UI.removeFromStorage('locked-' + UI.getSegmentId(section));
+        // }
     });
 })(jQuery); 

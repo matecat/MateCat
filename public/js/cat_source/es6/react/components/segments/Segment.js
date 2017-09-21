@@ -2,13 +2,13 @@
  * React Component for the editarea.
 
  */
-var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentHeader = require('./SegmentHeader').default;
-var SegmentFooter = require('./SegmentFooter').default;
-var SegmentBody = require('./SegmentBody').default;
-var TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
+let React = require('react');
+let SegmentStore = require('../../stores/SegmentStore');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentHeader = require('./SegmentHeader').default;
+let SegmentFooter = require('./SegmentFooter').default;
+let SegmentBody = require('./SegmentBody').default;
+let TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
 
 class Segment extends React.Component {
 
@@ -23,21 +23,34 @@ class Segment extends React.Component {
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
 
+        let readonly = !!((this.props.segment.readonly == 'true') || ($('body').hasClass('archived')));
+
         this.state = {
             segment_classes : [],
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
-            showTranslationIssues: false
-        };
+            showTranslationIssues: false,
+            unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('locked-' + this.props.segment.sid),
+            readonly: readonly
+        }
     }
 
     createSegmentClasses() {
-        var classes = [];
-        var splitGroup = this.props.segment.split_group || [];
-        var readonly = ((this.props.segment.readonly == 'true')||($('body').hasClass('archived'))) ? true : false;
+        let classes = [];
+        let splitGroup = this.props.segment.split_group || [];
+        let readonly = this.state.readonly;
         if ( readonly ) {
             classes.push('readonly');
+        }
+
+        if ( this.props.segment.ice_locked === "1" && !readonly) {
+            if (UI.getFromStorage('locked-' + this.props.segment.sid)) {
+                classes.push('ice-unlocked');
+            } else {
+                classes.push('readonly');
+                classes.push('ice-locked');
+            }
         }
 
         if ( this.state.status ) {
@@ -74,7 +87,7 @@ class Segment extends React.Component {
             /*  TODO REMOVE THIS CODE
              *  The segment must know about his classes
              */
-            var classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
+            let classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
             if (!!classes.indexOf("modified")) {
                 classes.push("modified");
                 this.setState({
@@ -86,7 +99,7 @@ class Segment extends React.Component {
 
     addClass(sid, newClass) {
         if (this.props.segment.sid == sid) {
-            var classes = this.state.segment_classes;
+            let classes = this.state.segment_classes;
             if (classes.indexOf(newClass) < 0) {
                 classes.push(newClass);
                 this.setState({
@@ -98,8 +111,8 @@ class Segment extends React.Component {
 
     removeClass(sid, className) {
         if (this.props.segment.sid == sid) {
-            var classes = this.state.segment_classes;
-            var index = classes.indexOf(className);
+            let classes = this.state.segment_classes;
+            let index = classes.indexOf(className);
             if ( index > -1 ) {
                 classes.splice(index, 1);
                 this.setState({
@@ -147,6 +160,22 @@ class Segment extends React.Component {
         return null;
     }
 
+    lockUnlockSegment(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.state.unlocked) {
+            //TODO: move this to SegmentActions
+            UI.removeFromStorage('locked-' + this.props.segment.sid);
+            UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
+        } else {
+            UI.addInStorage('locked-'+ this.props.segment.sid, true);
+            UI.editAreaClick(UI.getEditAreaBySegmentId(this.props.segment.sid));
+        }
+        this.setState({
+            unlocked: !this.state.unlocked
+        });
+    }
+
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -177,22 +206,23 @@ class Segment extends React.Component {
     }
 
     render() {
-        var job_marker = "";
-        var timeToEdit = "";
+        let job_marker = "";
+        let timeToEdit = "";
 
-
-        var segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
-        var split_group = this.props.segment.split_group || [];
-        var autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
-        var originalId = this.props.segment.sid.split('-')[0];
+        let readonly = this.state.readonly;
+        let unlocked = false;
+        let segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
+        let split_group = this.props.segment.split_group || [];
+        let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
+        let originalId = this.props.segment.sid.split('-')[0];
 
         if ( this.props.timeToEdit ) {
             this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
             this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
         }
 
-        var start_job_marker = this.props.segment.sid == config.first_job_segment;
-        var end_job_marker = this.props.segment.sid == config.last_job_segment;
+        let start_job_marker = this.props.segment.sid == config.first_job_segment;
+        let end_job_marker = this.props.segment.sid == config.last_job_segment;
         if (start_job_marker) {
             job_marker = <span className={"start-job-marker"}/>;
         } else if ( end_job_marker) {
@@ -203,7 +233,7 @@ class Segment extends React.Component {
             timeToEdit = <span className="edit-min">{this.segment_edit_min}</span> + 'm' + <span className="edit-sec">{this.segment_edit_sec}</span> + 's';
         }
 
-        var translationIssues = this.getTranslationIssues();
+        let translationIssues = this.getTranslationIssues();
 
         return (
             <section
@@ -220,12 +250,29 @@ class Segment extends React.Component {
                 data-fid={this.props.fid}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
-                    <div className="actions">
-                        <a className="split" href="#" title="Click to split segment">
-                            <span className="icon-split"/>
-                        </a>
-                        <p className="split-shortcut">CTRL + S</p>
-                    </div>
+
+                    {(this.props.segment.ice_locked !== '1') ? (
+                        <div className="actions">
+                            <a className="split" href="#" title="Click to split segment">
+                                <span className="icon-split"/>
+                            </a>
+                            <p className="split-shortcut">CTRL + S</p>
+                        </div>
+                    ) : (
+                        !readonly ? (
+                            this.state.unlocked ? (
+                                <div className="ice-locked-icon"
+                                     onClick={this.lockUnlockSegment.bind(this)}>
+                                    <button className="unlock-button unlocked icon-unlocked3"/>
+                                </div>
+                            ) :(
+                                <div className="ice-locked-icon"
+                                     onClick={this.lockUnlockSegment.bind(this)}>
+                                    <button className="icon-lock unlock-button locked"/>
+                                </div>
+                            )
+                        ) : (null)
+                    )}
                 </div>
                 {job_marker}
 
@@ -238,6 +285,7 @@ class Segment extends React.Component {
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection}
+                        locked={!this.state.unlocked}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

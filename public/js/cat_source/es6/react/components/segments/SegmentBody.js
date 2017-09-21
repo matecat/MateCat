@@ -118,6 +118,7 @@ class SegmentBody extends React.Component {
                             speech2textEnabledFn={this.props.speech2textEnabledFn}
                             afterRenderOrUpdate={this.afterRenderOrUpdate}
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
+                            locked={this.props.locked}
                         />
 
                     </div>

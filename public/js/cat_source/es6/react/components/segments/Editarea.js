@@ -2,16 +2,16 @@
  * React Component for the editarea.
  
  */
-var React = require('react');
-var $ = require('jquery');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+let React = require('react');
+let $ = require('jquery');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
 class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            editareaClasses : ['targetarea', 'invisible']
+            editAreaClasses : ['targetarea']
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
@@ -25,28 +25,29 @@ class Editarea extends React.Component {
     allowHTML(string) {
         return { __html: string };
     }
+    
     hightlightEditarea(sid) {
 
         if (this.props.segment.sid == sid) {
-            var self = this;
-            var editareaClasses = this.state.editareaClasses;
-            editareaClasses.push('highlighted1');
+            let self = this;
+            let editAreaClasses = this.state.editAreaClasses;
+            editAreaClasses.push('highlighted1');
             this.setState({
-                editareaClasses: editareaClasses
+                editAreaClasses: editAreaClasses
             });
             setTimeout(function() {
-                editareaClasses.push.apply(editareaClasses, ['highlighted2']);
+                editAreaClasses.push.apply(editAreaClasses, ['highlighted2']);
                 self.setState({
-                    editareaClasses: editareaClasses
+                    editAreaClasses: editAreaClasses
                 });
             }, 300);
             setTimeout(function() {
-                var index = editareaClasses.indexOf('highlighted1');
-                editareaClasses.splice(index, 1);
-                index = editareaClasses.indexOf('highlighted2');
-                editareaClasses.splice(index, 1);
+                let index = editAreaClasses.indexOf('highlighted1');
+                editAreaClasses.splice(index, 1);
+                index = editAreaClasses.indexOf('highlighted2');
+                editAreaClasses.splice(index, 1);
                 self.setState({
-                    editareaClasses: editareaClasses
+                    editAreaClasses: editAreaClasses
                 });
             }, 2000);
         }
@@ -54,16 +55,16 @@ class Editarea extends React.Component {
 
     addClass(sid, className) {
         if (this.props.segment.sid == sid) {
-            var editareaClasses = this.state.editareaClasses;
-            editareaClasses.push(className);
+            let editAreaClasses = this.state.editAreaClasses;
+            editAreaClasses.push(className);
             this.setState({
-                editareaClasses: editareaClasses
+                editAreaClasses: editAreaClasses
             });
 
         }
     }
     onMouseUpEvent(e) {
-        var self = this;
+        let self = this;
         setTimeout(function () {
             if(!$(self.editAreaRef).find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
@@ -82,7 +83,11 @@ class Editarea extends React.Component {
         $('.editor .editToolbar').removeClass('visible');
     }
     onClickEvent(event) {
-        UI.editAreaClick(event.currentTarget);
+        if (this.props.segment.readonly == 'true' || this.props.locked) {
+            UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        } else {
+            UI.editAreaClick(event.currentTarget);
+        }
     }
     onInputEvent(e) {
         UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
@@ -105,46 +110,40 @@ class Editarea extends React.Component {
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillMount() {
-        var editareaClasses = this.state.editareaClasses;
-        if ((this.props.segment.readonly == 'true')||($("body").hasClass('archived'))) {
-            editareaClasses.push('area')
-        } else {
-            editareaClasses.push('editarea')
-        }
-
-        Speech2Text.enabled() && editareaClasses.push( 'micActive' ) ;
-
-        this.setState({
-            editareaClasses: editareaClasses
-        });
-
+        Speech2Text.enabled() && editAreaClasses.push( 'micActive' ) ;
     }
     render() {
+        let lang = '';
+        let readonly = false;
         if (this.props.segment){
-            var lang = config.target_rfc.toLowerCase();
-            var readonly = ((this.props.segment.readonly == 'true')) ? true : false;
+            lang = config.target_rfc.toLowerCase();
+            readonly = ((this.props.segment.readonly === 'true') || this.props.locked);
         }
-        return (
-            <div className={this.state.editareaClasses.join(' ')}
-                 id={'segment-' + this.props.segment.sid + '-editarea'}
-                 lang={lang}
-                 contentEditable={!readonly}
-                 spellCheck="true"
-                 data-sid={this.props.segment.sid}
-                 dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
-                 onMouseUp={this.onMouseUpEvent}
-                 onMouseDown={this.onMouseDownEvent}
-                 onContextMenu={this.onMouseUpEvent}
-                 onBlur={this.onBlurEvent}
-                 onClick={this.onClickEvent}
-                 onKeyDown={this.onKeyDownEvent}
-                 onKeyPress={this.onKeyPressEvent}
-                 onInput={this.onInputEvent}
-                 onPaste={this.onPasteEvent}
-                 ref={(ref) => this.editAreaRef = ref}
-            />
+        let classes = this.state.editAreaClasses;
+        if (this.props.locked || readonly) {
+            classes.push('area')
+        } else {
+            classes.push('editarea')
+        }
 
-        );
+        return <div className={classes.join(' ')}
+                    id={'segment-' + this.props.segment.sid + '-editarea'}
+                    lang={lang}
+                    contentEditable={!readonly}
+                    spellCheck="true"
+                    data-sid={this.props.segment.sid}
+                    dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
+                    onMouseUp={this.onMouseUpEvent}
+                    onMouseDown={this.onMouseDownEvent}
+                    onContextMenu={this.onMouseUpEvent}
+                    onBlur={this.onBlurEvent}
+                    onClick={this.onClickEvent.bind(this)}
+                    onKeyDown={this.onKeyDownEvent}
+                    onKeyPress={this.onKeyPressEvent}
+                    onInput={this.onInputEvent}
+                    onPaste={this.onPasteEvent}
+                    ref={(ref) => this.editAreaRef = ref}
+        />;
     }
 }
 

@@ -466,11 +466,13 @@ $.extend(UI, {
 				$('html').unbind('click.outOfStatusMenu');
 				UI.removeStatusMenu(statusMenu);
 			});
-		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
-            e.preventDefault();
-			var section = $(e.target).closest('section');
-			UI.handleClickOnReadOnly( section );
-		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
+		})
+		// 	.on('click', 'section.readonly, section.readonly a.status', function(e) {
+         //    e.preventDefault();
+		// 	var section = $(e.target).closest('section');
+		// 	UI.handleClickOnReadOnly( section );
+		// })
+			.on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
@@ -481,15 +483,7 @@ $.extend(UI, {
             UI.copyGlossaryItemInEditarea($(this));
 		}).on('click', '.glossary .switch-editing', function() {
 			UI.updateGlossary($(this).closest(".graysmall"));
-		}).on('click', '.ice-locked-icon .unlock-button', function (e) {
-		    e.preventDefault();
-            e.stopPropagation();
-            if ($(e.target).hasClass('locked')) {
-                UI.unlockIceSegment($(this));
-            } else {
-                UI.lockIceSegment($(this));
-            }
-        });
+		});
 
 		$(".joblink").click(function(e) {
 			e.preventDefault();

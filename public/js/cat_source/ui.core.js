@@ -2618,8 +2618,6 @@ UI = {
         }
 
         UI.saveInUndoStack('click');
-        this.onclickEditarea = new Date();
-
         UI.notYetOpened = false;
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
@@ -2627,8 +2625,8 @@ UI = {
         var segmentNotYetOpened = ($(this).is(UI.editarea) && !$(this).closest('section').hasClass("opened"));
 
         if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
-            if (operation == 'moving') {
-                if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
+            if (operation === 'moving') {
+                if ((UI.lastOperation === 'moving') && (UI.recentMoving)) {
                     UI.segmentToOpen = segment;
                     UI.blockOpenSegment = true;
                 } else {
@@ -2658,12 +2656,8 @@ UI = {
         }
 
         if (UI.editarea != '') {
-            // UI.lockTags(UI.editarea);
             UI.checkTagProximity();
         }
-
-        // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
     },
     /**
      * After User click on Translated or T+>> Button

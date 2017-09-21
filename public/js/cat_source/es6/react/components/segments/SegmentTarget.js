@@ -42,6 +42,20 @@ class SegmentTarget extends React.Component {
         }
     }
 
+    onClickEvent(event) {
+        if (this.props.segment.readonly == 'true') {
+            UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        }
+    }
+
+    decodeTranslation(segment, translation) {
+        return this.props.decodeTextFn(segment, translation);
+    }
+
+    allowHTML(string) {
+        return { __html: string };
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
         this.afterRenderActions();
@@ -62,21 +76,13 @@ class SegmentTarget extends React.Component {
         this.afterRenderActions();
     }
 
-    decodeTranslation(segment, translation) {
-        return this.props.decodeTextFn(segment, translation);
-    }
-
-    allowHTML(string) {
-        return { __html: string };
-    }
-
     render() {
         var textAreaContainer = "";
 
         if (this.props.isReviewImproved) {
 
             textAreaContainer = <div data-mount="segment_text_area_container">
-                                    <div className="textarea-container">
+                                    <div className="textarea-container" onClick={this.onClickEvent.bind(this)}>
                                         <div className="targetarea issuesHighlightArea errorTaggingArea" dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }/>
                                     </div>
                                 </div>
@@ -125,9 +131,13 @@ class SegmentTarget extends React.Component {
 
                                     <span className="loader"/>
 
-                                    <div className="editarea-container" id={"editarea-container-"+ this.props.segment.sid}></div>
+                                    {/*<div className="editarea-container" id={"editarea-container-"+ this.props.segment.sid}/>*/}
 
-                                    <EditArea segment={this.props.segment} translation={translation}/>
+                                    <EditArea
+                                        segment={this.props.segment}
+                                        translation={translation}
+                                        locked={this.props.locked}
+                                    />
 
                                     {s2tMicro}
 
