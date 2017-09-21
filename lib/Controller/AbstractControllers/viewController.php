@@ -323,6 +323,8 @@ abstract class viewController extends controller {
             Log::doLog( "Bad Configuration" );
         }
 
+        $this->template->googleDriveEnabled = !is_null(INIT::$OAUTH_BROWSER_API_KEY);
+
     }
 
     /**
