@@ -20,7 +20,7 @@ $klein->respond('/utils/pee', function() {
         $method = new ReflectionMethod( 'badConfigurationController', 'render404' );
         $method->setAccessible( true );
         $method->invoke( new badConfigurationController() );
-        return;
+        die(); // do not complete klein response, set 404 header in render404 instead of 200
     }
 
     $reflect  = new ReflectionClass('peeViewController');
