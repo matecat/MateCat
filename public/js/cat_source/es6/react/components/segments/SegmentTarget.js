@@ -142,7 +142,7 @@ class SegmentTarget extends React.Component {
                                     {s2tMicro}
 
                                     <div className="toolbar">
-                                        <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}></div>
+                                        <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}/>
                                         {tagModeButton}
                                         <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
                                         <ul className="editToolbar">

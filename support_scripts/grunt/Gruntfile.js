@@ -251,7 +251,7 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/speech2text.js',
                     basePath + 'tm.js',
-                    basePath + 'advancedOptionsTab.js'
+                    basePath + 'advancedOptionsTab.js',
                 ],
                 dest: buildPath + 'app.js'
             },
