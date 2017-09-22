@@ -27,6 +27,7 @@ use LQA\ChunkReviewDao;
 use Monolog\Logger;
 use PHPTALWithAppend;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 use WorkerClient;
 
@@ -177,7 +178,18 @@ class Dqf extends BaseFeature {
 
     public static function loadRoutes( Klein $klein ) {
 
+    }
 
+    /**
+     * Define if a project is completable.
+     *
+     * @param                    $value
+     * @param Chunks_ChunkStruct $chunk
+     * @param Users_UserStruct   $user
+     */
+    public function filterJobCompletable($value, Chunks_ChunkStruct $chunk, Users_UserStruct $user, $isRevision) {
+        $authModel = new Features\Dqf\Model\CatAuthorizationModel($chunk, $isRevision );
+        return $value && $authModel->isUserAuthorized( $user ) ;
     }
 
     /**

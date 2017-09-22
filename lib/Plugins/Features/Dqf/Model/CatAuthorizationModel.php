@@ -57,25 +57,29 @@ class CatAuthorizationModel {
     }
 
     public function getStatus( Users_UserStruct $user ) {
-        $record = $this->dao->get($this->job->id, $this->job->password, $this->key) ;
 
         if ( $user->isAnonymous() ) {
             return self::STATUS_USER_ANONYMOUS ;
         }
 
-        if ( ! $record ) {
+        $uid = $this->getAuthorizedUid()  ;
+        if ( ! $uid ) {
             return self::STATUS_NOT_ASSIGNED ;
         }
-        elseif ( $record->value != $user->uid ) {
+        elseif ( $uid != $user->uid ) {
             return self::STATUS_USER_NOT_MATCHING ;
         }
         else {
-            $storedUser = ( new Users_UserDao())->getByUid( $record->value ) ;
+            $storedUser = ( new Users_UserDao())->getByUid( $uid ) ;
             $dqfCredentialsStatus = $this->dqfUserCredentialsInvalidStatus( $storedUser );
             if ( is_null( $dqfCredentialsStatus ) ) {
                 return $storedUser->uid ;
             }
         }
+    }
+
+    public function isUserAuthorized( Users_UserStruct $user ) {
+        return $this->getAuthorizedUid() == $user->uid && !is_null( $user->uid ) ;
     }
 
     protected function dqfUserCredentialsInvalidStatus( Users_UserStruct $user ) {
@@ -90,6 +94,14 @@ class CatAuthorizationModel {
 
     protected function setAuthorizedUser( Users_UserStruct $user ) {
         return $this->dao->set( $this->job->id, $this->job->password, $this->key, $user->uid );
+    }
+
+    public function getAuthorizedUid() {
+        $record = $this->dao->get( $this->job->id, $this->job->password, $this->key );
+        if ( !$record ) {
+            return false ;
+        }
+        return $record->value ;
     }
 
 }
