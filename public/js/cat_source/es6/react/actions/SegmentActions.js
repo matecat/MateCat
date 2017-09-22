@@ -121,6 +121,14 @@ var SegmentActions = {
         });
     },
 
+    setSegmentAsTagged: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_TAGGED,
+            id: sid,
+            fid: fid,
+        });
+    },
+
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

@@ -26,5 +26,6 @@ module.exports = keyMirror({
     SET_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
     RENDER_GLOSSARY: null,
-    MOUNT_TRANSLATIONS_ISSUES: null
+    MOUNT_TRANSLATIONS_ISSUES: null,
+    SET_SEGMENT_TAGGED: null
 });

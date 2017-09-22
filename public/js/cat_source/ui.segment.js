@@ -118,8 +118,8 @@
          */
         setSegmentAsTagged: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            SegmentActions.removeClassToSegment(UI.getSegmentId(currentSegment), 'enableTP');
-            currentSegment.data('tagprojection', 'tagged');
+            SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
+            // currentSegment.data('tagprojection', 'tagged');
         },
         /**
          * Check if the  the Tag Projection in the current segment is enabled and still not tagged
@@ -225,7 +225,7 @@
             }
             return returnArray;
         },
-        decodeText(segment, text) {
+        decodeText: function(segment, text) {
             var decoded_text;
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {

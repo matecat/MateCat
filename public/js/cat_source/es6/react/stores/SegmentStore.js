@@ -86,7 +86,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         time_to_edit: "0",
                         translation: translation,
                         version: segment.version,
-                        warning: "0"
+                        warning: "0",
+                        tagged: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -181,6 +182,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
         return trans;
     },
+
+    setSegmentAsTagged(sid, fid) {
+        var index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
+    },
     removeLockTagsFromString(str) {
         return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
@@ -271,6 +277,10 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
             SegmentStore.emitChange(action.actionType);
+            break;
+        case SegmentConstants.SET_SEGMENT_TAGGED:
+            SegmentStore.setSegmentAsTagged(action.id, action.fid)
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         default:
     }

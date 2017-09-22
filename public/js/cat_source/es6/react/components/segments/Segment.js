@@ -9,6 +9,7 @@ let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
 let TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
+let Immutable = require('immutable');
 
 class Segment extends React.Component {
 
@@ -99,7 +100,7 @@ class Segment extends React.Component {
 
     addClass(sid, newClass) {
         if (this.props.segment.sid == sid) {
-            let classes = this.state.segment_classes;
+            let classes = this.state.segment_classes.slice();
             if (classes.indexOf(newClass) < 0) {
                 classes.push(newClass);
                 this.setState({
@@ -111,7 +112,7 @@ class Segment extends React.Component {
 
     removeClass(sid, className) {
         if (this.props.segment.sid == sid) {
-            let classes = this.state.segment_classes;
+            let classes = this.state.segment_classes.slice();
             let index = classes.indexOf(className);
             if ( index > -1 ) {
                 classes.splice(index, 1);
@@ -199,6 +200,27 @@ class Segment extends React.Component {
 
     componentDidUpdate() {
         console.log("Udate Segment" + this.props.segment.sid);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            (!Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))) ||
+            (!Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes))) ||
+            (nextState.modified !== this.state.modified) ||
+            (nextState.autopropagated !== this.state.autopropagated) ||
+            (nextState.status !== this.state.status) ||
+            (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
+            (nextState.unlocked !== this.state.unlocked) ||
+            (nextState.readonly !== this.state.readonly)
+        );
+
+        // segment_classes : [],
+        //     modified: false,
+        //     autopropagated: this.props.segment.autopropagated_from != 0,
+        //     status: this.props.segment.status,
+        //     showTranslationIssues: false,
+        //     unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('locked-' + this.props.segment.sid),
+        //     readonly: readonly
     }
 
     allowHTML(string) {

@@ -14,7 +14,7 @@ class SegmentsContainer extends React.Component {
         this.state = {
             segments : [],
             splitGroup: [],
-            fid: ""
+            timeToEdit: config.time_to_edit_enabled
         };
         this.renderSegments = this.renderSegments.bind(this);
         // this.updateSegments = this.updateSegments.bind(this);
@@ -68,8 +68,9 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
-    shouldComponentUpdate() {
-        return true;
+    shouldComponentUpdate(nextProps, nextState) {
+        return (!nextState.segments.equals(this.state.segments) ||
+        nextState.splitGroup !== this.state.splitGroup)
     }
 
     componentWillUpdate() {
