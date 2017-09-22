@@ -97,8 +97,7 @@ class TranslationChildProject {
             $project = new ChildProjectCreationModel($struct, $this->chunk, 'translate' );
 
             $model = new ProjectModel( $parent );
-
-            $project->setUser( $model->getUser() );
+            $project->setUser( $this->dqfTranslateUser ) ;
             $project->setFiles( $model->getFilesResponseStruct() ) ;
 
             $project->create();

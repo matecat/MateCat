@@ -117,6 +117,10 @@ class Client {
             $curlopts[ CURLOPT_CUSTOMREQUEST ] = 'PUT' ;
         }
 
+        elseif ( $method == 'delete' ) {
+            $curlopts[ CURLOPT_CUSTOMREQUEST ] = 'DELETE' ;
+        }
+
         if ( isset( $params['json'] ) ) {
             $json_string = json_encode( $params['json'] ) ;
 

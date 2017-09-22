@@ -27,6 +27,22 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
     protected static $auto_increment_fields = [ 'id' ];
     protected static $primary_keys          = [ 'id' ];
 
+
+    /**
+     * Finds the parent record for translation.
+     * first, search any non archived transaltion job, then search for vendor_root, then search for master type.
+     *
+     * @return \Features\Dqf\Model\DqfProjectMapStruct|null
+     */
+    public function findById( $id ) {
+        $sql = "SELECT * FROM dqf_child_projects_map WHERE id = :id  " ;
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->execute([ 'id' => $id ]);
+        return $stmt->fetch() ;
+    }
+
     /**
      * Finds the parent record for translation.
      * first, search any non archived transaltion job, then search for vendor_root, then search for master type.

@@ -44,6 +44,27 @@ class ChildProjectService {
         $this->clientId = $id_project ;
     }
 
+    public function deleteProject(ChildProjectRequestStruct $struct ) {
+        $client = new Client() ;
+        $client->setSession( $this->session );
+
+        $resource =  $client->createResource('/project/child/%s', 'delete', [
+                'headers'    =>  $this->session->filterHeaders( $struct ),
+                'pathParams' =>  $struct->getPathParams(),
+        ] );
+
+        $client->execRequests();
+
+        if ( count($client->curl()->getErrors() ) > 0 ) {
+            throw  new Exception('Error on delete of remote child project: ' .
+                    implode( ', ',  $client->curl()->getAllContents() )
+            ) ;
+        }
+
+        $returnable = $client->curl()->getAllContents();
+        return $returnable ;
+    }
+
     public function updateChildProjects( $requestStructs ) {
         $client = new Client() ;
         $client->setSession( $this->session );
