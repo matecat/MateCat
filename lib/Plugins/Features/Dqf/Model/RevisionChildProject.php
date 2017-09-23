@@ -157,7 +157,7 @@ class RevisionChildProject {
 
             $model = new ProjectModel( $parent );
 
-            $project->setUser( $model->getUser() );
+            $project->setUser( $this->dqfUser );
             $project->setFiles( $model->getFilesResponseStruct() ) ;
 
             $project->create();

@@ -66,8 +66,13 @@ class ProjectMapResolverModel {
             ] ;
         }
 
-        return $projects ;
+        $projects  = static::inSegmentBoundaries(
+                $projects,
+                $this->chunk->job_first_segment,
+                $this->chunk->job_last_segment
+        );
 
+        return $projects ;
     }
 
     protected function getInverseType() {
@@ -92,13 +97,16 @@ class ProjectMapResolverModel {
      * @return array|DqfProjectMapStruct[]
      */
     public function getCurrentInSegmentIdBoundaries( $lowest, $highest ) {
-        $records = array_filter( $this->records, function( DqfProjectMapStruct $item ) use ( $lowest, $highest ) {
+        return static::inSegmentBoundaries( $this->records, $lowest, $highest ) ;
+    }
+
+    public static function inSegmentBoundaries( $records, $lowest, $highest ){
+        return array_filter( $records, function( DqfProjectMapStruct $item ) use ( $lowest, $highest ) {
             return
                     ( $item->first_segment >= $lowest && $item->first_segment <= $highest ) || // first is contained
                     ( $item->last_segment  >= $lowest && $item->last_segment  <= $highest ) || // last is contained
                     ( $item->first_segment >= $lowest && $item->last_segment  <= $highest ) || //
                     ( $item->first_segment <= $lowest && $item->last_segment  >= $highest )  ;
         }) ;
-        return $records ;
     }
 }

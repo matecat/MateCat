@@ -18,6 +18,11 @@ class ArchivedQualityReportModel {
     /** @var  QualityReportModel */
     protected $report ;
 
+    /**
+     * @var ArchivedQualityReportStruct
+     */
+    protected $archivedRecord;
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk  ;
     }
@@ -25,7 +30,7 @@ class ArchivedQualityReportModel {
     /**
      * @return QualityReportModel
      */
-    public function getQualityReport() {
+    protected function getQualityReport() {
         if ( is_null( $this->report ) ) {
             $this->report = new QualityReportModel( $this->chunk );
         }
@@ -40,23 +45,30 @@ class ArchivedQualityReportModel {
     }
 
     public function saveWithUID( $uid ) {
-        $struct = new ArchivedQualityReportStruct();
-        $struct->quality_report = json_encode( $this->getQualityReport()->getStructure() ) ;
+        $this->archivedRecord                 = new ArchivedQualityReportStruct();
+        $this->archivedRecord->quality_report = json_encode( $this->getQualityReport()->getStructure() ) ;
 
-        $struct->password          = $this->chunk->password ;
-        $struct->id_job            = $this->chunk->id ;
-        $struct->job_first_segment = $this->chunk->job_first_segment ;
-        $struct->job_last_segment  = $this->chunk->job_last_segment ;
-        $struct->id_project        = $this->chunk->id_project ;
-        $struct->created_by        = $uid ;
+        $this->archivedRecord->password          = $this->chunk->password ;
+        $this->archivedRecord->id_job            = $this->chunk->id ;
+        $this->archivedRecord->job_first_segment = $this->chunk->job_first_segment ;
+        $this->archivedRecord->job_last_segment  = $this->chunk->job_last_segment ;
+        $this->archivedRecord->id_project        = $this->chunk->id_project ;
+        $this->archivedRecord->created_by        = $uid ;
 
         $dao = new ArchivedQualityReportDao() ;
-        $struct->version = $dao->getLastVersionNumber( $this->chunk ) + 1 ;
-        $result = $dao->archiveQualityReport( $struct );
+
+        $this->archivedRecord->version = $dao->getLastVersionNumber( $this->chunk ) + 1 ;
+
+        $result = $dao->archiveQualityReport( $this->archivedRecord );
 
         if ( $result ) {
             $this->chunk->getProject()->getFeatures()->run('archivedQualityReportSaved', $this);
         }
     }
+
+    public function getSavedRecord() {
+        return $this->archivedRecord ;
+    }
+
 
 }

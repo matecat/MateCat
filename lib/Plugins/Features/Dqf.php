@@ -146,14 +146,15 @@ class Dqf extends BaseFeature {
         }
     }
 
-//    public function archivedQualityReportSaved( ArchivedQualityReportModel $archivedQRModel ) {
-//       $qrModel = $archivedQRModel->getQualityReport();
-//
-//       $segments = $qrModel->getAllSegments() ;
-//
-//       $revisionChildModel = new RevisionChildProject( $archivedQRModel->getChunk() ) ;
-//       $revisionChildModel->submitRevisionData() ;
-//    }
+    public function archivedQualityReportSaved( ArchivedQualityReportModel $archivedQRModel ) {
+
+        $revisionChildModel = new RevisionChildProject(
+                $archivedQRModel->getChunk(),
+                $archivedQRModel->getSavedRecord()->version
+        ) ;
+
+        $revisionChildModel->submitRevisionData() ;
+    }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
         if ( isset( $postInput[ 'dqf' ] ) && $postInput[ 'dqf' ] == true ) {

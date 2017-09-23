@@ -50,6 +50,10 @@ class ProjectModel {
         return new UserModel( $user ) ;
     }
 
+    public function getUserWithIntermediatex() {
+        return $this->getUser();
+    }
+
     /**
      * @return UserModel the DQF user assigend to the job
      */
@@ -75,13 +79,13 @@ class ProjectModel {
     public function getFilesResponseStruct() {
         if ( $this->isMaster() ) {
             $object = new MasterProjectFiles(
-                    $this->getOwnerUser()->getSession()->login(),
+                    $this->getUser()->getSession()->login(),
                     $this->getResponseStruct()
             ) ;
         }
         else {
             $object = new ChildProjectFiles(
-                    $this->getUserWithIntermediate()->getSession()->login(),
+                    $this->getUser()->getSession()->login(),
                     $this->getResponseStruct()
             ) ;
         }

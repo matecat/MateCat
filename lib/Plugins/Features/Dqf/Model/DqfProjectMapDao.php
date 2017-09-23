@@ -73,10 +73,11 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
 
 
     public function getCurrentByType( Chunks_ChunkStruct $chunk, $type ) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
-                  AND archive_date IS NULL
-                  AND dqf_parent_uuid IS NOT NULL 
-                  AND project_type = :project_type
+        $sql = "SELECT * FROM dqf_child_projects_map
+                  WHERE id_job = :id_job
+                      AND archive_date IS NULL
+                      AND dqf_parent_uuid IS NOT NULL
+                      AND project_type = :project_type
                   ORDER BY id " ;
 
         $conn = Database::obtain()->getConnection();
@@ -85,7 +86,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
 
         $stmt->execute([
-                'id_job'   => $chunk->id,
+                'id_job'       => $chunk->id,
                 'project_type' => $type
         ]);
 

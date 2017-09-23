@@ -17,7 +17,8 @@ class GenericController extends AbstractStatefulKleinController {
 
     // Lock the job to the DQF user
     public function assignProject() {
-        $reviewItem = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->id_job, $this->request->password ) ;
+        $reviewItem = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->password, $this->request->id_job ) ;
+
         if ( !$reviewItem ) {
             $chunk = Chunks_ChunkDao::getByIdAndPassword($this->request->id_job, $this->request->password);
         }
