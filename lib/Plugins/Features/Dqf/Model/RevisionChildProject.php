@@ -162,7 +162,11 @@ class RevisionChildProject {
 
             $project->create();
 
+            // TODO: not sure this assignment is really helpful
+            // reloading the projectMapper should be enough
             $this->dqfChildProjects[]  = $project->getSavedRecord() ;
+
+            $this->dqfProjectMapResolver->reload();
         }
     }
 

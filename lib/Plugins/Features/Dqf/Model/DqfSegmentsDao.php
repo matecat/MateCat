@@ -67,7 +67,12 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $flattened_values = array_reduce( $structs, 'array_merge', array() );
-        $stmt->execute( $flattened_values );
+
+        $result = $stmt->execute( $flattened_values );
+
+        if ( !$result ) {
+            throw new \Exception('Error during bulk save of dqf_segments: ' . var_export( $flattened_values, true)  ) ;
+        }
     }
 
     /**
@@ -81,6 +86,11 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $flattened_values = array_reduce( $structs, 'array_merge', array() );
-        $stmt->execute( $flattened_values );
+        $result = $stmt->execute( $flattened_values );
+
+        if ( !$result ) {
+            throw new \Exception('Error during bulk save of dqf_segments: ' . var_export( $flattened_values, true)  ) ;
+
+        }
     }
 }

@@ -102,7 +102,11 @@ class TranslationChildProject {
 
             $project->create();
 
-            $this->dqfChildProjects[]  = $project->getSavedRecord() ;
+            // TODO: not sure this assignment is really helpful
+            // reloading the projectMapper should be enough
+            $this->dqfChildProjects[] = $project->getSavedRecord() ;
+
+            $this->dqfProjectMapResolver->reload() ;
         }
     }
 
@@ -159,9 +163,10 @@ class TranslationChildProject {
 
             $remoteFileId = $this->_findRemoteFileId( $file );
 
-            $dqfChildProjects = $this->dqfProjectMapResolver->getCurrentInSegmentIdBoundaries(
-                    $fileMinIdSegment, $fileMaxIdSegment
-            );
+            $dqfChildProjects = $this->dqfProjectMapResolver
+                    ->getCurrentInSegmentIdBoundaries(
+                            $fileMinIdSegment, $fileMaxIdSegment
+                    );
 
             foreach ( $dqfChildProjects as $dqfChildProject ) {
                 $dao = new Translations_TranslationVersionDao();
