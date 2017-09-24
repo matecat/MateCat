@@ -87,8 +87,8 @@ class ProjectCreation {
         $this->_initSession();
         $this->_createProject();
         $this->_submitProjectFiles();
-        $this->_submitSourceSegments();
         $this->_submitReviewSettings();
+        $this->_submitSourceSegments();
     }
 
     protected function _createProject() {
@@ -149,6 +149,19 @@ class ProjectCreation {
         $struct = $dqfQaModel->getReviewSettings() ;
 
         $this->reviewSettings = $request->create( $struct );
+
+        /**
+         * This check was introduced due to weird errors about missing reviewErrors on
+         */
+        if ( !empty( $this->reviewSettings->dqfId ) ) {
+            $this->project->setMetadata('dqf_review_settings_id', $this->reviewSettings->dqfId ) ;
+        }
+
+        else {
+            throw new Exception('Dqf review settings where not set. ' .
+                    var_export( $this->reviewSettings->toArray(), true )
+            ) ;
+        }
     }
 
     protected function _initSession() {
