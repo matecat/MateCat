@@ -16,7 +16,8 @@ class CreateProjectWorker extends AbstractWorker  {
 
     protected $sourceLanguageCode ;
 
-    protected $reQueueNum = 10 ;
+
+    protected $reQueueNum = 0 ; // stop at first error
 
     /**
      * @var QueueElement
