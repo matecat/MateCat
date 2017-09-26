@@ -459,7 +459,7 @@
             }
 
             if (this.readonly) return;
-
+            this.setLastSegmentFromLocalStorage(id_segment.toString());
             APP.doRequest({
                 data: {
                     action: 'setCurrentSegment',

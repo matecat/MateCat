@@ -146,7 +146,7 @@ class SegmentFooterTabMatches extends React.Component {
                         data-item={(index + 1)}
                         data-id={match.id}
                         data-original= {match.segment}
-                        onDoubleClick = {self.suggestionDblClick.bind(null, match, index+1)}>
+                        onDoubleClick = {self.suggestionDblClick.bind(self, match, index+1)}>
                         <li className="sugg-source" > {trashIcon}
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-source'}

@@ -30,7 +30,7 @@ class Editarea extends React.Component {
 
         if (this.props.segment.sid == sid) {
             let self = this;
-            let editAreaClasses = this.state.editAreaClasses;
+            let editAreaClasses = this.state.editAreaClasses.slice();
             editAreaClasses.push('highlighted1');
             this.setState({
                 editAreaClasses: editAreaClasses
@@ -55,11 +55,13 @@ class Editarea extends React.Component {
 
     addClass(sid, className) {
         if (this.props.segment.sid == sid) {
-            let editAreaClasses = this.state.editAreaClasses;
-            editAreaClasses.push(className);
-            this.setState({
-                editAreaClasses: editAreaClasses
-            });
+            let editAreaClasses = this.state.editAreaClasses.slice();
+            if (editAreaClasses.indexOf(className) < 0) {
+                editAreaClasses.push(className);
+                this.setState({
+                    editAreaClasses: editAreaClasses
+                });
+            }
 
         }
     }
@@ -119,7 +121,7 @@ class Editarea extends React.Component {
             lang = config.target_rfc.toLowerCase();
             readonly = ((this.props.segment.readonly === 'true') || this.props.locked);
         }
-        let classes = this.state.editAreaClasses;
+        let classes = this.state.editAreaClasses.slice();
         if (this.props.locked || readonly) {
             classes.push('area')
         } else {

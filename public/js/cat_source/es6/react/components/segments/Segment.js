@@ -100,26 +100,49 @@ class Segment extends React.Component {
 
     addClass(sid, newClass) {
         if (this.props.segment.sid == sid) {
+            let self = this;
             let classes = this.state.segment_classes.slice();
-            if (classes.indexOf(newClass) < 0) {
-                classes.push(newClass);
-                this.setState({
-                    segment_classes: classes
-                });
+            if (newClass.indexOf(' ') > 0) {
+                let self = this;
+                let classesSplit = newClass.split(' ');
+                _.forEach(classesSplit, function (item) {
+                    if (classes.indexOf(item) < 0) {
+                        classes.push(item);
+                    }
+                })
+            } else {
+                if (classes.indexOf(newClass) < 0) {
+                    classes.push(newClass);
+                }
             }
+            this.setState({
+                segment_classes: classes
+            });
         }
     }
 
     removeClass(sid, className) {
         if (this.props.segment.sid == sid) {
             let classes = this.state.segment_classes.slice();
-            let index = classes.indexOf(className);
-            if ( index > -1 ) {
-                classes.splice(index, 1);
-                this.setState({
-                    segment_classes: classes
-                });
+            let removeFn = function (item) {
+                let index = classes.indexOf(item);
+                if (index > -1) {
+                    classes.splice(index, 1);
+
+                }
+            };
+            if ( className.indexOf(' ') > 0 ) {
+                let self = this;
+                let classesSplit = className.split(' ');
+                _.forEach(classesSplit, function (item) {
+                    removeFn(item);
+                })
+            } else {
+                removeFn(className);
             }
+            this.setState({
+                segment_classes: classes
+            });
         }
     }
 

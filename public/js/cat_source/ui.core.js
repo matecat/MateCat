@@ -289,10 +289,9 @@ UI = {
             this.removeGlossaryMarksFormSource();
 
             segment.find('.editarea').attr('contenteditable', 'false');
-
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'opened');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'editor');
+            setTimeout(function () {
+                SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
+            }, 0);
             $('span.locked.mismatch', segment).removeClass('mismatch');
 
 
