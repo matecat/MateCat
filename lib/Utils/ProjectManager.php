@@ -62,6 +62,11 @@ class ProjectManager {
 
     protected $gdriveSession ;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $features;
+
     const TRANSLATED_USER = 'translated_user';
 
     /**
@@ -629,40 +634,10 @@ class ProjectManager {
             return false;
         }
 
-        try {
-
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
-            }
-
-        } catch ( Exception $e ) {
-
-            $output = "<pre>\n";
-            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-            $output .= "\n\t";
-            $output .= "Aborting...\n";
-            $output .= "</pre>";
-
-            Log::doLog( $output );
-
-            Utils::sendErrMailReport( $output, $e->getMessage() );
-
-        }
-
         $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
-        $isEmptyProject = false;
-        //FIXME for project with only pre-translations this condition is not enough, because the translated segments are marked as not to be shown in cattool
-        //we need to compare the number of segments with the number of translations
         if ( $this->show_in_cattool_segs_counter == 0 ) {
             Log::doLog( "Segment Search: No segments in this project - \n" );
-            $isEmptyProject = true;
-        }
-        if ( $isEmptyProject ) {
             $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_EMPTY;
         }
 
@@ -702,11 +677,34 @@ class ProjectManager {
         $this->pushActivityLog();
 
         Database::obtain()->begin();
-
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );
         Database::obtain()->commit();
+
+        try {
+
+            Utils::deleteDir( $this->uploadDir );
+            if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                Utils::deleteDir( $this->uploadDir . '_converted' );
+            }
+
+        } catch ( Exception $e ) {
+
+            $output = "<pre>\n";
+            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+            $output .= "\n\t";
+            $output .= "Aborting...\n";
+            $output .= "</pre>";
+
+            Log::doLog( $output );
+
+            Utils::sendErrMailReport( $output, $e->getMessage() );
+
+        }
 
     }
 
@@ -1509,7 +1507,7 @@ class ProjectManager {
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
 
-        $xliff_obj = new Xliff_Parser();
+        $xliff_obj = new Xliff_Parser( $this->features );
 
         try {
             $xliff = $xliff_obj->Xliff2Array( $xliff_file_content );

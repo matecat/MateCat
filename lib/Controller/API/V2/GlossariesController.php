@@ -153,7 +153,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $fileStream = new KleinResponseFileStream( $this->response );
         $fileName   = $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip";
-        $fileStream->streamFileFromPointer( $ZipFilePointer, $fileName );
+        $fileStream->streamFileDownloadFromPointer( $ZipFilePointer, $fileName );
     }
 
     protected function logDownloadError( Exception $e ) {

@@ -6,21 +6,24 @@ class Files_FileDao extends DataAccess_AbstractDao {
     protected static $auto_increment_fields = ['id'] ;
 
     /**
-     * @param $id_job
+     * @param     $id_job
      *
-     * @return Files_FileStruct[]
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
      */
-    public static function getByJobId( $id_job ) {
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(
-        "SELECT * FROM files " .
-        " INNER JOIN files_job ON files_job.id_file = files.id " .
-        " AND id_job = :id_job "
-      );
+    public static function getByJobId( $id_job, $ttl = 60 ) {
 
-      $stmt->execute( array( 'id_job' => $id_job ) );
-      $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-      return $stmt->fetchAll();
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT * FROM files " .
+                " INNER JOIN files_job ON files_job.id_file = files.id " .
+                " AND id_job = :id_job "
+        );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job ] );
+
     }
 
     /**

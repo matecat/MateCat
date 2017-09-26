@@ -24,6 +24,11 @@ class FeatureSet {
         $this->__loadFromMandatory();
     }
 
+    /**
+     * TODO Check if $this->feature is every time an object like [ 'review_improved' => OwnerFeatures_OwnerFeatureStruct ],
+     * TODO  in this case array_keys is enough instead of array_values( array_map() )
+     * @return array
+     */
     public function getCodes() {
         return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
