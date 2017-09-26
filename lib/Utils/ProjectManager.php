@@ -704,11 +704,11 @@ class ProjectManager {
 
         Database::obtain()->begin();
 
-        $this->features->run('postProjectCreate',
-            $this->projectStructure
-        );
+        $this->features->run('postProjectCreate', $this->projectStructure );
+
         Database::obtain()->commit();
 
+        $this->features->run('postProjectCommit', $this->projectStructure );
     }
 
     private function __clearFailedProject( Exception $e ){

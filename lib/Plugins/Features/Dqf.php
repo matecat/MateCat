@@ -166,7 +166,7 @@ class Dqf extends BaseFeature {
     /**
      * @param $projectStructure
      */
-    public function postProjectCreate( $projectStructure ) {
+    public function postProjectCommit( $projectStructure ) {
         $struct = new ProjectCreationStruct([
             'id_project'          => $projectStructure['id_project'],
             'source_language'     => $projectStructure['source_language'],
