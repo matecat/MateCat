@@ -29,6 +29,9 @@ class CreateProjectWorker extends AbstractWorker  {
         $this->_checkForReQueueEnd( $this->queueElement );
         $this->_checkDatabaseConnection() ;
 
+        /** Wati to ensure slave databases are up to date. */
+        sleep( 4 ) ;
+
         try {
             $struct = new ProjectCreationStruct( json_decode( $queueElement->params, true ) );
             (new ProjectCreation( $struct ))->process();
