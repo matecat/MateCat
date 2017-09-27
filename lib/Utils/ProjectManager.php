@@ -1087,6 +1087,7 @@ class ProjectManager {
      *
      */
     private function insertSegmentNotesForFile() {
+        $this->features->filter( 'handleJsonNotes', $this->projectStructure );
         Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure['notes'] )  ;
     }
 
@@ -1904,7 +1905,13 @@ class ProjectManager {
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
-            array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+
+            if( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ){
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
+            } else {
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+            }
+
         }
 
     }
@@ -2301,10 +2308,17 @@ class ProjectManager {
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'segment_ids', array() );
                 }
 
-                $this->projectStructure[ 'notes' ][ $internal_id ][ 'entries' ]->append( $note[ 'raw-content' ] );
+                if( isset( $note[ 'json' ] ) ){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ]->append( $note[ 'json' ] );
+                } elseif( isset( $note[ 'raw-content' ] ) ){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'entries' ]->append( $note[ 'raw-content' ] );
+                }
+
             }
         }
     }
