@@ -151,8 +151,8 @@ class PreferencesModal extends React.Component {
             var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
             couponHtml = <div className="coupon-container">
                 {!this.state.openCoupon ? (
-                        <div className="open-coupon-link"
-                        onClick={this.openCoupon.bind(this)}>Add a coupon</div>
+                        <a className="open-coupon-link"
+                        onClick={this.openCoupon.bind(this)}>Add a coupon</a>
                     ): (
                     <div>
                         <h2 htmlFor="user-coupon">Coupon</h2>

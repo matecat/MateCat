@@ -523,6 +523,9 @@ APP = {
         }
         return x1 + x2;
     },
+    numberWithCommas: function(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
     zerofill: function ( i, l, s ) {
         var o = i.toString();
         if ( !s ) {
@@ -894,19 +897,32 @@ APP = {
             setTimeout(this.setUserImage.bind(this), 500);
         }
     },
-    getGMTDate: function (date) {
+
+    fromDateToString: function (date) {
+        var dd = new Date( date );
+        return {
+            day: $.format.date(dd, "d") ,
+            month: $.format.date(dd, "MMMM"),
+            year: $.format.date(dd, "yy"),
+            time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+        };
+    },
+
+    getGMTDate: function (date, timeZoneFrom) {
         var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
         var dd = new Date( date );
-        var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
+        var timeZoneFrom = (timeZoneFrom) ? timeZoneFrom : (-1 * ( new Date().getTimezoneOffset() / 60) ); //TODO UTC0 ? Why the browser gmt
         dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
         var timeZone = this.getGMTZoneString();
         return {
             day: $.format.date(dd, "d") ,
             month: $.format.date(dd, "MMMM"),
             time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+            time2: $.format.date(dd, "HH") + ":" + $.format.date(dd, "mm"),
+            year: $.format.date(dd, "yyyy"),
             gmt: timeZone
         };
     },
@@ -920,6 +936,14 @@ APP = {
         timezoneToShow = (timezoneToShow > 0) ? '+' + timezoneToShow : timezoneToShow;
         return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
 
+    },
+
+    getDefaultTimeZone: function () {
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        return timezoneToShow;
     },
 
     readCookie: function( cookieName ) {

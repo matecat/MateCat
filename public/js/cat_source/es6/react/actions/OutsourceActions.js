@@ -17,6 +17,10 @@ let OutsourceActions = {
         AppDispatcher.dispatch({
             actionType: OutsourceConstants.GET_OUTSOURCE_QUOTE,
         });
+    },
+
+    sendJobToTranslator: function (email, date, timezone, job, project) {
+        UI.sendJobToTranslator(email, date, timezone, job, project);
     }
 
 };

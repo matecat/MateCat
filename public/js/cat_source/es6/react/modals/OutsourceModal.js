@@ -18,7 +18,7 @@ class OutsourceModal extends React.Component {
 
     getOutsourceQuote() {
         let self = this;
-        let typeOfService = $( this.revisionSelect).is(":checked") ? "premium" : "professional";
+        let typeOfService = $( this.revisionCheckbox).is(":checked") ? "premium" : "professional";
         let fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
         UI.currentOutsourceProject = this.props.project;
         UI.currentOutsourceJob = this.props.job;
@@ -108,7 +108,7 @@ class OutsourceModal extends React.Component {
     getDeliveryHtml() {
         let containerClass = (this.state.showTranslatorInfo) ? "compress" : "";
         if (this.state.outsource) {
-            let isRevisionChecked = $(this.revisionSelect).is( ":checked" );
+            let isRevisionChecked = $(this.revisionCheckbox).is( ":checked" );
             let deliveryToShow = ( isRevisionChecked ) ?  this.chunk.r_delivery : this.chunk.delivery;
             let priceToShow = ( isRevisionChecked ) ? parseFloat( this.chunk.r_price ) + parseFloat( this.chunk.price ) : this.chunk.price;
 
@@ -173,7 +173,7 @@ class OutsourceModal extends React.Component {
         }
         return <div className="addrevision">
                     <input type="checkbox" name="revision" value="revision"
-                           ref={(select) => this.revisionSelect = select}/>
+                           ref={(select) => this.revisionCheckbox = select}/>
                     <h4>Add revision</h4>
                     <span className="revision_delivery" data-timezone={timeZone} data-rawtime={date}>{dateString}</span>
                     <span className="revision_price_box">+
@@ -247,6 +247,10 @@ class OutsourceModal extends React.Component {
         if (!config.enable_outsource) {
             this.initOutsourceModal();
         }
+        $('.ui.rating')
+            .rating('disable')
+        ;
+
     }
     componentWillUnmount() {
         OutsourceStore.removeListener(OutsourceConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
@@ -304,8 +308,9 @@ class OutsourceModal extends React.Component {
             date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
         }
 
+        // TODO : @Ruben Modificare questo Return
 
-        return <div className={"modal outsource " + loadingClass}>
+        return<div className={"modal outsource " + loadingClass}>
         <div className="popup">
         <div className={"popup-box pricebox " + pricesClass}>
             <h2>Choose how to translate:
