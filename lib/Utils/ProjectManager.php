@@ -1522,9 +1522,8 @@ class ProjectManager {
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $this->features->run('postJobMerged',
-            $projectStructure
-        );
+        $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
+        $this->features->run('postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
 

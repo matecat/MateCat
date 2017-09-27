@@ -9,6 +9,7 @@ use BasicFeatureStruct;
 use catController;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Exception;
 use Exceptions\ValidationError;
 use Features;
 use Features\Dqf\Model\RevisionChildProject;
@@ -19,6 +20,8 @@ use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportModel;
 use INIT;
+use Jobs\MetadataDao;
+use Jobs_JobStruct;
 use Klein\Klein;
 use Klein\Request;
 use Klein\ServiceProvider;
@@ -263,11 +266,16 @@ class Dqf extends BaseFeature {
 
     }
 
-    public function postJobMerged( $projectStructure ) {
+    public function postJobMerged( $projectStructure, Chunks_ChunkStruct $chunk ) {
+        ( new MetadataDao() )->set( $chunk->id, $chunk->password, 'dqf_merge_date', Utils::mysqlTimestamp(time()) );
+    }
 
+    public function checkSplitAccess( $jobs ) {
+        $merged = ( new MetadataDao())->get( $jobs[0]->id, $jobs[0]->password, 'dqf_merge_date');
+        if ( $merged ) {
+            throw new Exception('You cannot split this DQF poject because it was splitted once already and merged on date ' . $merged->value );
+        }
 
-        // keep previous records
-        // save a flag somewhere to deny subsequent re-splits
 
     }
 
