@@ -473,16 +473,16 @@ body.manage {
                                     position: relative;
                                     text-align: left;
                                     .outsource-logo-box {
-                                        min-width: 140px;
+                                        min-width: 123px;
                                         display: inherit;
-                                        margin-left: 20px;
+                                        margin-left: 10px;
                                         img.outsource-logo {
                                             width: 100px;
                                             margin: -5px 10px 0 0;
                                             vertical-align: middle;
                                         }
-                                        @media only screens and (max-width: 1199px) and (min-width: 992px) {
-                                            min-width: 113px;
+                                        @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                                            width: 180px;
                                         }
                                     }
                                     &.outsource {
@@ -502,9 +502,7 @@ body.manage {
                                     line-height: 20px;
                                     margin-top: 5px;
                                     transition: 0.3s ease;
-                                   /* @media only screen and (max-width: 1200px) {
-                                        width: 125px;
-                                    }*/
+
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         width: 200px;
                                     }
@@ -559,9 +557,6 @@ body.manage {
                                 &:hover .translator .job-delivery {
                                     display: none;
                                 }
-                                &:hover .outsource .job-delivery {
-                                    display: inline-block;
-                                }
                                 .item {
                                     margin-left: 10px;
                                     display: none;
@@ -588,15 +583,6 @@ body.manage {
                                 &:hover .item {
                                     display: inline-block;
                                 }
-                                /*.job-price {
-                                    display: inline-block;
-                                    margin-right: 10px;
-                                    vertical-align: text-bottom;
-                                    font-weight: 700;
-                                    @media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }
-                                }*/
                             }
                             .open-translate {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;

@@ -270,12 +270,12 @@
             display: inline-block;
             .job-url {
                 display: inline-block;
-                max-width: 88%;
+                max-width: 80%;
                 min-width: 0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                font-size: 16px;
+                font-size: 15px;
                 a {
                     font-size: 16px;
                 }
@@ -915,7 +915,7 @@
                     }
                     .payment-service {
                         display: inline-block;
-                        width: 64%;
+                        width: 63%;
                         vertical-align: top;
                         position: relative;
                         top: 10px;
@@ -953,7 +953,7 @@
                     }
                     .delivery-order {
                         display: inline-block;
-                        width: 36%;
+                        width: 37%;
                         text-align: right;
                         position: relative;
                         top: -15px;

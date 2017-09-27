@@ -55,13 +55,13 @@ class OutsourceInfo extends React.Component {
             <div className="ui grid">
                 <div className="customer-box" ref={(slider)=> this.slider = slider}>
                     <div className="title-pointer">
-                        {/*<h3>Our customer said</h3>*/}
+
                         <div className="pointers">
                             <div className="pointer active" onClick={this.slideItem.bind(this, 1)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 2)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 3)}/>
                             <div className="pointer" onClick={this.slideItem.bind(this, 4)}/>
-                            <div className="pointer" onClick={this.slideItem.bind(this, 5)}/>
+                           {/* <div className="pointer" onClick={this.slideItem.bind(this, 5)}/>*/}
                         </div>
                     </div>
                     <div className="slider-box" >
@@ -88,7 +88,7 @@ class OutsourceInfo extends React.Component {
                                  <img src="../../public/img/outsource-clients/testimonial-responsive-translation.png" />
                             </div>
                         </div>
-                        <div className="customer-box-info">
+                        {/*<div className="customer-box-info">
                             <div className="customer-text">
                                 The outsourcing option in Matecat is so straightforward.
                                 You choose your language pairs, upload the document, get the price and send it off to the PM. So easy!
@@ -107,7 +107,7 @@ class OutsourceInfo extends React.Component {
                             <div className="customer-corporate-logo">
                                Kevin Connor
                             </div>
-                        </div>
+                        </div>*/}
                         <div className="customer-box-info">
                             <div className="customer-text">
                                 I always receive translations back, exactly as I want. Great service, well worth trying out.
@@ -193,12 +193,8 @@ class OutsourceInfo extends React.Component {
                                 </div>
                                 <div className="item open-chat">
                                     <div className="content">
-                                       {/* <div className="header">Talk with us
-                                            <span className="online"> (On line)</span>
-                                            <span className="offline"> (Off line)</span>
-                                        </div>*/}
+
                                         <div className="ui button intercom-button">
-                                            {/*<div className="sign online-item"/>*/}
                                             <i className="big icon-uniE970 middle aligned icon" />
                                             Open chat
                                         </div>
