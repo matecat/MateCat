@@ -810,9 +810,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
     $jStructs = Jobs_JobDao::getById( $jid );
-    $currentJob = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
+    $filtered = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
         return $item->password == $jpassword;
-    } )[ 0 ];
+    } );
+    $currentJob = array_pop( $filtered );
 
     if ( $sid != null ) {
 
@@ -964,6 +965,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
      * We want to avoid that a translation overrides a propagation,
      * so we have to set an additional status when the requested status to propagate is TRANSLATE
      */
+    $additional_status = '';
     if( $params['status'] == Constants_TranslationStatus::STATUS_TRANSLATED ){
         $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
 ";
