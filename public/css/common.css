@@ -4361,6 +4361,9 @@ text-align: left;
 .icon-file:before {
     content: "\e904";
 }
+.icon-unlocked3:before {
+    content: "\ea8a";
+}
 
 
 
