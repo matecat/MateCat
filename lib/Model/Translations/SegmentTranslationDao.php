@@ -74,6 +74,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          * We want to avoid that a translation overrides a propagation,
          * so we have to set an additional status when the requested status to propagate is TRANSLATE
          */
+        $additional_status = '';
         if( $status == Constants_TranslationStatus::STATUS_TRANSLATED ){
             $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
 ";
@@ -83,7 +84,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 " WHERE id_job = :id_job " .
                 " AND segment_hash = :segment_hash " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment $additional_status;";
+                " AND id_segment <> :id_segment $additional_status; ";
 
         $conn =  $this->con->getConnection() ;
         $stmt = $conn->prepare( $selectSegmentsToPropagate );
