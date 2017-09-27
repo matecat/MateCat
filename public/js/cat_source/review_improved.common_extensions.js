@@ -27,10 +27,7 @@ if ( ReviewImproved.enabled() ) {
                 status = 'rebutted' ;
             }
             return status;
-        },
-        autoCopySuggestionEnabled: function () {
-            return false;
-        },
+        }
     });
 })(jQuery, window);
 }
