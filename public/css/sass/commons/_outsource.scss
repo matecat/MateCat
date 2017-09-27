@@ -171,6 +171,8 @@
             font-weight: 700;
             width: 25%;
             vertical-align: top;
+            position: relative;
+            top: 24px;
         }
         .title-url {
             padding: 10px 0;
@@ -911,7 +913,7 @@
                     }
                     .title-reduced {
                         font-size: 24px;
-                        font-weight: 700;
+                        font-weight: 100;
                     }
                     .payment-service {
                         display: inline-block;
