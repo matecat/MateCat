@@ -810,9 +810,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
     $jStructs = Jobs_JobDao::getById( $jid );
-    $currentJob = array_pop( array_filter( $jStructs, function( $item ) use ( $jpassword ) {
+    $filtered = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
         return $item->password == $jpassword;
-    } ) );
+    } );
+    $currentJob = array_pop( $filtered );
 
     if ( $sid != null ) {
 
