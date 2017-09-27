@@ -292,7 +292,7 @@ abstract class viewController extends controller implements IController {
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template) ) {
-            throw new Exception('Tempalte is not defined');
+            throw new Exception('Tamplate is not defined');
         }
 
         $this->template->footer_js = array();
