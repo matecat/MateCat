@@ -52,7 +52,7 @@ class ChildProjectRevisionBatchService  {
 
         foreach( $this->resources as $resource ) {
             if ( $error = $this->client->curl()->hasError( $resource ) ) {
-                throw new Exception('Error sending translation batch: ' .
+                throw new Exception('Error sending revision batch: ' .
                         var_export( $this->client->curl()->getAllContents(), true )
                 ) ;
             }

@@ -266,16 +266,15 @@ class Dqf extends BaseFeature {
 
     }
 
-    public function postJobMerged( $projectStructure, Chunks_ChunkStruct $chunk ) {
-        ( new MetadataDao() )->set( $chunk->id, $chunk->password, 'dqf_merge_date', Utils::mysqlTimestamp(time()) );
-    }
-
     public function checkSplitAccess( $jobs ) {
-        $merged = ( new MetadataDao())->get( $jobs[0]->id, $jobs[0]->password, 'dqf_merge_date');
-        if ( $merged ) {
-            throw new Exception('You cannot split this DQF poject because it was splitted once already and merged on date ' . $merged->value );
-        }
+        $chunk = new Chunks_ChunkStruct( $jobs[0]->toArray() );
+        $mapDao = new Features\Dqf\Model\DqfProjectMapDao();
 
+        $currentTranslations = $mapDao->getCurrentByType( $chunk,  Features\Dqf\Model\DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) ;
+
+        if (!empty( $currentTranslations ) ) {
+            throw new Exception('You cannot split DQF projects at this stage. Translation data has been sent.' );
+        }
 
     }
 

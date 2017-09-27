@@ -221,9 +221,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
-        $dao = new Chunks_ChunkDao( Database::obtain() );
-
-        return $dao->getByProjectID( $this->id_project );
+        return $this->cachable(__METHOD__, $this, function($obj) {
+            return Chunks_ChunkDao::getByJobID( $obj->id ) ;
+        }) ;
     }
 
     public function getOwnerKeys(){

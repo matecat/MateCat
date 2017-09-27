@@ -133,13 +133,17 @@ class RevisionChildProject {
     }
 
 
-    protected function getSegmentsWithIssues($max, $min) {
+    protected function getSegmentsWithIssues($min, $max) {
+        if ( $min > $max ) {
+            throw new Exception('min is higher than max' ) ;
+        }
+
         $this->qualityModel = new QualityReportModel( $this->chunk );
         $this->qualityModel->setVersionNumber( $this->version );
         $this->qualityModel->getStructure() ; // terrible API
 
         return array_filter( $this->qualityModel->getAllSegments(), function( $item ) use ( $max, $min ) {
-            return count( $item['issues'] ) > 0 ;
+            return $item['id'] <= $max && $item['id'] >= $min && count( $item['issues'] ) > 0 ;
         }) ;
     }
 
@@ -149,11 +153,7 @@ class RevisionChildProject {
         $this->dqfChildProjects = [] ;
 
         foreach( $parents as $parent ) {
-            $struct = new CreateProjectResponseStruct();
-            $struct->dqfUUID = $parent->dqf_project_uuid ;
-            $struct->dqfId = $parent->dqf_project_id ;
-
-            $project = new ChildProjectCreationModel($struct, $this->chunk, 'revise' );
+            $project = new ChildProjectCreationModel($parent, $this->chunk, 'revise' );
 
             $model = new ProjectModel( $parent );
 

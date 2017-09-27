@@ -10,6 +10,7 @@ namespace Features\Dqf\Service;
 
 use Chunks_ChunkStruct;
 use Exception;
+use Features\Dqf\Model\DqfProjectMapDao;
 use Features\Dqf\Model\DqfProjectMapStruct;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
@@ -178,14 +179,14 @@ class ChildProjectService {
      * @throws Exception
      * @internal param MaserFileCreationResponseStruct[] $remoteFiles
      */
-    public function createTranslationChild( CreateProjectResponseStruct $parent, $remoteFiles ) {
+    public function createTranslationChild( DqfProjectMapStruct $parent, $remoteFiles ) {
         $projectStruct            = new ChildProjectRequestStruct() ;
         $projectStruct->type      = self::TRANSLATION ;
 
         return $this->createChild( $parent, $remoteFiles, $projectStruct );
     }
 
-    public function createRevisionChild( CreateProjectResponseStruct $parent, $remoteFiles ) {
+    public function createRevisionChild( DqfProjectMapStruct $parent, $remoteFiles ) {
         $projectStruct            = new ChildProjectRequestStruct() ;
         $projectStruct->type      = self::REVIEW ;
 
@@ -240,19 +241,19 @@ class ChildProjectService {
     }
 
     /**
-     * @param $remoteFiles
-     * @param $projectStruct
+     * @param DqfProjectMapStruct $parent
+     * @param                     $remoteFiles
+     * @param                     $projectStruct
      *
      * @return CreateProjectResponseStruct
      * @throws Exception
      */
-    protected function createChild( $parent, $remoteFiles, $projectStruct ) {
+    protected function createChild( DqfProjectMapStruct $parent, $remoteFiles, $projectStruct ) {
 
         $projectStruct->sessionId = $this->session->getSessionId();
-
         $projectStruct->clientId  = Functions::scopeId( $this->clientId );
+        $projectStruct->parentKey = $parent->dqf_project_uuid ;
 
-        $projectStruct->parentKey = $parent->dqfUUID ;
         $client = new Client();
         $client->setSession( $this->session );
         $resource = $client->createResource( '/project/child', 'post', [

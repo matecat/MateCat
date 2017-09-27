@@ -57,7 +57,10 @@ class IntermediateRootProject {
         $ids      = [] ;
 
         foreach( $this->project->getChunks() as $chunk ) {
-            $childProject = new ChildProjectCreationModel( $createProjectResponseStruct, $chunk, 'vendor_root' );
+
+            $masterRecord = ( new DqfProjectMapDao() )->findRootProject( $chunk ) ;
+
+            $childProject = new ChildProjectCreationModel( $masterRecord, $chunk, 'vendor_root' );
 
             $childProject->setUser( $this->user ) ;
             $childProject->setFiles( $files ) ;

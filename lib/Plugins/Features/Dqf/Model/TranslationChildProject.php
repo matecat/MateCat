@@ -15,6 +15,7 @@ use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Files_FileStruct;
 use INIT;
 use Jobs\MetadataDao;
+use LoudArray;
 use Translations_TranslationVersionDao;
 use Users_UserDao;
 
@@ -90,11 +91,7 @@ class TranslationChildProject {
         $this->dqfChildProjects = [] ;
 
         foreach( $parents as $parent ) {
-            $struct = new CreateProjectResponseStruct();
-            $struct->dqfUUID = $parent->dqf_project_uuid ;
-            $struct->dqfId = $parent->dqf_project_id ;
-
-            $project = new ChildProjectCreationModel($struct, $this->chunk, 'translate' );
+            $project = new ChildProjectCreationModel($parent, $this->chunk, 'translate' );
 
             $model = new ProjectModel( $parent );
             $project->setUser( $this->dqfTranslateUser ) ;
@@ -159,7 +156,9 @@ class TranslationChildProject {
         foreach( $this->files as $file ) {
             list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
 
-            $segmentIdsMap = ( new DqfSegmentsDao() )->getByIdSegmentRange( $fileMinIdSegment, $fileMaxIdSegment ) ;
+            $segmentIdsMap = new LoudArray(
+                    ( new DqfSegmentsDao() )->getByIdSegmentRange( $fileMinIdSegment, $fileMaxIdSegment )
+            );
 
             $remoteFileId = $this->_findRemoteFileId( $file );
 

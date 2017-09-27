@@ -14,6 +14,7 @@ use Database;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\ProjectCompletion\ChunkStatus;
 use Files_FileStruct;
+use Jobs_JobStruct;
 use PDO;
 
 class DqfProjectMapDao extends DataAccess_AbstractDao  {
@@ -71,7 +72,12 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
         return $stmt->fetch() ;
     }
 
-
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     * @param                    $type
+     *
+     * @return array
+     */
     public function getCurrentByType( Chunks_ChunkStruct $chunk, $type ) {
         $sql = "SELECT * FROM dqf_child_projects_map
                   WHERE id_job = :id_job
@@ -92,7 +98,6 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
 
         return $stmt->fetchAll() ;
     }
-
 
     /**
      * Lastest translation should return just one record, because for each chunk there can be
