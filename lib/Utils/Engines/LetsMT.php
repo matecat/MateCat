@@ -12,7 +12,7 @@
  * @property string client_id
  * @property string client_secret
  */
-class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_LetsMT extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,

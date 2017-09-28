@@ -1,7 +1,5 @@
 <?php
 
-use DataAccess\ShapelessConcreteStruct;
-
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments' ;
     protected static $auto_increment_fields = ['id'];
@@ -138,33 +136,71 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
+     * @param Segments_SegmentStruct[] $obj_arr
      *
-     * @return DataAccess_IDaoStruct|ShapelessConcreteStruct
+     * @throws Exception
      */
-    public function getRawWCSumForTranslatedSegments( $id_job, $password ){
+    public function createList( Array $obj_arr ) {
 
-        //we do not need to filter on show_in_cattool = 1 because in segment_translations table only these IDs can exists
-        $query = "SELECT SUM(raw_word_count) as translated_raw_wc FROM segments 
-                  WHERE id IN(
-                        SELECT id_segment 
-                        FROM segment_translations 
-                        JOIN jobs ON id_job = jobs.id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-                        WHERE id_job = :id_job 
-                        AND password = :password
-                        AND segment_translations.status != :status_new 
-                        AND segment_translations.status != :status_draft
-                  )
-                 ";
+        $obj_arr = array_chunk( $obj_arr, 100 );
 
-        $stmt = $this->con->getConnection()->prepare( $query );
+        $baseQuery = "INSERT INTO segments ( 
+                            id, 
+                            internal_id, 
+                            id_file,
+                            /* id_project, */ 
+                            segment, 
+                            segment_hash, 
+                            raw_word_count, 
+                            xliff_mrk_id, 
+                            xliff_ext_prec_tags, 
+                            xliff_ext_succ_tags, 
+                            show_in_cattool,
+                            xliff_mrk_ext_prec_tags,
+                            xliff_mrk_ext_succ_tags
+                            ) VALUES ";
 
-        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_job'     => $id_job,
-                'password'   => $password,
-                'status_new' => Constants_TranslationStatus::STATUS_NEW,
-                'status_draft' => Constants_TranslationStatus::STATUS_DRAFT,
-        ] )[0];
+
+        Log::doLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
+
+        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 12 ), ", " ) . " )";  //set to 13 when implements id_project
+
+        foreach ( $obj_arr as $i => $chunk ) {
+
+            $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
+
+            $values = [];
+            foreach( $chunk as $segStruct ){
+
+                $values[] =$segStruct->id;
+                $values[] =$segStruct->internal_id;
+                $values[] =$segStruct->id_file;
+                /* $values[] = $segStruct->id_project */
+                $values[] = $segStruct->segment;
+                $values[] = $segStruct->segment_hash;
+                $values[] = $segStruct->raw_word_count;
+                $values[] = $segStruct->xliff_mrk_id;
+                $values[] = $segStruct->xliff_ext_prec_tags;
+                $values[] = $segStruct->xliff_ext_succ_tags;
+                $values[] = $segStruct->show_in_cattool;
+                $values[] = $segStruct->xliff_mrk_ext_prec_tags;
+                $values[] = $segStruct->xliff_mrk_ext_succ_tags;
+
+            }
+
+            try {
+
+                $stm = $this->con->getConnection()->prepare( $query );
+                $stm->execute( $values );
+                Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
+
+            } catch ( PDOException $e ) {
+                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+            }
+
+        }
+
 
     }
 

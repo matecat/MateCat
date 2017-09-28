@@ -69,6 +69,7 @@ class Job {
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
+                'total_raw_wc'          => (int) $jStruct->total_raw_wc
         ];
 
     }

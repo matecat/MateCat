@@ -3,6 +3,7 @@
 namespace Features ;
 use BasicFeatureStruct;
 use INIT;
+use Klein\Klein;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -68,4 +69,12 @@ abstract class BaseFeature  {
     public function getFeatureStruct() {
         return $this->feature ;
     }
+
+    /**
+     * @param Klein $klein
+     *
+     * @see \Features::loadRoutes
+     */
+    public static function loadRoutes( Klein $klein ){}
+
 }

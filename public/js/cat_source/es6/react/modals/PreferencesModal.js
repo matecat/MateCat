@@ -151,8 +151,8 @@ class PreferencesModal extends React.Component {
             var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
             couponHtml = <div className="coupon-container">
                 {!this.state.openCoupon ? (
-                        <div className="open-coupon-link"
-                        onClick={this.openCoupon.bind(this)}>Add a coupon</div>
+                        <a className="open-coupon-link"
+                        onClick={this.openCoupon.bind(this)}>Add a coupon</a>
                     ): (
                     <div>
                         <h2 htmlFor="user-coupon">Coupon</h2>
@@ -191,6 +191,31 @@ class PreferencesModal extends React.Component {
             </div>;
         }
 
+
+        let googleDrive = null ;
+
+        if ( config.googleDriveEnabled ) {
+            googleDrive = <div>
+                <h2>Google Drive</h2>
+                <div className="user-gdrive">
+
+                    <div className="onoffswitch-drive">
+                        <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
+                               ref={(input) => this.checkDrive = input}
+                               className="onoffswitch-checkbox" id="gdrive_check"/>
+                        <label className="onoffswitch-label" htmlFor="gdrive_check">
+                            <span className="onoffswitch-inner"/>
+                            <span className="onoffswitch-switch"/>
+                            <span className="onoffswitch-label-status-active">ON</span>
+                            <span className="onoffswitch-label-status-inactive">OFF</span>
+                            <span className="onoffswitch-label-status-unavailable">Unavailable</span>
+                        </label>
+                    </div>
+                    <label>{services_label}</label>
+                </div>
+            </div>;
+        }
+
         return <div className="preferences-modal">
 
                      <div className="user-info-form">
@@ -212,23 +237,7 @@ class PreferencesModal extends React.Component {
 
                         </div>
 
-                        <h2>Google Drive</h2>
-                        <div className="user-gdrive">
-
-                            <div className="onoffswitch-drive">
-                                <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
-                                       ref={(input) => this.checkDrive = input}
-                                       className="onoffswitch-checkbox" id="gdrive_check"/>
-                                <label className="onoffswitch-label" htmlFor="gdrive_check">
-                                    <span className="onoffswitch-inner"/>
-                                    <span className="onoffswitch-switch"/>
-                                    <span className="onoffswitch-label-status-active">ON</span>
-                                    <span className="onoffswitch-label-status-inactive">OFF</span>
-                                    <span className="onoffswitch-label-status-unavailable">Unavailable</span>
-                                </label>
-                            </div>
-                            <label>{services_label}</label>
-                        </div>
+                        {googleDrive}
                         {couponHtml}
                     </div>
             </div>;

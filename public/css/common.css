@@ -858,7 +858,7 @@ color:#333;}
     }
 	
 	.mgmt-popup-outer {
-		z-index: 10;
+		z-index: 99999999999999;
 	}
 
     .popup
@@ -899,11 +899,10 @@ color:#333;}
     overflow-x: hidden;
     overflow-y: auto;
     position: fixed;
-    z-index: 999999999;
+    z-index: 10000000000000;
     top: 0;
     right: -1100px;
     background: #fff;
-    box-shadow: -2px 5px 7px #7B7B7B;
 }
 
 .advanced-options-box {
@@ -1151,12 +1150,6 @@ color:#333;}
     width: 140px;
     float: left;
     height: 35px;
-}
-
-.dqf-settings {
-    cursor: pointer;
-    font-weight: bold;
-    text-decoration: underline;
 }
 
 /********** TM panel End **********/
@@ -3823,8 +3816,8 @@ float: left;
 
 .fileupload-buttonbar .fileinput-button:before, #add-files:before {
     content: "\f067";
-      font-size: 14px;
-  margin-right: 20px;
+    font-size: 14px;
+    margin-right: 5px;
 }
 .close:before {
      content: "\ea0d";
@@ -3882,7 +3875,7 @@ float: left;
 #clear-all-files:before {
     content: "\f00d";
       font-size: 14px;
-  margin-right: 20px;
+  margin-right: 5px;
 }
 
 #swaplang:after {
@@ -4367,6 +4360,9 @@ text-align: left;
 }
 .icon-file:before {
     content: "\e904";
+}
+.icon-unlocked3:before {
+    content: "\ea8a";
 }
 
 

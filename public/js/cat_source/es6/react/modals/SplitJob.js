@@ -236,12 +236,12 @@ class SplitJobModal extends React.Component {
             <div className="popup" id="split-modal-cont">
                 <div className="splitbtn-cont">
                     <h3>
-                        {/*<span className="popup-split-job-id">({this.props.job.get('id')}) </span>*/}
+                        <span className="popup-split-job-id">ID: {this.props.job.get('id')} </span>
                         <span className="popup-split-job-title">{this.props.job.get('sourceTxt') + " > " + this.props.job.get('targetTxt')}</span>
                     </h3>
 
                     <div className="container-split-select">
-                        <div className="label left">Split in</div>
+                        <div className="label left">Split job in:</div>
                         <select name="popup-splitselect" className="splitselect left"
                                 ref={(select) => this.splitSelect = select} onChange={this.changeSplitNumber.bind(this)}>
                             <option value="2">2</option>
@@ -294,7 +294,7 @@ class SplitJobModal extends React.Component {
                             <option value="49">49</option>
                             <option value="50">50</option>
                         </select>
-                        <div className="label left">Jobs</div>
+                        <div className="label left">Chunks</div>
                     </div>
                 </div>
                 <div className="popup-box split-box3">

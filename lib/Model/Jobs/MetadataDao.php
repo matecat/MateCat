@@ -8,26 +8,26 @@ class MetadataDao extends \DataAccess_AbstractDao {
 
     const TABLE = 'job_metadata' ;
 
+    const _query_metadata_by_job_id_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
+
     /**
      * @param $id_job
-     * @param $password
      * @param $key
      *
-     * @return MetadataStruct[]
+     * @return \DataAccess_IDaoStruct[]|MetadataStruct[]
      */
     public function getByIdJob( $id_job, $key ) {
-        $stmt = $this->_getStatementForCache(
-            "SELECT * FROM job_metadata WHERE " .
-            " id_job = :id_job " .
-            " AND `key` = :key "
-        );
-
-        $result = $this->_fetchObject( $stmt, new MetadataStruct() , array(
+        $stmt = $this->_getStatementForCache( self::_query_metadata_by_job_id_key );
+        $result = $this->_fetchObject( $stmt, new MetadataStruct() , [
             'id_job' => $id_job,
             'key' => $key
-        ) );
-
+        ] );
         return @$result;
+    }
+
+    public function destroyCacheByJobId( $id_job, $key ){
+        $stmt = $this->_getStatementForCache( self::_query_metadata_by_job_id_key );
+        return $this->_destroyObjectCache( $stmt, [ 'id_job' => $id_job, 'key' => $key ] );
     }
 
     /**
@@ -76,6 +76,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
             'key' => $key,
             'value' => $value
         ) );
+
+        $this->destroyCacheByJobId( $id_job, $key );
 
         return $this->get($id_job, $password, $key);
     }

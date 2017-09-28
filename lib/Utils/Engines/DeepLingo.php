@@ -9,7 +9,7 @@
  * 
  */
 
-class Engines_DeepLingo extends Engines_Moses implements Engines_EngineInterface {
+class Engines_DeepLingo extends Engines_Moses {
 
     protected $_config = array(
             'segment'     => null,

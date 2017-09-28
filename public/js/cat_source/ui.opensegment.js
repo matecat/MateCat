@@ -46,7 +46,7 @@
             var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
             var isEqual = (s1 == s2);
 
-            getNormally = isNotSimilar || isEqual;
+            var getNormally = isNotSimilar || isEqual;
 
             this.activateSegment(segment, getNormally);
 
@@ -58,21 +58,26 @@
             if ((!this.readonly)&&(!getNormally)) {
                 $('#segment-' + segment.id + ' .alternatives .overflow').hide();
             }
-            this.setCurrentSegment();
 
             if (!this.readonly) {
-
+                var self = this;
                 if(getNormally) {
-                    this.getContribution(segment.el, 0);
+                    this.getContribution(segment.el, 0).done(function() {
+                        self.setCurrentSegment()
+                    });
                 } else {
-                    console.log('riprova dopo 3 secondi');
+                    // console.log('riprova dopo 3 secondi');
                     $(segment.el).removeClass('loaded');
                     $(".loader", segment.el).addClass('loader_on');
                     setTimeout(function() {
                         $('.alternatives .overflow', segment.el).show();
-                        UI.getContribution(segment.el, 0);
+                        UI.getContribution(segment.el, 0).done(function() {
+                            self.setCurrentSegment()
+                        });
                     }, 3000);
                 }
+            } else {
+                this.setCurrentSegment();
             }
 
             this.currentSegment.addClass('opened');

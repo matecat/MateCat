@@ -11,6 +11,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive  ;
+use Jobs\SplitQueue;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -792,48 +793,36 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-                //load it into MyMemory; we'll check later on how it went
-                $file            = new stdClass();
+            $ext = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+
+            $file = new stdClass();
+            if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
                 $file->file_path = "$this->uploadDir/$fileName";
                 $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( array( $file ) );
+                $this->tmxServiceWrapper->setFile( [ $file ] );
+            }
 
-                try {
+            try {
+
+                if ( 'tmx' == $ext ) {
                     $this->tmxServiceWrapper->addTmxInMyMemory();
-                } catch ( Exception $e ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    throw new Exception( $e );
-                }
-
-                //in any case, skip the rest of the loop, go to the next file
-                continue;
-
-            } elseif ( 'g' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-
-                //{"responseStatus":"202","responseData":{"id":505406}}
-                //load it into MyMemory; we'll check later on how it went
-                $file            = new stdClass();
-                $file->file_path = "$this->uploadDir/$fileName";
-                $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( array( $file ) );
-
-                try {
+                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ], $this->tmxServiceWrapper->getTMKey() );
+                } elseif ( 'g' == $ext ) {
                     $this->tmxServiceWrapper->addGlossaryInMyMemory();
-                } catch ( Exception $e ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    throw new Exception( $e );
+                } else {
+                    //don't call the postPushTMX for normal files
+                    continue;
                 }
 
-                //in any case, skip the rest of the loop, go to the next file
-                continue;
+            } catch ( Exception $e ) {
+
+                $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                        "code"    => $e->getCode(),
+                        "message" => $e->getMessage()
+                ];
+
+                throw new Exception( $e );
+
             }
 
         }
@@ -1036,9 +1025,9 @@ class ProjectManager {
                 //TODO: change this: private tm key field should not be used
                 //set private tm key string to the first tm_key for retro-compatibility
 
-                Log::doLog( $projectStructure[ 'private_tm_key' ] );
-
             }
+
+            Log::doLog( $projectStructure[ 'private_tm_key' ] );
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
@@ -1341,19 +1330,9 @@ class ProjectManager {
      */
     protected function _splitJob( ArrayObject $projectStructure ) {
 
-        $query_job = "SELECT * FROM jobs WHERE id = %u AND password = '%s'";
-        $query_job = sprintf( $query_job, $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
-        //$projectStructure[ 'job_to_split' ]
+        $jobInfo = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
 
-        $jobInfo = $this->dbHandler->fetch_array( $query_job );
-        $jobInfo = $jobInfo[ 0 ];
-
-
-        /*
-         * If a translator is assigned to the job, we must send an email to inform that job is changed
-         */
-        $jStruct = new Jobs_JobStruct( $jobInfo );
-        $translatorModel = new TranslatorsModel( $jStruct );
+        $translatorModel = new TranslatorsModel( $jobInfo );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
 
@@ -1365,37 +1344,46 @@ class ProjectManager {
                     ->setNewJobPassword( CatUtils::generate_password() );
 
             $translatorModel->update();
-            $jobInfo[ 'password'] = $jStruct->password;
 
         }
 
-        $data = array();
-        $jobs = array();
-
         foreach ( $projectStructure[ 'split_result' ][ 'chunks' ] as $chunk => $contents ) {
 
-            //            Log::doLog( $projectStructure['split_result']['chunks'] );
-
-            //IF THIS IS NOT the original job, DELETE relevant fields
+            //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
                 $jobInfo[ 'password' ]    = $this->generatePassword();
                 $jobInfo[ 'create_date' ] = date( 'Y-m-d H:i:s' );
+                $jobInfo[ 'avg_post_editing_effort' ] = 0;
+                $jobInfo[ 'total_time_to_edit' ] = 0;
             }
 
             $jobInfo[ 'last_opened_segment' ] = $contents[ 'last_opened_segment' ];
             $jobInfo[ 'job_first_segment' ]   = $contents[ 'segment_start' ];
             $jobInfo[ 'job_last_segment' ]    = $contents[ 'segment_end' ];
 
-            $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
-                VALUES ( '" . implode( "', '", array_values( array_map( array(
-                            $this->dbHandler, 'escape'
-                    ), $jobInfo ) ) ) . "' )
-                ON DUPLICATE KEY UPDATE
-                last_opened_segment = {$jobInfo['last_opened_segment']},
-                job_first_segment = '{$jobInfo['job_first_segment']}',
-                job_last_segment = '{$jobInfo['job_last_segment']}'";
+            $stmt = ( new Jobs_JobDao() )->getSplitJobPreparedStatement( $jobInfo );
+            $stmt->execute();
 
+            $wCountManager = new WordCount_Counter();
+            $wCountManager->initializeJobWordCount( $jobInfo->id, $jobInfo->password );
+
+            if ( $this->dbHandler->affected_rows == 0 ) {
+                $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
+                $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
+                $msg .= "Failed Statement is: \n" . print_r( $jobInfo, true ) . "\n";
+//                Utils::sendErrMailReport( $msg );
+                Log::doLog( $msg );
+                throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
+            }
+
+            $stmt->closeCursor();
+            unset( $stmt );
+
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for splitted jobs
+             */
+            SplitQueue::recount( $jobInfo );
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
@@ -1406,28 +1394,9 @@ class ProjectManager {
                     $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ) ) );
 
-            $data[] = $query;
-            $jobs[] = $jobInfo;
         }
 
-        foreach ( $data as $position => $query ) {
-
-            $res = $this->dbHandler->query( $query );
-
-            $wCountManager = new WordCount_Counter();
-            $wCountManager->initializeJobWordCount( $jobs[ $position ][ 'id' ], $jobs[ $position ][ 'password' ] );
-
-            if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
-                $msg .= "Tried to perform SQL: \n" . print_r( $data, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                Utils::sendErrMailReport( $msg );
-                throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
-            }
-
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
-
-        }
+        Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
 
@@ -1446,6 +1415,12 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param ArrayObject $projectStructure
+     * @param Jobs_JobStruct[]       $jobStructs
+     *
+     * @throws Exception
+     */
     public function mergeALL( ArrayObject $projectStructure, array $jobStructs ) {
 
         $metadata_dao = new Projects_MetadataDao();
@@ -1484,40 +1459,26 @@ class ProjectManager {
             Log::doLog( __METHOD__ . " -> Merge Jobs error - TM key problem: " . $e->getMessage() );
         }
 
-        $oldPassword = $first_job[ 'password' ];
-        if( $first_job->getTranslator() ){
-            $first_job[ 'password' ] = self::generatePassword();
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        $totalAvgPee = 0;
+        $totalTimeToEdit = 0;
+        foreach( $jobStructs as $_jStruct ){
+            $totalAvgPee += $_jStruct->avg_post_editing_effort;
+            $totalTimeToEdit += $_jStruct->total_time_to_edit;
         }
-
-        $_data = array();
-        foreach ( $first_job as $field => $value ) {
-            $_data[] = "`$field`='" . $this->dbHandler->escape( $value ) . "'";
-        }
-
-        //----------------------------------------------------
-
-        $queries = array();
-
-        $queries[] = "UPDATE jobs SET " . implode( ", \n", $_data ) .
-                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //use old password
-
-        //delete all old jobs
-        $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
+        $first_job[ 'avg_post_editing_effort' ] = $totalAvgPee;
+        $first_job[ 'total_time_to_edit' ] = $totalTimeToEdit;
 
         \Database::obtain()->begin();
 
-        foreach ( $queries as $query ) {
-            $res = $this->dbHandler->query( $query );
-            if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to merge job  " . $first_job[ 'id' ] . " from " . count( $jobStructs ) . " chunks\n";
-                $msg .= "Tried to perform SQL: \n" . print_r( $queries, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $jobStructs, true ) . "\n";
-                Utils::sendErrMailReport( $msg );
-                throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
-            }
+        if( $first_job->getTranslator() ){
+            //Update the password in the struct and in the database for the first job
+            Jobs_JobDao::updateForMerge( $first_job, self::generatePassword() );
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        } else {
+            Jobs_JobDao::updateForMerge( $first_job, false );
         }
+
+        Jobs_JobDao::deleteOnMerge( $first_job );
 
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
@@ -1654,34 +1615,22 @@ class ProjectManager {
 
                             }
 
-                            //Log::doLog( $xliff_trans_unit ); die();
-
-                            // $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
-
-                            $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
-                            $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
-                            $source            = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ) );
-                            $source_hash       = $this->dbHandler->escape( md5( $seg_source[ 'raw-content' ] ) );
-                            $ext_succ_tags     = $this->dbHandler->escape( $seg_source[ 'ext-succ-tags' ] );
-                            $num_words         = $wordCount;
-                            $trans_unit_id     = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
-                            $mrk_ext_prec_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-prec-tags' ] );
-                            $mrk_ext_succ_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-succ-tags' ] );
-
-                            $this->projectStructure[ 'segments' ][ $fid ]->append( [
-                                    $trans_unit_id,
-                                    $fid,
-                                    $this->projectStructure[ 'id_project' ],
-                                    $source,
-                                    $source_hash,
-                                    $num_words,
-                                    $mid,
-                                    $ext_tags,
-                                    $ext_succ_tags,
-                                    $show_in_cattool,
-                                    $mrk_ext_prec_tags,
-                                    $mrk_ext_succ_tags
+                            $segStruct = new Segments_SegmentStruct( [
+                                    'id_file'                 => $fid,
+                                    'id_project'              => $this->projectStructure[ 'id_project' ],
+                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                    'segment'                 => CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ),
+                                    'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
+                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                    'raw_word_count'          => $wordCount,
+                                    'show_in_cattool'         => $show_in_cattool
                             ] );
+
+                            $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
                             //increment counter for word count
                             $this->files_word_count += $num_words;
@@ -1732,42 +1681,22 @@ class ProjectManager {
                             $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                        $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
-
-                        //we do the word count after the place-holding with <x id="nbsp"/>
-                        //so &nbsp; are now not recognized as word and not counted as payable
-                        $num_words = $wordCount;
-
-                        //applying escaping after raw count
-                        $source      = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $source ) );
-                        $source_hash = $this->dbHandler->escape( md5( $source ) );
-
-                        $trans_unit_id = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
-
-                        if ( !is_null( $prec_tags ) ) {
-                            $prec_tags = $this->dbHandler->escape( $prec_tags );
-                        }
-                        if ( !is_null( $succ_tags ) ) {
-                            $succ_tags = $this->dbHandler->escape( $succ_tags );
-                        }
-
-                        $this->projectStructure[ 'segments' ][ $fid ]->append( [
-                                $trans_unit_id,
-                                $fid,
-                                $this->projectStructure[ 'id_project' ],
-                                $source,
-                                $source_hash,
-                                $num_words,
-                                null,
-                                $prec_tags,
-                                $succ_tags,
-                                $show_in_cattool,
-                                null,
-                                null
+                        $segStruct = new Segments_SegmentStruct( [
+                                'id_file'                 => $fid,
+                                'id_project'              => $this->projectStructure[ 'id_project' ],
+                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                'xliff_ext_prec_tags'     => ( !is_null( $prec_tags ) ? $prec_tags : null ),
+                                'segment'                 => CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'segment_hash'            => md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'xliff_ext_succ_tags'     => ( !is_null( $succ_tags ) ? $succ_tags : null ),
+                                'raw_word_count'          => $num_words,
+                                'show_in_cattool'         => $show_in_cattool
                         ] );
 
+                        $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
                         //increment counter for word count
-                        $this->files_word_count += $num_words;
+                        $this->files_word_count += $wordCount;
 
                     }
                 }
@@ -1835,8 +1764,6 @@ class ProjectManager {
 
     protected function _storeSegments( $fid ){
 
-        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file,/* id_project, */ segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
-
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         Log::doLog( "Id sequence reserved." );
@@ -1854,24 +1781,9 @@ class ProjectManager {
         foreach ( $sequenceIds as $position => $id_segment ){
 
             /**
-             *  $trans_unit_id,
-             *  $fid,
-             *  $id_project,
-             *  $source,
-             *  $source_hash,
-             *  $num_words,
-             *  $mid,
-             *  $ext_tags,
-             *  $ext_succ_tags,
-             *  $show_in_cattool,
-             *  $mrk_ext_prec_tags,
-             *  $mrk_ext_succ_tags
+             * @var $this->projectStructure[ 'segments' ][ $fid ][ $position ] Segments_SegmentStruct
              */
-            $tuple = $this->projectStructure[ 'segments' ][ $fid ][ $position ];
-//            $tuple_string = "'{$tuple[0]}',{$tuple[1]},{$tuple[2]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
-            $tuple_string = "'{$tuple[0]}',{$tuple[1]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
-
-            $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
+            $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] )  ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
@@ -1881,32 +1793,22 @@ class ProjectManager {
             // TODO: continue here to find the count of segments per project
             $segments_metadata[] = [
                     'id'              => $id_segment,
-                    'internal_id'     => self::sanitizedUnitId( $tuple[ 0 ], $fid ),
-                    'segment'         => $tuple[ 3 ],
-                    'segment_hash'    => $tuple[ 4 ],
-                    'raw_word_count'  => $tuple[ 5 ],
-                    'xliff_mrk_id'    => $tuple[ 6 ],
-                    'show_in_cattool' => $tuple[ 9 ],
+                    'internal_id'     => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
+                    'segment'         => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                    'segment_hash'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
+                    'raw_word_count'  => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
+                    'xliff_mrk_id'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
+                    'show_in_cattool' => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
             ];
 
         }
 
+        $segmentsDao = new Segments_SegmentDao();
         //split the query in to chunks if there are too much segments
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 100 ) );
+        $segmentsDao->createList( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy() );
 
-        Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
-
-        foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
-
-            try {
-                $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
-                Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
-            } catch ( PDOException $e ) {
-                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
-                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
-            }
-
-        }
+        //free memory
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
 
         // Here we make a query for the last inserted segments. This is the point where we
         // can read the id of the segments table to reference it in other inserts in other tables.
@@ -1975,10 +1877,8 @@ class ProjectManager {
 
         }
 
+        //merge segments_metadata for every files in the project
         $this->projectStructure[ 'segments_metadata' ]->exchangeArray( array_merge( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), $segments_metadata ) );
-
-        //free memory
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
 
     }
 
@@ -2539,6 +2439,9 @@ class ProjectManager {
             }
             try {
                 $mkDao->createList( $memoryKeysToBeInserted );
+
+                $featuresSet = new FeatureSet();
+                $featuresSet->run( 'postTMKeyCreation', $memoryKeysToBeInserted, $this->projectStructure[ 'uid' ] );
 
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );

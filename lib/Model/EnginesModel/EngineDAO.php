@@ -110,7 +110,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         //return the inserted object on success, null otherwise
         if ( $this->con->affected_rows > 0 ) {
-            $obj->id = $this->con->last_insert( self::TABLE );
+            $obj->id = $this->con->last_insert();
             return $obj;
         }
 
@@ -120,7 +120,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     /**
      * @param EnginesModel_EngineStruct $obj
      *
-     * @return array|void
+     * @return array
      * @throws Exception
      */
     public function read( EnginesModel_EngineStruct $obj ) {
@@ -132,7 +132,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
          */
         $query = $this->_buildQueryForEngine( $obj );
         $arr_result = $this->_fetch_array( $query );
-        return $this->_buildResult( $arr_result );
+        return $this->_buildResult( $arr_result, Constants_Engines::getAvailableEnginesList() );
 
     }
 
@@ -247,6 +247,30 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $this->con->query( $query );
 
         if ( $this->con->affected_rows > 0 ) {
+            $tmpEng = $this->setCacheTTL( 60 * 60 * 5 )->read( $obj )[0];
+            $tmpEng->active = 0; // avoid slave replication delay
+            return $tmpEng;
+        }
+
+        return null;
+    }
+
+    public function enable( EnginesModel_EngineStruct $obj ){
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "UPDATE " . self::TABLE . " SET active = 1 WHERE id = %d and uid = %d";
+
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $obj->uid
+        );
+
+        $this->con->query( $query );
+
+        if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -261,9 +285,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
         $result = array();
 
+        $availableEngines = func_get_arg( 1 );
+
         foreach ( $array_result as $item ) {
 
-            $build_arr = array(
+            if( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
+                $result[ ] = new EnginesModel_NONEStruct();
+                continue;
+            }
+
+            $build_arr = [
                     'id'                           => (int)$item[ 'id' ],
                     'name'                         => $item[ 'name' ],
                     'type'                         => $item[ 'type' ],
@@ -280,7 +311,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                     'penalty'                      => $item[ 'penalty' ],
                     'active'                       => $item[ 'active' ],
                     'uid'                          => $item[ 'uid' ]
-            );
+            ];
 
             $obj = new EnginesModel_EngineStruct( $build_arr );
 

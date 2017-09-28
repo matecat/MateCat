@@ -274,6 +274,7 @@
                                        
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
+                                                <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">MMT</option>
                                                 <option value="altlang">AltLang</option>
                                                 <option value="apertium">Apertium</option>
                                                 <option value="deeplingo" >DeepLingo</option>
@@ -325,8 +326,8 @@
                             <table class="mgmt-mt">
                                 <thead>
                                 <tr>
-                                    <th class="privatekey">MT provider</th>
-                                    <th class="description">Engine name</th>
+                                    <th class="privatekey">Engine Name</th>
+                                    <th class="description">Description</th>
                                     <tal:block tal:condition="php: page == 'home'">
                                         <th class="enable-mt text-center">Use in this project</th>
                                     </tal:block>
@@ -342,7 +343,7 @@
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
                                             <td class="engine-name">
-                                                <div class="edit-desc">Machine translation from Google Translate and Microsoft Translator.</div>
+                                                <div>Machine translation from Google Translate and Microsoft Translator.</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
@@ -355,11 +356,11 @@
                                         <tr class="" data-id="${engine/id}">
                                             <td class="mt-provider" tal:content="structure engine/name"></td>
                                             <td class="engine-name">
-                                                <div class="edit-desc">${engine/description}</div>
+                                                <div class="">${engine/description}</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" />
-                                                <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
+                                                <!--<input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />-->
                                             </td>
                                             <td class="action">
                                                 <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -374,7 +375,7 @@
                                                 <tr class="activemt" data-id="${engine/id}">
                                                     <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
-                                                        <div class="edit-desc">${engine/description}</div>
+                                                        <div>${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
                                                         <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
@@ -391,7 +392,7 @@
                                                 <tr class="" data-id="${engine/id}">
                                                     <td class="mt-provider" tal:content="structure engine/name"></td>
                                                     <td class="engine-name">
-                                                        <div class="edit-desc">${engine/description}</div>
+                                                        <div class="">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
                                                     </td>
@@ -579,6 +580,7 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
+    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="mt_engines.html/template-mmt" />
     <div metal:use-macro="mt_engines.html/template-microsofthub" />
     <div metal:use-macro="mt_engines.html/template-iptranslator" />
     <div metal:use-macro="mt_engines.html/template-deeplingo" />

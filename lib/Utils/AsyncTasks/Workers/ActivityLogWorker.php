@@ -27,7 +27,7 @@ class ActivityLogWorker extends AbstractWorker {
 
         $logEvent = new ActivityLogStruct( $queueElement->params->toArray() );
 
-        //re inizialize DB if socked is closed
+        //re initialize DB if socked is closed
         $this->_checkDatabaseConnection();
 
         $this->_writeLog( $logEvent );

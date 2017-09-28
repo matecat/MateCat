@@ -217,13 +217,6 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc = $displaySeg->getPEE();
 
-            if ( $displaySeg->pe_effort_perc < 0 ) {
-                $displaySeg->pe_effort_perc = 0;
-            }
-            if ( $displaySeg->pe_effort_perc > 100 ) {
-                $displaySeg->pe_effort_perc = 100;
-            }
-
             $stat_pee[] = $displaySeg->pe_effort_perc * $seg->raw_word_count;
 
             $displaySeg->pe_effort_perc .= "%";
@@ -271,11 +264,13 @@ class EditLog_EditLogModel {
                 $stat_mt[]                     = $seg->raw_word_count;
             } elseif( $displaySeg->match_type == 'NO_MATCH' ) {
                 $displaySeg->suggestion_source = 'NO_MATCH';
+            } elseif( $displaySeg->isICE() ) {
+                $displaySeg->suggestion_source = $displaySeg->match_type;
+                $displaySeg->suggestion_match = "101%";
             } else {
                 $displaySeg->suggestion_source = 'TM';
             }
-
-
+            
             $array_patterns = array(
                     rtrim( CatUtils::lfPlaceholderRegex, 'g' ),
                     rtrim( CatUtils::crPlaceholderRegex, 'g' ),
@@ -331,10 +326,9 @@ class EditLog_EditLogModel {
 
         //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
-        if ( $stats[ 'edited-word-count' ] > 0 ) {
+        if ( $stats[ 'edited-word-count' ] > 0 ) { //FIXME [ BUG ] this is calculated on 50 segments, slow and fast segments are only related to the 50 selected segments
             $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
-            $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
             $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;

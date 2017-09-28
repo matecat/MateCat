@@ -14,11 +14,6 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $display_time_to_edit;
 
     /**
-     * @var float
-     */
-    public $secs_per_word;
-
-    /**
      * @var string
      */
     public $stats_valid;
@@ -79,6 +74,16 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $num_translation_mismatch;
 
     /**
+     * @var bool
+     */
+    public $ice_modified = false;
+
+    /**
+     * @var bool
+     */
+    public $locked = false;
+
+    /**
      * @return float|string
      */
     public function getPEE() {
@@ -102,6 +107,19 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
             );
         }
 
+        if( $this->isICEModified() ){
+            $this->ice_modified = true;
+        }
+
         $this->warnings = implode( ", ", $this->warnings );
     }
+
+    public function isICEModified(){
+        return ( $this->getPEE() != 0 && $this->isICE() );
+    }
+
+    public function isICE(){
+        return ( $this->match_type == 'ICE' && $this->locked );
+    }
+
 }

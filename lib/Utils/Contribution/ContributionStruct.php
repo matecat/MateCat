@@ -58,6 +58,16 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $oldTranslation = "";
 
     /**
+     * @var string
+     */
+    public $context_before = "";
+
+    /**
+     * @var string
+     */
+    public $context_after = "";
+
+    /**
      * \INIT::$MYMEMORY_API_KEY
      * @var string
      */
@@ -90,18 +100,9 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $propagationRequest =true;
 
     /**
-     * @param $name
-     *
-     * @return mixed
+     * @var integer
      */
-    public function __get( $name ) {
-
-        if ( !property_exists( $this, $name ) ) {
-            throw new \DomainException( 'Trying to get an undefined property ' . $name );
-        }
-
-        return $this->$name;
-    }
+    public $id_mt;
 
     /**
      * Global Cached record for jobs metadata
@@ -109,7 +110,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
      * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
      * because we want control the cache eviction from other entrypoints.
      *
-     * @return mixed
+     * @return Jobs_JobStruct[]
      *
      * @throws ValidationError
      */

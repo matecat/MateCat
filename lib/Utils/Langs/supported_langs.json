@@ -164,7 +164,7 @@
     ,
         {
             "localized":[{
-                "en":"Belarus"
+                "en":"Belarusian"
             }],
             "isocode":"be",
             "enabled":true,
@@ -1280,6 +1280,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"qu-XN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Rohingya"
+            }],
+            "isocode":"rhg",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"rhg-MM"
         }
     ,
         {

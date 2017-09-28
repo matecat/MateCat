@@ -28,7 +28,7 @@ class AnalyzeHeader extends React.Component {
              html = <div className="analysis-create">
                 <div className="search-tm-matches hide" ref={(container) => this.containerAnalysisComplete = container}>
                     <h5 className="complete">Analysis:
-                        <span> complete</span>
+                        <span>complete <i className="icon-checkmark icon" /></span>
                     </h5>
                     <a className="downloadAnalysisReport" onClick={this.downloadAnalysisReport.bind(this)}>Download Analysis Report</a>
                 </div>
@@ -218,7 +218,7 @@ class AnalyzeHeader extends React.Component {
 
     componentDidMount() {
         $(this.tooltip).popup({
-            position: 'bottom left'
+            position: 'bottom center'
         });
         let self = this;
         let status = this.props.data.get('STATUS');

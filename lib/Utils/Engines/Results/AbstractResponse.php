@@ -32,4 +32,32 @@ abstract class Engines_Results_AbstractResponse {
 
     }
 
+    /**
+     * Returns an array of the public attributes of the struct.
+     * If $mask is provided, the resulting array will include
+     * only the specified keys.
+     *
+     * This method is useful in conjunction with PDO execute, where only
+     * a subset of the attributes may be required to be bound to the query.
+     *
+     * @param $mask array|null a mask for the keys to return
+     * @return array
+     */
+    public function toArray( $mask = null ){
+
+        $attributes = array();
+        $reflectionClass = new ReflectionClass( $this );
+        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
+        foreach( $publicProperties as $property ) {
+            if ( !empty($mask) ) {
+                if ( !in_array( $property->getName(), $mask ) ) {
+                    continue;
+                }
+            }
+            $attributes[ $property->getName() ] = $property->getValue( $this );
+        }
+        return $attributes;
+
+    }
+
 } 

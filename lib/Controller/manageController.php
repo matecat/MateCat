@@ -10,9 +10,10 @@ class manageController extends viewController {
 
     protected $_outsource_login_API = '//signin.translated.net/';
 
+    protected $login_required = true ;
+
 	public function __construct() {
-		$isAuthRequired = true;
-		parent::__construct( $isAuthRequired );
+		parent::__construct( );
 
 		parent::makeTemplate("manage.html");
 
@@ -23,6 +24,7 @@ class manageController extends viewController {
 	}
 
 	public function doAction() {
+	    $this->checkLoginRequiredAndRedirect();
 
 		$activity             = new ActivityLogStruct();
 		$activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;

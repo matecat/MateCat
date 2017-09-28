@@ -17,7 +17,7 @@ abstract class viewController extends controller implements IController {
     /**
      * Template Engine Instance
      *
-     * @var PHPTAL
+     * @var PHPTALWithAppend
      */
     protected $template = null;
 
@@ -47,6 +47,8 @@ abstract class viewController extends controller implements IController {
      * @var string
      */
     protected $authURL;
+
+    protected $login_required = false ;
 
     /**
      * Try to identify the browser of users
@@ -137,7 +139,7 @@ abstract class viewController extends controller implements IController {
      *
      * @param bool $isAuthRequired
      */
-    public function __construct( $isAuthRequired = false ) {
+    public function __construct() {
 
 	    if( !Bootstrap::areMandatoryKeysPresent() ) {
 		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
@@ -154,18 +156,16 @@ abstract class viewController extends controller implements IController {
         $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 
-        if( $isAuthRequired  ) {
-            $this->doAuth();
-        }
-
     }
 
     /**
      * Perform Authentication Requests and set incoming url
-     *
-     * @return bool
      */
-    private function doAuth() {
+    protected function checkLoginRequiredAndRedirect() {
+        if ( !$this->login_required ) {
+            return true ;
+        }
+
         //prepare redirect flag
         $mustRedirectToLogin = false;
 
@@ -186,7 +186,9 @@ abstract class viewController extends controller implements IController {
         return true;
     }
 
-
+    public function setLoginRequired( $value ) {
+        $this->login_required = $value ;
+    }
 
     /**
      * isLoggedIn
@@ -320,6 +322,8 @@ abstract class viewController extends controller implements IController {
         } else {
             Log::doLog( "Bad Configuration" );
         }
+
+        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
 
     }
 

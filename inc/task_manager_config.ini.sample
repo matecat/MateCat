@@ -89,3 +89,22 @@ DQF[pid_set_name]  = "ch_pid_dqf"
 DQF[max_executors] = 1
 DQF[redis_key]     = "dqf_list"
 DQF[loggerName]    = "dqf.log"
+
+
+;;######################################
+;;##### Key Name setContributionMT #####
+;;######################################
+CONTRIBUTION_MT[queue_name]    = "set_contribution_mt"
+CONTRIBUTION_MT[pid_set_name]  = "ch_pid_set_contribution_mt"
+CONTRIBUTION_MT[max_executors] = 1
+CONTRIBUTION_MT[redis_key]     = "set_contribution_mt_list"
+CONTRIBUTION_MT[loggerName]    = "set_contribution_mt.log"
+
+;;##############################
+;;##### Key Name jobs      #####
+;;##############################
+JOBS[queue_name]    = "jobs"
+JOBS[pid_set_name]  = "ch_pid_jobs"
+JOBS[max_executors] = 1
+JOBS[redis_key]     = "jobs_list"
+JOBS[loggerName]    = "jobs.log"

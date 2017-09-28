@@ -8,10 +8,20 @@
             escapedSegment, splitAr, splitGroup, originalId
         ) {
             var splitGroup = segment.split_group || splitGroup || '';
-
+            var unlocked = false;
             var classes = new Array();
             if ( readonly ) {
                 classes.push('readonly');
+            }
+
+            if ( segment.ice_locked === "1" && !readonly) {
+                if (UI.getFromStorage('locked-' + originalId)) {
+                    classes.push('ice-unlocked');
+                    unlocked = true;
+                } else {
+                    classes.push('readonly');
+                    classes.push('ice-locked');
+                }
             }
 
             if ( segment.status ) {
@@ -36,7 +46,7 @@
             }
 
             var editarea_classes = ['targetarea', 'invisible'];
-            if ( readonly ) {
+            if ( readonly || (segment.ice_locked === "1" && !UI.getFromStorage('locked-' + originalId))) {
                 editarea_classes.push( 'area' );
             } else {
                 editarea_classes.push( 'editarea' );
@@ -89,6 +99,8 @@
                 escapedSegment          : escapedSegment,
                 segment                 : segment,
                 readonly                : readonly,
+                ice_locked              : parseInt(segment.ice_locked),
+                unlocked                : unlocked,
                 splitGroup              : splitGroup ,
                 segment_classes         : classes.join(' '),
                 shortened_sid           : UI.shortenId( segment.sid ),
@@ -344,6 +356,78 @@
                 });
             }
             return returnArray;
+        },
+        getContextBefore: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentBefore = (function  findBefore(segment) {
+                var before = segment.prev('section');
+                if (before.size() === 0 ) {
+                    return undefined;
+                }
+                else if (before.attr('data-split-original-id') !== originalId) {
+                    return before;
+                } else {
+                    return findBefore(before);
+                }
+
+            })(segment);
+            // var segmentBefore = findSegmentBefore();
+            if (_.isUndefined(segmentBefore)) {
+                return null;
+            }
+            var segmentBeforeId = UI.getSegmentId(segmentBefore);
+            var isSplitted = segmentBeforeId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentBeforeId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentBefore, '.source');
+            } else {
+                return $('.source', segmentBefore ).text();
+            }
+        },
+        getContextAfter: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentAfter = (function findAfter(segment) {
+                var after = segment.next('section');
+                if (after.size() === 0 ) {
+                    return undefined;
+                }
+                else if (after.attr('data-split-original-id') !== originalId) {
+                    return after;
+                } else {
+                    return findAfter(after);
+                }
+
+            })(segment);
+            if (_.isUndefined(segmentAfter)) {
+                return null;
+            }
+            var segmentAfterId = UI.getSegmentId(segmentAfter);
+            var isSplitted = segmentAfterId.split('-').length > 1;
+            if (isSplitted) {
+                return this.collectSplittedTranslations(segmentAfterId, ".source");
+            } else if (config.brPlaceholdEnabled)  {
+                return this.postProcessEditarea(segmentAfter, '.source');
+            } else {
+                return $('.source', segmentAfter ).text();
+            }
+        },
+        unlockIceSegment: function (elem) {
+            elem.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
+            var section = elem.closest('section');
+            section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
+            section.find('.targetarea').removeClass('area').addClass('editarea').click();
+            UI.addInStorage('locked-'+ UI.getSegmentId(section), true);
+        },
+        lockIceSegment: function (elem) {
+            elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
+            var section = elem.closest('section');
+            section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
+            section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
+            UI.closeSegment(section, 1);
+            UI.removeFromStorage('locked-' + UI.getSegmentId(section));
         }
-    }); 
+    });
 })(jQuery); 
