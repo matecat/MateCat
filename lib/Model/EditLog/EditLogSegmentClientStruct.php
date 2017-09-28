@@ -79,6 +79,11 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $ice_modified = false;
 
     /**
+     * @var bool
+     */
+    public $locked = false;
+
+    /**
      * @return float|string
      */
     public function getPEE() {
@@ -110,7 +115,11 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     }
 
     public function isICEModified(){
-        return ( $this->getPEE() != 0 && $this->match_type == 'ICE' );
+        return ( $this->getPEE() != 0 && $this->isICE() );
+    }
+
+    public function isICE(){
+        return ( $this->match_type == 'ICE' && $this->locked );
     }
 
 }

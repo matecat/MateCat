@@ -31,7 +31,7 @@ class ConfirmRegister extends React.Component {
         }
         return <div className="success-modal">
             <p>{'To complete your registration please follow the instructions in the email we sent you to ' + this.props.emailAddress + '.'}</p>
-            <a className="btn-confirm-small" style={{width: "120px"}}
+            <a className="btn-confirm-small" style={{width: "120px", padding: "0"}}
                onClick={this.closeModal.bind(this)}> OK </a><br/>
             <div id="resendlink"  onClick={this.resendEmail.bind(this)}>Resend Email</div>
             {resend}

@@ -16,6 +16,12 @@
         //margin-left: 10px;
         margin-top: 20px;
         //width: 100%;
+        .popup-split-job-id {
+            font-weight: 100;
+            font-size: 16px;
+            color: #696969;
+            margin-right: 5px;
+        }
     }
 
     .error-count {
@@ -112,6 +118,7 @@
         width: 48%;
         display: inline-block;
         padding-left: 25px;
+        vertical-align: text-top;
     }
 
     h4 {
@@ -122,6 +129,8 @@
         display: inline-block;
         text-align: right;
         width: 45%;
+        position: relative;
+        top: 2px;
         .label {
             display: inline-block;
         }
@@ -367,7 +376,17 @@
         width: 120px;
     }
 
-
+    input.input-small {
+        outline: none !important;
+        &:hover {
+            border-color: rgba(34, 36, 38, 0.35);
+            box-shadow: none;
+        }
+        &:focus {
+            border-color: #96C8DA;
+            box-shadow: none;
+        }
+    }
 
 
 }

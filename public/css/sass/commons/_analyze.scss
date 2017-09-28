@@ -45,7 +45,7 @@ body.analyze{
                 padding-top: 20px;
                 top: 14px;
                 position: relative;
-                left: 15px;
+                left: 20px;
                 width: 55% !important;
                 height: 205px;
                 .h1 {
@@ -56,12 +56,12 @@ body.analyze{
                 }
                 .ui.ribbon.label {
                     position: relative;
-                    top: 0px;
+                    top: 0;
                     z-index: 2;
-                    left: -45px;
+                    left: -48px;
                     max-width: 100%;
                     min-width: 0;
-                    background-color: #d8d8d8;
+                    background-color: #d7d8dc;
                     color: #000000;
                     border-radius: 0 2px 2px 0;
                     padding-right: 15px;
@@ -86,12 +86,13 @@ body.analyze{
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
-                        padding-left: 15px;
+                        padding-left: 18px;
                     }
                 }
                 .project-create {
                     top: 10px;
                     position: relative;
+                    font-size: 18px;
                 }
                 .analysis-create {
                     margin-top: 35px;
@@ -104,15 +105,20 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                             span {
-                                color: green;
+                                color: #1fbd1f;
+                                padding: 5px 2px 5px 0;
+                                margin-left: 4px;
+                                border-radius: 15px;
                             }
                             i {
-                                color: green;
+                                color: #1fbd1f;
+                                position: relative;
+                                top: 2px;
                             }
                         }
                         .complete {
                             display: inline-block;
-                            font-size: 17px;
+                            font-size: 18px;
                             .number {
                                 font-weight: 700;
                             }
@@ -151,7 +157,7 @@ body.analyze{
                 .word-percent {
                     position: relative;
                     background-color: #f2f4f1;
-                    padding: 25px 15px 10px 20px;
+                    padding: 15px 15px 10px 20px;
                     border: 1px solid #7eaf3e;
                     top: 27px;
                     font-size: 16px;
@@ -225,7 +231,7 @@ body.analyze{
                 margin-bottom: 15px;
                 padding: 15px;
                 border: 1px solid green;
-                border-radius: 0px;
+                border-radius: 0;
                 .percent {
                     vertical-align: middle;
                     display: inline-block;
@@ -233,7 +239,7 @@ body.analyze{
             }
             .progress {
                 padding: 0 15px;
-                top: -5px;
+                top: 5px;
                 .progress-bar {
                     width: 100%;
                 }
@@ -242,11 +248,11 @@ body.analyze{
 
 
         .project-top {
-            padding: 50px 15px 15px;
+            padding: 45px 15px 15px;
             background-color: #f3f3f3;
-            margin: 0px -1rem 0;
+            margin: 0 -1rem 0;
             .compare-table{
-                background-color: gainsboro;
+                background-color: #d7d8dc;
                 margin-bottom: 1px;
                 .updated-count {
                     background-color: #f9ffb5;
@@ -254,7 +260,7 @@ body.analyze{
                 }
                 .header-compare-table, .jobs-compare-table {
                     h5 {
-                        margin-bottom: 0px;
+                        margin-bottom: 0;
                         font-weight: 100;
                         font-size: 17px;
                     }
@@ -274,6 +280,11 @@ body.analyze{
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
+                    padding: 0 0 0 20px;
+                    &.splitted {
+                        width: 78%;
+                    }
+
                 }
                 .titles-compare {
                     display: inline-block;
@@ -286,8 +297,8 @@ body.analyze{
                 .title-total-words, .title-standard-words, .title-matecat-words {
                     display: inline-block;
                     width: 33.333%;
-                    border-right: 1px solid gainsboro;
-                    border-left: 1px solid gainsboro;
+                    border-right: 1px solid #d7d8dc;
+                    border-left: 1px solid #d7d8dc;
                     margin-left: -1px;
                     line-height: 50px;
                     padding-top: 15px;
@@ -299,7 +310,7 @@ body.analyze{
                             color: #a7a7a7;
                             font-weight: 100;
                             position: relative;
-                            top: 1px;
+                            top: 2px;
                             left: 2px;
                         }
                     }
@@ -345,8 +356,8 @@ body.analyze{
                                     text-align: right;
                                     padding-right: 15px;
                                     color: #9c9898;
-                                    padding-top: 0px;
-                                    padding-bottom: 0px;
+                                    padding-top: 0;
+                                    padding-bottom: 0;
                                     .cell-label {
                                         float: left;
                                         margin-left: 15px;
@@ -376,6 +387,25 @@ body.analyze{
                                         margin-top: 9px;
                                     }
                                 }
+                                @media only screen and (max-width: 1199px) and (min-width: 992px) {
+                                    .source-target {
+                                        max-width: 70% !important;
+                                        .source-box{
+                                            &.no-split {
+                                                max-width: 41%;
+                                                min-width: 30px;
+                                                vertical-align: middle;
+                                                overflow: hidden;
+                                                text-overflow: ellipsis;
+                                            }
+                                        }
+                                    }
+                                }
+                                /*@media only screen and (max-width: 991px) and (min-width: 768px) {
+                                    .source-target {
+                                        max-width: 70% !important;
+                                    }
+                                }*/
                             }
                         }
                     }
@@ -424,7 +454,7 @@ body.analyze{
                         font-size: 20px;
                         border: 1px solid #797979;
                         border-radius: 2px;
-                        margin: -3px 0px 0px 0px;
+                        margin: -3px 0 0 0;
                     }
                     @media only screen and (max-width: 1199px) {
                         .merge {
@@ -443,6 +473,11 @@ body.analyze{
                         }
                     }
                 }
+                .openOutsource {
+                    .title-job, .titles-compare, .activity-icons {
+                        display: none;
+                    }
+                }
             }
             .analyze-report {
                 text-align: center;
@@ -459,7 +494,7 @@ body.analyze{
                     width: 35px;
                     height: 35px;
                     margin: 0 auto;
-                    line-height: 0px;
+                    line-height: 0;
                     border-radius: 17px;
                     background: white;
                     cursor: pointer;
@@ -470,7 +505,7 @@ body.analyze{
                     }
                     i {
                         font-size: 30px;
-                        margin: 0px;
+                        margin: 0;
                         padding: 0;
                         top: -3px;
                         position: relative;
@@ -490,20 +525,19 @@ body.analyze{
         .job-id {
             display: inline-block;
             min-width: 70px;
-            color: #0a0a0a;
-            font-size: 16px;
+            color: #969696;
+            font-size: 14px;
             position: relative;
             line-height: 35px;
             top: 1px;
             text-align: left;
-            font-weight: 700;
-
         }
+
         .source-target {
-            min-width: 180px;
+            min-width: 167px;
             display: inline-block;
             font-weight: bold;
-            max-width: 100%;
+            max-width: 70%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -516,7 +550,6 @@ body.analyze{
                     max-width: 50%;
                     min-width: 30px;
                     vertical-align: middle;
-                    margin-right: 5px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
@@ -547,11 +580,9 @@ body.analyze{
                 }
             }
         }
-
-
         .project-body {
             margin-top: 0;
-            background-color: #cdcdcd;
+            background-color: #d7d8dc;
             .job {
                 padding: 0 15px;
                 margin-top: 35px;
@@ -567,7 +598,7 @@ body.analyze{
                             padding-top: 0;
                             .analysis {
                                 //padding-top: 60px;
-                                margin-top: 0px;
+                                margin-top: 0;
                                 &.show-details {
                                     .head-chunk, .job-table-header > div,
                                     .chunk-analyze-container > div {
@@ -583,8 +614,7 @@ body.analyze{
                                 .head-chunk {
                                     transition: 0.3s ease;
                                     background-color: #ffffff;
-                                    padding: 8px 15px;
-                                    text-align: center;
+                                    padding: 8px 20px;
                                     position: relative;
                                     z-index: 4;
                                     text-align: left;
@@ -623,7 +653,7 @@ body.analyze{
 
 .analysis {
     .job-table-header {
-        margin-top: 0px !important;
+        margin-top: 0 !important;
         margin-bottom: 0;
 
     }
@@ -657,9 +687,9 @@ body.analyze{
             .single {
                 display: inline-block;
                 width: 8.5%;
-                margin-left: 0px;
+                margin-left: 0;
                 margin-right: -1px;
-                padding: 4px 6px 0px 2px;
+                padding: 4px 6px 0 2px;
                 span {
                     font-size: 13px;
                     vertical-align: top;
@@ -835,9 +865,9 @@ body.analyze{
 
     .chunks-title-table {
         box-shadow: none !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        border-bottom: 1px solid #bbb;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-bottom: 1px solid #d7d8dc;
         .single-analysis {
             line-height: 25px;
             .single {
@@ -848,7 +878,7 @@ body.analyze{
                 padding-bottom: 3px;
                 height: 60px;
                 vertical-align: text-top;
-                border: 1px solid #bbbbbb;
+                border: 1px solid #d7d8dc;
                 border-bottom: none;
                 border-top: none;
                 text-align: center;
@@ -859,19 +889,19 @@ body.analyze{
 
     .chunks-pay-table {
         box-shadow: none !important;
-        padding-top: 0px !important;
+        padding-top: 0 !important;
         padding-bottom: 3px !important;
         top: -1px;
         .single-analysis {
             .single {
-                border: 1px solid #bbbbbb;
+                border: 1px solid #d7d8dc;
                 border-bottom: none;
                 text-align: right;
                 padding-right: 6px;
                 &.total {
                     width: 16.9%;
                     text-decoration: none;
-                    border-left: 1px solid #f6f6f6;
+                    border-left: 1px solid #d7d8dc;
                 }
             }
         }
@@ -941,9 +971,9 @@ body.analyze{
     }
 
     .chunk-detail {
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        background-color: #e4e6e8;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        background-color: #d7d8dc;
         z-index: 0;
         .left-box {
             padding-top: 8px;
@@ -1049,9 +1079,9 @@ body.analyze{
     position: relative;
     overflow: hidden;
     &.transition-enter {
-        height: 0px;
+        height: 0;
         padding-top:0px !important;
-        padding-bottom: 0px !important;
+        padding-bottom: 0 !important;
     }
 
     &.transition-enter.transition-enter-active {
@@ -1060,9 +1090,9 @@ body.analyze{
     }
 
     &.transition-leave.transition-leave-active {
-        height: 0px;
+        height: 0;
         padding-top:0px !important;
-        padding-bottom: 0px !important;
+        padding-bottom: 0 !important;
         -webkit-transition: height .3s ease;
     }
 }
@@ -1071,9 +1101,9 @@ body.analyze{
     position: relative;
     overflow: hidden;
     &.transition-enter {
-        height: 0px;
+        height: 0;
         padding-top:0px !important;
-        padding-bottom: 0px !important;
+        padding-bottom: 0 !important;
     }
 
     &.transition-enter.transition-enter-active {
@@ -1082,9 +1112,9 @@ body.analyze{
     }
 
     &.transition-leave.transition-leave-active {
-        height: 0px;
+        height: 0;
         padding-top:0px !important;
-        padding-bottom: 0px !important;
+        padding-bottom: 0 !important;
         -webkit-transition: height .3s ease;
     }
 }
@@ -1092,11 +1122,11 @@ body.analyze{
 .project-body {
     .jobs {
         position: relative;
-        overflow-y: hidden;
-        max-height: 3000px;
+        overflow-y: scroll;
+        max-height: 2500px;
         opacity: 1;
         &.transition-enter {
-            max-height: 0px;
+            max-height: 0;
             opacity: 0;
         }
 
@@ -1131,7 +1161,7 @@ body.analyze{
 }
 
 .analyze footer .wrapper {
-    margin: 0px auto 0 auto;
+    margin: 0 auto 0 auto;
     padding: 3px 0 0 0;
     width: 92%;
     font-size: 14px;
@@ -1149,13 +1179,13 @@ footer ul {
 }
 
 footer li {
-    margin: 0 0px 0 0;
+    margin: 0 0 0 0;
     padding: 5px 5px;
     float: left;
     height: 18px;
-    padding-top: 0px;
+    padding-top: 0;
     border-right: 1px solid #fff;
-    margin-top: 0px;
+    margin-top: 0;
     margin-left: 4px;
 }
 

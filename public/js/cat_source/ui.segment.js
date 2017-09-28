@@ -225,20 +225,6 @@
             }
             return returnArray;
         },
-        decodeText: function(segment, text) {
-            var decoded_text;
-            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-                && !UI.checkXliffTagsInText(segment.translation) ) {
-                decoded_text = UI.removeAllTags(text);
-            } else {
-                decoded_text = text;
-            }
-            decoded_text = UI.decodePlaceholdersToText(decoded_text || '');
-            if ( !(config.tagLockCustomizable && $('body').hasClass('tagmarkDisabled')) ) {
-                decoded_text = UI.transformTextForLockTags(decoded_text);
-            }
-            return decoded_text;
-        },
         getPercentuageClass: function(match) {
             var percentageClass = "";
             var m_parse = parseInt(match);

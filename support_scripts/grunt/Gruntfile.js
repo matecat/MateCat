@@ -275,6 +275,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
+                    basePath + 'lib/calendar.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
@@ -336,7 +337,6 @@ module.exports = function(grunt) {
             manage: {
                 src: [
                     basePath + 'manage.js',
-                    basePath + 'forcedelivery.js',
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
@@ -346,7 +346,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'analyze_old.js',
                     basePath + 'forcedelivery.js',
-                    basePath + 'outsource.js',
+                    basePath + 'outsource_old.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze_old.js'
@@ -354,7 +354,6 @@ module.exports = function(grunt) {
             analyze_new: {
                 src: [
                     basePath + 'analyze.js',
-                    basePath + 'forcedelivery.js',
                     basePath + 'outsource.js',
                     basePath + 'cat_source/es6/react/ajax_utils/*.js'
                 ],

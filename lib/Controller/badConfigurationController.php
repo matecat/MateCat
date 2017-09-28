@@ -8,8 +8,6 @@
  */
 class badConfigurationController extends viewController {
 
-    public function __construct() {}
-
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *

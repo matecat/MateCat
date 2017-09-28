@@ -30,9 +30,9 @@
         padding-left: 10px;
         font-size: 16px;
         margin: 0 0 5px 0;
-        font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
         border-radius: 2px;
         min-height: initial;
+        cursor: pointer !important;
     }
     .dropdown.icon {
         padding: 8px;
@@ -55,6 +55,9 @@
     }
     #tmx-select {
         width: 260px;
+        &:hover {
+            box-shadow: none !important;
+        }
     }
     .menu-dropdown {
         max-height: none !important;

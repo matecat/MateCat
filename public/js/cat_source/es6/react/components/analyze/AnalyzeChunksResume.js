@@ -1,5 +1,6 @@
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeActions = require('../../actions/AnalyzeActions');
+let OutsourceContainer = require('../outsource/OutsourceContainer').default;
 
 
 
@@ -11,15 +12,22 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValuesChenged = [];
         this.containers = {};
         this.state = {
-            openDetails: false
+            openDetails: false,
+            openOutsource: false,
+            outsourceJobId : null
         }
     }
 
-    showDetails(idJob) {
-        AnalyzeActions.showDetails(idJob);
-        this.setState({
-            openDetails: true
-        });
+    showDetails(idJob, evt) {
+        if ($(evt.target).parents('.outsource-container').length ===  0) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            AnalyzeActions.showDetails(idJob);
+            this.setState({
+                openDetails: true
+            });
+        }
+
 
     }
     openSplitModal(id,e) {
@@ -53,13 +61,20 @@ class AnalyzeChunksResume extends React.Component {
         return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
     }
 
-    openOutsourceModal(id, pass, index, e) {
+    openOutsourceModal(idJob, e) {
         e.stopPropagation();
         e.preventDefault();
-        let job = this.props.project.get('jobs').find(function (item) {
-            return item.get('id') == id && item.get('password') == pass;
+        this.setState({
+            openOutsource: true,
+            outsourceJobId : idJob
         });
-        ModalsActions.openOutsourceModal(this.props.project.toJS(), job.toJS(), this.getTranslateUrl(job, index), false, false, false);
+    }
+
+    closeOutsourceModal() {
+        this.setState({
+            openOutsource: false,
+            outsourceJobId : null
+        });
     }
 
     checkPayableChanged(idJob, payable) {
@@ -82,13 +97,20 @@ class AnalyzeChunksResume extends React.Component {
                         let indexChunk = chunkConfig.jpassword;
                         let chunkAnalysis = jobAnalysis.get('totals').get(indexChunk);
                         let chunk = chunkConfig;
+                        let chunkJob = self.props.project.get('jobs').find(function (job) {
+                            return job.get('id') == chunk.jid && job.get('password') === chunk.jpassword;
+                        });
                         index++;
+
+                        let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === (chunk.jid +'-'+ index));
 
                         self.checkPayableChanged(chunk.jid + index, chunkAnalysis.get('TOTAL_PAYABLE').get(1));
 
-                        return <div key={indexChunk} className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, chunk.jid)}>
+                        let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
+
+                        return <div key={indexChunk} className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, chunk.jid)}>
                             <div className="title-job">
-                                <div className="job-id" >Chunk {index}</div>
+                                <div className="job-id" >{'Chunk ' + index}</div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
@@ -105,25 +127,37 @@ class AnalyzeChunksResume extends React.Component {
                             </div>
                             <div className="activity-icons">
                                 <div className="open-translate ui primary button open"
-                                     onClick={self.openOutsourceModal.bind(self, chunk.jid, indexChunk, index)}>Translate</div>
+                                     onClick={self.openOutsourceModal.bind(self, chunk.jid + '-' + index)}>Translate</div>
                             </div>
+                            <OutsourceContainer project={self.props.project}
+                                                job={chunkJob}
+                                                standardWC={chunkAnalysis.get('standard_word_count').get(1)}
+                                                url={self.getTranslateUrl(chunkJob, index)}
+                                                showTranslatorBox={false}
+                                                extendedView={true}
+                                                showOpenBox={true}
+                                                onClickOutside={self.closeOutsourceModal.bind(self)}
+                                                openOutsource={openOutsource}
+                                                idJobLabel={ chunk.jid +'-'+ index }
+                                                outsourceJobId={self.state.outsourceJobId}/>
                         </div>;
                     });
+
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
 
                             <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
-                                <div className="title-job">
+                                <div className="title-job splitted">
+                                    <div className="job-id" >ID: {self.props.jobsInfo[indexJob].jid}</div>
                                     <div className="source-target" >
                                         <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
                                         <div className="in-to"><i className="icon-chevron-right icon"/></div>
                                         <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
                                     </div>
                                 </div>
-                                <div className="titles-compare">
-                                </div>
+
                                 <div className="activity-icons">
-                                    <div className={"merge ui blue basic button " + buttonsClass}
+                                    <div className="merge ui blue basic button"
                                          onClick={self.openMergeModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-compress icon"/>Merge</div>
                                 </div>
                             </div>
@@ -136,14 +170,21 @@ class AnalyzeChunksResume extends React.Component {
                     let total_raw = obj.total_raw_word_count_print;
                     let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
 
+                    let chunkJob = self.props.project.get('jobs').find(function (job) {
+                        return job.get('id') == self.props.jobsInfo[indexJob].jid ;
+                    });
+
+                    let openOutsource = (self.state.openOutsource && self.state.outsourceJobId === self.props.jobsInfo[indexJob].jid);
+                    let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
+
                     self.checkPayableChanged(self.props.jobsInfo[indexJob].jid,
                         jobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1));
 
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
-                            <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
+                            <div className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
-                                    {/*<div className="job-id">({self.props.jobsInfo[indexJob].jid})</div>*/}
+                                    <div className="job-id">ID: {self.props.jobsInfo[indexJob].jid}</div>
                                     <div className="source-target" >
                                         <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
                                         <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -169,14 +210,24 @@ class AnalyzeChunksResume extends React.Component {
                                 </div>
                                 <div className="activity-icons">
                                     {!config.jobAnalysis ? (
-                                        <div className={"split ui blue basic button " + buttonsClass}
-                                                                 onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
+                                        <div className={"split ui blue basic button " + buttonsClass + ' '}
+                                             onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     ) : (null)}
                                     <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid, password, null)}>Translate</div>
+                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
                                 </div>
                             </div>
-
+                            <OutsourceContainer project={self.props.project}
+                                                job={chunkJob}
+                                                url={self.getTranslateUrl(chunkJob)}
+                                                standardWC={total_standard}
+                                                showTranslatorBox={false}
+                                                extendedView={true}
+                                                showOpenBox={true}
+                                                onClickOutside={self.closeOutsourceModal.bind(self)}
+                                                openOutsource={openOutsource}
+                                                idJobLabel={ self.props.jobsInfo[indexJob].jid }
+                                                outsourceJobId={self.state.outsourceJobId}/>
                         </div>
                     </div>
                 }
@@ -186,7 +237,7 @@ class AnalyzeChunksResume extends React.Component {
                 return <div key={jobInfo.get('id') + '-' + indexJob} className="job ui grid">
                     <div className="chunks sixteen wide column">
                         <div className="chunk ui grid shadow-1">
-                            <div className="title-job">
+                            <div className="title-job no-split">
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
                                     <div className="in-to"><i className="icon-chevron-right icon"/></div>
@@ -253,7 +304,8 @@ class AnalyzeChunksResume extends React.Component {
     shouldComponentUpdate(nextProps, nextState){
         return ( !nextProps.jobsAnalysis.equals(this.props.jobsAnalysis) ||
             nextProps.status !== this.props.status ||
-            nextState.openDetails !== this.state.openDetails)
+            nextState.openDetails !== this.state.openDetails ||
+            nextState.outsourceJobId !== this.state.outsourceJobId)
     }
 
     render() {
@@ -274,7 +326,7 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="title-standard-words">
                             <h5>Industry weighted
                                 <span data-tooltip="As counted by other CAT tools">
-                                    <span className="icon-info icon"/>
+                                    <i className="icon-info icon"/>
                                 </span>
                             </h5>
                         </div>

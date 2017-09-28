@@ -1,0 +1,47 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 21/09/17
+ * Time: 15.38
+ *
+ */
+
+namespace API\V2\Validators;
+
+
+use API\V2\KleinController;
+use Exceptions\NotFoundError;
+use Utils;
+
+class WhitelistAccessValidator extends Base {
+
+    /**
+     * @var KleinController
+     */
+    protected $controller;
+
+    public function __construct( KleinController $controller ) {
+
+        parent::__construct( $controller->getRequest() );
+        $this->controller = $controller;
+
+    }
+
+    public function validate() {
+
+        #Block all not whitelisted IPs
+        $ipWhiteList = [
+                "/^10\.30\.1\..*/",
+                "/^10\.3\.14\..*/",
+                "/^10\.3\.15\..*/",
+                "/^149\.7\.212\..*/",
+        ];
+
+        if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
+            throw new NotFoundError( "Not Found.", 404 );
+        }
+
+    }
+
+}

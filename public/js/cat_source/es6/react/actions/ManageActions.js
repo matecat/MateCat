@@ -305,6 +305,7 @@ let ManageActions = {
                 translator: translator
             });
         } else {
+            //TODO Delete this function in the new analysis version
             UI.updateOutsourceInfo(translator);
         }
     },

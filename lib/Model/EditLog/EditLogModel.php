@@ -264,11 +264,13 @@ class EditLog_EditLogModel {
                 $stat_mt[]                     = $seg->raw_word_count;
             } elseif( $displaySeg->match_type == 'NO_MATCH' ) {
                 $displaySeg->suggestion_source = 'NO_MATCH';
+            } elseif( $displaySeg->isICE() ) {
+                $displaySeg->suggestion_source = $displaySeg->match_type;
+                $displaySeg->suggestion_match = "101%";
             } else {
                 $displaySeg->suggestion_source = 'TM';
             }
-
-
+            
             $array_patterns = array(
                     rtrim( CatUtils::lfPlaceholderRegex, 'g' ),
                     rtrim( CatUtils::crPlaceholderRegex, 'g' ),

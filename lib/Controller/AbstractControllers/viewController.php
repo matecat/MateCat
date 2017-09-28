@@ -48,6 +48,8 @@ abstract class viewController extends controller {
      */
     protected $authURL;
 
+    protected $login_required = false ;
+
     /**
      * Try to identify the browser of users
      *
@@ -137,7 +139,7 @@ abstract class viewController extends controller {
      *
      * @param bool $isAuthRequired
      */
-    public function __construct( $isAuthRequired = false ) {
+    public function __construct() {
 
 	    if( !Bootstrap::areMandatoryKeysPresent() ) {
 		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
@@ -154,18 +156,16 @@ abstract class viewController extends controller {
         $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 
-        if( $isAuthRequired  ) {
-            $this->doAuth();
-        }
-
     }
 
     /**
      * Perform Authentication Requests and set incoming url
-     *
-     * @return bool
      */
-    private function doAuth() {
+    protected function checkLoginRequiredAndRedirect() {
+        if ( !$this->login_required ) {
+            return true ;
+        }
+
         //prepare redirect flag
         $mustRedirectToLogin = false;
 
@@ -186,7 +186,9 @@ abstract class viewController extends controller {
         return true;
     }
 
-
+    public function setLoginRequired( $value ) {
+        $this->login_required = $value ;
+    }
 
     /**
      * isLoggedIn
@@ -321,6 +323,8 @@ abstract class viewController extends controller {
             Log::doLog( "Bad Configuration" );
         }
 
+        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
+
     }
 
     /**
@@ -367,6 +371,7 @@ abstract class viewController extends controller {
     }
 
     protected function render404() {
+        header( "HTTP/1.0 404 Not Found" );
         $this->makeTemplate('404.html');
         $this->finalize();
     }
