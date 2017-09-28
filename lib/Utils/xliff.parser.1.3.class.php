@@ -354,7 +354,7 @@ class Xliff_Parser {
 
     private static function evalNotes(&$xliff, $i, $j, $trans_unit) {
         $temp = null;
-        preg_match_all('|<note>(.+?)</note>|si', $trans_unit, $temp);
+        preg_match_all('|<note.*>(.+?)</note>|si', $trans_unit, $temp);
         $matches = array_values( $temp[1] );
         if ( count($matches) > 0 ) {
             foreach($matches as $match) {
