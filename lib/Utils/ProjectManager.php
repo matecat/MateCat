@@ -1526,7 +1526,6 @@ class ProjectManager {
         //needed to check if a file has only one segment
         //for correctness: we could have more tag files in the xliff
         $_fileCounter_Show_In_Cattool = 0;
-        $num_words                    = 0; //initialize counter for words in the file to avoid IDE warnings
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
@@ -1631,7 +1630,7 @@ class ProjectManager {
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
                             //increment counter for word count
-                            $this->files_word_count += $num_words;
+                            $this->files_word_count += $wordCount;
 
                         } // end foreach seg-source
 
@@ -1687,7 +1686,7 @@ class ProjectManager {
                                 'segment'                 => CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
                                 'segment_hash'            => md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
                                 'xliff_ext_succ_tags'     => ( !is_null( $succ_tags ) ? $succ_tags : null ),
-                                'raw_word_count'          => $num_words,
+                                'raw_word_count'          => $wordCount,
                                 'show_in_cattool'         => $show_in_cattool
                         ] );
 
