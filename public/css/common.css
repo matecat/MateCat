@@ -4364,6 +4364,9 @@ text-align: left;
 .icon-unlocked3:before {
     content: "\ea8a";
 }
+.icon-picture:before {
+    content: "\e95d";
+}
 
 
 
