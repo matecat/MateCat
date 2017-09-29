@@ -33,6 +33,7 @@ class BaseKleinViewController extends \API\App\AbstractStatefulKleinController
         $this->view->authURL = $oauth_client->createAuthUrl();
         $this->view->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->view->dqf_enabled = false ;
+        $this->view->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
 
     }
 
