@@ -155,6 +155,7 @@ class Dqf extends BaseFeature {
         ) ;
 
         $revisionChildModel->createRemoteProjectsAndSubmit() ;
+        $revisionChildModel->setCompleted();
     }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
@@ -268,7 +269,7 @@ class Dqf extends BaseFeature {
         $chunk = new Chunks_ChunkStruct( $jobs[0]->toArray() );
         $mapDao = new Features\Dqf\Model\DqfProjectMapDao();
 
-        $currentTranslations = $mapDao->getCurrentByType( $chunk,  Features\Dqf\Model\DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) ;
+        $currentTranslations = $mapDao->getByType( $chunk,  Features\Dqf\Model\DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) ;
 
         if (!empty( $currentTranslations ) ) {
             throw new Exception('You cannot split DQF projects at this stage. Translation data has been sent.' );

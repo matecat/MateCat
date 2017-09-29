@@ -11,17 +11,9 @@ namespace Features\Dqf\Model;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\Dqf\Service\ChildProjectRevisionBatchService;
-use Features\Dqf\Service\FileIdMapping;
-use Features\Dqf\Service\ISession;
-use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\Request\RevisionErrorEntryStruct;
 use Features\Dqf\Service\Struct\Request\RevisionRequestStruct;
 use Features\ReviewImproved\Model\QualityReportModel;
-use Files_FileStruct;
-use INIT;
-use Jobs\MetadataDao;
 use LoudArray;
-use Users_UserDao;
 
 
 /**

@@ -514,7 +514,14 @@ abstract class DataAccess_AbstractDao {
 
         $attrs = $struct->attributes();
 
-        $fields = isset( $options['fields'] ) ? $options['fields'] : null ;
+        $fields = [];
+
+        if ( isset( $options['fields'] ) ) {
+            if ( !is_array( $options['fields'] )) {
+                throw new Exception('`fields` must be an array' );
+            }
+            $fields = $options['fields'] ;
+        }
 
         $sql = " UPDATE " . static::TABLE;
         $sql .= " SET " . static::buildUpdateSet( $attrs, $fields );

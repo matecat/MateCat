@@ -11,6 +11,7 @@ namespace Features\Dqf\Model;
 
 use Chunks_ChunkStruct;
 use DomainException;
+use Utils;
 
 class ProjectMapResolverModel {
 
@@ -42,8 +43,19 @@ class ProjectMapResolverModel {
     }
 
     public function reload() {
-        $this->records = $this->mappedProjectsDao->getCurrentByType( $this->chunk, $this->type ) ;
+        $this->records = $this->mappedProjectsDao->getByType( $this->chunk, $this->type ) ;
         return $this ;
+    }
+
+    public function archiveInverseType() {
+        $currentInverseProjects = $this->mappedProjectsDao
+                ->getByType( $this->chunk, $this->getInverseType() );
+
+        foreach( $currentInverseProjects as $project ) {
+            /** @var DqfProjectMapStruct $project */
+            $project->archive_date = Utils::mysqlTimestamp(time());
+            DqfProjectMapDao::updateStruct( $project, ['fields' => [ 'archive_date' ] ] );
+        }
     }
 
     /**
@@ -58,7 +70,7 @@ class ProjectMapResolverModel {
 
     public function getParents() {
         $projects = $this->mappedProjectsDao
-                ->getCurrentByType( $this->chunk, $this->getInverseType() ) ;
+                ->getByType( $this->chunk, $this->getInverseType() ) ;
 
         if ( empty( $projects ) ) {
             $projects = [

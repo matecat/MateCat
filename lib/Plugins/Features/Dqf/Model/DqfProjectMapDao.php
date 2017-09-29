@@ -72,16 +72,24 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
         return $stmt->fetch() ;
     }
 
+
+    public function getByTypeWithArchived( Chunks_ChunkStruct $chunk, $type ) {
+        return $this->getByType( $chunk, $type, true );
+    }
     /**
      * @param Chunks_ChunkStruct $chunk
      * @param                    $type
+     * @param bool               $include_archived
      *
      * @return array
+     *
      */
-    public function getCurrentByType( Chunks_ChunkStruct $chunk, $type ) {
+    public function getByType( Chunks_ChunkStruct $chunk, $type, $include_archived = false ) {
+        $archived_condition = $include_archived ? "" : " AND archive_date IS NULL " ;
+
         $sql = "SELECT * FROM dqf_child_projects_map
                   WHERE id_job = :id_job
-                      AND archive_date IS NULL
+                      $archived_condition
                       AND dqf_parent_uuid IS NOT NULL
                       AND project_type = :project_type
                   ORDER BY id " ;
@@ -95,7 +103,6 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
                 'id_job'       => $chunk->id,
                 'project_type' => $type
         ]);
-
         return $stmt->fetchAll() ;
     }
 
@@ -108,7 +115,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      * @return DqfProjectMapStruct[]
      */
     public function getCurrentRemoteTranslationsProjectsForChunk( Chunks_ChunkStruct $chunk ) {
-        return $this->getCurrentByType( $chunk, self::PROJECT_TYPE_TRANSLATE ) ;
+        return $this->getByType( $chunk, self::PROJECT_TYPE_TRANSLATE ) ;
     }
 
     /**

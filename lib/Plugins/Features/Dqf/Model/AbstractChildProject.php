@@ -47,7 +47,7 @@ abstract class AbstractChildProject {
         $this->chunk = $chunk;
         $this->type = $type ;
 
-        $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, 'revise' );
+        $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, $type );
         $this->dqfChildProjects = $this->dqfProjectMapResolver->getMappedProjects();
 
         $this->_initUserAndSession() ;
@@ -122,6 +122,8 @@ abstract class AbstractChildProject {
             $this->createRemoteProjects();
         }
         $this->_submitData() ;
+        $this->dqfProjectMapResolver->archiveInverseType();
+
     }
 
 

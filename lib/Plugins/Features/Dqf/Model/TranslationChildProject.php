@@ -4,20 +4,12 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
-use Exception;
-use Features\Dqf\Service\ChildProjectService;
-use Features\Dqf\Service\TranslationBatchService;
-use Features\Dqf\Service\FileIdMapping;
-use Features\Dqf\Service\Session;
-use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
-use Files_FileStruct;
+use Features\Dqf\Service\TranslationBatchService;
+use Features\Dqf\Utils\Functions;
 use INIT;
-use Jobs\MetadataDao;
 use LoudArray;
 use Translations_TranslationVersionDao;
-use Users_UserDao;
 
 class TranslationChildProject extends AbstractChildProject {
 
@@ -106,7 +98,7 @@ class TranslationChildProject extends AbstractChildProject {
                             // TODO: the corect form of this key should be the following, to so to get back the
                             // id_job for multi-language projects.
                             // "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
-                            "clientId"          => $translation->id_segment,
+                            "clientId"          => $this->getTranslationId( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $translation->time,
@@ -140,11 +132,10 @@ class TranslationChildProject extends AbstractChildProject {
         $results = $service->process() ;
 
         $this->_saveResults( $results ) ;
-        $this->_archiveInverseMappedProjects();
     }
 
-    protected function _archiveInverseMappedProjects() {
-
+    protected function getTranslationId( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
+        return Functions::scopeId( $dqfChildProject->id . "-" . $translation->id_segment ) ;
     }
 
     protected function _saveResults( $results ) {
