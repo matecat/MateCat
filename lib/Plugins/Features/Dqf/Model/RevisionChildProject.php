@@ -32,57 +32,22 @@ use Users_UserDao;
  *
  * @package Features\Dqf\Model
  */
-class RevisionChildProject {
-
-    /** * @var Chunks_ChunkStruct */
-    protected $chunk ;
+class RevisionChildProject extends AbstractChildProject {
 
     protected $qualityModel;
 
     protected $version;
 
-    /** * @var ChildProjectRevisionBatchService */
-    protected $revisionService ;
-
-    /** * @var UserModel */
-    protected $dqfUser ;
-
-    /** * @var DqfProjectMapStruct[] */
-    protected $dqfChildProjects = [];
-
-    protected $parentKeysMap = [] ;
-
-    /** * @var ProjectMapResolverModel */
-    protected $dqfProjectMapResolver  ;
-
-    /** * @var ISession */
-    private $userSession;
-
-    private $files;
-
     public function __construct( Chunks_ChunkStruct $chunk, $version ) {
+        parent::__construct( $chunk, 'revise' );
+
         $this->version  = $version ;
-        $this->chunk    = $chunk ;
-
-        $this->_initUserAndSession() ;
-
-        $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, 'revise' );
-        $this->dqfChildProjects = $this->dqfProjectMapResolver->getMappedProjects();
     }
 
-    public function submitRevisionData() {
-        if ( $this->projectCreationRequired() ) {
-            $this->createRemoteProjects();
-        }
-        $this->_submitRevisions() ;
-    }
-
-    protected function _submitRevisions() {
-
+    protected function _submitData() {
         $this->files = $this->chunk->getFiles() ;
 
         $requestStructs = [] ;
-
 
         foreach( $this->files as $file ) {
             list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
@@ -147,55 +112,5 @@ class RevisionChildProject {
         }) ;
     }
 
-    protected function createRemoteProjects() {
-        $parents = $this->dqfProjectMapResolver->getParents();
 
-        $this->dqfChildProjects = [] ;
-
-        foreach( $parents as $parent ) {
-            $project = new ChildProjectCreationModel($parent, $this->chunk, 'revise' );
-
-            $model = new ProjectModel( $parent );
-
-            $project->setUser( $this->dqfUser );
-            $project->setFiles( $model->getFilesResponseStruct() ) ;
-
-            $project->create();
-
-            // TODO: not sure this assignment is really helpful
-            // reloading the projectMapper should be enough
-            $this->dqfChildProjects[]  = $project->getSavedRecord() ;
-
-            $this->dqfProjectMapResolver->reload();
-        }
-    }
-
-
-    protected function projectCreationRequired() {
-        return empty( $this->dqfChildProjects ) ;
-    }
-
-    public function setCompleted() {
-
-    }
-
-    protected function _initUserAndSession() {
-        $uid = ( new MetadataDao() )
-                ->get( $this->chunk->id, $this->chunk->password, CatAuthorizationModel::DQF_REVISE_USER )
-                ->value ;
-
-        if ( !$uid ) {
-            throw new Exception('dqf_revise_user must be set') ;
-        }
-
-        $this->dqfUser     = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
-        $this->userSession = $this->dqfUser->getSession()->login();
-    }
-
-    protected function _findRemoteFileId( Files_FileStruct $file ) {
-        $projectOwner = new UserModel ( $this->chunk->getProject()->getOwner()  ) ;
-        $service = new FileIdMapping( $projectOwner->getSession()->login(), $file ) ;
-
-        return $service->getRemoteId() ;
-    }
 }

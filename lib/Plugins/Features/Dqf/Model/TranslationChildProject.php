@@ -19,95 +19,15 @@ use LoudArray;
 use Translations_TranslationVersionDao;
 use Users_UserDao;
 
-class TranslationChildProject {
+class TranslationChildProject extends AbstractChildProject {
 
     const SEGMENT_PAIRS_CHUNK_SIZE = 80 ;
 
-    /** * @var Chunks_ChunkStruct */
-    protected $chunk ;
-
-    /** * @var Session */
-    protected $userSession ;
-
-    /** * @var DqfProjectMapStruct[] */
-    protected $remoteDqfProjects ;
-
-    /** * @var Files_FileStruct[] */
-    protected $files ;
-
-    /** * @var TranslationBatchService */
-    protected $translationBatchService ;
-
-    /** * @var UserModel */
-    protected $dqfTranslateUser ;
-
-    /** * @var DqfProjectMapStruct[] */
-    protected $dqfChildProjects = [];
-
-    protected $parentKeysMap = [] ;
-
-    /** * @var ProjectMapResolverModel */
-    protected $dqfProjectMapResolver  ;
-
     public function __construct( Chunks_ChunkStruct $chunk ) {
-        $this->chunk = $chunk ;
-
-        $this->_initUserAndSession() ;
-
-        $this->dqfProjectMapResolver = new ProjectMapResolverModel( $this->chunk, 'translate' );
-
-        $this->dqfChildProjects = $this->dqfProjectMapResolver->getMappedProjects();
+        parent::__construct( $chunk, 'translate' );
     }
 
-    public function setCompleted() {
-        /** @var DqfProjectMapStruct $project */
-        foreach( $this->dqfChildProjects as $project ) {
-            $service = new ChildProjectService(
-                    $this->userSession, $this->chunk, $project->id ) ;
-
-            $struct = new ChildProjectRequestStruct([
-                    'projectId' => $project->dqf_project_id,
-                    'projectKey' => $project->dqf_project_uuid
-            ]);
-
-            $service->setCompleted( $struct );
-        }
-    }
-
-    public function submitTranslationBatch() {
-        if ( $this->projectCreationRequired() ) {
-            $this->createRemoteProjects();
-        }
-        $this->_submitSegmentPairs() ;
-    }
-
-    protected function projectCreationRequired() {
-        return empty( $this->dqfChildProjects ) ;
-    }
-
-    protected function createRemoteProjects() {
-        $parents = $this->dqfProjectMapResolver->getParents();
-
-        $this->dqfChildProjects = [] ;
-
-        foreach( $parents as $parent ) {
-            $project = new ChildProjectCreationModel($parent, $this->chunk, 'translate' );
-
-            $model = new ProjectModel( $parent );
-            $project->setUser( $this->dqfTranslateUser ) ;
-            $project->setFiles( $model->getFilesResponseStruct() ) ;
-
-            $project->create();
-
-            // TODO: not sure this assignment is really helpful
-            // reloading the projectMapper should be enough
-            $this->dqfChildProjects[] = $project->getSavedRecord() ;
-
-            $this->dqfProjectMapResolver->reload() ;
-        }
-    }
-
-    protected function _submitSegmentPairs() {
+    protected function _submitData() {
         /**
          * At this point we must call this endpoint:
          * https://dqf-api.stag.taus.net/#!/Project%2FChild%2FFile%2FTarget_Language%2FSegment/add_0
@@ -220,6 +140,11 @@ class TranslationChildProject {
         $results = $service->process() ;
 
         $this->_saveResults( $results ) ;
+        $this->_archiveInverseMappedProjects();
+    }
+
+    protected function _archiveInverseMappedProjects() {
+
     }
 
     protected function _saveResults( $results ) {
@@ -235,13 +160,7 @@ class TranslationChildProject {
         foreach( $results as $batch ) {
             $dao->insertBulkMapForTranslationId( $batch ) ;
         }
-    }
 
-    protected function _findRemoteFileId( Files_FileStruct $file ) {
-        $projectOwner = new UserModel ( $this->chunk->getProject()->getOwner()  ) ;
-        $service = new FileIdMapping( $projectOwner->getSession()->login(), $file ) ;
-
-        return $service->getRemoteId() ;
     }
 
     protected function getLimitDate( DqfProjectMapStruct $dqfChildProject) {
@@ -253,19 +172,5 @@ class TranslationChildProject {
             return $lastEvent['create_date'];
         }
     }
-
-    protected function _initUserAndSession() {
-        $uid = ( new MetadataDao() )
-                ->get( $this->chunk->id, $this->chunk->password, 'dqf_translate_user' )
-                ->value ;
-
-        if ( !$uid ) {
-            throw new Exception('dqf_translate_user must be set') ;
-        }
-
-        $this->dqfTranslateUser = new UserModel( ( new Users_UserDao() )->getByUid( $uid ) );
-        $this->userSession      = $this->dqfTranslateUser->getSession()->login();
-    }
-
 
 }

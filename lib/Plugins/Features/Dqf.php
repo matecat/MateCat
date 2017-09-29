@@ -142,7 +142,7 @@ class Dqf extends BaseFeature {
         // TODO: put this in a queue for background processing
         if ( ! $params->is_review ) {
             $translationChildProject = new TranslationChildProject( $chunk ) ;
-            $translationChildProject->submitTranslationBatch();
+            $translationChildProject->createRemoteProjectsAndSubmit();
             $translationChildProject->setCompleted();
         }
     }
@@ -154,7 +154,7 @@ class Dqf extends BaseFeature {
                 $archivedQRModel->getSavedRecord()->version
         ) ;
 
-        $revisionChildModel->submitRevisionData() ;
+        $revisionChildModel->createRemoteProjectsAndSubmit() ;
     }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
