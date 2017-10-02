@@ -12,6 +12,10 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * This function returns a data structure that answers to the following question:
+     *
+     *  - How did the segments change since a given date?
+     *
      * @param $file
      * @param $since
      * @param $min
@@ -39,12 +43,13 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 stv.time_to_edit AS versioned_time_to_edit,
                 stv.version_number
 
-                FROM segment_translations st JOIN segments s ON s.id = st.id_segment
-                  LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
-                  AND stv.creation_date >= :since
+                FROM segment_translations st
+                  JOIN segments s ON s.id = st.id_segment
+                  JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
 
               WHERE id_file = :id_file
               AND s.id >= :min AND s.id <= :max
+              AND ( stv.creation_date >= :since OR stv.creation_date IS NULL )
 
                 ORDER BY s.id, stv.id
                 " ;

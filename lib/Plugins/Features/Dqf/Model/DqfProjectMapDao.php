@@ -107,18 +107,6 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
     }
 
     /**
-     * Lastest translation should return just one record, because for each chunk there can be
-     * only one current translation dqf_child_projects_map record.
-     *
-     * @param Chunks_ChunkStruct $chunk
-     *
-     * @return DqfProjectMapStruct[]
-     */
-    public function getCurrentRemoteTranslationsProjectsForChunk( Chunks_ChunkStruct $chunk ) {
-        return $this->getByType( $chunk, self::PROJECT_TYPE_TRANSLATE ) ;
-    }
-
-    /**
      *
      * @param $chunk
      *

@@ -31,7 +31,7 @@ class RevisionChildProject extends AbstractChildProject {
     protected $version;
 
     public function __construct( Chunks_ChunkStruct $chunk, $version ) {
-        parent::__construct( $chunk, 'revise' );
+        parent::__construct( $chunk, DqfProjectMapDao::PROJECT_TYPE_REVISE );
 
         $this->version  = $version ;
     }

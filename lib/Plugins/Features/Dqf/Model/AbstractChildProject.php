@@ -13,7 +13,6 @@ use Exception;
 use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\FileIdMapping;
 use Features\Dqf\Service\ISession;
-use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
 use Files_FileStruct;
 use Jobs\MetadataDao;

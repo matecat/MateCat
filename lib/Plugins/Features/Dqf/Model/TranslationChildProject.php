@@ -63,7 +63,8 @@ class TranslationChildProject extends AbstractChildProject {
 
         $this->files = $this->chunk->getFiles() ;
 
-        $service = new TranslationBatchService( $this->userSession ) ;
+        $service   = new TranslationBatchService( $this->userSession ) ;
+        $limitDate = $this->getLimitDate() ;
 
         foreach( $this->files as $file ) {
             list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
@@ -83,7 +84,7 @@ class TranslationChildProject extends AbstractChildProject {
                 $dao = new Translations_TranslationVersionDao();
                 $translations = $dao->getExtendedTranslationByFile(
                         $file,
-                        $this->getLimitDate($dqfChildProject),
+                        $limitDate,
                         $dqfChildProject->first_segment,
                         $dqfChildProject->last_segment
                 ) ;
@@ -154,13 +155,16 @@ class TranslationChildProject extends AbstractChildProject {
 
     }
 
-    protected function getLimitDate( DqfProjectMapStruct $dqfChildProject) {
-        $lastEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $this->chunk, ['is_review' => false ] );
-        if ( $lastEvent ) {
-            return $dqfChildProject->create_date ;
+    protected function getLimitDate() {
+        // find date of completion event for inverse type
+        $is_review = ( $this->type == DqfProjectMapDao::PROJECT_TYPE_REVISE ) ;
+        $prevEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $this->chunk, ['is_review' => !$is_review ] );
+
+        if ( $prevEvent ) {
+            return $prevEvent['create_date'];
         }
         else {
-            return $lastEvent['create_date'];
+            return $this->chunk->getProject()->create_date ;
         }
     }
 
