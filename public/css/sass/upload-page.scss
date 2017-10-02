@@ -2775,3 +2775,7 @@ select:focus {
 .ui.input input {
     box-shadow: inset 0 1px 3px #ddd;
 }
+
+.matecat-modal {
+    z-index: 9999999999;
+}
