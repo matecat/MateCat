@@ -3257,9 +3257,9 @@ UI = {
         if ( UI.justSelecting('readonly') )   return;
         if ( UI.someUserSelection )           return;
         if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) {
-            // UI.selectingReadonly = setTimeout(function() {
-            //     APP.alert({ msg: UI.messageForClickOnIceMatch() });
-            // }, 200);
+            UI.selectingReadonly = setTimeout(function() {
+                APP.alert({ msg: UI.messageForClickOnIceMatch() });
+            }, 200);
             return
         }
 
@@ -3275,7 +3275,9 @@ UI = {
     },
 
     messageForClickOnIceMatch : function() {
-        return  'Job has been archived and cannot be edited.' ;
+        return  'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
+            'If you must edit it, click on the padlock icon to the left of the segment. ' +
+            'The owner of the project will be notified of any edits.' ;
 
     },
 
