@@ -45,11 +45,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
                 FROM segment_translations st
                   JOIN segments s ON s.id = st.id_segment
-                  JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
+                  LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
+                    AND stv.creation_date >= :since
 
               WHERE id_file = :id_file
               AND s.id >= :min AND s.id <= :max
-              AND ( stv.creation_date >= :since OR stv.creation_date IS NULL )
 
                 ORDER BY s.id, stv.id
                 " ;

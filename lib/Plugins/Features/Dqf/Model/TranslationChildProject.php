@@ -99,7 +99,7 @@ class TranslationChildProject extends AbstractChildProject {
                             // TODO: the corect form of this key should be the following, to so to get back the
                             // id_job for multi-language projects.
                             // "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
-                            "clientId"          => $this->getTranslationId( $translation, $dqfChildProject ),
+                            "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $translation->time,
@@ -135,15 +135,23 @@ class TranslationChildProject extends AbstractChildProject {
         $this->_saveResults( $results ) ;
     }
 
-    protected function getTranslationId( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
+    protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
         return Functions::scopeId( $dqfChildProject->id . "-" . $translation->id_segment ) ;
     }
+
+    protected function translationIdFromDqf( $id ) {
+        list( $scope, $dqfMapId, $segmentId ) = explode('-', $id);
+        return $segmentId ;
+    }
+
 
     protected function _saveResults( $results ) {
         $results = array_map( function( $item ) {
             $translations = json_decode( $item, true )['translations'];
             return array_map( function($item) {
-                return [ $item['clientId'], $item['dqfId'] ] ;
+                return [
+                        $this->translationIdFromDqf($item['clientId']), $item['dqfId']
+                ] ;
             }, $translations );
         }, $results );
 
