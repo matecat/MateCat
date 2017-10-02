@@ -1,6 +1,6 @@
 
 
-export default React.createClass({
+export default React.Component({
 
     getInitialState : function() {
         return {

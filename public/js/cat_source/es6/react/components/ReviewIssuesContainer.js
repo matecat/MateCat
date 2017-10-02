@@ -1,41 +1,51 @@
-export default React.createClass({
-    getIssuesFromDb : function( sid, versionNumber ) {
+class ReviewIssuesContainer extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            issues : this.getIssuesFromDb(this.props.sid,
+                this.props.versionNumber)
+        };
+
+    }
+
+    getIssuesFromDb ( sid, versionNumber ) {
         return db.segment_translation_issues.findObjects({
             'id_segment' : parseInt(sid),
             'translation_version' : '' + versionNumber
         });
-    },
+    }
 
-    getInitialState : function() {
-        return {
-            issues : this.getIssuesFromDb(this.props.sid, 
-                                          this.props.versionNumber)
-        }
-    },
+    // getInitialState () {
+    //     return {
+    //         issues : this.getIssuesFromDb(this.props.sid,
+    //                                       this.props.versionNumber)
+    //     }
+    // }
 
-    componentWillReceiveProps : function( nextProps ) {
+    componentWillReceiveProps ( nextProps ) {
         var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
         this.setState({ issues: issues }); 
-    },
+    }
 
-    componentDidMount : function() {
+    componentDidMount () {
         MateCat.db.addListener('segment_translation_issues', 
-                               ['delete'], this.issueDeleted ); 
+                               ['delete'], this.issueDeleted.bind(this) );
         
 
-    },
+    }
 
-    componentWillUnmount : function() {
+    componentWillUnmount () {
         MateCat.db.removeListener('segment_translation_issues', 
                                ['delete'], this.issueDeleted );
-    },
+    }
 
-    issueDeleted : function (issue) {
+    issueDeleted  (issue) {
         var issues = this.getIssuesFromDb( this.props.sid, this.props.versionNumber) ;
         this.setState({ issues: issues });
-    },
+    }
 
-    render : function() {
+    render () {
 
         var cs = classnames({
             'review-issues-container' : true,
@@ -69,4 +79,6 @@ export default React.createClass({
         </div>;
         
     }
-});
+}
+
+export default ReviewIssuesContainer;
