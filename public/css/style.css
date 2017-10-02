@@ -3822,9 +3822,7 @@ section.modified.editor .status {
     color: #ddd !important;
     font-size: 13px;
     font-style: italic;
-    /*
-		cursor: move !important;
-	*/
+    cursor: text !important;
     display: inline-block;
 }
 
