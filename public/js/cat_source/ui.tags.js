@@ -93,7 +93,7 @@ $.extend(UI, {
             return false;
         }
 
-		$('.source, .editarea').each(function() {
+		$('.source, .editarea, .ice-locked .targetarea').each(function() {
 			UI.lockTags(this);
 		});
 	},
