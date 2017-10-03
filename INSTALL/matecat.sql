@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.19, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: matecat_old
+-- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.30
 
@@ -16,14 +16,14 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `matecat_old`
+-- Current Database: `matecat`
 --
 
-/*!40000 DROP DATABASE IF EXISTS `matecat_old`*/;
+/*!40000 DROP DATABASE IF EXISTS `matecat`*/;
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat_old` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
-USE `matecat_old`;
+USE `matecat`;
 
 --
 -- Table structure for table `activity_log`
@@ -1093,10 +1093,10 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Current Database: `matecat_old`
+-- Current Database: `matecat`
 --
 
-USE `matecat_old`;
+USE `matecat`;
 
 --
 -- Final view structure for view `show_clients`
@@ -1125,7 +1125,7 @@ USE `matecat_old`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-03 12:10:45
+-- Dump completed on 2017-10-03 15:29:31
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1292,4 +1292,4 @@ INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-03 12:10:45
+-- Dump completed on 2017-10-03 15:29:31
