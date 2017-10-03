@@ -784,7 +784,9 @@ $.extend(UI, {
 
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
-            UI.saveSegment(UI.currentSegment);
+			if (UI.currentSegment) {
+                UI.saveSegment(UI.currentSegment);
+            }
 			UI.closeAllMenus(e, true);
 			QAComponent.togglePanel();
 		});

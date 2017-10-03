@@ -629,15 +629,17 @@
             return false ;
         },
         // unlockIceSegment: function (elem) {
-        //     elem.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
         //     var section = elem.closest('section');
+        //     var icon = section.find('.ice-locked-icon .unlock-button');
+        //     icon.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
         //     section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
         //     section.find('.targetarea').removeClass('area').addClass('editarea').click();
         //     UI.addInStorage('locked-'+ UI.getSegmentId(section), true);
         // },
         // lockIceSegment: function (elem) {
-        //     elem.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
         //     var section = elem.closest('section');
+        //     var icon = section.find('.ice-locked-icon .unlock-button');
+        //     icon.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
         //     section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
         //     section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
         //     UI.closeSegment(section, 1);
