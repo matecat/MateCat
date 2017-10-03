@@ -37,11 +37,11 @@ class RevisionRequestStruct extends BaseRequestStruct {
                 'errorCategoryId' => json_decode( $qualityReportIssueStruct['category_options'], true )['dqf_id'],
                 'severityId'      => Severity::obtain()->demapName( $qualityReportIssueStruct['severity'] ),
                 'charPosStart'    => $qualityReportIssueStruct['start_offset'],
-                'charPosEnd'      => $qualityReportIssueStruct['end_offset']
+                'charPosEnd'      => $this->matecatToDqfCharPosEnd( $qualityReportIssueStruct['end_offset'] )
         ] ) ;
     }
 
-    function getHeaders() {
+    public function getHeaders() {
         return $this->toArray(['sessionId', 'apiKey', 'projectKey']);
     }
 
@@ -68,6 +68,17 @@ class RevisionRequestStruct extends BaseRequestStruct {
         ] ;
 
         return $output ;
+    }
+
+    /**
+     * DQF uses char position 0 based, not offset like the one we save in database.
+     *
+     * @param $pos
+     *
+     * @return int
+     */
+    protected function matecatToDqfCharPosEnd( $pos ) {
+        return $pos - 1;
     }
 
     /**
