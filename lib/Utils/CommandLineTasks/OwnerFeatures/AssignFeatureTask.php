@@ -56,6 +56,14 @@ class AssignFeatureTask extends Command {
 
             $insert = $featureDao->create( new OwnerFeatures_OwnerFeatureStruct( $values ) );
         }
+
+        /*
+         * WARNING: this works only with --email option or UID and not with --id_team option
+         */
+        if( isset( $reference[ 'UserStruct' ] ) ){
+            $featureDao->destroyCacheByIdCustomer( $reference[ 'UserStruct' ]->email );
+        }
+
     }
 
     private function __getReference( InputInterface $input ) {
@@ -82,7 +90,7 @@ class AssignFeatureTask extends Command {
                 throw new Exception( 'user not found' );
             }
 
-            return array( 'uid' => $user->uid, 'id_team' => null );
+            return array( 'uid' => $user->uid, 'id_team' => null, 'UserStruct' => $user );
         }
     }
 

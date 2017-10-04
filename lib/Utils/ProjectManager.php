@@ -420,6 +420,7 @@ class ProjectManager {
         }
         //TMX Management
 
+
         /*
             loop through all input files to
             2)convert, in case, non standard XLIFF files to a format that Matecat understands
@@ -428,15 +429,17 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
+            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+
             /*
                Conversion Enforce
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAFileToConvert = $this->isConversionToEnforce( $fileName );
+            $isAConvertedFile = $this->isAConvertedFile( $fileName, $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAFileToConvert ) {
+            if ( !$isAConvertedFile ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -2332,28 +2335,29 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function isConversionToEnforce( $fileName ) {
-        $isAConvertedFile = true;
+    private function isAConvertedFile( $fileName, $forceXliff ) {
 
         $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
-        try {
-            $isAConvertedFile = DetectProprietaryXliff::isConversionToEnforce( $fullPath );
 
-            if ( -1 === $isAConvertedFile ) {
-                $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                        "code"    => -8,
-                        "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
-                );
-                if( PHP_SAPI != 'cli' ){
-                    setcookie( "upload_session", "", time() - 10000 );
-                }
+        $isAConvertedFile = DetectProprietaryXliff::isAConvertedFile( $fullPath, $forceXliff );
+
+        /**
+         * Application misconfiguration.
+         * upload should not be happened, but if we are here, raise an error.
+         * @see upload.class.php
+         * */
+        if ( -1 === $isAConvertedFile ) {
+            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                    "code"    => -8,
+                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+            ];
+            if ( PHP_SAPI != 'cli' ) {
+                setcookie( "upload_session", "", time() - 10000 );
             }
-
-        } catch ( Exception $e ) {
-            Log::doLog( $e->getMessage() );
         }
 
         return $isAConvertedFile;
+
     }
 
     /**
