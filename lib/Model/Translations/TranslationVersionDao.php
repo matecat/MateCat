@@ -42,6 +42,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 st.suggestion,
                 st.suggestion_source,
                 st.suggestion_position,
+                st.version_number,
+                st.match_type,
+                st.locked,
 
                 stv.creation_date,
                 stv.translation AS versioned_translation,
@@ -74,33 +77,46 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         while( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ) {
             if ( isset( $result[ $row['id'] ] ) ) {
+                // Due to the ORDER instruction of the query, this skips all versions but the last.
                 continue ;
             }
-            else {
 
-                $suggestion_match = null ;
-                $translation_before = is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'] ;
+            $data = [
+                    'id_job'             => $row['id_job'],
+                    'id_segment'         => $row['id'],
+                    'translation_after'  => $row['translation'],
+                    'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 )
+            ];
 
-                if ( empty( $translation_before ) ) {
-                    // there's no prior version so the translator should have faced some sort of MT/TM suggestion
-                    // we expect the suggestion array to be populated. The suggestion is saved in database
-                    // so we need to populate $translation_before with the suggestion.
-                    $translation_before = $row['suggestion'];
-                    $suggestion_match = $row['suggestion_match'];
+            if ( $this->isFirstBatch( $row ) ) {
+                if ( $this->isPreTranslated( $row ) ) {
+                    $data['translation_before'] = $this->getOriginalVersion( $row ) ;
                 }
-
-                $result[ $row['id'] ] = new ExtendedTranslationStruct([
-                        'id_job'             => $row['id_job'],
-                        'id_segment'         => $row['id'],
-                        'translation_before' => $translation_before,
-                        'translation_after'  => $row['translation'],
-                        'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 ),
-                        'suggestion_match'   => $suggestion_match
-                ]) ;
+                else {
+                    $data['translation_before'] = $row['suggestion'];
+                    $data['suggestion_match'] = $row['suggestion_match'];
+                }
             }
+            else { // Not first batch, no need to consider suggestion
+                $data['translation_before'] = $row['versioned_translation'];
+            }
+
+            $result[ $row['id'] ] = new ExtendedTranslationStruct( $data ) ;
         }
 
         return $result ;
+    }
+
+    private function getOriginalVersion( $row ) {
+        return is_null( $row['versioned_translation'] ) ? $row['translation'] : $row['versioned_translation'] ;
+    }
+
+    private function isPreTranslated( $row ) {
+        return $row['match_type'] == 'ICE' && $row['locked'] == 0 ;
+    }
+
+    private function isFirstBatch( $row ) {
+        return is_null( $row['version_number'] ) || $row['version_number'] == 0 ;
     }
 
     /**
