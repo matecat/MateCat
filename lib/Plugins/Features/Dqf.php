@@ -16,6 +16,7 @@ use Features\Dqf\Model\RevisionChildProject;
 use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
+use Features\Dqf\Utils\Metadata;
 use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportModel;
@@ -159,10 +160,20 @@ class Dqf extends BaseFeature {
     }
 
     public function filterCreateProjectFeatures( $features, $postInput ) {
-        if ( isset( $postInput[ 'dqf' ] ) && $postInput[ 'dqf' ] == true ) {
+        if ( isset( $postInput[ 'dqf' ] ) && !!$postInput[ 'dqf' ] ) {
+            $validationErrors = ProjectMetadata::getValiationErrors( $postInput ) ;
+
+            if ( !empty( $validationErrors ) ) {
+                throw new ValidationError('input validation failed: ' . implode(', ', $validationErrors ) ) ;
+            }
+
             $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
+    }
+
+    public function filterNewProjectInputFilters( $inputFilter ) {
+        return array_merge( $inputFilter, ProjectMetadata::getInputFilter() ) ;
     }
 
     /**
@@ -189,6 +200,8 @@ class Dqf extends BaseFeature {
      * @param                    $value
      * @param Chunks_ChunkStruct $chunk
      * @param Users_UserStruct   $user
+     *
+     * @return bool
      */
     public function filterJobCompletable($value, Chunks_ChunkStruct $chunk, Users_UserStruct $user, $isRevision) {
         $authModel = new Features\Dqf\Model\CatAuthorizationModel($chunk, $isRevision );

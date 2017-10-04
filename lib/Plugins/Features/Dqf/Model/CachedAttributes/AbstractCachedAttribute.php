@@ -37,4 +37,10 @@ abstract class AbstractCachedAttribute {
         return $this->resource_json ;
     }
 
+    public function getIds() {
+        return array_filter( array_map( function( $item ) {
+            return $item['id'];
+        }, $this->getArray() ) ) ;
+    }
+
 }
