@@ -909,6 +909,9 @@ APP = {
     },
 
     getGMTDate: function (date, timeZoneFrom) {
+        if (typeof date === "string" && date.indexOf("-") > -1) {
+            date = date.replace(/-/g, "/");
+        }
         var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
