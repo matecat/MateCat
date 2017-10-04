@@ -98,16 +98,15 @@ class TranslationChildProject extends AbstractChildProject {
                             "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ]['dqf_segment_id'],
                             // TODO: the corect form of this key should be the following, to so to get back the
                             // id_job for multi-language projects.
-                            // "clientId"          => "{$translation->id_job}-{$translation->id_segment}",
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $translation->time,
                             "segmentOriginId"   => 5, // HT hardcoded for now
-                            "mtEngineId"        => 22,
+                            "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
-                            "matchRate"         => '85' // $translation->suggestion_match
+                            "matchRate"         => $translation->suggestion_match
                     ]) )->toArray() ;
                 }
 

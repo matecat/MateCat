@@ -37,6 +37,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 st.time_to_edit,
                 st.translation,
                 st.version_number AS current_version,
+                st.suggestion_match,
+                st.suggestions_array,
+                st.suggestion,
+                st.suggestion_source,
+                st.suggestion_position,
 
                 stv.creation_date,
                 stv.translation AS versioned_translation,
@@ -72,13 +77,25 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 continue ;
             }
             else {
+
+                $suggestion_match = null ;
+                $translation_before = is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'] ;
+
+                if ( empty( $translation_before ) ) {
+                    // there's no prior version so the translator should have faced some sort of MT/TM suggestion
+                    // we expect the suggestion array to be populated. The suggestion is saved in database
+                    // so we need to populate $translation_before with the suggestion.
+                    $translation_before = $row['suggestion'];
+                    $suggestion_match = $row['suggestion_match'];
+                }
+
                 $result[ $row['id'] ] = new ExtendedTranslationStruct([
                         'id_job'             => $row['id_job'],
                         'id_segment'         => $row['id'],
-                        'translation_before' => is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'],
+                        'translation_before' => $translation_before,
                         'translation_after'  => $row['translation'],
                         'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 ),
-                        'suggestion_match'   => null, // $row['suggestion_match']
+                        'suggestion_match'   => $suggestion_match
                 ]) ;
             }
         }
