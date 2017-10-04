@@ -19,6 +19,11 @@ class convertFileController extends ajaxController {
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
     protected $convertZipFile = true;
 
+    /**
+     * @var FeatureSet
+     */
+    public $featureSet;
+
     public function __construct() {
 
         parent::__construct();
@@ -57,6 +62,9 @@ class convertFileController extends ajaxController {
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
+        $this->checkLogin();
+        $this->featureSet = new FeatureSet() ;
+
     }
 
     public function doAction() {
@@ -70,6 +78,10 @@ class convertFileController extends ajaxController {
             return false;
         }
 
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        }
+
         $ext = FilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
 
         $conversionHandler = new ConversionHandler();
@@ -80,6 +92,7 @@ class convertFileController extends ajaxController {
         $conversionHandler->setCookieDir( $this->cookieDir );
         $conversionHandler->setIntDir( $this->intDir );
         $conversionHandler->setErrDir( $this->errDir );
+        $conversionHandler->setFeatures( $this->featureSet );
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {
@@ -184,6 +197,7 @@ class convertFileController extends ajaxController {
       $converter->cookieDir   = $this->cookieDir;
       $converter->source_lang = $this->source_lang;
       $converter->target_lang = $this->target_lang;
+      $converter->featureSet  = $this->featureSet;
       $converter->doAction();
 
       $errors = $converter->checkResult();

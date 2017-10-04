@@ -374,7 +374,7 @@ class Xliff_Parser {
 
                 $note = [];
                 if( $this->isJSON( $match ) ){
-                    $note[ 'json' ] = $match;
+                    $note[ 'json' ] = $this->cleanCDATA( $match );
                 } else {
                     $note[ 'raw-content' ] = $this->fix_non_well_formed_xml( $match );
                 }
@@ -387,12 +387,18 @@ class Xliff_Parser {
 
     private function isJSON( $noteField ){
         try {
+            $noteField = $this->cleanCDATA( $noteField );
             json_decode( $noteField );
             Utils::raiseJsonExceptionError();
         } catch ( Exception $exception ){
             return false;
         }
         return true;
+    }
+
+    private function cleanCDATA( $testString ){
+        $cleanXMLContent = new SimpleXMLElement( '<rootNoteNode>' . $testString . '</rootNoteNode>', LIBXML_NOCDATA );
+        return $cleanXMLContent->__toString();
     }
 
     private function getTarget( &$xliff, $i, $j, $trans_unit ) {
