@@ -19,7 +19,7 @@ use PDO;
 
 class DqfProjectMapDao extends DataAccess_AbstractDao  {
 
-    const TABLE       = "dqf_child_projects_map";
+    const TABLE       = "dqf_projects_map";
     const STRUCT_TYPE = "\Features\Dqf\Model\DqfProjectMapStruct";
 
     const PROJECT_TYPE_TRANSLATE = 'translate' ;
@@ -36,7 +36,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      * @return \Features\Dqf\Model\DqfProjectMapStruct|null
      */
     public function findById( $id ) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id = :id  " ;
+        $sql = "SELECT * FROM dqf_projects_map WHERE id = :id  " ;
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
@@ -51,7 +51,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      * @return \Features\Dqf\Model\DqfProjectMapStruct|null
      */
     public function findRootProject( Chunks_ChunkStruct $chunk) {
-        $sql = "SELECT * FROM dqf_child_projects_map
+        $sql = "SELECT * FROM dqf_projects_map
                 WHERE id_job = :id_job
                  AND archive_date IS NULL
                  AND project_type in ('master', 'vendor_root')
@@ -87,7 +87,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
     public function getByType( Chunks_ChunkStruct $chunk, $type, $include_archived = false ) {
         $archived_condition = $include_archived ? "" : " AND archive_date IS NULL " ;
 
-        $sql = "SELECT * FROM dqf_child_projects_map
+        $sql = "SELECT * FROM dqf_projects_map
                   WHERE id_job = :id_job
                       $archived_condition
                       AND dqf_parent_uuid IS NOT NULL
@@ -113,7 +113,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      * @return DqfProjectMapStruct[]
      */
     public function getByChunk( $chunk ) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
+        $sql = "SELECT * FROM dqf_projects_map WHERE id_job = :id_job
                   AND password = :password  AND archive_date IS NULL
                   ORDER BY id " ;
 
@@ -136,7 +136,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
      * @return \Features\Dqf\Model\DqfProjectMapStruct
      */
     public function getMasterByChunk( $chunk ) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
+        $sql = "SELECT * FROM dqf_projects_map WHERE id_job = :id_job
                   AND password = :password AND dqf_parent_uuid IS NULL " ;
 
         $conn = Database::obtain()->getConnection();
@@ -153,7 +153,7 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
     }
 
     public function getChildByChunk( $chunk ) {
-        $sql = "SELECT * FROM dqf_child_projects_map WHERE id_job = :id_job
+        $sql = "SELECT * FROM dqf_projects_map WHERE id_job = :id_job
                   AND password = :password AND dqf_parent_uuid IS NOT NULL
                   AND archive_date IS NULL " ;
 
