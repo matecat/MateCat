@@ -28,6 +28,11 @@ class getContributionController extends ajaxController {
 
     private $__postInput = array();
 
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project;
+
     public function __construct() {
 
         parent::__construct();
@@ -105,6 +110,9 @@ class getContributionController extends ajaxController {
 
             return -1;
         }
+
+        $this->project = Projects_ProjectDao::findById( $this->jobData->id_project );
+        $this->feature_set->loadForProject( $this->project );
 
         /*
          * string manipulation strategy
@@ -416,7 +424,14 @@ class getContributionController extends ajaxController {
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
+            $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
+            $statuses = $this->feature_set->filter('filterSetSuggestionReportStatuses', $statuses );
+
+            $statuses_condition = implode(' OR ', array_map( function($status) {
+                return " status = '$status' " ;
+            }, $statuses ) ) ;
+
+            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " AND ( $statuses_condition ) ";
 
             $db = Database::obtain();
 
