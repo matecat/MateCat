@@ -973,3 +973,13 @@ top: 25%;
 	padding: 5px 10px !important;
 	margin: 0 0 -3px 10px !important;
 }
+
+.dqf-info .loader {
+	width: 20px;
+	height: 20px;
+	background-image: url(../img/loader.gif);
+	background-size: cover;
+	margin-left: 200px;
+	margin-top: -34px;
+	display: none;
+}
