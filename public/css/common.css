@@ -1152,6 +1152,13 @@ color:#333;}
     height: 35px;
 }
 
+.dqf-settings {
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
 /********** TM panel End **********/
 
 span.notify {
