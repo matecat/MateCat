@@ -75,35 +75,35 @@ $.extend(UI, {
     },
 
 
-    transformTextForLockTags : function( tx ) {
-        var brTx1 = (UI.isFirefox)? "<_plh_ class=\"locked\" contenteditable=\"false\">$1</_plh_>" : "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
-        var brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+    transformTextForLockTags: function ( tx ) {
+        var brTx1 = (UI.isFirefox) ? "<_plh_ class=\"locked\" contenteditable=\"false\">$1</_plh_>" : "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
+        var brTx2 = (UI.isFirefox) ? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 
-        tx = tx.replace(/<span/gi, "<_plh_")
-            .replace(/<\/span/gi, "</_plh_")
-            .replace(/&lt;/gi, "<")
-            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1)
-            .replace(/</gi, "&lt;")
-            .replace(/\&lt;_plh_/gi, "<span")
-            .replace(/\&lt;\/_plh_/gi, "</span")
-            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
-            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
-            .replace(/\&lt;div\>/gi, "<div>")
-            .replace(/\&lt;\/div\>/gi, "</div>")
-            .replace(/\&lt;br\>/gi, "<br>")
-            .replace(/\&lt;mark/gi, "<mark")
-            .replace(/\&lt;\/mark/gi, "</mark")
-            .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
-            .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+        tx = tx.replace( /<span/gi, "<_plh_" )
+            .replace( /<\/span/gi, "</_plh_" )
+            .replace( /&lt;/gi, "<" )
+            .replace( /(<(g|x|bx|ex|bpt|ept|ph.*?|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /</gi, "&lt;" )
+            .replace( /\&lt;_plh_/gi, "<span" )
+            .replace( /\&lt;\/_plh_/gi, "</span" )
+            .replace( /\&lt;lxqwarning/gi, "<lxqwarning" )
+            .replace( /\&lt;\/lxqwarning/gi, "</lxqwarning" )
+            .replace( /\&lt;div\>/gi, "<div>" )
+            .replace( /\&lt;\/div\>/gi, "</div>" )
+            .replace( /\&lt;br\>/gi, "<br>" )
+            .replace( /\&lt;mark/gi, "<mark" )
+            .replace( /\&lt;\/mark/gi, "</mark" )
+            .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
+            .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
-            if (UI.isFirefox) {
-                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            } else {
-                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            }
+        if ( UI.isFirefox ) {
+            tx = tx.replace( /(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
+        } else {
+            tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
+        }
 
-            tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
-            tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+        tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
+        tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
         return tx;
     },
 
