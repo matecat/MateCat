@@ -16,7 +16,7 @@ $klein->respond('/utils/pee', function() {
             "/^149\.7\.212\..*/",
     ];
 
-    if( 0 && preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
+    if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
         $method = new ReflectionMethod( 'badConfigurationController', 'render404' );
         $method->setAccessible( true );
         $method->invoke( new badConfigurationController() );
