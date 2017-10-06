@@ -91,16 +91,20 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             if ( $this->isFirstBatch( $row ) ) {
                 if ( $this->isPreTranslated( $row ) ) {
                     $data['translation_before'] = $this->getOriginalVersion( $row ) ;
+                    $data['segment_origin']     = 'MT';
                 }
                 else {
                     $data['translation_before'] = $row['suggestion'];
-                    $data['suggestion_match'] = $row['suggestion_match'];
+                    $data['suggestion_match']   = $row['suggestion_match'];
+                    $data['segment_origin']     = is_null( $row['suggestion_source'] ) ? 'HT' : $row['suggestion_source'] ;
                 }
             }
             else { // Not first batch, no need to consider suggestion
                 $data['translation_before'] = $row['versioned_translation'];
+                $data['segment_origin'] = 'HT';
             }
 
+            // TODO: ExtendedTranslationStruct is under DQF namespace, while this DAO should not be aware of DQF
             $result[ $row['id'] ] = new ExtendedTranslationStruct( $data ) ;
         }
 
@@ -116,7 +120,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     }
 
     private function isFirstBatch( $row ) {
-        return is_null( $row['version_number'] ) || $row['version_number'] == 0 ;
+        return is_null( $row['current_version'] ) || $row['current_version'] == 0 ;
     }
 
     /**

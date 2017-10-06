@@ -8,6 +8,7 @@
 
 namespace Features\Dqf\Model\CachedAttributes;
 
+use Exception;
 use INIT;
 
 abstract class AbstractCachedAttribute {
@@ -42,5 +43,18 @@ abstract class AbstractCachedAttribute {
             return $item['id'];
         }, $this->getArray() ) ) ;
     }
+
+    public function getByName( $name ) {
+        $result = array_filter($this->resource_json, function($item) use ($name) {
+            return $item['name'] == $name ;
+        }) ;
+
+        if ( empty( $result ) ) {
+            throw new Exception('object not found by name ' . $name );
+        }
+
+        return $result[0];
+    }
+
 
 }

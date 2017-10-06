@@ -4,6 +4,7 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use Features\Dqf\Model\CachedAttributes\SegmentOrigin;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Utils\Functions;
@@ -15,8 +16,14 @@ class TranslationChildProject extends AbstractChildProject {
 
     const SEGMENT_PAIRS_CHUNK_SIZE = 80 ;
 
+    /**
+     * @var SegmentOrigin
+     */
+    protected $originMap ;
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         parent::__construct( $chunk, 'translate' );
+        $this->originMap = new SegmentOrigin() ;
     }
 
     protected function _submitData() {
@@ -66,6 +73,8 @@ class TranslationChildProject extends AbstractChildProject {
         $service   = new TranslationBatchService( $this->userSession ) ;
         $limitDate = $this->getLimitDate() ;
 
+        $sourceMap = new SegmentOrigin();
+
         foreach( $this->files as $file ) {
             list ( $fileMinIdSegment, $fileMaxIdSegment ) = $file->getMaxMinSegmentBoundariesForChunk( $this->chunk );
 
@@ -102,7 +111,7 @@ class TranslationChildProject extends AbstractChildProject {
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $translation->time,
-                            "segmentOriginId"   => 5, // HT hardcoded for now
+                            "segmentOriginId"   => $this->mapSegmentOrigin( $translation ),
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
@@ -133,6 +142,13 @@ class TranslationChildProject extends AbstractChildProject {
 
         $this->_saveResults( $results ) ;
     }
+
+
+    protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
+        $object = $this->originMap->getByName( $translation->segment_origin );
+        return $object['id'] ;
+    }
+
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
         return Functions::scopeId( $dqfChildProject->id . "-" . $translation->id_segment ) ;
