@@ -39,7 +39,7 @@ class WhitelistAccessValidator extends Base {
         ];
 
         if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
-            throw new NotFoundError( "Not Found.", 404 );
+            //throw new NotFoundError( "Not Found.", 404 );
         }
 
     }

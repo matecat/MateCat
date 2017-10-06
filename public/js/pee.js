@@ -3,8 +3,8 @@
 (function ($) {
     PEE = {
         chartOptions: {
-            chart: {
-                title: 'Andamento PEE'
+            trendlines: {
+                0: {}
             },
             tooltip: {isHtml: true},
             width: '100%',
@@ -171,14 +171,6 @@
             this.initFilters();
             this.initTable();
             this.initGraph();
-            //        $("input[data-column='0']").attr("placeholder", "All");
-            //        $("input[data-column='1']").attr("placeholder", "All");
-            //        $("select[data-column='2']").val("All");
-            //        $("select[data-column='3']").val("> 100.000");
-            //        $("input[data-column='4']").attr("placeholder", ">50%");
-            //
-            //        $("select[data-column='2'] option ").first().remove();
-            //        $("select[data-column='3'] option ").first().remove();
 
             $("#tablePEE").data('tablesorter').sortList = [ [0, 0], [1, 0] ];
             $("#tablePEE").trigger('update');
@@ -327,7 +319,7 @@
             data.dataSet.forEach(function (item) {
                 var row = [];
                 var properties = Object.keys(item);
-                row.push(properties[0]);
+                row.push(new Date(properties[0]));
                 item[properties[0]].forEach(function (v, index) {
                     row.push(v);
                     var annotation = findAnnotations(data.lines[index][0], data.lines[index][1], properties[0]);
@@ -363,14 +355,20 @@
         },
         drawChart: function(columns, rows) {
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Months');
-            columns.forEach(function (column) {
+            data.addColumn('date', 'Months');
+            columns.forEach(function (column, index) {
                 data.addColumn('number', column);
                 data.addColumn({type: 'string', role: 'annotation'});
                 data.addColumn({type: 'string', role: 'annotationText', p: {html:true}});
+                PEE.chartOptions.trendlines[index] = {};
             });
 
             data.addRows(rows);
+
+            var dateFormatter = new google.visualization.NumberFormat({
+                pattern: 'MMM yyyy'
+            });
+            dateFormatter.format(data, 0);
 
             var chart = new google.visualization.LineChart(document.getElementById('myChart'));
             // google.visualization.errors.addError(document.getElementById('myChart-error'), 'error');
