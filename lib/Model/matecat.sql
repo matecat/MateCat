@@ -193,7 +193,7 @@ CREATE TABLE `dqf_child_projects_map` (
   `dqf_project_uuid` varchar(255) NOT NULL,
   `dqf_parent_uuid` varchar(255) DEFAULT NULL,
   `archive_date` datetime DEFAULT NULL,
-  `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `first_last_segment` (`first_segment`,`last_segment`) USING BTREE
@@ -963,7 +963,7 @@ CREATE TABLE `teams` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `created_by` bigint(20) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `type` varchar(45) NOT NULL DEFAULT 'personal',
   PRIMARY KEY (`id`),
   KEY `created_by_idx` (`created_by`) USING BTREE
