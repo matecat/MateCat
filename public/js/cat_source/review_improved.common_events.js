@@ -31,7 +31,9 @@ if ( ReviewImproved.enabled() ) {
     });
 
     var issuesPanelSideButtonEnabled = function( segment ) {
-        return !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() );
+        return segment.isICELocked() || (
+            !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() )
+        );
     }
 
     $(document).on('segment-filter:filter-data:load', function() {

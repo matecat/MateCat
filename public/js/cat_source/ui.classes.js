@@ -34,6 +34,10 @@
         this.isReadonly = function() {
             return this.el.hasClass('readonly');
         }
+
+        this.isICELocked = function() {
+            return this.el.hasClass('ice-locked');
+        }
     }
 
     Segment.findEl = function( number ) {
