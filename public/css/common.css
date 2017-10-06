@@ -4367,7 +4367,9 @@ text-align: left;
 .icon-picture:before {
     content: "\e95d";
 }
-
+.icon-window:before {
+    content: "\e933";
+}
 
 
 .icon-gdrive:before {
