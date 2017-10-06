@@ -958,15 +958,6 @@ article .approved {
     right: 0;
 }
 
-.buttons li {
-    float: left;
-    text-align: center;
-    margin: 0px 0 20px 0px;
-    height: 35px;
-    width: auto !important;
-    padding: 0 !important
-}
-
 .buttons p {
     margin: 2px 0 0 5px;
     font-size: 11px;
@@ -3995,7 +3986,7 @@ section.modified.editor .status {
     .draft,
     .approved,
     .guesstags {
-        padding: 7px 6px;
+        padding: 8px 6px;
     }
 
     .meter {
@@ -5541,8 +5532,22 @@ section:hover .segment-side-buttons {
 
 .action {
 
+
+}
 .tmx-import-slider {
     width: 110px !important;
 }
 
+/*Editor Toggle*/
+.editor .toggle {
+    display: inline-block;
+    margin-right: 0;
+    text-align: right;
+}
+
+.buttons li {
+    text-align: center;
+    height: 35px;
+    vertical-align: -webkit-baseline-middle;
+    display: inline-block;
 }
