@@ -1,4 +1,5 @@
-var TextField = require('../common/TextField').default;
+let PropTypes = require('prop-types');
+let TextField = require('../common/TextField').default;
 import * as RuleRunner from '../common/ruleRunner';
 import * as FormRules from '../common/formRules';
 import update from 'react-addons-update';
@@ -22,14 +23,14 @@ class LoginModal extends React.Component {
     }
 
     googole_popup(  ) {
-        var url = this.props.googleUrl;
-        var self = this;
+        let url = this.props.googleUrl;
+        let self = this;
         this.checkRedeemProject();
-        var newWindow = window.open( url, 'name', 'height=600,width=900' );
+        let newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
             newWindow.focus();
         }
-        var interval = setInterval(function () {
+        let interval = setInterval(function () {
             if (newWindow.closed) {
                 clearInterval(interval);
                 if (self.props.goToManage) {
@@ -43,7 +44,7 @@ class LoginModal extends React.Component {
 
     handleFieldChanged(field) {
         return (e) => {
-            var newState = update(this.state, {
+            let newState = update(this.state, {
                 [field]: {$set: e.target.value}
             });
             newState.validationErrors = RuleRunner.run(newState, fieldValidations);
@@ -53,7 +54,7 @@ class LoginModal extends React.Component {
     }
 
     handleSubmitClicked() {
-        var self = this;
+        let self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
         if ( this.state.requestRunning ) {
@@ -67,7 +68,7 @@ class LoginModal extends React.Component {
                 window.location.reload();
             }
         }).fail(function (response) {
-            var text;
+            let text;
             if (response.responseText.length) {
                 text = JSON.parse( response.responseText );
 
@@ -86,7 +87,7 @@ class LoginModal extends React.Component {
         if (this.props.redeemMessage) {
             return $.post('/api/app/user/redeem_project');
         } else {
-            var deferred = $.Deferred();
+            let deferred = $.Deferred();
             deferred.resolve();
             return deferred.promise();
         }
@@ -112,15 +113,15 @@ class LoginModal extends React.Component {
     }
 
     render() {
-        var generalErrorHtml = '';
-        var buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
+        let generalErrorHtml = '';
+        let buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
         if (this.state.generalError.length) {
             generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
         }
 
-        var loaderClass = (this.state.requestRunning) ? 'show' : '';
+        let loaderClass = (this.state.requestRunning) ? 'show' : '';
 
-        var htmlMessage = <div className="login-container-right">
+        let htmlMessage = <div className="login-container-right">
             <h2>Sign up now to:</h2>
             <ul className="">
                 <li>Manage your TMs, glossaries and MT engines</li>
@@ -176,7 +177,7 @@ const fieldValidations = [
 ];
 
 LoginModal.propTypes = {
-    googleUrl: React.PropTypes.string
+    googleUrl: PropTypes.string
 };
 
 export default LoginModal ;

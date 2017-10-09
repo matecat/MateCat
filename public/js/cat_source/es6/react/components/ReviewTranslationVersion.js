@@ -1,62 +1,73 @@
-export default React.createClass({
-    getInitialState : function() {
-        return {
+class ReviewTranslationVersion extends React.Component {
+
+
+    constructor(props) {
+        super(props);
+        this.state = {
             collapsed : this.props.isCurrent == false
-        }; 
-    },
+        };
 
-    componentWillReceiveProps : function(nextProps) {
+    }
+
+    // getInitialState () {
+    //     return {
+    //         collapsed : this.props.isCurrent == false
+    //     };
+    // }
+
+    componentWillReceiveProps (nextProps) {
         this.setState({ collapsed : !nextProps.isCurrent, trackChanges : false });
-    },
+    }
 
-    issueMouseEnter : function( issue, event, reactid ) {
-        var node = $('.muted-text-box', ReactDOM.findDOMNode( this ) ) ; 
+    issueMouseEnter ( issue, event, reactid ) {
+        let node = $('.muted-text-box', ReactDOM.findDOMNode( this ) ) ; 
         ReviewImproved.highlightIssue( issue, node ); 
-    }, 
+    } 
 
-    issueMouseLeave : function() {
-        var selection = document.getSelection();
+    issueMouseLeave () {
+        let selection = document.getSelection();
         selection.removeAllRanges();
-    },
+    }
 
-    translationMarkup : function() {
+    translationMarkup () {
         return { __html : UI.decodePlaceholdersToText( this.props.translation ) };
-    },
+    }
 
-    toggleTrackChanges : function(e) {
+    toggleTrackChanges (e) {
         e.preventDefault(); 
         e.stopPropagation(); 
         this.setState({trackChanges : !this.state.trackChanges });
-    },
+    }
 
-    getMarkupForTrackChanges : function() {
+    getMarkupForTrackChanges () {
         return { __html :  this.props.trackChangesMarkup  };
-    },
+    }
     
-    render : function() {
-        var cs = classnames({
+    render () {
+        let cs = classnames({
             collapsed : this.state.collapsed,
             'review-translation-version' : true 
         });
+        let versionLabel;
 
         if ( this.props.isCurrent ) {
-            var versionLabel = sprintf('Version %s (current)', this.props.versionNumber );
+            versionLabel = sprintf('Version %s (current)', this.props.versionNumber );
         } else {
-            var versionLabel = sprintf('Version %s', this.props.versionNumber );
+            versionLabel = sprintf('Version %s', this.props.versionNumber );
         }
 
 
-        var styleForVersionText = { 
+        let styleForVersionText = { 
             display: this.state.trackChanges ? 'none' : 'block' 
         }; 
-        var styleForTrackChanges = {
+        let styleForTrackChanges = {
             display: this.state.trackChanges ? 'block' : 'none' 
         }; 
 
-        var labelForToggle = this.state.trackChanges ? 'Issues' : 'Track changes' ;
-
+        let labelForToggle = this.state.trackChanges ? 'Issues' : 'Track changes' ;
+        let trackChangesLink
         if ( this.props.trackChangesMarkup ) {
-            var trackChangesLink = <a href="#" onClick={this.toggleTrackChanges}
+            trackChangesLink = <a href="#" onClick={this.toggleTrackChanges.bind(this)}
                     className="review-track-changes-toggle">{labelForToggle}</a>;
         }
 
@@ -88,4 +99,6 @@ export default React.createClass({
             ;
 
     }
-}); 
+}
+
+export default ReviewTranslationVersion;

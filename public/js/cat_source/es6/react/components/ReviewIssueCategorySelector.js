@@ -1,17 +1,25 @@
 
-export default React.createClass({
+class ReviewIssueCategorySelector extends React.Component{
 
-    getInitialState : function() {
-        return {
+    constructor(props) {
+        super(props);
+        this.state = {
             value : this.props.selectedValue
         };
-    },
 
-    componentWillReceiveProps : function(nextProps) {
+    }
+
+    // getInitialState() {
+    //     return {
+    //         value : this.props.selectedValue
+    //     };
+    // }
+
+    componentWillReceiveProps(nextProps) {
         this.setState({ value: nextProps.selectedValue });
-    },
+    }
 
-    render : function() {
+    render() {
         // It may happen for a category to come with no severities. In this case
         // the category should be considered to be a header for the nested
         // subcategories. Don't print the select box if no severity is found.
@@ -42,4 +50,6 @@ export default React.createClass({
         </td>
         </tr> ; 
     }
-}); 
+}
+
+export default ReviewIssueCategorySelector;

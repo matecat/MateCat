@@ -1,26 +1,37 @@
-export default React.createClass({
-    getInitialState : function() {
-        
-        return {
+
+class ReviewTranslationIssue extends React.Component{
+
+    constructor(props) {
+        super(props);
+        this.state = {
             issue : MateCat.db
                 .segment_translation_issues.by('id', this.props.issueId )
-        }
-    },
+        };
 
-    categoryLabel : function() {
-        var id_category = this.state.issue.id_category ; 
+    }
+    
+    // getInitialState() {
+    //    
+    //     return {
+    //         issue : MateCat.db
+    //             .segment_translation_issues.by('id', this.props.issueId )
+    //     }
+    // },
 
+    categoryLabel() {
+        var id_category = this.state.issue.id_category ;
+        config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[").replace(/\]"/g, "]").replace(/\"\{/g, "{").replace(/\}"/g, "}")
         return _( JSON.parse( config.lqa_flat_categories ))
             .select(function(e) { return  e.id == id_category ; })
             .first().label
-    },
+    }
 
-    deleteIssue : function(event) {
+    deleteIssue(event) {
         event.preventDefault(); 
         event.stopPropagation(); 
         ReviewImproved.deleteIssue(this.state.issue); 
-    },
-    render : function() {
+    }
+    render() {
         var category_label = this.categoryLabel();
         var formatted_date = moment( this.state.issue.created_at ).format('lll'); 
 
@@ -36,7 +47,7 @@ export default React.createClass({
 
         if ( config.isReview ) {
             deleteIssue = <a href="#" className="cancel-project"
-                onClick={this.deleteIssue}>Delete issue</a>;
+                onClick={this.deleteIssue.bind(this)}>Delete issue</a>;
         }
 
         return <div className="review-issue-detail"
@@ -58,4 +69,6 @@ export default React.createClass({
             {deleteIssue}
         </div>; 
     }
-});
+}
+
+export default ReviewTranslationIssue ;
