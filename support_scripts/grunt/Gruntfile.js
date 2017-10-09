@@ -484,6 +484,16 @@ module.exports = function(grunt) {
                 ],
                 dest: cssBase + 'build/analyze-build.css'
             },
+            distIcons: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase ]
+                },
+                src: [
+                    cssBase + 'sass/commons/icons_main.scss'
+                ],
+                dest: cssBase + 'build/icons.css'
+            },
             distSemantic: {
                 options : {
                     sourceMap : false,
