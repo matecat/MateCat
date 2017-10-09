@@ -1,22 +1,32 @@
 
 
-export default React.Component({
+class ReviewIssueSelectionPanel extends React.Component{
 
-    getInitialState : function() {
-        return {
+    constructor(props) {
+        super(props);
+        this.state = {
             selections : {},
             submitDisabled : true,
-        }; 
-    },
-    autoShortLabel : function(label) {
+        };
+
+    }
+
+    // getInitialState() {
+    //     return {
+    //         selections : {},
+    //         submitDisabled : true,
+    //     };
+    // }
+
+    autoShortLabel(label) {
         return label; 
-    },
+    }
 
-    issueCategories : function() {
+    issueCategories() {
         return JSON.parse(config.lqa_nested_categories).categories ; 
-    },
+    }
 
-    severitySelected : function( category, event ) {
+    severitySelected( category, event ) {
         var severity = $(ReactDOM.findDOMNode( event.target )).val() ;
         var selections = _.clone( this.state.selections );
 
@@ -31,17 +41,17 @@ export default React.Component({
             submitDisabled : Object.keys( selections ).length == 0 
         });
 
-    },
+    }
 
-    buttonClasses : function() {
+    buttonClasses() {
         return classnames({
             'mc-button' : true,
             'blue-button' : true, 
             'disabled' : this.state.submitDisabled
         });
-    },
+    }
 
-    sendClick : function() {
+    sendClick() {
         if ( this.state.submitDisabled ) {
             return; 
         }
@@ -64,16 +74,16 @@ export default React.Component({
         }.bind(this) ))
             .done( this.props.submitIssueCallback )
             .fail( this.handleFail ) ;
-    },
+    }
 
-    handleFail : function() {
+    handleFail() {
         genericErrorAlertMessage() ;
         this.setState({ submitDone : false, submitDisabled : false });
-    },
-    render : function() {
+    }
+    render() {
         var categoryComponents = []; 
         var withSeverities = 0;
-        
+
         this.issueCategories().forEach(function(category, i) {
             var selectedValue = "";
 
@@ -91,7 +101,7 @@ export default React.Component({
                 <ReviewIssueCategorySelector 
                     key={k}
                     focus={withSeverities == 1}
-                    severitySelected={this.severitySelected} 
+                    severitySelected={this.severitySelected.bind(this)}
                     selectedValue={selectedValue}
                     nested={false} category={category} />);
 
@@ -113,7 +123,7 @@ export default React.Component({
                             key={kk}
                             focus={withSeverities == 1}
                             selectedValue={selectedValue}
-                            severitySelected={this.severitySelected}
+                            severitySelected={this.severitySelected.bind(this)}
                             nested={true}
                             category={category}  />
                     );
@@ -144,10 +154,12 @@ export default React.Component({
                 />
 
             <div className="review-issue-buttons-right">
-                <button onClick={this.sendClick}
+                <button onClick={this.sendClick.bind(this)}
                     className={this.buttonClasses()}>{buttonLabel}</button>
             </div>
         </div>
         </div> 
     }
-});
+}
+
+export default ReviewIssueSelectionPanel ;

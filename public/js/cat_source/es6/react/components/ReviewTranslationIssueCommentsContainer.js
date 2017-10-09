@@ -1,6 +1,8 @@
-export default React.Component({
-    getInitialState : function() {
-        return {
+class ReviewTranslationIssueCommentsContainer extends React.Component{
+
+    constructor(props) {
+        super(props);
+        this.state = {
             sendLabel : 'Send',
             sendDisabled : true,
             replying : false,
@@ -13,14 +15,31 @@ export default React.Component({
             undoRebutLabel : 'Undo Rebut',
             undoRebutDisabled : false,
             undoRebutVisible : false
-        }
-    },
+        };
 
-    replyClick : function() {
+    }
+    // getInitialState () {
+    //     return {
+    //         sendLabel : 'Send',
+    //         sendDisabled : true,
+    //         replying : false,
+    //         comments : MateCat.db.segment_translation_issue_comments.findObjects({
+    //             'id_issue' : this.props.issueId
+    //         }),
+    //         rebutLabel : 'Send and Rebut',
+    //         rebutDisabled : true,
+    //         rebutVisible : true,
+    //         undoRebutLabel : 'Undo Rebut',
+    //         undoRebutDisabled : false,
+    //         undoRebutVisible : false
+    //     }
+    // }
+
+    replyClick() {
         this.setState({ replying: true });
-    },
+    }
 
-    undoRebutClick : function() {
+    undoRebutClick() {
         this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
         ReviewImproved.undoRebutIssue( this.props.sid, this.props.issueId )
             .fail( this.handleFail )
@@ -28,9 +47,9 @@ export default React.Component({
                 this.setState({ undoRebutDisabled : false, undoRebutLabel: this.getInitialState().undoRebutLabel });
             }.bind(this) );
 
-    },
+    }
 
-    commentsChanged : function() {
+    commentsChanged() {
         this.setState({
             comment_text: '', 
             sendLabel : 'Send',
@@ -40,15 +59,15 @@ export default React.Component({
             }),
             rebutLabel : 'Send and Rebut'
         });
-    },
+    }
 
-    issueChanged : function( data ) {
+    issueChanged( data ) {
         if( data.id === this.props.issueId ) {
             this.checkIssue( data );
         }
-    },
+    }
 
-    checkIssue : function( issue ) {
+    checkIssue( issue ) {
         if( issue.rebutted_at ) {
             if( this.state.rebutVisible ) {
                 this.setState({
@@ -70,35 +89,35 @@ export default React.Component({
                 });
             }
         }
-    },
+    }
 
-    componentDidMount : function() {
+    componentDidMount() {
         MateCat.db.addListener('segment_translation_issue_comments', 
-                               ['insert', 'delete'], this.commentsChanged);
+                               ['insert', 'delete'], this.commentsChanged.bind(this));
         ReviewImproved.loadComments(this.props.sid, this.props.issueId);
 
         var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
         this.checkIssue( issue );
 
         MateCat.db.addListener('segment_translation_issues',
-                               ['insert', 'update', 'delete'], this.issueChanged);
-    },
-    componentWillUnmount: function() {
+                               ['insert', 'update', 'delete'], this.issueChanged.bind(this));
+    }
+    componentWillUnmount() {
         MateCat.db.removeListener('segment_translation_issue_comments', 
                                   ['insert', 'delete'], this.commentsChanged);
 
         MateCat.db.removeListener('segment_translation_issues',
                                   ['insert', 'update', 'delete'], this.issueChanged);
-    },
-    handleFail: function() {
+    }
+    handleFail() {
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
-    },
-    handleFail: function() {
+    }
+    handleFail() {
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
-    },
-    sendClick : function() {
+    }
+    sendClick() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
@@ -114,9 +133,9 @@ export default React.Component({
             .submitComment( this.props.sid, this.props.issueId, data )
             .fail( this.handleFail );
 
-    },
+    }
 
-    rebutClick : function() {
+    rebutClick() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
@@ -134,9 +153,9 @@ export default React.Component({
             ReviewImproved.submitComment( this.props.sid, this.props.issueId, data )
         ).fail( this.handleFail );
 
-    },
+    }
 
-    handleCommentChange : function(event) {
+    handleCommentChange(event) {
         var text = event.target.value ;
         var disabled = true;
 
@@ -148,16 +167,16 @@ export default React.Component({
             sendDisabled : disabled,
             rebutDisabled : disabled
         });
-    },
+    }
 
-    cancelClick : function() {
+    cancelClick() {
         this.setState({ replying: false });
-    },
+    }
 
-    handleRootClick : function(event) {
+    handleRootClick(event) {
         event.stopPropagation();
-    },
-    render : function() {
+    }
+    render() {
 
         var terminal ;
 
@@ -189,7 +208,7 @@ export default React.Component({
                 });
 
                 undoRebutButton =
-                    <a onClick={this.undoRebutClick} className={undoRebutButtonClasses}>
+                    <a onClick={this.undoRebutClick.bind(this)} className={undoRebutButtonClasses}>
                         {this.state.undoRebutLabel}
                     </a>;
             }
@@ -197,7 +216,7 @@ export default React.Component({
             terminal = <div className="review-issue-comment-buttons">
                 <div className="review-issue-comment-buttons-right">
                     {undoRebutButton}
-                    <a onClick={this.replyClick} className="mc-button blue-button">Reply</a>
+                    <a onClick={this.replyClick.bind(this)} className="mc-button blue-button">Reply</a>
                 </div>
             </div>;
         }
@@ -218,7 +237,7 @@ export default React.Component({
                     'disabled' : this.state.rebutDisabled
                 });
                 rebutButton =
-                    <a onClick={this.rebutClick} className={rebutButtonClasses}>
+                    <a onClick={this.rebutClick.bind(this)} className={rebutButtonClasses}>
                         {this.state.rebutLabel}
                     </a>;
             }
@@ -230,13 +249,13 @@ export default React.Component({
                 className="mc-textinput mc-textarea mc-resizable-textarea"
                 placeholder="Write a comment..."
                 value={this.state.comment_text}
-                onChange={this.handleCommentChange} />
+                onChange={this.handleCommentChange.bind(this)} />
 
             </div>
             <div className="review-issue-comment-buttons">
             <div className="review-issue-comment-buttons-right">
             {rebutButton}
-            <a onClick={this.sendClick} className={buttonClasses}>{this.state.sendLabel}</a>
+            <a onClick={this.sendClick.bind(this)} className={buttonClasses}>{this.state.sendLabel}</a>
             </div>
             </div>
             </div>;
@@ -250,4 +269,6 @@ export default React.Component({
         </div>; 
     }
 
-});
+}
+
+export default ReviewTranslationIssueCommentsContainer;
