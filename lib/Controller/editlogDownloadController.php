@@ -9,9 +9,6 @@ use ActivityLog\ActivityLogStruct;
  */
 class editlogDownloadController extends downloadController {
 
-    private $jid = "";
-    private $password;
-
     public function __construct() {
 
         $filterArgs = array(
@@ -21,17 +18,17 @@ class editlogDownloadController extends downloadController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->jid      = $__postInput[ "jid" ];
-        $this->password = $__postInput[ "password" ];
-        $this->_filename = "Edit-log-export-" . $this->jid . ".csv";
+        $this->id_job    = $__postInput[ "jid" ];
+        $this->password  = $__postInput[ "password" ];
+        $this->setFilename( "Edit-log-export-" . $this->id_job . ".csv" );
 
     }
 
     public function doAction() {
 
-        $job = Jobs_JobDao::getById( $this->jid, 60 * 60 )[ 0 ];
+        $job = Jobs_JobDao::getById( $this->id_job, 60 * 60 )[ 0 ];
 
-        $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
+        $this->model = new EditLog_EditLogModel( $this->id_job, $this->password );
         $this->model->setStartId( $job->job_first_segment );
         $this->model->setSegmentsPerPage( PHP_INT_MAX );
         list( $data, , ) = $this->model->getEditLogData();
@@ -105,7 +102,7 @@ class editlogDownloadController extends downloadController {
             }
 
             $row_array = array(
-                    $this->jid, $sid, $sugg_source, $rwc, $sugg_match, $sugg_tte, $pe_effort_perc, $hter, $segment,
+                    $this->id_job, $sid, $sugg_source, $rwc, $sugg_match, $sugg_tte, $pe_effort_perc, $hter, $segment,
                     $suggestion, $translation, $mt_qe, $id_translator, $s1_source, $s1_translation, $s1_match,
                     $s1_origin, $s2_source, $s2_translation, $s2_match, $s2_origin, $s3_source, $s3_translation,
                     $s3_match, $s3_origin, $d->suggestion_position,$statistical_relevant
@@ -118,7 +115,7 @@ class editlogDownloadController extends downloadController {
         $csvHandler->rewind();
 
         foreach ( $csvHandler as $row ) {
-            $this->content .= $row;
+            $this->outputContent .= $row;
         }
 
         /**
@@ -127,7 +124,7 @@ class editlogDownloadController extends downloadController {
         $this->checkLogin();
 
         $activity             = new ActivityLogStruct();
-        $activity->id_job     = $this->jid;
+        $activity->id_job     = $this->id_job;
         $activity->id_project = Projects_ProjectDao::findByJobId( $data[ 0 ]->job_id, 60 * 60 )->id; //assume that all rows have the same project id
         $activity->action     = ActivityLogStruct::DOWNLOAD_EDIT_LOG;
         $activity->ip         = Utils::getRealIpAddr();
