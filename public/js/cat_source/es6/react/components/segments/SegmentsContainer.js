@@ -3,6 +3,7 @@
 
  */
 var React = require('react');
+let PropTypes = require('prop-types');
 var SegmentStore = require('../../stores/SegmentStore');
 var Segment = require('./Segment').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
@@ -105,9 +106,9 @@ class SegmentsContainer extends React.Component {
 }
 
 SegmentsContainer.propTypes = {
-    segments: React.PropTypes.array,
-    splitGroup: React.PropTypes.array,
-    timeToEdit: React.PropTypes.string
+    segments: PropTypes.array,
+    splitGroup: PropTypes.array,
+    timeToEdit: PropTypes.string
 };
 
 SegmentsContainer.defaultProps = {
