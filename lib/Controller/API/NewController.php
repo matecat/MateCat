@@ -1,5 +1,6 @@
 <?php
 
+use Exceptions\ValidationError;
 use ProjectQueue\Queue;
 use Teams\MembershipDao;
 
@@ -73,8 +74,9 @@ class NewController extends ajaxController {
     private $lexiqa = false;
     private $speech2text = false;
     private $tag_projection = false;
+    private $project_completion = false ;
 
-    private $project_features = [];
+    private $projectFeatures = [];
 
     private $metadata = array();
 
@@ -103,12 +105,32 @@ class NewController extends ajaxController {
      */
     protected $projectManager ;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $systemWideFeatures ;
+
+    protected $postInput ;
+
     public function __construct() {
 
         parent::__construct();
 
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
+
+        if ( !$this->validateAuthHeader() ) {
+            header( 'HTTP/1.0 401 Unauthorized' );
+            $this->api_output[ 'message' ] = 'Authentication failed';
+
+            return -1;
+        }
+
+        $this->systemWideFeatures = new FeatureSet();
+
+        if ( $this->current_user ) {
+            $this->systemWideFeatures->loadFromUserEmail( $this->current_user->email ) ;
+        }
 
         $filterArgs = [
                 'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -145,6 +167,8 @@ class NewController extends ajaxController {
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
         ];
 
+        $filterArgs = $this->systemWideFeatures->filter('filterNewProjectInputFilters', $filterArgs ) ;
+
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         if ( !isset( $__postInput[ 'tms_engine' ] ) || is_null( $__postInput[ 'tms_engine' ] ) ) {
@@ -157,7 +181,6 @@ class NewController extends ajaxController {
         foreach ( $__postInput as $key => $val ) {
             $__postInput[ $key ] = urldecode( $val );
         }
-
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
@@ -193,13 +216,12 @@ class NewController extends ajaxController {
             }
         }
 
-        $this->setProjectFeatures( $__postInput );
-
         try {
-
             $this->lexiqa = $__postInput[ 'lexiqa' ];
             $this->speech2text = $__postInput[ 'speech2text' ];
             $this->tag_projection = $__postInput[ 'tag_projection' ];
+            $this->project_completion = $__postInput[ 'project_completion' ];
+
             $this->validateMetadataParam( $__postInput['metadata'] );
 
         } catch ( Exception $ex ) {
@@ -207,7 +229,6 @@ class NewController extends ajaxController {
             Log::doLog( $ex->getMessage() );
             return -1;
         }
-
 
         try {
             $this->validateEngines();
@@ -268,16 +289,20 @@ class NewController extends ajaxController {
             return -$e->getCode();
         }
 
+        $this->postInput  = $__postInput ;
+
     }
 
-    private function setProjectFeatures( $__postInput ){
-
-        //change project features
-        if( !empty( $__postInput[ 'project_completion' ] ) ){
+    private function setProjectFeatures() {
+        if ( $this->postInput['project_completion'] ) {
             $feature = new BasicFeatureStruct();
             $feature->feature_code = 'project_completion';
-            $this->project_features[] = $feature;
+            $this->projectFeatures[] = $feature;
         }
+
+        $this->projectFeatures = $this->systemWideFeatures->filter(
+                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput
+        ) ;
 
     }
 
@@ -302,10 +327,11 @@ class NewController extends ajaxController {
     }
 
     public function doAction() {
-        if ( !$this->validateAuthHeader() ) {
-            header( 'HTTP/1.0 401 Unauthorized' );
-            $this->api_output[ 'message' ] = 'Authentication failed';
-
+        try {
+            $this->setProjectFeatures();
+        }
+        catch ( ValidationError $e ) {
+            $this->api_output = [ 'status' => 'FAIL', 'message' => $e->getMessage() ] ;
             return -1;
         }
 
@@ -320,7 +346,7 @@ class NewController extends ajaxController {
         }
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
-            return;
+            return -1 ;
         }
 
         $uploadFile = new Upload();
@@ -370,7 +396,6 @@ class NewController extends ajaxController {
         $cookieDir      = $uploadFile->getDirUploadToken();
         $intDir         = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir         = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
-        $response_stack = array();
 
         foreach ( $arFiles as $file_name ) {
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
@@ -383,6 +408,7 @@ class NewController extends ajaxController {
             $conversionHandler->setCookieDir( $cookieDir );
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
+            $conversionHandler->setFeatures( $this->systemWideFeatures );
 
             $status = array();
 
@@ -479,6 +505,7 @@ class NewController extends ajaxController {
                 $converter->cookieDir   = $cookieDir;
                 $converter->source_lang = $this->source_lang;
                 $converter->target_lang = $this->target_lang;
+                $converter->featureSet  = $this->systemWideFeatures;
                 $converter->doAction();
 
                 $status = $errors = $converter->checkResult();
@@ -600,7 +627,7 @@ class NewController extends ajaxController {
         }
 
         //set features override
-        $projectStructure[ 'project_features' ] = $this->project_features;
+        $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
@@ -711,7 +738,6 @@ class NewController extends ajaxController {
         }
 
         return true;
-
     }
 
     /**
