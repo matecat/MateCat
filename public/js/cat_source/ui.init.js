@@ -249,31 +249,33 @@ UI.SegmentFooter.registerTab({
     }
 });
 
-UI.SegmentFooter.registerTab({
-    code                : 'tm',
-    tab_class           : 'matches',
-    label               : 'Translation Matches',
-    activation_priority : 50,
-    tab_position        : 10,
-    is_enabled          : function(segment) {
-        return true;
-    },
-    tab_markup          : function(segment) {
-        if ( config.mt_enabled ) {
-            return this.label ;
+if ( config.translationMatchesTabEnabled ) {
+    UI.SegmentFooter.registerTab({
+        code                : 'tm',
+        tab_class           : 'matches',
+        label               : 'Translation Matches',
+        activation_priority : 50,
+        tab_position        : 10,
+        is_enabled          : function(segment) {
+            return true;
+        },
+        tab_markup          : function(segment) {
+            if ( config.mt_enabled ) {
+                return this.label ;
+            }
+            else {
+                return this.label + " (No MT) ";
+            }
+        },
+        content_markup      : function(segment) {
+            return '<div class="overflow"></div>' +
+                '<div class="engine-errors"></div>' ;
+        },
+        is_hidden    : function(segment) {
+            return false;
         }
-        else {
-            return this.label + " (No MT) ";
-        }
-    },
-    content_markup      : function(segment) {
-        return '<div class="overflow"></div>' +
-            '<div class="engine-errors"></div>' ;
-    },
-    is_hidden    : function(segment) {
-        return false;
-    }
-});
+    });
+}
 
 UI.SegmentFooter.registerTab({
     code                : 'gl',

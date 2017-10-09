@@ -2653,6 +2653,15 @@ UI = {
         return $(area).text();
     },
 
+    processContributions : function() {
+    },
+
+    getContribution : function(segment, next) {
+        var deferred = new jQuery.Deferred() ;
+        $( segment ).addClass('loaded');
+
+        return deferred.resolve();
+    },
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with br tags
      * @param str
