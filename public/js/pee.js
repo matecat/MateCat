@@ -321,7 +321,7 @@
                 var properties = Object.keys(item);
                 // var date = new Date(properties[0]);
                 // row.push(new Date(date.getFullYear(), date.getMonth() + 1, 0));
-                row.push(new Date(properties[0]);
+                row.push(new Date(properties[0]));
                 item[properties[0]].forEach(function (v, index) {
                     row.push(v);
                     var annotation = findAnnotations(data.lines[index][0], data.lines[index][1], properties[0]);
