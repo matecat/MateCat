@@ -40,6 +40,10 @@ class CatAuthorizationModel {
         $this->dao = new MetadataDao() ;
     }
 
+    public function revokeAssignment() {
+        $this->dao->delete( $this->job->id, $this->job->password, $this->key );
+    }
+
     public function assignJobToUser( Users_UserStruct $user ) {
         $status = $this->getStatus( $user );
 
@@ -102,6 +106,18 @@ class CatAuthorizationModel {
             return false ;
         }
         return $record->value ;
+    }
+
+    /**
+     * @return bool|Users_UserStruct
+     */
+    public function getAuthorizedUser() {
+        $uid = $this->getAuthorizedUid();
+        if ( $uid ) {
+            return ( new Users_UserDao() )->getByUid( $uid ) ;
+        } else {
+            return false ;
+        }
     }
 
 }

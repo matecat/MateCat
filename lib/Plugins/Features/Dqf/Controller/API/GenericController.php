@@ -17,6 +17,18 @@ class GenericController extends AbstractStatefulKleinController {
 
     // Lock the job to the DQF user
     public function assignProject() {
+        $aut = $this->getAuth();
+        $aut->assignJobToUser( $this->getUser() );
+        $this->response->code(200) ;
+    }
+
+    public function revokeAssignment() {
+        $aut = $this->getAuth();
+        $aut->revokeAssignment();
+        $this->response->code(200) ;
+    }
+
+    private function getAuth() {
         $reviewItem = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->password, $this->request->id_job ) ;
 
         if ( !$reviewItem ) {
@@ -26,9 +38,7 @@ class GenericController extends AbstractStatefulKleinController {
             $chunk = $reviewItem->getChunk() ;
         }
 
-        $aut = new CatAuthorizationModel( $chunk->getJob(), !!$reviewItem ) ;
-        $aut->assignJobToUser( $this->getUser() );
-        $this->response->code(200) ;
+        return new CatAuthorizationModel( $chunk->getJob(), !!$reviewItem ) ;
     }
 
 }
