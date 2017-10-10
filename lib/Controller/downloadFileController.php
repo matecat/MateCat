@@ -291,6 +291,7 @@ class downloadFileController extends downloadController {
             try {
 
                 $pathinfo = FilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
+                $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
                     $this->startRemoteFileService($output_content);
