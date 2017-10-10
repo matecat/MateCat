@@ -141,6 +141,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     padding: 20px 20px 20px 25px;
 }
 
+.preferences-modal .user-dqf ,
 .preferences-modal .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
@@ -197,8 +198,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     margin-top: 25px;
 }
 
-.dqf-modal .dqf-container {
-    padding: 40px;
+.preferences-modal,
+.dqf-modal {
+    .dqf-container {
+        padding: 40px;
+    }
     .user-dqf  {
         border: 1px solid #ccc;
         padding: 15px;
@@ -284,7 +288,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 
-
+.preferences-modal  {
+    .dqf-container {
+        padding: 0px;
+    }
+}
 
 .onoffswitch-drive {
     position: relative;
