@@ -193,7 +193,7 @@ CREATE TABLE `dqf_child_projects_map` (
   `dqf_project_uuid` varchar(255) NOT NULL,
   `dqf_parent_uuid` varchar(255) DEFAULT NULL,
   `archive_date` datetime DEFAULT NULL,
-  `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `first_last_segment` (`first_segment`,`last_segment`) USING BTREE
@@ -963,7 +963,7 @@ CREATE TABLE `teams` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `created_by` bigint(20) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `type` varchar(45) NOT NULL DEFAULT 'personal',
   PRIMARY KEY (`id`),
   KEY `created_by_idx` (`created_by`) USING BTREE
@@ -1125,7 +1125,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-10 11:43:17
+-- Dump completed on 2017-10-10 16:06:08
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1292,4 +1292,4 @@ INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-10 11:43:17
+-- Dump completed on 2017-10-10 16:06:08
