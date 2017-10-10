@@ -9,16 +9,71 @@
 
 abstract class downloadController extends controller {
 
-    protected $content = "";
-    protected $_filename = "unknown";
+    public $id_job ;
+    public $password;
+
+    protected $outputContent = "";
+    protected $_filename     = "unknown";
+
     protected $_user_provided_filename ;
 
-    protected $id_job ;
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $job;
+
+    /**
+     * @param int $ttl
+     *
+     * @return Jobs_JobStruct
+     */
+    public function getJob( $ttl = 0 ) {
+        if( empty( $this->job ) ){
+            $this->job = Jobs_JobDao::getById( $this->id_job, $ttl )[0];
+        }
+        return $this->job;
+    }
+
+    /**
+     * @param string $content
+     *
+     * @return $this
+     */
+    public function setOutputContent( $content ) {
+        $this->outputContent = $content;
+
+        return $this;
+    }
+
+    /**
+     * @param string $filename
+     *
+     * @return $this
+     */
+    public function setFilename( $filename ) {
+        $this->_filename = $filename;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilename() {
+        return $this->_filename;
+    }
 
     /**
      * @var Projects_ProjectStruct
      */
-    protected $project ;
+    protected $project;
+
+    /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->project;
+    }
 
     protected function unlockToken( $tokenContent = null ) {
 
@@ -45,7 +100,7 @@ abstract class downloadController extends controller {
             }
 
             if ( empty($this->_filename ) ) {
-                $this->_filename = $this->_getDefaultFileName( $this->project );
+                $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
             $isGDriveProject = \Projects_ProjectDao::isGDriveProject($this->project->id);
@@ -63,7 +118,7 @@ abstract class downloadController extends controller {
                 header("Content-Disposition: attachment; filename=\"$this->_filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header("Expires: 0");
                 header("Connection: close");
-                echo $this->content;
+                echo $this->outputContent;
                 exit;
             }
         } catch (Exception $e) {
@@ -78,9 +133,12 @@ abstract class downloadController extends controller {
     /**
      * If more than one file constitutes the project, then the filename is the project name.
      * If the project is made of just one file, then the filename for download is the file name itself.
+     *
      * @param $project Projects_ProjectStruct
+     *
+     * @return string
      */
-    protected function _getDefaultFileName( Projects_ProjectStruct $project ) {
+    public function getDefaultFileName( Projects_ProjectStruct $project ) {
             $files = Files_FileDao::getByProjectId( $project->id );
 
             if ( count(  $files ) > 1 ) {
@@ -143,7 +201,7 @@ abstract class downloadController extends controller {
         return $zip_content;
     }
 
-    protected static function sanitizeFileExtension( $filename ) {
+    public static function sanitizeFileExtension( $filename ) {
 
         $pathinfo = FilesStorage::pathinfo_fix( $filename );
 

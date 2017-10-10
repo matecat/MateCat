@@ -19,11 +19,6 @@ class downloadAnalysisReportController extends downloadController {
     /**
      * @var string
      */
-    protected $password;
-
-    /**
-     * @var string
-     */
     protected $download_type;  // switch flag, for now not important
 
     public function __construct() {
@@ -70,8 +65,8 @@ class downloadAnalysisReportController extends downloadController {
         $analysisStatus = new Analysis_XTRFStatus( $_project_data );
         $outputContent = $analysisStatus->fetchData()->getResult();
 
-        $this->content = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
-        $this->_filename = $_project_data[0][ 'pname' ] . ".zip";
+        $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
+        $this->_filename     = $_project_data[0][ 'pname' ] . ".zip";
 
         /**
          * Retrieve user information

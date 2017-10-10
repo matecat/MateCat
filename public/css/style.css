@@ -2622,11 +2622,17 @@ section.readonly {
 
 section.ice-locked .text {
     cursor: no-drop !important;
+    background-color: #ececec !important;
+}
+
+body.editing section:not(.editor).ice-locked .text {
+    background: #c1c2c2 !important
 }
 
 section.ice-unlocked .next-unapproved {
     display: none;
 }
+
 
 /*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
     /*background-color: rgba(99, 157, 94, 0.1) !important;*/

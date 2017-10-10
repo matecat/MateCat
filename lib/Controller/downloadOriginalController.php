@@ -7,9 +7,6 @@ set_time_limit( 180 );
 
 class downloadOriginalController extends downloadController {
 
-    protected $id_job;
-    private $password;
-    private $fname;
     private $download_type;
     private $id_file;
     private $id_project;
@@ -92,22 +89,22 @@ class downloadOriginalController extends downloadController {
 
             if ( count( $output_content ) > 1 ) {
 
-                $this->_filename = $this->_getDefaultFileName( $this->project );
+                $this->_filename = $this->getDefaultFileName( $this->project );
                 $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
 
                 if ( $pathInfo[ 'extension' ] != 'zip' ) {
                     $this->_filename = $pathInfo[ 'basename' ] . ".zip";
                 }
 
-                $this->content = self::composeZip( $output_content,null,true ); //add zip archive content here;
+                $this->outputContent = self::composeZip( $output_content,null,true ); //add zip archive content here;
 
             } elseif ( count( $output_content ) == 1 ) {
-                $this->setContent( $output_content );
+                $this->setOutputContent( $output_content );
             }
 
         } else {
 
-            $this->setContent( $output_content );
+            $this->setOutputContent( $output_content );
 
         }
 
@@ -131,11 +128,13 @@ class downloadOriginalController extends downloadController {
      * There is a foreach, but this should be always one element
      *
      * @param $output_content ZipContentObject[]
+     *
+     * @return $this|void
      */
-    private function setContent( $output_content ) {
+    public function setOutputContent( $output_content ) {
         foreach ( $output_content as $oc ) {
-            $this->_filename = $oc->output_filename;
-            $this->content   = $oc->getContent();
+            $this->_filename     = $oc->output_filename;
+            $this->outputContent = $oc->getContent();
         }
     }
 
