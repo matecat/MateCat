@@ -72,19 +72,14 @@ class downloadFileController extends downloadController {
 
     public function doAction() {
 
-        //get job language and data
-        //Fixed Bug: need a specific job, because we need The target Language
-        //Removed from within the foreach cycle, the job is always the same....
-        $jobData = $this->jobInfo = getJobData( $this->id_job, $this->password );
-
-        $pCheck = new AjaxPasswordCheck();
+        //get Job Info, we need only a row of jobs ( split )
+        $jobData = $this->jobInfo = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
         //check for Password correctness
-        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
+        if ( empty( $jobData ) ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
-
             return null;
         }
 
@@ -285,8 +280,11 @@ class downloadFileController extends downloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
+            $this->sessionStart();
+            $this->setUserCredentials();
             $OTdownloadDecorator = new DownloadOmegaTDecorator( $this );
             $OTdownloadDecorator->decorate();
+            $this->disableSessions();
 
         } else {
 

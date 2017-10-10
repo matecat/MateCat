@@ -37,7 +37,13 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         /**
          * @var $tmFile SplTempFileObject
          */
-        $tmFile = $tmsService->exportJobAsTMX( $this->controller->id_job, $this->controller->password, $this->controller->getJob()->source, $this->controller->getJob()->target );
+        $tmFile = $tmsService->exportJobAsTMX(
+                $this->controller->id_job,
+                $this->controller->password,
+                $this->controller->getJob()->source,
+                $this->controller->getJob()->target,
+                $this->controller->getLoggedUser()->uid
+        );
 
         $tmsService->setOutputType( 'mt' );
 
