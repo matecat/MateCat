@@ -496,7 +496,7 @@ class Utils {
 		$key        = $match[ 'memory_key' ];
 
 		//suggestion is coming from a public TM
-		if ( $sug_source == 'Matecat' ) {
+		if ( strtolower( $sug_source ) == 'matecat' ) {
 
 			$description = "Public TM";
 
