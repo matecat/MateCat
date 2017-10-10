@@ -112,7 +112,7 @@ class Editarea extends React.Component {
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillMount() {
-        Speech2Text.enabled() && editAreaClasses.push( 'micActive' ) ;
+        Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
     }
     render() {
         let lang = '';
