@@ -2,7 +2,7 @@
 
     var segment ;
 
-    var scrollSelector = 'html,body'; 
+    UI.scrollSelector = 'html,body';
 
     var tryToRenderAgain = function( segment, highlight ) {
         UI.unmountSegments();
@@ -118,7 +118,7 @@
      * @returns Deferred
      */
     var animateScroll = function( segment, speed ) {
-        var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
+        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
         var pos ;
         var prev = segment.prev('section') ;
 
@@ -142,7 +142,7 @@
     };
 
     $.extend(UI, {
-        scrollSegment : scrollSegment,
+        scrollSegment : scrollSegment
     });
 
 })(window, $, UI, undefined);
