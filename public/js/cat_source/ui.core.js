@@ -459,8 +459,7 @@ UI = {
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
-        var thereAreUntranslated = $('section.status-new, section.status-draft').size() > 0;
-        var sameButton = (nextSegment.hasClass('status-new') || nextSegment.hasClass('status-draft')) || !thereAreUntranslated;
+        var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";
             currentButton = '<li><a id="segment-' + this.currentSegmentId +
