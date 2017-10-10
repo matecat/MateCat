@@ -68,9 +68,21 @@ class ProjectMapResolverModel {
         ) ;
     }
 
+    /**
+     * This method returns the parents to use when creating new projects.
+     *
+     * When type is `translate`, always use the root project (master or vendor root),
+     * otherwise use the latest translation proejcts.
+     *
+     * @return array
+     */
     public function getParents() {
-        $projects = $this->mappedProjectsDao
-                ->getByType( $this->chunk, $this->getInverseType() ) ;
+        $projects = [];
+
+        if ( !$this->isTranslate() ) {
+            $projects = $this->mappedProjectsDao
+                    ->getByType( $this->chunk, $this->getInverseType() ) ;
+        }
 
         if ( empty( $projects ) ) {
             $projects = [

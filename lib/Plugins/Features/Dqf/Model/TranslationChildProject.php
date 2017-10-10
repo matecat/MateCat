@@ -139,7 +139,8 @@ class TranslationChildProject extends AbstractChildProject {
     }
 
     protected function translationIdFromDqf( $id ) {
-        list( $scope, $dqfMapId, $segmentId ) = explode('-', $id);
+        $cleanId = Functions::descope( $id );
+        list( $dqfMapId, $segmentId ) = explode('-', $cleanId );
         return $segmentId ;
     }
 

@@ -646,5 +646,6 @@ section:not(.editor).highlighted2 .targetarea {
     color: #4d4d4f;
 }
 
-
-
+section.ice-locked .translation-issues-button {
+    display: none;
+}
