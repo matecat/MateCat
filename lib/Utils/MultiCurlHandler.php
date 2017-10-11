@@ -144,7 +144,7 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
             //TIMING
             $timing = array(
@@ -175,6 +175,11 @@ class MultiCurlHandler {
 
             if ( $this->verbose ) {
                 Log::doLog("$tokenHash options: " . var_export( $this->curl_options_requests[ $tokenHash ], true ) ) ;
+
+                if ( $this->hasError( $tokenHash ) ) {
+                    Log::doLog("$tokenHash error: " . var_export( $this->getError($tokenHash), true ) ) ;
+                    Log::doLog("$tokenHash body: "  . var_export( $this->getSingleContent($tokenHash), true ) ) ;
+                }
             }
         }
     }
