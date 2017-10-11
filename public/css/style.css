@@ -22,10 +22,8 @@ header {
     z-index: 999999999;
     border-bottom: 1px solid #333;
     padding: 0;
-    margin-top: -34px;
     transition: margin-top 200ms ease-out;
     -webkit-transition: margin-top 200ms ease-out;
-    height: 81px;
 }
 
 body.login header {
@@ -4266,52 +4264,6 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty {
     height: 100%;
     z-index: 99999999999999;
     opacity: 0.6;
-}
-
-#messageBar {
-    display: block;
-    height: auto;
-    text-align: left;
-    min-height: 34px;
-    background: #FFFA8B;
-    /*	-webkit-transition: all 200ms ease-in;
-	padding: 4px 10px;
-	transition: all 200ms ease-in;*/
-}
-
-#messageBar .msg {
-    display: block;
-    /*position: absolute;*/
-    position: relative;
-    /*margin: 2px auto 0 auto;*/
-    margin: 0px auto 0 auto;
-
-    padding-top: 5px;
-    padding-bottom: 2px;
-
-    width: 100%;
-    z-index: 999999;
-    text-align: center;
-    /*  margin: 7px 0;*/
-}
-
-#messageBar .progress {
-    width: 0%;
-    background: #F9D164;
-    height: 30px;
-    position: absolute;
-    z-index: 9;
-    transition: width 0.4s ease-in-out;
-}
-
-#messageBar .close {
-    float: right;
-    margin: 6px 6px 0 0;
-    z-index: 9999999;
-}
-
-#messageBar.fixed .close {
-    display: none;
 }
 
 #settingsSwitcher {

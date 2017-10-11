@@ -154,7 +154,6 @@ $.extend(UI, {
 
 		this.setShortcuts();
 		this.createJobMenu();
-		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
 		this.initAdvanceOptions();
