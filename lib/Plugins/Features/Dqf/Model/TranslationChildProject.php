@@ -4,6 +4,7 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use Exception;
 use Features\Dqf\Model\CachedAttributes\SegmentOrigin;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\TranslationBatchService;
@@ -21,9 +22,28 @@ class TranslationChildProject extends AbstractChildProject {
      */
     protected $originMap ;
 
+    /**
+     * @var projectType
+     */
+    protected $projectType ;
+
+    /**
+     * TranslationChildProject constructor.
+     *
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @throws Exception
+     */
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         parent::__construct( $chunk, 'translate' );
         $this->originMap = new SegmentOrigin() ;
+
+        $this->projectType = $this->chunk->getProject()->getMetadataValue('project_type') ;
+
+        if ( !in_array($this->projectType, ['MT', 'HT'] ) ) {
+            throw new Exception('project_type is not valid ' . $this->projectType ) ;
+        }
     }
 
     protected function _submitData() {
@@ -115,7 +135,7 @@ class TranslationChildProject extends AbstractChildProject {
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
-                            "matchRate"         => $translation->suggestion_match
+                            // "matchRate"         => $translation->suggestion_match
                     ]) )->toArray() ;
                 }
 
@@ -143,12 +163,10 @@ class TranslationChildProject extends AbstractChildProject {
         $this->_saveResults( $results ) ;
     }
 
-
     protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
-        $object = $this->originMap->getByName( $translation->segment_origin );
+        $object = $this->originMap->getByName( $this->projectType );
         return $object['id'] ;
     }
-
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
         return Functions::scopeId( $dqfChildProject->id . "-" . $translation->id_segment ) ;
@@ -159,7 +177,6 @@ class TranslationChildProject extends AbstractChildProject {
         list( $dqfMapId, $segmentId ) = explode('-', $cleanId );
         return $segmentId ;
     }
-
 
     protected function _saveResults( $results ) {
         $results = array_map( function( $item ) {
@@ -176,7 +193,6 @@ class TranslationChildProject extends AbstractChildProject {
         foreach( $results as $batch ) {
             $dao->insertBulkMapForTranslationId( $batch ) ;
         }
-
     }
 
     protected function getLimitDate() {
