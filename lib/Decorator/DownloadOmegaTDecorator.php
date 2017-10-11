@@ -16,11 +16,8 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
     protected $controller;
 
     public function decorate(){
-        $output_content =  $this->setUp();
-        $this->createOmegaTZip( $output_content );
-    }
 
-    public function setUp(){
+        $output_content = [];
 
         //set the file Name
         $pathinfo        = FilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
@@ -76,7 +73,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
     }
 
-    protected function createOmegaTZip( $output_content ) {
+    public function createOmegaTZip( $output_content ) {
 
         $file = tempnam( "/tmp", "zipmatecat" );
 
