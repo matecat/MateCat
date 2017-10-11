@@ -84,15 +84,17 @@ class Mmt extends BaseFeature {
 
         $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
-        /**
-         * @var $newTestCreatedMT Engines_MMT
-         */
-        $mt_result = $newTestCreatedMT->checkAccount();
+        try {
 
-        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+            /**
+             * @var $newTestCreatedMT Engines_MMT
+             */
+            $me_result = $newTestCreatedMT->checkAccount();
+            Log::doLog( $me_result );
+
+        } catch ( Exception $e ) {
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-            Log::doLog( $mt_result );
-            throw new Exception( $mt_result[ 'error' ][ 'message' ], $mt_result[ 'error' ][ 'code' ] );
+            throw $e;
         }
 
         $UserMetadataDao = new MetadataDao();
