@@ -4380,6 +4380,17 @@ text-align: left;
     content: url(../img/logo-drive-16-gray.png);
 }
 
+.icon-preview-bottom-window:before {
+    content: "\ea8b";
+}
+.icon-preview-new-window:before {
+    content: "\ea8c";
+}
+
+.icon-no-preview:before {
+    content: "\ea8d";
+}
+
 
 
 
