@@ -283,7 +283,8 @@ class downloadFileController extends downloadController {
             $this->sessionStart();
             $this->setUserCredentials();
             $OTdownloadDecorator = new DownloadOmegaTDecorator( $this );
-            $OTdownloadDecorator->decorate();
+            $output_content = array_merge( $output_content, $OTdownloadDecorator->decorate() );
+            $OTdownloadDecorator->createOmegaTZip( $output_content );
             $this->disableSessions();
 
         } else {
