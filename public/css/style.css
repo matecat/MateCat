@@ -327,18 +327,6 @@ body.searchActive #filterSwitch {
     z-index: 1;
 }
 
-.blacked {
-    background: #000;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    opacity: 0.5;
-    display: none;
-    z-index: 1000;
-}
-
 body.editing .grayed, body.virtualEditing .grayed {
     display: block;
 }
@@ -1606,11 +1594,6 @@ body .footer.showMatches .sub-editor.open {
     font-size: 0.8em;
     background: #09beec;
     -webkit-box-shadow: inset 0px 2px 2px #666;
-}
-
-.addtmx-tr .open-popup-tmx {
-    margin-left: 5px;
-    cursor: pointer;
 }
 
 .sub-editor.concordances .results {
@@ -3333,13 +3316,6 @@ body[data-offline-mode="light-off"] .msg span,
     display: inline-block;
 }
 
-/* Always load this rule even if it is not used, it loads images for the offline mode */
-.offline_stuffs {
-    display: none;
-    visibility: hidden;
-    background-image: url(../img/offline-bg.png) !important;
-}
-
 section.editor.status-rejected .status {
     background-color: #dc2e34 !important;
 }
@@ -4074,11 +4050,6 @@ li.tag-mismatch {
 
 section.mismatch li.tag-mismatch {
     display: block;
-}
-
-#dialog
-{
-	display: none;
 }
 
 /*RTL language*/
