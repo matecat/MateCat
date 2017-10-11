@@ -3747,6 +3747,10 @@ left: 9999px;
     display: block;
 }
 
+.segment-options-container {
+    display: none;
+}
+
 
 .splitpoint:before {
     content: "\f03d";

@@ -145,9 +145,9 @@ class SegmentTarget extends React.Component {
                                         <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}/>
                                         {tagModeButton}
                                         <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
-                                        <ul className="editToolbar preview-screen">
-                                            <li classname="open-screenshot-button">
-                                                <i className="icon icon-picture"></i>
+                                        <ul className="segment-options-container">
+                                            <li className="open-screenshot-button">
+                                                <i className="icon icon-picture"/>
                                             </li>
                                         </ul>
 
