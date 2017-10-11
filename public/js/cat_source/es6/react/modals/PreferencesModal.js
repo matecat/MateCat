@@ -15,6 +15,7 @@ class PreferencesModal extends React.Component {
             couponError: '',
             validCoupon : false,
             openCoupon: false,
+            dqfValid : !!this.props.metadata.dqf_username,
             dqfCredentials : {
                 dqfUsername : this.props.metadata.dqf_username,
                 dqfPassword : this.props.metadata.dqf_password
