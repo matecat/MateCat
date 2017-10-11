@@ -34,17 +34,15 @@ UI = {
             }
             var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
-            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
             var searchBoxIsOpen = UI.body.hasClass('filterOpen');
             searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() + 1 : 0;
             if (LXQ.enabled()) {
                 var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible');
                 var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 8 : 0;
-                jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
             }
             else {
-                jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (searchBoxHeight + 43 - menuHeight) + "px");
             }
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
@@ -749,8 +747,7 @@ UI = {
         }
     },
     fixHeaderHeightChange: function() {
-        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) +
-            ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0);
         $('#outer').css('margin-top', headerHeight + 'px');
     },
 
@@ -2566,7 +2563,7 @@ UI = {
         UI.body = $('body');
         UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
-
+        UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);

@@ -238,43 +238,13 @@ $.extend(UI, {
 				UI.enableTagMark();
 			}
 			UI.setTagLockCustomizeCookie(false);
-		}).on('click', '#settingsSwitcher', function(e) {
-			e.preventDefault();
-			UI.unbindShortcuts();
-			$('.popup-settings').show();
-
-        // start addtmx
-        }).on('click', '.open-popup-addtm-tr', function(e) {
+		}).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             UI.openLanguageResourcesPanel();
-        }).on('click', '.popup-settings #settings-restore', function(e) {
-			e.preventDefault();
-			APP.closePopup();
-		}).on('click', '.popup-settings #settings-save', function(e) {
-			e.preventDefault();
-			APP.closePopup();
         }).on('click', '.modal .x-popup', function() {
 			if($('body').hasClass('shortcutsDisabled')) {
 				UI.bindShortcuts();
 			}
-		}).on('click', '.popup-settings .submenu li', function(e) {
-			e.preventDefault();
-			$('.popup-settings .submenu li.active').removeClass('active');
-			$(this).addClass('active');
-			$('.popup-settings .tab').hide();
-			$('#' + $(this).attr('data-tab')).show();
-		}).on('click', '.popup-settings .submenu li a', function(e) {
-			e.preventDefault();
-		}).on('click', '#settings-shortcuts .list .combination .keystroke', function() {
-			$('#settings-shortcuts .list .combination .msg').remove();
-			$('#settings-shortcuts .list .combination .keystroke.changing').removeClass('changing');
-			$(this).toggleClass('changing').after('<span class="msg">New: </span>');
-			$('#settings-shortcuts').addClass('modifying');
-		}).on('click', '#settings-shortcuts #default-shortcuts', function(e) {
-			e.preventDefault();
-			$('#settings-shortcuts .list').remove();
-			UI.setShortcuts();
-			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());

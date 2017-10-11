@@ -121,26 +121,6 @@ APP = {
             checkbox_label: options['checkbox-label']
         } );
     },
-    initMessageBar: function () {
-        if ( !$( 'header #messageBar' ).length ) {
-            console.log( 'no messageBar found' );
-            $( 'header' ).prepend( '<div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>' );
-        }
-        $( "body" ).on( 'click', '#messageBar .close', function ( e ) {
-            e.preventDefault();
-            $( 'body' ).removeClass( 'incomingMsg' );
-            $( '#messageBar' ).html( '<span class="msg"></span><a href="#" class="close"></a>' );
-        } );
-    },
-    showMessage: function ( options ) {
-        $( '#messageBar .msg' ).html( options.msg );
-        if ( typeof options.fixed != 'undefined' ) {
-            $( '#messageBar' ).addClass( 'fixed' );
-        } else {
-            $( '#messageBar' ).removeClass( 'fixed' );
-        }
-        $( 'body' ).addClass( 'incomingMsg' );
-    },
     doRequest: function ( req, log ) {
 
         var logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;

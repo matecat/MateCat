@@ -52,10 +52,6 @@ $.extend(UI, {
             };
             UI.offlineNotification = APP.addNotification(notification);
 
-            setTimeout( function () {
-                $( '#messageBar .close' ).click();
-            }, 10000 );
-
             clearInterval( UI.currentConnectionCountdown );
             clearInterval( UI.checkingConnection );
             UI.currentConnectionCountdown = null;

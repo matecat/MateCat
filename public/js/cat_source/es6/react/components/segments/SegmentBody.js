@@ -95,6 +95,7 @@ class SegmentBody extends React.Component {
         } else {
             status_change_title = 'Change segment status' ;
         }
+        let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.copySource.keystrokes.mac : UI.shortcuts.copySource.keystrokes.standard;
         return (
             <div className="text">
                 <div className="wrap">
@@ -107,7 +108,7 @@ class SegmentBody extends React.Component {
                         />
                         <div className="copy" title="Copy source to target">
                             <a href="#"/>
-                            <p>ALT+CTRL+I</p>
+                            <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>
                         <SegmentTarget
                             segment={this.props.segment}
