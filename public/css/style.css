@@ -1362,8 +1362,7 @@ body.cattool:not(.editing) article {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
-    padding: 5px 0 0px 0;
-    margin-bottom: 9px;
+    padding: 5px 0 9px 0;
     color: #000
 }
 

@@ -16,7 +16,7 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected $className;
     protected $_config = array();
-    protected $result;
+    protected $result = [];
     protected $error = array();
 
     protected $curl_additional_params = array();

@@ -23,31 +23,31 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "http://api.mymemory.translated.net";
+    public $base_url = "http://MMT";
 
     /**
      * @var string
      */
-    public $translate_relative_url = "mmt/get";
+    public $translate_relative_url = "translate";
 
     /**
      * @var string
      */
-    public $contribute_relative_url = "mmt/set";
+    public $contribute_relative_url = "memories/content";
 
     /**
      * @var string
      */
-    public $update_relative_url = "mmt/update";
+    public $update_relative_url = "memories/content";
 
     /**
      * @var array
      */
     public $others = [
-            'tmx_import_relative_url' => "mmt/tmx/import",
-            "api_key_check_auth_url" => "mmt/me",
-            "user_update_activate" => "mmt/keys/update",
-            "context_get" => "mmt/context/get",
+            "tmx_import_relative_url" => "memories/content",
+            "api_key_check_auth_url" => "users/me",
+            "user_update_activate" => "memories/connect",
+            "context_get" => "context-vector",
     ];
 
     /**
@@ -60,8 +60,7 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
      * @var array
      */
     public $extra_parameters = [
-            'MyMemory-License' => "",
-            'User_id'          => "", //<UNIQUE_COMPUTER_HASH>
+            'MMT-License' => "",
     ];
 
     /**

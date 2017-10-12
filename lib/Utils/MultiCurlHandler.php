@@ -141,10 +141,11 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]                 = curl_getinfo( $curl_resource, CURLINFO_HEADER_SIZE );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_out' ]                  = curl_getinfo( $curl_resource, CURLINFO_HEADER_OUT );
             $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                            = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
+            $this->multi_curl_info[ $tokenHash ][ 'primary_ip' ]                           = curl_getinfo( $curl_resource, CURLINFO_PRIMARY_IP );
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
             //TIMING
             $timing = array(
@@ -175,6 +176,11 @@ class MultiCurlHandler {
 
             if ( $this->verbose ) {
                 Log::doLog("$tokenHash options: " . var_export( $this->curl_options_requests[ $tokenHash ], true ) ) ;
+
+                if ( $this->hasError( $tokenHash ) ) {
+                    Log::doLog("$tokenHash error: " . var_export( $this->getError($tokenHash), true ) ) ;
+                    Log::doLog("$tokenHash body: "  . var_export( $this->getSingleContent($tokenHash), true ) ) ;
+                }
             }
         }
     }
