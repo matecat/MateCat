@@ -77,22 +77,21 @@ class DQFModal extends React.Component {
     clearDQFCredentials() {
         let self = this;
         let dqfCheck = $('.dqf-box #dqf_switch');
-        return $.post('/api/app/user/metadata', { metadata : {
-            dqf_clear : 1,
-        }
+
+        return $.ajax({
+            type: 'DELETE',
+            url: '/api/app/dqf/user/metadata',
         }).done( function( data ) {
-            if (data) {
-                APP.USER.STORE.metadata = data;
-                dqfCheck.trigger('dqfDisable');
-                if (self.saveButton) {
-                    self.saveButton.classList.remove('disabled');
-                }
-                self.setState({
-                    dqfValid: false,
-                    dqfCredentials : {},
-                    dqfOptions: {}
-                });
+            APP.USER.STORE.metadata = data;
+            dqfCheck.trigger('dqfDisable');
+            if (self.saveButton) {
+                self.saveButton.classList.remove('disabled');
             }
+            self.setState({
+                dqfValid: false,
+                dqfCredentials : {},
+                dqfOptions: {}
+            });
         });
     }
 

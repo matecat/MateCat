@@ -53,11 +53,12 @@ route( '/api/app/teams/members/invite/[:jwt]',                                  
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
 
 $klein->with('/api/app/dqf', function(\Klein\Klein $klein) {
-    route('/login/check',                               'GET',  'Features\Dqf\Controller\API\LoginCheckController', 'check');
-    route('/login',                                     'GET',  'Features\Dqf\Controller\API\LoginController', 'login');
-    route('/jobs/[:id_job]/[:password]/assign',         'POST', 'Features\Dqf\Controller\API\GenericController', 'assignProject' );
+    route('/login/check',                                     'GET',  'Features\Dqf\Controller\API\LoginCheckController', 'check');
+    route('/login',                                           'GET',  'Features\Dqf\Controller\API\LoginController', 'login');
+    route('/jobs/[:id_job]/[:password]/assign',               'POST', 'Features\Dqf\Controller\API\GenericController', 'assignProject' );
     route('/jobs/[:id_job]/[:password]/[:page]/assignment/revoke', 'DELETE', 'Features\Dqf\Controller\API\GenericController', 'revokeAssignment' );
-    route('/projects/[:id_project]/[:password]/assignments', 'GET', 'Features\Dqf\Controller\API\AssignmentsController', 'listAssignments' );
+    route('/projects/[:id_project]/[:password]/assignments',  'GET', 'Features\Dqf\Controller\API\AssignmentsController', 'listAssignments' );
+    route('/user/metadata',                                   'DELETE', 'Features\Dqf\Controller\API\GenericController', 'clearCredentials' );
 });
 
 
