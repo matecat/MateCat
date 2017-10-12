@@ -69,7 +69,7 @@
     var doDirectScroll = function( segment, highlight, quick ) {
         var pointSpeed = (quick)? 0 : 500;
 
-        var scrollPromise = animateScroll( segment, pointSpeed ) ;
+        var scrollPromise = UI.animateScroll( segment, pointSpeed ) ;
         scrollPromise.done( function() {
             UI.goingToNext = false;
         });
@@ -142,7 +142,8 @@
     };
 
     $.extend(UI, {
-        scrollSegment : scrollSegment
+        scrollSegment : scrollSegment,
+        animateScroll: animateScroll
     });
 
 })(window, $, UI, undefined);
