@@ -509,11 +509,7 @@ UI = {
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
 
-
-
         UI.segmentButtons = null;
-
-
 
 	},
 

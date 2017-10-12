@@ -15,6 +15,20 @@
 
     var original_isReadonlySegment         = UI.isReadonlySegment ;
     var original_messageForClickOnReadonly = UI.messageForClickOnReadonly ;
+    var original_readonlyClickDisplay      = UI.readonlyClickDisplay ;
+
+    function readonlyClickDisplay() {
+        APP.confirm({
+            // msg: UI.messageForClickOnReadonly()
+            msg      : UI.messageForClickOnReadonly(),
+            callback : 'dqfConfirmSignin',
+            okTxt    : 'Ok, sign me in'
+        });
+    }
+
+    function dqfConfirmSignin() {
+        $('#modal').trigger('openlogin');
+    }
 
     function showAssignmentModal() {
         APP.confirm({
@@ -58,7 +72,7 @@
     var getSegmentClickMessage = function( section ) {
         switch( config.dqf_user_status ) {
             case STATUS_USER_ANONYMOUS :
-                return 'You must be signed to edit this project.';
+                return 'You must be signed in to edit this project.';
             case STATUS_USER_NOT_MATCHING :
                 return 'This DQF project is already assigned to another user.';
             case STATUS_USER_INVALID_CREDENTIALS :
@@ -96,7 +110,9 @@
     }
 
     $.extend( UI, {
-        isReadonlySegment         : isReadonlySegment,
+        isReadonlySegment    : isReadonlySegment,
+        readonlyClickDisplay : readonlyClickDisplay,
+        dqfConfirmSignin     : dqfConfirmSignin
     });
 
 })(UI);

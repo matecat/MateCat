@@ -12,7 +12,9 @@ use API\App\AbstractStatefulKleinController;
 use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkDao;
 use Features\Dqf\Model\CatAuthorizationModel;
+use Features\Dqf\Utils\UserMetadata;
 use LQA\ChunkReviewDao;
+use Users\MetadataDao;
 
 class GenericController extends AbstractStatefulKleinController {
 
@@ -20,6 +22,11 @@ class GenericController extends AbstractStatefulKleinController {
     public function assignProject() {
         $aut = $this->getAuthorizationModelByCurrentStatus();
         $aut->assignJobToUser( $this->getUser() );
+        $this->response->code(200) ;
+    }
+
+    public function clearCredentials() {
+        UserMetadata::clearCredentials( $this->getUser() ) ;
         $this->response->code(200) ;
     }
 

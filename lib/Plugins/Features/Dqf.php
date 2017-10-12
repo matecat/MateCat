@@ -72,7 +72,6 @@ class Dqf extends BaseFeature {
     }
 
     public function catControllerDoActionStart( catController $controller ) {
-        $controller->setLoginRequired( true ) ;
     }
 
     public function filterUserMetadataFilters($filters, $metadata) {
