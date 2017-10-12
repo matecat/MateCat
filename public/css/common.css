@@ -1684,12 +1684,13 @@ th.owner,td.owner {
 
 
 .mgmt-table-mt td {
-    padding: 10px 15px 10px 10px!important;
+    padding: 10px !important;
 }
 
 .mgmt-mt .action {
-		/*width:22%!important;*/
-		width: 155px!important;
+    /*width:22%!important;*/
+    width: 95px!important;
+    text-align: center;
 }
 
 
