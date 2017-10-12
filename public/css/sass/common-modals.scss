@@ -213,6 +213,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         margin-top: 10px;
         input {
             max-width: 100%;
+            color: #999 !important;
+            cursor: not-allowed;
+            background: #f4f4f4;
         }
         .dqf-message {
             float: right;
