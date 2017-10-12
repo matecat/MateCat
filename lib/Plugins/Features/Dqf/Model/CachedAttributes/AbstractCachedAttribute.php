@@ -53,7 +53,7 @@ abstract class AbstractCachedAttribute {
             throw new Exception('object not found by name ' . $name );
         }
 
-        return $result[0];
+        return current( $result );
     }
 
 

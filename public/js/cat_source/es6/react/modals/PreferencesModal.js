@@ -15,6 +15,7 @@ class PreferencesModal extends React.Component {
             couponError: '',
             validCoupon : false,
             openCoupon: false,
+            dqfValid : !!this.props.metadata.dqf_username,
             dqfCredentials : {
                 dqfUsername : this.props.metadata.dqf_username,
                 dqfPassword : this.props.metadata.dqf_password
@@ -205,33 +206,56 @@ class PreferencesModal extends React.Component {
         });
     }
 
-    getDqfHtml() {
-        if (this.state.dqfValid) {
-            return <div className="dqf-container">
-                <h2>DQF Credentials</h2>
-                <div className="user-dqf">
-                    <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
-                    <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
-                    <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}>Clear</div>
+    clearDQFCredentials() {
+        let self = this;
+        return $.post('/api/app/user/metadata', { metadata : {
+            dqf_clear : 1,
+        }
+        }).done( function( data ) {
+            if (data) {
+                APP.USER.STORE.metadata = data;
+                if (self.saveButton) {
+                    self.saveButton.classList.remove('disabled');
+                }
+                self.setState({
+                    dqfValid: false,
+                    dqfCredentials : {},
+                    dqfOptions: {}
+                });
+            }
+        });
+    }
 
-                </div>
-            </div>
-        } else {
-            return <div className="dqf-container">
-                <h2>DQF Credentials</h2>
-                <div className="user-dqf">
-                    <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
-                               placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
-                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                    <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
-                               placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
-                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
-                    <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
-                    <div className="dqf-message">
-                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
+    getDqfHtml() {
+        if (config.dqf_enabled === 1) {
+            if (this.state.dqfValid) {
+                return <div className="dqf-container">
+                    <h2>DQF Credentials</h2>
+                    <div className="user-dqf">
+                        <input type="text" name="dqfUsername"  defaultValue={this.state.dqfCredentials.dqfUsername} disabled /><br/>
+                        <input type="password" name="dqfPassword"  defaultValue={this.state.dqfCredentials.dqfPassword} disabled  style={{marginTop: '15px'}}/><br/>
+                        <div className="ui primary button" style={{marginTop: '15px', marginLeft: '82%'}}
+                             onClick={this.clearDQFCredentials.bind(this)}>Clear</div>
+
                     </div>
                 </div>
-            </div>
+            } else {
+                return <div className="dqf-container">
+                    <h2>DQF Credentials</h2>
+                    <div className="user-dqf">
+                        <TextField showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfUsername")}
+                                   placeholder="Username" name="dqfUsername" errorText={this.errorFor("dqfUsername")} tabindex={1}
+                                   onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                        <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleDQFFieldChanged("dqfPassword")}
+                                   placeholder="Password (minimum 8 characters)" name="dqfPassword" errorText={this.errorFor("dqfPassword")} tabindex={2}
+                                   onKeyPress={(e) => { (e.key === 'Enter' ? this.handleDQFSubmitClicked() : null) }}/>
+                        <div className="ui primary button" onClick={this.handleDQFSubmitClicked.bind(this)}>Sign in</div>
+                        <div className="dqf-message">
+                            <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.dqfError}</span>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     }
 
