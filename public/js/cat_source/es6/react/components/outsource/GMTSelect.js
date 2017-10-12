@@ -31,95 +31,85 @@ export default class GMTSelect extends React.Component {
                 <div className="menu">
                     <div className="item" data-value="-11">
                         <div className="gmt-value">(GMT -11:00 )</div>
-                        <div className="gmt-description"> Midway Islands, American Samoa</div> </div>
+                        <div className="gmt-description"> Midway Islands Time</div> </div>
                     <div className="item" data-value="-10">
                         <div className="gmt-value">(GMT -10:00 )</div>
-                        <div className="gmt-description"> Hawaii, Tahiti, Cook Islands</div> </div>
+                        <div className="gmt-description"> Hawaii Standard Time</div> </div>
                     <div className="item" data-value="-9">
                         <div className="gmt-value">(GMT -9:00 )</div>
-                        <div className="gmt-description"> Alaska</div> </div>
+                        <div className="gmt-description"> Alaska Standard Time</div> </div>
                     <div className="item" data-value="-8">
                         <div className="gmt-value">(GMT -8:00 )</div>
-                        <div className="gmt-description"> Pacific Standard Time (LA, Vancouver)</div> </div>
+                        <div className="gmt-description"> Pacific Standard Time</div> </div>
                     <div className="item" data-value="-7">
                         <div className="gmt-value">(GMT -7:00 )</div>
-                        <div className="gmt-description"> Mountain Standard Time (Denver, SLC)</div> </div>
+                        <div className="gmt-description"> Mountain Standard Time</div> </div>
                     <div className="item" data-value="-6">
                         <div className="gmt-value">(GMT -6:00 )</div>
-                        <div className="gmt-description"> Central Standard Time (Mexico, Chicago)</div> </div>
+                        <div className="gmt-description"> Central Standard Time</div> </div>
                     <div className="item" data-value="-5">
                         <div className="gmt-value">(GMT -5:00 )</div>
-                        <div className="gmt-description"> Eastern Standard Time (NYC, Toronto)</div> </div>
+                        <div className="gmt-description"> Eastern Standard Time</div> </div>
                     <div className="item" data-value="-4">
                         <div className="gmt-value">(GMT -4:00 )</div>
-                        <div className="gmt-description"> Atlantic Standard Time (Santiago)</div> </div>
-                    <div className="item" data-value="-4.5">
-                        <div className="gmt-value">(GMT -4:30 )</div>
-                        <div className="gmt-description"> Venezuela (Caracas)</div> </div>
+                        <div className="gmt-description"> Atlantic Standard Time</div> </div>
                     <div className="item" data-value="-3">
                         <div className="gmt-value">(GMT -3:00 )</div>
-                        <div className="gmt-description"> Brasília, São Paulo, Buenos Aires</div> </div>
+                        <div className="gmt-description"> Brazil Eastern Time, Argentina Standard Time</div> </div>
                     <div className="item" data-value="-2">
                         <div className="gmt-value">(GMT -2:00 )</div>
                         <div className="gmt-description"> South Sandwich Islands</div> </div>
                     <div className="item" data-value="-1">
                         <div className="gmt-value">(GMT -1:00 )</div>
-                        <div className="gmt-description"> Azores, Cape Verde (Praia)</div> </div>
+                        <div className="gmt-description"> Central African Time</div> </div>
                     <div className="item" data-value="0">
                         <div className="gmt-value">(GMT)</div>
-                        <div className="gmt-description"> Western European Time (London, Lisbon)</div> </div>
+                        <div className="gmt-description"> Greenwich Mean Time</div> </div>
                     <div className="item" data-value="1">
                         <div className="gmt-value">(GMT +1:00 )</div>
-                        <div className="gmt-description"> Central European Time (Rome, Paris)</div> </div>
+                        <div className="gmt-description"> European Central Time	</div> </div>
                     <div className="item" data-value="2">
                         <div className="gmt-value">(GMT +2:00 )</div>
-                        <div className="gmt-description"> Eastern European Time, CAT, CEST</div> </div>
+                        <div className="gmt-description"> Eastern European Time</div> </div>
                     <div className="item" data-value="3">
                         <div className="gmt-value">(GMT +3:00 )</div>
-                        <div className="gmt-description"> Arabia Standard Time (Baghdad, Riyadh)</div> </div>
+                        <div className="gmt-description"> Eastern African Time </div> </div>
                     <div className="item" data-value="3.5">
                         <div className="gmt-value">(GMT +3:30 )</div>
-                        <div className="gmt-description"> Iran Standard Time (Tehran)</div> </div>
+                        <div className="gmt-description"> Middle East Time</div> </div>
                     <div className="item" data-value="4">
                         <div className="gmt-value">(GMT +4:00 )</div>
-                        <div className="gmt-description"> Moscow, St. Petersburg, Dubai</div> </div>
-                    <div className="item" data-value="4.5">
-                        <div className="gmt-value">(GMT +4:30 )</div>
-                        <div className="gmt-description"> Afghanistan Time (Kabul)</div> </div>
+                        <div className="gmt-description"> Near East Time</div> </div>
                     <div className="item" data-value="5">
                         <div className="gmt-value">(GMT +5:00 )</div>
-                        <div className="gmt-description"> Karachi, Tashkent, Maldive Islands</div> </div>
+                        <div className="gmt-description"> Pakistan Lahore Time</div> </div>
                     <div className="item" data-value="5.5">
                         <div className="gmt-value">(GMT +5:30 )</div>
-                        <div className="gmt-description"> India Standard Time (Mumbai, Colombo)</div> </div>
+                        <div className="gmt-description"> India Standard Time</div> </div>
                     <div className="item" data-value="6">
                         <div className="gmt-value">(GMT +6:00 )</div>
-                        <div className="gmt-description"> Yekaterinburg, Almaty, Dhaka</div> </div>
+                        <div className="gmt-description"> Bangladesh Standard Time</div> </div>
                     <div className="item" data-value="7">
                         <div className="gmt-value">(GMT +7:00 )</div>
-                        <div className="gmt-description"> Bangkok, Hanoi, Jakarta</div> </div>
+                        <div className="gmt-description"> Vietnam Standard Time</div> </div>
                     <div className="item" data-value="8">
                         <div className="gmt-value">(GMT +8:00 )</div>
-                        <div className="gmt-description"> Beijing, Perth, Singapore, Hong Kong</div> </div>
+                        <div className="gmt-description"> China Taiwan Time</div> </div>
                     <div className="item" data-value="9">
                         <div className="gmt-value">(GMT +9:00 )</div>
-                        <div className="gmt-description"> Tokyo, Seoul</div> </div>
+                        <div className="gmt-description"> Japan Standard Time</div> </div>
                     <div className="item" data-value="9.5">
                         <div className="gmt-value">(GMT +9:30 )</div>
-                        <div className="gmt-description"> ACST (Darwin, Adelaide)</div> </div>
+                        <div className="gmt-description"> Australia Central Time</div> </div>
                     <div className="item" data-value="10">
                         <div className="gmt-value">(GMT +10:00 )</div>
-                        <div className="gmt-description"> AEST (Brisbane, Sydney), Yakutsk</div> </div>
+                        <div className="gmt-description"> Australia Eastern Time</div> </div>
                     <div className="item" data-value="11">
                         <div className="gmt-value">(GMT +11:00 )</div>
-                        <div className="gmt-description"> Vladivostok, Nouméa, Solomon Islands</div> </div>
+                        <div className="gmt-description"> Solomon Standard Time</div> </div>
                     <div className="item" data-value="12">
                         <div className="gmt-value">(GMT +12:00 )</div>
-                        <div className="gmt-description"> Auckland, Fiji, Marshall Islands</div> </div>
-                    <div className="item" data-value="13">
-                        <div className="gmt-value">(GMT +13:00 )</div>
-                        <div className="gmt-description"> Samoa</div>
-                    </div>
+                        <div className="gmt-description"> New Zealand Standard Time</div> </div>
                 </div>
         </div>;
     }
