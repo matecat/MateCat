@@ -71,9 +71,6 @@ class Dqf extends BaseFeature {
         Features\Dqf\Utils\Functions::commonVarsForDecorator($template);
     }
 
-    public function catControllerDoActionStart( catController $controller ) {
-    }
-
     public function filterUserMetadataFilters($filters, $metadata) {
         if ( isset( $metadata['dqf_username'] ) || isset( $metadata['dqf_password'] ) ) {
             $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
