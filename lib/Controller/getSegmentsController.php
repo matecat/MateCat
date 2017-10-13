@@ -230,8 +230,16 @@ class getSegmentsController extends ajaxController {
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
+            if( $this->feature_set->filter( 'prepareAllNotes', false ) ){
+                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
+                foreach ( $this->segment_notes as $k => $noteObj ){
+                    $this->segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
+                }
+                $this->segment_notes = $this->feature_set->filter( 'processExtractedJsonNotes', $this->segment_notes );
+            } else {
+                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+            }
 
-            $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
     }

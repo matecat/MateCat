@@ -84,6 +84,18 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getAllAggregatedBySegmentIdInInterval($start, $stop) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT id_segment, id, note, json FROM segment_notes " .
+                " WHERE id_segment BETWEEN :start AND :stop"
+        );
+        $stmt->execute( array( 'start' => $start, 'stop' => $stop ) );
+
+        return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+    }
+
+
     /**
      * @param     $id_segment_start
      * @param     $id_segment_stop
