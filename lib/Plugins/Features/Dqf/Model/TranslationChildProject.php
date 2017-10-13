@@ -177,7 +177,9 @@ class TranslationChildProject extends AbstractChildProject {
     }
 
     protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
-        $object = $this->originMap->getByName( $this->projectType );
+        $originName = is_null( $this->projectType ) ? 'MT' : $this->projectType ;
+        $object = $this->originMap->getByName( $originName ) ;
+
         return $object['id'] ;
     }
 
