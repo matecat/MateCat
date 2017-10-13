@@ -344,7 +344,6 @@
 
         <div metal:use-macro="tm.html/tm_panel"></div>
 
-        <div class="blacked" ></div>
 
         <ul id="contextMenu">
             <li id="searchConcordance">
@@ -352,44 +351,6 @@
                 <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
             </li>
         </ul>
-
-        <a id="segmentPointer" href="#" title="Go to the active segment"></a>
-        <div id="dialog" class="dialog" title="Basic dialog">
-            <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
-            <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
-        </div>
-
-		<script type="text/javascript">
-		$( ".open-popup-tmx" ).click(function() {
-  $( this ).hide();
-});
-
-</script>
-
-<script>
-$( document ).ready(function() {
-
-
-        // Change the selector if needed
-var $table = $('table.scroll'),
-    $bodyCells = $table.find('tbody tr:first').children(),
-    colWidth;
-
-// Adjust the width of thead cells when window resizes
-$(window).resize(function() {
-    // Get the tbody columns width array
-    colWidth = $bodyCells.map(function() {
-        return $(this).width();
-    }).get();
-
-    // Set the width of thead columns
-    $table.find('thead tr').children().each(function(i, v) {
-        $(v).width(colWidth[i]);
-    });
-}).resize(); // Trigger resize handler
-
-});
-		</script>
 
     <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
