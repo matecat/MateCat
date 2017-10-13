@@ -130,7 +130,9 @@ class TranslationChildProject extends AbstractChildProject {
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
-                            "time"              => $translation->time,
+
+                            "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
+
                             "segmentOriginId"   => $this->mapSegmentOrigin( $translation ),
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
@@ -161,6 +163,17 @@ class TranslationChildProject extends AbstractChildProject {
         $results = $service->process() ;
 
         $this->_saveResults( $results ) ;
+    }
+
+    /**
+     * TODO: use this function to implement a timeout
+     *
+     * @param $time
+     *
+     * @return mixed
+     */
+    protected function transaltionTimeWithTimeout( $time ) {
+        return $time ;
     }
 
     protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
