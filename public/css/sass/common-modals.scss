@@ -151,6 +151,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     min-height: 40px;
     margin-bottom: 25px;
     margin-top: 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .user-name {
