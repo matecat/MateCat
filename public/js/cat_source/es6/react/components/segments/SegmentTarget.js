@@ -80,10 +80,10 @@ class SegmentTarget extends React.Component {
         var textAreaContainer = "";
 
         if (this.props.isReviewImproved) {
-
+            let translation = this.decodeTranslation(this.props.segment, this.state.translation);
             textAreaContainer = <div data-mount="segment_text_area_container">
                                     <div className="textarea-container" onClick={this.onClickEvent.bind(this)}>
-                                        <div className="targetarea issuesHighlightArea errorTaggingArea" dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }/>
+                                        <div className="targetarea issuesHighlightArea errorTaggingArea" dangerouslySetInnerHTML={ this.allowHTML(translation) }/>
                                     </div>
                                 </div>
 
