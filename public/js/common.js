@@ -173,7 +173,9 @@ APP = {
                 '</div>';
 
         _tpl_button = '' +
-                '<a href="javascript:;" class="btn-ok">Ok</a>';
+                '<p class="button-aligned-right">' +
+                    '<a href="javascript:;" class="btn-ok">Ok</a>' +
+                '</p>';
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
@@ -188,9 +190,9 @@ APP = {
 
         var renderOkButton = function ( options ) {
             var filled_tpl = $(_tpl_button);
-            filled_tpl.attr("class","")
-                    .addClass( 'btn-ok' )
-                    .html("Ok");
+            /*filled_tpl.attr("class","")
+                    .addClass( 'button-aligned-right' )
+                    .html('<a href="javascript:;" class="btn-ok">Ok</a>');*/
 
             if ( typeof options[ 'callback'] != 'undefined' ) {
                 filled_tpl.data( 'callback', options['callback'] )
