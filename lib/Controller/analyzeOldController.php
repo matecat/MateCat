@@ -132,6 +132,7 @@ class analyzeOldController extends viewController {
 
         if( $this->project_not_found ){
             parent::makeTemplate( 'project_not_found.html' );
+            $this->template->support_mail    = INIT::$SUPPORT_MAIL;
             return;
         }
 

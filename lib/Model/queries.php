@@ -482,16 +482,16 @@ function getTMForTMXExport( $jid, $jPassword ) {
     $sql = "
         SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
-            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date,
-            st.status, suggestions_array
+            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, jobs.create_date ) as translation_date,
+            st.status, suggestions_array, jobs.tm_keys, id_customer
         FROM segment_translations st
         JOIN segments ON id = id_segment
-        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
-
+        JOIN jobs ON jobs.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
+        JOIN projects ON jobs.id_project = projects.id
             WHERE st.id_job = " . (int)$jid . "
             AND show_in_cattool = 1
             AND suggestion_source is not null
-            -- AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
+            AND ( suggestion_source = 'TM' OR suggestion_source not in ( 'MT', 'MT-' ) )
 ";
 
     try {
