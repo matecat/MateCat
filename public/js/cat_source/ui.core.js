@@ -836,8 +836,6 @@ UI = {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
 
-            SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
-
 			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event
@@ -902,8 +900,6 @@ UI = {
         }
 
 		var where = d.data.where;
-
-        SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
         // Why here?? Investigate
         UI.setGlobalTagProjection();

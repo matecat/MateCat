@@ -9,11 +9,12 @@ var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
 var SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
 var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
+var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
         super(props);
-        var tMLabel;
+        let tMLabel;
         if ( config.mt_enabled ) {
             tMLabel =  'Translation Matches';
         }
@@ -55,6 +56,15 @@ class SegmentFooter extends React.Component {
                 enabled : false,
                 visible : false,
                 open : false,
+                elements : []
+            },
+            messages: {
+                label : 'Messages',
+                code : 'notes',
+                tab_class : 'segment-notes',
+                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                open : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
                 elements : []
             }
         };
@@ -122,6 +132,15 @@ class SegmentFooter extends React.Component {
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}/>;
                 break;
+            case 'notes':
+                return <SegmentTabMessages
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}
+                    notes={this.props.segment.notes}/>;
+                break;
             default:
                 return ''
         }
@@ -166,6 +185,7 @@ class SegmentFooter extends React.Component {
     componentWillMount() {
 
     }
+
     allowHTML(string) {
         return { __html: string };
     }

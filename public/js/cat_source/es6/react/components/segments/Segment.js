@@ -336,7 +336,10 @@ class Segment extends React.Component {
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
                         {timeToEdit}
                     </div>
-                    <SegmentFooter sid={this.props.segment.sid}/>
+                    <SegmentFooter
+                        segment={this.props.segment}
+                        sid={this.props.segment.sid}
+                    />
                 </div>
 
 
