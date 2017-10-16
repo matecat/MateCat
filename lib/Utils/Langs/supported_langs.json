@@ -1873,6 +1873,16 @@
     ,
         {
             "localized":[{
+                "en":"Yoruba"
+            }],
+            "isocode":"yo",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"yo-NG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Zulu"
             }],
             "isocode":"zu",
