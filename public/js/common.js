@@ -193,7 +193,7 @@ APP = {
                 '</div>';
 
         _tpl_button = '' +
-                '<a href="javascript:;" class="btn-ok">Ok</a>';
+            '<a href="javascript:;" class="btn-ok">Ok</a>';
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +

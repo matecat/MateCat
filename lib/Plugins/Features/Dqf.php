@@ -71,9 +71,6 @@ class Dqf extends BaseFeature {
         Features\Dqf\Utils\Functions::commonVarsForDecorator($template);
     }
 
-    public function catControllerDoActionStart( catController $controller ) {
-    }
-
     public function filterUserMetadataFilters($filters, $metadata) {
         if ( isset( $metadata['dqf_username'] ) || isset( $metadata['dqf_password'] ) ) {
             $filters['dqf_username'] = array( 'filter' => FILTER_SANITIZE_STRING ) ;
@@ -274,18 +271,6 @@ class Dqf extends BaseFeature {
      * @param $projectStructure
      */
     public function postJobSplitted( $projectStructure ) {
-
-    }
-
-    public function checkSplitAccess( $jobs ) {
-        $chunk = new Chunks_ChunkStruct( $jobs[0]->toArray() );
-        $mapDao = new Features\Dqf\Model\DqfProjectMapDao();
-
-        $currentTranslations = $mapDao->getByType( $chunk,  Features\Dqf\Model\DqfProjectMapDao::PROJECT_TYPE_TRANSLATE ) ;
-
-        if (!empty( $currentTranslations ) ) {
-            throw new Exception('You cannot split DQF projects at this stage. Translation data has been sent.' );
-        }
 
     }
 

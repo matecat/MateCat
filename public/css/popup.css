@@ -28,7 +28,13 @@
 .modal .popup p {
     font-size: 18px;
     margin-top: 20px;
-    padding: 0 0px;
+    padding: 0 15px;
+    text-align: left;
+
+}
+
+.modal .popup {
+
 }
 
 .popup h1 {
@@ -1918,7 +1924,6 @@ span.title-source {
 
 .popup.popup-confirm.confirm_checkbox {
     text-align: right;
-    padding: 0;
 }
 
 .popup.popup-confirm.confirm_checkbox p{

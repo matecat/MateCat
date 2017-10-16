@@ -22,6 +22,7 @@ abstract class controller {
     protected $userIsLogged = false;
     protected $userMail;
 
+
     /**
      * Controllers Factory
      *

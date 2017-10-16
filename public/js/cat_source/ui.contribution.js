@@ -172,7 +172,6 @@ if ( config.translation_matches_enabled ) {
             this.appendAddTMXButton( segment );
             this.processContributions(d, segment);
             this.segmentQA(segment);
-            $(document).trigger('getContribution:complete', segment);
         },
         processContributions: function(d, segment) {
             if(!d) return true;
