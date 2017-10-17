@@ -252,8 +252,6 @@ class setTranslationController extends ajaxController {
     }
 
     public function doAction() {
-        throw new Exception();
-
         try {
 
             $this->_checkData();
