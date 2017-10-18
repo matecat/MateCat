@@ -3452,20 +3452,6 @@ only screen and (in-resolution: 2dppx) {
 }
 
 }
-
-p.surveynotice{
-	font-size:13px !important; font-weight:bold; text-align:center;color:#c43b1d;
-	margin-top:10px; margin-bottom:20px;margin-left:10px; margin-right:10px;
-	border-color:#f0c36d;background-color:#f9edbe; padding:1px 2px 1px 3px;
-	-moz-border-radius: 7px;-webkit-border-radius: 7px;border-radius: 7px;
-
-}
-
-.survey{ top:5%!important; margin-top:0!important;height:600px;max-height:85%;min-height:85%}
-
-.survey .popup-box{
-	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
-}
 /*
 .tm-error-message, .tm-warning-message {
 background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;

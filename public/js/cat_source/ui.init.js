@@ -44,7 +44,6 @@ $.extend(UI, {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
 		this.checkSegmentsArray = {};
-		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.logEnabled = true;
@@ -74,9 +73,6 @@ $.extend(UI, {
 
         // SET EVENTS
 		this.setEvents();
-		if(this.surveyAlreadyDisplayed()) {
-			this.surveyDisplayed = true;
-		}
 		this.checkQueryParams();
 
         UI.firstLoad = false;

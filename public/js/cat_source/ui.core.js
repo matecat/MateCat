@@ -552,42 +552,6 @@ UI = {
 				'</nav>';
 		this.body.append(menu);
 	},
-	displaySurvey: function(s) {
-        if(this.surveyDisplayed) return;
-        survey = '<div class="modal survey" data-type="view">' +
-                '	<div class="popup-outer"></div>' +
-                '	<div class="popup survey">' +
-                '		<a href="#" class="x-popup"></a>' +
-                '		<h1>Translation Completed - Take a Survey</h1>' +
-                '		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner of this popup.</p>' +
-                '		<div class="popup-box">' +
-                '			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
-                '		</div>' +
-                '	</div>' +
-                '</div>';
-        this.body.append(survey);
-        $('.modal.survey').show();
-	},
-	surveyAlreadyDisplayed: function() {
-		if(typeof $.cookie('surveyedJobs') != 'undefined') {
-			var c = $.cookie('surveyedJobs');
-			surv = c.split('||')[0];
-			if(config.survey === surv) {
-				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
-				var found = false;
-				$.each(jobs, function() {
-					if(this == config.id_job) {
-						found = true;
-					}
-				});
-				return found;
-			} else {
-                return true;
-            }
-		} else {
-			return false;
-		}
-	},
     handleReturn: function(e) {
         if(!this.hiddenTextEnabled) return;
         e.preventDefault();

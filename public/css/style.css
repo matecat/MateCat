@@ -4215,10 +4215,6 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty {
     display: none;
 }
 
-.modal.survey .popup {
-    margin-top: -370px;
-}
-
 .noConnection {
     -webkit-animation: fadein 0.5s; /* Safari and Chrome */
     -moz-animation: fadein 0.5s; /* Firefox */

@@ -281,20 +281,6 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			// UI.lockTags(UI.editarea);
 			UI.segmentQA(UI.currentSegment);
-		}).on('click', '.modal.survey .x-popup', function() {
-			UI.surveyDisplayed = true;
-			if(typeof $.cookie('surveyedJobs') != 'undefined') {
-				var c = $.cookie('surveyedJobs');
-				surv = c.split('||')[0];
-				if(config.survey === surv) {
-					$.cookie('surveyedJobs', c + config.job_id + ',');
-				}
-			} else {
-				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { expires: 20, path: '/' });
-			}
-			$('.modal.survey').remove();
-		}).on('click', '.modal.survey .popup-outer', function() {
-			$('.modal.survey').hide().remove();
 		}).on('keydown', '#settings-shortcuts.modifying .keystroke', function(e) {
 			e.preventDefault();
 			var n = e.which;
@@ -341,8 +327,6 @@ $.extend(UI, {
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('allTranslated', function() {
-			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
 			if ($(e.target).hasClass("editarea")) {
 				return;
