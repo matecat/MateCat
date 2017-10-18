@@ -15,7 +15,7 @@
     z-index:999999999;
 }
 
-.modal .popup p {
+.modal .popup p.text-container-top {
     font-size: 18px;
     margin-top: 20px;
     padding: 0 30px;
@@ -1916,7 +1916,7 @@ span.title-source {
     padding: 0;
 }
 
-.popup.popup-confirm.confirm_checkbox p{
+.popup.popup-confirm.confirm_checkbox p.text-container-top {
     text-align: left;
     padding: 20px;
 }

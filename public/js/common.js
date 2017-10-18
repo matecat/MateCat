@@ -169,13 +169,13 @@ APP = {
                 '<div class="popup">' +
                 ' <a href="javascript:;" class="x-popup remove"></a>' +
                 ' <h1></h1>' +
-                ' <p></p>' +
-                '</div>';
+                ' <p class="text-container-top"></p>' +
+                ' <p class="buttons-popup-container button-aligned-right">' +
+                '</p>' +
+            '</div>';
 
         _tpl_button = '' +
-                '<p class="button-aligned-right">' +
-                    '<a href="javascript:;" class="btn-ok">Ok</a>' +
-                '</p>';
+                    '<a href="javascript:;" class="btn-ok">Ok</a>' ;
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
@@ -190,9 +190,7 @@ APP = {
 
         var renderOkButton = function ( options ) {
             var filled_tpl = $(_tpl_button);
-            /*filled_tpl.attr("class","")
-                    .addClass( 'button-aligned-right' )
-                    .html('<a href="javascript:;" class="btn-ok">Ok</a>');*/
+
 
             if ( typeof options[ 'callback'] != 'undefined' ) {
                 filled_tpl.data( 'callback', options['callback'] )
@@ -302,7 +300,7 @@ APP = {
             }
 
             if ( typeof options['content'] != 'undefined' ) {
-                filled_tpl.find( 'p' ).html( options['content'] );
+                filled_tpl.find( 'p.text-container-top' ).html( options['content'] );
             }
 
             return filled_tpl;
@@ -334,7 +332,7 @@ APP = {
                         data( 'type', options['type'] );
                 switch ( options['type'] ) {
                     case 'alert' :
-                        filled_tpl.find( '.popup' )
+                        filled_tpl.find( '.popup .buttons-popup-container' )
                                 .append( renderOkButton( {
                                             'context' : options['context'],
                                             'callback': options['onConfirm'],
@@ -352,7 +350,7 @@ APP = {
 
                         filled_tpl.find( '.popup' )
                                 .addClass('confirm_checkbox')
-                                .addClass('popup-confirm')
+                                .addClass('popup-confirm').find('.buttons-popup-container')
                                 .append( renderCancelButton( {
                                     'context' : options['context'],
                                     'callback': options['onCancel'],
@@ -398,7 +396,7 @@ APP = {
                         break;
 
                     case 'free':
-                        filled_tpl.find( '.popup' ).append(
+                        filled_tpl.find( '.popup .buttons-popup-container' ).append(
                                 renderButton( {
                                     'callback': this.callback,
                                     'btn-type': this.type,
