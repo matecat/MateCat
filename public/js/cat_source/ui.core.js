@@ -1748,6 +1748,16 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
+    segmentLexiQA: function (_segment) {
+        var segment = _segment;
+        //new API?
+        if (_segment.raw) {
+            segment = _segment.raw
+        }
+        var translation = $('.editarea', segment).text().replace(/\uFEFF/g, '');
+        var id_segment = UI.getSegmentId(segment);
+        LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
+    },
     segmentLexiQA: function(_segment) {
         var segment = _segment;
         //new API?
