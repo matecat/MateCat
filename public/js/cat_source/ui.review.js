@@ -136,66 +136,48 @@ if ( Review.enabled() )
 
 if ( Review.enabled() && Review.type == 'simple' ) {
 
-    SegmentActions.registerTab({
-        code                : 'review',
-        tab_class           : 'review',
-        label               : 'Revise',
-        activation_priority : 60,
-        tab_position        : 50,
-        is_enabled    : function(sid) {
-            return true;
-        },
-        tab_markup          : function(sid) {
-            return this.label ;
-        },
-        content_markup      : function(sid) {
-            return $('#tpl-review-tab').html();
-        },
-        is_hidden    : function(sid) {
-            return false;
-        },
-    });
-
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
             $(this).find('.tab-switcher-review').click();
         }
-    }).on('start', function() {
-
-        // temp
-        config.stat_quality = [
-            {
-                "type":"Typing",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Translation",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Terminology",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Language Quality",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Style",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            }
-        ];
-    }).on('buttonsCreation', 'section', function() {
+    })
+    //     .on('start', function() {
+    //
+    //     // temp
+    //     config.stat_quality = [
+    //         {
+    //             "type":"Typing",
+    //             "allowed":5,
+    //             "found":1,
+    //             "vote":"Excellent"
+    //         },
+    //         {
+    //             "type":"Translation",
+    //             "allowed":5,
+    //             "found":1,
+    //             "vote":"Excellent"
+    //         },
+    //         {
+    //             "type":"Terminology",
+    //             "allowed":5,
+    //             "found":1,
+    //             "vote":"Excellent"
+    //         },
+    //         {
+    //             "type":"Language Quality",
+    //             "allowed":5,
+    //             "found":1,
+    //             "vote":"Excellent"
+    //         },
+    //         {
+    //             "type":"Style",
+    //             "allowed":5,
+    //             "found":1,
+    //             "vote":"Excellent"
+    //         }
+    //     ];
+    // })
+        .on('buttonsCreation', 'section', function() {
         UI.overrideButtonsForRevision();
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();

@@ -128,5 +128,8 @@ $.extend(UI, {
         SegmentActions.registerTab('glossary', true, false);
         SegmentActions.registerTab('alternatives', false, false);
         // SegmentActions.registerTab('messages', false, false);
+        if ( Review.enabled() && Review.type === 'simple' ) {
+            SegmentActions.registerTab('review', true, true);
+        }
 	}
 });
