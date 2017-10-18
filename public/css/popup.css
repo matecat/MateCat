@@ -1911,16 +1911,19 @@ span.title-source {
 }
 
 
-.popup.popup-confirm.confirm_checkbox {
+.popup.popup-confirm.confirm_checkbox,
+.popup.popup-alert {
     text-align: right;
     padding: 0;
 }
 
-.popup.popup-confirm.confirm_checkbox p.text-container-top {
+.popup.popup-confirm.confirm_checkbox p.text-container-top,
+.popup.popup-alert p.text-container-top {
     text-align: left;
     padding: 20px;
 }
 
-.popup.popup-confirm.confirm_checkbox .btn-ok{
+.popup.popup-confirm.confirm_checkbox .btn-ok,
+.popup.popup-alert .btn-ok {
     margin-right: 20px;
 }
