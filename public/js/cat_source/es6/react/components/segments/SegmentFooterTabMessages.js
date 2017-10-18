@@ -20,11 +20,11 @@ class SegmentFooterTabMessages extends React.Component {
                     <span> {item.note} </span>
                 </li>;
                 notesHtml.push(html);
-            } else if (item.json && item.json.length > 0) {
-                item.json.forEach(function (jitem, index) {
+            } else if (item.json && Object.keys(item.json).length > 0) {
+                Object.keys(item.json).forEach(function (key, index) {
                     let html = <li key={"note-json" + index}>
-                        <span className="note-label">Note Json {index + 1}: </span>
-                        <span> {jitem} </span>
+                        <span className="note-label">{key.toUpperCase()}: </span>
+                        <span> {item.json[key]} </span>
                     </li>;
                     notesHtml.push(html);
                 });
