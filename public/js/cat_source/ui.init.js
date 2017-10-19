@@ -31,7 +31,6 @@ $.extend(UI, {
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
-		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
         this.offline = false;
         this.searchEnabled = true;
@@ -69,7 +68,6 @@ $.extend(UI, {
 		this.checkVersion();
         this.initTM();
 		this.initAdvanceOptions();
-        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();

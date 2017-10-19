@@ -107,7 +107,6 @@ $.extend(UI, {
             while ( scrollHeightWithBorders > $this.outerHeight() && $this.height() < maxHeight ) {
                 $this.height( $this.height() + 10 );
             }
-            ;
 
             while ( scrollHeightWithBorders <= $this.outerHeight() && $this.height() > minHeight ) {
                 $this.height( $this.height() - 10 );
@@ -178,8 +177,6 @@ $.extend(UI, {
 			UI.tagSelection = false;
         }).bind('keydown', 'Meta+shift+s', function(e) {
             UI.body.toggleClass('tagmode-default-extended');
-        }).on('click','#cmn-toggle-1',function(e){
-            LXQ.toogleHighlighting();
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
             UI.toggleTagsMode(this);
@@ -281,53 +278,9 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			// UI.lockTags(UI.editarea);
 			UI.segmentQA(UI.currentSegment);
-		}).on('keydown', '#settings-shortcuts.modifying .keystroke', function(e) {
-			e.preventDefault();
-			var n = e.which;
-			var c = $(this).parents('.combination');
-			if(!(c.find('.new').length)) {
-				$(c).append('<span class="new"></span>');
-			}
-			var s = $('.new', c);
-			console.log(n);
-			if((n == '16')||(n == '17')||(n == '18')||(n == '91')) { // is a control key
+		});
 
-				if($('.control', s).length > 1) {
-					console.log('troppi tasti control: ', $('span', s).length);
-					return false;
-				}
-
-				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
-				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
-			} else {
-				console.log(n);
-				symbol = (n == '8')? '9003' :
-						(n == '9')? '8682' :
-						(n == '13')? '8629' :
-						(n == '37')? '8592' :
-						(n == '38')? '8593' :
-						(n == '39')? '8594' :
-						(n == '40')? '8595' : n;
-				console.log('symbol: ', symbol);
-				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
-				console.log(s.html());
-			}
-			if($('span', s).length > 2) {
-				UI.writeNewShortcut(c, s, this);
-			}
-		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
-			console.log('keyup');
-			var c = $(this).parents('.combination');
-			var s = $('.new', c);
-			if(($('.control', s).length)&&($('.char', s).length)) {
-				UI.writeNewShortcut(c, s, this);
-			}
-			$(s).remove();
-		} );
-
-		$(window).on('scroll', function() {
-			UI.browserScrollPositionRestoreCorrection();
-		}).on('mousedown', function(e) {
+		$(window).on('mousedown', function(e) {
 			if ($(e.target).hasClass("editarea")) {
 				return;
 			}
@@ -396,10 +349,6 @@ $.extend(UI, {
 
 		//overlay
 
-		$(".x-stats").click(function() {
-			$(".stats").toggle();
-		});
-
 		$("#outer").on('click', 'a.sid', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -420,13 +369,7 @@ $.extend(UI, {
 				$('html').unbind('click.outOfStatusMenu');
 				UI.removeStatusMenu(statusMenu);
 			});
-		})
-		// 	.on('click', 'section.readonly, section.readonly a.status', function(e) {
-         //    e.preventDefault();
-		// 	var section = $(e.target).closest('section');
-		// 	UI.handleClickOnReadOnly( section );
-		// })
-			.on('mousedown', 'section.readonly, section.readonly a.status', function() {
+		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
@@ -439,22 +382,6 @@ $.extend(UI, {
 			UI.updateGlossary($(this).closest(".graysmall"));
 		});
 
-		$(".joblink").click(function(e) {
-			e.preventDefault();
-			$(".joblist").toggle();
-			return false;
-		});
-
-		$(".statslink").click(function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			$(".stats").toggle();
-		});
-
-		$(".getoriginal").click(function(e) {
-			e.preventDefault();
-			$('#originalDownload').submit();
-		});
 		$("form#fileDownload").bind('submit', function(e) {
 			e.preventDefault();
 		});
@@ -480,14 +407,7 @@ $.extend(UI, {
             if ( !$(e.target).closest('section').length ) close();
         });
 
-		$('html').click(function() {
-			$(".menucolor").hide();
-        // }).on('click', 'section .sid, section .segment-side-buttons', function(e){
-        //     // TODO: investigate the neeed for '.segment-side-buttons'
-        //     if ( ! eventFromReact(e) ) {
-        //         UI.closeSegment(UI.currentSegment, 1);
-        //     }
-        }).on('click', 'section .actions', function(e){
+		$('html').on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
@@ -706,24 +626,13 @@ $.extend(UI, {
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
 			SegmentActions.highlightEditarea($(this).attr('data-goto'));
 		});
-		UI.toSegment = true;
 
-        if(!$('#segment-' + this.startSegmentId).length) {
-            if($('#segment-' + this.startSegmentId + '-1').length) {
-                if ( typeof this.startSegmentId != 'undefined' ) {
-                    this.startSegmentId = this.startSegmentId + '-1';
-                }
-            }
-        }
 
-		if (!this.segmentToScrollAtRender)
-			UI.gotoSegment(this.startSegmentId);
 
 		$(".end-message-box a.close").on('click', function(e) {
 			e.preventDefault();
 			UI.body.removeClass('justdone');
 		});
-		this.checkIfFinishedFirst();
 
 
 		$("section .close").bind('keydown', 'Shift+tab', function(e) {
@@ -895,37 +804,17 @@ $.extend(UI, {
 		$("#match-case, #exact-match").on('change', function() {
 			UI.setFindFunction('find');
 		});
+
+
+        if (!this.segmentToScrollAtRender)
+            UI.gotoSegment(this.startSegmentId);
+        this.checkIfFinishedFirst();
+
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
     }
-	// autoCompleteTagClick: function (elem) {
-	// 	var text = UI.editarea.html();
-	// 	text = text.replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>');
-	// 	UI.editarea.html(text);
-    //
-	// 	UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
-	// 	text = UI.editarea.html();
-	// 	text = text.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1')
-	// 		.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1')
-	// 		.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1')
-	// 		.replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1');
-    //
-	// 	UI.editarea.html(text);
-	// 	saveSelection();
-	// 	if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-	// 		setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-	// 		saveSelection();
-	// 	}
-	// 	var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-	// 	$('.rangySelectionBoundary', UI.editarea).remove();
-	// 	$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
-	// 	$('.tag-autocomplete-endcursor').before(htmlEncode($(elem).text()));
-	// 	restoreSelection();
-	// 	UI.closeTagAutocompletePanel();
-	// 	UI.currentSegmentQA();
-	// }
 
 });
 
