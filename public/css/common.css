@@ -278,66 +278,6 @@ footer #statistics
     color: #000;
 }
 
-.stats ul
-{
-    margin: 0;
-}
-
-.statslink:hover .stats
-{
-    display: block !important;
-}
-
-.stats .first
-{
-    width: 220px;
-    text-align: left;
-}
-
-.stats li
-{
-    border-left: none;
-    text-align: right;
-    border-bottom: 1px solid #666;
-    width: 35px;
-}
-
-.h-stats
-{
-    color: #000;
-    font-weight: bold;
-}
-
-.h-stats a
-{
-    color: #000;
-    font-weight: normal;
-}
-
-.stats .arrow-notification
-{
-    margin: 220px 0 0 432px;
-    background: url(../img/arrow-stats.png) 0 0 no-repeat;
-}
-
-.statslink:hover .stats
-{
-    display: block;
-}
-
-.header-stats
-{
-    background: #efefef;
-    border-bottom: 1px solid #ccc;
-    font-size: 12px;
-    padding: 5px 10px;
-    font-weight: bold;
-}
-
-.x-stats
-{
-    margin-top: -17px;
-}
 
     /*browser supported box */
 
@@ -516,7 +456,7 @@ border-bottom: 3px solid #1B5D7B!important;
 	width: 400px;
 	background: #fff;
 	border: 1px solid #333;
-	z-index: 99999999;
+	z-index: 11;
 	text-align: left;
 	padding: 0;
 	font-size:14px;

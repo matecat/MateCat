@@ -488,55 +488,8 @@ UI = {
 
         UI.segmentButtons = null;
 
-
-
 	},
 
-    /**
-     * createFooter is invoked each time the footer is to be rendered for a
-     * given segment. During the activation of a segment, footer for the next
-     * segment is also rendered, so to be cached and ready when the user moves
-     * to the next segment.
-     *
-     * @param segment DOMElement the <section> tag of the segment
-     * @param forceEmptyContribution boolean default true. To force to reload the footer.
-     */
-	// createFooter: function(segment, forceEmptyContribution) {
-     //    var sid = UI.getSegmentId( segment );
-    //
-	// 	forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
-    //
-     //    /* If the segment just translated is equal or similar (Levenshtein distance) to the
-     //     * current segment force to reload the matches
-     //    **/
-	// 	if ( $('.matches .overflow', segment).text() !== '' ) {
-	// 		if (!forceEmptyContribution) {
-	// 			$('.matches .overflow', segment).empty();
-	// 			return false;
-	// 		}
-	// 	}
-     //    // If the footer is already present skip (prefetched segment)
-	// 	if ( $('.footer ul.submenu', segment).length ) {
-     //        return false;
-     //    }
-    //
-     //    var segmentFooter = new UI.SegmentFooter( segment );
-     //    $('.footer', segment).append( segmentFooter.html() );
-    //
-     //    // If the Messages Tab is present open it by default
-     //    if ($('.footer', segment).find('.open.segment-notes').length) {
-     //        this.forceShowMatchesTab();
-     //    }
-    //
-     //    UI.currentSegment.trigger('afterFooterCreation', segment);
-    //
-     //    // FIXME: arcane. Whatever it does, it should go in the contribution module.
-     //    // Maybe to handle the case the contribution arrives before the create footer???
-	// 	if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-     //        var d = JSON.parse( UI.getFromStorage('contribution-' + config.id_job + '-' + sid ) );
-	// 		UI.processContributions( d, segment );
-	// 	}
-	// },
 
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
@@ -564,61 +517,61 @@ UI = {
         this.unnestMarkers();
     },
 
-    getIconClass: function(ext) {
-		c =		(
-					(ext == 'doc')||
-					(ext == 'dot')||
-					(ext == 'docx')||
-					(ext == 'dotx')||
-					(ext == 'docm')||
-					(ext == 'dotm')||
-					(ext == 'odt')||
-					(ext == 'sxw')
-				)?				'extdoc' :
-				(
-					(ext == 'pot')||
-					(ext == 'pps')||
-					(ext == 'ppt')||
-					(ext == 'potm')||
-					(ext == 'potx')||
-					(ext == 'ppsm')||
-					(ext == 'ppsx')||
-					(ext == 'pptm')||
-					(ext == 'pptx')||
-					(ext == 'odp')||
-					(ext == 'sxi')
-				)?				'extppt' :
-				(
-					(ext == 'htm')||
-					(ext == 'html')
-				)?				'exthtm' :
-				(ext == 'pdf')?		'extpdf' :
-				(
-					(ext == 'xls')||
-					(ext == 'xlt')||
-					(ext == 'xlsm')||
-					(ext == 'xlsx')||
-					(ext == 'xltx')||
-					(ext == 'ods')||
-					(ext == 'sxc')||
-					(ext == 'csv')
-				)?				'extxls' :
-				(ext == 'txt')?		'exttxt' :
-				(ext == 'ttx')?		'extttx' :
-				(ext == 'itd')?		'extitd' :
-				(ext == 'xlf')?		'extxlf' :
-				(ext == 'mif')?		'extmif' :
-				(ext == 'idml')?	'extidd' :
-				(ext == 'xtg')?		'extqxp' :
-				(ext == 'xml')?		'extxml' :
-				(ext == 'rc')?		'extrcc' :
-				(ext == 'resx')?		'extres' :
-				(ext == 'sgml')?	'extsgl' :
-				(ext == 'sgm')?		'extsgm' :
-				(ext == 'properties')? 'extpro' :
-								'extxif';
-		return c;
-	},
+    getIconClass: function (ext) {
+        c = (
+            (ext == 'doc') ||
+            (ext == 'dot') ||
+            (ext == 'docx') ||
+            (ext == 'dotx') ||
+            (ext == 'docm') ||
+            (ext == 'dotm') ||
+            (ext == 'odt') ||
+            (ext == 'sxw')
+        ) ? 'extdoc' :
+            (
+                (ext == 'pot') ||
+                (ext == 'pps') ||
+                (ext == 'ppt') ||
+                (ext == 'potm') ||
+                (ext == 'potx') ||
+                (ext == 'ppsm') ||
+                (ext == 'ppsx') ||
+                (ext == 'pptm') ||
+                (ext == 'pptx') ||
+                (ext == 'odp') ||
+                (ext == 'sxi')
+            ) ? 'extppt' :
+                (
+                    (ext == 'htm') ||
+                    (ext == 'html')
+                ) ? 'exthtm' :
+                    (ext == 'pdf') ? 'extpdf' :
+                        (
+                            (ext == 'xls') ||
+                            (ext == 'xlt') ||
+                            (ext == 'xlsm') ||
+                            (ext == 'xlsx') ||
+                            (ext == 'xltx') ||
+                            (ext == 'ods') ||
+                            (ext == 'sxc') ||
+                            (ext == 'csv')
+                        ) ? 'extxls' :
+                            (ext == 'txt') ? 'exttxt' :
+                                (ext == 'ttx') ? 'extttx' :
+                                    (ext == 'itd') ? 'extitd' :
+                                        (ext == 'xlf') ? 'extxlf' :
+                                            (ext == 'mif') ? 'extmif' :
+                                                (ext == 'idml') ? 'extidd' :
+                                                    (ext == 'xtg') ? 'extqxp' :
+                                                        (ext == 'xml') ? 'extxml' :
+                                                            (ext == 'rc') ? 'extrcc' :
+                                                                (ext == 'resx') ? 'extres' :
+                                                                    (ext == 'sgml') ? 'extsgl' :
+                                                                        (ext == 'sgm') ? 'extsgm' :
+                                                                            (ext == 'properties') ? 'extpro' :
+                                                                                'extxif';
+        return c;
+    },
     showRevisionStatuses : function() {
         return true;
     },
@@ -920,6 +873,7 @@ UI = {
 
 	},
 
+    // Update the translations if job is splitted
 	getUpdates: function() {
 		if (UI.chunkedSegmentsLoaded()) {
 			lastUpdateRequested = UI.lastUpdateRequested;
@@ -1722,16 +1676,6 @@ UI = {
         var id_segment = UI.getSegmentId(segment);
         LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
     },
-    segmentLexiQA: function(_segment) {
-        var segment = _segment;
-        //new API?
-        if (_segment.raw) {
-          segment = _segment.raw
-        }
-        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-        var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
-    },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2329,7 +2273,6 @@ UI = {
         }
     },
     switchFooter: function() {
-        console.log('switchFooter');
         this.currentSegment.find('.footer').removeClass('showMatches');
         this.body.toggleClass('hideMatches');
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
@@ -2373,9 +2316,7 @@ UI = {
         }
 
     },
-    forceShowMatchesTab: function () {
-        UI.body.removeClass('hideMatches');
-    },
+
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
@@ -2403,25 +2344,6 @@ UI = {
 		}, UI.upOpts);
 	},
 
-    storeClientInfo: function () {
-        clientInfo = {
-            xRes: window.screen.availWidth,
-            yRes: window.screen.availHeight
-        };
-        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
-    },
-
-	browserScrollPositionRestoreCorrection: function() {
-		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment
-		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI
-			if (!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport
-				if (this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init
-					this.scrollSegment(this.currentSegment);
-					this.autoscrollCorrectionEnabled = false;
-				}
-			}
-		}
-	},
 	undoInSegment: function() {
 		console.log('undoInSegment');
 		if (this.undoStackPosition === 0)

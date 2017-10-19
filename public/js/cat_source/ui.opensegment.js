@@ -26,7 +26,6 @@
             }
 
             this.numOpenedSegments++;
-            this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
             this.byButton = false;
 
             this.cacheObjects( segment );

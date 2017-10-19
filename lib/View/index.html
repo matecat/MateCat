@@ -194,49 +194,7 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
-        <header metal:use-macro="header.html/main_header">
-            <div class="wrapper">
-                <form id="fileDownload" action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="downloadFile" />
-                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                    <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="password" tal:attributes="value password" />
-                    <input type="hidden" name="download_type" value="all" />
-                </form>
-                <a href="#" class="filter"> <span class="arrow-top "></span></a>
-
-                <a href="${basepath}" class="logo">
-                </a>
-                <div class="breadcrumbs">
-                    <div class="joblist">
-                        <a href="#" class="arrow-notification"></a>
-                        <ul>
-                            <li>
-                                <a href="">
-                                    <b>Job1</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Another job</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Eaaasy job</b>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <a href="#" id="pname" tal:content="pname">Project</a>
-                    <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
-                </div>
-
-            </div>   <!-- .wrapper -->
-
-
-        </header>
+        <header metal:use-macro="header.html/main_header"/>
 
         <div class="main-container">
             <div data-mount="review-side-panel"></div>
