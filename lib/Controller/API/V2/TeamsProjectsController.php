@@ -22,6 +22,8 @@ class TeamsProjectsController extends KleinController {
 
     public function update() {
 
+        $this->_appendSingleProjectTeamValidators()->validateRequest();
+
         $acceptedFields = array( 'id_assignee', 'name', 'id_team' );
 
         $projectModel   = new ProjectModel( $this->project );
@@ -41,18 +43,30 @@ class TeamsProjectsController extends KleinController {
 
     protected function afterConstruct() {
         parent::afterConstruct();
-        $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new TeamAccessValidator( $this ) );
+    }
+
+    /**
+     * @return $this
+     */
+    protected function _appendSingleProjectTeamValidators(){
+        $this->project = \Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
+        return $this;
     }
 
     public function get(){
-
+        $this->_appendSingleProjectTeamValidators()->validateRequest();
         $formatted     = new Project();
         $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
+    }
 
+    public function getAll(){
+        $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 * 10 );
+        $formatted     = new Project( $projectsList );
+        $this->response->json( array( 'projects' => $formatted->render() ) );
     }
 
 }
