@@ -151,6 +151,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     min-height: 40px;
     margin-bottom: 25px;
     margin-top: 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .user-name {
@@ -213,9 +216,9 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
         margin-top: 10px;
         input {
             max-width: 100%;
-            color: #999 !important;
-            cursor: not-allowed;
-            background: #f4f4f4;
+            //color: #999 !important;
+            //cursor: not-allowed;
+            //background: #f4f4f4;
         }
         .dqf-message {
             float: right;
@@ -1014,9 +1017,6 @@ div#matecat-modal p {
 .matecat-modal-content {
     font-size: 16px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
-    .matecat-modal-header {
-        min-height: 40px;
-    }
     .matecat-modal-top {
         background-color: #ffffff;
         /*border-bottom: 1px solid #cccccc;*/
