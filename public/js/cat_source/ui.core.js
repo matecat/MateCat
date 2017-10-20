@@ -2093,7 +2093,7 @@ UI = {
     },
 
     /**
-     * Called when a Segment string returned by server has to be visualized, it replace placeholders with br tags
+     * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
      * @returns {XML|string}
      */
@@ -2117,6 +2117,7 @@ UI = {
 
 		return _str;
     },
+
 	encodeSpacesAsPlaceholders: function(str, root) {
         if(!UI.hiddenTextEnabled) return str;
 

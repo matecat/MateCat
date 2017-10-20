@@ -299,7 +299,7 @@ class JobContainer extends React.Component {
     }
 
     getTMIcon() {
-        if (JSON.parse(this.props.job.get('private_tm_key')).length) {
+        if (this.props.job.get('private_tm_key').length) {
             let keys = JSON.parse(this.props.job.get('private_tm_key'));
             let tooltipText = '';
             keys.forEach(function (key, i) {

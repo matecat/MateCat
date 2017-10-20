@@ -140,44 +140,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         if($(this).hasClass('opened')) {
             $(this).find('.tab-switcher-review').click();
         }
-    })
-    //     .on('start', function() {
-    //
-    //     // temp
-    //     config.stat_quality = [
-    //         {
-    //             "type":"Typing",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Translation",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Terminology",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Language Quality",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Style",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         }
-    //     ];
-    // })
-        .on('buttonsCreation', 'section', function() {
+    }).on('buttonsCreation', 'section', function() {
         UI.overrideButtonsForRevision();
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
