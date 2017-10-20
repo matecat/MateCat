@@ -466,6 +466,12 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     color: #333;
 }
 
+.dqf-modal input[disabled] {
+    color: #999;
+    cursor: not-allowed;
+    background: #f4f4f4;
+}
+
 
 
 
