@@ -92,13 +92,17 @@ class QAComponent extends React.Component {
     }
 
     scrollToSegment(segmentId) {
+        let $segment = $('#segment-' + segmentId);
+        if ($segment.hasClass('ice-locked')) {
+            UI.unlockIceSegment($segment)
+        }
         if ( segmentId) {
-            if ( $('#segment-' + segmentId).length ) {
+            if ( $segment.length ) {
                 window.location.hash = segmentId;
             } else if($('#segment-' + segmentId + '-1').length) {
                 window.location.hash = segmentId + '-1';
             }
-            UI.scrollSegment($('#segment-' + segmentId));
+            UI.scrollSegment($segment);
         }
     }
 

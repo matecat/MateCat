@@ -28,7 +28,7 @@ abstract class AbstractDecorator {
      */
     protected $template;
 
-    public function __construct( IController $controller, PHPTAL $template ) {
+    public function __construct( IController $controller, PHPTAL $template = null ) {
         $this->controller = $controller;
         $this->template   = $template;
     }

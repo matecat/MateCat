@@ -406,15 +406,17 @@ class TMSService {
     /**
      * Export Job as Tmx File
      *
-     * @param $jid
-     * @param $jPassword
-     * @param $sourceLang
-     * @param $targetLang
+     * @param      $jid
+     * @param      $jPassword
+     * @param      $sourceLang
+     * @param      $targetLang
+     *
+     * @param int|null $uid
      *
      * @return SplTempFileObject $tmpFile
      *
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
@@ -481,13 +483,24 @@ class TMSService {
             }
             $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
 
+            $tmOrigin = "";
+            if ( strpos( $this->output_type, 'tm' ) !== false ) {
+                $suggestionsArray = json_decode( $row[ 'suggestions_array' ], true );
+                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $row[ 'id_customer' ], $uid );
+                $tmOrigin         = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
+                if ( preg_match( "/[a-f0-9]{8,}/", $suggestionsArray[ 0 ][ 'memory_key' ] ) ) {
+                    $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[ 0 ][ 'memory_key' ] . "</prop>";
+                }
+            }
+
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
-        '.$chunkPropString.'
+        '. $chunkPropString . '
+        '. $tmOrigin .'
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
         </tuv>';

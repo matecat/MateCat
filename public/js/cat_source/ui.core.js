@@ -3261,7 +3261,12 @@ UI = {
     handleClickOnReadOnly : function(section) {
         if ( UI.justSelecting('readonly') )   return;
         if ( UI.someUserSelection )           return;
-        if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) return;
+        if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) {
+            UI.selectingReadonly = setTimeout(function() {
+                APP.alert({ msg: UI.messageForClickOnIceMatch() });
+            }, 200);
+            return
+        }
 
         UI.selectingReadonly = setTimeout(function() {
             UI.readonlyClickDisplay() ;
@@ -3276,6 +3281,13 @@ UI = {
         var msgArchived = 'Job has been archived and cannot be edited.' ;
         var msgOther = 'This part has not been assigned to you.' ;
         return (UI.body.hasClass('archived'))? msgArchived : msgOther ;
+    },
+
+    messageForClickOnIceMatch : function() {
+        return  'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
+            'If you must edit it, click on the padlock icon to the left of the segment. ' +
+            'The owner of the project will be notified of any edits.' ;
+
     },
 
     openOptionsPanel: function() {

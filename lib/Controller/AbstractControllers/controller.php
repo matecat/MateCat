@@ -24,6 +24,13 @@ abstract class controller {
 
 
     /**
+     * @return Users_UserStruct
+     */
+    public function getLoggedUser() {
+        return $this->logged_user;
+    }
+
+    /**
      * Controllers Factory
      *
      * Initialize the Controller Instance and route the

@@ -7,7 +7,7 @@ class OpenJobBox extends React.Component {
     }
 
     openJob() {
-        window.open(this.props.url, "_blank")
+        return this.props.url;
     }
 
     componentDidMount () {}
@@ -23,12 +23,12 @@ class OpenJobBox extends React.Component {
                 Open job:
             </div>
             <div className="title-url">
-                <div className="job-url">
+                <a className="job-url"
+                   href={this.openJob()} target="_blank">
                     {window.location.protocol + '//' + window.location.host + this.props.url}
-                </div>
-                <button className="ui primary button"
-                        onClick={this.openJob.bind(this)}
-                        ref={(button) => this.openButton = button }>Open job</button>
+                </a>
+                <a className="ui primary button"
+                   href={this.openJob()} target="_blank">Open job</a>
             </div>
         </div>;
     }

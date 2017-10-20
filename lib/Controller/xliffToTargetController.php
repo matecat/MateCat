@@ -19,14 +19,14 @@ class xliffToTargetController extends downloadController {
         $conversion = $conversion[0];
 
         if ($conversion['isSuccess'] === true) {
-            $this->content = json_encode(array(
+            $this->outputContent = json_encode(array(
               "fileName" => (isset($conversion['fileName']) ? $conversion['fileName'] : $conversion['filename']),
               "fileContent" => base64_encode($conversion['document_content']),
               "size" => filesize($file_path),
               "type" => mime_content_type($file_path),
               "message" => "File downloaded! Check your download folder"
             ));
-            $this->_filename = $conversion['fileName'];
+            $this->_filename     = $conversion['fileName'];
         } else {
             $this->error = true;
             $this->errorMessage =  $conversion[0]['errorMessage'];
@@ -53,7 +53,7 @@ class xliffToTargetController extends downloadController {
                 header("Content-Disposition: attachment; filename=\"$this->_filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header("Expires: 0");
                 header("Connection: close");
-                echo $this->content;
+                echo $this->outputContent;
                 exit;
             } catch (Exception $e) {
                 echo "<pre>";
