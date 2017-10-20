@@ -300,7 +300,7 @@ class JobContainer extends React.Component {
 
     getTMIcon() {
         if (this.props.job.get('private_tm_key').length) {
-            let keys = JSON.parse(this.props.job.get('private_tm_key'));
+            let keys = this.props.job.get('private_tm_key');
             let tooltipText = '';
             keys.forEach(function (key, i) {
                 let descript = (key.name) ? key.name : "Private TM and Glossary";
