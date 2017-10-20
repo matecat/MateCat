@@ -76,7 +76,7 @@ class catController extends viewController {
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
-        parent::__construct( false );
+        parent::__construct();
 
         parent::makeTemplate( "index.html" );
 

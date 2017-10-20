@@ -31,10 +31,14 @@ class LoginModal extends React.Component {
             newWindow.focus();
         }
         let interval = setInterval(function () {
-            if (newWindow.closed) {
-                clearInterval(interval);
-                if (self.props.goToManage) {
+            if ( newWindow.closed ) {
+                clearInterval( interval );
+                let loc;
+                if ( self.props.goToManage ) {
                     window.location = '/manage/';
+                } else if ( loc = window.localStorage.getItem( 'wanted_url' ) ) {
+                    window.localStorage.removeItem( 'wanted_url' );
+                    window.location.href = loc;
                 } else {
                     window.location.reload();
                 }
