@@ -100,6 +100,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 $data['translation_before'] = $row['versioned_translation'];
             }
 
+            $data['translation_before'] = is_null( $row['translation_before'] ) ? '' : $row['translation_before'] ;
+
             // TODO: ExtendedTranslationStruct is under DQF namespace, while this DAO should not be aware of DQF
             $result[ $row['id'] ] = new ExtendedTranslationStruct( $data ) ;
         }
