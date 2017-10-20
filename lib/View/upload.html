@@ -919,6 +919,20 @@
 
 <div id="uploadCallback"></div>
 
+
+<script type="text/javascript">
+
+    $(function() {
+        window.addEventListener('storage', function storageEventHandler (evt){
+            if ( evt.key == 'wanted_url' ) {
+                window.location.href = evt.newValue ;
+            }
+        });
+    });
+
+</script>
+
+
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
 
