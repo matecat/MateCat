@@ -72,7 +72,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 "Project"
               ],
               "summary": "Create new Project on Matecat",
-              "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. Matecat PRO accept only 68 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
+              "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. MateCat PRO accepts 70 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
               "parameters": [
                 {
                   "name": "files",
@@ -143,7 +143,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 {
                   "name": "owner_email",
                   "in": "formData",
-                  "description": "The email of the owner of the project.",
+                  "description": "The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.",
                   "required": false,
                   "type": "string",
                   "default": "anonymous"
@@ -1696,7 +1696,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 "type": "integer",
                 "format": "int32"
               },
-              "id:job": {
+              "id_job": {
                 "type": "integer",
                 "format": "int32"
               },
@@ -1732,7 +1732,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
           "UploadGlossaryStatusObject": {
             "type": "object",
             "properties": {
-              "errore": {
+              "error": {
                 "type": "array",
                 "items": {
                   "type": "object"
