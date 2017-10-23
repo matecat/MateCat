@@ -221,7 +221,12 @@ class Dqf extends BaseFeature {
     }
 
     public function validateProjectCreation( $projectStructure ) {
-        Log::doLog('DQF validateProjectCreation -------------------- ');
+
+        if ( count( $projectStructure[ 'target_language' ] ) > 1 ) {
+            $multilang_error = [ 'code' => -1000, 'message' => 'Cannot create multilanguage projects when DQF option is enabled' ];
+            $projectStructure['result']['errors'][] = $multilang_error ;
+            return ;
+        }
 
         if ( $projectStructure['metadata'] ) {
             // TODO: other incoming DQF related options to be validated
