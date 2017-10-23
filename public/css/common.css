@@ -1469,16 +1469,12 @@ margin-left: 10px;
     {
 	    color: #fff;
 	    background: #09beec;
-	    border: 1px solid #848689;
+        border: 1px solid #797979;
 	    font-weight: bold;
 	    text-decoration: none;
 	    padding: 8px 18px;
-/*	    margin: 0 5px;*/
 	    border-radius: 2px;
 	    font-size: 18px;
-	    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
 
 
@@ -1552,10 +1548,9 @@ float: none!important;
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover
 {
-	cursor: pointer;
-	-webkit-box-shadow: 0 1px 2px #ccc;
-	box-shadow: 0 1px 2px #ccc;
-	border:1px solid #000;
+    background-color: #08b3de;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    border: 1px solid #797979;
     }
 		.mgmt-panel-gl .btn-ok:active,
 	.mgmt-panel-tm .btn-ok:active,
@@ -3028,14 +3023,11 @@ width:100%;
 }
 
 .nav-tabs>li {
-float: left;
-position: relative;
-width: auto !important;
-background: #efefef url(../img/point.gif) 0 0 repeat-x;
-z-index: 9999999999999;
+    float: left;
+    position: relative;
+    background: #efefef;
 }
 .nav>li {
-position: relative;
 display: block;
 }
 
@@ -3064,18 +3056,14 @@ padding-top: 5px !important;
 
 }
 .nav-tabs>li>a {
--webkit-transition: all 100ms ease-in;
--moz-transition: all 100ms ease-in;
-padding: 4px 20px;
-display: block;
-color: #939598;
-font-size: 18px;
-float: left;
-font-weight: bold;
-text-decoration: none;
-border-right: 1px solid #666;
-border-top: 1px solid #666;
--webkit-box-shadow: inset 0 -1px 4px #ccc;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    padding: 4px 20px;
+    color: #939598;
+    float: left;
+    font-weight: bold;
+    text-decoration: none;
+    border-right: 1px solid #666;
 }
 
 .text-center {
