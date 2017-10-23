@@ -1678,7 +1678,7 @@ th.owner,td.owner {
 
 .mgmt-tm .check {
 		/*width:6%!important;*/
-		width:60px!important;
+		width:55px!important;
 		text-align: center;
 }
 
@@ -1695,11 +1695,11 @@ th.owner,td.owner {
 
 
 .mgmt-tm  th.action, .mgmt-tm td.action {
-    width: 172px!important;
+    width: 175px!important;
 }
 
 th.activate, td.activate {
-    width: 50px!important;
+    width: 55px!important;
     text-align: center;
 }
 
