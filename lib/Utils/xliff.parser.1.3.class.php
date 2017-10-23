@@ -115,10 +115,18 @@ class Xliff_Parser {
 					$xliff['files'][$i]['attr']['datatype'] = "txt";
 				}
 				// Target-language
-				unset($temp);
-				preg_match('|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp);
-				if (isset($temp[1]))
-					$xliff['files'][$i]['attr']['target-language'] = $temp[1];
+                unset( $temp );
+                preg_match( '|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'target-language' ] = $temp[ 1 ];
+                }
+
+                //Custom MateCat x-Attribute
+                unset( $temp );
+                preg_match( '|x-(.*?)=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'custom' ][ $temp[ 1 ] ] = $temp[ 2 ];
+                }
 
                 /*
                  * PHP 5.2 BUG/INCONSISTENCY vs PHP > 5.2 IN preg_match_all
