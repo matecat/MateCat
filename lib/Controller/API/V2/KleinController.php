@@ -100,7 +100,7 @@ abstract class KleinController {
         }
 
         if ( !$this->validKeys() ) {
-            throw new AuthenticationError();
+            throw new AuthenticationError( "Invalid Login.", 401 );
         }
 
     }
