@@ -1171,6 +1171,7 @@ width: 804px;
 }
 #activetm td.action .addtmx {
     display: block;
+    margin-right: 17px;
 }
 
 input.email-export-tmx {
@@ -1467,15 +1468,16 @@ margin-left: 10px;
     .uploadtm.disabled,
     .download-manage.btn-ok 
     {
-	    color: #fff;
-	    background: #09beec;
+        color: #fff;
+        background: #09beec;
         border: 1px solid #797979;
-	    font-weight: bold;
-	    text-decoration: none;
-	    padding: 8px 14px;
-	    border-radius: 2px;
-	    font-size: 18px;
-}
+        font-weight: bold;
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 2px;
+        font-size: 18px;
+        margin-right: 23px;
+    }
 
 
 .btn-cancel.in-popup {
@@ -1871,8 +1873,8 @@ font-size:14px;
 .mgmt-tm .canceladdtmx,
 .mgmt-tm .canceladdglossary
 {
-    width: 35px;
-    margin-left: 12px;
+    width: 32px;
+    margin-left: 6px;
 }
 
 .canceladdtmx ,
@@ -1960,7 +1962,7 @@ td.uploadfile
 }
 
 .mgmt-tm .btn-grey .text {
-    width: 35px!important;
+    width: 33px!important;
 }
 
 .canceladdtmx.btn-grey .text,
@@ -2037,6 +2039,8 @@ td.uploadfile .canceladdtmx,
 td.uploadfile .canceladdglossary
 {
     margin-bottom: 0px;
+    margin-right: 5px;
+    width: 33px;
 }
 
 td.uploadfile input[type="file"] {
@@ -2070,11 +2074,12 @@ td.uploadfile .uploadprogress .error {
 }
 
 .filter-box input {
-    padding:3px 10px 3px 30px;
+    padding: 3px 10px 3px 30px;
     border-radius: 2px;
     border: 1px solid #ccc;
     color: #999;
-        width: 123px;
+    width: 106px;
+    margin-right: 23px;
 }
 
 .dataTables_length, .dataTables_info {display: none;}
@@ -4944,3 +4949,8 @@ img.ui-user-top-image-general {
 
 /*****************************/
 
+a.pull-left.btn-ok.uploadtm {
+    width: 93px;
+    position: relative;
+    left: -8px;
+}
