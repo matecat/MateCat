@@ -429,7 +429,7 @@ $(function () {
                         "200": {
                             "description": "Teams",
                             "schema": {
-                                "$ref": "#/definitions/Team"
+                                "$ref": "#/definitions/TeamList"
                             }
                         },
                         "default": {
@@ -473,7 +473,41 @@ $(function () {
                         "200": {
                             "description": "Team",
                             "schema": {
-                                "$ref": "#/definitions/Team"
+                                "$ref": "#/definitions/TeamItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
+            "/v2/teams/{id_team}" : {
+                "put": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Update team",
+                    "description": "Update team.",
+                    "parameters" : [
+                        {
+                            "name"     : "id",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        },
+                        {
+                            "name" : "name",
+                            "type" : "string",
+                            "in" : "fromData",
+                            "required" : true
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/TeamItem"
                             }
                         },
                         "default": {
@@ -1789,6 +1823,29 @@ $(function () {
                     }
                 }
             },
+
+            "TeamList" : {
+                "type": "object",
+                "properties" : {
+                    "teams" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/Team"
+                        }
+                    }
+                }
+            },
+
+            "TeamItem" : {
+                "type": "object",
+                "properties" : {
+                    "team" : {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Team"
+                    }
+                }
+            },
+
             "Team" : {
                 "type": "object",
                 "properties": {
