@@ -119,7 +119,7 @@ class TeamsController extends KleinController {
 
         $teamList = ( new MembershipDao() )->findUserTeams( $this->getUser() );
         $formatted = new Team( $teamList );
-        $this->response->json( [ 'team' => $formatted->render() ] );
+        $this->response->json( [ 'teams' => $formatted->render() ] );
 
     }
 
