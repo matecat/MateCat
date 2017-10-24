@@ -4318,6 +4318,12 @@ text-align: left;
     content: "\ea8d";
 }
 
+.icon-go-to-first:before {
+    content: "\ea8e";
+}
+.icon-go-to-last:before {
+    content: "\ea8f";
+}
 
 
 
