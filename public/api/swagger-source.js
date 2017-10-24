@@ -429,7 +429,51 @@ $(function () {
                         "200": {
                             "description": "Teams",
                             "schema": {
-                                "$ref": "#/definitions/Teams"
+                                "$ref": "#/definitions/Team"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "post": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Create a new team",
+                    "description": "Creates a new team.",
+                    "parameters" : [
+                        {
+                            "name" : "type",
+                            "type" : "string",
+                            "in" : "fromData",
+                            "required" : true,
+                        },
+                        {
+                            "name" : "name",
+                            "type" : "string",
+                            "in" : "fromData",
+                            "required" : true
+                        },
+                        {
+                            "name" : "members",
+                            "type" : "array",
+                            "in" : "fromData",
+                            "items" : {
+                                "type" : "string",
+                                "format" : "email",
+                                "collectionFormat" : "multi"
+                            },
+                            "description" : "Array of email addresses of people to invite in a project",
+                            "required" : true
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/Team"
                             }
                         },
                         "default": {
@@ -1745,12 +1789,16 @@ $(function () {
                     }
                 }
             },
-            "Teams" : {
+            "Team" : {
                 "type": "object",
                 "properties": {
                     "id" : { "type" : "integer", "required" : true },
                     "name": { "type" : "string", "required" : true },
-                    "type": { "type" : "string", "required" : true },
+                    "type": {
+                        "type" : "string",
+                        "enum" : ["general", "personal"],
+                        "required" : true
+                    },
                     "created_at": {
                         "type" : "string" ,
                         "format" : "date-time",
