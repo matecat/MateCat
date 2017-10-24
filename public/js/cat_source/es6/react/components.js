@@ -13,14 +13,14 @@ window.classnames = require('classnames');
 
 window.TranslationIssuesSideButton = require('./components/TranslationIssuesSideButton').default ;
 
-window.ReviewSidePanel = require('./components/ReviewSidePanel').default ;
+window.ReviewSidePanel = require('./components/review/ReviewSidePanel').default ;
 window.TranslationIssuesOverviewPanel = require('./components/TranslationIssuesOverviewPanel').default ;
-window.ReviewTranslationVersion = require('./components/ReviewTranslationVersion').default ;
-window.ReviewIssuesContainer = require('./components/ReviewIssuesContainer').default ;
-window.ReviewTranslationIssue = require('./components/ReviewTranslationIssue').default ;
-window.ReviewTranslationIssueCommentsContainer = require('./components/ReviewTranslationIssueCommentsContainer').default ;
-window.ReviewIssueSelectionPanel = require('./components/ReviewIssueSelectionPanel').default ;
-window.ReviewIssueCategorySelector = require('./components/ReviewIssueCategorySelector').default ;
+window.ReviewTranslationVersion = require('./components/review/ReviewTranslationVersion').default ;
+window.ReviewIssuesContainer = require('./components/review/ReviewIssuesContainer').default ;
+window.ReviewTranslationIssue = require('./components/review/ReviewTranslationIssue').default ;
+window.ReviewTranslationIssueCommentsContainer = require('./components/review/ReviewTranslationIssueCommentsContainer').default ;
+window.ReviewIssueSelectionPanel = require('./components/review/ReviewIssueSelectionPanel').default ;
+window.ReviewIssueCategorySelector = require('./components/review/ReviewIssueCategorySelector').default ;
 window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
 
 

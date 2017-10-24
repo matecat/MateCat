@@ -73,12 +73,14 @@ class catController extends viewController {
      */
     private $wStruct ;
 
+    protected $templateName = "index.html";
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct( false );
 
-        parent::makeTemplate( "index.html" );
+        parent::makeTemplate( $this->templateName );
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),

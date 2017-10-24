@@ -123,7 +123,8 @@ $.extend(UI, {
         SegmentActions.registerTab('alternatives', false, false);
         // SegmentActions.registerTab('messages', false, false);
         if ( Review.enabled() && Review.type === 'simple' ) {
-            SegmentActions.registerTab('review', true, true);
+            UI.registerReviseTab();
+
         }
 	}
 });

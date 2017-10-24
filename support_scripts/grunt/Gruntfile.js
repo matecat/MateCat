@@ -256,6 +256,61 @@ module.exports = function(grunt) {
                 dest: buildPath + 'app.js'
             },
 
+            revise: {
+                src: [
+                    // basePath + 'build/templates.js',
+                    basePath + 'cat_source/ui.core.js',
+                    basePath + 'cat_source/ui.segment.js',
+                    basePath + 'cat_source/ui.editarea.js',
+                    basePath + 'cat_source/ui.scrollsegment.js',
+                    basePath + 'cat_source/ui.classes.js',
+                    basePath + 'cat_source/ui.init.js',
+                    basePath + 'cat_source/ui.render.js',
+                    basePath + 'cat_source/ui.events.js',
+                    basePath + 'cat_source/ui.contribution.js',
+                    basePath + 'cat_source/ui.tags.js',
+                    basePath + 'cat_source/ui.concordance.js',
+                    basePath + 'cat_source/ui.glossary.js',
+                    basePath + 'cat_source/ui.search.js',
+
+                    basePath + 'cat_source/qa_check_glossary.js',
+                    basePath + 'cat_source/qa_check_blacklist.js',
+
+                    basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
+                    basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
+
+                    basePath + 'cat_source/ui.customization.js',
+
+                    basePath + 'cat_source/ui.review2.js',
+                    basePath + 'cat_source/ui.offline.js',
+
+                    basePath + 'cat_source/ui.split.js',
+                    basePath + 'cat_source/ui.opensegment.js',
+                    basePath + 'cat_source/sse.js',
+                    basePath + 'cat_source/db.js',
+                    basePath + 'cat_source/mbc.main.js',
+                    basePath + 'cat_source/mbc.templates.js',
+                    //WARNING: lxq.main.js: this should always be below qa_check_glossary and
+                    //qa_check_blacklist, in order for its event handlers to be excecuted last
+                    basePath + 'cat_source/lxq.main.js',
+                    basePath + 'cat_source/lxq.templates.js',
+                    basePath + 'cat_source/project_completion.*.js',
+                    basePath + 'cat_source/segment_notes.*.js',
+                    basePath + 'cat_source/review_improved.js',
+                    basePath + 'cat_source/review_improved.*.js',
+
+                    basePath + 'cat_source/segment_filter.js',
+                    basePath + 'cat_source/segment_filter.*.js',
+
+                    // basePath + 'cat_source/handlebars-helpers.js',
+
+                    basePath + 'cat_source/speech2text.js',
+                    basePath + 'tm.js',
+                    basePath + 'advancedOptionsTab.js',
+                ],
+                dest: buildPath + 'revise.js'
+            },
+
             libs: {
                 src: [
                     basePath + 'lib/jquery-1.11.0.min.js',
@@ -585,6 +640,7 @@ module.exports = function(grunt) {
         'concat:libs_upload',
         'concat:semantic',
         'concat:app',
+        'concat:revise',
         'concat:common',
         'concat:manage',
         'concat:analyze',
