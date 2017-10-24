@@ -63,7 +63,7 @@ class TeamsController extends KleinController {
         $team      = $model->create();
         $formatted = new Team();
 
-        $this->response->json( array( 'team' => $formatted->renderItem( $team ) ) );
+        $this->response->json( [ 'team' => $formatted->renderItem( $team ) ] );
     }
 
     public function update() {
