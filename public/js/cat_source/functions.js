@@ -608,7 +608,25 @@ function goodbye(e) {
 }
 
 function cleanupHTMLCharsForDiff( string ) {
-	return string.replace(/&nbsp;/g, '');
+	return replacePlaceholder(string.replace(/&nbsp;/g, ''));
+}
+
+function replacePlaceholder(string) {
+   return  string
+       .replace( config.lfPlaceholderRegex, "softReturnMonad")
+        .replace( config.crPlaceholderRegex, "crPlaceholder" )
+        .replace( config.crlfPlaceholderRegex, "brMarker" )
+        .replace( config.tabPlaceholderRegex, "tabMarkerMonad" )
+        .replace( config.nbspPlaceholderRegex, "nbspPlMark" )
+}
+
+function restorePlaceholders(string) {
+    return string
+        .replace(/softReturnMonad/g , config.lfPlaceholder)
+        .replace(/crPlaceholder/g,  config.crPlaceholder)
+        .replace(/brMarker/g,  config.crlfPlaceholder )
+        .replace(/tabMarkerMonad/g, config.tabPlaceholder)
+        .replace(/nbspPlMark/g, config.nbspPlaceholder)
 }
 
 function trackChangesHTML(source, target) {
@@ -625,20 +643,21 @@ function trackChangesHTML(source, target) {
         if(this[0] == -1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="deleted"/>' );
-            $( newElem ).text( this[1] );
+            $( newElem ).text( htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else if(this[0] == 1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="added"/>' );
-            $( newElem ).text( this[1] );
+            $( newElem ).text( htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else {
             diffTxt += this[1];
         }
     });
-    return diffTxt ;
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt) ;
 }
 
 

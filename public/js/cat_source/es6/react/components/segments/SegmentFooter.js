@@ -158,7 +158,9 @@ class SegmentFooter extends React.Component {
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
-                    notes={this.props.segment.notes}/>;
+                    translation={this.props.segment.translation}
+                    segment={this.props.segment}
+                    decodeTextFn={this.props.decodeTextFn}/>;
                 break;
             default:
                 return ''

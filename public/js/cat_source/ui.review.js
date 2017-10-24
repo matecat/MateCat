@@ -50,13 +50,17 @@ if ( Review.enabled() )
         alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
         trackChanges: function (editarea) {
-            var source = UI.currentSegment.find('.original-translation').text();
-            source = UI.clenaupTextFromPleaceholders( source );
+            var segmentId = UI.getSegmentId($(editarea));
+            var text = UI.postProcessEditarea($(editarea).closest('section'), '.editarea');
+            SegmentActions.updateTranslation(segmentId, htmlEncode(text));
 
-            var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
-            var diffHTML = trackChangesHTML( source, target );
-
-            $('.editor .sub-editor.review .track-changes p').html( diffHTML );
+            // var source = UI.currentSegment.find('.original-translation').text();
+            // source = UI.clenaupTextFromPleaceholders( source );
+            //
+            // var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
+            // var diffHTML = trackChangesHTML( source, target );
+            //
+            // $('.editor .sub-editor.review .track-changes p').html( diffHTML );
         },
 
         setReviewErrorData: function (d) {
@@ -156,7 +160,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         } else {
             $('.editor .sub-editor.review').addClass('open');
         }
-    }).on('input', '.editor .editarea', function() {
+    }).on('keyup', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
@@ -174,7 +178,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         if(d.original == '') d.original = xEditarea.text();
         if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
-        UI.trackChanges(xEditarea);
+        // UI.trackChanges(xEditarea);
     });
 
     $.extend(UI, {
@@ -190,52 +194,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                     });
                 }
             });
-        },
-        trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment
-                .find('.original-translation').text()
-                    .replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
-
-            UI.dmp.diff_cleanupSemantic( diff ) ;
-
-            diffTxt = '';
-            $.each(diff, function (index) {
-
-                if(this[0] == -1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="deleted"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else if(this[0] == 1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="added"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else {
-                    diffTxt += this[1];
-                }
-                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
-            });
-        },
-
-        setReviewErrorData: function (d) {
-            $.each(d, function (index) {
-                if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
-
-            });
-
         },
 
         renderAfterConfirm: function (nextId) {

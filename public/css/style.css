@@ -4430,7 +4430,9 @@ section .toolbar .autofillTag {
 }
 
 .editarea span.softReturn,
-.source span.softReturn {
+.source span.softReturn,
+.track-changes span.softReturn
+{
     display: inline;
     margin-left: 6px;
     padding: 1px 2px 3px 40px;

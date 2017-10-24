@@ -2022,7 +2022,7 @@ UI = {
 
 	clearStorage: function(what) {
 		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
+			if(k.substring(0, what.length) === what) {on
 				localStorage.removeItem(k);
 			}
 		});

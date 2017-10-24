@@ -260,6 +260,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
+        case SegmentConstants.UPDATE_TRANSLATION:
+            SegmentStore.emitChange(action.actionType, action.id, action.text);
+            break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;

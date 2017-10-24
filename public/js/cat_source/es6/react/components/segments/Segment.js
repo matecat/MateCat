@@ -339,6 +339,7 @@ class Segment extends React.Component {
                     <SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
+                        decodeTextFn={this.props.decodeTextFn}
                     />
                 </div>
 

@@ -747,6 +747,7 @@ LXQ.init  = function () {
                    if (txt!==null) {
                         var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
                         var warningData = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]];
+                        if (!warningData) return;
                         var word = warningData.text;
                         count++;
                         var row = $(tpls.lxqTooltipBody);

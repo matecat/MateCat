@@ -154,6 +154,13 @@ var SegmentActions = {
             className: className
         });
     },
+    updateTranslation: function (sid, editAreaText) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_TRANSLATION,
+            id: sid,
+            text: editAreaText
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
