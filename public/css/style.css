@@ -26,6 +26,7 @@ header {
     transition: margin-top 200ms ease-out;
     -webkit-transition: margin-top 200ms ease-out;
     height: 81px;
+    box-sizing: content-box;
 }
 
 body.login header {
@@ -1120,6 +1121,9 @@ td.action .btn,
     text-align: center;
     min-width: 130px;
     height: 31px !important;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .topmenu-drop input.translated {
@@ -1268,6 +1272,7 @@ article {
     margin-left: 5%;
     width: 91.5%;
     float: left;
+    box-sizing: content-box;
 }
 
 #outer.loadingBefore {
@@ -1613,9 +1618,9 @@ body .footer.showMatches .sub-editor.open {
     border: 1px solid #58595b;
     color: #fff;
     padding: 7px 4px 4px 4px;
-    font-size: 0.8em;
+    font-size: 12px;
     background: #09beec;
-    -webkit-box-shadow: inset 0px 2px 2px #666;
+    -webkit-box-shadow: inset 0px 2px 2px #f3f3f3;
 }
 
 .addtmx-tr .open-popup-tmx {
@@ -2461,21 +2466,16 @@ body.cattool .searchbox .block.right {
 }
 
 .percentuage {
+    position: relative;
     display: none;
-    line-height: 180%;
-    height: 20px;
-    text-align: center;
-    width: 25px;
-    top: -9px;
-    position: absolute;
-    left: 47.4%;
+    width: 45px;
+    line-height: 182%;
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     text-decoration: none;
-    font-weight: bold;
-    cursor: default;
-    padding: 0 10px;
-    z-index: 999;
+    font-weight: 100;
+    margin: 0 auto;
+    text-align: center;
 }
 
 /*
@@ -3265,14 +3265,14 @@ section.readonly:hover .ice-locked-label {
     width: 11px;
     display: block;
     position: absolute;
-    height: 100%;
+    height: 101%;
     padding: 0;
     background: #dddedf;
     right: 0;
     border-left: 1px solid #ccc;
     margin: 0px 0px 0px 0 !important;
-    z-index: 1;
-    border-bottom: 1px solid #ccc
+    border-bottom: 1px solid #ccc;
+    top: 0%;
 }
 
 section.readonly .status-container a.status:hover,
@@ -3280,7 +3280,7 @@ body.archived section .status-container a.status:hover {
     cursor: default !important;
 }
 
-.editor .status {
+/*.editor .status {
     width: 8px;
     display: block;
     position: absolute;
@@ -3291,7 +3291,7 @@ body.archived section .status-container a.status:hover {
     top: 3%;
     margin: -6px 0 0 0 !important;
     border-bottom: 0;
-}
+}*/
 
 .status img {
     display: none
@@ -3566,12 +3566,11 @@ section.modified.editor .status {
 }
 
 .source .original {
-    display: none;
+    display: none
 }
 
 .bold {
-    font-weight: bold
-}
+    font-weight: 700}
 
 .per-orange {
     background: #FF9900 !important;
@@ -4979,8 +4978,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr:hover {
-    -webkit-box-shadow: inset 0px 2px 5px #666;
-    box-shadow: inset 0px 2px 5px #666;
+    background: #d8d9da;
 
 }
 
@@ -5038,7 +5036,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 }
 
 .addtmx-tr:hover {
-    border: 1px solid #000;
+
 }
 
 .fileupload {
