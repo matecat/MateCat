@@ -516,6 +516,105 @@ $(function () {
                     }
                 },
             },
+            "/v2/teams/{id_team}/members" : {
+                "get": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "List team members",
+                    "description": "List team members.",
+                    "parameters" : [
+                        {
+                            "name"     : "id",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/TeamMembersList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "post": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Create new team memberships",
+                    "description": "Create new team memberships.",
+                    "parameters" : [
+                        {
+                            "name"     : "id",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        },
+                        {
+                            "name"     : "members",
+                            "type"     : "array",
+                            "in"       : "fromData",
+                            "items"    : {
+                                "type"   : "string",
+                                "format" : "email",
+                                "collectionFormat" : "multi"
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/TeamMembersList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
+            "/v2/teams/{id_team}/members/{id_member}" : {
+                "delete": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "List team members",
+                    "description": "List team members.",
+                    "parameters" : [
+                        {
+                            "name"        : "id_team",
+                            "type"        : "integer",
+                            "in"          : "path",
+                            "required"    : true
+                        },
+                        {
+                            "name"        : "uid_member",
+                            "type"        : "integer",
+                            "in"          : "path",
+                            "required"    : true,
+                            "description" : "Id of the user to remove from team"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/TeamMembersList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
             "/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
@@ -1821,6 +1920,55 @@ $(function () {
                     "completed": {
                         "type": "boolean"
                     }
+                }
+            },
+
+            "PendingInvitation" : {
+                "type" : "array",
+                "items" : {
+                    "type" : "string",
+                    "description" : "Email address of the invited user"
+                }
+            },
+
+            "TeamMembersList" : {
+                "type": "object",
+                "properties" : {
+                    "members" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/TeamMember"
+                        }
+                    },
+                    "pending_invitations" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/PendingInvitation"
+                        }
+                    }
+                }
+            },
+
+            "TeamMember" : {
+                "type": "object",
+                "properties" : {
+                    "id" : { "type" : "integer" },
+                    "id_team" : { "type" : "integer" },
+                    "user" : {
+                        "type" : "object",
+                        "$ref" : "#/definitions/User"
+                    }
+                }
+            },
+
+            "User" : {
+                "type" : "object",
+                "properties" : {
+                    "uid" : { "type" : "integer" },
+                    "first_name" : { "type" : "string" } ,
+                    "last_name" : { "type" : "string" } ,
+                    "email" : { "type" : "string" },
+                    "has_password" : { "type" : "boolean" }
                 }
             },
 
