@@ -5562,11 +5562,15 @@ section:hover .segment-side-buttons {
 .user-nolog.sing-in-header {
     margin-right: 11px;
 }
+    .tmx-import-slider {
+        width: 110px !important;
+    }
 
 .action {
 
-.tmx-import-slider {
-    width: 110px !important;
+
 }
 
+*, *:before, *:after {
+    box-sizing: content-box;
 }

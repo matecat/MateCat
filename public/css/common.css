@@ -1476,13 +1476,12 @@ margin-left: 10px;
         padding: 8px 10px;
         border-radius: 2px;
         font-size: 18px;
-        margin-right: 23px;
+        margin-right: 3px;
     }
 
 
 .btn-cancel.in-popup {
-            padding: 7px 18px!important;
-
+    padding: 7px 18px!important;
 }
 
 
@@ -1538,9 +1537,8 @@ float: none!important;
     }
 
  .slide-panel h1 .btn-ok,
- .slide-panel h1 .btn-cancel
-{
-	padding: 4px 18px;
+ .slide-panel h1 .btn-cancel {
+	padding: 0px 18px;
     }
 
 .mgmt-panel-tm .btn-ok:hover,
@@ -4951,9 +4949,3 @@ img.ui-user-top-image-general {
 }
 
 /*****************************/
-
-a.pull-left.btn-ok.uploadtm {
-    width: 93px;
-    position: relative;
-    left: -8px;
-}
