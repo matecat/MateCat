@@ -25,7 +25,6 @@ class changeJobsStatusController extends ajaxController {
                 'new_status'    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'only_if'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'pn'            => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
         );
@@ -41,16 +40,6 @@ class changeJobsStatusController extends ajaxController {
             $this->new_status = $postInput[ 'new_status' ];
         } else {
             throw new Exception( "Invalid Status" );
-        }
-
-        if ( !empty( $postInput[ 'only_if' ] ) ) {
-
-            if ( Constants_JobStatus::isAllowedStatus( $postInput[ 'only_if' ] ) ) {
-                $this->only_if = $postInput[ 'only_if' ];
-            } else {
-                throw new Exception( "Invalid Status" );
-            }
-
         }
 
     }

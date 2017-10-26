@@ -38,12 +38,9 @@ API.PROJECTS = {
      * @param type Job or Project: obj, prj
      * @param object
      * @param status
-     * @param only_if
      */
-    changeJobsOrProjectStatus: function(type,object,status,only_if) {
+    changeJobsOrProjectStatus: function(type,object,status) {
         // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
-
-        if(typeof only_if == 'undefined') only_if = 0;
 
         var id = object.id;
         var password = object.password;
@@ -54,7 +51,6 @@ API.PROJECTS = {
             id:			id,             // Job or Project Id
             password:   password,          // Job or Project Password
             page:		UI.Search.currentPage,        //The pagination ??
-            only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
             undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
 
