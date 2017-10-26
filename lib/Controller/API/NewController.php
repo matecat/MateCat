@@ -66,7 +66,10 @@ class NewController extends ajaxController {
     protected $new_keys = array();
 
     private $owner = "";
+
     /**
+     * This property is set by `validateAuthHeader` method in `doAction`.
+     *
      * @var Users_UserStruct
      */
     private $current_user;
@@ -712,6 +715,11 @@ class NewController extends ajaxController {
         $this->target_lang = implode(',', $targets);
     }
 
+    /**
+     * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
+     *
+     * @return bool
+     */
     private function validateAuthHeader() {
 
         $api_key = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
