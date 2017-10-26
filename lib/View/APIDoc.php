@@ -25,6 +25,13 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
   <link href='/public/api/dist/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='/public/api/dist/css/print.css' media='print' rel='stylesheet' type='text/css'/>
 
+    <script>
+        /*<![CDATA[*/
+        config = {} ;
+        config.swagger_host = '<?php echo INIT::$HTTPHOST ?>';
+        /*]]>*/
+    </script>
+
   <script src='/public/api/dist/lib/object-assign-pollyfill.js' type='text/javascript'></script>
   <script src='/public/api/dist/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
   <script src='/public/api/dist/lib/jquery.slideto.min.js' type='text/javascript'></script>
