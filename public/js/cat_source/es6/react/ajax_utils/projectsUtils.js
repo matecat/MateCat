@@ -50,8 +50,6 @@ API.PROJECTS = {
             res: 		type,            //Project or Job:
             id:			id,             // Job or Project Id
             password:   password,          // Job or Project Password
-            page:		UI.Search.currentPage,        //The pagination ??
-            undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
 
         // Filters
