@@ -199,6 +199,142 @@ $(function () {
                     }
                 }
             },
+            "/v1/new": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Create new Project on Matecat in detatched mode",
+                    "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/" +
+                        "new has a maximum file size limit of 200 MB per file and a max number of files of 600. " +
+                        "This is the same as /new API but it will process the project creation in background. Client can poll the v1 project creation status API " +
+                        "to be notified when the project is actually created.",
+
+                    "parameters": [
+                        {
+                            "name": "files",
+                            "in": "formData",
+                            "description": "The file(s) to be uploaded. You may also upload your own translation memories (TMX).",
+                            "required": true,
+                            "type": "file"
+                        },
+                        {
+                            "name": "project_name",
+                            "in": "formData",
+                            "description": "The name of the project you want create.",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "source_lang",
+                            "in": "formData",
+                            "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "target_lang",
+                            "in": "formData",
+                            "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)",
+                            "required": true,
+                            "type": "integer"
+                        },
+                        {
+                            "name": "tms_engine",
+                            "in": "formData",
+                            "description": "Identifier for Memory Server 0 means disabled, 1 means MyMemory)",
+                            "required": false,
+                            "type": "integer",
+                            "default": 1
+                        },
+                        {
+                            "name": "mt_engine",
+                            "in": "formData",
+                            "description": "Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).",
+                            "required": false,
+                            "type": "integer",
+                            "default": 1
+                        },
+                        {
+                            "name": "private_tm_key",
+                            "in": "formData",
+                            "description": "Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create a new key. - Multiple keys must be comma separated. Up to 5 keys allowed. (xxx345cvf,new,s342f234fc) - Only available if tms_engine is set to 1 or if is not used",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "subject",
+                            "in": "formData",
+                            "description": "The subject of the project you want to create.",
+                            "required": false,
+                            "type": "string",
+                            "default": "general"
+                        },
+                        {
+                            "name": "segmentation_rule",
+                            "in": "formData",
+                            "description": "The segmentation rule you want to use to parse your file.",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "owner_email",
+                            "in": "formData",
+                            "description": "The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.",
+                            "required": false,
+                            "type": "string",
+                            "default": "anonymous"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "The metadata for the created project.",
+                            "schema": {
+                                "$ref": "#/definitions/NewProject"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/v1/projects/{id_project}/{password}/creation_status": {
+                "get": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Shows creation status of a project",
+                    "description": "Shows creation status of a project.",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "urls",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectCreationStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
@@ -2121,6 +2257,18 @@ $(function () {
                 }
             },
 
+            "ProjectCreationStatus" : {
+                "type" : "object",
+                "properties" : {
+                    "status": { "type" : "integer" },
+                    "message": { "type" : "string" },
+                    "id_project": { "type" : "integer" },
+                    "project_pass": { "type" : "string" },
+                    "project_name": { "type" : "string" },
+                    "new_keys": { "type" : "string" },
+                    "analyze_url": { "type" : "string" }
+                }
+            },
 
             "Error" : {
                 "type" : "object",
