@@ -91,7 +91,7 @@ footer {
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 999999999;
+    z-index: 1;
 }
 
 footer p {
@@ -1166,13 +1166,7 @@ margin-top: 10px;
   background: #F1F1F1!important;
 }
 
-td.addtmxtd {
-width: 804px;
-}
-#activetm td.action .addtmx {
-    display: block;
-    margin-right: 17px;
-}
+td.addtmxtd {width: 804px;}
 
 input.email-export-tmx {
     width: 180px;
@@ -1585,39 +1579,26 @@ float: none!important;
     }
 
 
-.mgmt-panel-tm .nav-tabs
-{
+.mgmt-panel-tm .nav-tabs {
     background: #4D4D4D;
     display: block;
-    text-align: left;
-    width: 100%;
-    border-bottom: 1px solid #666;
-    /*padding-top: 5px;*/
 }
 
-.manage .searchbox
-{
+.manage .searchbox {
     min-height: 20px;
     height: 48px;
 }
 
-.searchbox, .mgmt-panel-tm, .mgmt-panel-gl
-{
-	float: left;
-	width: 100%;
-	font-size:12px;
-	background:#efefef url(../img/point.gif) 0 0 repeat-x;
+.searchbox, .mgmt-panel-tm, .mgmt-panel-gl {
+    font-size: 16px;
 }
 
 
-.mgmt-add-tm, .mgmt-add-gl, .searchbox, .mgmt-panel-gl, .addrow-tm, .addrow-gl, .dataTables_paginate
- {display:none;
+.mgmt-add-tm, .mgmt-add-gl, .searchbox, .mgmt-panel-gl, .addrow-tm, .addrow-gl, .dataTables_paginate {
+    display:none;
 }
 
-.add-tm span {
-margin: 2px 8px 0 0;
-
-}
+.add-tm span {margin: 2px 8px 0 0;}
 
 .notlogged  {color:#ccc!important;}
 
@@ -1632,19 +1613,6 @@ div.mgmt-container {
     padding-bottom: 150px;
     text-align: left;
     min-height: 400px;
-}
-
-
-
-
-.mgmt-panel-tm, .mgmt-panel-gl {
-
-margin:0 auto; overflow:hidden; width:100%;
-		background: #fff;
-		padding: 0 0 30px;
-			font-size:16px;
-		
-
 }
 
 
@@ -1796,33 +1764,23 @@ width: 100%;
 }
 
 
- .back-mgmt {padding:20px; margin-right:20px;}
+.back-mgmt {padding:20px; margin-right:20px;}
 
-.memory-mgmt.btn {
-width: auto;
-}
+.memory-mgmt.btn { width: auto;  }
 
-.slide-panel-body
-{
-    margin: 2%;
-}
+.slide-panel-body {margin: 2%;}
 
 .slide-panel table, .mgmt-gl, .mgmt-tm-nested {
-	border-bottom:40px;
-	border-collapse:collapse;
-	font-size: 15px;
-    float: left;
-    table-layout: fixed;
+    font-size: 15px;
     width: 100%;
     margin-bottom: 20px;
     border: 1px solid #ccc;
 }
 
-
-
 .privatekey .btn-ok {
 margin: 0!important
 }
+
 .btn-grey.uploadtm {
 clear: right;
 }
@@ -2711,16 +2669,12 @@ header .searchbox {
 
 .wrapper-dropdown-5 {
     position: relative;
-    cursor: pointer;
     outline: none;
     background: #dcdedf;
-    font-weight: bold;
     width: 12px;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
-    font-size: 17px !important;
     cursor: pointer;
-    color: #000;
     border: 1px solid #666;
     border-left: none;
     -moz-box-shadow: 0 1px 2px #ccc;
@@ -2730,8 +2684,6 @@ header .searchbox {
     text-decoration: none;
     text-align: center;
     padding: 4px 10px !important;
-    margin: 0 !important;
-    float: right;
 }
 
 
@@ -2993,26 +2945,25 @@ padding: 1% 2% 0;
 }
 
 td.action .btn {
-  cursor: pointer;
-  height: 22px;
-  color: #333!important;
-  /*width: 75px!important;*/
-  background: #dcdedf!important;
-  border-radius: 2px 0 0 2px;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
+    cursor: pointer;
+    height: 22px;
+    color: #333 !important;
+    width: 75px !important;
+    background: #dcdedf !important;
+    border-radius: 2px 0 0 2px;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    box-sizing: content-box;
+    padding: 5px 20px 0 20px !important;
+    text-align: center;
 }
 
-
-table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:center;background:#fff;float:left}
 
 td.action .btn .text {margin:0!important;}
 a.memory-mgmt.pull-right {
     margin-top: 35px;
- /*   background: url(../img/sprite.png) 0 -259px no-repeat;
-    background-size: 12px;
-   */ padding: 0 0 5px 18px;
+    padding: 0 0 5px 18px;
     margin-bottom: 5px;
 }
 
@@ -3092,6 +3043,9 @@ border: 1px solid #999;
 .searchbox input[type=submit]
 {
 	text-transform: uppercase;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 .searchbox .block {
 	float: left;
