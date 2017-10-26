@@ -77,7 +77,6 @@ class changeJobsStatusController extends ajaxController {
             $this->result[ 'code' ]    = 1;
             $this->result[ 'data' ]    = "OK";
             $this->result[ 'status' ]  = $this->new_status;
-            $this->result[ 'page' ]    = 1;
 
         } else {
 
