@@ -133,11 +133,6 @@ footer li
 	    margin-top: 5px;
 }
 
-footer .link-manage-page {
-    cursor: pointer;
-    text-decoration: underline;
-}
-
 ul.statistics-details {
     margin: 0 auto;
     overflow: hidden;
@@ -215,11 +210,16 @@ footer a
 {
     color: #fff;
     text-shadow: none;
+    text-decoration: underline;
+    font-weight: 100;
+    margin-right: 3px;
+    cursor: pointer;
 }
 
 footer a:hover
 {
     text-decoration: none;
+    color: #ffffff;
 }
 
 footer .wrapper
