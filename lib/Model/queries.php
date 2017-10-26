@@ -1977,22 +1977,19 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
  * @param      $res
  * @param      $id
  * @param      $status
- * @param      $only_if
  * @param null $jPassword
  *
  * @deprecated
  * //TODO: Refactoring with prepared statements
  *
  */
-function updateJobsStatus( $res, $id, $status, $only_if, $jPassword = null ) {
+function updateJobsStatus( $res, $id, $status, $jPassword = null ) {
 
     $db = Database::obtain();
 
     if ( $res == "prj" ) {
 
-        $status_filter_query = ( $only_if ) ? " and status_owner='" . $db->escape( $only_if ) . "'" : "";
-
-        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id . $status_filter_query;
+        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id;
 
         $db->query( $query );
 

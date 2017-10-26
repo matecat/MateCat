@@ -6,7 +6,6 @@ class changeJobsStatusController extends ajaxController {
     private $res_id;
     private $new_status = Constants_JobStatus::STATUS_ACTIVE;
     private $password = "fake wrong password";
-    private $only_if = false;
 
     public function __construct() {
 
@@ -72,7 +71,7 @@ class changeJobsStatusController extends ajaxController {
 
             $this->result[ 'old_status' ] = $strOld;
 
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status );
 
             $this->result[ 'code' ]    = 1;
             $this->result[ 'data' ]    = "OK";
@@ -80,7 +79,7 @@ class changeJobsStatusController extends ajaxController {
 
         } else {
 
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->password );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->password );
 
             $this->result[ 'code' ]   = 1;
             $this->result[ 'data' ]   = "OK";
