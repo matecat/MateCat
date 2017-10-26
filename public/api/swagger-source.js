@@ -615,6 +615,40 @@ $(function () {
                     }
                 },
             },
+            "/v2/teams/{id_team}/projects/{id_project}" : {
+                "get": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Get a project in a team scope",
+                    "description": "Get a project in a team scope.",
+                    "parameters" : [
+                        {
+                            "name"     : "id_team",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        },
+                        {
+                            "name"     : "id_project",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
@@ -2013,6 +2047,80 @@ $(function () {
                     "pending_invitations": { "type" : "array", "items" : "string" }
                 }
             },
+
+            "ProjectItem" : {
+                "type" : "object" ,
+                "properties" : {
+
+                    "project" : {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Project"
+                    }
+                }
+            },
+
+            "ExtendedJob" : {
+                "type" : "object",
+
+                "properties" : {
+                    "id": { "type" : "integer" },
+                    "password": { "type" : "password" },
+                    "source": { "type" : "string" },
+                    "target": { "type" : "string" },
+                    "sourceTxt": { "type" : "string" },
+                    "targetTxt": { "type" : "string" },
+                    "status": { "type" : "string" } ,
+                    "subject": { "type" : "string" },
+                    "owner": { "type" : "string", "format" : "email" },
+                    "open_threads_count": { "type" : "integer" },
+                    "create_timestamp": { "type" : "integer" },
+                    "create_date": { "type" : "string", "format" : "date-time" },
+                    // "formatted_create_date": "Oct 23, 08:37", // TODO: to be removed from SERVER
+                    "quality_overall": { "type" : "string" },
+                    "pee": { "type" : "integer" },
+                    "private_tm_key": { "type" : "string" },
+                    "warnings_count": { "type" : "integer" },
+                    "warning_segments": {
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object"
+                        }
+                    },
+                    "outsource": { "type" : "string" },
+                    "translator": { "type" : "string" } ,
+                    "total_raw_wc": { "type" : "float" },
+                    "stats" : {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Stats"
+                    }
+                }
+            },
+
+            "Project" : {
+                "type" : "object",
+                "properties" : {
+                    "id": { "type" : "integer" },
+                    "password": { "type" : "string" },
+                    "name": { "type" : "string" },
+                    "id_team": { "type" : "integer" },
+                    "id_assignee": { "type" : "integer" } ,
+                    "create_date": { "type" : "string", "format" : "date-time" },
+                    "fast_analysis_wc": { "type" : "float" },
+                    "standard_analysis_wc": { "type" : "float" },
+                    "project_slug": { "type" : "string" },
+                    "features": { "type" : "string" },
+                    "is_cancelled": { "type" : "boolean" },
+                    "is_archived": { "type" : "boolean" },
+                    "remote_file_service": { "type" : "string" },
+                    "jobs" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/ExtendedJob"
+                        }
+                    }
+                }
+            },
+
 
             "Error" : {
                 "type" : "object",

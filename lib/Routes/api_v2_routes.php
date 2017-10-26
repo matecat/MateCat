@@ -140,8 +140,8 @@ $klein->with('/api/v2/teams', function() {
     route( '/[i:id_team]/members', 'POST', '\API\V2\TeamMembersController', 'update') ;
     route( '/[i:id_team]/members/[i:uid_member]', 'DELETE' , '\API\V2\TeamMembersController', 'delete' );
 
-    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\TeamsProjectsController', 'update' ) ;
     route( '/[i:id_team]/projects/[i:id_project]', 'GET', 'API\V2\TeamsProjectsController', 'get' ) ;
+    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\TeamsProjectsController', 'update' ) ;
 
 }) ;
 
