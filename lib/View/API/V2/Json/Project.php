@@ -71,8 +71,8 @@ class Project {
                 'project_slug'         => Utils::friendly_slug( $data->name ),
                 'jobs'                 => $jobJSONs,
                 'features'             => implode( ",", $data->getFeatures()->getCodes() ),
-                'has_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
-                'has_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
+                'is_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
+                'is_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $data->getRemoteFileServiceName()
         ];
 
