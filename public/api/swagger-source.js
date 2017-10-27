@@ -627,7 +627,7 @@ $(function () {
                     "description": "Update team.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -661,7 +661,7 @@ $(function () {
                     "description": "List team members.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -687,7 +687,7 @@ $(function () {
                     "description": "Create new team memberships.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -731,7 +731,7 @@ $(function () {
                             "required"    : true
                         },
                         {
-                            "name"        : "uid_member",
+                            "name"        : "id_member",
                             "type"        : "integer",
                             "in"          : "path",
                             "required"    : true,
