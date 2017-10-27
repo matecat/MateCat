@@ -11,9 +11,6 @@ $.extend( UI, {
             UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
-            UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if (!UI.hiddenTextEnabled) return;
             e.preventDefault();
@@ -243,6 +240,8 @@ $.extend( UI, {
                 e.preventDefault();
                 $('.tag-autocomplete li.current').click();
                 return false;
+            } else {
+                UI.handleReturn(e);
             }
         }
     },

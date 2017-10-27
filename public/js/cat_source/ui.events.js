@@ -253,30 +253,36 @@ $.extend(UI, {
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
 
-            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+			var editareaClone = UI.editarea.clone();
 
-            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
 
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+            editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
 
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
 
-            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
+            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
+            editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
 
 			saveSelection();
-			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+			if(!$('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				saveSelection();
 			}
-			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			$('.rangySelectionBoundary', UI.editarea).remove();
-			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
-			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
+			var ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
+			$('.rangySelectionBoundary', editareaClone).remove();
+			$('.tag-autocomplete-endcursor', editareaClone).after(ph);
+			$('.tag-autocomplete-endcursor', editareaClone).before(htmlEncode($(this).text()));
 			restoreSelection();
+            $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
 			UI.closeTagAutocompletePanel();
-			// UI.lockTags(UI.editarea);
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+
+            // UI.lockTags(UI.editarea);
 			UI.segmentQA(UI.currentSegment);
 		});
 
