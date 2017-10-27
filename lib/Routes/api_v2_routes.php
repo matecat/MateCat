@@ -129,6 +129,7 @@ route( '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping' );
 
 route( '/api/v2/user/[:user_api_key]', 'GET',  '\API\V2\KeyCheckController',   'getUID' );
 route( '/api/v2/keys/list',            'GET',  '\API\V2\MemoryKeysController', 'listKeys' );
+route( '/api/v2/engines/list',         'GET',  '\API\V2\EnginesController',    'listEngines' );
 
 $klein->with('/api/v2/teams', function() {
 
