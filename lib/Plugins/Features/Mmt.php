@@ -100,8 +100,9 @@ class Mmt extends BaseFeature {
         $UserMetadataDao = new MetadataDao();
         $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
         $keyList = self::_getKeyringOwnerKeys( $userStruct );
-        $newTestCreatedMT->activate( $keyList );
-
+        if( !empty( $keyList ) ){
+            $newTestCreatedMT->activate( $keyList );
+        }
     }
 
     public function engineCreationFailed( $errorObject, $class_load ){
