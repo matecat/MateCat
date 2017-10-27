@@ -197,6 +197,13 @@ var SegmentActions = {
             sid: sid,
             matches: matches
         });
+    },
+    renderReviseErrors: function (sid, data) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.RENDER_REVISE_ISSUES,
+            sid: sid,
+            data: data
+        });
     }
     /***********************************/
 

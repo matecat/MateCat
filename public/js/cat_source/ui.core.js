@@ -1084,6 +1084,7 @@ UI = {
                 var mountPoint = $(".article-segments-container-" + fid)[0];
                 this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
                     fid: fid,
+                    isReviewImproved: ReviewImproved.enabled(),
                     enableTagProjection: UI.enableTagProjection,
                     decodeTextFn: UI.decodeText,
                     tagModesEnabled: UI.tagModesEnabled,

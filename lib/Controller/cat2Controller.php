@@ -9,4 +9,9 @@
 class cat2Controller extends catController
 {
     protected $templateName = "revise.html";
+
+    public function setTemplateVars() {
+        parent::setTemplateVars();
+        $this->template->review_type = "revise2";
+    }
 }

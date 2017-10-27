@@ -1,5 +1,5 @@
 /*
- Component: ui.review
+ Component: ui.review2
  */
 
 Review = {
@@ -21,7 +21,7 @@ if ( Review.enabled() )
                 context: sid,
                 msg: UI.alertNotTranslatedMessage
             });
-        }
+        };
 
         $.extend(Review, {
             evalOpenableSegment : function(section) {
@@ -55,16 +55,55 @@ if ( Review.enabled() )
                 // $('.editor .sub-editor.review .track-changes p').html( diffHTML );
             },
 
-            setReviewErrorData: function (d) {
-                $.each(d, function (index) {
-
-                    if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
-                    if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
-                    if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
-                    if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
-                    if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
-
-                });
+            setReviewErrorData: function (id) {
+                let errors =[
+                    {
+                        "start": 149,
+                        "end": 169,
+                        "selected_string": "maggior </g></g>",
+                        "errors": [
+                            {
+                                "name": "t1",
+                                "value": "2"
+                            }
+                        ],
+                        "id": 1
+                    },
+                    {
+                        "start": 12,
+                        "end": 33,
+                        "selected_string": "Esistono innumerevoli",
+                        "errors": [
+                            {
+                                "name": "t5",
+                                "value": "2"
+                            }
+                        ],
+                        "id": 2
+                    },
+                    {
+                        "start": 12,
+                        "end": 63,
+                        "selected_string": "Esistono innumerevoli</g><g id=\"2\"> variazioni",
+                        "errors": [
+                            {
+                                "name": "t1",
+                                "value": "2"
+                            }
+                        ],
+                        "id": 3
+                    }
+                ];
+                SegmentActions.renderReviseErrors(id, errors)
+                // $.each(d, function (index) {
+                //
+                //     if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
+                //     if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
+                //     if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
+                //     if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
+                //     if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
+                //
+                // });
 
             },
 
@@ -130,7 +169,7 @@ if ( Review.enabled() )
  * Only bind events for specific review type
  */
 
-if ( Review.enabled() && Review.type == 'simple' ) {
+if ( Review.enabled() && Review.type == 'revise2' ) {
 
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
@@ -169,7 +208,8 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         xSegment = $('#segment-' + id_segment);
         if(d.original == '') d.original = xEditarea.text();
         if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
-        UI.setReviewErrorData(d.error_data);
+        // UI.setReviewErrorData(d.error_data);
+        UI.setReviewErrorData(id_segment);
         // UI.trackChanges(xEditarea);
     });
 

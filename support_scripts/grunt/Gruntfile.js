@@ -258,7 +258,7 @@ module.exports = function(grunt) {
 
             revise: {
                 src: [
-                    // basePath + 'build/templates.js',
+                    basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.editarea.js',

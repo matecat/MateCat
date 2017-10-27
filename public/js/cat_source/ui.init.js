@@ -122,7 +122,7 @@ $.extend(UI, {
         SegmentActions.registerTab('glossary', true, false);
         SegmentActions.registerTab('alternatives', false, false);
         // SegmentActions.registerTab('messages', false, false);
-        if ( Review.enabled() && Review.type === 'simple' ) {
+        if ( Review.enabled() ) {
             UI.registerReviseTab();
 
         }

@@ -285,6 +285,9 @@ AppDispatcher.register(function(action) {
             SegmentStore.setSegmentAsTagged(action.id, action.fid)
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
+        case SegmentConstants.RENDER_REVISE_ISSUES:
+            SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);
+            break;
         default:
     }
 });

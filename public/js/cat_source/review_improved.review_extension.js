@@ -154,21 +154,29 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             return translation ;
         },
-        renderSegments: function (segments, justCreated, fid) {
-
-            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-                var mountPoint = $(".article-segments-container-" + fid)[0];
-                ReactDOM.render(React.createElement(SegmentsContainer,{
-                    fid : fid,
-                    isReviewImproved: true,
-                    enableTagProjection: UI.enableTagProjection,
-                    decodeTextFn: UI.decodeText,
-                    tagModesEnabled: UI.tagModesEnabled,
-                    speech2textEnabledFn: Speech2Text.enabled
-                }), mountPoint);
-                SegmentActions.renderSegments(segments, fid);
-            }
-        },
+        // renderSegments: function (segments, justCreated, fid, where) {
+        //
+        //     if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+        //         if ( !this.SegmentsContainers || !this.SegmentsContainers[fid] ) {
+        //             if (!this.SegmentsContainers) {
+        //                 this.SegmentsContainers = [];
+        //             }
+        //             var mountPoint = $(".article-segments-container-" + fid)[0];
+        //             this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
+        //                 fid: fid,
+        //                 isReviewImproved: true,
+        //                 enableTagProjection: UI.enableTagProjection,
+        //                 decodeTextFn: UI.decodeText,
+        //                 tagModesEnabled: UI.tagModesEnabled,
+        //                 speech2textEnabledFn: Speech2Text.enabled,
+        //             }), mountPoint);
+        //             SegmentActions.renderSegments(segments, fid);
+        //         } else {
+        //             SegmentActions.addSegments(segments, fid, where);
+        //         }
+        //         UI.registerFooterTabs();
+        //     }
+        // },
         rejectAndGoToNext : function() {
             UI.setTranslation({
                 id_segment: UI.currentSegmentId,

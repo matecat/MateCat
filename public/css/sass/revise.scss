@@ -1,0 +1,16 @@
+.tab.review {
+    .track-changes {
+        p::selection, span::selection, br::selection {
+            background-color: #FFFF00;
+        }
+    }
+    .error-list {
+        float: left;
+        padding: 10px;
+        .error-list-item {
+            padding: 5px;
+            cursor: pointer;
+            border: 1px solid grey;
+        }
+    }
+}
