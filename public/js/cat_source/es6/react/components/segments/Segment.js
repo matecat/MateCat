@@ -24,7 +24,7 @@ class Segment extends React.Component {
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
 
-        let readonly = !!((this.props.segment.readonly == 'true') || ($('body').hasClass('archived')));
+        let readonly = UI.isReadonlySegment(this.props.segment);
 
         this.state = {
             segment_classes : [],
@@ -325,6 +325,7 @@ class Segment extends React.Component {
                     <SegmentHeader sid={this.props.segment.sid} autopropagated={this.state.autopropagated}/>
                     <SegmentBody
                         segment={this.props.segment}
+                        readonly={this.state.readonly}
                         isReviewImproved={this.props.isReviewImproved}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
