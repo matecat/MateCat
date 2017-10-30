@@ -72,7 +72,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 "Project"
               ],
               "summary": "Create new Project on Matecat",
-              "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. Matecat PRO accept only 68 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
+              "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. MateCat PRO accepts 70 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
               "parameters": [
                 {
                   "name": "files",
@@ -143,7 +143,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 {
                   "name": "owner_email",
                   "in": "formData",
-                  "description": "The email of the owner of the project.",
+                  "description": "The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.",
                   "required": false,
                   "type": "string",
                   "default": "anonymous"
@@ -458,6 +458,27 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 }
               }
             }
+          },
+          "/v2/teams": {
+              "get": {
+                  "tags": [
+                      "Teams",
+                  ],
+                  "summary": "List available teams",
+                  "description": "Returns a list of all teams the current user is member of.",
+                  "parameters": [],
+                  "responses": {
+                      "200": {
+                          "description": "Teams",
+                          "schema": {
+                              "$ref": "#/definitions/Teams"
+                          }
+                      },
+                      "default": {
+                          "description": "Unexpected error"
+                      }
+                  }
+              },
           },
           "/v2/jobs/{id_job}/{password}/translation-issues": {
             "get": {
@@ -1696,7 +1717,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 "type": "integer",
                 "format": "int32"
               },
-              "id:job": {
+              "id_job": {
                 "type": "integer",
                 "format": "int32"
               },
@@ -1732,7 +1753,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
           "UploadGlossaryStatusObject": {
             "type": "object",
             "properties": {
-              "errore": {
+              "error": {
                 "type": "array",
                 "items": {
                   "type": "object"
@@ -1764,6 +1785,43 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "completed": {
                 "type": "boolean"
               }
+            }
+          },
+          "Teams" : {
+            "type": "object",
+              "properties": {
+                  "id" : { "type" : "integer", "required" : true },
+                  "name": { "type" : "string", "required" : true },
+                  "type": { "type" : "string", "required" : true },
+                  "created_at": {
+                      "type" : "string" ,
+                      "format" : "date-time",
+                      "required" : true
+                  },
+                  "created_by": {"type" : "integer", "required" : true },
+                  "pending_invitations": { "type" : "array", "items" : "string" }
+              }
+          },
+
+          "Error" : {
+            "type" : "object",
+            "properties" : {
+                "errors" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "code" : "integer",
+                            "message" : "string"
+                        }
+                    }
+                },
+                "data" : {
+                    "type" : "array",
+                    "items" : { "type" : "object" },
+                    "description" : "This property contains any debug data that can " +
+                        "serve for better understanding of the error"
+                }
             }
           }
         }
@@ -1834,6 +1892,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               
                 <li data-id="Comments"><a class="anchor_api">Comments</a></li>
                 <li data-id="Quality_Report"><a class="anchor_api">Quality Report</a></li>
+                <li data-id="Teams"><a class="anchor_api">Teams</a></li>
                 <li data-id="Translation_Issues"><a class="anchor_api">Translation Issues</a></li>
                 <li data-id="Translation_Versions"><a class="anchor_api">Translation Versions</a></li>
                 <li data-id="Job"><a class="anchor_api">Job</a></li>
