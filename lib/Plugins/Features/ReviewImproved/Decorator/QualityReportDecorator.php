@@ -8,6 +8,7 @@
 
 namespace Features\ReviewImproved\Decorator;
 
+use Bootstrap;
 use Features\QaCheckBlacklist;
 use Features\QaCheckGlossary;
 use Features\ReviewImproved\Model\QualityReportModel;
@@ -33,8 +34,12 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
 
     /**
      * @param $template \PHPTAL
+     *
+     * @return mixed|void
      */
     public function decorate( $template ) {
+        $this->setTempalteVarsBefore( $template );
+
         $template->current_date = strftime('%c', strtotime('now')) ;
 
         $template->basepath     = INIT::$BASEURL;
@@ -92,6 +97,8 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
                }
            }
        }
+
+       $this->setTemplateVarsAfter( $template );
     }
 
     public function getFilenameForDownload() {
