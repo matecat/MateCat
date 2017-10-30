@@ -5,7 +5,6 @@ div.segment-notes ul.graysmall li {
 div.segment-notes ul.graysmall li span.note-label {
     font-weight: bold;
 }
-
 .segments-notes-container div.note {
     text-align: left;
     padding: 20px;
@@ -14,7 +13,11 @@ div.segment-notes ul.graysmall li span.note-label {
     font-size: 14px;
     line-height: 16px;
     float: left;
-    display: inline-flex;
+    width: 100%;
+}
+
+.segments-notes-container div.note p{
+    margin: 0;
 }
 
 .note-label {

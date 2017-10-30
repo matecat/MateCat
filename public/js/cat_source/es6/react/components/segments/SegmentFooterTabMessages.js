@@ -2,9 +2,10 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+let React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let showdown = require( "showdown" );
 class SegmentFooterTabMessages extends React.Component {
 
     constructor(props) {
@@ -31,7 +32,9 @@ class SegmentFooterTabMessages extends React.Component {
                 });
 
             } else if (typeof item.json === "string") {
-                let html = <div key={"note-json" + index} className="note" style={{whiteSpace: "pre"}} dangerouslySetInnerHTML={self.allowHTML(item.json)}/>
+                let converter = new showdown.Converter();
+                let text = converter.makeHtml( item.json );
+                let html = <div key={"note-json" + index} className="note" style={{whiteSpace: "pre"}} dangerouslySetInnerHTML={self.allowHTML(text)}/>
                 notesHtml.push(html);
             }
         });

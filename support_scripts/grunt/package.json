@@ -39,7 +39,8 @@
     "react-addons-css-transition-group": "^15.6.2",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.0.0",
-    "sprintf": "^0.1.5"
+    "sprintf": "^0.1.5",
+    "showdown": "^1.8.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
