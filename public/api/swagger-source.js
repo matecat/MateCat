@@ -751,6 +751,34 @@ $(function () {
                     }
                 },
             },
+            "/v2/teams/{id_team}/projects" : {
+                "get": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Get the list of projects in a team",
+                    "description": "Get the list of projects in a team.",
+                    "parameters" : [
+                        {
+                            "name"     : "id_team",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
             "/v2/teams/{id_team}/projects/{id_project}" : {
                 "get": {
                     "tags": [
@@ -771,6 +799,60 @@ $(function () {
                             "in"       : "path",
                             "required" : true,
                         }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "put": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Update a team's project",
+                    "description": "Updates a team's project.",
+                    "parameters" : [
+                        {
+                            "name"     : "id_team",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        },
+                        {
+                            "name"     : "id_project",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        },
+
+                        {
+                            "name" : "id_assignee",
+                            "type" : "integer",
+                            "in" : "formData",
+                            "required" : false,
+                            "description" : "Provide a user's `uid` property to change project assignee"
+                        },
+                        {
+                            "name" : "id_team",
+                            "type" : "integer",
+                            "in" : "formData",
+                            "required" : false,
+                            "description" : "Provide a given project's team to change project team"
+                        },
+                        {
+                            "name" : "name",
+                            "type" : "string",
+                            "in" : "formData",
+                            "required" : false,
+                            "description" : "Changes the project's name"
+                        },
                     ],
                     "responses": {
                         "200": {

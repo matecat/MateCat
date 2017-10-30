@@ -222,7 +222,7 @@ class Segment extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log("Udate Segment" + this.props.segment.sid);
+        console.log("Update Segment" + this.props.segment.sid);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
