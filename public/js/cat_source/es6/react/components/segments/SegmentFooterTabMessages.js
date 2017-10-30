@@ -13,22 +13,26 @@ class SegmentFooterTabMessages extends React.Component {
 
     getNotes() {
         let notesHtml = [];
+        var self = this;
         this.props.notes.forEach(function (item, index) {
             if (item.note && item.note !== "") {
-                let html = <li key={"note-" + index}>
+                let html = <div className="note" key={"note-" + index}>
                     <span className="note-label">Note: </span>
                     <span> {item.note} </span>
-                </li>;
+                </div>;
                 notesHtml.push(html);
-            } else if (item.json && Object.keys(item.json).length > 0) {
+            } else if (item.json && typeof item.json === "object" && Object.keys(item.json).length > 0) {
                 Object.keys(item.json).forEach(function (key, index) {
-                    let html = <li key={"note-json" + index}>
+                    let html = <div className="note" key={"note-json" + index}>
                         <span className="note-label">{key.toUpperCase()}: </span>
                         <span> {item.json[key]} </span>
-                    </li>;
+                    </div>;
                     notesHtml.push(html);
                 });
 
+            } else if (typeof item.json === "string") {
+                let html = <div key={"note-json" + index} className="note" style={{whiteSpace: "pre"}} dangerouslySetInnerHTML={self.allowHTML(item.json)}/>
+                notesHtml.push(html);
             }
         });
         return notesHtml;
@@ -59,9 +63,9 @@ class SegmentFooterTabMessages extends React.Component {
                 <div className="overflow">
                     <div className="segment-notes-container">
                         <div className="segment-notes-panel-body">
-                            <ul className="graysmall">
+                            <div className="segments-notes-container">
                                 {this.getNotes()}
-                            </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
