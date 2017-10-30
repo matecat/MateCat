@@ -269,19 +269,20 @@ $.extend(UI, {
             editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
 
 			saveSelection();
+            var ph = "";
 			if(!$('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
-				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+				setCursorPosition($("tag-autocomplete-endcursor", editareaClone)[0]);
 				saveSelection();
+			} else {
+                ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
 			}
-			var ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
 			$('.rangySelectionBoundary', editareaClone).remove();
 			$('.tag-autocomplete-endcursor', editareaClone).after(ph);
 			$('.tag-autocomplete-endcursor', editareaClone).before(htmlEncode($(this).text()));
-			restoreSelection();
+            restoreSelection();
             $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
 			UI.closeTagAutocompletePanel();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
-
             // UI.lockTags(UI.editarea);
 			UI.segmentQA(UI.currentSegment);
 		});
