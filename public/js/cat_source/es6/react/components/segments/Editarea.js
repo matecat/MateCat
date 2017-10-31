@@ -6,6 +6,7 @@ let React = require('react');
 let $ = require('jquery');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
+let Immutable = require('immutable');
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -113,6 +114,10 @@ class Editarea extends React.Component {
     }
     componentWillMount() {
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
+            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation)
     }
     render() {
         let lang = '';
