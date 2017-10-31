@@ -1,5 +1,7 @@
 <?php
 
+use Constants\Ices;
+
 class getContributionController extends ajaxController {
 
     protected $id_segment;
@@ -359,9 +361,7 @@ class getContributionController extends ajaxController {
                 );
             }
 
-            if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && $match[ 'match' ] == '100%' ){
-                $match[ 'match' ] = '101%';
-            }
+            $match = $this->_iceMatchRewrite( $match );
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
                 $match[ 'sentence_confidence' ] = round( $match[ 'sentence_confidence' ], 0 ) . "%";
@@ -379,6 +379,20 @@ class getContributionController extends ajaxController {
         }
 
         $this->result[ 'data' ][ 'matches' ] = $matches;
+    }
+
+    protected function _iceMatchRewrite( $match ){
+
+        if( $match[ 'match' ] == '100%' ){
+            list( $lang, ) = explode( '-', $this->jobData[ 'target' ] );
+            if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ){
+                $match[ 'match' ] = '101%';
+            }
+            //else do not rewrite the match value
+        }
+
+        return $match;
+
     }
 
     private function setSuggestionReport( $matches ) {

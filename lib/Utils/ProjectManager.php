@@ -1066,16 +1066,21 @@ class ProjectManager {
             }
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
-
-                if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
-                    $this->insertSegmentNotesForFile();
-                }
-
                 insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id ) ;
                 }
+            }
+        }
+
+
+        /**
+         * Operations to be done once per file
+         */
+        foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
+            if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
+                $this->insertSegmentNotesForFile();
             }
         }
 
