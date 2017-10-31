@@ -2652,10 +2652,17 @@ UI = {
     processContributions : function() {
     },
 
+    /**
+     * This function is overwritten in ui.contribution.js. This version is meant to be used by
+     * customisations that do not make use of contributions.
+     *
+     * @param segment
+     * @param next
+     */
     getContribution : function(segment, next) {
-        var deferred = new jQuery.Deferred() ;
+        UI.blockButtons = false ;
         $( segment ).addClass('loaded');
-
+        var deferred = new jQuery.Deferred() ;
         return deferred.resolve();
     },
     /**
