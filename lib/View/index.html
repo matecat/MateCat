@@ -67,7 +67,7 @@
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
-                splitSegmentEnabled: true,
+                splitSegmentEnabled: ${splitSegmentEnabled},
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
