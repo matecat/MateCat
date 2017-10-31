@@ -296,13 +296,15 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {(this.props.segment.ice_locked !== '1') ? (
+                    {(this.props.segment.ice_locked !== '1' ) ? (
+                        config.splitSegmentEnabled ? (
                         <div className="actions">
                             <a className="split" href="#" title="Click to split segment">
                                 <span className="icon-split"/>
                             </a>
                             <p className="split-shortcut">CTRL + S</p>
                         </div>
+                        ) : (null)
                     ) : (
                         !readonly ? (
                             this.state.unlocked ? (
