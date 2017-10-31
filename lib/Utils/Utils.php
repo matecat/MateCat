@@ -391,7 +391,12 @@ class Utils {
 
     }
 
+    //Array_column() is not supported on PHP 5.4, so i'll rewrite it
 	public static function array_column( array $input, $column_key, $index_key = null ) {
+
+        if ( function_exists( 'array_column' ) ) {
+            return array_column( $input, $column_key, $index_key );
+        }
 
 		$result = array();
 		foreach ( $input as $k => $v ) {

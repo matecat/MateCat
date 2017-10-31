@@ -1111,6 +1111,7 @@ width: 804px;
 }
 #activetm td.action .addtmx {
     display: block;
+    margin-right: 17px;
 }
 
 input.email-export-tmx {
@@ -1407,19 +1408,16 @@ margin-left: 10px;
     .uploadtm.disabled,
     .download-manage.btn-ok
     {
-	    color: #fff;
-	    background: #09beec;
-	    border: 1px solid #848689;
-	    font-weight: bold;
-	    text-decoration: none;
-	    padding: 8px 18px;
-/*	    margin: 0 5px;*/
-	    border-radius: 2px;
-	    font-size: 18px;
-	    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	    background: linear-gradient(top,  #09beec,  #119ec4);
-}
+        color: #fff;
+        background: #09beec;
+        border: 1px solid #797979;
+        font-weight: bold;
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 2px;
+        font-size: 18px;
+        margin-right: 23px;
+    }
 
 
 .btn-cancel.in-popup {
@@ -1492,10 +1490,9 @@ float: none!important;
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover
 {
-	cursor: pointer;
-	-webkit-box-shadow: 0 1px 2px #ccc;
-	box-shadow: 0 1px 2px #ccc;
-	border:1px solid #000;
+    background-color: #08b3de;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    border: 1px solid #797979;
     }
 		.mgmt-panel-gl .btn-ok:active,
 	.mgmt-panel-tm .btn-ok:active,
@@ -1618,7 +1615,7 @@ th.owner,td.owner {
 
 .mgmt-tm .check {
 		/*width:6%!important;*/
-		width:60px!important;
+		width:55px!important;
 		text-align: center;
 }
 
@@ -1635,11 +1632,11 @@ th.owner,td.owner {
 
 
 .mgmt-tm  th.action, .mgmt-tm td.action {
-    width: 172px!important;
+    width: 175px!important;
 }
 
 th.activate, td.activate {
-    width: 50px!important;
+    width: 55px!important;
     text-align: center;
 }
 
@@ -1816,8 +1813,8 @@ font-size:14px;
 .mgmt-tm .canceladdtmx,
 .mgmt-tm .canceladdglossary
 {
-    width: 35px;
-    margin-left: 12px;
+    width: 32px;
+    margin-left: 6px;
 }
 
 .canceladdtmx ,
@@ -1905,7 +1902,7 @@ td.uploadfile
 }
 
 .mgmt-tm .btn-grey .text {
-    width: 35px!important;
+    width: 33px!important;
 }
 
 .canceladdtmx.btn-grey .text,
@@ -1982,6 +1979,8 @@ td.uploadfile .canceladdtmx,
 td.uploadfile .canceladdglossary
 {
     margin-bottom: 0px;
+    margin-right: 5px;
+    width: 33px;
 }
 
 td.uploadfile input[type="file"] {
@@ -2015,11 +2014,12 @@ td.uploadfile .uploadprogress .error {
 }
 
 .filter-box input {
-    padding:3px 10px 3px 30px;
+    padding: 3px 10px 3px 30px;
     border-radius: 2px;
     border: 1px solid #ccc;
     color: #999;
-        width: 123px;
+    width: 106px;
+    margin-right: 23px;
 }
 
 .dataTables_length, .dataTables_info {display: none;}
@@ -2968,14 +2968,11 @@ width:100%;
 }
 
 .nav-tabs>li {
-float: left;
-position: relative;
-width: auto !important;
-background: #efefef url(../img/point.gif) 0 0 repeat-x;
-z-index: 9999999999999;
+    float: left;
+    position: relative;
+    background: #efefef;
 }
 .nav>li {
-position: relative;
 display: block;
 }
 
@@ -3004,18 +3001,14 @@ padding-top: 5px !important;
 
 }
 .nav-tabs>li>a {
--webkit-transition: all 100ms ease-in;
--moz-transition: all 100ms ease-in;
-padding: 4px 20px;
-display: block;
-color: #939598;
-font-size: 18px;
-float: left;
-font-weight: bold;
-text-decoration: none;
-border-right: 1px solid #666;
-border-top: 1px solid #666;
--webkit-box-shadow: inset 0 -1px 4px #ccc;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    padding: 4px 20px;
+    color: #939598;
+    float: left;
+    font-weight: bold;
+    text-decoration: none;
+    border-right: 1px solid #666;
 }
 
 .text-center {
@@ -4318,6 +4311,12 @@ text-align: left;
     content: "\ea8d";
 }
 
+.icon-go-to-first:before {
+    content: "\ea8e";
+}
+.icon-go-to-last:before {
+    content: "\ea8f";
+}
 
 
 
@@ -4902,3 +4901,8 @@ img.ui-user-top-image-general {
 
 /*****************************/
 
+a.pull-left.btn-ok.uploadtm {
+    width: 93px;
+    position: relative;
+    left: -8px;
+}

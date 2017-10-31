@@ -6,6 +6,7 @@ let React = require('react');
 let $ = require('jquery');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
+let Immutable = require('immutable');
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -85,7 +86,7 @@ class Editarea extends React.Component {
         $('.editor .editToolbar').removeClass('visible');
     }
     onClickEvent(event) {
-        if (this.props.segment.readonly == 'true' || this.props.locked) {
+        if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
             UI.editAreaClick(event.currentTarget);
@@ -114,15 +115,19 @@ class Editarea extends React.Component {
     componentWillMount() {
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
     }
+    shouldComponentUpdate(nextProps, nextState) {
+        return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
+            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation)
+    }
     render() {
         let lang = '';
         let readonly = false;
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
-            readonly = ((this.props.segment.readonly === 'true') || this.props.locked);
+            readonly = ((this.props.readonly) || this.props.locked);
         }
         let classes = this.state.editAreaClasses.slice();
-        if (this.props.locked || readonly) {
+        if (this.props.locked || this.props.readonly) {
             classes.push('area')
         } else {
             classes.push('editarea')
@@ -131,7 +136,7 @@ class Editarea extends React.Component {
         return <div className={classes.join(' ')}
                     id={'segment-' + this.props.segment.sid + '-editarea'}
                     lang={lang}
-                    contentEditable={!readonly}
+                    contentEditable={!this.props.readonly}
                     spellCheck="true"
                     data-sid={this.props.segment.sid}
                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }

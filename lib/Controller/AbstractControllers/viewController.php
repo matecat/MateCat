@@ -2,8 +2,6 @@
 /**
  * Created by PhpStorm.
  */
-use ConnectedServices\GDrive;
-
 
 /**
  * Abstract class for all html views
@@ -137,7 +135,6 @@ abstract class viewController extends controller {
     /**
      * Class constructor
      *
-     * @param bool $isAuthRequired
      */
     public function __construct() {
 

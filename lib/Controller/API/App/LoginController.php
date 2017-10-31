@@ -8,10 +8,9 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
+use AuthCookie;
 use Users\RedeemableProject;
-
-Use AuthCookie ;
+use Users_UserDao;
 
 class LoginController extends AbstractStatefulKleinController  {
 
@@ -27,11 +26,11 @@ class LoginController extends AbstractStatefulKleinController  {
             'password' => FILTER_SANITIZE_STRING
         ));
 
-        $dao = new \Users_UserDao() ;
+        $dao = new Users_UserDao() ;
         $user = $dao->getByEmail( $params['email'] ) ;
 
         if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
-            \AuthCookie::setCredentials($user->email, $user->uid ) ;
+            AuthCookie::setCredentials($user->email, $user->uid ) ;
 
             $project = new RedeemableProject( $user, $_SESSION ) ;
 

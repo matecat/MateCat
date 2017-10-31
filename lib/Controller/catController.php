@@ -78,7 +78,7 @@ class catController extends viewController {
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
-        parent::__construct( false );
+        parent::__construct();
 
         parent::makeTemplate( $this->templateName );
 
@@ -188,7 +188,7 @@ class catController extends viewController {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
                 //FIXME use Dao
-                updateJobsStatus( $res, $this->jid, $new_status, null, $this->password );
+                updateJobsStatus( $res, $this->jid, $new_status, $this->password );
                 $this->job_archived = true;
             }
 
@@ -570,6 +570,9 @@ class catController extends viewController {
         $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
+
+        //Maybe some plugin want disable the Split from the config
+        $this->template->splitSegmentEnabled = var_export(true, true);
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();

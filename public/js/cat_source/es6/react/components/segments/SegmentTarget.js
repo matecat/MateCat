@@ -43,7 +43,7 @@ class SegmentTarget extends React.Component {
     }
 
     onClickEvent(event) {
-        if (this.props.segment.readonly == 'true') {
+        if (this.props.readonly) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         }
     }
@@ -137,6 +137,7 @@ class SegmentTarget extends React.Component {
                                         segment={this.props.segment}
                                         translation={translation}
                                         locked={this.props.locked}
+                                        readonly={this.props.readonly}
                                     />
 
                                     {s2tMicro}

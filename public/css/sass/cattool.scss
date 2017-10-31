@@ -76,11 +76,15 @@ section:hover .segment-side-buttons {
 }
 
 //ICE MATCH
-.ice-locked .footer,
-.ice-locked .buttons,
-.ice-locked .copy,
-.ice-locked .loader {
-  display: none !important;
+.ice-locked,
+.readonly {
+  .footer,
+  .buttons,
+  .copy,
+  .loader {
+    display: none !important;
+  }
 }
+
 
 

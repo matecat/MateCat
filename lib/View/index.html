@@ -67,7 +67,7 @@
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
-                splitSegmentEnabled: true,
+                splitSegmentEnabled: ${splitSegmentEnabled},
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
@@ -276,10 +276,14 @@
                     <ul class="statistics-core">
 
                         <li id="stat-eqwords">
-                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
+                            <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
                                 <span tal:condition="not: isCJK">Words</span>
                                 <span tal:condition="isCJK">Characters</span>
                             </a>
+                            <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
+                                <span tal:condition="not: isCJK">Words</span>
+                                <span tal:condition="isCJK">Characters</span>
+                            </tal:block>
                             <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>

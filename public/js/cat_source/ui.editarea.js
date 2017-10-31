@@ -11,9 +11,6 @@ $.extend( UI, {
             UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
-            UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if (!UI.hiddenTextEnabled) return;
             e.preventDefault();
@@ -31,6 +28,10 @@ $.extend( UI, {
          */
     },
     keydownEditAreaEventHandler: function (e) {
+
+        if (e.ctrlKey || e.shiftKey){
+            return;
+        }
         var code = e.which || e.keyCode;
         var selection, range, r, rr, referenceNode;
         if ((code == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
@@ -138,7 +139,7 @@ $.extend( UI, {
 
             if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
                 r = range.startContainer.innerText;
-                if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
+                if (r && (r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                     e.preventDefault();
 
 
@@ -165,7 +166,7 @@ $.extend( UI, {
             range = selection.getRangeAt(0);
             if (range.startOffset != range.endOffset) {
                 r = range.startContainer.data;
-                if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+                if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
                     saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
@@ -187,7 +188,7 @@ $.extend( UI, {
 
             if (range.startOffset != range.endOffset) {
                 r = range.startContainer.innerText;
-                if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+                if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
                     saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
@@ -209,7 +210,7 @@ $.extend( UI, {
             range = selection.getRangeAt(0);
             if (range.startOffset != range.endOffset) {
                 r = range.startContainer.data;
-                if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+                if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
                     saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
@@ -243,6 +244,8 @@ $.extend( UI, {
                 e.preventDefault();
                 $('.tag-autocomplete li.current').click();
                 return false;
+            } else {
+                UI.handleReturn(e);
             }
         }
     },
@@ -296,6 +299,9 @@ $.extend( UI, {
 
     },
     keyPressEditAreaEventHandler: function (e) {
+        if (e.ctrlKey || e.shiftKey){
+            return;
+        }
         if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
             if($('.tag-autocomplete').length) {
                 e.preventDefault();

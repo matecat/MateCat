@@ -1,7 +1,25 @@
 div.segment-notes ul.graysmall li {
-  width: 90%;
+    width: 90%;
 }
 
 div.segment-notes ul.graysmall li span.note-label {
-  font-weight: bold ;
+    font-weight: bold;
+}
+.segments-notes-container div.note {
+    text-align: left;
+    padding: 20px;
+    color: #666;
+    list-style: none;
+    font-size: 14px;
+    line-height: 16px;
+    float: left;
+    width: 100%;
+}
+
+.segments-notes-container div.note p{
+    margin: 0;
+}
+
+.note-label {
+    font-weight: bold;
 }

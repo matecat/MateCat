@@ -120,6 +120,7 @@ class SegmentBody extends React.Component {
                             afterRenderOrUpdate={this.afterRenderOrUpdate}
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                             locked={this.props.locked}
+                            readonly={this.props.readonly}
                         />
 
                     </div>

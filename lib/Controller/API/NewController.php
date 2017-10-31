@@ -66,7 +66,10 @@ class NewController extends ajaxController {
     protected $new_keys = array();
 
     private $owner = "";
+
     /**
+     * This property is set by `validateAuthHeader` method in `doAction`.
+     *
      * @var Users_UserStruct
      */
     private $current_user;
@@ -222,7 +225,7 @@ class NewController extends ajaxController {
             $this->tag_projection = $__postInput[ 'tag_projection' ];
             $this->project_completion = $__postInput[ 'project_completion' ];
 
-            $this->validateMetadataParam( $__postInput['metadata'] );
+            $this->validateMetadataParam( $__postInput );
 
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = 'Error evaluating metadata param';
@@ -250,11 +253,7 @@ class NewController extends ajaxController {
         }
 
         //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        if ( !function_exists( 'array_column' ) ) {
-            $subjectList = Utils::array_column( $subjectList, 'key' );
-        } else {
-            $subjectList = array_column( $subjectList, 'key' );
-        }
+        $subjectList = Utils::array_column( $subjectList, 'key' );
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
@@ -716,6 +715,11 @@ class NewController extends ajaxController {
         $this->target_lang = implode(',', $targets);
     }
 
+    /**
+     * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
+     *
+     * @return bool
+     */
     private function validateAuthHeader() {
 
         $api_key = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
@@ -759,19 +763,20 @@ class NewController extends ajaxController {
      * Json string is expected to be flat key value, this is enforced padding 1 to json
      * conversion depth param.
      *
-     * @param $json_string
+     * @param $__postInput
      *
      * @throws Exception
      */
-    private function validateMetadataParam($json_string) {
-        if (!empty($json_string)) {
-            if ( strlen($json_string) > 2048 ) {
-                throw new Exception('metadata string is too long');
+    private function validateMetadataParam( $__postInput ) {
+
+        if ( !empty( $__postInput[ 'metadata' ] ) ) {
+            if ( strlen( $__postInput[ 'metadata' ] ) > 2048 ) {
+                throw new Exception( 'metadata string is too long' );
             }
-            $depth = 2 ; // only converts key value structures
-            $assoc = TRUE;
-            $json_string = html_entity_decode($json_string);
-            $this->metadata = json_decode( $json_string, $assoc, $depth );
+            $depth                     = 2; // only converts key value structures
+            $assoc                     = true;
+            $__postInput[ 'metadata' ] = html_entity_decode( $__postInput[ 'metadata' ] );
+            $this->metadata            = json_decode( $__postInput[ 'metadata' ], $assoc, $depth );
             Log::doLog( "Passed parameter metadata as json string." );
         }
 
@@ -791,6 +796,8 @@ class NewController extends ajaxController {
         if ( !empty( $this->project_completion ) ){
             $this->metadata[ 'project_completion' ] = $this->project_completion;
         }
+
+        $this->metadata = $this->systemWideFeatures->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
 
     }
 

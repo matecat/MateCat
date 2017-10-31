@@ -24,7 +24,7 @@ class Segment extends React.Component {
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
 
-        let readonly = !!((this.props.segment.readonly == 'true') || ($('body').hasClass('archived')));
+        let readonly = UI.isReadonlySegment(this.props.segment);
 
         this.state = {
             segment_classes : [],
@@ -222,7 +222,7 @@ class Segment extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log("Udate Segment" + this.props.segment.sid);
+        console.log("Update Segment" + this.props.segment.sid);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -296,13 +296,15 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {(this.props.segment.ice_locked !== '1') ? (
+                    {(this.props.segment.ice_locked !== '1' ) ? (
+                        config.splitSegmentEnabled ? (
                         <div className="actions">
                             <a className="split" href="#" title="Click to split segment">
                                 <span className="icon-split"/>
                             </a>
                             <p className="split-shortcut">CTRL + S</p>
                         </div>
+                        ) : (null)
                     ) : (
                         !readonly ? (
                             this.state.unlocked ? (
@@ -325,6 +327,7 @@ class Segment extends React.Component {
                     <SegmentHeader sid={this.props.segment.sid} autopropagated={this.state.autopropagated}/>
                     <SegmentBody
                         segment={this.props.segment}
+                        readonly={this.state.readonly}
                         isReviewImproved={this.props.isReviewImproved}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
