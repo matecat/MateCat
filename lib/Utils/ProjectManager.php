@@ -1992,6 +1992,11 @@ class ProjectManager {
     }
 
     protected function _strip_external( $segment ) {
+        
+        if( $this->features->filter( 'skipTagLessFeature', false ) ){
+            return array( 'prec' => null, 'seg' => $segment, 'succ' => null );
+        }
+
         // With regular expressions you can't strip a segment like this:
         //   <g>hello <g>world</g></g>
         // While keeping untouched this other:

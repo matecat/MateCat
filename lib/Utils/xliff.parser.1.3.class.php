@@ -304,7 +304,7 @@ class Xliff_Parser {
     /**
      * This function exists because many developers started adding html tags directly into the XLIFF source since:
      * 1) XLIFF tag remapping is too complex for them
-     * 2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tollerant to html tags in <source>
+     * 2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tolerant to html tags in <source>
      *
      * in short people typed:
      * <source>The <b>red</d> house</source> or worst <source>5 > 3</source>
