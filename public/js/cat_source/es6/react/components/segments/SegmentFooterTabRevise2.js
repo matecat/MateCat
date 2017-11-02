@@ -23,9 +23,10 @@ class SegmentFooterTabRevise2 extends React.Component {
             var source = this.originalTranslation;
             var target = editareaText;
             var diffHTML = trackChangesHTML(source, target);
-
+            let wrappers = this.getWrappers(diffHTML);
             this.setState({
-                diff: this.props.decodeTextFn(this.props.segment, diffHTML)
+                diff: this.props.decodeTextFn(this.props.segment, diffHTML),
+                selectionWrappers: wrappers
             });
         }
     }
@@ -62,8 +63,9 @@ class SegmentFooterTabRevise2 extends React.Component {
                 selected_string : selection.toString()
             };
         }
-        else
+        else {
             return null;
+        }
     }
     /*
      Gets the offset of a node within another node. Text nodes are
@@ -258,6 +260,14 @@ class SegmentFooterTabRevise2 extends React.Component {
             selectionObj: null,
             selectionWrappers: selectionsWrappers
         });
+    }
+
+    getWrappers(newDiff) {
+        return this.state.selectionWrappers.filter(function (wrapper) {
+            let text = newDiff.substring(wrapper.start, wrapper.end);
+            return (text === wrapper.selected_string)
+        });
+
     }
 
     applyWrapper(idWrapper) {

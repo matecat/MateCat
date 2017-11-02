@@ -209,7 +209,9 @@ if ( Review.enabled() && Review.type == 'revise2' ) {
         if(d.original == '') d.original = xEditarea.text();
         if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         // UI.setReviewErrorData(d.error_data);
-        UI.setReviewErrorData(id_segment);
+
+        // UI.setReviewErrorData(id_segment);
+
         // UI.trackChanges(xEditarea);
     });
 
