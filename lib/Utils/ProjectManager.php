@@ -1066,16 +1066,21 @@ class ProjectManager {
             }
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
-
-                if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
-                    $this->insertSegmentNotesForFile();
-                }
-
                 insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id ) ;
                 }
+            }
+        }
+
+
+        /**
+         * Operations to be done once per file
+         */
+        foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
+            if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
+                $this->insertSegmentNotesForFile();
             }
         }
 
@@ -1987,6 +1992,11 @@ class ProjectManager {
     }
 
     protected function _strip_external( $segment ) {
+        
+        if( $this->features->filter( 'skipTagLessFeature', false ) ){
+            return array( 'prec' => null, 'seg' => $segment, 'succ' => null );
+        }
+
         // With regular expressions you can't strip a segment like this:
         //   <g>hello <g>world</g></g>
         // While keeping untouched this other:

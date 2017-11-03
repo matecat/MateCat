@@ -8,6 +8,7 @@
  */
 
 namespace Analysis\Workers;
+use Constants\Ices;
 use Engine;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -222,18 +223,7 @@ class TMAnalysisWorker extends AbstractWorker {
         //check the value of suggestion_match
         $tm_data[ 'suggestion_match' ]       = $suggestion_match;
 
-        //Separates the if to make the conditions more readable
-        if( stripos( $tm_data[ 'suggestion_match' ], "100%" ) !== false ){
-
-            if( $tm_data[ 'match_type' ] == "ICE" ){
-                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_APPROVED;
-                $tm_data[ 'locked' ] = true;
-            } elseif( $queueElement->params->pretranslate_100 ) {
-                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
-                $tm_data[ 'locked' ] = false;
-            }
-
-        }
+        $tm_data = $this->_iceLockCheck( $tm_data, $queueElement->params );
 
         $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
         if ( $updateRes < 0 ) {
@@ -263,6 +253,33 @@ class TMAnalysisWorker extends AbstractWorker {
                 'tm_data'       => $tm_data,
                 'queue_element' => $queueElement
         ));
+
+    }
+
+    protected function _iceLockCheck( $tm_data, $queueElementParams ){
+
+        //Separates the if to make the conditions more readable
+        if( stripos( $tm_data[ 'suggestion_match' ], "100%" ) !== false ){
+
+            if( $tm_data[ 'match_type' ] == "ICE" ){
+
+                list( $lang, ) = explode( '-', $queueElementParams->target );
+
+                //i found this language in the list of disabled target language??
+                if( array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ){
+                    //ice lock enabled, language not found
+                    $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_APPROVED;
+                    $tm_data[ 'locked' ] = true;
+                }
+
+            } elseif( $queueElementParams->pretranslate_100 ) {
+                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'locked' ] = false;
+            }
+
+        }
+
+        return $tm_data;
 
     }
 

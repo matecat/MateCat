@@ -133,16 +133,16 @@ route( '/api/v2/engines/list',         'GET',  '\API\V2\EnginesController',    '
 
 $klein->with('/api/v2/teams', function() {
 
-    route( '',                                     'GET', '\API\V2\TeamsController', 'getTeamList') ;
+    route( '',                                     'GET',  '\API\V2\TeamsController', 'getTeamList') ;
     route( '',                                     'POST', '\API\V2\TeamsController', 'create') ;
     route( '/[i:id_team]',                         'PUT',  '\API\V2\TeamsController', 'update' ) ;
 
-    route( '/[i:id_team]/members',                 'POST', '\API\V2\TeamMembersController', 'update') ;
-    route( '/[i:id_team]/members',                 'GET',  '\API\V2\TeamMembersController', 'index' ) ;
+    route( '/[i:id_team]/members',                 'POST',    '\API\V2\TeamMembersController', 'update') ;
+    route( '/[i:id_team]/members',                 'GET',     '\API\V2\TeamMembersController', 'index' ) ;
     route( '/[i:id_team]/members/[i:uid_member]',  'DELETE' , '\API\V2\TeamMembersController', 'delete' );
 
-    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\TeamsProjectsController', 'update' ) ;
-    route( '/[i:id_team]/projects/[i:id_project]', 'GET', 'API\V2\TeamsProjectsController', 'get' ) ;
+    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\TeamsProjectsController',  'update' ) ;
+    route( '/[i:id_team]/projects/[i:id_project]', 'GET', 'API\V2\TeamsProjectsController',  'get' ) ;
     route( '/[i:id_team]/projects',                'GET', '\API\V2\TeamsProjectsController', 'getAll') ;
 
 }) ;
