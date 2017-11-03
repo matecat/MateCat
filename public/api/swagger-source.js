@@ -446,39 +446,103 @@ $(function () {
                     }
                 }
             },
-//          "/v2/project-completion-status/{id_project}": {
-//            "get": {
-//              "tags": [
-//                "Project"
-//              ],
-//              "summary": "Project completion status",
-//              "description": "Add \"Mark as Complete\" button",
-//              "parameters": [
-//                {
-//                  "name": "id_project",
-//                  "in": "path",
-//                  "description": "The id of the project",
-//                  "required": true,
-//                  "type": "string"
-//                }
-//              ],
-//              "responses": {
-//                "200": {
-//                  "description": "Project completion status"
-//                },
-//                "default": {
-//                  "description": "Unexpected error"
-//                }
-//              }
-//            }
-//          },
+            "/v2/jobs/{id_job}/{password}/translator": {
+                "get": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Gets the translator assigned to a job",
+                    "description": "Gets the translator assigned to a job.",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Job",
+                            "schema": {
+                                "$ref": "#/definitions/ExtendedJobItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Assigns a job to a translator",
+                    "description": "Assigns a job to a translator.",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name" : "email",
+                            "in" : "formData",
+                            "description" : "email of the translator to assign the job",
+                            "required" : true,
+                            "type" : "string"
+                        },
+                        {
+                            "name" : "delivery_date",
+                            "in" : "formData",
+                            "description" : "deliery date for the assignment, expressed as timestamp",
+                            "required" : true,
+                            "type" : "integer"
+                        },
+                        {
+                            "name" : "timezone",
+                            "in" : "formData",
+                            "description" : "time zone to convert the delivery_date param expressed as offset based on UTC. Example 1.0, -7.0 etc.",
+                            "required" : true,
+                            "type" : "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Job",
+                            "schema": {
+                                "$ref": "#/definitions/ExtendedJobItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/v2/jobs/{id_job}/{password}/comments": {
                 "get": {
                     "tags": [
-                        "Project",
-                        "Comments"
+                        "Job"
                     ],
-                    "summary": "Get segment comments",
+                    "summary": "Get segment comments in a job",
                     "description": "Gets the list of comments on all job segments.",
                     "parameters": [
                         {
@@ -627,7 +691,7 @@ $(function () {
                     "description": "Update team.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -661,7 +725,7 @@ $(function () {
                     "description": "List team members.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -687,7 +751,7 @@ $(function () {
                     "description": "Create new team memberships.",
                     "parameters" : [
                         {
-                            "name"     : "id",
+                            "name"     : "id_team",
                             "type"     : "integer",
                             "in"       : "path",
                             "required" : true,
@@ -731,7 +795,7 @@ $(function () {
                             "required"    : true
                         },
                         {
-                            "name"        : "uid_member",
+                            "name"        : "id_member",
                             "type"        : "integer",
                             "in"          : "path",
                             "required"    : true,
@@ -2276,8 +2340,16 @@ $(function () {
                             "type" : "object"
                         }
                     },
-                    "outsource": { "type" : "string" },
-                    "translator": { "type" : "string" } ,
+                    "outsource": {
+                        "type" : "object",
+                        "$ref" : "#/definitions/OutsourceConfirmation"
+                    },
+
+                    "translator": {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Translator"
+                    },
+
                     "total_raw_wc": { "type" : "float" },
                     "stats" : {
                         "type" : "object",
@@ -2286,6 +2358,39 @@ $(function () {
                 }
             },
 
+            "Translator" : {
+                "type" : "object",
+                "properties" : {
+                    "email" : { "type" : "string", "format" : "email" },
+                    "added_by" : { "type" : "integer" },
+                    "delivery_date" : { "type" : "string" },
+                    "delivery_timestamp"    : { "type" : "string" },
+                    "source"                : { "type" : "string" },
+                    "target"                : { "type" : "string" },
+                    "id_translator_profile" : { "type" : "integer" },
+                    "user"                  : {
+                        "type" : "object",
+                        "$ref" : "#/definitions/User"
+                    }
+                }
+            },
+
+            "OutsourceConfirmation" : {
+                "type" : "object",
+                "properties" : {
+                    "create_timestamp" : {
+                        "type" : "string",
+                        "format" : "date-time",
+                        "required" : true
+                    },
+                    "delivery_timestamp" : {
+                        "type" : "integer",
+                    },
+                    "quote_review_link" : {
+
+                    }
+                }
+            },
             "Project" : {
                 "type" : "object",
                 "properties" : {
@@ -2307,6 +2412,15 @@ $(function () {
                         "items" : {
                             "$ref" : "#/definitions/ExtendedJob"
                         }
+                    }
+                }
+            },
+
+            "ExtendedJobItem" : {
+                "type" : "object",
+                "properties" : {
+                    "job" : {
+                        "$ref" : "#/definitions/ExtendedJob"
                     }
                 }
             },
