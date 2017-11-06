@@ -1453,7 +1453,7 @@ margin-left: 10px;
         border: 1px solid #797979;
         font-weight: bold;
         text-decoration: none;
-        padding: 8px 10px;
+        padding: 8px 19px;
         border-radius: 2px;
         font-size: 18px;
         margin-right: 3px;
@@ -2815,9 +2815,9 @@ background-size: 25px!important;
 .wrapper-dropdown-5.active .dropdown,
 .wrapper-dropdown-5.activeMenu .dropdown
 {
-    /*border-bottom: 1px solid rgba(0, 0, 0, 0.2);*/
-    /*border-top: 1px solid rgba(0, 0, 0, 0.2);*/
     max-height: 400px;
+/*    width: 149px;
+    margin-left: 15px;*/
 }
 
 body.filterOpen .searchbox
@@ -2932,6 +2932,10 @@ td.action .btn {
     text-align: center;
 }
 
+a.btn.pull-left.addtmx.tmx-import-slider {
+    padding-right: 36px !important;
+    padding-left: 36px !important;
+}
 
 td.action .btn .text {margin:0!important;}
 a.memory-mgmt.pull-right {
