@@ -186,7 +186,7 @@ class catController extends viewController {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
                 //FIXME use Dao
-                updateJobsStatus( $res, $this->jid, $new_status, null, $this->password );
+                updateJobsStatus( $res, $this->jid, $new_status, $this->password );
                 $this->job_archived = true;
             }
 
