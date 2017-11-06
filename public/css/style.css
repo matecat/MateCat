@@ -1152,11 +1152,6 @@ article .approved:active {
     margin-right: 15px;
 }
 
-.header-menu .wrapper-dropdown-5 .dropdown {
-    left: -132px;
-    width: 164px;
-}
-
 .justdone .header-menu .wrapper-dropdown-5 .dropdown {
     left: -224px;
     width: 256px;
@@ -1831,7 +1826,8 @@ body .footer.showMatches .sub-editor.open {
 
 .search-inputs label[for="enable-replace"] {
     float: left;
-    margin-top: 4px;
+    margin-left: 5px;
+    margin-right: 10px;
 
 }
 
@@ -1861,7 +1857,7 @@ body .footer.showMatches .sub-editor.open {
 .search-options label {
     text-transform: none;
     float: left;
-    margin-top: 4px;
+    margin-left: 5px;
 }
 
 .search-options input {

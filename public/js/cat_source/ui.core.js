@@ -64,10 +64,10 @@ UI = {
             if (LXQ.enabled()) {
                 var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible');
                 var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 8 : 0;
-                jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 48 - menuHeight) + "px");
             }
             else {
-                jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (messageBarHeight + searchBoxHeight + 48 - menuHeight) + "px");
             }
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
