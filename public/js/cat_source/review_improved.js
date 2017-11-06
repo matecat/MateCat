@@ -14,7 +14,7 @@
 ReviewImproved = window.ReviewImproved || {};
 
 ReviewImproved.enabled = function() {
-    return Review.type == 'improved';
+    return Review.enabled() && Review.type === 'improved';
 };
 
 if ( ReviewImproved.enabled() )

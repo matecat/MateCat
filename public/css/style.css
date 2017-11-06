@@ -4938,7 +4938,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
     text-align: left;
 }
 
-.track-changes p {
+.track-changes .segment-diff-container {
     width: 100%;
     line-height: 27px;
     margin: 36px auto 17px auto;

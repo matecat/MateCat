@@ -204,6 +204,13 @@ var SegmentActions = {
             sid: sid,
             data: data
         });
+    },
+    showSelection: function (sid, data) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SHOW_SELECTION,
+            sid: sid,
+            data: data
+        });
     }
     /***********************************/
 

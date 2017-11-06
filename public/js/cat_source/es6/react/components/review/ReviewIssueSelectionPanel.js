@@ -1,5 +1,5 @@
 
-
+let PropTypes = require('prop-types');
 class ReviewIssueSelectionPanel extends React.Component{
 
     constructor(props) {
@@ -10,13 +10,6 @@ class ReviewIssueSelectionPanel extends React.Component{
         };
 
     }
-
-    // getInitialState() {
-    //     return {
-    //         selections : {},
-    //         submitDisabled : true,
-    //     };
-    // }
 
     autoShortLabel(label) {
         return label; 
@@ -58,7 +51,7 @@ class ReviewIssueSelectionPanel extends React.Component{
 
         this.setState({ submitDone: true, submitDisabled : true });
 
-        var message = $('textarea', ReactDOM.findDOMNode( this )).val();
+        var message = $(this.textarea).val();
 
         ReviewImproved.submitIssue(this.props.sid, _.map( this.state.selections, function(item,key) { 
             return { 
@@ -148,7 +141,7 @@ class ReviewIssueSelectionPanel extends React.Component{
 
 
         <div className="review-issue-terminal">
-            <textarea data-minheight="40" data-maxheight="90"
+            <textarea ref={(textarea)=>this.textarea = textarea} data-minheight="40" data-maxheight="90"
                 className="mc-textinput mc-textarea mc-resizable-textarea"
                 placeholder="Write a comment..."
                 />

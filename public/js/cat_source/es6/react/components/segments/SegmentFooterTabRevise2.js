@@ -2,16 +2,19 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+let React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let ReviewVersionDiff = require('../review/ReviewVersionsDiff').default;
+let ReviewIssueSelectionPanel = require('../review/ReviewIssueSelectionPanel').default;
+
 class SegmentFooterTabRevise2 extends React.Component {
 
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
         this.state = {
-            diff: this.props.decodeTextFn(this.props.segment, this.props.translation),
+            translation: this.props.translation,
             selectedText: '',
             selectionObj: null,
             selectionWrappers: []
@@ -20,223 +23,23 @@ class SegmentFooterTabRevise2 extends React.Component {
 
     trackChanges(sid, editareaText) {
         if (this.props.id_segment === sid) {
-            var source = this.originalTranslation;
-            var target = editareaText;
-            var diffHTML = trackChangesHTML(source, target);
-            let wrappers = this.getWrappers(diffHTML);
+            let wrappers = "";
             this.setState({
-                diff: this.props.decodeTextFn(this.props.segment, diffHTML),
+                translation: editareaText,
                 selectionWrappers: wrappers
             });
         }
     }
 
-    textSelected(event) {
-        var selection = window.getSelection();
-        if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
-            let data = this.getSelectionData(selection);
-            this.setState({
-                selectedText: data.selected_string,
-                selectionObj: data
-            });
-        } else {
-            this.setState({
-                selectedText: '',
-                selectionObj: null
-            });
-        }
+    textSelected(data) {
+        this.setState({
+            selectedText: data.selected_string,
+            selectionObj: data
+        });
     }
 
-    textSelectedInsideSelectionArea( selection, container ) {
-        return container.contents().text().indexOf(selection.focusNode.textContent)>=0 &&
-            container.contents().text().indexOf(selection.anchorNode.textContent)>=0 &&
-            selection.toString().length > 0 ;
-    }
-
-    getSelectionData(selection) {
-        let containerEl = $(this.diffElem)[0];
-        if (selection.rangeCount > 0) {
-            var range = selection.getRangeAt(0);
-            return {
-                start: this.getNodeOffset(containerEl, range.startContainer) + this.totalOffsets(range.startContainer, range.startOffset),
-                end: this.getNodeOffset(containerEl, range.endContainer) + this.totalOffsets(range.endContainer, range.endOffset),
-                selected_string : selection.toString()
-            };
-        }
-        else {
-            return null;
-        }
-    }
-    /*
-     Gets the offset of a node within another node. Text nodes are
-     counted a n where n is the length. Entering (or passing) an
-     element is one offset. Exiting is 0.
-     */
-    getNodeOffset(start, dest) {
-        var offset = 0;
-
-        var node = start;
-        var stack = [];
-
-        while (true) {
-            if (node === dest) {
-                return offset;
-            }
-
-            // Go into children
-            if (node.firstChild) {
-                // Going into first one doesn't count
-                if (node !== start)
-                    offset += 1;
-                stack.push(node);
-                node = node.firstChild;
-            }
-            // If can go to next sibling
-            else if (stack.length > 0 && node.nextSibling) {
-                // If text, count length (plus 1)
-                if (node.nodeType === 3)
-                    offset += node.nodeValue.length + 1;
-                else
-                    offset += 1;
-
-                node = node.nextSibling;
-            }
-            else {
-                // If text, count length
-                if (node.nodeType === 3)
-                    offset += node.nodeValue.length + 1;
-                else
-                    offset += 1;
-
-                // No children or siblings, move up stack
-                while (true) {
-                    if (stack.length <= 1)
-                        return offset;
-
-                    var next = stack.pop();
-
-                    // Go to sibling
-                    if (next.nextSibling) {
-                        node = next.nextSibling;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // Calculate the total offsets of a node
-    calculateNodeOffset(node) {
-        var offset = 0;
-
-        // If text, count length
-        if (node.nodeType === 3)
-            offset += node.nodeValue.length + 1;
-        else
-            offset += 1;
-
-        if (node.childNodes) {
-            for (var i=0;i<node.childNodes.length;i++) {
-                offset += this.calculateNodeOffset(node.childNodes[i]);
-            }
-        }
-
-        return offset;
-    }
-
-    // Determine total offset length from returned offset from ranges
-    totalOffsets(parentNode, offset) {
-        if (parentNode.nodeType == 3)
-            return offset;
-
-        if (parentNode.nodeType == 1) {
-            var total = 0;
-            // Get child nodes
-            for (var i=0;i<offset;i++) {
-                total += this.calculateNodeOffset(parentNode.childNodes[i]);
-            }
-            return total;
-        }
-
-        return 0;
-    };
-
-    getNodeAndOffsetAt(start, offset) {
-        var node = start;
-        var stack = [];
-
-        while (true) {
-            // If arrived
-            if (offset <= 0)
-                return { node: node, offset: 0 };
-
-            // If will be within current text node
-            if (node.nodeType == 3 && (offset <= node.nodeValue.length))
-                return { node: node, offset: Math.min(offset, node.nodeValue.length) };
-
-            // Go into children (first one doesn't count)
-            if (node.firstChild) {
-                if (node !== start)
-                    offset -= 1;
-                stack.push(node);
-                node = node.firstChild;
-            }
-            // If can go to next sibling
-            else if (stack.length > 0 && node.nextSibling) {
-                // If text, count length
-                if (node.nodeType === 3)
-                    offset -= node.nodeValue.length + 1;
-                else
-                    offset -= 1;
-
-                node = node.nextSibling;
-            }
-            else {
-                // No children or siblings, move up stack
-                while (true) {
-                    if (stack.length <= 1) {
-                        // No more options, use current node
-                        if (node.nodeType == 3)
-                            return { node: node, offset: Math.min(offset, node.nodeValue.length) };
-                        else
-                            return { node: node, offset: 0 };
-                    }
-
-                    var next = stack.pop();
-
-                    // Go to sibling
-                    if (next.nextSibling) {
-                        // If text, count length
-                        if (node.nodeType === 3)
-                            offset -= node.nodeValue.length + 1;
-                        else
-                            offset -= 1;
-
-                        node = next.nextSibling;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-
-    restoreSelection( savedSel) {
-        if (!savedSel)
-            return;
-        let containerEl = $(this.diffElem)[0];
-        var range = document.createRange();
-
-        var startNodeOffset, endNodeOffset;
-        startNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.start);
-        endNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.end);
-
-        range.setStart(startNodeOffset.node, startNodeOffset.offset);
-        range.setEnd(endNodeOffset.node, endNodeOffset.offset);
-
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
+    restoreSelection( savedSel ) {
+        SegmentActions.showSelection(this.props.id_segment, savedSel);
     }
 
     saveSelectionWrapper(event) {
@@ -262,13 +65,6 @@ class SegmentFooterTabRevise2 extends React.Component {
         });
     }
 
-    getWrappers(newDiff) {
-        return this.state.selectionWrappers.filter(function (wrapper) {
-            let text = newDiff.substring(wrapper.start, wrapper.end);
-            return (text === wrapper.selected_string)
-        });
-
-    }
 
     applyWrapper(idWrapper) {
         let self = this;
@@ -325,17 +121,9 @@ class SegmentFooterTabRevise2 extends React.Component {
         SegmentStore.removeListener(SegmentConstants.RENDER_REVISE_ISSUES, this.addIssues);
     }
 
-    componentWillMount() {
+    componentWillMount() {}
 
-    }
-
-    componentDidUpdate() {
-        // this.applyWrappers()
-    }
-
-    allowHTML(string) {
-        return { __html: string };
-    }
+    componentDidUpdate() {}
 
     render() {
         let errorsHtml = this.getErrorsList();
@@ -346,55 +134,10 @@ class SegmentFooterTabRevise2 extends React.Component {
 
             {this.state.selectedText !== '' ? (
                 <div className="error-type">
-                    <h3>Select the type of issue</h3>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>None</th>
-                            <th>Enhancement</th>
-                            <th>Error</th>
-                            <th><a className="tooltip">?<span>Error that changes the meaning of the segment</span></a></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td><input type="radio" name="t1" value="0"/></td>
-                            <td><input type="radio" name="t1" value="1"/></td>
-                            <td><input type="radio" name="t1" value="2"/></td>
-                            <td className="align-left">Tag issues (mismatches, whitespaces)</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="t2" value="0"/></td>
-                            <td><input type="radio" name="t2" value="1"/></td>
-                            <td><input type="radio" name="t2" value="2"/></td>
-                            <td className="align-left">Translation errors (mistranslation, additions/omissions)</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="t3" value="0"/></td>
-                            <td><input type="radio" name="t3" value="1"/></td>
-                            <td><input type="radio" name="t3" value="2"/></td>
-                            <td className="align-left">Terminology and translation consistency</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="t4" value="0"/></td>
-                            <td><input type="radio" name="t4" value="1"/></td>
-                            <td><input type="radio" name="t4" value="2"/></td>
-                            <td className="align-left">Language quality (grammar, punctuation, spelling)</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="t5" value="0"/></td>
-                            <td><input type="radio" name="t5" value="1"/></td>
-                            <td><input type="radio" name="t5" value="2"/></td>
-                            <td className="align-left">Style (readability, consistent style and tone)</td>
-                        </tr>
-
-                        </tbody>
-                    </table>
-                    <div className="mc-button blue-button"
-                         style={{float: "left", marginTop: "10px"}}
-                         onClick={this.saveSelectionWrapper.bind(this)}>
-                        Save
-                    </div>
+                    <ReviewIssueSelectionPanel
+                        sid={this.props.id_segment}
+                        selection={this.state.selectionObj}
+                    />
                 </div>
             ) : ( this.state.selectionWrappers.length > 0 ? (
                 <div className="error-list" style={{float: "left", padding: "20px"}}>
@@ -416,9 +159,12 @@ class SegmentFooterTabRevise2 extends React.Component {
 
             <div className="track-changes">
                 <h3>Revision (track changes)</h3>
-                <p ref={(node)=>this.diffElem=node}
-                   dangerouslySetInnerHTML={ this.allowHTML(this.state.diff) }
-                   onMouseUp={this.textSelected.bind(this)}/>
+                <ReviewVersionDiff
+                    translation={this.state.translation}
+                    segment={this.props.segment}
+                    textSelectedFn={this.textSelected.bind(this)}
+                    decodeTextFn={this.props.decodeTextFn}
+                />
             </div>
         </div>
     }

@@ -9,12 +9,6 @@ class ReviewIssueCategorySelector extends React.Component{
 
     }
 
-    // getInitialState() {
-    //     return {
-    //         value : this.props.selectedValue
-    //     };
-    // }
-
     componentWillReceiveProps(nextProps) {
         this.setState({ value: nextProps.selectedValue });
     }

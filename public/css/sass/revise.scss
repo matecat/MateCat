@@ -1,6 +1,6 @@
 .tab.review {
     .track-changes {
-        p::selection, span::selection, br::selection {
+        .segment-diff-container::selection, span::selection, br::selection {
             background-color: #FFFF00;
         }
     }

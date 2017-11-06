@@ -289,6 +289,7 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);
             break;
         default:
+            SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }
 });
 

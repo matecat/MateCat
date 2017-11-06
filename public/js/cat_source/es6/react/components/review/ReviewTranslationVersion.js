@@ -20,7 +20,7 @@ class ReviewTranslationVersion extends React.Component {
     }
 
     issueMouseEnter ( issue, event, reactid ) {
-        let node = $('.muted-text-box', ReactDOM.findDOMNode( this ) ) ; 
+        let node = $( this.highlightArea ) ;
         ReviewImproved.highlightIssue( issue, node ); 
     } 
 
@@ -79,7 +79,7 @@ class ReviewTranslationVersion extends React.Component {
 
             <div className="collapsable">
 
-                <div ref="highlightArea" className="muted-text-box issueHighlightArea" style={styleForVersionText}
+                <div ref={(elem)=>this.highlightArea=elem} className="muted-text-box issueHighlightArea" style={styleForVersionText}
                 dangerouslySetInnerHTML={this.translationMarkup()} />
 
                 <div style={styleForTrackChanges}
@@ -89,8 +89,8 @@ class ReviewTranslationVersion extends React.Component {
                 {trackChangesLink}
 
                 <ReviewIssuesContainer 
-                    issueMouseEnter={this.issueMouseEnter} 
-                    issueMouseLeave={this.issueMouseLeave}
+                    issueMouseEnter={this.issueMouseEnter.bind(this)}
+                    issueMouseLeave={this.issueMouseLeave.bind(this)}
                     sid={this.props.sid} 
                     versionNumber={this.props.versionNumber} />
                 </div>
