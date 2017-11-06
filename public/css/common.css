@@ -53,33 +53,32 @@ ul
 	list-style: none;
     }
 
-    .wrapper
-    {
-        width: 98%;
-        min-width: 910px;
-        margin: 0px auto 0 auto;
-        padding: 5px 0 0 0;
-        width: 92%;
-        font-size: 14px;
-        position: relative;
-        text-align: left;
-    }
+.wrapper
+{
+    min-width: 910px;
+    margin: 0 auto;
+    padding: 5px 0 0 0;
+    width: 92%;
+    font-size: 14px;
+    position: relative;
+    text-align: left;
+}
 
-    .logo
-    {
-        float: left;
-        border: 0;
-        background: url(../img/logo.png) 0px 2px no-repeat;
-        width: 145px;
-        height: 31px;
-        background-size: 130px 26px;
-        margin-top: 5px;
-        position: relative;
+.logo
+{
+    float: left;
+    border: 0;
+    background: url(../img/logo.png) 0px 2px no-repeat;
+    width: 145px;
+    height: 31px;
+    background-size: 130px 26px;
+    margin-top: 5px;
+    position: relative;
 
-    }
-    .offline .logo {
-        margin-left: 13px;
-    }
+}
+.offline .logo {
+    margin-left: 13px;
+}
 
 footer {
     background: #6d6e71;
@@ -158,10 +157,10 @@ ul.statistics-details li:first-child {
 	border-right: none;
 }
 
-.editing footer .wrapper {
+/*.editing footer .wrapper {
 width: 91.6%;
 margin-left: 5%;
-}
+}*/
 
 a[class^='edit_'] span {
     text-decoration: underline;
@@ -222,10 +221,10 @@ footer a:hover
     color: #ffffff;
 }
 
-footer .wrapper
+/*footer .wrapper
 {
     text-align: right;
-}
+}*/
 
 .editlog
 {
