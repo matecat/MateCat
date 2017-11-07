@@ -14,6 +14,9 @@ class ProjectRequestStruct extends BaseRequestStruct  {
     public $apiKey ;
     public $sessionId ;
 
+    public $projectId ;
+    public $projectKey ;
+
     public $name ;
     public $sourceLanguageCode ;
     public $contentTypeId ;
@@ -24,8 +27,11 @@ class ProjectRequestStruct extends BaseRequestStruct  {
     public $templateName ;
     public $tmsProjectKey ;
 
-    public function getHeaders() {
-        return $this->toArray(['apiKey', 'sessionId'] );
+    public function getPathParams() {
+        return [ $this->projectId ];
     }
 
+    public function getHeaders() {
+        return array_filter( $this->toArray(['apiKey', 'sessionId', 'projectKey'] ) ) ;
+    }
 }

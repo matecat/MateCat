@@ -10,20 +10,29 @@ namespace Features\Dqf\Service;
 
 use API\V2\Exceptions\AuthenticationError;
 use Exception;
+use Features\Dqf\Service\Struct\IBaseStruct;
 use Features\Dqf\Service\Struct\LoginRequestStruct;
 Use Features\Dqf\Service\Struct\LoginResponseStruct ;
 use Log;
 
-class Session {
+class Session implements ISession {
 
     protected $email ;
     protected $password ;
-    protected $sessonId ;
+    protected $sessionId ;
     protected $expires ;
 
     public function __construct( $email, $password ) {
         $this->email    = $email ;
         $this->password = $password ;
+    }
+
+    protected function getHeaders( $headers ) {
+        return $headers;
+    }
+
+    public function filterHeaders( IBaseStruct $struct ) {
+        return $struct->getHeaders();
     }
 
     public function login() {
@@ -35,7 +44,7 @@ class Session {
 
         $request = $client->createResource('/login', 'post', [
                 'formData' => $struct->getParams(),
-                'headers'  => $struct->getHeaders()
+                'headers'  => $this->getHeaders( $struct->getHeaders() )
         ] );
 
         $client->curl()->multiExec();
@@ -50,7 +59,7 @@ class Session {
 
         Log::doLog(" SessionId " . $response->sessionId );
 
-        $this->sessonId = $response->sessionId ;
+        $this->sessionId = $response->sessionId ;
         $this->expires = $response->expires ;
 
         return $this;
@@ -61,10 +70,10 @@ class Session {
      * @throws Exception
      */
     public function getSessionId() {
-        if ( is_null($this->sessonId) ) {
+        if ( is_null($this->sessionId) ) {
             throw new Exception('sessionId is null, try to login first');
         }
-        return $this->sessonId ;
+        return $this->sessionId ;
     }
 
     public function getExpires() {

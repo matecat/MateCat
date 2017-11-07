@@ -60,7 +60,7 @@ SQL;
     /**
      * @param \Chunks_ChunkStruct $chunk
      *
-     * @return bool
+     * @return array
      */
     public static function getSegmentsForQualityReport( \Chunks_ChunkStruct $chunk ) {
 
@@ -90,12 +90,19 @@ SELECT
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
+  
+  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with 
+  -- both start_node and end_node equal to 0 ( no tags in target string ). 
+  issues.start_offset  as issue_start_offset,
+  issues.end_offset    as issue_end_offset,
 
-  qa_categories.label as issue_category,
-  issues.severity as issue_severity,
-  issues.comment as issue_comment,
-  issues.target_text as target_text,
-  issues.uid as issue_uid,
+  qa_categories.label   as issue_category,
+  qa_categories.options as category_options,
+  
+  issues.severity     as issue_severity,
+  issues.comment      as issue_comment,
+  issues.target_text  as target_text,
+  issues.uid          as issue_uid,
   
   translation_warnings.scope as warning_scope, 
   translation_warnings.data as warning_data, 
@@ -163,8 +170,6 @@ SQL;
                 'id_job'   => $chunk->id,
                 'password' => $chunk->password
         ) );
-
-
 
         return $stmt->fetchAll();
 

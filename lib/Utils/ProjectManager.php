@@ -680,11 +680,12 @@ class ProjectManager {
         $this->pushActivityLog();
 
         Database::obtain()->begin();
-        $this->features->run('postProjectCreate',
-            $this->projectStructure
-        );
+
+        $this->features->run('postProjectCreate', $this->projectStructure );
+
         Database::obtain()->commit();
 
+        $this->features->run('postProjectCommit', $this->projectStructure );
         try {
 
             Utils::deleteDir( $this->uploadDir );
@@ -1488,9 +1489,8 @@ class ProjectManager {
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $this->features->run('postJobMerged',
-            $projectStructure
-        );
+        $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
+        $this->features->run('postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
 
@@ -1992,7 +1992,7 @@ class ProjectManager {
     }
 
     protected function _strip_external( $segment ) {
-        
+
         if( $this->features->filter( 'skipTagLessFeature', false ) ){
             return array( 'prec' => null, 'seg' => $segment, 'succ' => null );
         }

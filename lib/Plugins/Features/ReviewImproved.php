@@ -285,7 +285,7 @@ class ReviewImproved extends BaseFeature {
     }
 
     /**
-     * @param $array_jobs The jobs array coming from the project_structure
+     * @param $array_jobs array The jobs array coming from the project_structure
      *
      */
     private function createQaChunkReviewRecord( $id_job, $projectStructure, $options=array() ) {

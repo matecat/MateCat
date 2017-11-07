@@ -11,7 +11,6 @@ namespace Features\Dqf\Model;
 use DataAccess_AbstractDaoSilentStruct;
 
 class ExtendedTranslationStruct extends DataAccess_AbstractDaoSilentStruct {
-
     public $id_segment ;
     public $id_job;
 
@@ -21,4 +20,5 @@ class ExtendedTranslationStruct extends DataAccess_AbstractDaoSilentStruct {
     public $time ;
     public $suggestion_match ;
 
+    public $segment_origin ;
 }

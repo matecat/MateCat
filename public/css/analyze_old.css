@@ -45,7 +45,7 @@ a:hover{text-decoration:none}
 .payable{background:#c4df9b;-moz-box-shadow: 0 0px 6px #888;-webkit-box-shadow: 0 0px 6px #888;color:#000 !important}
 .first{width:250px;font-weight:bold;}
 .numbers{text-align:right;width:100px;}
-.last{float:right !important;}
+.last{float:right !important;}\
 .error-count{color:#FF0000;font-size:16px}
 .last a{display:block;background:#f0f0f0;color:#333;text-decoration:none;padding:5px 10px;font-size:13px;font-weight:bold;-moz-border-radius: 15px;
 		border-radius: 15px;-moz-box-shadow: 0 1px 1px #888;
@@ -58,8 +58,7 @@ a:hover{text-decoration:none}
 .tablestats{font-size:16px;clear: both;}
 .tablestats th, .tablestats td{ background:#fff;padding:7px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
-.tablestats th:first-child {width: 35%; min-width: 250px; border-left:1px solid #ccc;}
-.tablestats td:first-child {width: 35%; min-width: 250px;border-left:1px solid #ccc;}
+.tablestats th:first-child {width: 35%; min-width: 170px;; border-left:1px solid #ccc;}
 .tablestats th.new, .tablestats td.stat_new,
 .tablestats th.repetition, .tablestats td.repetition,
 .tablestats th.internal-matches, .tablestats td.internal-matches,
@@ -927,7 +926,7 @@ top: 25%;
 
 	.tablestats th:first-child,
 	.tablestats td:first-child {
-		min-width: 200px;
+		min-width: 170px;
 	}
 
 	.subfile p {
@@ -950,4 +949,36 @@ top: 25%;
 
 .contact_box p {
 	line-height: 23px !important;
+}
+
+.bluebtn {
+	background: #09beec;
+	font-weight: bold;
+	width: 88px;
+	-webkit-transition: all 100ms ease-in;
+	-moz-transition: all 100ms ease-in;
+	font-size: 20px !important;
+	cursor: pointer;
+	color: #fff;
+	-moz-box-shadow: 0 1px 2px #ccc;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
+	border: 1px solid #666;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	text-decoration: none;
+	opacity: 0.9;
+	text-align: center;
+	padding: 5px 10px !important;
+	margin: 0 0 -3px 10px !important;
+}
+
+.dqf-info .loader {
+	width: 20px;
+	height: 20px;
+	background-image: url(../img/loader.gif);
+	background-size: cover;
+	margin-left: 200px;
+	margin-top: -34px;
+	display: none;
 }

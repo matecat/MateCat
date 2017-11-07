@@ -4,11 +4,10 @@
 
 namespace Features\Dqf\Model ;
 
-use Chunks_ChunkStruct;
+use Database;
 use Exception;
-use Exceptions\NotFoundError;
-use Features\Dqf\Service\ChildProjectService;
 use Features\Dqf\Service\MasterProject;
+use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\MasterProjectReviewSettings;
 use Features\Dqf\Service\MasterProjectSegmentsBatch;
@@ -16,20 +15,19 @@ use Features\Dqf\Service\Session;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct;
-use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
 use Features\Dqf\Service\Struct\Response\ReviewSettingsResponseStruct;
 use Features\Dqf\Utils\Functions;
 use Features\Dqf\Utils\ProjectMetadata;
-use Features\Dqf\Utils\UserMetadata;
 use Files_FileDao;
-use Log;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use Users_UserDao;
 use Utils;
 
 
 class ProjectCreation {
+
+    protected $intermediateRootProjectRequired = false;
 
     /**
      * @var Projects_ProjectStruct
@@ -43,7 +41,7 @@ class ProjectCreation {
     /**
      * @var Session
      */
-    protected $session ;
+    protected $ownerSession ;
 
     /**
      * @var CreateProjectResponseStruct
@@ -56,7 +54,7 @@ class ProjectCreation {
     protected $inputStruct ;
 
     /**
-     * @var MasterFileResponseStruct[]
+     * @var MaserFileCreationResponseStruct[]
      */
     protected $remoteFiles ;
 
@@ -69,6 +67,9 @@ class ProjectCreation {
      * @var ReviewSettingsResponseStruct ;
      */
     protected $reviewSettings ;
+
+    /** @var  UserModel */
+    protected $user ;
 
     public function __construct( ProjectCreationStruct $struct ) {
         $this->inputStruct = $struct  ;
@@ -83,80 +84,102 @@ class ProjectCreation {
     }
 
     public function process() {
-        /**
-         * - Creation of master project (http://dqf-api.ta-us.net/#!/Project%2FMaster/add)
-         * - Submit of project files (http://dqf-api.ta-us.net/#!/Project%2FMaster%2FFile/add)
-         * - Submit of project’s source segments (http://dqf-api.ta-us.net/#!/Project%2FMaster%2FFile%2FSource_segment/add)
-         * - Submit of project’s target languages (http://dqf-api.ta-us.net/#!/Project%2FMaster%2FFile%2FTarget_Language/add)
-         * - Submit of one child project per target language (http://dqf-api.ta-us.net/#!/Project%2FChild/add)
-         * - Submit the child project’s target language (http://dqf-api.ta-us.net/#!/Project%2FChild%2FFile%2FTarget_Language/add)
-         * - Submit reviewSettings to be used throughout the whole project lifecycle
-         */
-
         $this->_initSession();
         $this->_createProject();
         $this->_submitProjectFiles();
-        $this->_submitSourceSegments();
-        $this->_submitChildProjects();
         $this->_submitReviewSettings();
+        $this->_submitSourceSegments();
     }
 
     protected function _createProject() {
         $projectInputParams = ProjectMetadata::extractProjectParameters( $this->project->getMetadataAsKeyValue() );
 
+        /**
+         * Generating id_project from a sequence here allows for retrying this step if anything fails.
+         * Otherwise we would have a conflict if the master project is created but something goes wrong during later on.
+         */
+        $id_project = Database::obtain()->nextSequence('id_dqf_project')[ 0 ] ;
+
         $params = new ProjectRequestStruct(array_merge( array(
                 'name'               => $this->project->name,
                 'sourceLanguageCode' => $this->inputStruct->source_language,
-                'clientId'           => Functions::scopeId( $this->project->id ),
+                'clientId'           => Functions::scopeId( $id_project ),
                 'templateName'       => '',
                 'tmsProjectKey'      => ''
         ), $projectInputParams ) );
 
-        $project                   = new MasterProject($this->session);
+        $project = new MasterProject($this->ownerSession);
         $this->remoteMasterProject = $project->create( $params ) ;
+
+        foreach( $this->project->getChunks() as $chunk ) {
+            $struct = new DqfProjectMapStruct([
+                    'id'               => $id_project,
+                    'id_job'           => $chunk->id,
+                    'password'         => $chunk->password,
+                    'first_segment'    => $chunk->job_first_segment,
+                    'last_segment'     => $chunk->job_last_segment,
+                    'dqf_project_id'   => $this->remoteMasterProject->dqfId,
+                    'dqf_project_uuid' => $this->remoteMasterProject->dqfUUID,
+                    'create_date'      => Utils::mysqlTimestamp( time() ),
+                    'project_type'     => 'master',
+                    'uid'              => $this->project->getOwner()->uid
+            ]);
+
+            DqfProjectMapDao::insertStructWithAutoIncrements( $struct ) ;
+        }
     }
 
     protected function _submitProjectFiles() {
         $files = Files_FileDao::getByProjectId($this->project->id) ;
-        $filesSubmit = new MasterProjectFiles( $this->session, $this->remoteMasterProject ) ;
+        $remoteFiles = new MasterProjectFiles(
+                $this->ownerSession,
+                $this->remoteMasterProject
+        );
 
         foreach( $files as $file ) {
             $segmentsCount = $this->inputStruct->file_segments_count[ $file->id ];
-            $filesSubmit->setFile( $file, $segmentsCount );
+            $remoteFiles->setFile( $file, $segmentsCount );
         }
 
-        $filesSubmit->setTargetLanguages( $this->project->getTargetLanguages() );
+        $remoteFiles->setTargetLanguages( $this->project->getTargetLanguages() );
 
-        $this->remoteFiles = $filesSubmit->getRemoteFiles();
+        $this->remoteFiles = $remoteFiles->submitFiles();
     }
 
     protected function _submitReviewSettings() {
         $dqfQaModel = new DqfQualityModel( $this->project ) ;
-        $request = new MasterProjectReviewSettings( $this->session, $this->remoteMasterProject );
+        $request = new MasterProjectReviewSettings( $this->ownerSession, $this->remoteMasterProject );
 
         $struct = $dqfQaModel->getReviewSettings() ;
 
         $this->reviewSettings = $request->create( $struct );
-    }
 
-    protected function _getCredentials() {
-        $user = ( new Users_UserDao() )->getByEmail( $this->project->id_customer );
-
-        if ( !$user ) {
-            throw new NotFoundError("User not found") ;
+        /**
+         * This check was introduced due to weird errors about missing reviewErrors on
+         */
+        if ( !empty( $this->reviewSettings->dqfId ) ) {
+            $this->project->setMetadata('dqf_review_settings_id', $this->reviewSettings->dqfId ) ;
         }
 
-        return UserMetadata::extractCredentials(  $user->getMetadataAsKeyValue() );
+        else {
+            throw new Exception('Dqf review settings where not set. ' .
+                    var_export( $this->reviewSettings->toArray(), true )
+            ) ;
+        }
     }
 
     protected function _initSession() {
-        list( $username, $password ) = $this->_getCredentials();
-        $this->session = new Session( $username, $password );
-        $this->session->login();
+        $this->user = ( new UserModel( $this->project->getOwner() ) );
+        $this->ownerSession = $this->user->getSession()->login() ;
     }
 
     protected function _submitSourceSegments() {
-        $batchSegments = new MasterProjectSegmentsBatch($this->session, $this->remoteMasterProject, $this->remoteFiles);
+        $batchSegments = new MasterProjectSegmentsBatch(
+                $this->ownerSession,
+                $this->remoteMasterProject,
+                $this->remoteFiles
+        );
+
         $results = $batchSegments->getResult() ;
 
         foreach( $results as $result ) {
@@ -177,36 +200,4 @@ class ProjectCreation {
             ];
         }, $segmentList ) ) ;
     }
-
-    protected function _submitChildProjects() {
-        // TODO: save the parent child into database table to we always know the parent when acting through API.
-        $this->childProjects = [] ;
-
-        foreach( $this->project->getChunks() as $chunk ) {
-            $childProject = new ChildProjectService($this->session, $chunk ) ;
-            $remoteProject = $childProject->createTranslationChild( $this->remoteMasterProject, $this->remoteFiles );
-            $this->_saveDqfChildProjectMap( $chunk, $remoteProject ) ;
-        }
-    }
-
-
-    /**
-     * @param Chunks_ChunkStruct          $chunk
-     * @param CreateProjectResponseStruct $remoteProject
-     */
-    protected function _saveDqfChildProjectMap( Chunks_ChunkStruct $chunk, CreateProjectResponseStruct $remoteProject ) {
-        $struct = new ChildProjectsMapStruct() ;
-
-        $struct->id_job           = $chunk->id ;
-        $struct->first_segment    = $chunk->job_first_segment ;
-        $struct->last_segment     = $chunk->job_last_segment ;
-        $struct->password         = $chunk->password ;
-        $struct->dqf_project_id   = $remoteProject->dqfId ;
-        $struct->dqf_project_uuid = $remoteProject->dqfUUID ;
-        $struct->dqf_parent_uuid  = $this->remoteMasterProject->dqfUUID ;
-        $struct->create_date      = Utils::mysqlTimestamp(time()) ;
-
-        $lastId = ChildProjectsMapDao::insertStruct( $struct ) ;
-    }
-
 }

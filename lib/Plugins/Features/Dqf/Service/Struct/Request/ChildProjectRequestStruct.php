@@ -9,7 +9,6 @@
 namespace Features\Dqf\Service\Struct\Request;
 
 use Features\Dqf\Service\Struct\BaseRequestStruct;
-use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
 
 class ChildProjectRequestStruct extends BaseRequestStruct {
 
@@ -33,7 +32,7 @@ class ChildProjectRequestStruct extends BaseRequestStruct {
     }
 
     public function getHeaders() {
-        return array_filter( $this->toArray(['sessonId', 'apiKey', 'projectKey']) ) ;
+        return array_filter( $this->toArray(['sessionId', 'apiKey', 'projectKey']) ) ;
     }
 
 }
