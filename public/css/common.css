@@ -794,7 +794,7 @@ color:#333;}
 	    width: 100%;
 	    height: 100%;
 	    z-index: 12;
-	    opacity: 0.6;
+	    opacity: 0.4;
     }
 	
 	.mgmt-popup-outer {
@@ -1091,6 +1091,13 @@ color:#333;}
     float: left;
     height: 35px;
 }
+
+.dqf-settings {
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 
 /********** TM panel End **********/
 
@@ -1450,7 +1457,7 @@ font-size: 18px;
 
 #sign-in-o,
 #sign-in-o-mt {
-padding: 5px 10px 10px;
+padding: 5px 10px 0px;
 margin: 0 auto;
 width: 200px;
 text-align: center;

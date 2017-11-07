@@ -434,7 +434,14 @@ class getContributionController extends ajaxController {
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
+            $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
+            $statuses = $this->featureSet->filter('filterSetSuggestionReportStatuses', $statuses );
+
+            $statuses_condition = implode(' OR ', array_map( function($status) {
+                return " status = '$status' " ;
+            }, $statuses ) ) ;
+
+            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " AND ( $statuses_condition ) ";
 
             $db = Database::obtain();
 

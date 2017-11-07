@@ -26,13 +26,13 @@ class CatDecorator extends AbstractDecorator {
 
         Functions::commonVarsForDecorator( $this->template );
 
-        $project = $this->controller->getJob()->getProject() ;
+        $project = $this->controller->getChunk()->getProject() ;
 
         if ( $project->isFeatureEnabled( Dqf::FEATURE_CODE ) ) {
             $this->template->append('footer_js', Routes::appRoot() . 'public/js/dqf-cat.js') ;
 
-            $authorizationModel = new CatAuthorizationModel( $this->controller->getJob(), $controller::isRevision() );
-            $this->template->dqf_user_status   = $authorizationModel->getStatusWithImplicitAssignment( $controller->getLoggedUser() ) ;
+            $authorizationModel = new CatAuthorizationModel( $this->controller->getChunk(), $controller::isRevision() );
+            $this->template->dqf_user_status   = $authorizationModel->getStatus( $controller->getLoggedUser() ) ;
 
             $metadataKeyValue = $project->getMetadataAsKeyValue() ;
             $this->template->dqf_selected_content_types = $metadataKeyValue['dqf_content_type'] ;

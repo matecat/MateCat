@@ -59,4 +59,8 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         $dao = new \Translations\WarningDao() ;
         return $dao->getErrorsByChunk( $this );
     }
+
+    public function hasSiblings() {
+        return count( $this->getJob()->getChunks() ) > 1 ;
+    }
 }

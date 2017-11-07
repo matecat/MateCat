@@ -1,4 +1,5 @@
 <?php
+use AbstractControllers\IController;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Features\Dqf;
@@ -147,6 +148,17 @@ class FeatureSet {
                     array_unshift( $args, $filterable );
 
                     try {
+                        /**
+                         * There may be the need to avoid a filter to be executed before or after other ones.
+                         * To solve this problem we could always pass last argument to call_user_func_array which
+                         * contains a list of executed feature codes.
+                         *
+                         * Example: $args + [ $executed_features ]
+                         *
+                         * This way plugins have the chance to decide wether to change the value, throw an exception or
+                         * do whatever they need to based on the behaviour of the other features.
+                         *
+                         */
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
                     } catch ( ValidationError $e ) {
                         throw $e ;
@@ -192,12 +204,13 @@ class FeatureSet {
      * Also, gives a last chance to plugins to define a custom decorator class to be
      * added to any call.
      *
-     * @param $name name of the decorator to activate
-     * @param viewController $controller the controller to work on
+     * @param string $name name of the decorator to activate
+     * @param IController $controller the controller to work on
      * @param PHPTAL $template the PHPTAL view to add properties to
      *
      */
-    public function appendDecorators($name, viewController $controller, PHPTAL $template) {
+    public function appendDecorators($name, IController $controller, PHPTAL $template) {
+        /** @var BasicFeatureStruct $feature */
         foreach( $this->sortFeatures()->features as $feature ) {
 
             $baseClass = "Features\\" . $feature->toClassName()  ;
@@ -209,6 +222,7 @@ class FeatureSet {
             Log::doLog('loading Decorator ' . $cls );
 
             if ( class_exists( $cls ) ) {
+                /** @var AbstractDecorator $obj */
                 $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }

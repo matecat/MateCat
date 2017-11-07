@@ -22,7 +22,7 @@ class ProjectTargetLanguageRequestStruct extends BaseRequestStruct {
     public $targetLanguageCode ;
 
     public function getHeaders() {
-        return $this->toArray(['sessonId', 'apiKey', 'projectKey'] ) ;
+        return $this->toArray(['sessionId', 'apiKey', 'projectKey'] ) ;
     }
 
     public function getPathParams() {

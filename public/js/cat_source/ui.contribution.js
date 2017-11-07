@@ -1,9 +1,12 @@
 /*
 	Component: ui.contribution
  */
-$('html').on('copySourceToTarget', 'section', function() {
-    UI.setChosenSuggestion(0);
-});
+
+if ( config.translation_matches_enabled ) {
+
+    $('html').on('copySourceToTarget', 'section', function() {
+        UI.setChosenSuggestion(0);
+    });
 
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
@@ -350,4 +353,5 @@ $.extend(UI, {
     },
 
 
-});
+    });
+} ;

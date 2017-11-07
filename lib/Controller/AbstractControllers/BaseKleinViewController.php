@@ -1,4 +1,6 @@
 <?php
+use AbstractControllers\IController;
+use API\App\AbstractStatefulKleinController;
 
 /**
  * Created by PhpStorm.
@@ -6,7 +8,7 @@
  * Date: 06/10/16
  * Time: 10:24
  */
-class BaseKleinViewController extends \API\App\AbstractStatefulKleinController
+class BaseKleinViewController extends AbstractStatefulKleinController implements IController
 {
 
     /**

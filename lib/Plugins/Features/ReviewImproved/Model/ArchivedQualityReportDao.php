@@ -21,7 +21,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
     protected function _buildResult( $result_array ) {}
 
     public function archiveQualityReport( ArchivedQualityReportStruct $report ) {
-        self::insertStruct( $report, [ 'no_nulls' => true ] );
+        return self::insertStruct( $report, [ 'no_nulls' => true ] );
     }
 
     /**

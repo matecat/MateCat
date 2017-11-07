@@ -2,28 +2,44 @@
 
 namespace Features;
 
+use AbstractControllers\IController;
 use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use catController;
+use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Exception;
 use Exceptions\ValidationError;
 use Features;
+use Features\Dqf\Model\RevisionChildProject;
 use Features\Dqf\Model\TranslationChildProject;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
+use Features\Dqf\Utils\Metadata;
 use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel;
 use INIT;
+use Jobs\MetadataDao;
+use Jobs_JobStruct;
+use Klein\Klein;
+use Klein\Request;
+use Klein\ServiceProvider;
 use Log;
+use LQA\ChunkReviewDao;
 use Monolog\Logger;
+use PHPTALWithAppend;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 use WorkerClient;
 
 class Dqf extends BaseFeature {
 
     const FEATURE_CODE = 'dqf' ;
+    const INTERMEDIATE_PROJECT_METADATA_KEY = 'dqf_intermediate_project' ;
+    const INTERMEDIATE_USER_METADATA_KEY    = 'dqf_intermediate_user' ;
 
     protected $autoActivateOnProject = false ;
 
@@ -47,9 +63,12 @@ class Dqf extends BaseFeature {
         return self::$logger ;
     }
 
-
-    public function catControllerDoActionStart( catController $controller ) {
-        $controller->setLoginRequired( true ) ;
+    /**
+     * @param PHPTALWithAppend $template
+     * @param IController      $controller
+     */
+    public function decorateTemplate( PHPTALWithAppend $template, IController $controller ) {
+        Features\Dqf\Utils\Functions::commonVarsForDecorator($template);
     }
 
     public function filterUserMetadataFilters($filters, $metadata) {
@@ -104,10 +123,10 @@ class Dqf extends BaseFeature {
     public function createProjectAssignInputMetadata( $metadata, $options ) {
         $options = Utils::ensure_keys( $options, array('input'));
 
-        $metadata = array_intersect_key( $options['input'], array_flip( ProjectMetadata::$keys ) ) ;
-        $metadata = array_filter( $metadata ); // <-- remove all `empty` array elements
+        $my_metadata = array_intersect_key( $options['input'], array_flip( ProjectMetadata::$keys ) ) ;
+        $my_metadata = array_filter( $my_metadata ); // <-- remove all `empty` array elements
 
-        return  $metadata ;
+        return  array_merge( $my_metadata, $metadata ) ;
     }
 
     /**
@@ -117,26 +136,46 @@ class Dqf extends BaseFeature {
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $params, $lastId ) {
         // at this point we have to enqueue delivery to DQF of the translated or reviewed segments
-        if ( $params->is_review ) {
-            // enqueue task for review
-        }
-        else {
-            $translationBatch = new TranslationChildProject( $chunk ) ;
-            $translationBatch->submitTranslationBatch();
+        // TODO: put this in a queue for background processing
+        if ( ! $params->is_review ) {
+            $translationChildProject = new TranslationChildProject( $chunk ) ;
+            $translationChildProject->createRemoteProjectsAndSubmit();
+            $translationChildProject->setCompleted();
         }
     }
 
+    public function archivedQualityReportSaved( ArchivedQualityReportModel $archivedQRModel ) {
+
+        $revisionChildModel = new RevisionChildProject(
+                $archivedQRModel->getChunk(),
+                $archivedQRModel->getSavedRecord()->version
+        ) ;
+
+        $revisionChildModel->createRemoteProjectsAndSubmit() ;
+        $revisionChildModel->setCompleted();
+    }
+
     public function filterCreateProjectFeatures( $features, $postInput ) {
-        if ( isset( $postInput[ 'dqf' ] ) && $postInput[ 'dqf' ] == true ) {
+        if ( isset( $postInput[ 'dqf' ] ) && !!$postInput[ 'dqf' ] ) {
+            $validationErrors = ProjectMetadata::getValiationErrors( $postInput ) ;
+
+            if ( !empty( $validationErrors ) ) {
+                throw new ValidationError('input validation failed: ' . implode(', ', $validationErrors ) ) ;
+            }
+
             $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
     }
 
+    public function filterNewProjectInputFilters( $inputFilter ) {
+        return array_merge( $inputFilter, ProjectMetadata::getInputFilter() ) ;
+    }
+
     /**
      * @param $projectStructure
      */
-    public function postProjectCreate( $projectStructure ) {
+    public function postProjectCommit( $projectStructure ) {
         $struct = new ProjectCreationStruct([
             'id_project'          => $projectStructure['id_project'],
             'source_language'     => $projectStructure['source_language'],
@@ -145,6 +184,24 @@ class Dqf extends BaseFeature {
 
         WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'DQF', '\Features\Dqf\Worker\CreateProjectWorker', $struct->toArray() );
+    }
+
+    public static function loadRoutes( Klein $klein ) {
+
+    }
+
+    /**
+     * Define if a project is completable.
+     *
+     * @param                    $value
+     * @param Chunks_ChunkStruct $chunk
+     * @param Users_UserStruct   $user
+     *
+     * @return bool
+     */
+    public function filterJobCompletable($value, Chunks_ChunkStruct $chunk, Users_UserStruct $user, $isRevision) {
+        $authModel = new Features\Dqf\Model\CatAuthorizationModel($chunk, $isRevision );
+        return $value && $authModel->isUserAuthorized( $user ) ;
     }
 
     /**
@@ -164,7 +221,12 @@ class Dqf extends BaseFeature {
     }
 
     public function validateProjectCreation( $projectStructure ) {
-        Log::doLog('DQF validateProjectCreation -------------------- ');
+
+        if ( count( $projectStructure[ 'target_language' ] ) > 1 ) {
+            $multilang_error = [ 'code' => -1000, 'message' => 'Cannot create multilanguage projects when DQF option is enabled' ];
+            $projectStructure['result']['errors'][] = $multilang_error ;
+            return ;
+        }
 
         if ( $projectStructure['metadata'] ) {
             // TODO: other incoming DQF related options to be validated
@@ -191,7 +253,6 @@ class Dqf extends BaseFeature {
             return ;
         }
 
-
         $error_on_remote_login = [ 'code' => -1000, 'message' => 'DQF credentials are not correct.' ];
         if ( ! $dqfUser->validCredentials() ) {
             $projectStructure['result']['errors'][] = $error_on_remote_login ;
@@ -209,5 +270,13 @@ class Dqf extends BaseFeature {
         }
     }
 
+    /**
+     * DQF projects can be splitted only one time.
+     *
+     * @param $projectStructure
+     */
+    public function postJobSplitted( $projectStructure ) {
+
+    }
 
 }

@@ -19,7 +19,7 @@ class FileIdMapping {
     protected $session ;
     protected $file ;
 
-    public function __construct(Session $session, Files_FileStruct $file ) {
+    public function __construct(ISession $session, Files_FileStruct $file ) {
         $this->session = $session ;
         $this->file = $file ;
     }

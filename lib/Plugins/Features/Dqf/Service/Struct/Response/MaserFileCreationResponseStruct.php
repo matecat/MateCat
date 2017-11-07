@@ -11,7 +11,7 @@ namespace Features\Dqf\Service\Struct\Response ;
 
 use Features\Dqf\Service\Struct\BaseStruct;
 
-class MasterFileResponseStruct extends BaseStruct {
+class MaserFileCreationResponseStruct extends BaseStruct {
     public $dqfId ;
     public $message ;
 }

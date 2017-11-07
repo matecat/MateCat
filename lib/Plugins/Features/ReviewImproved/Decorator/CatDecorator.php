@@ -19,7 +19,7 @@ class CatDecorator extends \AbstractDecorator {
      */
     public function decorate() {
 
-        $project = $this->controller->getJob()->getProject();
+        $project = $this->controller->getChunk()->getProject();
 
         $model = $project->getLqaModel() ;
 
@@ -41,8 +41,8 @@ class CatDecorator extends \AbstractDecorator {
         // TODO: complete this with the actual URL
         $this->template->quality_report_href = \Routes::pluginsBase() .
             "/review_improved/quality_report/" .
-            "{$this->controller->getJob()->id}/" .
-            "{$this->controller->getJob()->password}";
+            "{$this->controller->getChunk()->id}/" .
+            "{$this->controller->getChunk()->password}";
 
         if ( $this->controller->isRevision() ) {
             $this->template->showReplaceOptionsInSearch = false ;
@@ -61,11 +61,12 @@ class CatDecorator extends \AbstractDecorator {
 
         return json_encode( $out );
     }
+
     private function getOverallQualityClass() {
         $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(
             array(
-                $this->controller->getJob()->id,
-                $this->controller->getJob()->password
+                $this->controller->getChunk()->id,
+                $this->controller->getChunk()->password
             )
         ));
 

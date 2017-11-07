@@ -12,6 +12,10 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * This function returns a data structure that answers to the following question:
+     *
+     *  - How did the segments change since a given date?
+     *
      * @param $file
      * @param $since
      * @param $min
@@ -33,15 +37,24 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 st.time_to_edit,
                 st.translation,
                 st.version_number AS current_version,
+                st.suggestion_match,
+                st.suggestions_array,
+                st.suggestion,
+                st.suggestion_source,
+                st.suggestion_position,
+                st.version_number,
+                st.match_type,
+                st.locked,
 
                 stv.creation_date,
                 stv.translation AS versioned_translation,
                 stv.time_to_edit AS versioned_time_to_edit,
                 stv.version_number
 
-                FROM segment_translations st JOIN segments s ON s.id = st.id_segment
+                FROM segment_translations st
+                  JOIN segments s ON s.id = st.id_segment
                   LEFT JOIN segment_translation_versions stv ON st.id_segment = stv.id_segment
-                  AND stv.creation_date >= :since
+                    AND stv.creation_date >= :since
 
               WHERE id_file = :id_file
               AND s.id >= :min AND s.id <= :max
@@ -64,21 +77,48 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         while( $row = $stmt->fetch( PDO::FETCH_ASSOC ) ) {
             if ( isset( $result[ $row['id'] ] ) ) {
+                // Due to the ORDER instruction of the query, this skips all versions but the last.
                 continue ;
             }
-            else {
-                $result[ $row['id'] ] = new ExtendedTranslationStruct([
-                        'id_job'             => $row['id_job'],
-                        'id_segment'         => $row['id'],
-                        'translation_before' => is_null( $row['versioned_translation'] ) ? '' : $row['versioned_translation'],
-                        'translation_after'  => $row['translation'],
-                        'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 ),
-                        'suggestion_match'   => null, // $row['suggestion_match']
-                ]) ;
+
+            $data = [
+                    'id_job'             => $row['id_job'],
+                    'id_segment'         => $row['id'],
+                    'translation_after'  => $row['translation'],
+                    'time'               => $row['time_to_edit'] - ( $row['versioned_time_to_edit'] || 0 )
+            ];
+
+            if ( $this->isFirstBatch( $row ) ) {
+                if ( $this->isPreTranslated( $row ) ) {
+                    $data['translation_before'] = $this->getOriginalVersion( $row ) ;
+                }
+                else {
+                    $data['translation_before'] = $row['suggestion'];
+                }
             }
+            else { // Not first batch, no need to consider suggestion
+                $data['translation_before'] = $row['versioned_translation'];
+            }
+
+            $data['translation_before'] = is_null( $row['translation_before'] ) ? '' : $row['translation_before'] ;
+
+            // TODO: ExtendedTranslationStruct is under DQF namespace, while this DAO should not be aware of DQF
+            $result[ $row['id'] ] = new ExtendedTranslationStruct( $data ) ;
         }
 
         return $result ;
+    }
+
+    private function getOriginalVersion( $row ) {
+        return is_null( $row['versioned_translation'] ) ? $row['translation'] : $row['versioned_translation'] ;
+    }
+
+    private function isPreTranslated( $row ) {
+        return $row['match_type'] == 'ICE' && $row['locked'] == 0 ;
+    }
+
+    private function isFirstBatch( $row ) {
+        return is_null( $row['current_version'] ) || $row['current_version'] == 0 ;
     }
 
     /**

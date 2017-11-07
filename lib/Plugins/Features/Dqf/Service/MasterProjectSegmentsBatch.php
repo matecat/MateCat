@@ -11,7 +11,7 @@ namespace Features\Dqf\Service;
 use Exception;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\SourceSegmentsBatchRequestStruct;
-use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
 use Features\Dqf\Service\Struct\Response\SourceSegmentsBatchResponseStruct;
 use Features\Dqf\Utils\Functions;
 use Segments_SegmentDao;
@@ -28,7 +28,7 @@ class MasterProjectSegmentsBatch {
      */
     protected $remoteProject ;
     /**
-     * @var MasterFileResponseStruct[]
+     * @var MaserFileCreationResponseStruct[]
      *
      */
     protected $remoteFiles ;
@@ -39,7 +39,7 @@ class MasterProjectSegmentsBatch {
      */
     protected $batchRequests ;
 
-    public function __construct(Session $session, CreateProjectResponseStruct $remoteProject, $remoteFiles) {
+    public function __construct(ISession $session, CreateProjectResponseStruct $remoteProject, $remoteFiles) {
         $this->remoteProject = $remoteProject ;
         $this->session       = $session ;
         $this->remoteFiles   = $remoteFiles ;
@@ -90,7 +90,7 @@ class MasterProjectSegmentsBatch {
                     '/project/master/%s/file/%s/sourceSegment/batch', 'post', [
                             'json'       => $request->getBody(),
                             'pathParams' => $request->getPathParams(),
-                            'headers'    => $request->getHeaders()
+                            'headers'    => $this->session->filterHeaders( $request )
                     ]
             );
         }
