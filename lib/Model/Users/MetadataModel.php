@@ -32,7 +32,6 @@ class MetadataModel {
     public function save() {
         // validate
         $features = new FeatureSet() ;
-        $features->loadSystemWideFeatures();
         $features->loadFromUserEmail( $this->user->email ) ;
 
         $metadataFilters = $features->filter('filterUserMetadataFilters', array(), $this->metadata ) ;

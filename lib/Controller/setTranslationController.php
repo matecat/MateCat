@@ -281,7 +281,6 @@ class setTranslationController extends ajaxController {
         $check = new QA( $this->segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
-
         if ( $check->thereAreWarnings() ) {
 
             $err_json    = $check->getWarningsJSON();
@@ -289,7 +288,6 @@ class setTranslationController extends ajaxController {
         } else {
             $err_json    = '';
             $translation = $check->getTrgNormalized();
-
         }
 
         /*

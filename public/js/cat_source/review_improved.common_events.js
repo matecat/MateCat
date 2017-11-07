@@ -19,6 +19,12 @@ if ( ReviewImproved.enabled() ) {
         ReviewImproved.mountPanelComponent();
     });
 
+    var issuesPanelSideButtonEnabled = function( segment ) {
+        return segment.isICELocked() || (
+            !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() )
+        );
+    }
+
     $(document).on('segment-filter:filter-data:load', function() {
         ReviewImproved.closePanel();
     });

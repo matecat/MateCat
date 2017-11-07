@@ -103,18 +103,23 @@ class SegmentTranslationVersionHandler {
     /**
      * translationIsEqual
      *
-     * Here we need to handle a special case, the one in which the old translation
-     * is the first version that was popuplated by a pre-translated XLIFF with chars that
-     * can be HTML encoded. In such case the old_translation contains the HTML entity,
-     * while we receive the entity decoded even if the segment was not changed by the translator.
+     * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
+     * encoding is different than the one receiveed from the UI. Quotes are different for instance.
      *
-     * html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES) resolves this issue.
+     * So we compare the decoded version of the two strings. Should always work.
+     *
+     * TODO: this may give false negatives when string changes but decoded version doesn't
      *
      * @param $new_translation
      * @param $old_translation
+     *
+     * @return bool
      */
     private function translationIsEqual( $new_translation, $old_translation ) {
-        return html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  == $new_translation['translation'] ;
+        $old = html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
+        $new = html_entity_decode($new_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
+
+        return $new == $old ;
     }
 
     private function prepareDao() {

@@ -42,7 +42,7 @@ class catController extends viewController {
     /**
      * @var Chunks_ChunkStruct
      */
-    private $job ;
+    private $chunk ;
 
     /**
      * @var Projects_ProjectStruct
@@ -133,7 +133,7 @@ class catController extends viewController {
 
         }
 
-        $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
     }
 
     public function doAction() {
@@ -379,7 +379,7 @@ class catController extends viewController {
 
         //this gets MT engine active for the job
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->id     = $this->job->id_mt_engine ;
+        $engineQuery->id     = $this->chunk->id_mt_engine ;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
@@ -497,10 +497,10 @@ class catController extends viewController {
         $this->template->pname       = $this->project->name;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->mt_id      = $this->job->id_mt_engine ;
+        $this->template->mt_id      = $this->chunk->id_mt_engine ;
 
-        $this->template->first_job_segment   = $this->job->job_first_segment ;
-        $this->template->last_job_segment    = $this->job->job_last_segment ;
+        $this->template->first_job_segment   = $this->chunk->job_first_segment ;
+        $this->template->last_job_segment    = $this->chunk->job_last_segment ;
 
         $this->template->owner_email         = $this->job_owner;
 
@@ -518,8 +518,8 @@ class catController extends viewController {
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
-        $this->template->tms_enabled = var_export( (bool) $this->job->id_tms , true );
-        $this->template->mt_enabled  = var_export( (bool) $this->job->id_mt_engine , true );
+        $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
+        $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
@@ -591,8 +591,8 @@ class catController extends viewController {
     /**
      * @return Chunks_ChunkStruct
      */
-    public function getJob() {
-      return $this->job ;
+    public function getChunk() {
+      return $this->chunk ;
     }
 
     /**
@@ -630,7 +630,7 @@ class catController extends viewController {
     }
 
     public function isCurrentProjectGDrive() {
-        return \Projects_ProjectDao::isGDriveProject($this->job->id_project);
+        return \Projects_ProjectDao::isGDriveProject($this->chunk->id_project);
     }
 
 }

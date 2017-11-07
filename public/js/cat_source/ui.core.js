@@ -484,8 +484,6 @@ UI = {
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
 
-
-
         UI.segmentButtons = null;
 
 	},
@@ -2093,6 +2091,22 @@ UI = {
         return $(area).text();
     },
 
+    processContributions : function() {
+    },
+
+    /**
+     * This function is overwritten in ui.contribution.js. This version is meant to be used by
+     * customisations that do not make use of contributions.
+     *
+     * @param segment
+     * @param next
+     */
+    getContribution : function(segment, next) {
+        UI.blockButtons = false ;
+        $( segment ).addClass('loaded');
+        var deferred = new jQuery.Deferred() ;
+        return deferred.resolve();
+    },
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
@@ -2568,8 +2582,12 @@ UI = {
         }
 
         UI.selectingReadonly = setTimeout(function() {
-            APP.alert({ msg: UI.messageForClickOnReadonly() });
+            UI.readonlyClickDisplay() ;
         }, 200);
+    },
+
+    readonlyClickDisplay : function() {
+        APP.alert({ msg: UI.messageForClickOnReadonly() });
     },
 
     messageForClickOnReadonly : function() {

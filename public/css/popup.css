@@ -1,5 +1,15 @@
 /*popup*/
-.popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:12;opacity:0.6;}
+.popup-outer{
+    background:#000;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:12;
+    opacity:0.4;
+}
+
 .modal .popup{
     overflow:hidden;
     line-height:30px;
@@ -1914,7 +1924,6 @@ span.title-source {
 .popup.popup-confirm.confirm_checkbox,
 .popup.popup-alert {
     text-align: right;
-    padding: 0;
 }
 
 .popup.popup-confirm.confirm_checkbox p.text-container-top,

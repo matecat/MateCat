@@ -1,9 +1,12 @@
 /*
 	Component: ui.contribution
  */
-$('html').on('copySourceToTarget', 'section', function() {
-    UI.setChosenSuggestion(0);
-});
+
+if ( config.translation_matches_enabled ) {
+
+    $('html').on('copySourceToTarget', 'section', function() {
+        UI.setChosenSuggestion(0);
+    });
 
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
@@ -13,26 +16,26 @@ $.extend(UI, {
 		var percentageClass = this.getPercentuageClass(match);
 		if ($.trim(translation) !== '') {
 
-			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
+                //ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
-			if (decode) {
-				translation = htmlDecode(translation);
-			}
-			if (this.body.hasClass('searchActive'))
-				this.addWarningToSearchDisplay();
+                if (decode) {
+                    translation = htmlDecode(translation);
+                }
+                if (this.body.hasClass('searchActive'))
+                    this.addWarningToSearchDisplay();
 
-			this.saveInUndoStack('copysuggestion');
+                this.saveInUndoStack('copysuggestion');
 
-			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
+                if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 
-            // XXX we are modifing the APP state so that MateCat will know that the object is changed
-            // in particular this is needed for the Speech2Text to know that the newly added text is coming
-            // from a 100% match.
-            var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
-            if ( segmentObj ) {
-                segmentObj.suggestion_match = match.replace('%', '');
-                MateCat.db.segments.update( segmentObj );
-            }
+                // XXX we are modifing the APP state so that MateCat will know that the object is changed
+                // in particular this is needed for the Speech2Text to know that the newly added text is coming
+                // from a 100% match.
+                var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
+                if ( segmentObj ) {
+                    segmentObj.suggestion_match = match.replace('%', '');
+                    MateCat.db.segments.update( segmentObj );
+                }
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
             SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');
@@ -47,8 +50,8 @@ $.extend(UI, {
             }
 		}
 
-		// a value of 0 for 'which' means the choice has been made by the
-		// program and not by the user
+            // a value of 0 for 'which' means the choice has been made by the
+            // program and not by the user
 
 		$(window).trigger({
 			type: "suggestionChosen",
@@ -87,36 +90,36 @@ $.extend(UI, {
 			return $.Deferred().resolve();
 		}
 
-        var id = current.attr('id');
-        var id_segment = id.split('-')[1];
+            var id = current.attr('id');
+            var id_segment = id.split('-')[1];
 
-        if( config.brPlaceholdEnabled ) {
-            txt = this.postProcessEditarea(current, '.source');
-        } else {
-            txt = $('.source', current).text();
-        }
+            if( config.brPlaceholdEnabled ) {
+                txt = this.postProcessEditarea(current, '.source');
+            } else {
+                txt = $('.source', current).text();
+            }
 
-        //If tag projection enabled in the source there are not tags, so I take the data-original value
-        if (UI.checkCurrentSegmentTPEnabled(current)) {
-            txt = current.find('.source').data('original');
-            txt = htmlDecode(txt).replace(/&quot;/g, '\"');
-            txt = htmlDecode(txt);
-        }
+            //If tag projection enabled in the source there are not tags, so I take the data-original value
+            if (UI.checkCurrentSegmentTPEnabled(current)) {
+                txt = current.find('.source').data('original');
+                txt = htmlDecode(txt).replace(/&quot;/g, '\"');
+                txt = htmlDecode(txt);
+            }
 
-		txt = view2rawxliff(txt);
-		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
+            txt = view2rawxliff(txt);
+            // Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 
-		if (!next) {
-			$(".loader", current).addClass('loader_on');
-		}
+            if (!next) {
+                $(".loader", current).addClass('loader_on');
+            }
 
-        // `next` and `untranslated next` are the same
-		if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
-			return $.Deferred().resolve();
-		}
+            // `next` and `untranslated next` are the same
+            if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
+                return $.Deferred().resolve();
+            }
 
-        var contextBefore = UI.getContextBefore(id_segment);
-        var contextAfter = UI.getContextAfter(id_segment);
+            var contextBefore = UI.getContextBefore(id_segment);
+            var contextAfter = UI.getContextAfter(id_segment);
 
 		return APP.doRequest({
 			data: {
@@ -192,7 +195,7 @@ $.extend(UI, {
             }
             if (editareaLength === 0) {
 
-                UI.setChosenSuggestion(1, segment);
+                    UI.setChosenSuggestion(1, segment);
 
                 translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
@@ -207,14 +210,14 @@ $.extend(UI, {
                     }
                 }
 
-                var copySuggestion = function() {
-                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
-                };
-                if ( UI.autoCopySuggestionEnabled() &&
-                    ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
-                ) {
-				    copySuggestion();
-                }
+                    var copySuggestion = function() {
+                        UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+                    };
+                    if ( UI.autoCopySuggestionEnabled() &&
+                        ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
+                    ) {
+                        copySuggestion();
+                    }
 
                 if (UI.body.hasClass('searchActive')) {
                     UI.addWarningToSearchDisplay();
@@ -312,42 +315,43 @@ $.extend(UI, {
         var html = $(segment).find('.source').html();
         var parsed = $.parseHTML( html ) ;
 
-        if ( parsed == null ) return;
+            if ( parsed == null ) return;
 
-        $.each( parsed, function (index) {
-            if(this.nodeName == '#text') {
-                sourceText += this.data;
-            } else {
-                sourceText += this.innerText;
-            }
-        });
+            $.each( parsed, function (index) {
+                if(this.nodeName == '#text') {
+                    sourceText += this.data;
+                } else {
+                    sourceText += this.innerText;
+                }
+            });
 
-        $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
-            percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
-            if(percent > 74) {
-                var ss = $(this).find('.suggestion_source');
+            $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
+                percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
+                if(percent > 74) {
+                    var ss = $(this).find('.suggestion_source');
 
-                suggestionSourceText = '';
+                    suggestionSourceText = '';
 
-                $.each($.parseHTML($(ss).html()), function (index) {
+                    $.each($.parseHTML($(ss).html()), function (index) {
 
-                    if(this.nodeName == '#text') {
-                        suggestionSourceText += this.data;
-                    } else {
-                        suggestionSourceText += this.innerText;
-                    }
-                });
+                        if(this.nodeName == '#text') {
+                            suggestionSourceText += this.data;
+                        } else {
+                            suggestionSourceText += this.innerText;
+                        }
+                    });
 
-                $(this).find('.suggestion_source').html(
-                    UI.dmp.diff_prettyHtml(
-                        UI.execDiff(sourceText, suggestionSourceText)
-                    )
-                );
-            }
-
-
-        });
-    },
+                    $(this).find('.suggestion_source').html(
+                        UI.dmp.diff_prettyHtml(
+                            UI.execDiff(sourceText, suggestionSourceText)
+                        )
+                    );
+                }
 
 
-});
+            });
+        },
+
+
+    });
+} ;

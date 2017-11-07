@@ -1,3 +1,9 @@
+let TextField = require('../common/TextField').default;
+let DQFCredentials = require('./DQFCredentials').default;
+
+import * as RuleRunner from '../common/ruleRunner';
+import * as FormRules from '../common/formRules';
+
 class PreferencesModal extends React.Component {
 
 
@@ -9,11 +15,12 @@ class PreferencesModal extends React.Component {
             coupon: this.props.metadata.coupon,
             couponError: '',
             validCoupon : false,
-            openCoupon: false
-        };
+            openCoupon: false,
 
+        };
         this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
+
 
     openResetPassword() {
         $('#modal').trigger('openresetpassword');
@@ -127,6 +134,16 @@ class PreferencesModal extends React.Component {
         });
     }
 
+    getDqfHtml() {
+        if (config.dqf_enabled === 1) {
+            return <div className="dqf-container">
+                    <h2>DQF Credentials</h2>
+                <DQFCredentials
+                    metadata={this.props.metadata}/>
+                </div>
+        }
+    }
+
     render() {
         var gdriveMessage = '';
         if (this.props.showGDriveMessage) {
@@ -238,10 +255,17 @@ class PreferencesModal extends React.Component {
                         </div>
 
                         {googleDrive}
+                        {this.getDqfHtml()}
                         {couponHtml}
+
                     </div>
             </div>;
     }
 }
+
+const fieldValidations = [
+    RuleRunner.ruleRunner("dqfUsername", "Username", FormRules.requiredRule),
+    RuleRunner.ruleRunner("dqfPassword", "Password", FormRules.requiredRule, FormRules.minLength(8)),
+];
 
 export default PreferencesModal ;

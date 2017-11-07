@@ -214,12 +214,11 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = :id AND password = :password " );
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
 
-        if ( !$fetched) {
+        if ( !$fetched ) {
             throw new Exceptions\NotFoundError( "No project found." );
         }
 
         return $fetched;
-
     }
 
     /**
