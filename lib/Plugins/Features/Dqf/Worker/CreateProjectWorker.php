@@ -29,7 +29,7 @@ class CreateProjectWorker extends AbstractWorker  {
         $this->_checkForReQueueEnd( $this->queueElement );
         $this->_checkDatabaseConnection() ;
 
-        /** Wati to ensure slave databases are up to date. */
+        /** Wait to ensure slave databases are up to date. */
         sleep( 4 ) ;
 
         try {

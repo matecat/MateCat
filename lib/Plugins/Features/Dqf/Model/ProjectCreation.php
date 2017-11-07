@@ -94,6 +94,10 @@ class ProjectCreation {
     protected function _createProject() {
         $projectInputParams = ProjectMetadata::extractProjectParameters( $this->project->getMetadataAsKeyValue() );
 
+        /**
+         * Generating id_project from a sequence here allows for retrying this step if anything fails.
+         * Otherwise we would have a conflict if the master project is created but something goes wrong during later on.
+         */
         $id_project = Database::obtain()->nextSequence('id_dqf_project')[ 0 ] ;
 
         $params = new ProjectRequestStruct(array_merge( array(
