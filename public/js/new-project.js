@@ -608,6 +608,7 @@ $.extend(UI.UPLOAD_PAGE, {
                 ll.attr('checked','true');
                 ll.prop('checked','true');
             });
+            $('.popup-languages h1 .number').text( tlAr.length );
             $(".popup-outer.lang-slide").show();
             $('body').addClass('side-popup');
         });

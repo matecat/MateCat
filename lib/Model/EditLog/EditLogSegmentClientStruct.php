@@ -36,11 +36,6 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     /**
      * @var string
      */
-    public $ter;
-
-    /**
-     * @var string
-     */
     public $diff;
 
     /**

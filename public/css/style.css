@@ -19,7 +19,7 @@ header {
     left: 0;
     width: 100%;
     position: fixed;
-    z-index: 999999999;
+    z-index: 12;
     border-bottom: 1px solid #333;
     padding: 0;
     margin-top: -34px;
@@ -545,7 +545,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     text-align: center;
     display: block;
     font-size: 12px;
-    z-index: 999;
+    z-index: 1;
     color: #aaa;
     text-decoration: none;
     cursor: default;
@@ -1385,8 +1385,7 @@ body.cattool:not(.editing) article {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
-    padding: 5px 0 0px 0;
-    margin-bottom: 9px;
+    padding: 5px 0 9px 0;
     color: #000
 }
 
@@ -2405,10 +2404,9 @@ body.cattool .searchbox .block.right {
     font-size: 11px;
     background: #999;
     padding: 4px 8px;
-
     left: 46%;
     position: absolute;
-    z-index: 10;
+    z-index: 12;
 }
 
 .close {
@@ -2565,7 +2563,7 @@ section .text .warning {
 
 textarea, .editarea {
     position: relative;
-    z-index: 99;
+    z-index: 0;
 }
 
 section.status-new .editarea {
@@ -2577,7 +2575,7 @@ section.status-new.opened .editarea {
 }
 
 section.editor {
-    z-index: 10000;
+    z-index: 1;
     position: relative;
     height: 100%;
 }
@@ -2781,7 +2779,7 @@ body.rtl-target .editor .editarea span {
 
 .source {
     position: relative;
-    z-index: 999;
+    z-index: 0;
     /*word-break: break-all;*/
 }
 
@@ -3273,7 +3271,7 @@ section.readonly:hover .ice-locked-label {
     right: 0;
     border-left: 1px solid #ccc;
     margin: 0px 0px 0px 0 !important;
-    z-index: 99;
+    z-index: 1;
     border-bottom: 1px solid #ccc
 }
 
@@ -5308,7 +5306,7 @@ section.loaded .footer .tab.open {
     text-decoration: none;
     right: -8%;
     width: 8%;
-    z-index: 999;
+    z-index: 1 !important;
 }
 
 section:hover .segment-side-buttons {

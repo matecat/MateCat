@@ -1631,9 +1631,9 @@ class QA {
 //            }
 //
 //            if( $srcHasHeadNBSP ) {
-//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", CatUtils::unicode2chr(0Xa0), $_trgNodeContent );
 //            } else {
-//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", CatUtils::unicode2chr(0X20), $_trgNodeContent );
 //            }
 //            $_nodeNormalized->nodeValue = $_trgNodeContent;
 //
@@ -1708,9 +1708,9 @@ class QA {
 //            }
 //
 //    		if( $srcHasTailNBSP ) {
-//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", CatUtils::unicode2chr(0Xa0), $_trgNodeContent );
 //    		} else {
-//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", CatUtils::unicode2chr(0X20), $_trgNodeContent );
 //    		}
 //
 //            $_nodeNormalized->nodeValue = $_trgNodeContent;

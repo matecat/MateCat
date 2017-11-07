@@ -63,7 +63,7 @@ class TeamsController extends KleinController {
         $team      = $model->create();
         $formatted = new Team();
 
-        $this->response->json( array( 'team' => $formatted->renderItem( $team ) ) );
+        $this->response->json( [ 'team' => $formatted->renderItem( $team ) ] );
     }
 
     public function update() {
@@ -119,7 +119,7 @@ class TeamsController extends KleinController {
 
         $teamList = ( new MembershipDao() )->findUserTeams( $this->getUser() );
         $formatted = new Team( $teamList );
-        $this->response->json( [ 'team' => $formatted->render() ] );
+        $this->response->json( [ 'teams' => $formatted->render() ] );
 
     }
 

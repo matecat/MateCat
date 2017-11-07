@@ -73,6 +73,7 @@ class JobsWorker extends AbstractWorker {
         $Pee_weighted = 0;
         $total_time_to_edit = 0;
         foreach( $segments as $segment ){
+            $segment->job_target = $jobStruct->target; //Add language to tell to TMS_MATCH if this is a CJK
             $Pee_weighted += $segment->getPEE() * $segment->raw_word_count;
             $total_time_to_edit += $segment->time_to_edit;
         }

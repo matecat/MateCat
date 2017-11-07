@@ -84,22 +84,25 @@ class Mmt extends BaseFeature {
 
         $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
-        /**
-         * @var $newTestCreatedMT Engines_MMT
-         */
-        $mt_result = $newTestCreatedMT->checkAccount()->get_as_array();
+        try {
 
-        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+            /**
+             * @var $newTestCreatedMT Engines_MMT
+             */
+            $me_result = $newTestCreatedMT->checkAccount();
+            Log::doLog( $me_result );
+
+        } catch ( Exception $e ) {
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-            Log::doLog( $mt_result );
-            throw new Exception( $mt_result[ 'error' ][ 'message' ], $mt_result[ 'error' ][ 'code' ] );
+            throw $e;
         }
 
         $UserMetadataDao = new MetadataDao();
         $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
         $keyList = self::_getKeyringOwnerKeys( $userStruct );
-        $newTestCreatedMT->activate( $keyList );
-
+        if( !empty( $keyList ) ){
+            $newTestCreatedMT->activate( $keyList );
+        }
     }
 
     public function engineCreationFailed( $errorObject, $class_load ){
@@ -190,10 +193,12 @@ class Mmt extends BaseFeature {
         if( $engine instanceof Engines_MMT ){
 
             $source       = $segments[ 0 ][ 'source' ];
+            $targets = [];
             $jobLanguages = [];
             foreach( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ){
                 list( $jobId, $target ) = explode( ":", $jid_Lang );
                 $jobLanguages[ $jobId ] = $source . "|" . $target;
+                $targets[] = $target;
             }
 
             $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
@@ -210,7 +215,7 @@ class Mmt extends BaseFeature {
                         [en-US|it-IT] =>
                     )
                 */
-                $result = $engine->getContext( $tmpFileObject, array_values( $jobLanguages ) );
+                $result = $engine->getContext( $tmpFileObject, $source, $targets );
 
                 $jMetadataDao = new \Jobs\MetadataDao();
                 Database::obtain()->begin();
@@ -357,8 +362,7 @@ class Mmt extends BaseFeature {
             $newEngineStruct->name                                   = Constants_Engines::MMT;
             $newEngineStruct->uid                                    = $logged_user->uid;
             $newEngineStruct->type                                   = Constants_Engines::MT;
-            $newEngineStruct->extra_parameters[ 'MyMemory-License' ] = $data->engineData[ 'secret' ];
-            $newEngineStruct->extra_parameters[ 'User_id' ]          = $logged_user->getEmail();
+            $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
 
             return $newEngineStruct;
         }
