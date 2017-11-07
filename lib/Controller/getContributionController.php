@@ -26,7 +26,7 @@ class getContributionController extends ajaxController {
      */
     private $jobData;
 
-    private $feature_set;
+    private $featureSet;
 
     private $__postInput = array();
 
@@ -66,7 +66,7 @@ class getContributionController extends ajaxController {
             $this->id_translator = "";
         }
 
-        $this->feature_set = new FeatureSet();
+        $this->featureSet = new FeatureSet();
 
     }
 
@@ -107,6 +107,8 @@ class getContributionController extends ajaxController {
 
             return -1;
         }
+
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /*
          * string manipulation strategy
@@ -242,7 +244,7 @@ class getContributionController extends ajaxController {
             $config = $mt_engine->getConfigStruct();
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
-            $config = $this->feature_set->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+            $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
 
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
@@ -390,6 +392,8 @@ class getContributionController extends ajaxController {
             }
             //else do not rewrite the match value
         }
+
+        $match = $this->featureSet->filter( 'iceMatchRewriteForContribution', $match );
 
         return $match;
 

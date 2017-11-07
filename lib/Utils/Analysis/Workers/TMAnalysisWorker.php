@@ -272,6 +272,8 @@ class TMAnalysisWorker extends AbstractWorker {
                     $tm_data[ 'locked' ] = true;
                 }
 
+                $tm_data = $this->featureSet->filter( 'checkIceLocked', $tm_data, $queueElementParams );
+
             } elseif( $queueElementParams->pretranslate_100 ) {
                 $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
                 $tm_data[ 'locked' ] = false;
