@@ -1962,17 +1962,26 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $iceLock = $this->features->filter( 'setICESLockFromXliffValues', [ 'approved' => $translation_row [ 4 ], 'locked' => 0, 'match_type' => 'ICE', 'eq_word_count' => 0 ] );
+                $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
+                        [
+                                'approved'      => $translation_row [ 4 ],
+                                'locked'        => 0,
+                                'match_type'    => 'ICE',
+                                'eq_word_count' => 0,
+                                'status'        => $status
+                        ]
+                );
 
+                //WARNING do not change the order of the keys
                 $sql_values = [
                         'id_segment'    => $translation_row [ 0 ],
                         'id_job'        => $jid,
                         'segment_hash'  => $translation_row [ 3 ],
-                        'status'        => $status,
+                        'status'        => $iceLockArray[ 'status' ],
                         'translation'   => $translation_row [ 2 ],
-                        'locked'        => $iceLock[ 'locked' ],
-                        'match_type'    => $iceLock[ 'match_type' ],
-                        'eq_word_count' => $iceLock[ 'eq_word_count' ],
+                        'locked'        => $iceLockArray[ 'locked' ],
+                        'match_type'    => $iceLockArray[ 'match_type' ],
+                        'eq_word_count' => $iceLockArray[ 'eq_word_count' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
