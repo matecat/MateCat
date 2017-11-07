@@ -113,7 +113,6 @@ class ProjectManager {
                             'translations'         => [],
                             'notes'                => [],
                         //one translation for every file because translations are files related
-                            'query_translations'   => [],
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
                             'job_to_split'         => null,
                             'job_to_split_pass'    => null,
@@ -1607,7 +1606,15 @@ class ProjectManager {
                                         if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
                                             $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                         }
-                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet( $seg_source[ 'mid' ], new ArrayObject( array( 2 => $target ) ) );
+
+                                        /**
+                                         * Approved Flag
+                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                         */
+                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
+                                                $seg_source[ 'mid' ],
+                                                new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                        );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1674,7 +1681,14 @@ class ProjectManager {
                                     if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
                                         $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                     }
-                                    $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append( new ArrayObject( array( 2 => $target ) ) );
+
+                                    /**
+                                     * Approved Flag
+                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                     */
+                                    $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
+                                            new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                    );
 
                                 }
 
@@ -1870,8 +1884,12 @@ class ProjectManager {
 
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
-                    //WARNING offset 2 are the target translations
+                    //WARNING offset 2 is the target translation
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
+                    /**
+                     * WARNING offset 4 is the Approved Flag
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                     */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
                     unset( $segments_metadata[ $k ] );
@@ -1934,6 +1952,7 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        $query_translations_values = [];
         foreach ( $this->projectStructure[ 'translations' ] as $trans_unit_reference => $struct ) {
 
             if ( empty( $struct ) ) {
@@ -1943,39 +1962,61 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $sql_values = sprintf(
-                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 0, 'ICE', '%s' )",
-                    $translation_row [ 0 ],
-                    $jid,
-                    $translation_row [ 3 ],
-                    $status,
-                    $translation_row [ 2 ],
-                    0
-                );
+                $iceLock = $this->features->filter( 'setICESLockFromXliffValues', [ 'approved' => $translation_row [ 4 ], 'locked' => 0, 'match_type' => 'ICE', 'eq_word_count' => 0 ] );
 
-                $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
+                $sql_values = [
+                        'id_segment'    => $translation_row [ 0 ],
+                        'id_job'        => $jid,
+                        'segment_hash'  => $translation_row [ 3 ],
+                        'status'        => $status,
+                        'translation'   => $translation_row [ 2 ],
+                        'locked'        => $iceLock[ 'locked' ],
+                        'match_type'    => $iceLock[ 'match_type' ],
+                        'eq_word_count' => $iceLock[ 'eq_word_count' ],
+                ];
+
+                $query_translations_values[] = $sql_values;
+
             }
 
         }
 
         // Executing the Query
-        if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
+        if ( !empty( $query_translations_values ) ) {
 
-            $baseQuery = "INSERT INTO segment_translations (
-                id_segment, id_job, segment_hash, status, translation, translation_date,
-                tm_analysis_status, locked, match_type, eq_word_count )
-				values ";
+            $baseQuery = "
+                INSERT INTO segment_translations (
+                        id_segment, 
+                        id_job, 
+                        segment_hash, 
+                        status, 
+                        translation, 
+                        translation_date, /* NOW() */
+                        tm_analysis_status, /* DONE */
+                        locked, 
+                        match_type, 
+                        eq_word_count 
+                )
+                VALUES ";
 
-            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ? )";
+
+
+            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
+
             //split the query in to chunks if there are too much segments
-            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 100 ) );
+            $query_translations_values = array_chunk( $query_translations_values, 100 );
 
-            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
+            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
 
-            foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
+            foreach ( $query_translations_values as $i => $chunk ) {
 
                 try {
-                    $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
+
+                    $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
+                    $stmt = $this->dbHandler->getConnection()->prepare( $query );
+                    $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
+
                     Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
                 } catch ( PDOException $e ) {
                     Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
@@ -1987,7 +2028,7 @@ class ProjectManager {
         }
 
         //clean translations and queries
-        $this->projectStructure[ 'query_translations' ]->exchangeArray( array() );
+        unset( $query_translations_values );
 
     }
 
