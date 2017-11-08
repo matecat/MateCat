@@ -56,6 +56,7 @@ class analyzeOldController extends viewController {
     protected $analyze_html = "analyze_old.html";
     protected $job_analysis_html = "jobAnalysis_old.html" ;
 
+    protected $page_type ;
 
     public function __construct() {
 
@@ -86,6 +87,8 @@ class analyzeOldController extends viewController {
             parent::makeTemplate( $this->job_analysis_html  );
             $this->jpassword = $pass;
             $this->ppassword = $this->project->password;
+            $this->page_type = 'job_analysis';
+
         } else {
             $this->project_not_found = $this->project->password != $pass;
 
@@ -93,6 +96,7 @@ class analyzeOldController extends viewController {
             $this->jid       = null;
             $this->jpassword = null;
             $this->ppassword = $pass;
+            $this->page_type = 'project_analysis';
         }
 
         $this->features = new FeatureSet();
@@ -106,7 +110,7 @@ class analyzeOldController extends viewController {
 
     public function doAction() {
         $this->features->run('beginDoAction', 'analyzeController', array(
-                'project' => $this->project
+                'project' => $this->project,  'page_type' => $this->page_type
         ));
 
         if ( !$this->project ) {

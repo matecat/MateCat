@@ -66,6 +66,7 @@ class ProjectCreationWorker extends AbstractWorker {
     protected function _publishResults(){
         Queue::publishResults( $this->projectStructure );
         $this->_doLog( "Project creation completed: " . $this->projectStructure[ 'id_project' ] );
+        $this->projectStructure = new RecursiveArrayObject();
     }
 
 }
