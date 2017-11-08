@@ -1598,8 +1598,7 @@ class ProjectManager {
 
                                     if ( $this->__isTranslated( $src, $trg ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
-                                        $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-                                        $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
+                                        $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
@@ -1674,7 +1673,6 @@ class ProjectManager {
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-                                    $target = $this->dbHandler->escape( $target );
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
