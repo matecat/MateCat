@@ -174,8 +174,6 @@ $.extend(UI, {
         // TODO Move to SegmentFooter Component
 		if (d.data.matches && d.data.matches.length > 0) {
 			$('.submenu li.tab-switcher-tm a span', segment).text(' (' + d.data.matches.length + ')');
-		} else {
-			$(".submenu > li.tab-switcher-tm", segment).hide();
 		}
 		this.renderContributionErrors(d.errors, segment);
     },
@@ -184,6 +182,9 @@ $.extend(UI, {
         if(!d) return true;
 
         var editarea = $('.editarea', segment);
+        if (!$('.sub-editor.matches', segment).length) {
+            SegmentActions.createFooter(UI.getSegmentId(segment));
+        }
         if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
             var editareaLength = editarea.text().trim().length;
             var translation = d.data.matches[0].translation;
@@ -191,9 +192,6 @@ $.extend(UI, {
             var match = d.data.matches[0].match;
 
             var segment_id = segment.attr('id');
-            if (!$('.sub-editor.matches', segment).length) {
-                SegmentActions.createFooter(UI.getSegmentId(segment));
-            }
             SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
 
             // UI.setDeleteSuggestion(segment);
