@@ -47,7 +47,7 @@ class SegmentTranslationIssue extends Base {
 
         $this->translation = $this->parent_validator->translation ;
 
-        $this->segment =$this->parent_validator->segment ;
+        $this->segment = $this->parent_validator->segment ;
 
         if ( $this->request->id_issue ) {
             $this->ensureIssueIsInScope();

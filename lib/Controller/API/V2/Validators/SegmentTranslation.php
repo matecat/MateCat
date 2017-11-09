@@ -23,6 +23,7 @@ class SegmentTranslation extends Base {
 
     public function setPassword( $password ) {
         $this->password = $password  ;
+        return $this;
     }
 
     public function validate() {

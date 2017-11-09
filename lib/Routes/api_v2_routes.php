@@ -65,6 +65,10 @@ route(
     '\API\V2\SegmentVersion', 'index'
 );
 
+route( '/api/v2/revise/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', 'GET',
+        '\API\V2\ReviseTranslationIssuesController', 'index'
+);
+
 route(
     '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', 'GET',
     'API_V2_SegmentVersion', 'detail'
