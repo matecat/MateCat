@@ -1,4 +1,5 @@
 let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
+let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
 
 class ReviewTranslationDiffVersion extends React.Component {
 
@@ -19,11 +20,18 @@ class ReviewTranslationDiffVersion extends React.Component {
         return { __html : UI.decodePlaceholdersToText( this.props.translation ) };
     }
 
-    issueMouseEnter() {
-
+    textSelected(data) {
+        this.setState({
+            selectedText: data.selected_string,
+            selectionObj: data
+        });
     }
 
-    issueMouseLeave() {
+    issueMouseEnter ( issue, event, reactid ) {
+        SegmentActions.showSelection(this.props.sid, issue);
+    }
+
+    issueMouseLeave () {
 
     }
 
@@ -44,13 +52,18 @@ class ReviewTranslationDiffVersion extends React.Component {
                 </div>
 
                 <div className="collapsable">
-
+                    <h4> Target </h4>
                     <div ref={(elem)=>this.highlightArea=elem} className="muted-text-box issueHighlightArea"
                          dangerouslySetInnerHTML={this.translationMarkup()} />
-
-                    <div className="muted-text-box review-track-changes-box"
-                         dangerouslySetInnerHTML={this.getMarkupForTrackChanges()} />
-
+                    <h4> Diff </h4>
+                    <ReviewVersionDiff
+                        // translation={this.props.translation}
+                        sid={this.props.sid}
+                        textSelectedFn={this.textSelected.bind(this)}
+                        decodeTextFn={UI.decodeText}
+                        diff={this.props.diff}
+                        versionNumber={this.props.versionNumber}
+                    />
 
                     <ReviewIssuesContainer
                         issueMouseEnter={this.issueMouseEnter.bind(this)}
@@ -61,8 +74,7 @@ class ReviewTranslationDiffVersion extends React.Component {
                         versionNumber={this.props.versionNumber} />
                 </div>
             </div>
-        </div>
-            ;
+        </div>;
 
     }
 }

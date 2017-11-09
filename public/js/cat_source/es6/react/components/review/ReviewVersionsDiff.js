@@ -206,8 +206,8 @@ class ReviewVersionsDiff extends React.Component {
         var range = document.createRange();
 
         var startNodeOffset, endNodeOffset;
-        startNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.start);
-        endNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.end);
+        startNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.start_offset);
+        endNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.end_offset);
 
         range.setStart(startNodeOffset.node, startNodeOffset.offset);
         range.setEnd(endNodeOffset.node, endNodeOffset.offset);
@@ -219,21 +219,25 @@ class ReviewVersionsDiff extends React.Component {
 
     getWrappers(newDiff) {
         return this.state.selectionWrappers.filter(function (wrapper) {
-            let text = newDiff.substring(wrapper.start, wrapper.end);
+            let text = newDiff.substring(wrapper.start_offset, wrapper.end_offset);
             return (text === wrapper.selected_string)
         });
 
     }
 
-    applyWrapper(sid, wrapper) {
-        if (this.props.segment.sid === sid) {
-            this.restoreSelection(wrapper);
+    applyWrapper(sid, issue) {
+        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.translation_version)) {
+            this.restoreSelection(issue);
         }
     }
 
     getDiff() {
-        let diffHtml = trackChangesHTML(this.originalTranslation, this.props.translation);
-        return this.props.decodeTextFn(this.props.segment, diffHtml);
+        if (this.props.diff && this.props.diff.length > 0) {
+            return trackChangesHTMLFromDiffArray(this.props.diff);
+        } else {
+            let diffHtml = trackChangesHTML(this.originalTranslation, this.props.translation);
+            return this.props.decodeTextFn(UI.currentSegment, diffHtml);
+        }
     }
 
     componentDidMount() {
