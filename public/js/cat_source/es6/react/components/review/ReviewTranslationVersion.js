@@ -1,3 +1,4 @@
+let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
 class ReviewTranslationVersion extends React.Component {
 
 
@@ -91,6 +92,7 @@ class ReviewTranslationVersion extends React.Component {
                 <ReviewIssuesContainer 
                     issueMouseEnter={this.issueMouseEnter.bind(this)}
                     issueMouseLeave={this.issueMouseLeave.bind(this)}
+                    reviewType={this.props.reviewType}
                     sid={this.props.sid} 
                     versionNumber={this.props.versionNumber} />
                 </div>

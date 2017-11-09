@@ -109,6 +109,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                     versionNumber={v.version_number}
                     isCurrent={false}
                     translation={v.translation}
+                    reviewType={this.props.reviewType}
                 />
             );
         }.bind(this) );
@@ -118,7 +119,8 @@ class TranslationIssuesOverviewPanel extends React.Component {
             key={'version-0'}
             versionNumber={this.state.segment.version_number}
             isCurrent={true}
-            translation={window.cleanupSplitMarker( this.state.segment.translation ) } />
+            translation={window.cleanupSplitMarker( this.state.segment.translation ) }
+            reviewType={this.props.reviewType}/>
 
         return [currentVersion].concat(previousVersions);
 

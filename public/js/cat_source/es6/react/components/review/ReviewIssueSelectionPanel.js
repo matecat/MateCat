@@ -66,7 +66,7 @@ class ReviewIssueSelectionPanel extends React.Component{
             };
         }.bind(this) );
 
-        SegmentActions.submitIssue(this.props.sid, data, diff)
+        SegmentActions.submitIssue(this.props.sid, data)
             .done( this.props.submitIssueCallback )
             .fail( this.handleFail.bind(this) ) ;
     }
