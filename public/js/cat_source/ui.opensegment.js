@@ -96,9 +96,7 @@
                 } else {
                     UI.editarea.attr('contenteditable', 'true');
                 }
-            }
 
-            if (!this.readonly) {
                 this.getContribution(segment.el, 1);
                 this.getContribution(segment.el, 2);
 

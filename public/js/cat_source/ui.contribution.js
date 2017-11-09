@@ -64,6 +64,15 @@ $.extend(UI, {
 	getContribution: function(segment, next) {
         var txt;
         var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+        var currentSegment  = new UI.Segment( current );
+        if (currentSegment.isReadonly() ) {
+            UI.blockButtons = false ;
+            $( segment ).addClass('loaded');
+            var deferred = new jQuery.Deferred() ;
+            return deferred.resolve();
+            return;
+        }
+
         /* If the segment just translated is equal or similar (Levenshtein distance) to the
          * current segment force to reload the matches
         **/
