@@ -201,19 +201,6 @@ class Utils {
 
 	}
 
-	// multibyte string manipulation functions
-	// source : http://stackoverflow.com/questions/9361303/can-i-get-the-unicode-value-of-a-character-or-vise-versa-with-php
-	// original source : PHPExcel libary (http://phpexcel.codeplex.com/)
-
-	// get the char from unicode code
-	public static function unicode2chr($o) {
-		if (function_exists('mb_convert_encoding')) {
-			return mb_convert_encoding('&#' . intval($o) . ';', 'UTF-8', 'HTML-ENTITIES');
-		} else {
-			return chr(intval($o));
-		}
-	}
-
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {

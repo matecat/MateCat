@@ -174,6 +174,8 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                             
                             if ( $segment->isValidForPeeTable() ) {
 
+                                $segment->job_target = $_target;
+
                                 $_PEE = $segment->getPEE();
 
                                 $job_stats[ 'ALL' ][ 'raw_wc_job' ] += $segment->raw_word_count;

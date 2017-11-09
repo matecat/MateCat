@@ -184,7 +184,8 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
         $post_editing_effort = round(
                 ( 1 - MyMemory::TMS_MATCH(
                                 self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->translation )
+                                self::cleanSegmentForPee( $this->translation ),
+                                $this->job_target
                         )
                 ) * 100
         );

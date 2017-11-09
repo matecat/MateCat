@@ -38,7 +38,7 @@ class editlogDownloadController extends downloadController {
 
         $csv_fields = array(
                 "Job ID", "Segment ID", "Suggestion Source", "Words", "Match percentage", "Time-to-edit",
-                "Post-editing effort", "HTER", "Segment", "Suggestion", "Translation", "MT QE", "ID translator",
+                "Post-editing effort", "Segment", "Suggestion", "Translation", "MT QE", "ID translator",
                 "Suggestion1-source", "Suggestion1-translation", "Suggestion1-match", "Suggestion1-origin",
                 "Suggestion2-source", "Suggestion2-translation", "Suggestion2-match", "Suggestion2-origin",
                 "Suggestion3-source", "Suggestion3-translation", "Suggestion3-match", "Suggestion3-origin",
@@ -55,7 +55,6 @@ class editlogDownloadController extends downloadController {
             $sugg_match     = $d->suggestion_match;
             $sugg_tte       = $d->time_to_edit;
             $pe_effort_perc = $d->pe_effort_perc;
-            $hter           = $d->ter;
             $segment        = $d->source_csv;
             $suggestion     = $d->sug_csv;
             $translation    = $d->translation_csv;

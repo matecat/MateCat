@@ -36,8 +36,8 @@ class RedirectMeController extends \BaseKleinViewController {
          * @var $engineMMT Engines_MMT
          */
         $this->view->basepath = INIT::$BASEURL;
-        $this->view->license  = $engineMMT->extra_parameters[ 'MyMemory-License' ];
-        $this->view->url      = "https://mymemory.translated.net/mmt/me";
+        $this->view->license  = $engineMMT->extra_parameters[ 'MMT-License' ];
+        $this->view->url      = "https://www.modernmt.eu/license/me";
 
         $this->response->body( $this->view->execute() );
         $this->response->send();
