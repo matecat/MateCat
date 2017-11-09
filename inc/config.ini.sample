@@ -39,11 +39,14 @@ LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
 
-; Config params for DQF
-DQF_BASE_URL = 'http://dqf-api.ta-us.net/'
-DQF_API_KEY = XXX
-DQF_ENCRYPTION_KEY = XXX
-DQF_ENCRYPTION_IV = XXX
+DQF_ENABLED = yes
+DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
+DQF_API_KEY = api-key
+DQF_ID_PREFIX = devinstance
+DQF_ENCRYPTION_KEY = encryption-key
+DQF_ENCRYPTION_IV = encryption-iv
+DQF_GENERIC_USERNAME = "matecatGeneric@taus.net"
+DQF_GENERIC_PASSWORD = "generic-user-password"
 
 ; Segments partition rule, leave unset to write to `segments` table.
 ; Format of configuration string is: "{id_project}:{table_name};...".

@@ -2,6 +2,8 @@
 
 namespace Exceptions ;
 
-class ValidationError extends \Exception {
+use Exception;
+
+class ValidationError extends Exception {
 
 }

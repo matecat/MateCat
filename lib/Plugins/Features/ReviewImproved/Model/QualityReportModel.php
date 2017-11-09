@@ -12,6 +12,8 @@ use ArrayObject;
 use Chunks_ChunkStruct;
 use Features\ReviewImproved\ChunkReviewModel;
 use LQA\ChunkReviewDao;
+use RecursiveArrayObject;
+use Users_UserDao;
 
 
 class QualityReportModel {
@@ -31,6 +33,9 @@ class QualityReportModel {
 
     private $chunk_review;
 
+    /**
+     * @var ChunkReviewModel
+     */
     private $chunk_review_model;
 
     private $all_segments = array();
@@ -49,6 +54,10 @@ class QualityReportModel {
         $this->chunk = $chunk;
     }
 
+    /**
+     * @param $version
+     * @deprecated no need for a setter, pass in constructor, no need for mutation here.
+     */
     public function setVersionNumber( $version ) {
         $this->version = $version;
     }
@@ -131,6 +140,11 @@ class QualityReportModel {
         $this->avg_time_to_edit = round( $avgs['avg_time_to_edit'] / 1000, 2);
     }
 
+    /**
+     * @param $records
+     *
+     * @return array
+     */
     private function buildQualityReportStructure( $records ) {
 
         $this->__setAverages();
@@ -162,11 +176,9 @@ class QualityReportModel {
                 )
         );
 
-
         $this->buildFilesSegmentsNestedTree( $records );
 
         return $this->quality_report_structure;
-
     }
 
     /**
@@ -179,7 +191,7 @@ class QualityReportModel {
         $name             = '';
 
         if ( $completion_event[ 'uid' ] != null ) {
-            $userDao = new \Users_UserDao( \Database::obtain() );
+            $userDao = new Users_UserDao( \Database::obtain() );
             $user    = $userDao->getByUid( $completion_event[ 'uid' ] );
             $name    = $user->fullName();
         }
@@ -255,15 +267,20 @@ class QualityReportModel {
     }
 
     private function structureNestIssue( $record ) {
-        $this->current_issue = new \ArrayObject( array(
-                'id'            => $record[ 'issue_id' ],
-                'created_at'    => $this->filterDate( $record[ 'issue_create_date' ] ),
-                'category'      => $record[ 'issue_category' ],
-                'severity'      => $record[ 'issue_severity' ],
-                'target_text'   => $record[ 'target_text' ],
-                'comment'       => $record[ 'issue_comment' ],
-                'replies_count' => $record[ 'issue_replies_count' ],
-                'comments'      => array()
+        $this->current_issue = new ArrayObject( array(
+                'id'               => $record[ 'issue_id' ],
+                'created_at'       => $this->filterDate( $record[ 'issue_create_date' ] ),
+                'category'         => $record[ 'issue_category' ],
+                'category_options' => $record[ 'category_options' ],
+                'severity'         => $record[ 'issue_severity' ],
+
+                'start_offset'     => $record[ 'issue_start_offset' ],
+                'end_offset'       => $record[ 'issue_end_offset' ],
+
+                'target_text'      => $record[ 'target_text' ],
+                'comment'          => $record[ 'issue_comment' ],
+                'replies_count'    => $record[ 'issue_replies_count' ],
+                'comments'         => array()
         ) );
 
         array_push(
@@ -324,12 +341,14 @@ class QualityReportModel {
 
     private function __getCurrentStructure() {
         $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
+
+
         return $this->buildQualityReportStructure( $records );
     }
 
     private function __getArchviedStructure() {
         $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version ) ;
-        $decoded = new \RecursiveArrayObject( json_decode( $archivedRecord->quality_report, TRUE ) );
+        $decoded = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );
 
         foreach( $decoded['chunk']['files'] as $file ) {
             foreach( $file['segments'] as $segment ) {

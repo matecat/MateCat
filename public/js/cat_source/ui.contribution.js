@@ -1,9 +1,12 @@
 /*
 	Component: ui.contribution
  */
-$('html').on('copySourceToTarget', 'section', function() {
-    UI.setChosenSuggestion(0);
-});
+
+if ( config.translation_matches_enabled ) {
+
+    $('html').on('copySourceToTarget', 'section', function() {
+        UI.setChosenSuggestion(0);
+    });
 
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
@@ -47,8 +50,8 @@ $.extend(UI, {
             }
 		}
 
-		// a value of 0 for 'which' means the choice has been made by the
-		// program and not by the user
+            // a value of 0 for 'which' means the choice has been made by the
+            // program and not by the user
 
 		$(window).trigger({
 			type: "suggestionChosen",
@@ -106,17 +109,17 @@ $.extend(UI, {
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 
-		if (!next) {
-			$(".loader", current).addClass('loader_on');
-		}
+            if (!next) {
+                $(".loader", current).addClass('loader_on');
+            }
 
-        // `next` and `untranslated next` are the same
-		if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
-			return $.Deferred().resolve();
-		}
+            // `next` and `untranslated next` are the same
+            if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
+                return $.Deferred().resolve();
+            }
 
-        var contextBefore = UI.getContextBefore(id_segment);
-        var contextAfter = UI.getContextAfter(id_segment);
+            var contextBefore = UI.getContextBefore(id_segment);
+            var contextAfter = UI.getContextAfter(id_segment);
 
 		return APP.doRequest({
 			data: {
@@ -192,7 +195,7 @@ $.extend(UI, {
             }
             if (editareaLength === 0) {
 
-                UI.setChosenSuggestion(1, segment);
+                    UI.setChosenSuggestion(1, segment);
 
                 translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
@@ -350,4 +353,5 @@ $.extend(UI, {
     },
 
 
-});
+    });
+} ;

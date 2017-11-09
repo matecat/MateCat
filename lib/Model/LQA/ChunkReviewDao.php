@@ -2,8 +2,6 @@
 
 namespace LQA ;
 
-use \CatUtils ;
-
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     const TABLE = "qa_chunk_reviews";

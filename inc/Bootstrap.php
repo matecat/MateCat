@@ -13,6 +13,9 @@ class Bootstrap {
     protected static $CONFIG;
     protected static $_ROOT;
 
+    /**
+     * @var FeatureSet
+     */
     private  $mandatoryFeatureSet ;
 
     public static function start() {

@@ -12,6 +12,12 @@ class Severity extends AbstractCachedAttribute {
 
     protected $resource_name = 'severity' ;
 
+    public $mappedNames = [] ;
+
+    public function __construct() {
+        parent::__construct() ;
+    }
+
     public function getSeveritiesForReviewSettings() {
         return array_map(function( $severity ) {
 
@@ -21,6 +27,13 @@ class Severity extends AbstractCachedAttribute {
             ];
 
         }, $this->resource_json ) ;
+    }
+
+    public function demapName( $name ) {
+        $found = array_filter( $this->resource_json, function( $severity ) use ( $name ) {
+            return $severity[ 'name' ] == $name ;
+        }) ;
+        return end( $found )['id'] ;
     }
 
     public function getSortedDqfIds() {

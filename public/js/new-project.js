@@ -296,17 +296,19 @@ APP.checkForDqf = function() {
 
     dqfCheck.off('click').on('click', function (e) {
         if ( dqfCheck.prop('checked')) {
-            if (!_.isUndefined(APP.USER.STORE.metadata) &&
+            if( _.isUndefined(APP.USER.STORE.metadata) ) {
+                e.stopPropagation();
+                e.preventDefault();
+                $('#modal').trigger('openlogin');
+                return;
+            } else if (!_.isUndefined(APP.USER.STORE.metadata) &&
                 (_.isUndefined(APP.USER.STORE.metadata.dqf_username) ||
                 _.isUndefined(APP.USER.STORE.metadata.dqf_options))) {
                 e.stopPropagation();
                 e.preventDefault();
-                ModalsActions.openDQFModal();
-            } else if( _.isUndefined(APP.USER.STORE.metadata) ) {
-                e.stopPropagation();
-                e.preventDefault();
-                $('#modal').trigger('openlogin');
             }
+            ModalsActions.openDQFModal();
+
         }
 
     });

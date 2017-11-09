@@ -14,7 +14,7 @@ use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
 
 class FileTargetLanguageRequestStruct extends BaseRequestStruct implements  ISessionBasedRequestStruct  {
 
-    public $sessonId ;
+    public $sessionId ;
     public $apiKey ;
     public $projectKey ;
 
@@ -24,7 +24,7 @@ class FileTargetLanguageRequestStruct extends BaseRequestStruct implements  ISes
     public $targetLanguageCode ;
 
     public function getHeaders() {
-        return $this->toArray(['apiKey', 'sessonId', 'projectKey']);
+        return $this->toArray(['apiKey', 'sessionId', 'projectKey']);
     }
 
     public function getPathParams() {

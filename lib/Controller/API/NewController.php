@@ -181,6 +181,7 @@ class NewController extends ajaxController {
             $__postInput[ 'mt_engine' ] = 1;
         }
 
+
         foreach ( $__postInput as $key => $val ) {
             $__postInput[ $key ] = urldecode( $val );
         }
@@ -220,9 +221,11 @@ class NewController extends ajaxController {
         }
 
         try {
-            $this->lexiqa = $__postInput[ 'lexiqa' ];
-            $this->speech2text = $__postInput[ 'speech2text' ];
-            $this->tag_projection = $__postInput[ 'tag_projection' ];
+            $this->lexiqa             = $__postInput[ 'lexiqa' ];
+            $this->speech2text        = $__postInput[ 'speech2text' ];
+            $this->tag_projection     = $__postInput[ 'tag_projection' ];
+            $this->project_completion = $__postInput[ 'project_completion' ];
+
             $this->project_completion = $__postInput[ 'project_completion' ];
 
             $this->validateMetadataParam( $__postInput );
@@ -294,8 +297,8 @@ class NewController extends ajaxController {
 
     private function setProjectFeatures() {
         if ( $this->postInput['project_completion'] ) {
-            $feature = new BasicFeatureStruct();
-            $feature->feature_code = 'project_completion';
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = 'project_completion';
             $this->projectFeatures[] = $feature;
         }
 
@@ -331,7 +334,7 @@ class NewController extends ajaxController {
         }
         catch ( ValidationError $e ) {
             $this->api_output = [ 'status' => 'FAIL', 'message' => $e->getMessage() ] ;
-            return -1;
+            return -1 ;
         }
 
         try {

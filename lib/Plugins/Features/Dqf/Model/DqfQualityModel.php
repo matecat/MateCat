@@ -9,6 +9,7 @@
 namespace Features\Dqf\Model;
 
 use DomainException;
+use Exception;
 use Features\Dqf\Model\CachedAttributes\Severity;
 use Features\Dqf\Service\Struct\Request\ReviewSettingsRequestStruct;
 use LQA\CategoryStruct;
@@ -33,6 +34,7 @@ class DqfQualityModel {
     protected $severities ;
 
     public function __construct( Projects_ProjectStruct $project ) {
+
         $this->qaModelStruct = $project->getLqaModel() ;
         $this->matecat_categories = $this->qaModelStruct->getCategories();
     }
@@ -42,8 +44,8 @@ class DqfQualityModel {
         $struct = new ReviewSettingsRequestStruct();
         $struct->reviewType        = 'error_typology';
         $struct->severityWeights   = $this->getSeverities() ;
-        $struct->sampling          = 20 ;
-        $struct->passFailThreshold = 200 ;
+        $struct->sampling          = 100 ;
+        $struct->passFailThreshold = $this->getPassFailThreshold();
 
         /**
          * Decide which categories to use. DQF expects four categories to be defined:
@@ -57,6 +59,13 @@ class DqfQualityModel {
         }
 
         return $struct ;
+    }
+
+    protected function getPassFailThreshold() {
+        if ( $this->qaModelStruct->pass_type != 'points_per_thousand' ) {
+            throw new Exception("type not supported " . $this->qaModelStruct->pass_type );
+        }
+        return $this->qaModelStruct->getLimit() ;
     }
 
     /**

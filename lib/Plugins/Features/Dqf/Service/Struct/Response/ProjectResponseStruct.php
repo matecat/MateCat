@@ -9,6 +9,7 @@
 namespace Features\Dqf\Service\Struct\Response;
 
 
+use Exception;
 use Features\Dqf\Service\Struct\BaseStruct;
 
 class ProjectResponseStruct extends BaseStruct {
@@ -47,7 +48,11 @@ class ProjectResponseStruct extends BaseStruct {
 
     public function __get($method) {
         $method = "_$method";
-        return $this->$method ;
+        if ( property_exists($this, $method) ) {
+            return $this->$method ;
+        }
+
+        throw new Exception("Property does not exist: $method");
     }
 
 }
