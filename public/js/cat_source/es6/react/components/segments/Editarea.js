@@ -136,7 +136,7 @@ class Editarea extends React.Component {
         return <div className={classes.join(' ')}
                     id={'segment-' + this.props.segment.sid + '-editarea'}
                     lang={lang}
-                    contentEditable={!this.props.readonly}
+                    contentEditable={!readonly}
                     spellCheck="true"
                     data-sid={this.props.segment.sid}
                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
