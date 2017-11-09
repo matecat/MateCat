@@ -2,38 +2,39 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {
-            sendLabel : 'Send',
-            sendDisabled : true,
-            replying : false,
-            comments : MateCat.db.segment_translation_issue_comments.findObjects({
-                'id_issue' : this.props.issueId
-            }),
-            rebutLabel : 'Send and Rebut',
-            rebutDisabled : true,
-            rebutVisible : true,
-            undoRebutLabel : 'Undo Rebut',
-            undoRebutDisabled : false,
-            undoRebutVisible : false
-        };
+        if (this.props.reviewType === "improved") {
+            this.state = {
+                sendLabel : 'Send',
+                sendDisabled : true,
+                replying : false,
+                comments : MateCat.db.segment_translation_issue_comments.findObjects({
+                    'id_issue' : this.props.issueId
+                }),
+                rebutLabel : 'Send and Rebut',
+                rebutDisabled : true,
+                rebutVisible : true,
+                undoRebutLabel : 'Undo Rebut',
+                undoRebutDisabled : false,
+                undoRebutVisible : false
+            };
+        } else if (this.props.reviewType === "extended") {
+            this.state = {
+                sendLabel : 'Send',
+                sendDisabled : true,
+                replying : false,
+                comments : [],
+                rebutLabel : 'Send and Rebut',
+                rebutDisabled : true,
+                rebutVisible : true,
+                undoRebutLabel : 'Undo Rebut',
+                undoRebutDisabled : false,
+                undoRebutVisible : false
+            };
+        }
+
 
     }
-    // getInitialState () {
-    //     return {
-    //         sendLabel : 'Send',
-    //         sendDisabled : true,
-    //         replying : false,
-    //         comments : MateCat.db.segment_translation_issue_comments.findObjects({
-    //             'id_issue' : this.props.issueId
-    //         }),
-    //         rebutLabel : 'Send and Rebut',
-    //         rebutDisabled : true,
-    //         rebutVisible : true,
-    //         undoRebutLabel : 'Undo Rebut',
-    //         undoRebutDisabled : false,
-    //         undoRebutVisible : false
-    //     }
-    // }
+
 
     replyClick() {
         this.setState({ replying: true });
@@ -92,22 +93,32 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
     }
 
     componentDidMount() {
-        MateCat.db.addListener('segment_translation_issue_comments', 
-                               ['insert', 'delete'], this.commentsChanged.bind(this));
-        ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+        if (this.props.reviewType === "improved") {
+            MateCat.db.addListener('segment_translation_issue_comments',
+                ['insert', 'delete'], this.commentsChanged.bind(this));
+            ReviewImproved.loadComments(this.props.sid, this.props.issueId);
 
-        var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
-        this.checkIssue( issue );
+            var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
+            this.checkIssue( issue );
 
-        MateCat.db.addListener('segment_translation_issues',
-                               ['insert', 'update', 'delete'], this.issueChanged.bind(this));
+            MateCat.db.addListener('segment_translation_issues',
+                ['insert', 'update', 'delete'], this.issueChanged.bind(this));
+        } else if (this.props.reviewType === "extended") {
+
+        }
+
     }
     componentWillUnmount() {
-        MateCat.db.removeListener('segment_translation_issue_comments', 
-                                  ['insert', 'delete'], this.commentsChanged);
+        if (this.props.reviewType === "improved") {
+            MateCat.db.removeListener('segment_translation_issue_comments',
+                ['insert', 'delete'], this.commentsChanged);
 
-        MateCat.db.removeListener('segment_translation_issues',
-                                  ['insert', 'update', 'delete'], this.issueChanged);
+            MateCat.db.removeListener('segment_translation_issues',
+                ['insert', 'update', 'delete'], this.issueChanged);
+        } else if (this.props.reviewType === "extended") {
+
+        }
+
     }
     handleFail() {
         genericErrorAlertMessage() ;

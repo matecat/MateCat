@@ -3,27 +3,27 @@ class ReviewTranslationIssue extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {
-            issue : MateCat.db
-                .segment_translation_issues.by('id', this.props.issueId )
-        };
+        if (this.props.reviewType === "improved") {
+            this.state = {
+                issue : MateCat.db
+                    .segment_translation_issues.by('id', this.props.issueId )
+            };
+        } else {
+            this.state = {
+                issue : this.props.issue
+            }
+        }
+
 
     }
-    
-    // getInitialState() {
-    //    
-    //     return {
-    //         issue : MateCat.db
-    //             .segment_translation_issues.by('id', this.props.issueId )
-    //     }
-    // },
 
     categoryLabel() {
         var id_category = this.state.issue.id_category ;
         config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[").replace(/\]"/g, "]").replace(/\"\{/g, "{").replace(/\}"/g, "}")
         return _( JSON.parse( config.lqa_flat_categories ))
-            .select(function(e) { return  e.id == id_category ; })
-            .first().label
+            .select(function(e) {
+                return parseInt(e.id) == id_category ;
+            }).first().label
     }
 
     deleteIssue(event) {
@@ -64,7 +64,9 @@ class ReviewTranslationIssue extends React.Component{
 
             <ReviewTranslationIssueCommentsContainer 
                 sid={this.props.sid} 
-                issueId={this.props.issueId} />
+                issueId={this.props.issueId}
+                reviewType={this.props.reviewType}
+            />
 
             {deleteIssue}
         </div>; 

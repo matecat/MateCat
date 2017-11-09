@@ -137,6 +137,7 @@ class SegmentFooterTabRevise2 extends React.Component {
                     <ReviewIssueSelectionPanel
                         sid={this.props.id_segment}
                         selection={this.state.selectionObj}
+                        segmentVersion={this.props.segment.version_number}
                     />
                 </div>
             ) : ( this.state.selectionWrappers.length > 0 ? (

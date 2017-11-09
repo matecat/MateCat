@@ -30,5 +30,8 @@ module.exports = keyMirror({
     MOUNT_TRANSLATIONS_ISSUES: null,
     SET_SEGMENT_TAGGED: null,
     RENDER_REVISE_ISSUES: null,
-    SHOW_SELECTION: null
+    SHOW_SELECTION: null,
+    OPEN_ISSUES_PANEL: null,
+    CLOSE_ISSUES_PANEL: null,
+    ADD_SEGMENT_VERSIONS_ISSUES: null
 });

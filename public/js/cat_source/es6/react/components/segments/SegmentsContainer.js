@@ -98,6 +98,7 @@ class SegmentsContainer extends React.Component {
                 decodeTextFn={self.props.decodeTextFn}
                 tagModesEnabled={self.props.tagModesEnabled}
                 speech2textEnabledFn={self.props.speech2textEnabledFn}
+                reviewType={self.props.reviewType}
             />;
             items.push(item);
         });

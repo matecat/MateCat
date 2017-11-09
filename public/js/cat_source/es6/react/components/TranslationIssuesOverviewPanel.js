@@ -1,9 +1,18 @@
+let ReviewTranslationDiffVersion = require("./review/ReviewTranslationDiffVersion").default;
+let ReviewTranslationVersion = require("./review/ReviewTranslationVersion").default;
 class TranslationIssuesOverviewPanel extends React.Component {
     
     
     constructor(props) {
         super(props);
-        this.state = this.getStateFromSid( this.props.sid );
+        if (this.props.reviewType === "improved") {
+            this.state = this.getStateFromSid(this.props.sid);
+        } else {
+            this.state = {
+                versions: this.props.segment.versions,
+                segment: this.props.segment
+            }
+        }
 
     }
     
@@ -88,40 +97,69 @@ class TranslationIssuesOverviewPanel extends React.Component {
         }
     }
 
-    render() {
-
+    getListVersionsReviewImproved() {
         let previousVersions = this.state.versions.map( function(v) {
             let key = 'version-' + v.id + '-' + this.props.sid ;
 
             return (
-                <ReviewTranslationVersion 
-                trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
-                sid={this.state.segment.sid}
-                key={key}
-                versionNumber={v.version_number}  
-                isCurrent={false} 
-                translation={v.translation} 
+                <ReviewTranslationVersion
+                    trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
+                    sid={this.state.segment.sid}
+                    key={key}
+                    versionNumber={v.version_number}
+                    isCurrent={false}
+                    translation={v.translation}
                 />
-            ); 
-        }.bind(this) ); 
-
-        let key = 'version-0-' + this.props.sid ;
-        let currentVersion = <ReviewTranslationVersion 
+            );
+        }.bind(this) );
+        let currentVersion = <ReviewTranslationVersion
             trackChangesMarkup={this.getTrackChangesForCurrentVersion()}
             sid={this.state.segment.sid}
             key={'version-0'}
             versionNumber={this.state.segment.version_number}
-            isCurrent={true} 
+            isCurrent={true}
             translation={window.cleanupSplitMarker( this.state.segment.translation ) } />
 
-        let fullList = [currentVersion].concat(previousVersions); 
+        return [currentVersion].concat(previousVersions);
 
-        return <div className="review-issues-overview-panel"> 
+    }
 
-            <div className="review-original-target-wrapper sidebar-block">
-                <h3>Original target</h3>
-                <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
-            </div>
+    getListVersionsReviewExtended() {
+        return this.state.versions.map( function(v) {
+            let key = 'version-' + v.id + '-' + this.props.sid ;
+
+            return (
+                <ReviewTranslationDiffVersion
+                    diff={v.diff}
+                    sid={this.state.segment.sid}
+                    key={key}
+                    versionNumber={v.version_number}
+                    isCurrent={false}
+                    translation={v.translation}
+                    decodeTextFn={UI.decodeText}
+                    reviewType={this.props.reviewType}
+                    issues={v.issues}
+                />
+            );
+        }.bind(this) );
+    }
+
+    render() {
+        let fullList = '';
+
+        if (this.props.reviewType === "improved") {
+            fullList = this.getListVersionsReviewImproved();
+        } else if (this.props.reviewType === "extended") {
+            fullList = this.getListVersionsReviewExtended();
+        }
+
+        return <div className="review-issues-overview-panel">
+                { this.props.reviewType === "improved" ? (
+                    <div className="review-original-target-wrapper sidebar-block">
+                        <h3>Original target</h3>
+                        <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
+                    </div>
+                ) : (null) }
 
             {fullList}
         </div>

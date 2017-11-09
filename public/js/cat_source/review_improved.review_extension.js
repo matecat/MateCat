@@ -214,9 +214,15 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
             UI.closeSegment(section, 1);
         },
+
         registerReviseTab: function () {
             return false;
         },
+
+        submitIssues: function (sid, data) {
+             return ReviewImproved.submitIssue(sid, data);
+        }
+
     });
 
 

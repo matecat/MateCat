@@ -227,7 +227,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
 
                     basePath + 'cat_source/ui.customization.js',
-                    basePath + 'cat_source/ui.review.js',
+                    // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
@@ -241,8 +241,13 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
+                    
+                    basePath + 'cat_source/ui.review.js',
+                    basePath + 'cat_source/review_extended.js',
+                    basePath + 'cat_source/review_extended.*.js',
                     basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
+                    basePath + 'cat_source/review.*.js',
 
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
@@ -281,7 +286,13 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/ui.customization.js',
 
-                    basePath + 'cat_source/ui.review2.js',
+                    basePath + 'cat_source/ui.review.js',
+                    basePath + 'cat_source/review_extended.js',
+                    basePath + 'cat_source/review_extended.*.js',
+                    basePath + 'cat_source/review_improved.js',
+                    basePath + 'cat_source/review_improved.*.js',
+                    basePath + 'cat_source/review.*.js',
+
                     basePath + 'cat_source/ui.offline.js',
 
                     basePath + 'cat_source/ui.split.js',
@@ -294,11 +305,9 @@ module.exports = function(grunt) {
                     //qa_check_blacklist, in order for its event handlers to be excecuted last
                     basePath + 'cat_source/lxq.main.js',
                     basePath + 'cat_source/lxq.templates.js',
+
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
-                    basePath + 'cat_source/review_improved.js',
-                    basePath + 'cat_source/review_improved.*.js',
-
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
 

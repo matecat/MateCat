@@ -167,19 +167,23 @@ class Segment extends React.Component {
 
     isFirstOfSplit() {
         return (!_.isUndefined(this.props.split_group) &&
-        this.props.segmane.split_group.indexOf(this.props.segment.sid) === 0);
+        this.props.segment.split_group.indexOf(this.props.segment.sid) === 0);
     }
 
     addTranslationsIssues() {
         this.setState({
-            showTranslationIssues: true
+            showTranslationIssues: true,
         });
     }
 
     getTranslationIssues() {
         if (this.state.showTranslationIssues &&
             (!(this.props.segment.readonly === 'true')  && !this.isSplitted()  ) ) {
-            return <TranslationIssuesSideButtons sid={this.props.segment.sid.split('-')[0]} />;
+            return <TranslationIssuesSideButtons
+                    sid={this.props.segment.sid.split('-')[0]}
+                    reviewType={this.props.reviewType}
+                    segment={this.props.segment}
+            />;
         }
         return null;
     }

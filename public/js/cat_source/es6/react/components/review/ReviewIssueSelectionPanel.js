@@ -1,5 +1,4 @@
 
-let PropTypes = require('prop-types');
 class ReviewIssueSelectionPanel extends React.Component{
 
     constructor(props) {
@@ -53,24 +52,28 @@ class ReviewIssueSelectionPanel extends React.Component{
 
         var message = $(this.textarea).val();
 
-        ReviewImproved.submitIssue(this.props.sid, _.map( this.state.selections, function(item,key) { 
-            return { 
+        let data =  _.map( this.state.selections, function(item,key) {
+            return {
                 'id_category'         : key,
-                'severity'            : item, 
-                'target_text'         : this.props.selection.selected_string, 
-                'start_node'          : this.props.selection.start_node, 
-                'start_offset'        : this.props.selection.start_offset, 
+                'severity'            : item,
+                'target_text'         : this.props.selection.selected_string,
+                'start_node'          : this.props.selection.start_node,
+                'start_offset'        : this.props.selection.start_offset,
                 'end_node'            : this.props.selection.end_node,
-                'end_offset'          : this.props.selection.end_offset, 
+                'end_offset'          : this.props.selection.end_offset,
                 'comment'             : message,
+                'version'             : this.props.segmentVersion,
             };
-        }.bind(this) ))
+        }.bind(this) );
+
+        SegmentActions.submitIssue(this.props.sid, data, diff)
             .done( this.props.submitIssueCallback )
-            .fail( this.handleFail ) ;
+            .fail( this.handleFail.bind(this) ) ;
     }
 
     handleFail() {
         genericErrorAlertMessage() ;
+        this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
     render() {
@@ -154,5 +157,9 @@ class ReviewIssueSelectionPanel extends React.Component{
         </div> 
     }
 }
+
+ReviewIssueSelectionPanel.defaultProps = {
+    handleFail: function () {}
+};
 
 export default ReviewIssueSelectionPanel ;

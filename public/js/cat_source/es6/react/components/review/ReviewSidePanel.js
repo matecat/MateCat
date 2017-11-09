@@ -1,3 +1,7 @@
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
+let TranslationIssuesOverviewPanel = require('../TranslationIssuesOverviewPanel').default;
 class ReviewSidePanel extends React.Component{
 
     constructor(props) {
@@ -11,11 +15,17 @@ class ReviewSidePanel extends React.Component{
     }
 
     openPanel(e, data) {
-        this.setState({
-            sid: absoluteId(data.sid),
-            visible: true,
-            selection : data.selection
-        });
+        if (this.props.reviewType === "improved") {
+            this.setState({
+                visible: true,
+                selection : data.selection
+            });
+        } else {
+            this.setState({
+                visible: true,
+            });
+        }
+
     }
 
     closePanel(e, data) {
@@ -27,22 +37,28 @@ class ReviewSidePanel extends React.Component{
     }
 
     componentDidMount() {
-        $(document).on('review-panel:opened', this.openPanel.bind(this));
-        $(document).on('review-panel:closed', this.closePanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openPanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closePanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened.bind(this));
 
-        $(window).on('segmentOpened', this.segmentOpened.bind(this));
+        // $(window).on('segmentOpened', this.segmentOpened.bind(this));
 
     }
 
     componentWillUnmount() {
-        $(document).off('review-panel:opened', this.openPanel);
-        $(document).off('review-panel:closed', this.closePanel);
+        SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openPanel);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closePanel);
+        SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened);
 
-        $(window).off('segmentOpened', this.segmentOpened);
+        // $(window).off('segmentOpened', this.segmentOpened);
     }
 
-    segmentOpened(event) {
-        this.setState({sid: event.segment.absId, selection: null});
+    segmentOpened(sid, segment) {
+        this.setState({
+            sid: sid,
+            selection: null,
+            segment: segment
+        });
     }
 
     submitIssueCallback() {
@@ -50,21 +66,34 @@ class ReviewSidePanel extends React.Component{
     }
 
     render() {
-        let innerPanel;
+        let innerPanel = '';
         let classes = classnames({
             'hidden' : !this.state.visible
         });
-
-        if ( this.state.visible && this.state.selection != null ) {
-            innerPanel = <div className="review-side-inner1">
-                <ReviewIssueSelectionPanel submitIssueCallback={this.submitIssueCallback.bind(this)}
-                                           selection={this.state.selection} sid={this.state.sid} />
-            </div>
-        }
-        else if ( this.state.visible ) {
-            innerPanel = <div className="review-side-inner1">
-                <TranslationIssuesOverviewPanel sid={this.state.sid} />
-            </div>;
+        if (this.props.reviewType === "improved") {
+            if (this.state.visible && this.state.selection != null) {
+                innerPanel = <div className="review-side-inner1">
+                    <ReviewIssueSelectionPanel submitIssueCallback={this.submitIssueCallback.bind(this)}
+                                               selection={this.state.selection} sid={this.state.sid}/>
+                </div>
+            }
+            else if (this.state.visible) {
+                innerPanel = <div className="review-side-inner1">
+                    <TranslationIssuesOverviewPanel
+                        sid={this.state.sid}
+                        reviewType={this.props.reviewType}
+                    />
+                </div>;
+            }
+        } else {
+            if (this.props.reviewType === "extended" && this.state.segment && this.state.visible) {
+                innerPanel = <div className="review-side-inner1">
+                    <TranslationIssuesOverviewPanel
+                        reviewType={this.props.reviewType}
+                        segment={this.state.segment}
+                        sid={this.state.sid}/>
+                </div>;
+            }
         }
 
         return <div className={classes} id="review-side-panel">

@@ -12,6 +12,6 @@ class cat2Controller extends catController
 
     public function setTemplateVars() {
         parent::setTemplateVars();
-        $this->template->review_type = "revise2";
+        $this->template->review_type = "extended";
     }
 }

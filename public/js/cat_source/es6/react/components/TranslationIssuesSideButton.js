@@ -1,8 +1,18 @@
+let SegmentStore = require('../stores/SegmentStore');
+let SegmentConstants = require('../constants/SegmentConstants');
+
 class TranslationIssuesSideButton extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = this.readDatabaseAndReturnState();
+
+        if (this.props.reviewType === "improved") {
+            this.state = this.readDatabaseAndReturnState();
+        } else {
+            this.state = {
+                issues_count : 0
+            }
+        }
     }
 
     readDatabaseAndReturnState () {
@@ -30,21 +40,38 @@ class TranslationIssuesSideButton extends React.Component{
         }
     }
 
+    setSegmentVersions(sid, segment) {
+        if (this.props.sid === sid) {
+            this.setState({
+                issues_count : segment.versions.length
+            });
+        }
+    }
+
     componentDidMount() {
-        MateCat.db.addListener('segments', ['update'], this.setStateOnSegmentsChange.bind(this) );
-        MateCat.db.addListener('segment_translation_issues', ['insert', 'update', 'delete'],
-            this.setStateOnIssueChange.bind(this) );
+        if (this.props.reviewType === "improved") {
+            MateCat.db.addListener('segments', ['update'], this.setStateOnSegmentsChange.bind(this));
+            MateCat.db.addListener('segment_translation_issues', ['insert', 'update', 'delete'],
+                this.setStateOnIssueChange.bind(this));
+        } else if (this.props.reviewType === "extended") {
+            SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions.bind(this));
+        }
 
     }
 
     componentWillUnmount() {
-        MateCat.db.removeListener('segments', ['update'], this.setStateOnSegmentsChange );
-        MateCat.db.removeListener('segment_translation_issues', ['insert', 'update', 'delete'],
-            this.setStateOnIssueChange );
+        if (this.props.reviewType === "improved") {
+            MateCat.db.removeListener('segments', ['update'], this.setStateOnSegmentsChange);
+            MateCat.db.removeListener('segment_translation_issues', ['insert', 'update', 'delete'],
+                this.setStateOnIssueChange);
+        } else if (this.props.reviewType === "extended") {
+            SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
+        }
     }
 
     handleClick (e) {
-        ReviewImproved.openPanel({sid: this.props.sid});
+        SegmentActions.openIssuesPanel({sid: this.props.sid});
+        // ReviewImproved.openPanel({sid: this.props.sid});
     }
 
     shouldComponentUpdate (nextProps, nextState) {

@@ -36,8 +36,8 @@ class ReviewVersionsDiff extends React.Component {
         if (selection.rangeCount > 0) {
             var range = selection.getRangeAt(0);
             return {
-                start: this.getNodeOffset(containerEl, range.startContainer) + this.totalOffsets(range.startContainer, range.startOffset),
-                end: this.getNodeOffset(containerEl, range.endContainer) + this.totalOffsets(range.endContainer, range.endOffset),
+                start_offset: this.getNodeOffset(containerEl, range.startContainer) + this.totalOffsets(range.startContainer, range.startOffset),
+                end_offset: this.getNodeOffset(containerEl, range.endContainer) + this.totalOffsets(range.endContainer, range.endOffset),
                 selected_string : selection.toString()
             };
         }

@@ -138,52 +138,15 @@ if ( Review.enabled() )
  * Only bind events for specific review type
  */
 
-if ( Review.enabled() && Review.type == 'simple' ) {
+if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )) {
 
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
             $(this).find('.tab-switcher-review').click();
         }
-    })
-    //     .on('start', function() {
-    //
-    //     // temp
-    //     config.stat_quality = [
-    //         {
-    //             "type":"Typing",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Translation",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Terminology",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Language Quality",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         },
-    //         {
-    //             "type":"Style",
-    //             "allowed":5,
-    //             "found":1,
-    //             "vote":"Excellent"
-    //         }
-    //     ];
-    // })
-        .on('buttonsCreation', 'section', function() {
+    }).on('buttonsCreation', 'section', function() {
             UI.overrideButtonsForRevision();
-        }).on('click', '.editor .tab-switcher-review', function(e) {
+    }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
 
         $('.editor .submenu .active').removeClass('active');

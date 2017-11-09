@@ -31,10 +31,10 @@
  }
  */
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
-var SegmentConstants = require('../constants/SegmentConstants');
-var assign = require('object-assign');
+let AppDispatcher = require('../dispatcher/AppDispatcher');
+let EventEmitter = require('events').EventEmitter;
+let SegmentConstants = require('../constants/SegmentConstants');
+let assign = require('object-assign');
 let Immutable = require('immutable');
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -191,6 +191,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
 
+    addSegmentVersions(fid, sid, versions) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'versions'], versions);
+        return this._segments[fid].get(index);
+    },
+
     getAllSegments: function () {
         var result = [];
         $.each(this._segments, function(key, value) {
@@ -287,6 +293,10 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.RENDER_REVISE_ISSUES:
             SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);
+            break;
+        case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
+            let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
+            SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

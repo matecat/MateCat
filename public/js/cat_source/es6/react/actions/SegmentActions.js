@@ -198,6 +198,31 @@ var SegmentActions = {
             matches: matches
         });
     },
+
+    showSelection: function (sid, data) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SHOW_SELECTION,
+            sid: sid,
+            data: data
+        });
+    },
+
+    /************ Revise ***************/
+    openIssuesPanel: function (data) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+            data: data,
+        });
+
+        UI.openIssuesPanel(data);
+    },
+
+    closeIssuesPanel: function () {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL
+        });
+    },
+
     renderReviseErrors: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_REVISE_ISSUES,
@@ -205,15 +230,19 @@ var SegmentActions = {
             data: data
         });
     },
-    showSelection: function (sid, data) {
+
+    submitIssue: function (sid, data, diff) {
+        return UI.submitIssues(sid, data, diff)
+    },
+
+    addTranslationIssuesToSegment: function (fid, sid, versions) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.SHOW_SELECTION,
+            actionType: SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES,
+            fid: fid,
             sid: sid,
-            data: data
+            versions: versions
         });
     }
-    /***********************************/
-
 
 
 

@@ -27,6 +27,14 @@ if ( ReviewImproved.enabled() ) {
                 status = 'rebutted' ;
             }
             return status;
+        },
+
+        getSegmentVersionsIssues: function (event) {
+            // TODO Uniform behavior of ReviewExtended and ReviewImproved
+            let sid = event.segment.absId;
+            let fid = UI.getSegmentFileId(event.segment.el);
+            let versions = [];
+            SegmentActions.addTranslationIssuesToSegment(fid, sid, versions);
         }
     });
 })(jQuery, window);

@@ -1,11 +1,20 @@
+
+let ReviewTranslationIssue = require('./ReviewTranslationIssue').default;
 class ReviewIssuesContainer extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            issues : this.getIssuesFromDb(this.props.sid,
-                this.props.versionNumber)
-        };
+        if (this.props.reviewType === "improved") {
+            this.state = {
+                issues : this.getIssuesFromDb(this.props.sid,
+                    this.props.versionNumber)
+            };
+        } else {
+            this.state = {
+                issues : this.props.issues
+            }
+        }
+
 
     }
 
@@ -24,24 +33,29 @@ class ReviewIssuesContainer extends React.Component {
     // }
 
     componentWillReceiveProps ( nextProps ) {
-        var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
-        this.setState({ issues: issues }); 
+        if (this.props.reviewType === "improved") {
+            var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
+            this.setState({ issues: issues });
+        }
+
     }
 
     componentDidMount () {
-        MateCat.db.addListener('segment_translation_issues', 
-                               ['delete'], this.issueDeleted.bind(this) );
-        
-
+        if (this.props.reviewType === "improved") {
+            MateCat.db.addListener('segment_translation_issues',
+                ['delete'], this.issueDeleted.bind(this) );
+        }
     }
 
     componentWillUnmount () {
-        MateCat.db.removeListener('segment_translation_issues', 
-                               ['delete'], this.issueDeleted );
+        if (this.props.reviewType === "improved") {
+            MateCat.db.removeListener('segment_translation_issues',
+                ['delete'], this.issueDeleted );
+        }
     }
 
     issueDeleted  (issue) {
-        var issues = this.getIssuesFromDb( this.props.sid, this.props.versionNumber) ;
+        let issues = this.getIssuesFromDb( this.props.sid, this.props.versionNumber) ;
         this.setState({ issues: issues });
     }
 
@@ -65,7 +79,11 @@ class ReviewIssuesContainer extends React.Component {
                     issueMouseLeave={this.props.issueMouseLeave}
                     sid={this.props.sid}
                     progressiveNumber={prog}
-                    issueId={item.id} key={item.id} />
+                    issueId={item.id}
+                    key={item.id}
+                    issue={item}
+                    reviewType={this.props.reviewType}
+                />
 
             }.bind(this) );
 

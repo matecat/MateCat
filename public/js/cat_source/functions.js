@@ -660,6 +660,30 @@ function trackChangesHTML(source, target) {
     return restorePlaceholders(diffTxt) ;
 }
 
+function trackChangesHTMLFromDiffArray(diff) {
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt);
+}
+
 
 
 $.fn.isOnScreen = function() {

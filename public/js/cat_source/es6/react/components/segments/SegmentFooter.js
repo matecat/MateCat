@@ -11,7 +11,7 @@ var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
 var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 var SegmentTabRevise = require('./SegmentFooterTabRevise').default;
-var SegmentTabRevise = require('./SegmentFooterTabRevise2').default;
+var SegmentTabRevise2 = require('./SegmentFooterTabRevise2').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
@@ -80,7 +80,7 @@ class SegmentFooter extends React.Component {
             },
             review2 : {
                 label : 'Revise',
-                code : 'review',
+                code : 'review2',
                 tab_class : 'review',
                 enabled : false,
                 visible : false,
