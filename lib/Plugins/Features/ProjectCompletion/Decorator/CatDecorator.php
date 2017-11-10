@@ -65,13 +65,14 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function completable() {
+
         if ($this->controller->isRevision()) {
-            $completed = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
+            $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
                     $this->stats['DRAFT'] == 0 &&
                     ( $this->stats['APPROVED'] + $this->stats['REJECTED'] ) > 0;
         }
         else {
-            $completable =  $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
+            $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
                     $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0 ;
         }
 

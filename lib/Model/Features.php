@@ -21,7 +21,8 @@ class Features {
     const REVIEW_IMPROVED      = 'review_improved';
     const QACHECK_GLOSSARY     = 'qa_check_glossary';
     const QACHECK_BLACKLIST    = 'qa_check_blacklist';
-    const DQF                  = \Features\Dqf::FEATURE_CODE  ;
+    const DQF                  = Dqf::FEATURE_CODE  ;
+    const REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE  ;
 
     public static $VALID_CODES = array(
         Features::PROJECT_COMPLETION,
@@ -30,6 +31,10 @@ class Features {
         Features::QACHECK_GLOSSARY,
         Features::QACHECK_BLACKLIST
     );
+
+    public static $FEATURES_WITH_DEPENDENCIES = [
+            self::DQF
+    ];
 
     /**
      * Give your plugins the possibilty to install routes

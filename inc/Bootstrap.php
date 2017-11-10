@@ -380,6 +380,9 @@ class Bootstrap {
             );
         }
 
+        if (!empty( INIT::$MANDATORY_PLUGINS ) ) {
+            INIT::$AUTOLOAD_PLUGINS = array_merge( INIT::$AUTOLOAD_PLUGINS, INIT::$MANDATORY_PLUGINS );
+        }
     }
 
     /**

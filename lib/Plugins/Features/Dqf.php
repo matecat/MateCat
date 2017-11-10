@@ -44,7 +44,9 @@ class Dqf extends BaseFeature {
     protected $autoActivateOnProject = false ;
 
     public static $dependencies = [
-            Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS
+            Features::PROJECT_COMPLETION,
+            Features::REVIEW_IMPROVED,
+            Features::TRANSLATION_VERSIONS
     ] ;
 
     /**

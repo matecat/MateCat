@@ -306,7 +306,6 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         ) t2
 
-
         ORDER BY version_number DESC
     " ;
 

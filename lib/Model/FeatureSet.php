@@ -40,7 +40,7 @@ class FeatureSet {
 
         if ( !empty( $feature_codes ) ) {
             foreach( $feature_codes as $code ) {
-                $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+                $features [] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
             }
             $this->merge( $features ) ;
         }
@@ -228,7 +228,6 @@ class FeatureSet {
         }
     }
 
-
     /**
      * This function ensures that whenever DQF is present, dependent features always come before.
      * TODO: conver into something abstract.
@@ -261,13 +260,23 @@ class FeatureSet {
      * Updates the features array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
-     * @param $new_features
-     *
-     * @return array
+     * @param $new_features BasicFeatureStruct[]
      *
      */
     private function merge( $new_features ) {
+        // first round, load dependencies
+        $features_with_deps = [] ;
+
         foreach( $new_features as $feature ) {
+            // flat dependency management
+            $deps = array_map( function( $code ) {
+                return new BasicFeatureStruct(['feature_code' => $code ]);
+            }, $feature->toNewObject()->getDependencies() );
+
+            $features_with_deps = array_merge( $features_with_deps, $deps, [$feature]  ) ;
+        }
+
+        foreach( $features_with_deps as $feature ) {
             if ( !isset( $this->features[ $feature->feature_code ] ) ) {
                 $this->features[ $feature->feature_code ] = $feature ;
             }
@@ -284,9 +293,9 @@ class FeatureSet {
     private function __loadFromMandatory() {
         $features = [] ;
 
-        if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
-            foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-                $features[] = new BasicFeatureStruct(['feature_code' => $plugin ] );
+        if ( !empty( INIT::$AUTOLOAD_PLUGINS ) )  {
+            foreach( INIT::$AUTOLOAD_PLUGINS as $plugin ) {
+                $features[] = new BasicFeatureStruct( [ 'feature_code' => $plugin ] );
             }
         }
 

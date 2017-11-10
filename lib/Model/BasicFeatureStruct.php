@@ -23,4 +23,12 @@ class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return $this->options ;
     }
 
+    /**
+     * @return \Features\IBaseFeature
+     */
+    public function toNewObject() {
+        $name = FeatureSet::getClassName( $this->feature_code );
+        return new $name($this);
+    }
+
 }

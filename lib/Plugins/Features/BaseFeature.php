@@ -10,7 +10,7 @@ use Monolog\Handler\StreamHandler;
 
 use ReflectionClass ;
 
-abstract class BaseFeature  {
+abstract class BaseFeature implements IBaseFeature {
 
     protected $feature;
 
@@ -19,6 +19,8 @@ abstract class BaseFeature  {
     private $logger_name ;
 
     protected $autoActivateOnProject = true ;
+
+    protected static $dependencies = []   ;
 
     /**
      * Warning: passing a $projectStructure prevents the possibility to pass
@@ -37,6 +39,10 @@ abstract class BaseFeature  {
 
     public function autoActivateOnProject() {
         return $this->autoActivateOnProject ;
+    }
+
+    public static function getDependencies() {
+        return static::$dependencies ;
     }
 
     // gets a feature specific logger
