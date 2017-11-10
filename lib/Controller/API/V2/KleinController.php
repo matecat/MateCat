@@ -167,10 +167,12 @@ abstract class KleinController {
         foreach( $this->validators as $validator ){
             $validator->validate();
         }
+        $this->validators = [];
     }
 
     protected function appendValidator( Base $validator ){
         $this->validators[] = $validator;
+        return $this;
     }
 
     /**

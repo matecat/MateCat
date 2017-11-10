@@ -27,16 +27,17 @@ class Files_FileDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_project
+     * @param     $id_project
      *
-     * @return Files_FileStruct[]
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
      */
-    public static function getByProjectId( $id_project ) {
+    public static function getByProjectId( $id_project, $ttl = 600 ) {
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id_project = ? ");
-        $stmt->execute( array( $id_project ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-        return $stmt->fetchAll();
+        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project ");
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_project' => $id_project ] );
     }
 
     public static function getByRemoteId( $remote_id ) {

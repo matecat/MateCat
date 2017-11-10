@@ -47,7 +47,7 @@ class ZipArchiveReference {
 
         for( $i = 0; $i < $zip->numFiles; $i++ ){
 
-            $name = $zip->getNameIndex( $i, ZipArchive::FL_NODIR );
+            $name = $zip->getNameIndex( $i );
 
             // Skip files not in $source
             if ( strpos( $name, "{$dirName}/" ) !== 0 || $name == "{$dirName}/" ) {
@@ -79,8 +79,7 @@ class ZipArchiveReference {
     public function getZipFilePointer( Projects_ProjectStruct $project ){
 
         $fs     = new \FilesStorage();
-        $jobs   = $project->getJobs( 60 * 60 );
-        $files  = Files_FileDao::getByJobId( $jobs[ 0 ]->id, 60 * 60 );
+        $files  = Files_FileDao::getByProjectId( $project->id, 60 * 60 );
 
         $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[ 0 ]->filename );
         $zipName = $zipName[ 0 ];
@@ -91,6 +90,50 @@ class ZipArchiveReference {
         $zip->open( $originalZipPath );
 
         return $zip;
+
+    }
+
+    public function getListTree( Projects_ProjectStruct $project, $dirName ){
+
+        $cache_query = '__files_ref_tree:' . $project->id . ':' . $project->password;
+
+        $redisHandler = ( new RedisHandler() )->getConnection();
+
+        $_existingResult = null;
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $_existingResult = unserialize( $redisHandler->get( $cache_query ) );
+
+            if ( $_existingResult !== false && $_existingResult !== null ) {
+                return $_existingResult;
+            }
+
+        }
+
+        $tree = [
+                'files'   => [],
+                'indexes' => []
+        ];
+
+        $zip = $this->getZipFilePointer( $project );
+        for( $i = 0; $i < $zip->numFiles; $i++ ){
+
+            $name = $zip->getNameIndex( $i );
+
+            // Skip files not in $source
+            if ( strpos( $name, "{$dirName}/" ) !== 0 || $name == "{$dirName}/" ) {
+                continue;
+            }
+
+            $tree[ 'files' ][] = $name;
+            $tree[ 'indexes' ][] = $i;
+
+        }
+
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $redisHandler->setex( $cache_query, 60 * 60 * 24, serialize( $tree ) );
+        }
+
+        return $tree;
 
     }
 
