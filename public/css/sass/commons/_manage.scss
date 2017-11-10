@@ -504,9 +504,8 @@ body.manage {
                                     transition: 0.3s ease;
 
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                                        width: 200px;
                                         width: fit-content;
-                                        max-width: 172px;
+                                        max-width: 178px;
                                     }
                                     a {
                                         text-decoration: underline;
