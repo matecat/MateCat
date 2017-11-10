@@ -76,5 +76,5 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
         UI.mountPanelComponent();
     });
 
-    $(window).on('segmentOpened', UI.getSegmentVersionsIssues);
+    $(window).on('segmentOpened', UI.getSegmentVersionsIssuesHandler);
 }

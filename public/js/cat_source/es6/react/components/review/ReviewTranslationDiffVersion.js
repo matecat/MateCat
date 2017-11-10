@@ -1,13 +1,13 @@
 let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
 let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
-
+let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
 class ReviewTranslationDiffVersion extends React.Component {
 
 
     constructor(props) {
         super(props);
         this.state = {
-
+            selectionObj: null,
         };
 
     }
@@ -22,7 +22,6 @@ class ReviewTranslationDiffVersion extends React.Component {
 
     textSelected(data) {
         this.setState({
-            selectedText: data.selected_string,
             selectionObj: data
         });
     }
@@ -33,6 +32,18 @@ class ReviewTranslationDiffVersion extends React.Component {
 
     issueMouseLeave () {
 
+    }
+
+    getTrackChangesForCurrentVersion () {
+        if ( this.state.segment.version_number != '0' ) {
+            // no track changes possibile for first version
+            let previous = this.findPreviousVersion( this.state.segment.version_number );
+            return trackChangesHTML(
+                UI.clenaupTextFromPleaceholders(previous.translation),
+                UI.clenaupTextFromPleaceholders(
+                    window.cleanupSplitMarker( this.state.segment.translation )
+                ));
+        }
     }
 
     render () {
@@ -65,13 +76,25 @@ class ReviewTranslationDiffVersion extends React.Component {
                         versionNumber={this.props.versionNumber}
                     />
 
-                    <ReviewIssuesContainer
-                        issueMouseEnter={this.issueMouseEnter.bind(this)}
-                        issueMouseLeave={this.issueMouseLeave.bind(this)}
-                        reviewType={this.props.reviewType}
-                        issues={this.props.issues}
-                        sid={this.props.sid}
-                        versionNumber={this.props.versionNumber} />
+                    {this.state.selectionObj  ? (
+                        <div className="error-type">
+                            <ReviewIssueSelectionPanel
+                                sid={this.props.sid}
+                                selection={this.state.selectionObj}
+                                segmentVersion={this.props.versionNumber}
+                            />
+                        </div>
+                    ) : (
+                        <ReviewIssuesContainer
+                            issueMouseEnter={this.issueMouseEnter.bind(this)}
+                            issueMouseLeave={this.issueMouseLeave.bind(this)}
+                            reviewType={this.props.reviewType}
+                            issues={this.props.issues}
+                            sid={this.props.sid}
+                            versionNumber={this.props.versionNumber} />
+                    )}
+
+
                 </div>
             </div>
         </div>;

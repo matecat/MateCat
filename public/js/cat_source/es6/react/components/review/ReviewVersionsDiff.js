@@ -10,9 +10,9 @@ class ReviewVersionsDiff extends React.Component {
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
-        this.state = {
-            diff: this.getDiff()
-        };
+        // this.state = {
+        //     diff: this.getDiff()
+        // };
     }
 
 
@@ -21,7 +21,8 @@ class ReviewVersionsDiff extends React.Component {
         if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
             let data = this.getSelectionData(selection);
             this.props.textSelectedFn(data);
-
+        } else {
+            this.props.textSelectedFn(null);
         }
     }
 

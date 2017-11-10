@@ -21,7 +21,15 @@ class TranslationIssuesOverviewPanel extends React.Component {
     // }
 
     componentWillReceiveProps ( nextProps ) {
-        this.setState( this.getStateFromSid( nextProps.sid ) );
+        if (this.props.reviewType === "improved") {
+            this.setState( this.getStateFromSid( nextProps.sid ) );
+        } else {
+            this.setState({
+                versions: nextProps.segment.versions,
+                segment: nextProps.segment
+            });
+        }
+
     } 
 
     getStateFromSid (sid) {

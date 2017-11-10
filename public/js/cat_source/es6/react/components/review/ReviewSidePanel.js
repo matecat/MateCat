@@ -91,7 +91,7 @@ class ReviewSidePanel extends React.Component{
                     <TranslationIssuesOverviewPanel
                         reviewType={this.props.reviewType}
                         segment={this.state.segment}
-                        sid={this.state.sid}/>
+                        sid={this.state.segment.sid}/>
                 </div>;
             }
         }

@@ -1920,11 +1920,10 @@ UI = {
 
                 var record = MateCat.db.segments.by('sid', data.translation.sid);
                 MateCat.db.segments.update( _.extend(record, data.translation) );
-
+                data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;
-                // var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-                // LXQ.doLexiQA(segment,translation,id_segment,true,null);
+
                 $(document).trigger('setTranslation:success', data);
 			}
 		});

@@ -59,19 +59,23 @@ var SegmentActions = {
     /********** Segment **********/
 
     addClassToSegment: function (sid, newClass) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_SEGMENT_CLASS,
-            id: sid,
-            newClass: newClass
-        });
+        setTimeout( function () {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.ADD_SEGMENT_CLASS,
+                id: sid,
+                newClass: newClass
+            });
+        }, 0)
     },
 
     removeClassToSegment: function (sid, className) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
-            id: sid,
-            className: className
-        });
+        setTimeout( function () {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
+                id: sid,
+                className: className
+            });
+        }, 0)
     },
 
     setStatus: function (sid, fid, status) {
