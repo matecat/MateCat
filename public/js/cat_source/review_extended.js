@@ -25,14 +25,12 @@ if ( ReviewExtended.enabled() ) {
                 return false;
             },
             submitIssue: function (sid, data_array, diff) {
-                var path = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
-                    config.id_job, config.password, sid);
+                var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
+                SegmentActions.addSegmentVersionIssue(fid, sid, data_array, data_array[0].version);
 
                 var deferreds = _.map(data_array, function (data) {
-                    return $.post(path, data)
-                        .done(function (data) {
-                            MateCat.db.segment_translation_issues.insert(data.issue);
-                        })
+                    data.diff = diff;
+                    return API.SEGMENT.sendSegmentVersionIssue(sid, data)
                 });
 
                 return $.when.apply($, deferreds).done(function () {

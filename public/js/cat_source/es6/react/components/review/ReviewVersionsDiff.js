@@ -17,12 +17,14 @@ class ReviewVersionsDiff extends React.Component {
 
 
     textSelected(event) {
-        var selection = window.getSelection();
-        if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
-            let data = this.getSelectionData(selection);
-            this.props.textSelectedFn(data);
-        } else {
-            this.props.textSelectedFn(null);
+        if (this.props.textSelectedFn) {
+            let selection = window.getSelection();
+            if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
+                let data = this.getSelectionData(selection);
+                this.props.textSelectedFn(data);
+            } else {
+                this.props.textSelectedFn(null);
+            }
         }
     }
 
@@ -227,7 +229,7 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     applyWrapper(sid, issue) {
-        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.translation_version)) {
+        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.version_number)) {
             this.restoreSelection(issue);
         }
     }

@@ -3246,10 +3246,9 @@ body.archived section .status-container a.status:hover {
     display: block;
     position: absolute;
     right: 0;
-    height: 92%;
+    height: 95%;
     padding-bottom: 15px;
     background: #f5f5f5;
-    top: 3%;
     margin: -6px 0 0 0 !important;
     border-bottom: 0;
 }
@@ -3267,7 +3266,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .status-container {
-    width: 10px !important;
+    /*width: 10px !important;*/
     float: right;
     margin: 0 0px 0 0 !important;
 }
@@ -4938,7 +4937,6 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
     text-align: left;
 }
 
-.track-changes .segment-diff-container,
 .track-changes p{
     width: 100%;
     line-height: 27px;

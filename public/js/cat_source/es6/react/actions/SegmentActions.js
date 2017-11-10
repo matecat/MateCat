@@ -246,6 +246,16 @@ var SegmentActions = {
             sid: sid,
             versions: versions
         });
+    },
+
+    addSegmentVersionIssue: function (fid, sid, issue, versionNumber) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_VERSION_ISSUE,
+            fid: fid,
+            sid: sid,
+            issue: issue,
+            versionNumber: versionNumber
+        });
     }
 
 

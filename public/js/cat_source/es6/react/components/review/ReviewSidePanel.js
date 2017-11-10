@@ -68,7 +68,9 @@ class ReviewSidePanel extends React.Component{
     render() {
         let innerPanel = '';
         let classes = classnames({
-            'hidden' : !this.state.visible
+            'hidden' : !this.state.visible,
+            'review-improved-panel': this.props.reviewType === "improved",
+            'review-extended-panel': this.props.reviewType === "extended",
         });
         if (this.props.reviewType === "improved") {
             if (this.state.visible && this.state.selection != null) {

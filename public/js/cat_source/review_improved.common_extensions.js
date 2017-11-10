@@ -29,7 +29,7 @@ if ( ReviewImproved.enabled() ) {
             return status;
         },
 
-        getSegmentVersionsIssues: function (event) {
+        getSegmentVersionsIssuesHandler: function (event) {
             // TODO Uniform behavior of ReviewExtended and ReviewImproved
             let sid = event.segment.absId;
             let fid = UI.getSegmentFileId(event.segment.el);

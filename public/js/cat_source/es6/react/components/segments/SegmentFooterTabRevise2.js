@@ -132,38 +132,38 @@ class SegmentFooterTabRevise2 extends React.Component {
                      id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
 
 
-            {this.state.selectedText !== '' ? (
-                <div className="error-type">
-                    <ReviewIssueSelectionPanel
-                        sid={this.props.id_segment}
-                        selection={this.state.selectionObj}
-                        segmentVersion={this.props.segment.version_number}
-                    />
-                </div>
-            ) : ( this.state.selectionWrappers.length > 0 ? (
-                <div className="error-list" style={{float: "left", padding: "20px"}}>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Errors</th>
-                            <th>Type</th>
-                            <th>Value</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            {errorsHtml}
-                        </tbody>
-                    </table>
-                </div>
-                ) : (null)
-            )}
+            {/*{this.state.selectedText !== '' ? (*/}
+                {/*<div className="error-type">*/}
+                    {/*<ReviewIssueSelectionPanel*/}
+                        {/*sid={this.props.id_segment}*/}
+                        {/*selection={this.state.selectionObj}*/}
+                        {/*segmentVersion={this.props.segment.version_number}*/}
+                    {/*/>*/}
+                {/*</div>*/}
+            {/*) : ( this.state.selectionWrappers.length > 0 ? (*/}
+                {/*<div className="error-list" style={{float: "left", padding: "20px"}}>*/}
+                    {/*<table>*/}
+                        {/*<thead>*/}
+                        {/*<tr>*/}
+                            {/*<th>Errors</th>*/}
+                            {/*<th>Type</th>*/}
+                            {/*<th>Value</th>*/}
+                        {/*</tr>*/}
+                        {/*</thead>*/}
+                        {/*<tbody>*/}
+                            {/*{errorsHtml}*/}
+                        {/*</tbody>*/}
+                    {/*</table>*/}
+                {/*</div>*/}
+                {/*) : (null)*/}
+            {/*)}*/}
 
             <div className="track-changes">
                 <h3>Revision (track changes)</h3>
                 <ReviewVersionDiff
                     translation={this.state.translation}
                     segment={this.props.segment}
-                    textSelectedFn={this.textSelected.bind(this)}
+                    // textSelectedFn={this.textSelected.bind(this)}
                     decodeTextFn={this.props.decodeTextFn}
                 />
             </div>

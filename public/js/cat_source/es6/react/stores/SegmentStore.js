@@ -193,7 +193,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     addSegmentVersions(fid, sid, versions) {
         let index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'versions'], versions);
+        this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
+        return this._segments[fid].get(index);
+    },
+
+    addSegmentVersionIssue(fid, sid, issue, versionNumber) {
+        let index = this.getSegmentIndex(sid, fid);
+        let versionIndex = this._segments[fid].get(index).get('versions').findIndex(function (item) {
+            return item.get('version_number') === versionNumber;
+        });
+
+        this._segments[fid] = this._segments[fid].updateIn([index, 'versions', versionIndex, 'issues'], arr => arr.concat(Immutable.fromJS(issue)));
+
         return this._segments[fid].get(index);
     },
 
@@ -297,6 +308,10 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
             SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            break;
+        case SegmentConstants.ADD_SEGMENT_VERSION_ISSUE:
+            let segIssue = SegmentStore.addSegmentVersionIssue(action.fid, action.sid, action.issue, action.versionNumber);
+            SegmentStore.emitChange(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, action.sid, segIssue.toJS());
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
