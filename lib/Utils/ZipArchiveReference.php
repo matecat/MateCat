@@ -9,7 +9,74 @@
 
 class ZipArchiveReference {
 
+    /**
+     * @var string
+     */
+    protected $tempZipFile;
+
+    public function __destruct() {
+        @unlink( $this->tempZipFile );
+    }
+
     public function getFileStreamPointerInfo( Projects_ProjectStruct $project, $fileName ){
+
+        $zip = $this->getZipFilePointer( $project );
+
+        $internalFileIndex = $zip->locateName( $fileName, ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR );
+        $internalFileName = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
+        $filePointer = $zip->getStream( $internalFileName );
+
+        $extension = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) use ( $extension ) {
+            if( array_search( $extension, $extensionList ) !== false ) return true;
+            return false;
+        } ) )[ 0 ];
+
+        return [ 'fileName' => $fileName, 'stream' => $filePointer, 'mime_type' => $mimeType ];
+
+    }
+
+    public function getDirectoryStreamFilePointer( Projects_ProjectStruct $project, $dirName ){
+
+        $zip = $this->getZipFilePointer( $project );
+
+        $this->tempZipFile = tempnam( INIT::$TMP_DOWNLOAD . '/' . $project->name . '/', "ZIP" );
+
+        $zipReference = new ZipArchive();
+        $zipReference->open( $this->tempZipFile, ZipArchive::CREATE );
+
+        for( $i = 0; $i < $zip->numFiles; $i++ ){
+
+            $name = $zip->getNameIndex( $i, ZipArchive::FL_NODIR );
+
+            // Skip files not in $source
+            if ( strpos( $name, "{$dirName}/" ) !== 0 || $name == "{$dirName}/" ) {
+                continue;
+            }
+
+            $zipReference->addFromString( $project->name .  $name, $zip->getFromIndex( $i ) );
+
+        }
+
+        $zipReference->close();
+
+        $filePointer = fopen( $this->tempZipFile, 'r' );
+
+        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) {
+            if( array_search( 'zip', $extensionList ) !== false ) return true;
+            return false;
+        } ) )[ 0 ];
+
+        return [ 'fileName' => $project->name . '__reference.zip' , 'stream' => $filePointer, 'mime_type' => $mimeType ];
+
+    }
+
+    /**
+     * @param Projects_ProjectStruct $project
+     *
+     * @return ZipArchive
+     */
+    public function getZipFilePointer( Projects_ProjectStruct $project ){
 
         $fs     = new \FilesStorage();
         $jobs   = $project->getJobs( 60 * 60 );
@@ -23,17 +90,7 @@ class ZipArchiveReference {
         $zip = new ZipArchive();
         $zip->open( $originalZipPath );
 
-        $internalFileIndex = $zip->locateName( $fileName, ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR );
-        $internalFileName = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
-        $filePointer = $zip->getStream( $internalFileName );
-
-        $extension = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
-        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) use ( $extension ) {
-            if( array_search( $extension, $extensionList ) !== false ) return true;
-            return false;
-        } ) )[ 0 ];
-
-        return [ 'fileName' => $fileName, 'stream' => $filePointer, 'mime_type' => $mimeType ];
+        return $zip;
 
     }
 

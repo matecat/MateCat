@@ -69,12 +69,17 @@ abstract class KleinController {
 
     }
 
-    public function respond( $method ) {
-        $start = microtime(true) ;
-
+    public function performValidations(){
         $this->validateAuth();
         $this->identifyUser();
         $this->validateRequest();
+    }
+
+    public function respond( $method ) {
+        $start = microtime(true) ;
+
+        $this->performValidations();
+
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }

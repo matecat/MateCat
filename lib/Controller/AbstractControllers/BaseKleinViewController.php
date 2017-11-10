@@ -39,30 +39,13 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
 
     }
 
-    protected function setLoggedUser() {
-        $this->logged_user = new Users_UserStruct();
-
-        if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user->uid = $_SESSION[ 'uid' ];
-            $this->logged_user->email = $_SESSION[ 'cid' ];
-
-            $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
-
-            $this->logged_user = $userObject[0];
-        }
-    }
-
     public function setView( $template_name ) {
         $this->view = new \PHPTALWithAppend( $template_name );
 
     }
 
     private function isLoggedIn() {
-        return (
-            ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
-            ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
-        );
+        return !is_null( $this->getUser() );
     }
 
 
