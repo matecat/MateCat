@@ -42,7 +42,7 @@ class FeatureSet {
             foreach( $feature_codes as $code ) {
                 $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
             }
-            $this->features = static::merge($this->features, $features);
+            $this->merge( $features ) ;
         }
     }
 
@@ -65,7 +65,7 @@ class FeatureSet {
         foreach( $project_dependencies as $dependency ) {
             $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
         }
-        $this->features = static::merge( $this->features, $features );
+        $this->merge( $features );
     }
 
     /**
@@ -74,7 +74,7 @@ class FeatureSet {
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        $this->features = static::merge( $this->features, $features );
+        $this->merge( $features );
     }
 
     /**
@@ -94,7 +94,6 @@ class FeatureSet {
      *
      * @param $id_customer
      *
-     * @return array
      */
     public function loadAutoActivablesOnProject( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
@@ -106,7 +105,7 @@ class FeatureSet {
             return $obj->autoActivateOnProject();
         }) ;
 
-        $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
+        $this->merge( array_map( function( BaseFeature $feature ) {
             return $feature->getFeatureStruct();
         }, $returnable ) ) ;
     }
@@ -119,7 +118,7 @@ class FeatureSet {
     public function loadFromTeam( TeamStruct $team ) {
         $dao = new OwnerFeatures_OwnerFeatureDao() ;
         $features = $dao->getByTeam( $team ) ;
-        $this->features = static::merge( $this->features, $features ) ;
+        $this->merge( $features );
     }
 
     /**
@@ -238,7 +237,9 @@ class FeatureSet {
         $codes = $this->getCodes() ;
 
         if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
+
             $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+
             if ( !empty( $missing_dependencies ) ) {
                 throw new Exception('Missing dependencies for DQF: ' . implode(',', $missing_dependencies ) ) ;
             }
@@ -257,28 +258,20 @@ class FeatureSet {
     }
 
     /**
-     * Returns an array of feature object instances, merging two input array,
-     * ensuring no duplicates are present.
+     * Updates the features array with new features. Ensures no duplicates are created.
+     * Loads dependencies as needed.
      *
-     * @param $left
-     * @param $right
+     * @param $new_features
      *
      * @return array
+     *
      */
-    public static function merge( $left, $right ) {
-        $returnable = array();
-
-        foreach( $left as $feature ) {
-            $returnable[ $feature->feature_code ] = $feature ;
-        }
-
-        foreach( $right as $feature ) {
-            if ( !isset( $returnable[ $feature->feature_code ] ) ) {
-                $returnable[ $feature->feature_code ] = $feature ;
+    private function merge( $new_features ) {
+        foreach( $new_features as $feature ) {
+            if ( !isset( $this->features[ $feature->feature_code ] ) ) {
+                $this->features[ $feature->feature_code ] = $feature ;
             }
         }
-
-        return $returnable ;
     }
 
     public static function splitString( $string ) {
@@ -297,7 +290,7 @@ class FeatureSet {
             }
         }
 
-        $this->features = static::merge($this->features, $features);
+        $this->merge( $features ) ;
     }
 
     /**

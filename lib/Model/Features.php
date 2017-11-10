@@ -1,6 +1,8 @@
 <?php
 
 use Features\BaseFeature;
+use Features\Dqf;
+use Features\ReviewExtended;
 use Klein\Klein;
 
 
