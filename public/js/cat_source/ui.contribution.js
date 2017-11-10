@@ -65,7 +65,8 @@ $.extend(UI, {
         var txt;
         var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
         var currentSegment  = new UI.Segment( current );
-        if (currentSegment.isReadonly() ) {
+        var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));
+        if (currentSegment.isReadonly() && !segmentUnlocked) {
             UI.blockButtons = false ;
             $( segment ).addClass('loaded');
             var deferred = new jQuery.Deferred() ;

@@ -32,7 +32,7 @@ class Segment extends React.Component {
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
             showTranslationIssues: false,
-            unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('locked-' + this.props.segment.sid),
+            unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('unlocked-' + this.props.segment.sid),
             readonly: readonly
         }
     }
@@ -46,7 +46,7 @@ class Segment extends React.Component {
         }
 
         if ( this.props.segment.ice_locked === "1" && !readonly) {
-            if (UI.getFromStorage('locked-' + this.props.segment.sid)) {
+            if (UI.getFromStorage('unlocked-' + this.props.segment.sid)) {
                 classes.push('ice-unlocked');
             } else {
                 classes.push('readonly');
@@ -189,10 +189,10 @@ class Segment extends React.Component {
         event.stopPropagation();
         if (this.state.unlocked) {
             //TODO: move this to SegmentActions
-            UI.removeFromStorage('locked-' + this.props.segment.sid);
+            UI.removeFromStorage('unlocked-' + this.props.segment.sid);
             UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
         } else {
-            UI.addInStorage('locked-'+ this.props.segment.sid, true);
+            UI.addInStorage('unlocked-'+ this.props.segment.sid, true);
             UI.editAreaClick(this.section);
         }
         this.setState({
