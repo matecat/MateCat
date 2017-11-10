@@ -1294,6 +1294,16 @@
     ,
         {
             "localized":[{
+                "en":"Rohingyalish"
+            }],
+            "isocode":"rhl",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"rhl-MM"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Romanian"
             }],
             "isocode":"ro",
