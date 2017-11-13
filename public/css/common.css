@@ -1176,10 +1176,6 @@ margin-top: 10px;
 td.addtmxtd {
 width: 804px;
 }
-#activetm td.action .addtmx {
-    display: block;
-    margin-right: 17px;
-}
 
 input.email-export-tmx {
     width: 180px;
