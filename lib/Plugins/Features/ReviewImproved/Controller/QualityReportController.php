@@ -29,7 +29,7 @@ class QualityReportController extends \BaseKleinViewController  {
 
     public function respond() {
 
-        $this->setLoggedUser();
+        $this->performValidations();
 
         $this->setDefaultTemplateData();
 
