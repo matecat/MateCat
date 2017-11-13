@@ -299,12 +299,12 @@ class JobContainer extends React.Component {
     }
 
     getTMIcon() {
-        if (this.props.job.get('private_tm_key').length) {
+        if (this.props.job.get('private_tm_key').size) {
             let keys = this.props.job.get('private_tm_key');
             let tooltipText = '';
             keys.forEach(function (key, i) {
-                let descript = (key.name) ? key.name : "Private TM and Glossary";
-                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
+                let descript = (key.get('name')) ? key.get('name') : "Private TM and Glossary";
+                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.get('key') + ')</div>';
                 tooltipText =  tooltipText + item;
             });
             return  <a className=" ui icon basic button tm-keys" data-html={tooltipText} data-variation="tiny"
