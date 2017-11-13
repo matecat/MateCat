@@ -60,15 +60,15 @@ class SegmentVersion {
 
             $version = $this->renderItem( $record ) ;
             $version['issues'] = [];
-            $version['diff'] = [
-                [0,"||| |||"],
-                [-1," Prova"],
-                [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
-            ] ;
+//            $version['diff'] = [
+//                [0,"||| |||"],
+//                [-1," Prova"],
+//                [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
+//            ] ;
 
-            // if ( !isset( $version['diff'] ) ) {
-            //     $version['diff'] = json_decode( $record->raw_diff, true );
-            // }
+             if ( !isset( $version['diff'] ) ) {
+                 $version['diff'] = json_decode( $record->raw_diff, true );
+             }
 
             if ( !is_null($record->qa_id_segment )) {
                 $subset[] = new EntryStruct([

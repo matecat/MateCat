@@ -63,12 +63,10 @@ class ReviewIssueSelectionPanel extends React.Component{
                 'end_offset'          : this.props.selection.end_offset,
                 'comment'             : message,
                 'version'             : this.props.segmentVersion,
-                'version_number'      : this.props.segmentVersion, //Todo da togliere
-                'id'                  : key //Todo da togliere
             };
         }.bind(this) );
 
-        SegmentActions.submitIssue(this.props.sid, data)
+        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
             .done( this.props.submitIssueCallback )
             .fail( this.handleFail.bind(this) ) ;
     }

@@ -24,25 +24,6 @@ if ( ReviewImproved.enabled() )
 
     $.extend( ReviewImproved, {
 
-        deleteIssue : function( issue ) {
-            var message = sprintf(
-                "You are about to delete the issue on string '%s' posted on %s." ,
-                issue.target_text,
-                moment( issue.created_at ).format('lll')
-            );
-
-            APP.confirm({
-                name : 'Confirm issue deletion',
-                callback : 'deleteTranslationIssue',
-                msg: message,
-                okTxt: 'Yes delete this issue',
-                context: JSON.stringify({
-                    id_segment : issue.id_segment,
-                    id_issue : issue.id
-                })
-            });
-        },
-
         highlightIssue : function(issue, node) {
             var selection = document.getSelection();
             selection.removeAllRanges();

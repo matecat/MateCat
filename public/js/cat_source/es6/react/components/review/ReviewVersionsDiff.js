@@ -10,9 +10,6 @@ class ReviewVersionsDiff extends React.Component {
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
-        // this.state = {
-        //     diff: this.getDiff()
-        // };
     }
 
 
@@ -21,9 +18,9 @@ class ReviewVersionsDiff extends React.Component {
             let selection = window.getSelection();
             if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
                 let data = this.getSelectionData(selection);
-                this.props.textSelectedFn(data);
+                this.props.textSelectedFn(data, this.getDiffPatch());
             } else {
-                this.props.textSelectedFn(null);
+                this.props.removeSelection();
             }
         }
     }
@@ -229,17 +226,25 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     applyWrapper(sid, issue) {
-        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.version_number)) {
+        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.translation_version)) {
             this.restoreSelection(issue);
         }
     }
 
-    getDiff() {
+    getDiffHtml() {
         if (this.props.diff && this.props.diff.length > 0) {
             return trackChangesHTMLFromDiffArray(this.props.diff);
         } else {
-            let diffHtml = trackChangesHTML(this.originalTranslation, this.props.translation);
+            let diffHtml = trackChangesHTML(this.props.translation, this.props.previousVersion);
             return this.props.decodeTextFn(UI.currentSegment, diffHtml);
+        }
+    }
+
+    getDiffPatch() {
+        if (this.props.diff && this.props.diff.length > 0) {
+            return this.props.diff;
+        } else {
+            return getDiffPatch(this.props.translation, this.props.previousVersion);
         }
     }
 
@@ -259,7 +264,7 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     render() {
-        let diffHTML = this.getDiff();
+        let diffHTML = this.getDiffHtml();
         return <div className="segment-diff-container" ref={(node)=>this.diffElem=node}
                   dangerouslySetInnerHTML={ this.allowHTML(diffHTML) }
                   onMouseUp={this.textSelected.bind(this)}/>

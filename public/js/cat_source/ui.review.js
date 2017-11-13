@@ -22,18 +22,20 @@ $.extend( UI, {
 });
 
 if ( Review.enabled() )
-    (function(Review, $, undefined) {
 
-        var alertNotTranslatedYet = function( sid ) {
-            APP.confirm({
-                name: 'confirmNotYetTranslated',
-                cancelTxt: 'Close',
-                callback: 'openNextTranslated',
-                okTxt: 'Open next translated segment',
-                context: sid,
-                msg: UI.alertNotTranslatedMessage
-            });
-        }
+    var alertNotTranslatedYet = function( sid ) {
+        APP.confirm({
+            name: 'confirmNotYetTranslated',
+            cancelTxt: 'Close',
+            callback: 'openNextTranslated',
+            okTxt: 'Open next translated segment',
+            context: sid,
+            msg: UI.alertNotTranslatedMessage
+        });
+    };
+
+
+    (function(Review, $, undefined) {
 
         $.extend(Review, {
             evalOpenableSegment : function(section) {

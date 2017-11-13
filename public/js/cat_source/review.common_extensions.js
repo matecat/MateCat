@@ -53,7 +53,27 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
                     UI.scrollSegment( UI.currentSegment );
                 }, 100 );
             }
-        }
+        },
+
+        deleteIssue : function( issue ) {
+            var message = sprintf(
+                "You are about to delete the issue on string <span style='font-style: italic;'>'%s'</span> " +
+                "posted on %s." ,
+                issue.target_text,
+                moment( issue.created_at ).format('lll')
+            );
+
+            APP.confirm({
+                name : 'Confirm issue deletion',
+                callback : 'deleteTranslationIssue',
+                msg: message,
+                okTxt: 'Yes delete this issue',
+                context: JSON.stringify({
+                    id_segment : issue.id_segment,
+                    id_issue : issue.id
+                })
+            });
+        },
 
     });
 

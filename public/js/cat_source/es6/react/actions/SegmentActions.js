@@ -236,7 +236,7 @@ var SegmentActions = {
     },
 
     submitIssue: function (sid, data, diff) {
-        return UI.submitIssues(sid, data, diff)
+        return UI.submitIssues(sid, data, diff);
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {
@@ -256,6 +256,10 @@ var SegmentActions = {
             issue: issue,
             versionNumber: versionNumber
         });
+    },
+
+    deleteIssue: function (issue) {
+        UI.deleteIssue(issue);
     }
 
 

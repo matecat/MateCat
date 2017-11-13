@@ -660,6 +660,16 @@ function trackChangesHTML(source, target) {
     return restorePlaceholders(diffTxt) ;
 }
 
+function getDiffPatch(source, target) {
+    var diff   = UI.dmp.diff_main(
+        cleanupHTMLCharsForDiff( source ),
+        cleanupHTMLCharsForDiff( target )
+    );
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
+    return diff;
+}
+
 function trackChangesHTMLFromDiffArray(diff) {
     var diffTxt = '';
 
