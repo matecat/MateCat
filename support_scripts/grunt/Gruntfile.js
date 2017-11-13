@@ -226,6 +226,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
                     basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
 
+                    basePath + 'cat_source/es6/react/ajax_utils/segmentUtils.js',
+
                     basePath + 'cat_source/ui.customization.js',
                     // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
