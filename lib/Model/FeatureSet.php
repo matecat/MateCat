@@ -40,7 +40,9 @@ class FeatureSet {
 
         if ( !empty( $feature_codes ) ) {
             foreach( $feature_codes as $code ) {
-                $features [] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                if ( !empty($code)) {
+                    $features [] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                }
             }
             $this->merge( $features ) ;
         }
