@@ -174,7 +174,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      *
      * @return null|Translations_TranslationVersionStruct
      */
-    public static function getVersionNumberForTranslation($id_job, $id_segment, $version_number) {
+    public function getVersionNumberForTranslation($id_job, $id_segment, $version_number) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment " .
                 " AND version_number = :version_number ;";
@@ -246,6 +246,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     st.translation_date AS creation_date,
     st.autopropagated_from AS propagated_from,
     st.time_to_edit,
+    stv.raw_diff,
 
     qa.id as qa_id,
     qa.comment as qa_comment,
@@ -265,10 +266,13 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     qa.rebutted_at as qa_rebutted_at
 
     FROM segment_translations st LEFT JOIN qa_entries qa
-    ON st.id_segment = qa.id_segment AND st.id_job = qa.id_job AND
-      st.version_number = qa.translation_version
-      WHERE st.id_job = :id_job AND st.id_segment = :id_segment
-      ) t1
+        ON st.id_segment = qa.id_segment AND st.id_job = qa.id_job AND
+          st.version_number = qa.translation_version
+        LEFT JOIN segment_translation_versions AS stv
+          ON stv.id_job = st.id_job AND stv.id_segment = st.id_segment
+          AND st.version_number = stv.version_number
+        WHERE st.id_job = :id_job AND st.id_segment = :id_segment
+    ) t1
 
   UNION SELECT * FROM (
 
@@ -282,6 +286,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     stv.creation_date,
     stv.propagated_from,
     stv.time_to_edit,
+    stv.raw_diff,
 
      qa.id as qa_id,
      qa.comment as qa_comment,
@@ -301,12 +306,12 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      qa.rebutted_at as qa_rebutted_at
 
     FROM segment_translation_versions stv LEFT JOIN qa_entries qa
-        ON stv.id_job = qa.id_job AND stv.id_segment = qa.id_segment AND stv.version_number = qa.translation_version
+        ON stv.id_job = qa.id_job AND stv.id_segment = qa.id_segment
+          AND stv.version_number = qa.translation_version
         WHERE stv.id_job = :id_job AND stv.id_segment = :id_segment
+    ) t2
 
-        ) t2
-
-        ORDER BY version_number DESC
+    ORDER BY version_number DESC
     " ;
 
         $conn = Database::obtain()->getConnection();

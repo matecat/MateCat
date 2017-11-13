@@ -26,10 +26,7 @@ class SegmentVersion {
      * @return array
      */
     public function render() {
-        $out        = [] ;
-        $current_id = 0 ;
         $version    = null ;
-        $subset     = [] ;
 
         if ( $this->with_issues ) {
             return $this->renderItemsWithIssues() ;
@@ -57,7 +54,6 @@ class SegmentVersion {
                     }, $subset );
 
                 }
-
                 $out[]  = $version ;
                 $subset = [];
             }
@@ -68,21 +64,24 @@ class SegmentVersion {
                 [0,"||| |||"],
                 [-1," Prova"],
                 [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
+            ] ;
 
-            ];
+            // if ( !isset( $version['diff'] ) ) {
+            //     $version['diff'] = json_decode( $record->raw_diff, true );
+            // }
 
             if ( !is_null($record->qa_id_segment )) {
                 $subset[] = new EntryStruct([
-                     'id'          => $record->qa_id,
-                     'id_segment'  => $record->qa_id_segment,
-                     'id_job'      => $record->qa_id_job,
-                     'id_category' => $record->qa_id_category,
-                     'severity'    => $record->qa_severity,
+                     'id'                  => $record->qa_id,
+                     'id_segment'          => $record->qa_id_segment,
+                     'id_job'              => $record->qa_id_job,
+                     'id_category'         => $record->qa_id_category,
+                     'severity'            => $record->qa_severity,
                      'translation_version' => $record->qa_translation_version,
-                     'start_node' => $record->qa_start_node,
-                     'start_offset' => $record->qa_start_offset,
-                     'end_node'     => $record->qa_end_node,
-                     'end_offset'   => $record->qa_end_offset,
+                     'start_node'          => $record->qa_start_node,
+                     'start_offset'    => $record->qa_start_offset,
+                     'end_node'        => $record->qa_end_node,
+                     'end_offset'      => $record->qa_end_offset,
                      'is_full_segment' => $record->qa_is_full_segment,
                      'penalty_points'  => $record->qa_penalty_points,
                      'comment'     => $record->qa_comment,
