@@ -94,6 +94,8 @@ class ReviewTranslationDiffVersion extends React.Component {
                                 selection={this.state.selectionObj}
                                 segmentVersion={this.props.versionNumber}
                                 diffPatch={this.state.diffPatch}
+                                closeSelectionPanel={this.removeSelection.bind(this)}
+                                submitIssueCallback={this.removeSelection.bind(this)}
                             />
                         </div>
                     ) : (

@@ -35,7 +35,6 @@ if ( ReviewExtended.enabled() ) {
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
-                    // SegmentActions.addSegmentVersionIssue(fid, sid, response, data_array[0].version);
                 });
             },
         });

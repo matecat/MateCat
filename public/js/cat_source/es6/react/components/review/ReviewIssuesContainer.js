@@ -25,17 +25,15 @@ class ReviewIssuesContainer extends React.Component {
         });
     }
 
-    // getInitialState () {
-    //     return {
-    //         issues : this.getIssuesFromDb(this.props.sid,
-    //                                       this.props.versionNumber)
-    //     }
-    // }
 
     componentWillReceiveProps ( nextProps ) {
         if (this.props.reviewType === "improved") {
             var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
             this.setState({ issues: issues });
+        } else {
+            this.state = {
+                issues : nextProps.issues
+            }
         }
 
     }

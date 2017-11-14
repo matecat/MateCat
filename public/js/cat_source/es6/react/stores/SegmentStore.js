@@ -108,7 +108,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     getSegmentIndex(sid, fid) {
         return this._segments[fid].findIndex(function (segment, index) {
-            return (segment.get('sid') === sid);
+            return parseInt(segment.get('sid')) === parseInt(sid);
         });
 
     },

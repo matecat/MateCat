@@ -76,6 +76,11 @@ class ReviewIssueSelectionPanel extends React.Component{
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
+    closePanel() {
+        if (this.props.closeSelectionPanel) {
+            this.props.closeSelectionPanel();
+        }
+    }
     render() {
         var categoryComponents = []; 
         var withSeverities = 0;
@@ -127,7 +132,7 @@ class ReviewIssueSelectionPanel extends React.Component{
             }
         }.bind(this)); 
 
-        var buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send'); 
+        let buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send');
 
         return <div className="review-issue-selection-panel">
 
@@ -152,6 +157,8 @@ class ReviewIssueSelectionPanel extends React.Component{
             <div className="review-issue-buttons-right">
                 <button onClick={this.sendClick.bind(this)}
                     className={this.buttonClasses()}>{buttonLabel}</button>
+                <button onClick={this.closePanel.bind(this)}
+                        className="mc-button grey-button">Close</button>
             </div>
         </div>
         </div> 
