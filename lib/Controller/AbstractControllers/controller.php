@@ -26,7 +26,7 @@ abstract class controller {
     /**
      * @return Users_UserStruct
      */
-    public function getLoggedUser() {
+    public function getUser() {
         return $this->logged_user;
     }
 

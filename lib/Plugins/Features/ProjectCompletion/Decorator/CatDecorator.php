@@ -77,7 +77,7 @@ class CatDecorator extends AbstractDecorator {
 
         $completable = $this->controller->getChunk()->getProject()->getFeatures()->filter('filterJobCompletable', $completable,
                 $this->controller->getChunk(),
-                $this->controller->getLoggedUser(),
+                $this->controller->getUser(),
                 catController::isRevision()
         );
 
