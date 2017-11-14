@@ -197,45 +197,10 @@
 
         <header metal:use-macro="header.html/main_header"/>
 
-                <a href="${basepath}" class="logo">
-                </a>
-                <div class="breadcrumbs">
-                    <div class="joblist">
-                        <a href="#" class="arrow-notification"></a>
-                        <ul>
-                            <li>
-                                <a href="">
-                                    <b>Job1</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Another job</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Eaaasy job</b>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <a href="#" id="pname" tal:content="pname">Project</a>
-                    <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
-                </div>
-
-            </div>   <!-- .wrapper -->
-
-
-        </header>
-
         <div class="main-container">
             <div data-mount="review-side-panel"></div>
-            <div id="outer">
-
-            </div>
-            <div id="plugin-mount-point"/>
+            <div id="outer"></div>
+            <div id="plugin-mount-point"></div>
         </div>
 
         <div class="notifications-wrapper"></div>
