@@ -41,7 +41,7 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     setSegmentVersions(sid, segment) {
-        if (this.props.sid === sid) {
+        if (this.props.sid === sid && segment.versions.length > 0) {
             this.setState({
                 issues_count : segment.versions[0].issues.length
             });

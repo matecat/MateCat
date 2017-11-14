@@ -137,24 +137,30 @@ class TranslationIssuesOverviewPanel extends React.Component {
     }
 
     getListVersionsReviewExtended() {
-        return this.state.versions.map( function(v) {
-            let key = 'version-' + v.id + '-' + this.props.sid ;
+        if (this.state.versions.length > 0) {
 
-            return (
-                <ReviewTranslationDiffVersion
-                    diff={v.diff}
-                    sid={this.state.segment.sid}
-                    key={key}
-                    versionNumber={v.version_number}
-                    isCurrent={false}
-                    translation={v.translation}
-                    previousVersion={this.findPreviousVersion(v.version_number).translation}
-                    decodeTextFn={UI.decodeText}
-                    reviewType={this.props.reviewType}
-                    issues={v.issues}
-                />
-            );
-        }.bind(this) );
+            return this.state.versions.map( function(v) {
+                let key = 'version-' + v.id + '-' + this.props.sid ;
+
+                return (
+                    <ReviewTranslationDiffVersion
+                        diff={v.diff}
+                        sid={this.state.segment.sid}
+                        key={key}
+                        versionNumber={v.version_number}
+                        isCurrent={false}
+                        translation={v.translation}
+                        previousVersion={this.findPreviousVersion(v.version_number).translation}
+                        decodeTextFn={UI.decodeText}
+                        reviewType={this.props.reviewType}
+                        issues={v.issues}
+                        isReview={this.props.isReview}
+                    />
+                );
+            }.bind(this) );
+        } else {
+            return <h3>No version has been created for this segment</h3>;
+        }
     }
 
     render() {

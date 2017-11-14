@@ -157,8 +157,8 @@ class ReviewIssueSelectionPanel extends React.Component{
             <div className="review-issue-buttons-right">
                 <button onClick={this.sendClick.bind(this)}
                     className={this.buttonClasses()}>{buttonLabel}</button>
-                <button onClick={this.closePanel.bind(this)}
-                        className="mc-button grey-button">Close</button>
+                {this.props.closeSelectionPanel ? (<button onClick={this.closePanel.bind(this)}
+                                                           className="mc-button grey-button">Close</button>) : (null)}
             </div>
         </div>
         </div> 
@@ -166,7 +166,7 @@ class ReviewIssueSelectionPanel extends React.Component{
 }
 
 ReviewIssueSelectionPanel.defaultProps = {
-    handleFail: function () {}
+    handleFail: function () {},
 };
 
 export default ReviewIssueSelectionPanel ;

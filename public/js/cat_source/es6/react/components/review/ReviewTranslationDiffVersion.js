@@ -85,6 +85,7 @@ class ReviewTranslationDiffVersion extends React.Component {
                         versionNumber={this.props.versionNumber}
                         translation={this.props.translation}
                         previousVersion={this.props.previousVersion}
+                        selectable={this.props.isReview}
                     />
 
                     {this.state.selectionObj  ? (

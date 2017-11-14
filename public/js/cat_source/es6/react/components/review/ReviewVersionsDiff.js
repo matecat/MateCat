@@ -14,7 +14,7 @@ class ReviewVersionsDiff extends React.Component {
 
 
     textSelected(event) {
-        if (this.props.textSelectedFn) {
+        if (this.props.textSelectedFn && this.props.selectable) {
             let selection = window.getSelection();
             if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
                 let data = this.getSelectionData(selection);
@@ -206,8 +206,8 @@ class ReviewVersionsDiff extends React.Component {
         var range = document.createRange();
 
         var startNodeOffset, endNodeOffset;
-        startNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.start_offset);
-        endNodeOffset = this.getNodeAndOffsetAt(containerEl, savedSel.end_offset);
+        startNodeOffset = this.getNodeAndOffsetAt(containerEl, parseInt(savedSel.start_offset));
+        endNodeOffset = this.getNodeAndOffsetAt(containerEl, parseInt(savedSel.end_offset));
 
         range.setStart(startNodeOffset.node, startNodeOffset.offset);
         range.setEnd(endNodeOffset.node, endNodeOffset.offset);
@@ -265,10 +265,18 @@ class ReviewVersionsDiff extends React.Component {
 
     render() {
         let diffHTML = this.getDiffHtml();
-        return <div className="segment-diff-container" ref={(node)=>this.diffElem=node}
+        let diffClass = classnames({
+            "segment-diff-container": true,
+            "locked": !this.props.selectable
+        });
+        return <div className={diffClass} ref={(node)=>this.diffElem=node}
                   dangerouslySetInnerHTML={ this.allowHTML(diffHTML) }
                   onMouseUp={this.textSelected.bind(this)}/>
     }
 }
+
+ReviewVersionsDiff.defaultProps = {
+    selectable: true
+};
 
 export default ReviewVersionsDiff;

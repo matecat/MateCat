@@ -44,9 +44,9 @@ $.extend(UI, {
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
             if (which) {
-                SegmentActions.addClassToSegment(UI.getSegmentId( this.currentSegment ), 'modified');
-                this.currentSegment.data('modified', true);
-                this.currentSegment.trigger('modified');
+                SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'modified');
+                segment.data('modified', true);
+                segment.trigger('modified');
             }
 		}
 

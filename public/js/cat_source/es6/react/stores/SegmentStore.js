@@ -192,7 +192,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     addSegmentVersions(fid, sid, versions) {
+
         let index = this.getSegmentIndex(sid, fid);
+        if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "")  {
+            // TODO Remove this if
+            this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
+            return this._segments[fid].get(index);
+        }
         this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
         return this._segments[fid].get(index);
     },

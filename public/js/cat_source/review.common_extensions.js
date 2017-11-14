@@ -13,7 +13,8 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
             ReactDOM.render(
                 React.createElement( ReviewSidePanel, {
                     closePanel: this.closeIssuesPanel,
-                    reviewType: Review.type
+                    reviewType: Review.type,
+                    isReview: config.isReview
                 } ),
                 UI.issuesMountPoint );
         },
