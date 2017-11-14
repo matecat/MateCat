@@ -64,10 +64,10 @@ UI = {
             if (LXQ.enabled()) {
                 var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible');
                 var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 8 : 0;
-                jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 48 - menuHeight) + "px");
             }
             else {
-                jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (messageBarHeight + searchBoxHeight + 48 - menuHeight) + "px");
             }
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
@@ -2192,16 +2192,16 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-  segmentLexiQA: function(_segment) {
-    var segment = _segment;
-    //new API?
-    if (_segment.raw) {
-      segment = _segment.raw
-    }
-    var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-    var id_segment = UI.getSegmentId(segment);
-    LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
-  },
+    segmentLexiQA: function (_segment) {
+        var segment = _segment;
+        //new API?
+        if (_segment.raw) {
+            segment = _segment.raw
+        }
+        var translation = $('.editarea', segment).text().replace(/\uFEFF/g, '');
+        var id_segment = UI.getSegmentId(segment);
+        LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
+    },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );

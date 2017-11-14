@@ -6,7 +6,6 @@ class changeJobsStatusController extends ajaxController {
     private $res_id;
     private $new_status = Constants_JobStatus::STATUS_ACTIVE;
     private $password = "fake wrong password";
-    private $only_if = false;
 
     public function __construct() {
 
@@ -25,7 +24,6 @@ class changeJobsStatusController extends ajaxController {
                 'new_status'    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'only_if'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'pn'            => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
         );
@@ -41,16 +39,6 @@ class changeJobsStatusController extends ajaxController {
             $this->new_status = $postInput[ 'new_status' ];
         } else {
             throw new Exception( "Invalid Status" );
-        }
-
-        if ( !empty( $postInput[ 'only_if' ] ) ) {
-
-            if ( Constants_JobStatus::isAllowedStatus( $postInput[ 'only_if' ] ) ) {
-                $this->only_if = $postInput[ 'only_if' ];
-            } else {
-                throw new Exception( "Invalid Status" );
-            }
-
         }
 
     }
@@ -83,16 +71,15 @@ class changeJobsStatusController extends ajaxController {
 
             $this->result[ 'old_status' ] = $strOld;
 
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status );
 
             $this->result[ 'code' ]    = 1;
             $this->result[ 'data' ]    = "OK";
             $this->result[ 'status' ]  = $this->new_status;
-            $this->result[ 'page' ]    = 1;
 
         } else {
 
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->password );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->password );
 
             $this->result[ 'code' ]   = 1;
             $this->result[ 'data' ]   = "OK";

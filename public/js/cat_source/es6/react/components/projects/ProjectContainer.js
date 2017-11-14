@@ -172,7 +172,7 @@ class ProjectContainer extends React.Component {
                 <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
             </div>
                         </div>;
-        if ( this.props.project.get('has_archived') ) {
+        if ( this.props.project.get('is_archived') ) {
             menuHtml = <div className="menu">
                 <div className="scrolling menu">
                     <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
@@ -182,7 +182,7 @@ class ProjectContainer extends React.Component {
                     <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
                 </div>
                         </div>;
-        } else if ( this.props.project.get('has_cancelled') ) {
+        } else if ( this.props.project.get('is_cancelled') ) {
             menuHtml = <div className="menu">
 
                 <div className="scrolling menu">
@@ -478,9 +478,9 @@ class ProjectContainer extends React.Component {
 
         // Project State (Archived or Cancelled)
         let state = '';
-        if ( this.props.project.get('has_archived') ) {
+        if ( this.props.project.get('is_archived') ) {
             state =  <div className="status-filter">(archived)</div>;
-        }  else if ( this.props.project.get('has_cancelled') ) {
+        }  else if ( this.props.project.get('is_cancelled') ) {
             state =  <div className="status-filter">(cancelled)</div>;
         }
 
