@@ -83,12 +83,6 @@ class TranslationIssueModel
         $this->setDefaultIssueValues();
         $data = $this->issue->attributes();
 
-//        $this->diff = [
-//                [0,"||| |||"],
-//                [-1," Prova"],
-//                [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
-//        ];
-
         if ( !empty( $this->diff ) ) {
             $this->saveDiff();
         }
@@ -134,6 +128,11 @@ class TranslationIssueModel
 
         if ( !$version_record ) {
             $insert = Translations_TranslationVersionDao::insertStruct( $struct ) ;
+        }
+        else {
+            // in case the record exists, we have to update it with the diff anyway
+            $version_record->raw_diff = $string_to_save ;
+            $update = Translations_TranslationVersionDao::updateStruct( $version_record, ['fields' => ['raw_diff']]  );
         }
 
     }
