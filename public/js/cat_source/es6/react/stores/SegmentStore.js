@@ -108,7 +108,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     getSegmentIndex(sid, fid) {
         return this._segments[fid].findIndex(function (segment, index) {
-            return (segment.get('sid') === sid);
+            return parseInt(segment.get('sid')) === parseInt(sid);
         });
 
     },
@@ -203,7 +203,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             return item.get('version_number') === versionNumber;
         });
 
-        this._segments[fid] = this._segments[fid].updateIn([index, 'versions', versionIndex, 'issues'], arr => arr.concat(Immutable.fromJS(issue)));
+        this._segments[fid] = this._segments[fid].updateIn([index, 'versions', versionIndex, 'issues'], arr => arr.push(Immutable.fromJS(issue)));
 
         return this._segments[fid].get(index);
     },

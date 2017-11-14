@@ -90,9 +90,11 @@ class TranslationIssuesOverviewPanel extends React.Component {
     }
 
     findPreviousVersion ( version_number ) {
-        return this.state.versions.filter(function(item) {
-            return parseInt( item.version_number ) == parseInt( version_number ) -1 ;
-        }.bind(this) )[0];
+        if ( this.state.segment.version_number !== '0' && version_number !== 0) {
+            return this.state.versions.filter(function (item) {
+                return parseInt(item.version_number) === parseInt(version_number) - 1;
+            }.bind(this))[0];
+        } else return this.state.versions[this.state.versions.length - 1];
     }
 
     getTrackChangesForOldVersion (version) {
@@ -146,6 +148,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                     versionNumber={v.version_number}
                     isCurrent={false}
                     translation={v.translation}
+                    previousVersion={this.findPreviousVersion(v.version_number).translation}
                     decodeTextFn={UI.decodeText}
                     reviewType={this.props.reviewType}
                     issues={v.issues}

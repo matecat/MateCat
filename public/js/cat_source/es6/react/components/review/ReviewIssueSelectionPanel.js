@@ -63,12 +63,10 @@ class ReviewIssueSelectionPanel extends React.Component{
                 'end_offset'          : this.props.selection.end_offset,
                 'comment'             : message,
                 'version'             : this.props.segmentVersion,
-                'version_number'      : this.props.segmentVersion, //Todo da togliere
-                'id'                  : key //Todo da togliere
             };
         }.bind(this) );
 
-        SegmentActions.submitIssue(this.props.sid, data)
+        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
             .done( this.props.submitIssueCallback )
             .fail( this.handleFail.bind(this) ) ;
     }
@@ -77,6 +75,11 @@ class ReviewIssueSelectionPanel extends React.Component{
         genericErrorAlertMessage() ;
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
+    }
+    closePanel() {
+        if (this.props.closeSelectionPanel) {
+            this.props.closeSelectionPanel();
+        }
     }
     render() {
         var categoryComponents = []; 
@@ -129,7 +132,7 @@ class ReviewIssueSelectionPanel extends React.Component{
             }
         }.bind(this)); 
 
-        var buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send'); 
+        let buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send');
 
         return <div className="review-issue-selection-panel">
 
@@ -154,6 +157,8 @@ class ReviewIssueSelectionPanel extends React.Component{
             <div className="review-issue-buttons-right">
                 <button onClick={this.sendClick.bind(this)}
                     className={this.buttonClasses()}>{buttonLabel}</button>
+                <button onClick={this.closePanel.bind(this)}
+                        className="mc-button grey-button">Close</button>
             </div>
         </div>
         </div> 

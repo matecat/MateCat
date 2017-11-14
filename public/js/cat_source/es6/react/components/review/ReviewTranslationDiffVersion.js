@@ -8,6 +8,7 @@ class ReviewTranslationDiffVersion extends React.Component {
         super(props);
         this.state = {
             selectionObj: null,
+            diffPatch: null
         };
 
     }
@@ -20,9 +21,17 @@ class ReviewTranslationDiffVersion extends React.Component {
         return { __html : UI.decodePlaceholdersToText( this.props.translation ) };
     }
 
-    textSelected(data) {
+    textSelected(data, diffPatch) {
         this.setState({
-            selectionObj: data
+            selectionObj: data,
+            diffPatch: diffPatch
+        });
+    }
+
+    removeSelection() {
+        this.setState({
+            selectionObj: null,
+            diffPatch: null
         });
     }
 
@@ -68,12 +77,14 @@ class ReviewTranslationDiffVersion extends React.Component {
                          dangerouslySetInnerHTML={this.translationMarkup()} />
                     <h4> Diff </h4>
                     <ReviewVersionDiff
-                        // translation={this.props.translation}
                         sid={this.props.sid}
                         textSelectedFn={this.textSelected.bind(this)}
+                        removeSelection={this.removeSelection.bind(this)}
                         decodeTextFn={UI.decodeText}
                         diff={this.props.diff}
                         versionNumber={this.props.versionNumber}
+                        translation={this.props.translation}
+                        previousVersion={this.props.previousVersion}
                     />
 
                     {this.state.selectionObj  ? (
@@ -82,6 +93,9 @@ class ReviewTranslationDiffVersion extends React.Component {
                                 sid={this.props.sid}
                                 selection={this.state.selectionObj}
                                 segmentVersion={this.props.versionNumber}
+                                diffPatch={this.state.diffPatch}
+                                closeSelectionPanel={this.removeSelection.bind(this)}
+                                submitIssueCallback={this.removeSelection.bind(this)}
                             />
                         </div>
                     ) : (

@@ -64,7 +64,12 @@ $.extend(UI, {
 	getContribution: function(segment, next) {
         var txt;
         var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
-        var currentSegment  = new UI.Segment( current );
+        try {
+            var currentSegment  = new UI.Segment( current );
+        } catch (e) {
+            console.error("Error, Missing segments in the UI");
+            return;
+        }
         var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));
         if (currentSegment.isReadonly() && !segmentUnlocked) {
             UI.blockButtons = false ;

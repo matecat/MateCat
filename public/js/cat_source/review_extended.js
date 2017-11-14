@@ -26,15 +26,15 @@ if ( ReviewExtended.enabled() ) {
             },
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
-                SegmentActions.addSegmentVersionIssue(fid, sid, data_array, data_array[0].version);
+
 
                 var deferreds = _.map(data_array, function (data) {
                     data.diff = diff;
                     return API.SEGMENT.sendSegmentVersionIssue(sid, data)
                 });
 
-                return $.when.apply($, deferreds).done(function () {
-                    // ReviewImproved.reloadQualityReport();
+                return $.when.apply($, deferreds).done(function (response) {
+                    UI.getSegmentVersionsIssues(sid, fid);
                 });
             },
         });
@@ -54,8 +54,8 @@ if ( ReviewExtended.enabled() ) {
                 SegmentActions.updateTranslation(segmentId, htmlEncode(text));
             },
 
-            submitIssues: function (sid, data) {
-                return ReviewExtended.submitIssue(sid, data);
+            submitIssues: function (sid, data, diff) {
+                return ReviewExtended.submitIssue(sid, data, diff);
             },
 
             getSegmentVersionsIssuesHandler(event) {
@@ -70,104 +70,6 @@ if ( ReviewExtended.enabled() ) {
                     .done(function (response) {
                         SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, response.versions);
                     });
-                // let versions = [
-                //     {
-                //         "id": 389,
-                //         "id_segment": 673489,
-                //         "id_job": 499,
-                //         "translation": "||| ||| Prova UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END",
-                //         "version_number": 1,
-                //         "propagated_from": 0,
-                //         "created_at": "2017-10-24 13:52:37",
-                //         "issues": [
-                //             {
-                //                 "comment": "",
-                //                 "created_at": "2017-10-23T15:39:08+02:00",
-                //                 "id": 27,
-                //                 "id_category": 336,
-                //                 "is_full_segment": "0",
-                //                 "severity": "Neutral",
-                //                 "start_node": "0",
-                //                 "start_offset": "10",
-                //                 "end_node": "0",
-                //                 "end_offset": "49",
-                //                 "translation_version": "1",
-                //                 "target_text": "No Previe",
-                //                 "penalty_points": "0",
-                //                 "rebutted_at": null
-                //             },
-                //             {
-                //                 "comment": "",
-                //                 "created_at": "2017-10-24T11:12:01+02:00",
-                //                 "id": 28,
-                //                 "id_category": 337,
-                //                 "is_full_segment": "0",
-                //                 "severity": "Critical",
-                //                 "start_node": "0",
-                //                 "start_offset": "1",
-                //                 "end_node": "0",
-                //                 "end_offset": "9",
-                //                 "translation_version": "1",
-                //                 "target_text": "o Previe",
-                //                 "penalty_points": "10",
-                //                 "rebutted_at": null
-                //             }
-                //         ],
-                //         "diff": [
-                //             [0,"||| |||"],
-                //             [1," Prova"],
-                //             [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
-                //         ]
-                //     },
-                //     {
-                //         "id": 388,
-                //         "id_segment": 673489,
-                //         "id_job": 499,
-                //         "translation": "||| ||| UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END",
-                //         "version_number": 0,
-                //         "propagated_from": 0,
-                //         "created_at": "2017-10-24 13:52:37",
-                //         "issues": [
-                //             {
-                //                 "comment": "",
-                //                 "created_at": "2017-10-23T15:39:08+02:00",
-                //                 "id": 27,
-                //                 "id_category": 336,
-                //                 "is_full_segment": "0",
-                //                 "severity": "Neutral",
-                //                 "start_node": "0",
-                //                 "start_offset": "30",
-                //                 "end_node": "0",
-                //                 "end_offset": "59",
-                //                 "translation_version": "0",
-                //                 "target_text": "No Previe",
-                //                 "penalty_points": "0",
-                //                 "rebutted_at": null
-                //             },
-                //             {
-                //                 "comment": "",
-                //                 "created_at": "2017-10-24T11:12:01+02:00",
-                //                 "id": 28,
-                //                 "id_category": 337,
-                //                 "is_full_segment": "0",
-                //                 "severity": "Critical",
-                //                 "start_node": "0",
-                //                 "start_offset": "1",
-                //                 "end_node": "0",
-                //                 "end_offset": "9",
-                //                 "translation_version": "0",
-                //                 "target_text": "o Previe",
-                //                 "penalty_points": "10",
-                //                 "rebutted_at": null
-                //             }
-                //         ],
-                //         "diff": [
-                //             [0,"||| ||| UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
-                //         ]
-                //     }
-                // ];
-
-
             },
 
             clickOnApprovedButton: function (e, button) {
@@ -189,6 +91,25 @@ if ( ReviewExtended.enabled() ) {
                         UI.gotoNextSegment();
                     }
                 }
+            },
+
+            deleteTranslationIssue : function( context ) {
+                console.debug('delete issue', context);
+
+                var parsed = JSON.parse( context );
+                var issue_path = sprintf(
+                    '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
+                    config.id_job, config.review_password,
+                    parsed.id_segment,
+                    parsed.id_issue
+                );
+                var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
+                $.ajax({
+                    url: issue_path,
+                    type: 'DELETE'
+                }).done( function( data ) {
+                    UI.getSegmentVersionsIssues(parsed.id_segment, fid);
+                });
             },
 
         });
