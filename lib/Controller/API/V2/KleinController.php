@@ -2,13 +2,14 @@
 
 namespace API\V2;
 
+use AbstractControllers\IController;
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use Users_UserDao;
 
-abstract class KleinController {
+abstract class KleinController implements IController {
 
     /**
      * @var \Klein\Request
@@ -204,8 +205,7 @@ abstract class KleinController {
         $this->downloadToken = null;
     }
 
-    protected function afterConstruct() {
-    }
+    protected function afterConstruct() {}
 
     protected function _logWithTime( $time ) {
         $previous_filename = \Log::$fileName ;

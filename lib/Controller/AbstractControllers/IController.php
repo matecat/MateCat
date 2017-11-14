@@ -11,4 +11,6 @@ namespace AbstractControllers;
 
 interface IController {
 
+    public function getUser();
+
 }
