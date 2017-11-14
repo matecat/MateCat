@@ -9,6 +9,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     public $source_page ;
     public $uid ;
 
+    protected static $primary_keys = ['id_job', 'id_segment', 'version_number'];
+
     protected function _buildResult( $array_result ) {
     }
 
@@ -182,12 +184,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute(
-                array( 'id_job' => $id_job,
-                       'id_segment' => $id_segment,
-                        'version_number' => $version_number
-                )
-        );
+        $stmt->execute( [
+                'id_job' => $id_job,
+                'id_segment' => $id_segment,
+                'version_number' => $version_number
+        ] );
 
         $stmt->setFetchMode(
                 PDO::FETCH_CLASS,
@@ -385,6 +386,26 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             'version_number' => $old_translation['version_number'],
             'time_to_edit'   => $old_translation['time_to_edit']
         ));
+    }
+
+    public function updateVersion( $old_translation ) {
+        $sql = "UPDATE segment_translation_versions
+                SET translation = :translation, time_to_edit = :time_to_edit
+                WHERE id_job = :id_job AND id_segment = :id_segment
+                AND version_number = :version_number " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql );
+
+        $stmt->execute( array(
+                'id_job'         => $old_translation['id_job'],
+                'id_segment'     => $old_translation['id_segment'] ,
+                'translation'    => $old_translation['translation'],
+                'version_number' => $old_translation['version_number'],
+                'time_to_edit'   => $old_translation['time_to_edit']
+        ));
+
+        return $stmt->rowCount() ;
     }
 
     private function insertVersionRecords($params) {

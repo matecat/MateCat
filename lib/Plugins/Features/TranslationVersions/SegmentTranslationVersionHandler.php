@@ -93,9 +93,30 @@ class SegmentTranslationVersionHandler {
             return false;
         }
 
-        $this->prepareDao();
 
         $new_translation['version_number'] += 1 ;
+
+        return $this->saveOrUpdateOldVersion( $old_translation, $new_translation );
+
+    }
+
+    /**
+     * In some cases, version 0 may already be there among saved_versions, because
+     * an issue for ReviewExtended has been saved on version 0.
+     *
+     * In any other case we expect the version record NOT to be there when we reach this point.
+     */
+
+    private function saveOrUpdateOldVersion( $old_translation, $new_translation) {
+        $this->prepareDao();
+
+        $version_record = $this->dao->getVersionNumberForTranslation(
+                $this->id_job, $this->id_segment, $old_translation['version_number']
+        );
+
+        if ( $version_record ) {
+            return $this->dao->updateVersion( $old_translation ) ;
+        }
 
         return $this->dao->saveVersion( $old_translation );
     }
