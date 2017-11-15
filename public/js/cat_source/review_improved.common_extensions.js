@@ -35,7 +35,10 @@ if ( ReviewImproved.enabled() ) {
             let fid = UI.getSegmentFileId(event.segment.el);
             let versions = [];
             SegmentActions.addTranslationIssuesToSegment(fid, sid, versions);
-        }
+        },
+        submitComment : function(id_segment, id_issue, data) {
+            return ReviewImproved.submitComment(id_segment, id_issue, data)
+        },
     });
 })(jQuery, window);
 }

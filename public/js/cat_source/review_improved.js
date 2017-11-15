@@ -61,18 +61,8 @@ if ( ReviewImproved.enabled() )
             });
         },
         submitComment : function(id_segment, id_issue, data) {
-            var replies_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
-                config.id_job, config.password,
-                id_segment,
-                id_issue
-            );
-
-            return $.ajax({
-                url: replies_path,
-                type: 'POST',
-                data : data
-            }).done( function( data ) {
+            return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
+                .done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
 
                 if( data.issue ) {

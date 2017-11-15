@@ -74,7 +74,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
                     id_issue : issue.id
                 })
             });
-        },
+        }
 
     });
 
