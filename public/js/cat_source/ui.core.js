@@ -840,9 +840,10 @@ UI = {
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
                 $('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
-            } else if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
-                UI.openSegment(UI.editarea);
             }
+            // else if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('#segment-' + UI.currentSegmentId).hasClass('opened'))) {
+            //     UI.openSegment(UI.editarea);
+            // }
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
 			    var next = UI.findNextSegment(UI.startSegmentId);
@@ -1530,9 +1531,9 @@ UI = {
 	 *
 	 * @returns {undefined}
 	 */
-	fillCurrentSegmentWarnings: function(warningDetails, global) {
+	fillCurrentSegmentWarnings: function(segment, warningDetails, global) {
 		if ( !global ) {
-            UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
+            UI.fillWarnings(segment, $.parseJSON(warningDetails.warnings));
 		}
 	},
 
@@ -1587,12 +1588,7 @@ UI = {
 
                 //check for errors
                 if (UI.globalWarnings) {
-
                     UI.renderQAPanel();
-
-                    if (openingSegment)
-                        UI.fillCurrentSegmentWarnings(data.details, true);
-
                 }
 
                 // check for messages
@@ -1726,14 +1722,13 @@ UI = {
 
 					}
                     else {
-                        UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+                        UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
                         UI.markTagMismatch(d.details);
                         delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
                         SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
                     }
 				}
-        $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
-        //if (LXQ.enabled()) UI.segmentLexiQA(segment);
+                $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');
 
@@ -2105,6 +2100,7 @@ UI = {
     getContribution : function(segment, next) {
         UI.blockButtons = false ;
         $( segment ).addClass('loaded');
+        this.segmentQA(segment);
         var deferred = new jQuery.Deferred() ;
         return deferred.resolve();
     },

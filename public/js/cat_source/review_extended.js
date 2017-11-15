@@ -84,6 +84,8 @@ if ( ReviewExtended.enabled() ) {
 
                 if (UI.currentSegment.data('modified')) {
                     SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
+                    SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+                    UI.currentSegment.data('modified', false);
                 } else {
                     if (goToNextNotApproved) {
                         UI.openNextTranslated();

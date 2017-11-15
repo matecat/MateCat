@@ -126,10 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-                    if ( !$( n ).hasClass( 'glossary-loaded' ) ) {
-                        UI.segmentQA( n );
-                    }
-
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
                         if ( d.errors[0].code == -1 ) {
                             UI.noGlossary = true;

@@ -73,7 +73,7 @@ $.extend(UI, {
         var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));
         if (currentSegment.isReadonly() && !segmentUnlocked) {
             UI.blockButtons = false ;
-            $( segment ).addClass('loaded');
+            SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
             var deferred = new jQuery.Deferred() ;
             return deferred.resolve();
             return;
