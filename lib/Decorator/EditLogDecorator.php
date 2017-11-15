@@ -52,7 +52,7 @@ class EditLogDecorator extends AbstractDecorator {
         $job_stats[ 'ANALYSIS_COMPLETE' ]     = ( @$project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats            = $job_stats;
 
-        $loggedUser = $controller->getLoggedUser();
+        $loggedUser = $controller->getUser();
 
         $this->template->extended_user = "";
         $this->template->logged_user   = "";

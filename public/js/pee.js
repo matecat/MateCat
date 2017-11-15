@@ -23,7 +23,7 @@
                 id: 1,
                 name: "Neural",
                 date: "2017-04",
-                text: "Introduzione Neural</br> 6 Aprile 2017",
+                text: "Neural introduction</br> 6 April 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "ar-SA"},
                     {l1: "en-GB",  l2: "zh-CN"},
@@ -46,7 +46,7 @@
                 id: 2,
                 name: "Neural",
                 date: "2017-04",
-                text: "Introduzione Neural</br> 16 Aprile 2017",
+                text: "Neural introduction</br> 16 April 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "it-IT"},
                 ]
@@ -55,7 +55,7 @@
                 id: 3,
                 name: "Neural",
                 date: "2017-04",
-                text: "Introduzione Neural</br> 27 Aprile 2017",
+                text: "Neural introduction</br> 27 April 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "sv-SE"},
                     {l1: "en-GB",  l2: "da-DK"},
@@ -77,7 +77,7 @@
                 id: 4,
                 name: "Neural",
                 date: "2017-07",
-                text: "Introduzione Neural</br> 14 Luglio 2017",
+                text: "Introduction Neural</br> 14 July 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "fi-FI"},
                     {l1: "en-GB",  l2: "hu-HU"},
@@ -128,8 +128,8 @@
             {
                 id: 5,
                 name: "Neural",
-                date: "2017-04",
-                text: "Introduzione Neural</br> 6 Settembre 2017",
+                date: "2017-09",
+                text: "Introduction Neural</br> 6 September 2017",
                 langsPairs: [
                     {l1: "en-GB",  l2: "eo-XN"},
                     {l1: "en-GB",  l2: "cy-GB"},
@@ -147,6 +147,46 @@
                     {l1: "en-GB",  l2: "so-SO"},
                     {l1: "en-GB",  l2: "ne-NP"},
                     {l1: "en-GB",  l2: "lo-LA"}
+                ]
+            },
+            {
+                id: 6,
+                name: "DeepL",
+                date: "2017-11",
+                text: "Introduction DeepL</br> 9 November 2017",
+                langsPairs: [
+                    {l1: "de-DE",  l2: "fr-BE"},
+                    {l1: "de-DE",  l2: "fr-FR"},
+                    {l1: "de-DE",  l2: "fr-CA"},
+                    {l1: "de-DE",  l2: "it-IT"},
+                    {l1: "de-DE",  l2: "nl-NL"},
+                    {l1: "de-DE",  l2: "nl-BE"},
+                    {l1: "de-DE",  l2: "pl-PL"},
+                    {l1: "de-CH",  l2: "fr-BE"},
+                    {l1: "de-CH",  l2: "fr-FR"},
+                    {l1: "de-CH",  l2: "fr-CA"},
+                    {l1: "de-CH",  l2: "it-IT"},
+                    {l1: "de-CH",  l2: "nl-NL"},
+                    {l1: "de-CH",  l2: "nl-BE"},
+                    {l1: "de-CH",  l2: "pl-PL"},
+                    {l1: "fr-FR",  l2: "it-IT"},
+                    {l1: "fr-FR",  l2: "nl-NL"},
+                    {l1: "fr-FR",  l2: "nl-BE"},
+                    {l1: "fr-FR",  l2: "pl-PL"},
+                    {l1: "fr-BE",  l2: "it-IT"},
+                    {l1: "fr-BE",  l2: "nl-NL"},
+                    {l1: "fr-BE",  l2: "nl-BE"},
+                    {l1: "fr-BE",  l2: "pl-PL"},
+                    {l1: "fr-CA",  l2: "it-IT"},
+                    {l1: "fr-CA",  l2: "nl-NL"},
+                    {l1: "fr-CA",  l2: "nl-BE"},
+                    {l1: "fr-CA",  l2: "pl-PL"},
+                    {l1: "it-IT",  l2: "nl-NL"},
+                    {l1: "it-IT",  l2: "nl-BE"},
+                    {l1: "it-IT",  l2: "pl-PL"},
+                    {l1: "nl-NL",  l2: "pl-PL"},
+                    {l1: "nl-BE",  l2: "pl-PL"},
+
                 ]
             }
             // ,

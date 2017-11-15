@@ -160,7 +160,7 @@ abstract class viewController extends controller implements IController {
     /**
      * Perform Authentication Requests and set incoming url
      */
-    protected function checkLoginRequiredAndRedirect() {
+    public function checkLoginRequiredAndRedirect() {
         if ( !$this->login_required ) {
             return true ;
         }
@@ -196,22 +196,6 @@ abstract class viewController extends controller implements IController {
      */
     public function isLoggedIn() {
         return $this->userIsLogged;
-    }
-
-    /**
-     * getLoginUserParams
-     *
-     * TODO: clarify. We check from session variables and then rely $this->logged_user ??
-     *
-     * @deprecated
-     *
-     * @return array()
-     */
-    public function getLoginUserParams() {
-        if ( $this->isLoggedIn() ) {
-            return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
-        }
-        return array( null, null );
     }
 
     /**
@@ -343,13 +327,6 @@ abstract class viewController extends controller implements IController {
      * @return mixed
      */
     abstract function setTemplateVars();
-
-    /**
-     * @return Users_UserStruct
-     */
-    public function getLoggedUser(){
-        return $this->logged_user;
-    }
 
     /**
      * @return string
