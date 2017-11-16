@@ -244,7 +244,7 @@ class ReviewVersionsDiff extends React.Component {
         if (this.props.diff && this.props.diff.length > 0) {
             return this.props.diff;
         } else {
-            return getDiffPatch(this.props.translation, this.props.previousVersion);
+            return getDiffPatch(this.props.previousVersion, this.props.translation);
         }
     }
 

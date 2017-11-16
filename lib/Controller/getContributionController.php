@@ -427,6 +427,7 @@ class getContributionController extends ajaxController {
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
