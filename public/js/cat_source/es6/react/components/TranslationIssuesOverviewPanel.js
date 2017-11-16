@@ -15,7 +15,9 @@ class TranslationIssuesOverviewPanel extends React.Component {
         }
 
     }
-    
+    closePanelClick(e, data) {
+        this.props.closePanel();
+    }
     // getInitialState() {
     //     return this.getStateFromSid( this.props.sid );
     // }

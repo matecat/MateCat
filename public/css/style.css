@@ -535,7 +535,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 }
 
 .sid .txt {
-    padding: 10px 0;
+    padding: 0px 0;
     background: #fff;
     margin: 12px 8px 0 8px;
 }
