@@ -101,7 +101,7 @@ class ReviewSidePanel extends React.Component{
         }
 
         return <div className={classes} id="review-side-panel">
-            <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
+            {/*<div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>*/}
             {innerPanel}
         </div>;
     }
