@@ -24,6 +24,22 @@
             -webkit-box-shadow: 0 1px 2px #DFDFDF;
             word-wrap: break-word;
             word-break: normal;
+            &.no-select {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .added {
+                background: #b0ffb3;
+                text-decoration: none;
+            }
+            .deleted {
+                background: #ffc7ca;
+                text-decoration: line-through;
+            }
         }
     }
     .error-list {
@@ -54,8 +70,13 @@
             &::selection {
                 background-color: #FFFF00;
             }
-            &.locked {
-
+            &.no-select {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
         }
 
