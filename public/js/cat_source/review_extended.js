@@ -37,6 +37,14 @@ if ( ReviewExtended.enabled() ) {
                     UI.getSegmentVersionsIssues(sid, fid);
                 });
             },
+
+            submitComment : function(id_segment, id_issue, data) {
+                return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
+                    .done( function( data ) {
+                        var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment));
+                        UI.getSegmentVersionsIssues(id_segment, fid);
+                    });
+            },
         });
 
 
@@ -84,6 +92,8 @@ if ( ReviewExtended.enabled() ) {
 
                 if (UI.currentSegment.data('modified')) {
                     SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
+                    SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+                    UI.currentSegment.data('modified', false);
                 } else {
                     if (goToNextNotApproved) {
                         UI.openNextTranslated();
@@ -103,7 +113,7 @@ if ( ReviewExtended.enabled() ) {
                     parsed.id_segment,
                     parsed.id_issue
                 );
-                var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
+                var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment));
                 $.ajax({
                     url: issue_path,
                     type: 'DELETE'
@@ -111,6 +121,10 @@ if ( ReviewExtended.enabled() ) {
                     UI.getSegmentVersionsIssues(parsed.id_segment, fid);
                 });
             },
+            submitComment : function(id_segment, id_issue, data) {
+                return ReviewExtended.submitComment(id_segment, id_issue, data)
+            },
+
 
         });
     })(Review, jQuery);

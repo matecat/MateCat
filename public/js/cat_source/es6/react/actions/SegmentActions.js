@@ -260,6 +260,10 @@ var SegmentActions = {
 
     deleteIssue: function (issue) {
         UI.deleteIssue(issue);
+    },
+
+    submitComment: function (sid, idIssue, data) {
+        return UI.submitComment(sid, idIssue, data);
     }
 
 

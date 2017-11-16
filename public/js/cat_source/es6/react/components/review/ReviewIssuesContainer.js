@@ -31,9 +31,9 @@ class ReviewIssuesContainer extends React.Component {
             var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
             this.setState({ issues: issues });
         } else {
-            this.state = {
+            this.setState({
                 issues : nextProps.issues
-            }
+            });
         }
 
     }

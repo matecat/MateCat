@@ -124,10 +124,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
     }
-    handleFail() {
-        genericErrorAlertMessage() ;
-        this.setState({ sendLabel : 'Send', sendDisabled : false });
-    }
+
     sendClick() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
@@ -140,7 +137,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
         };
 
         this.setState({ sendLabel : 'Sending', sendDisabled : true, rebutDisabled : true });
-        ReviewImproved
+        SegmentActions
             .submitComment( this.props.sid, this.props.issueId, data )
             .fail( this.handleFail );
 
@@ -211,7 +208,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
         if ( !this.state.replying ) {
             var undoRebutButton;
 
-            if( !config.isReview && this.state.undoRebutVisible ) {
+            if( !config.isReview && this.state.undoRebutVisible  && this.props.reviewType === "improved") {
                 var undoRebutButtonClasses = classnames({
                     'ui' : true,
                     'red' : true,
@@ -245,7 +242,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
             var rebutButton;
 
-            if ( !config.isReview && this.state.rebutVisible ) {
+            if ( !config.isReview && this.state.rebutVisible && this.props.reviewType === "improved") {
                 var rebutButtonClasses = classnames({
                     'ui' : true,
                     'red' : true,
