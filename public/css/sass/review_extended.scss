@@ -60,6 +60,9 @@
         }
 
         .review-version-wrapper {
+            &:nth-child(2) {
+                margin-top: 0;
+            }
             .review-version-header {
 
             }

@@ -3701,51 +3701,19 @@ section.modified.editor .status {
     margin-top: 5px;
 }
 
-.editarea .locked,
-.source .locked,
-.ice-locked .targetarea .locked{
-    color: #ddd !important;
-    font-size: 13px;
-    font-style: italic;
-    cursor: text !important;
-    display: inline-block;
-}
-
 .editarea .locked:hover,
 .source .locked:hover {
     cursor: pointer;
 }
 
-/*.source ::selection
-	{
-     color:#ff0000;
-     cursor: move !important;
-	}*/
-
-.editor .editarea .locked,
-.editor .source .locked,
-.editor .footer .locked {
+.editarea .locked,
+.source .locked,
+.ice-locked .targetarea .locked,
+.footer .locked,
+.splitArea .locked {
+    font-size: 15px;
     color: #767676;
     font-style: italic;
-    display: inline-block;
-}
-
-.editor .editarea .locked,
-.editor .source .locked,
-.splitArea .locked {
-    color: #767676 !important;
-    font-size: 13px;
-    font-style: italic;
-    margin-top: -2px;
-    height: 24px;
-    vertical-align: baseline;
-    border: 2px solid transparent;
-    display: inline-block;
-    line-height: 17px;
-}
-
-.editor .footer .locked {
-    color: #a8a8a8 !important;
 }
 
 .editarea .locked.mismatch,
@@ -3768,9 +3736,6 @@ section.modified.editor .status {
     border: 2px solid #7EB30C;
 }
 
-.editarea .locked {
-}
-
 .d-open {
     bottom: 20px !important;
 }
@@ -3779,12 +3744,6 @@ section.modified.editor .status {
     background-color: rgba(0, 0, 0, 0.9)
 }
 
-/*media query */
-
-/*@media screen and (max-width: 1580px){*/
-/*!*.buttons{margin:-15px 45px 0 0 !important;}*!*/
-/*.graysmall li{width:43%;}*/
-/*}*/
 @media screen and (min-width: 1600px) {
 
     .header-menu {
