@@ -108,11 +108,6 @@ class NewController extends ajaxController {
      */
     protected $projectManager ;
 
-    /**
-     * @var FeatureSet
-     */
-    protected $systemWideFeatures ;
-
     protected $postInput ;
 
     public function __construct() {
@@ -129,10 +124,8 @@ class NewController extends ajaxController {
             return -1;
         }
 
-        $this->systemWideFeatures = new FeatureSet();
-
         if ( $this->current_user ) {
-            $this->systemWideFeatures->loadFromUserEmail( $this->current_user->email ) ;
+            $this->featureSet->loadFromUserEmail( $this->current_user->email ) ;
         }
 
         $filterArgs = [
@@ -170,7 +163,7 @@ class NewController extends ajaxController {
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
         ];
 
-        $filterArgs = $this->systemWideFeatures->filter('filterNewProjectInputFilters', $filterArgs ) ;
+        $filterArgs = $this->featureSet->filter('filterNewProjectInputFilters', $filterArgs ) ;
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -302,7 +295,7 @@ class NewController extends ajaxController {
             $this->projectFeatures[] = $feature;
         }
 
-        $this->projectFeatures = $this->systemWideFeatures->filter(
+        $this->projectFeatures = $this->featureSet->filter(
                 'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput
         ) ;
 
@@ -410,7 +403,7 @@ class NewController extends ajaxController {
             $conversionHandler->setCookieDir( $cookieDir );
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
-            $conversionHandler->setFeatures( $this->systemWideFeatures );
+            $conversionHandler->setFeatures( $this->featureSet );
 
             $status = array();
 
@@ -507,7 +500,7 @@ class NewController extends ajaxController {
                 $converter->cookieDir   = $cookieDir;
                 $converter->source_lang = $this->source_lang;
                 $converter->target_lang = $this->target_lang;
-                $converter->featureSet  = $this->systemWideFeatures;
+                $converter->featureSet  = $this->featureSet;
                 $converter->doAction();
 
                 $status = $errors = $converter->checkResult();
@@ -800,7 +793,7 @@ class NewController extends ajaxController {
             $this->metadata[ 'project_completion' ] = $this->project_completion;
         }
 
-        $this->metadata = $this->systemWideFeatures->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
 
     }
 

@@ -26,8 +26,6 @@ class getContributionController extends ajaxController {
      */
     private $jobData;
 
-    private $featureSet;
-
     private $__postInput = array();
 
     public function __construct() {
@@ -65,8 +63,6 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
-
-        $this->featureSet = new FeatureSet();
 
     }
 
@@ -431,6 +427,7 @@ class getContributionController extends ajaxController {
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 

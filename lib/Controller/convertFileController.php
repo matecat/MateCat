@@ -19,11 +19,6 @@ class convertFileController extends ajaxController {
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
     protected $convertZipFile = true;
 
-    /**
-     * @var FeatureSet
-     */
-    public $featureSet;
-
     public function __construct() {
 
         parent::__construct();
@@ -63,7 +58,6 @@ class convertFileController extends ajaxController {
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
         $this->checkLogin();
-        $this->featureSet = new FeatureSet() ;
 
     }
 
