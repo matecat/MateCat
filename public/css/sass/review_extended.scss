@@ -1,10 +1,10 @@
+
 .tab.review {
     .track-changes {
         .segment-diff-container::selection, span::selection, br::selection {
-            -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             user-select: none;
         }
         .segment-diff-container {
@@ -40,19 +40,8 @@
 
 #review-side-panel.review-extended-panel {
     .review-issues-overview-panel {
-        padding: 25px 10px 40px;
         .segment-diff-container {
-            padding: 4px;
-            width: 96%;
-            background: #efefef;
-            outline: 0;
-            font-size: 1em;
-            color: #000;
-            margin: 10px 0;
-            border: 1px solid #727272;
-            box-shadow: 0 1px 2px #ccc;
-            -webkit-box-shadow: 0 1px 2px #ccc;
-            word-break: normal;
+
 
             .added {
                 background: #b0ffb3;
@@ -66,36 +55,19 @@
                 background-color: #FFFF00;
             }
             &.locked {
-                -webkit-user-select: none; /* Safari */
-                -moz-user-select: none; /* Firefox */
-                -ms-user-select: none; /* Internet Explorer/Edge */
-                user-select: none;
+
             }
         }
 
         .review-version-wrapper {
-            border-top: 0;
-            margin-top: 13px;
-            background: #ebebeb;
-            padding: 15px;
-            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             .review-version-header {
 
             }
             .collapsable {
-                .muted-text-box {
-                    background: rgba(124, 197, 118, 0.36);
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    -khtml-user-select: none;
-                    -moz-user-select: none;
-                    -ms-user-select: none;
-                    user-select: none;
+                .muted {
                 }
                 .review-issues-container {
-                    background: white;
-                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                    padding: 15px;
+
                 }
             }
         }
