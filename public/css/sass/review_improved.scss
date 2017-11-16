@@ -265,7 +265,6 @@ section {
 }
 
 .review-issues-overview-panel {
-    padding: 10px 0 40px;
     .review-original-target-wrapper {
         background: #eff2f5;
         position: fixed;
@@ -485,7 +484,7 @@ section:not(.opened) .revise-button-counter {
         }
     }
     &:nth-child(2) {
-        margin-top: 93px;
+        margin-top: 103px;
     }
 }
 
@@ -537,7 +536,7 @@ span.review-issue-label {
 
 .review-issue-date {
     float: right;
-    margin: 10px 0 5px;
+    margin: 10px 0 0px;
     font-size: 12px;
 }
 
