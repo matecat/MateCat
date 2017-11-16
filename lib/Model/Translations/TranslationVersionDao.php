@@ -237,6 +237,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $sql = "SELECT * FROM (
 
+    -- Query for data from current version
+
     SELECT
 
     0 as id,
@@ -276,6 +278,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     ) t1
 
   UNION SELECT * FROM (
+
+    -- Query for data from previous versions
 
      SELECT
 

@@ -21,11 +21,6 @@ class TeamsProjectsController extends KleinController {
 
     protected $project;
 
-    /**
-     * @var FeatureSet
-     */
-    protected $featureSet;
-
     public function update() {
 
         $this->_appendSingleProjectTeamValidators()->validateRequest();
@@ -71,7 +66,6 @@ class TeamsProjectsController extends KleinController {
 
     public function getAll(){
 
-        $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->getUser()->email ) ;
 
         $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );

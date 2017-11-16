@@ -12,7 +12,7 @@ use AbstractControllers\IController;
  * Time: 18.56
  *
  */
-abstract class viewController extends controller implements IController {
+abstract class viewController extends controller {
 
     /**
      * Template Engine Instance
@@ -141,8 +141,11 @@ abstract class viewController extends controller implements IController {
     public function __construct() {
 
 	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
-		    exit;
+	        $controllerInstance = new CustomErrorPage();
+	        $controllerInstance->setTemplate( "badConfiguration.html" );
+	        $controllerInstance->setCode( 503 );
+	        $controllerInstance->doAction();
+            die(); // do not complete klein response, set 404 header in render404 instead of 200
 	    }
 
         //SESSION ENABLED
@@ -154,6 +157,8 @@ abstract class viewController extends controller implements IController {
         $this->setBrowserSupport();
         $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
+
+        $this->featureSet = new FeatureSet();
 
     }
 
@@ -242,8 +247,7 @@ abstract class viewController extends controller implements IController {
 
         $this->setTemplateVars();
 
-        $featureSet = new FeatureSet();
-        $featureSet->run('appendDecorators', $this, $this->template);
+        $this->featureSet->run('appendDecorators', $this, $this->template);
 
         $this->setTemplateFinalVars();
 
@@ -315,7 +319,7 @@ abstract class viewController extends controller implements IController {
      * Set the variables for the browser support
      *
      */
-    private function setBrowserSupport() {
+    protected function setBrowserSupport() {
         $browser_info = $this->getBrowser();
         $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
         $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
@@ -346,21 +350,31 @@ abstract class viewController extends controller implements IController {
         return $is_revision_url;
     }
 
-    protected function render404() {
-        header( "HTTP/1.0 404 Not Found" );
-        $this->makeTemplate('404.html');
+    protected function render404( $customTemplate = '404.html' ) {
+        $this->renderCustomHTTP( $customTemplate, 404 );
+    }
+
+    protected function renderCustomHTTP( $customTemplate, $httpCode ){
+        $status = new \Klein\HttpStatus( $httpCode );
+        header( "HTTP/1.0 " . $status->getFormattedString() );
+        $this->makeTemplate( $customTemplate );
         $this->finalize();
+        die();
     }
 
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param $skeleton_file
-     *
+     * @param  PHPTAL|string $skeleton_file
      */
     protected function makeTemplate( $skeleton_file ) {
         try {
-            $this->template                       = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+
+            $this->template = $skeleton_file;
+            if( !$this->template instanceof PHPTAL ) {
+                $this->template                   = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            }
+
             $this->template->basepath             = INIT::$BASEURL;
             $this->template->hostpath             = INIT::$HTTPHOST;
             $this->template->supportedBrowser     = $this->supportedBrowser;

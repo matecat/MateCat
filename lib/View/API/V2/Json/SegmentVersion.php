@@ -40,38 +40,39 @@ class SegmentVersion {
 
     protected function renderItemsWithIssues() {
         $out = [] ;
-        $subset = [] ;
-        $current_id = null;
+        $issuesSubset = [] ;
+        $commentsSubset = [] ;
+
+        $versionId = null;
         $version = null ;
 
         $issues_renderer = new SegmentTranslationIssue();
 
         foreach($this->data as $record) {
-            if ( !is_null( $current_id ) && $current_id != $record->id ) {
-                if ( !empty( $subset ) ) {
+            if ( !is_null( $versionId ) && $versionId != $record->id ) {
+
+                if ( !empty( $issuesSubset ) ) {
+                    // attach issues to version
                     $version['issues'] = array_map(function( $item ) use ($issues_renderer) {
                         return $issues_renderer->renderItem( $item ) ;
-                    }, $subset );
-
+                    }, $issuesSubset );
                 }
+
                 $out[]  = $version ;
-                $subset = [];
+
+                $issuesSubset = [];
             }
 
             $version = $this->renderItem( $record ) ;
+
             $version['issues'] = [];
-//            $version['diff'] = [
-//                [0,"||| |||"],
-//                [-1," Prova"],
-//                [0," UNTRANSLATED_CONTENT_START&lt;g id=\"1\"&gt;ci sono innumerevoli&lt;/g&gt;&lt;g id=\"2\"&gt; variazioni &lt;g id=\"3\"&gt;passaggi&lt;/g&gt; il &lt;g id=\"4\"&gt;Lorem Ipsum&lt;/g&gt;, &lt;g id=\"5\"&gt;ma la maggior parte &lt;/g&gt;&lt;/g&gt;||| ||| UNTRANSLATED_CONTENT_END"]
-//            ] ;
 
              if ( !isset( $version['diff'] ) ) {
                  $version['diff'] = json_decode( $record->raw_diff, true );
              }
 
             if ( !is_null($record->qa_id_segment )) {
-                $subset[] = new EntryStruct([
+                $issuesSubset[] = new EntryStruct([
                      'id'                  => $record->qa_id,
                      'id_segment'          => $record->qa_id_segment,
                      'id_job'              => $record->qa_id_job,
@@ -91,14 +92,13 @@ class SegmentVersion {
                 ]) ;
             }
 
-            $current_id = $record->id ;
+            $versionId = $record->id ;
         }
 
-
-        if ( !empty( $subset ) ) {
+        if ( !empty( $issuesSubset ) ) {
             $version['issues'] = array_map(function( $item ) use ($issues_renderer) {
                 return $issues_renderer->renderItem( $item ) ;
-            }, $subset );
+            }, $issuesSubset );
         }
 
         $out[] = $version ;

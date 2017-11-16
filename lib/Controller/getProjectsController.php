@@ -62,11 +62,6 @@ class getProjectsController extends ajaxController {
 
     private $no_assignee ;
 
-    /**
-     * @var FeatureSet
-     */
-    private $featureSet;
-
     public function __construct() {
 
         //SESSION ENABLED
@@ -131,7 +126,6 @@ class getProjectsController extends ajaxController {
             return;
         }
 
-        $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
         try {

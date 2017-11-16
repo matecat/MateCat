@@ -10,6 +10,7 @@
 namespace API\V2\Validators;
 
 
+use AbstractControllers\IController;
 use API\V2\KleinController;
 use Exceptions\NotFoundError;
 use Utils;
@@ -21,9 +22,15 @@ class WhitelistAccessValidator extends Base {
      */
     protected $controller;
 
-    public function __construct( KleinController $controller ) {
+    public function __construct( IController $controller ) {
 
-        parent::__construct( $controller->getRequest() );
+        if( method_exists( $controller, 'getRequest' ) ){
+            /**
+             * @var $controller KleinController
+             */
+            parent::__construct( $controller->getRequest() );
+        }
+
         $this->controller = $controller;
 
     }

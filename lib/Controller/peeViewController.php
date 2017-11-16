@@ -1,6 +1,7 @@
 <?php
 
 use API\App\Json\PeeTableData;
+use API\V2\Validators\WhitelistAccessValidator;
 
 class peeViewController extends viewController {
 
@@ -26,6 +27,8 @@ class peeViewController extends viewController {
     }
 
     public function doAction() {
+
+        ( new WhitelistAccessValidator( $this ) )->validate();
 
         $languageStats = ( new LanguageStats_LanguageStatsDAO() )->getLanguageStats( null );
         $this->snapshots = ( new LanguageStats_LanguageStatsDAO() )->getSnapshotDates();
