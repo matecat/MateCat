@@ -109,7 +109,6 @@ class analyzeOldController extends viewController {
 
 
     public function doAction() {
-
         $this->features->run('beginDoAction', $this, array(
                 'project' => $this->project,  'page_type' => $this->page_type
         ));
