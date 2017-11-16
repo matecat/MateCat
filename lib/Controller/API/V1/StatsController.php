@@ -34,9 +34,9 @@ class StatsController extends KleinController {
 
         $response = array( 'stats' => $job_stats );
 
-        $featureSet = new \FeatureSet();
-        $featureSet->loadForProject( $job->getProject() )  ;
-        $response = $featureSet->filter('filterStatsControllerResponse', $response, array(
+        $this->featureSet = new \FeatureSet();
+        $this->featureSet->loadForProject( $job->getProject() )  ;
+        $response = $this->featureSet->filter('filterStatsControllerResponse', $response, array(
             'chunk' => $job ) );
 
         $this->response->json( $response ) ;

@@ -7,6 +7,7 @@ use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use FeatureSet;
 use Users_UserDao;
 
 abstract class KleinController implements IController {
@@ -49,6 +50,29 @@ abstract class KleinController implements IController {
     public $params;
 
     /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet() {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featuresSet ) {
+        $this->featureSet = $featuresSet;
+
+        return $this;
+    }
+
+    /**
      * @return mixed
      */
     public function getParams() {
@@ -65,7 +89,7 @@ abstract class KleinController implements IController {
         $paramsGet = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
-
+        $this->featureSet = new FeatureSet();
         $this->afterConstruct();
 
     }

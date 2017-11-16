@@ -1,5 +1,6 @@
 <?php
 use AbstractControllers\IController;
+use API\V2\Exceptions\AuthenticationError;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Features\Dqf;
@@ -163,6 +164,8 @@ class FeatureSet {
                     } catch ( ValidationError $e ) {
                         throw $e ;
                     } catch ( Exceptions_RecordNotFound $e ) {
+                        throw $e ;
+                    } catch ( AuthenticationError $e ) {
                         throw $e ;
                     } catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );

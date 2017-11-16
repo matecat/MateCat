@@ -14,11 +14,6 @@ class engineController extends ajaxController {
     private $name;
     private $engineData;
 
-    /**
-     * @var Features
-     */
-    private $feature_set;
-
     private static $allowed_actions           = [
             'add', 'delete', 'execute'
     ];
@@ -80,8 +75,6 @@ class engineController extends ajaxController {
                     'message' => "Login is required to perform this action"
             ];
         }
-
-        $this->feature_set = new FeatureSet();
 
     }
 
@@ -281,7 +274,7 @@ class engineController extends ajaxController {
 
             default:
 
-                $validEngine = $newEngineStruct = $this->feature_set->filter( 'buildNewEngineStruct', false, (object)[
+                $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
                         'providerName' => $this->provider,
                         'logged_user'  => $this->logged_user,
                         'engineData'   => $this->engineData
@@ -296,7 +289,7 @@ class engineController extends ajaxController {
             return;
         }
 
-        $engineList = $this->feature_set->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
+        $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
 
         $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
@@ -307,7 +300,7 @@ class engineController extends ajaxController {
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
 
-            $this->result[ 'errors' ][] = $this->feature_set->filter(
+            $this->result[ 'errors' ][] = $this->featureSet->filter(
                     'engineCreationFailed',
                     [ 'code' => -9, 'message' => "Creation failed. Generic error" ],
                     $newEngineStruct->class_load
@@ -391,7 +384,7 @@ class engineController extends ajaxController {
         } else {
 
             try {
-                $this->feature_set->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->logged_user );
+                $this->featureSet->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->logged_user );
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
 
@@ -429,7 +422,7 @@ class engineController extends ajaxController {
             return;
         }
 
-        $this->feature_set->run( 'postEngineDeletion', $result );
+        $this->featureSet->run( 'postEngineDeletion', $result );
 
         $this->result[ 'data' ][ 'id' ] = $result->id;
 

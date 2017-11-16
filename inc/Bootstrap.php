@@ -16,7 +16,7 @@ class Bootstrap {
     /**
      * @var FeatureSet
      */
-    private  $mandatoryFeatureSet ;
+    private $autoLoadedFeatureSet ;
 
     public static function start() {
         new self();
@@ -147,11 +147,11 @@ class Bootstrap {
     }
 
     private function initMandatoryPlugins() {
-        $this->mandatoryFeatureSet = new FeatureSet();
+        $this->autoLoadedFeatureSet = new FeatureSet();
     }
 
     private function notifyBootCompleted() {
-        $this->mandatoryFeatureSet->run('bootstrapCompleted');
+        $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
     public static function fatalErrorHandler() {
