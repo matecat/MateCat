@@ -55,10 +55,13 @@
 }
 
 #review-side-panel.review-extended-panel {
+    h4 {
+        margin: 0px 0 0 15px;
+    }
     .review-issues-overview-panel {
         .segment-diff-container {
-
-
+            padding: 10px 15px;
+            border-radius: 0;
             .added {
                 background: #b0ffb3;
                 text-decoration: none;
