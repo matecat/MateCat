@@ -161,10 +161,11 @@ class SegmentFooterTabRevise2 extends React.Component {
             <div className="track-changes">
                 <h3>Revision (track changes)</h3>
                 <ReviewVersionDiff
-                    previousVersion={this.state.translation}
+                    previousVersion={this.originalTranslation}
                     translation={this.state.translation}
                     segment={this.props.segment}
                     decodeTextFn={this.props.decodeTextFn}
+                    selectable={false}
                 />
             </div>
         </div>

@@ -72,10 +72,10 @@ class ReviewTranslationDiffVersion extends React.Component {
                 </div>
 
                 <div className="collapsable">
-                    <h4> Target </h4>
+                    <h4> Translation </h4>
                     <div ref={(elem)=>this.highlightArea=elem} className="ui ignore message muted issueHighlightArea"
                          dangerouslySetInnerHTML={this.translationMarkup()} />
-                    <h4> Diff </h4>
+                    <h4> Changes from previous version </h4>
                     <ReviewVersionDiff
                         sid={this.props.sid}
                         textSelectedFn={this.textSelected.bind(this)}
