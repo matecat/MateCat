@@ -8,7 +8,9 @@ if (ReviewExtended.enabled()) {
     });
 
     $(document).on('translation:change', function(e, data) {
-        UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
+        if (data.sid === UI.getSegmentId(UI.currentSegment)) {
+            UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
+        }
     });
 
 }
