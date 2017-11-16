@@ -110,7 +110,7 @@ class loadTMXController extends ajaxController {
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->addTmxInMyMemory();
 
-                    ( new \FeatureSet() )->run( 'postPushTMX', $fileInfo, $this->logged_user, $this->TMService->getTMKey() );
+                    $this->featureSet->run( 'postPushTMX', $fileInfo, $this->logged_user, $this->TMService->getTMKey() );
 
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key

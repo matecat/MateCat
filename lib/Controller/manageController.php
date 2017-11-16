@@ -6,8 +6,6 @@ class manageController extends viewController {
 
 	public $notAllCancelled = 0;
 
-    protected $featureSet ;
-
     protected $_outsource_login_API = '//signin.translated.net/';
 
     protected $login_required = true ;
@@ -19,7 +17,6 @@ class manageController extends viewController {
 
 		$this->lang_handler = Langs_Languages::getInstance();
 
-        $this->featureSet = new FeatureSet() ;
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 	}
 

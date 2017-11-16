@@ -14,9 +14,6 @@ class getWarningController extends ajaxController {
      */
     private $chunk ;
 
-    /** @var FeatureSet */
-    private $feature_set ;
-
     public function __construct() {
 
         parent::__construct();
@@ -115,8 +112,7 @@ class getWarningController extends ajaxController {
     }
 
     private function loadFeatures() {
-        $this->feature_set = new FeatureSet() ;
-        $this->feature_set->loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project ) ;
     }
 
     /**
@@ -205,7 +201,7 @@ class getWarningController extends ajaxController {
     private function invokeGlobalWarningsOnFeatures() {
         $data = array( );
 
-        $data = $this->feature_set->filter( 'filterGlobalWarnings', $data, array(
+        $data = $this->featureSet->filter( 'filterGlobalWarnings', $data, array(
                 'chunk'       => $this->chunk
         ) );
 
@@ -215,7 +211,7 @@ class getWarningController extends ajaxController {
     private function invokeLocalWarningsOnFeatures() {
         $data = array( );
 
-        $data = $this->feature_set->filter( 'filterSegmentWarnings', $data, array(
+        $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, array(
                 'src_content' => $this->__postInput->src_content,
                 'trg_content' => $this->__postInput->trg_content,
                 'project'     => $this->project,

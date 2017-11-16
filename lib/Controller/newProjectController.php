@@ -19,11 +19,6 @@ class newProjectController extends viewController {
 
     private $keyList = array();
 
-    /**
-     * @var FeatureSet
-     */
-    private $featureSet ;
-
     public function __construct() {
 
         parent::__construct();
@@ -40,8 +35,6 @@ class newProjectController extends viewController {
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
-
-        $this->featureSet = new FeatureSet() ;
 
     }
 

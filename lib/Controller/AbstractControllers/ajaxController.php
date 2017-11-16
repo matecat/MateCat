@@ -42,6 +42,9 @@ abstract class ajaxController extends controller {
 			$this->finalize();
 			exit;
 		}
+
+		$this->featureSet = new FeatureSet();
+
     }
 
     /**

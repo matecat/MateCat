@@ -9,7 +9,6 @@ use ActivityLog\ActivityLogStruct;
  */
 class editlogController extends viewController {
 
-    protected $featureSet;
     protected $project;
     private   $jid      = "";
     private   $password = "";
@@ -44,7 +43,6 @@ class editlogController extends viewController {
 
         $this->project    = Projects_ProjectDao::findByJobId( $this->jid );
 
-        $this->featureSet = new FeatureSet() ;
         $this->featureSet->loadForProject( $this->project ) ;
 
     }

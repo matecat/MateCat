@@ -42,10 +42,9 @@ class CompletionEventController extends BaseKleinViewController {
         $project = $this->validator->getChunk()->getProject() ;
         $undoable = true ;
 
-        $featureSet = new FeatureSet();
-        $featureSet->loadForProject( $project );
+        $this->featureSet->loadForProject( $project );
 
-        $undoable = $featureSet->filter('filterIsChunkCompletionUndoable', $undoable, $project,
+        $undoable = $this->featureSet->filter('filterIsChunkCompletionUndoable', $undoable, $project,
                 $this->validator->getChunk() );
 
         if ( $undoable ) {

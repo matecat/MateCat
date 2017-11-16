@@ -44,11 +44,6 @@ class analyzeOldController extends viewController {
     private $chunk ;
 
     /**
-     * @var FeatureSet
-     */
-    private $features ;
-
-    /**
      * @var bool
      */
     private $project_not_found = false;
@@ -99,17 +94,16 @@ class analyzeOldController extends viewController {
             $this->page_type = 'project_analysis';
         }
 
-        $this->features = new FeatureSet();
-
         if ( $this->project ) {
-            $this->features->loadForProject( $this->project );
+            $this->featureSet->loadForProject( $this->project );
         }
 
     }
 
 
     public function doAction() {
-        $this->features->run('beginDoAction', $this, array(
+
+        $this->featureSet->run('beginDoAction', $this, array(
                 'project' => $this->project,  'page_type' => $this->page_type
         ));
 
@@ -176,7 +170,7 @@ class analyzeOldController extends viewController {
         $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
         $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->enable_outsource           = $this->features->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
+        $this->template->enable_outsource           = $this->featureSet->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
 
         $this->template->outsource_service_login    = $this->_outsource_login_API ;
 

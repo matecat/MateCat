@@ -15,7 +15,7 @@ class ActivityLogDecorator {
 
         $this->controller = $controller;
         $this->template = $template;
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = $controller->getFeatureSet();
 
     }
 
