@@ -1,10 +1,10 @@
+
 .tab.review {
     .track-changes {
         .segment-diff-container::selection, span::selection, br::selection {
-            -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             user-select: none;
         }
         .segment-diff-container {
@@ -38,6 +38,8 @@
 
 }
 
+/*
+
 #review-side-panel.review-extended-panel {
     .review-issues-overview-panel {
         padding: 25px 10px 40px;
@@ -66,9 +68,9 @@
                 background-color: #FFFF00;
             }
             &.locked {
-                -webkit-user-select: none; /* Safari */
-                -moz-user-select: none; /* Firefox */
-                -ms-user-select: none; /* Internet Explorer/Edge */
+                -webkit-user-select: none; !* Safari *!
+                -moz-user-select: none; !* Firefox *!
+                -ms-user-select: none; !* Internet Explorer/Edge *!
                 user-select: none;
             }
         }
@@ -83,8 +85,7 @@
 
             }
             .collapsable {
-                .muted-text-box {
-                    background: rgba(124, 197, 118, 0.36);
+                .muted {
                     -webkit-touch-callout: none;
                     -webkit-user-select: none;
                     -khtml-user-select: none;
@@ -100,4 +101,4 @@
             }
         }
     }
-}
+}*/

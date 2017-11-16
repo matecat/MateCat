@@ -161,14 +161,14 @@ section.reviewImproved.opened .textarea-container {
 }
 
 .fx:after {
-      position: absolute;
+    position: absolute;
     content: "";
     width: 9px;
     right: 0;
     top: 0;
-    height: 29px;
+    height: 33px;
     background: 
-    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    repeating-linear-gradient( 135deg, transparent, transparent 8px, #fff 8px, #fff 12px ),
     linear-gradient( to bottom, #7cc576, #7cc576  )
 }
 
@@ -182,9 +182,9 @@ section.reviewImproved.opened .textarea-container {
     width: 9px;
     right: 0;
     top: 0;
-    height: 29px;
+    height: 33px;
     background: 
-    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    repeating-linear-gradient( 135deg, transparent, transparent 8px, #fff 8px, #fff 12px ),
     linear-gradient( to bottom, #dc2e34, #dc2e34  )
 }
 
@@ -242,37 +242,52 @@ section {
 }
 
 #review-side-panel {
-    background-color: #fff;
+    background-color: #ffffff;
     height: 100%;
     position: fixed;
     top: 0;
     right: 0;
     width: 22%;
     z-index: 1;
-    min-width:215px;
+    min-width: 215px;
     margin-top: 49px;
-    text-align: left ;
-    overflow: scroll; 
-
+    text-align: left;
+    overflow: scroll;
     .muted-text-box {
-        padding: 4px;
-        width: 96%;
-        background: #efefef;
-        border-bottom: 1px solid #ccc;
+        width: 100%;
         outline: 0;
-        font-size: 1em;
-        color: #000;
-        margin: 10px 0;
-        border: 1px solid #727272;
-        box-shadow: 0 1px 2px #ccc;
-        -webkit-box-shadow: 0 1px 2px #ccc;
-        word-break: normal;
+        border-radius: 0 !important;
+        margin-top: 0 !important;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
     }
-
 }
 
 .review-issues-overview-panel {
-    padding: 10px 10px 40px 10px;
+    padding: 10px 0 40px;
+    .review-original-target-wrapper {
+        background: #eff2f5;
+        position: fixed;
+        width: 22%;
+        padding: 15px;
+        margin-bottom: 100px;
+        z-index: 1;
+        box-sizing: border-box;
+        top: 48px;
+        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+        h3 {
+            padding-left: 15px;
+        }
+        .ui.ignored.message {
+            width: 100%;
+            background: #ecf0f5;
+            box-sizing: border-box;
+            padding: 10px 15px;
+            margin-top: 0;
+            border-radius: 0;
+        }
+    }
 }
 
 .review-current-version-container {
@@ -286,8 +301,12 @@ section {
 }
 
 .review-issue-comment-reply textarea {
-    width: 95%;
-    margin-top: 10px;
+    width: 100%;
+    margin-top: 5px;
+    box-sizing: border-box;
+    box-shadow: inset 0 1px 3px #ddd;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    padding: 10px 10px 0;
 }
 
 .review-previous-versions-wrapper {
@@ -312,29 +331,24 @@ section {
   font-weight: bold;
   text-align: center;
   cursor: pointer;
+    z-index: 2;
   &:hover {
     background-color: #666;
   }
 }
-/*
-.review-version-wrapper .collapsed .collapsable {
-    display: none; 
-}
-*/
 
 .review-track-changes-toggle {
-    position: absolute;
-    right: 4%;
-    border: 1px solid #727272;
     color: #333;
     font-size: 14px;
     background: #fff;
     padding: 2px 4px;
     text-decoration: none !important;
-    margin-top: -11px;
-    border-radius: 0px 0px 0px 4px;
-    -webkit-box-shadow: inset 0px 1px 2px #666;
-    box-shadow: inset 0px 1px 2px #666;
+    text-align: right;
+    display: inline-block;
+    position: relative;
+    top: 11px;
+    float: right;
+    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.22) inset, 0 0 0 0 transparent;
 }
 
 .review-version-wrapper .collapsable .muted-text-box {
@@ -342,7 +356,26 @@ section {
 }
 
 .review-issues-container {
-    margin-top: 23px;
+    background: #ffffff;
+    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.22) inset, 0px 0px 0px 0px transparent;
+    .review-issue-detail {
+        overflow: hidden;
+        padding: 10px 15px;
+        width: 100%;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        h4 {
+            float:left;
+        }
+        &:hover {
+            box-shadow: inset 3px 0 0 yellow;
+        }
+    }
+
+    .review-no-issues {
+        padding: 10px 15px;
+    }
 }
 
 .segment-side-buttons .revise-button {
@@ -411,20 +444,49 @@ section:not(.opened) .revise-button-counter {
     top:2px;
 }
 
-.review-version-wrapper {
-    border-top: 1px solid #ccc;
-    margin-top: 20px;
+.review-original-target-wrapper {
+    background: #d6ffe1;
+    position: fixed;
+    width: 22%;
+    padding: 15px;
+    margin-bottom: 100px;
 }
 
+.review-version-wrapper {
+    background: #f8f8f9;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    padding: 15px;
+    .review-translation-version {
+        /*box-sizing: border-box;*/
+        .review-version-header {
+            width: 100%;
+            padding-left: 15px;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .collapsable {
+            .issueHighlightArea {
+                padding: 10px 15px;
+            }
 
+            .muted-text-box {
+                
+            }
+        }
+    }
+    &:nth-child(2) {
+        margin-top: 93px;
+    }
+}
 
 .review-triangle {
     display:none;
     border-top: 10px solid #f7f7f7;
     border-left: 12px solid transparent;
-    -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
-    filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
-        margin-left: 8px;
+    -webkit-filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.2));
+        margin-left: -10px;
     margin-top: 10px;
 }
 
@@ -442,15 +504,12 @@ section:not(.opened) .revise-button-counter {
 }
 
 #review-side-panel h3 {
-    margin: 10px 0 5px;
+    margin-bottom: 10px;
+    display: inline-block;
 }
 
 #review-side-panel h4 {
     margin: 10px 0 0;
-}
-
-.review-issue-detail h4 {
-    float:left;
 }
 
 span.review-issue-label {
@@ -473,21 +532,8 @@ span.review-issue-label {
     font-size: 12px;
 }
 
-.review-issue-detail {
-    margin: 0 auto;
-    overflow: hidden;
-    border-bottom: 1px solid #f4f4f4;
-    padding: 0px 0 10px 0;
-    margin-left: -10px;
-    padding-left: 15px;
-}
-
 .segment-side-buttons .txt {
     margin: -10px auto 0;
-}
-
-.review-issue-detail:hover {
-    box-shadow: inset 3px 0px 0px yellow;
 }
 
 .review-issue-comment, .review-issue-comment-container {
@@ -495,6 +541,17 @@ span.review-issue-label {
     float: left;
     padding: 4px 0 0;
     font-size: 15px;
+    hr {
+        border-top: 1px dashed #dfdfdf;
+    }
+    .review-issue-comment-detail {
+        .review-issue-translator {
+            color: #b562ce;
+        }
+        .review-issue-revisor {
+            color: cadetblue;
+        }
+    }
 }
 
 a.cancel-project {
@@ -502,7 +559,7 @@ a.cancel-project {
     text-decoration: none;
     font-size: 13px;
     color: #999;
-    margin-top: -18px;
+    margin-top: -22px;
 }
 
 a.cancel-project:hover {
@@ -510,7 +567,7 @@ a.cancel-project:hover {
 }
 
 .review-issue-comment-buttons {
-    margin: 15px 0;
+    margin: 0;
 }
 
 .review-issue-selection-panel {
@@ -552,10 +609,8 @@ table.review-issue-category-list {
     margin-bottom: 70px;
 }
 
-.review-issue-detail:last-child {
-    border-bottom:0;
-}
 .review-track-changes-box {
+    padding: 10px 15px !important;
     .added {
         background: #b0ffb3;
         text-decoration: none;
@@ -594,10 +649,10 @@ text-indent: -10000px;
 display: inline-block;
 overflow: hidden;
 position: relative;
-margin: 0px 4px;
+margin: 0 4px;
 width: 7px;
 height: 8px;
-padding-top: 0px;
+padding-top: 0;
 }
 
 

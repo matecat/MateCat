@@ -407,6 +407,10 @@ button.ui-button-icon-only {
     width: 3.4em;
 }
 
+table .btn {
+    padding: 0px 20px;
+}
+
 button.ui-button-icons-only {
     width: 3.7em;
 }
@@ -1606,10 +1610,8 @@ h2.payoff {
     height: 35px !important;
     font-size: 1.1em;
     border: 0;
+    background: transparent;
 }
-
-/*.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}*/
-
 .cancel button:hover, .delete button:hover {
     background: #f26522;
     color: #fff;

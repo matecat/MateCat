@@ -1567,13 +1567,12 @@ body .footer.showMatches .sub-editor.open {
     position: absolute;
     bottom: -30px;
     right: -1px;
-    border-radius: 0px 0px 0px 4px;
+    border-radius: 0 0 0 4px;
     border: 1px solid #58595b;
     color: #fff;
     padding: 7px 4px 4px 4px;
     font-size: 12px;
     background: #09beec;
-    -webkit-box-shadow: inset 0px 2px 2px #f3f3f3;
 }
 
 .sub-editor.concordances .results {
@@ -2794,12 +2793,12 @@ body.rtl-target .editor .editarea span {
 }
 
 .wrap {
-    /*display: table;*/
     float: left;
     width: 99%;
     height: 100%;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     padding-top: 5px;
+    font-size: 16px;
 
 }
 
@@ -3199,17 +3198,16 @@ section.readonly:hover .ice-locked-label {
 
 /*status*/
 .status-container .status {
-    width: 11px;
+    width: 8px;
     display: block;
     position: absolute;
-    height: 101%;
-    padding: 0;
-    background: #dddedf;
     right: 0;
-    border-left: 1px solid #ccc;
-    margin: 0px 0px 0px 0 !important;
-    z-index: 0;
-    border-bottom: 1px solid #ccc
+    height: 98%;
+    padding-bottom: 7px;
+    background: #f5f5f5;
+    top: 3%;
+    margin: -6px 0 0 0 !important;
+    border-bottom: 0;
 }
 
 section.readonly .status-container a.status:hover,
@@ -4796,15 +4794,13 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr {
-
+    width: fit-content;
     color: #333;
     background: #fff;
-
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr:hover {
     background: #ededed;
-
 }
 
 .popup-addtm-tr .popup {

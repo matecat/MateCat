@@ -198,13 +198,13 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
         var commentLines = sortedComments.map(function(comment, index) {
             var source_page ; 
             if ( comment.source_page == '1' ) {
-                source_page = 'Translator' ; 
+                source_page = <strong className="review-issue-translator">Translator:</strong> ;
             } else {
-                source_page = 'Revisor'; 
+                source_page = <strong className="review-issue-revisor">Revisor:</strong>;
             }
 
             return <div key={comment.id} className="review-issue-comment-detail">
-                <strong>{source_page}:</strong> {comment.message}
+                {source_page} {comment.message}
             </div>;
         }); 
 
@@ -213,8 +213,10 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
             if( !config.isReview && this.state.undoRebutVisible ) {
                 var undoRebutButtonClasses = classnames({
-                    'mc-button' : true,
-                    'red-button' : true,
+                    'ui' : true,
+                    'red' : true,
+                    'button' : true,
+                    'small' : true,
                     'disabled' : this.state.undoRebutDisabled
                 });
 
@@ -227,15 +229,17 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
             terminal = <div className="review-issue-comment-buttons">
                 <div className="review-issue-comment-buttons-right">
                     {undoRebutButton}
-                    <a onClick={this.replyClick.bind(this)} className="mc-button blue-button">Reply</a>
+                    <a onClick={this.replyClick.bind(this)} className="ui primary button small">Reply</a>
                 </div>
             </div>;
         }
         else {
 
             var buttonClasses = classnames({
-                'mc-button' : true,
-                'blue-button' : true,
+                'ui' : true,
+                'primary' : true,
+                'button' : true,
+                'small' : true,
                 'disabled' : this.state.sendDisabled
             });
 
@@ -243,8 +247,10 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
             if ( !config.isReview && this.state.rebutVisible ) {
                 var rebutButtonClasses = classnames({
-                    'mc-button' : true,
-                    'red-button' : true,
+                    'ui' : true,
+                    'red' : true,
+                    'button' : true,
+                    'small' : true,
                     'disabled' : this.state.rebutDisabled
                 });
                 rebutButton =
@@ -256,26 +262,28 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
             terminal = <div className="review-issue-comment-reply">
                 <div className="review-issue-comment-reply-text">
 
-            <textarea data-minheight="40" data-maxheight="90"
-                className="mc-textinput mc-textarea mc-resizable-textarea"
-                placeholder="Write a comment..."
-                value={this.state.comment_text}
-                onChange={this.handleCommentChange.bind(this)} />
+                    <textarea data-minheight="40" data-maxheight="90"
+                        className="mc-textinput mc-textarea mc-resizable-textarea"
+                        placeholder="Write a comment..."
+                        value={this.state.comment_text}
+                        onChange={this.handleCommentChange.bind(this)} />
 
-            </div>
-            <div className="review-issue-comment-buttons">
-            <div className="review-issue-comment-buttons-right">
-            {rebutButton}
-            <a onClick={this.sendClick.bind(this)} className={buttonClasses}>{this.state.sendLabel}</a>
-            </div>
-            </div>
+                </div>
+
+                <div className="review-issue-comment-buttons">
+                    <div className="review-issue-comment-buttons-right">
+                        {rebutButton}
+                        <a onClick={this.sendClick.bind(this)} className={buttonClasses}>{this.state.sendLabel}</a>
+                    </div>
+                </div>
             </div>;
         }
 
         return <div onClick={this.handleRootClick} className="review-issue-comment-container" >
             <div className="review-issue-comment-entries">
-            {commentLines}
+                {commentLines}
             </div>
+            <hr/>
             {terminal}
         </div>; 
     }

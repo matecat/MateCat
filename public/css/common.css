@@ -3764,7 +3764,7 @@ float: left;
 .delete button:before {
     content: "\f014";
     font-size: 13px;
-      vertical-align: top;
+      vertical-align: middle;
 }
 
 .delete button.zip_row:before{

@@ -76,18 +76,19 @@ class ReviewTranslationVersion extends React.Component {
             <div className={cs} >
             <div className="review-version-header">
                 <h3>{versionLabel}</h3>
+                {trackChangesLink}
             </div>
 
             <div className="collapsable">
 
-                <div ref={(elem)=>this.highlightArea=elem} className="muted-text-box issueHighlightArea" style={styleForVersionText}
+                <div ref={(elem)=>this.highlightArea=elem} className="ui ignore message muted-text-box issueHighlightArea" style={styleForVersionText}
                 dangerouslySetInnerHTML={this.translationMarkup()} />
 
                 <div style={styleForTrackChanges}
-                className="muted-text-box review-track-changes-box"
+                className="ui ignore message muted-text-box review-track-changes-box"
                 dangerouslySetInnerHTML={this.getMarkupForTrackChanges()} />
 
-                {trackChangesLink}
+
 
                 <ReviewIssuesContainer 
                     issueMouseEnter={this.issueMouseEnter.bind(this)}

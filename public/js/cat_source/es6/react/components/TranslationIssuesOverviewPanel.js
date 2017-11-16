@@ -176,7 +176,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                 { this.props.reviewType === "improved" ? (
                     <div className="review-original-target-wrapper sidebar-block">
                         <h3>Original target</h3>
-                        <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
+                        <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
                     </div>
                 ) : (null) }
 
