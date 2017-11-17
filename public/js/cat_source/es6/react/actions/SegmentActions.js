@@ -203,6 +203,9 @@ var SegmentActions = {
         });
     },
 
+
+
+    /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_SELECTION,
@@ -211,7 +214,6 @@ var SegmentActions = {
         });
     },
 
-    /************ Revise ***************/
     openIssuesPanel: function (data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_ISSUES_PANEL,
