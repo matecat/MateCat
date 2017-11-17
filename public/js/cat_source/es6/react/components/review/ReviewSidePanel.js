@@ -32,6 +32,10 @@ class ReviewSidePanel extends React.Component{
         this.setState({visible: false});
     }
 
+    closePanelClick(e, data) {
+        this.props.closePanel();
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openPanel.bind(this));
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closePanel.bind(this));
@@ -99,7 +103,7 @@ class ReviewSidePanel extends React.Component{
 
         return <div className={classes} id="review-side-panel">
             {this.props.reviewType === "extended" ? (
-                <div className="review-side-panel-close" onClick={this.closePanel.bind(this)}>x</div>
+                <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
             ) : (null)}
             {innerPanel}
         </div>;
