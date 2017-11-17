@@ -37,8 +37,10 @@ class ReviewIssueSelectionPanel extends React.Component{
 
     buttonClasses() {
         return classnames({
-            'mc-button' : true,
-            'blue-button' : true, 
+            'ui' : true,
+            'primary' : true,
+            'button' : true,
+            'small' : true,
             'disabled' : this.state.submitDisabled
         });
     }
@@ -150,15 +152,15 @@ class ReviewIssueSelectionPanel extends React.Component{
 
         <div className="review-issue-terminal">
             <textarea ref={(textarea)=>this.textarea = textarea} data-minheight="40" data-maxheight="90"
-                className="mc-textinput mc-textarea mc-resizable-textarea"
+                className=""
                 placeholder="Write a comment..."
                 />
 
             <div className="review-issue-buttons-right">
+                {this.props.closeSelectionPanel ? (<button onClick={this.closePanel.bind(this)}
+                                                           className="ui button small">Close</button>) : (null)}
                 <button onClick={this.sendClick.bind(this)}
                     className={this.buttonClasses()}>{buttonLabel}</button>
-                {this.props.closeSelectionPanel ? (<button onClick={this.closePanel.bind(this)}
-                                                           className="mc-button grey-button">Close</button>) : (null)}
             </div>
         </div>
         </div> 

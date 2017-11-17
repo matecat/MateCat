@@ -2496,10 +2496,10 @@ section .text .warning {
     overflow: hidden;
 }
 
-textarea, .editarea {
+/*textarea, .editarea {
     position: relative;
     z-index: 0;
-}
+}*/
 
 section.status-new .editarea {
     text-indent: -20000px;
@@ -5094,7 +5094,7 @@ section:hover .segment-side-buttons {
     color: #6d6e71
 }
 
-.mc-resizable-textarea {
+/*.mc-resizable-textarea {
     -webkit-box-shadow: inset 0 1px 2px #ccc;
     box-shadow: inset 0 1px 2px #ccc;
     border: 1px solid #999;
@@ -5102,7 +5102,7 @@ section:hover .segment-side-buttons {
     margin: 0;
     overflow: hidden;
     padding: 4px;
-    position: static; /* avoid position relative set for any textarea element in style.css line 169 */
+    position: static; !* avoid position relative set for any textarea element in style.css line 169 *!
     resize: none;
     word-break: normal;
 }
@@ -5123,7 +5123,7 @@ section:hover .segment-side-buttons {
     text-transform: uppercase;
     font-weight: bold;
     margin-left: 10px;
-}
+}*/
 
 .blue-button {
     background: #09beec;
@@ -5369,4 +5369,8 @@ section:hover .segment-side-buttons {
     height: 35px;
     vertical-align: -webkit-baseline-middle;
     display: inline-block;
+}
+
+input#markAsCompleteButton[disabled] {
+    background: #d7d7d8;
 }

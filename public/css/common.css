@@ -3888,50 +3888,54 @@ cursor: pointer;
 	vertical-align: text-top;
 }
 
-.error-type table {
+.tab.review .error-type table {
 	border-collapse: collapse;
 	width: 102%;
 }
 
-.error-type th.tleft {
+.tab.review .error-type th.tleft {
     text-align:left;
 }
-.error-type th a {
+.tab.review .error-type th a {
     text-align:center;
 }
 
-.error-type tbody {
+.tab.review .error-type tbody {
 border: 1px solid #efefef;
 }
 
-.error-type tbody td:last-child {
+.tab.review .error-type tbody td:last-child {
 border-right: 1px solid #efefef;
 border-left: 1px solid #efefef;
 padding: 8px;
 }
 
-.error-type tbody tr {
+.tab.review .error-type tbody tr {
 border-bottom: 1px solid #efefef;
 }
-.error-type tbody tr:hover {
+.tab.review .error-type tbody tr:hover {
 background: rgba(187, 187, 187, 0.14);
 }
 
 
-.error-type th {
+.tab.review .error-type th {
 text-align: center;
 padding: 10px 4px;
 font-size: 80%;
 position: relative;
 }
 
-.error-type th:nth-child(2) {
+.tab.review .error-type th:nth-child(2) {
     padding: 10px 0;
       width: 80px;
 }
 
-td.align-left {
+.tab.review td.align-left {
 text-align: left;
+}
+
+.tab.review td {
+    text-align: center;
 }
 
 .icon-uniE96B:before {
