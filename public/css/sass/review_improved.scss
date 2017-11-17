@@ -729,6 +729,9 @@ section.ice-locked .translation-issues-button {
     display: none;
 }
 
-.ui.button {
+.ui.button.small {
     border: 1px solid #797979;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 100;
 }
