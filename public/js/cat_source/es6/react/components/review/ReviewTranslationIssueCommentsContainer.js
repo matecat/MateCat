@@ -260,7 +260,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
                 <div className="review-issue-comment-reply-text">
 
                     <textarea data-minheight="40" data-maxheight="90"
-                        className="mc-textinput mc-textarea mc-resizable-textarea"
+                        className=""
                         placeholder="Write a comment..."
                         value={this.state.comment_text}
                         onChange={this.handleCommentChange.bind(this)} />
