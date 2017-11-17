@@ -210,6 +210,16 @@ body.searchActive #filterSwitch {
     max-width: 50%;
     text-align: left;
     margin-bottom: 0px;
+    display: none;
+}
+
+.warnings,
+section.opened .warnings:empty{
+     display: none;
+}
+
+section.opened .warnings {
+    display: block;
 }
 
 .warnings:last-child {
@@ -222,10 +232,6 @@ body.searchActive #filterSwitch {
 
 .alternatives a {
     color: #D65959 !important;
-}
-
-.warnings:empty {
-    display: none;
 }
 
 .mismatch .warnings {

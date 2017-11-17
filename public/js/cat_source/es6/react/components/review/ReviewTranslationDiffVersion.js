@@ -40,7 +40,7 @@ class ReviewTranslationDiffVersion extends React.Component {
     }
 
     issueMouseLeave () {
-
+        this.removeSelection();
     }
 
     getTrackChangesForCurrentVersion () {

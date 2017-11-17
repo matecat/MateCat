@@ -10,6 +10,8 @@ class ReviewVersionsDiff extends React.Component {
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
+        this.pippo = "pippo + " + Math.floor((Math.random() * 100) + 1);
+        this.applyWrapper = this.applyWrapper.bind(this);
     }
 
 
@@ -235,8 +237,7 @@ class ReviewVersionsDiff extends React.Component {
         if (this.props.diff && this.props.diff.length > 0) {
             return trackChangesHTMLFromDiffArray(this.props.diff);
         } else {
-            let diffHtml = trackChangesHTML(this.props.previousVersion, this.props.translation);
-            return this.props.decodeTextFn(UI.currentSegment, diffHtml);
+            return trackChangesHTML(this.props.previousVersion, this.props.translation);
         }
     }
 
@@ -249,21 +250,26 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper.bind(this));
+        console.log("Mount " + this.pippo);
+        SegmentStore.addListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
     }
 
     componentWillUnmount() {
+        console.log("Unmount " + this.pippo);
         SegmentStore.removeListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
     }
     componentWillMount() {}
 
-    componentDidUpdate() {}
+    componentDidUpdate() {
+
+    }
 
     allowHTML(string) {
         return { __html: string };
     }
 
     render() {
+        console.log("Render " + this.pippo);
         let diffHTML = this.getDiffHtml();
         let diffClass = classnames({
             "ui ignored message segment-diff-container": true,
