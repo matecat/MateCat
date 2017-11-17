@@ -535,7 +535,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 }
 
 .sid .txt {
-    padding: 10px 0;
+    padding: 0px 0;
     background: #fff;
     margin: 12px 8px 0 8px;
 }
@@ -2618,7 +2618,6 @@ body.archived section {
 section.readonly .text,
 body.archived section .text {
     background: rgba(250, 250, 250, 0.1);
-    text-shadow: 0 1px 0 #ccc;
     color: #525252;
     cursor: not-allowed;
     -webkit-box-shadow: inset 0 1px 1px -1px #ccc;

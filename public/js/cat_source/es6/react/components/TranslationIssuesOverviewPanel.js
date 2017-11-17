@@ -15,7 +15,9 @@ class TranslationIssuesOverviewPanel extends React.Component {
         }
 
     }
-    
+    closePanelClick(e, data) {
+        this.props.closePanel();
+    }
     // getInitialState() {
     //     return this.getStateFromSid( this.props.sid );
     // }
@@ -177,6 +179,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                     <div className="review-original-target-wrapper sidebar-block">
                         <h3>Original target</h3>
                         <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
+                        <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
                     </div>
                 ) : (null) }
 
