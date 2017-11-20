@@ -97,17 +97,6 @@ class Dqf extends BaseFeature {
     }
 
     /**
-     * These are the dependencies we need to make to be enabled when we detedct DQF is to be
-     * activated for a given project. These will fill the project metadata table.
-     *
-     *
-     * @return array
-     */
-    public function getProjectDependencies() {
-        return self::$dependencies ;
-    }
-
-    /**
      * @param $inputFilter
      *
      * @return array
@@ -217,7 +206,7 @@ class Dqf extends BaseFeature {
      */
     public function filterProjectDependencies( $dependencies, $metadata ) {
         if ( isset( $metadata[ self::FEATURE_CODE ] ) && $metadata[ self::FEATURE_CODE ] ) {
-            $dependencies = array_merge( $dependencies, $this->getProjectDependencies() );
+            $dependencies = array_merge( $dependencies, static::getDependencies() );
         }
         return $dependencies ;
     }

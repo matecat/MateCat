@@ -13,6 +13,8 @@ use Jobs_JobStruct ;
 
 class ProjectCompletion extends BaseFeature {
 
+    const FEATURE_CODE = 'project_completion';
+
     public function postAddSegmentTranslation( $params ) {
         $params = Utils::ensure_keys( $params, array('is_review', 'chunk') );
 

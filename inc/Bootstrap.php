@@ -373,12 +373,7 @@ class Bootstrap {
             }
         }
 
-        if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
-            set_include_path( get_include_path() .
-                    PATH_SEPARATOR .
-                    implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS )
-            );
-        }
+        Features::setIncludePath();
 
         if (!empty( INIT::$MANDATORY_PLUGINS ) ) {
             INIT::$AUTOLOAD_PLUGINS = array_merge( INIT::$AUTOLOAD_PLUGINS, INIT::$MANDATORY_PLUGINS );

@@ -36,6 +36,8 @@ use Users_UserStruct;
 
 class Mmt extends BaseFeature {
 
+    const FEATURE_CODE = 'mmt';
+
     protected $autoActivateOnProject = false;
 
     public static function loadRoutes(  Klein $klein  ){

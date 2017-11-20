@@ -9,8 +9,11 @@ use Monolog\Handler\StreamHandler;
 
 
 use ReflectionClass ;
+use LogicException;
 
 abstract class BaseFeature implements IBaseFeature {
+
+    const FEATURE_CODE = null;
 
     protected $feature;
 
@@ -20,7 +23,16 @@ abstract class BaseFeature implements IBaseFeature {
 
     protected $autoActivateOnProject = true ;
 
-    protected static $dependencies = []   ;
+    protected static $dependencies = [];
+
+    protected static $conflictingDependencies = [];
+
+    /**
+     * @return array
+     */
+    public static function getConflictingDependencies() {
+        return static::$conflictingDependencies;
+    }
 
     /**
      * Warning: passing a $projectStructure prevents the possibility to pass
@@ -33,6 +45,8 @@ abstract class BaseFeature implements IBaseFeature {
      * @param BasicFeatureStruct $feature
      */
     public function __construct( BasicFeatureStruct $feature ) {
+        $fCode = static::FEATURE_CODE;
+        if( empty( $fCode ) ) throw new LogicException( "Plugin code not defined." );
         $this->feature = $feature ;
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
     }

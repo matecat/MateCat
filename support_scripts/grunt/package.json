@@ -4,7 +4,7 @@
   "description": "",
   "main": "Gruntfile.js",
   "author": "MateCat Team",
-  "license": "ISC",
+  "license": "LGPL",
   "dependencies": {
     "babel-core": "^6.11.4",
     "babel-loader": "^6.2.4",

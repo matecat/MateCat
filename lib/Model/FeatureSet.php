@@ -101,7 +101,8 @@ class FeatureSet {
     public function loadAutoActivablesOnProject( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $objs = array_map( function( $feature ) {
-            return self::getObj( $feature );
+            /* @var $feature BasicFeatureStruct */
+            return $feature->toNewObject();
         }, $features ) ;
 
         $returnable =  array_filter($objs, function( BaseFeature $obj ) {
@@ -141,8 +142,9 @@ class FeatureSet {
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
 
-        foreach( $this->sortFeatures()->features as $feature ) {
-            $obj = self::getObj( $feature );
+        foreach( $this->features as $feature ) {
+            /* @var $feature BasicFeatureStruct */
+            $obj = $feature->toNewObject();
 
             if ( !is_null( $obj ) ) {
                 if ( method_exists( $obj, $method ) ) {
@@ -178,24 +180,13 @@ class FeatureSet {
         return $filterable ;
     }
 
-    public static function getObj( $feature ) {
-        /* @var $feature BasicFeatureStruct */
-        $name = "Features\\" . $feature->toClassName() ;
-
-        if ( class_exists( $name ) ) {
-            return new $name( $feature );
-        } else {
-            return null ;
-        }
-    }
-
     /**
      * @param $method
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
 
-        foreach ( $this->sortFeatures()->features as $feature ) {
+        foreach ( $this->features as $feature ) {
             $this->runOnFeature($method, $feature, $args);
         }
     }
@@ -213,24 +204,20 @@ class FeatureSet {
      * @param PHPTAL $template the PHPTAL view to add properties to
      *
      */
-    public function appendDecorators($name, IController $controller, PHPTAL $template) {
+    public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
+
         /** @var BasicFeatureStruct $feature */
-        foreach( $this->sortFeatures()->features as $feature ) {
+        foreach ( $this->features as $feature ) {
 
-            $baseClass = "Features\\" . $feature->toClassName()  ;
-
-            $cls =  "$baseClass\\Decorator\\$name" ;
-
-            // XXX: keep this log line because due to a bug in Log class
-            // if this line is missing it won't log load errors.
-            Log::doLog('loading Decorator ' . $cls );
-
-            if ( class_exists( $cls ) ) {
+            $cls = Features::getFeatureClassDecorator( $feature, $name );
+            if( !empty( $cls ) ){
                 /** @var AbstractDecorator $obj */
-                $obj = new $cls( $controller, $template ) ;
+                $obj = new $cls( $controller, $template );
                 $obj->decorate();
             }
+
         }
+
     }
 
     /**
@@ -238,27 +225,27 @@ class FeatureSet {
      * TODO: conver into something abstract.
      */
     public function sortFeatures() {
-        $codes = $this->getCodes() ;
 
-        if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
+        $codes = $this->getCodes();
 
-            $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+        if ( in_array( Dqf::FEATURE_CODE, $codes ) ) {
+
+            $missing_dependencies = array_diff( Dqf::$dependencies, $codes );
 
             if ( !empty( $missing_dependencies ) ) {
-                throw new Exception('Missing dependencies for DQF: ' . implode(',', $missing_dependencies ) ) ;
+                throw new Exception( 'Missing dependencies for DQF: ' . implode( ',', $missing_dependencies ) );
             }
 
-           usort( $this->features, function( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
-               if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
-                   return 0 ;
-               }
-               else {
-                   return 1 ;
-               }
-           });
+            usort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
+                if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } );
         }
 
-        return $this ;
+        return $this;
     }
 
     /**
@@ -267,25 +254,41 @@ class FeatureSet {
      *
      * @param $new_features BasicFeatureStruct[]
      *
+     * @throws Exception
      */
     private function merge( $new_features ) {
         // first round, load dependencies
-        $features_with_deps = [] ;
+
+        $all_features = [] ;
+        $conflictingDeps = [] ;
 
         foreach( $new_features as $feature ) {
             // flat dependency management
+
+            $baseFeature     = $feature->toNewObject();
+
+            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+
             $deps = array_map( function( $code ) {
                 return new BasicFeatureStruct(['feature_code' => $code ]);
-            }, $feature->toNewObject()->getDependencies() );
+            }, $baseFeature->getDependencies() );
 
-            $features_with_deps = array_merge( $features_with_deps, $deps, [$feature]  ) ;
+
+            $all_features = array_merge( $all_features, $deps, [$feature]  ) ;
         }
 
-        foreach( $features_with_deps as $feature ) {
+        /** @var BasicFeatureStruct $feature */
+        foreach ( $all_features as $feature ) {
+            foreach ( $conflictingDeps as $key => $value ) {
+                if ( in_array( $feature->feature_code, $value ) ) {
+                    throw new Exception( "{$feature->feature_code} is conflicting with $key." );
+                }
+            }
             if ( !isset( $this->features[ $feature->feature_code ] ) ) {
-                $this->features[ $feature->feature_code ] = $feature ;
+                $this->features[ $feature->feature_code ] = $feature;
             }
         }
+
     }
 
     public static function splitString( $string ) {
@@ -315,7 +318,7 @@ class FeatureSet {
      * @param $args
      */
     private function runOnFeature($method, BasicFeatureStruct $feature, $args) {
-        $name = self::getClassName( $feature->feature_code );
+        $name = Features::getPluginClass( $feature->feature_code );
 
         if ( $name ) {
             $obj = new $name($feature);
@@ -323,16 +326,6 @@ class FeatureSet {
             if (method_exists($obj, $method)) {
                 call_user_func_array(array($obj, $method), $args);
             }
-        }
-    }
-
-    public static function getClassName( $code ) {
-        $className = '\Features\\' . Utils::underscoreToCamelCase( $code );
-        if ( class_exists( $className ) ) {
-            return $className;
-        }
-        else {
-            return false ;
         }
     }
 

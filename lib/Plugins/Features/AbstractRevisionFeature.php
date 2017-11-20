@@ -29,12 +29,6 @@ use Features\ReviewImproved\Model\QualityReportModel ;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
-    private $feature_options ;
-
-    public function getProjectDependencies() {
-        return array();
-    }
-
     /**
      * In ReviewImproved, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
      * revision status changes.
@@ -151,14 +145,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function postProjectCreate($projectStructure) {
         Log::doLog( $this->feature );
 
-        $this->feature_options = $this->feature->getOptions() ;
-
-        if ( isset( $this->feature_options['id_qa_model']) ) {
-            $this->setQaModelFromFeatureOptions($projectStructure);
-        }
-        else {
-            $this->setQaModelFromJsonFile( $projectStructure );
-        }
+        $this->setQaModelFromJsonFile( $projectStructure );
 
         foreach( $projectStructure['array_jobs']['job_list'] as $id_job ) {
             $this->createQaChunkReviewRecord( $id_job, $projectStructure );
@@ -226,14 +213,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * Entry point for project data validation for this feature.
      */
     public function validateProjectCreation($projectStructure)  {
-        $this->feature_options = $this->feature->getOptions() ;
-
-        if ( isset( $this->feature_options['id_qa_model'] ) ) {
-            // QA model was already provided referencing a pre-saved id
-            // TODO: ensure the record exists and it's valid
-        } else {
-            self::loadAndValidateModelFromJsonFile($projectStructure);
-        }
+        self::loadAndValidateModelFromJsonFile($projectStructure);
     }
 
     /**
@@ -323,23 +303,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         $dao = new Projects_ProjectDao( Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $model_record->id );
-    }
-
-    /**
-     * This method  is used to  assign the  qa_model to the project based on the
-     * option specified in the feature record itself.
-     *
-     * This was originally developed to avoid the need to pass the qa_model.json
-     * inside the zip file each time. This could be used to perform a conditonal
-     * check on the need for the qa_model.json file to be passed at each project
-     * creation.
-     */
-    private function setQaModelFromFeatureOptions($projectStructure) {
-        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] );
-
-        $dao = new Projects_ProjectDao( Database::obtain() );
-        $dao->updateField( $project, 'id_qa_model', $this->feature_options['id_qa_model'] );
-
     }
 
     /**
