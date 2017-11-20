@@ -73,7 +73,7 @@
                 }
             });
             $("#mt_engine_int").change(function() {
-                $('#add-mt-provider-cancel').hide();
+                // $('#add-mt-provider-cancel').hide();
                 $('#mt-provider-details .error').empty();
 
                 $(".insert-tm").show();
@@ -131,9 +131,11 @@
                 }
             });
             $('#add-mt-provider-cancel').click(function(e) {
-                console.log('clicked add-mt-provider-cancel');
                 $(".add-mt-engine").show();
                 $(".insert-tm").addClass('hide');
+                $('#mt_engine_int').val('none').trigger('change');
+                $(".insert-tm").addClass('hide').removeAttr('style');
+                $('#add-mt-provider-cancel').show();
             });
             $('#add-mt-provider-cancel-int').click(function(e) {
                 $(".add-mt-engine").show();
