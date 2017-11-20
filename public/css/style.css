@@ -210,6 +210,15 @@ body.searchActive #filterSwitch {
     margin-bottom: 0px;
 }
 
+.warnings,
+section.opened .warnings:empty{
+    display: none;
+}
+
+section.opened .warnings {
+    display: block;
+}
+
 .warnings:last-child {
     margin-bottom: 25px;
 }
@@ -222,9 +231,6 @@ body.searchActive #filterSwitch {
     color: #D65959 !important;
 }
 
-.warnings:empty {
-    display: none;
-}
 
 .mismatch .warnings {
     display: block

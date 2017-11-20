@@ -983,6 +983,8 @@ color:#333;}
     width: 100%;
     color: #666;
 }
+
+
 /*
 .editing .popup-tm {
     top:20px;
@@ -1201,19 +1203,6 @@ background-color: #D6D6D6;
 top: inherit;
 margin-top: 0;
 right: inherit;}
-
-
-
-
-
-.step3 .continuebtn {
-display: block;
-text-align: center;
-margin: 15px auto;
-background: #7eaf3e!important;
-overflow: hidden;
-width: 200px;
-}
 
 .continuebtn, .continuebtn:hover {
 background: #7eaf3e;
@@ -1777,9 +1766,9 @@ padding: 15px 31px 10px 10px;
 
 select#mt_engine_int {
     font-size: 18px;
-height: 30px;
-margin: 20px 0 9px;
-width: 100%;
+    height: 30px;
+    margin: 20px 0;
+    width: 90%;
 }
 
 
@@ -1883,11 +1872,12 @@ font-size:14px;
     padding: 7px 5px!important
 }
 
-span.mt-error-key {
+div.mt-error-key {
     display: none;
     color: red;
     padding: 5px 0 10px;
-    margin-left: 175px;
+    margin-left: 7px;
+    position: absolute;
 }
 
 .mgmt-table-mt .uploadtm.btn-ok {
@@ -2522,7 +2512,7 @@ color: #999;}
 {
     padding: 15px 5px 4px 5px;
     background: #fff;
-    vertical-align: top;
+    vertical-align: middle;
     border-top: 1px solid #ccc;
     box-shadow: inset 0px 1px 0px 0px #fff;
 }
@@ -2558,34 +2548,33 @@ display: block;
 }
 
 .mgmt-panel h3 {
-margin: 10px 0;
+    margin: 10px 0;
+    font-size: 20px;
 }
 
 .addrow {width:100%;}
 .addrow label {float:left;}
 
 .mgmt-panel p {
-margin: 0 0 5px;
-clear: both;
-text-align: left;
-line-height: 35px;
+    margin: 0 0 20px;
+    line-height: 30px;
 }
 
 p.required {
-  margin-bottom: 10px;
+  margin-bottom: -3px;
 }
 
 
 
 .mgmt-add-tm input, .mgmt-add-gl input {
- font-size: 12px !important;
-height: 22px;
-color: #999999;
-float:left;
-padding: 5px 10px;
-border: 1px solid #abadb3;
--webkit-transition: all 100ms ease-in;
--moz-transition: all 100ms ease-in;
+    font-size: 12px !important;
+    height: 22px;
+    color: #999999;
+    float:left;
+    padding: 5px 10px;
+    border: 1px solid #abadb3;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
 }
 #inactivetm.filtering tbody tr:not(.found) {
     display: none !important;
@@ -2906,28 +2895,36 @@ body.filterOpen .searchbox
 }
 
 .insert-tm label {
-    width: 22%!important;
     text-align: right;
     font-size: 16px;
     display: inline-block;
-    margin-bottom: 20px;
-    margin-right: 10px;
+    margin-top: 20px;
+    margin-bottom: 5px;
 }
 
 .insert-tm input {
-    border: 1px solid #999;
     background: #fff;
-    height: auto;
     outline: 0;
-    box-shadow: inset 0 1px 2px #ddd;
-    -webkit-box-shadow: inset 0 1px 2px #ddd;
     white-space: initial;
     overflow: initial;
     text-overflow: initial;
-    width: 72%;
-    height: 25px;
-    padding: 2px 5px;
+    width: 100%;
+    padding: 8px 5px;
     border-radius: 2px;
+    -webkit-box-shadow: inset 0 1px 3px #ddd;
+    box-shadow: inset 0 1px 3px #ddd;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    box-sizing: border-box;
+}
+
+.insert-tm input:hover {
+    border-color: rgba(34, 36, 38, 0.35);
+}
+
+.insert-tm input:focus {
+    border-color: #96C8DA !important;
+    box-shadow: none;
+    outline: none;
 }
 
 .insert-tm input[type="checkbox"] {
@@ -2936,10 +2933,10 @@ body.filterOpen .searchbox
 }
 
 .insert-tm {
-    border: 1px solid #ccc;
+
     margin: 0 auto;
     overflow: hidden;
-    padding: 10px 20px;
+    margin-bottom: 30px;
 }
 
 .insert-tm h4 {
@@ -2956,28 +2953,42 @@ margin-top: 20px;
 padding: 2%;
 }
 
+
 .step1 {
-margin-right: 14%;
+    width: 100%;
+    border-bottom: 1px solid #e1e1e1;
 }
 
-.step2,.step1 {
-clear: both;
-margin: 0 auto;
-overflow: hidden;
-width: 50%;
+.step2 {
+    width: 49%;
+}
+.step2 a#add-mt-provider-confirm.disabled {
+    box-shadow: none !important;
 }
 
 .step3 {
-margin: 0 auto;
-overflow: hidden;
-width: 42%;
-border: 1px solid #ccc;
-background: #FAFAFA;
-border-radius: 4px;
-margin-top: -4%;
-margin-left: 3%;
-padding: 1% 2% 0;
+    width: 48%;
+    background: #f3f3f3;
+    display: inline-block;
+    box-sizing: border-box;
+    float: left;
+    margin-left: 29px;
+    padding: 15px;
+    margin-top: 20px;
 }
+
+.step3 .continuebtn {
+    display: block;
+    text-align: center;
+    margin: 15px 0 0px !important;
+    background: #7eaf3e !important;
+}
+
+.mgmt-table-mt select {
+
+}
+
+
 
 td.action .btn {
   cursor: pointer;
@@ -2986,9 +2997,12 @@ td.action .btn {
   /*width: 75px!important;*/
   background: #dcdedf!important;
   border-radius: 2px 0 0 2px;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
+}
+
+td.action .btn:hover {
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
 }
 
 
@@ -3483,6 +3497,10 @@ display: none;
     transition: 0.3s ease-in-out;
 }
 
+.mgmt-panel .tm-warning-message {
+    margin-top: 70px !important;
+}
+
 .tm-error-message {
     border-top: 3px solid #ec3d3d;
     background-color: rgb(251, 218, 218);
@@ -3491,6 +3509,10 @@ display: none;
 .tm-warning-message {
     border-top: 3px solid #f9f903;
     background-color: rgb(255, 254, 216);
+}
+
+p.tm-warning-message {
+    margin-top: 50px !important;
 }
 
 .tm-success-message {
@@ -3920,6 +3942,15 @@ float: left;
 {
     padding-right: 8px;
 }
+
+.step1 a#add-mt-provider-cancel .text {
+    width: unset;
+}
+
+.step1 a#add-mt-provider-cancel .text:before {
+    padding-right: 0 !important;
+}
+
 .deleteTM .text:before {
 content: "\f014";
 padding-right: 5px;
@@ -4930,6 +4961,12 @@ img.ui-user-top-image-general {
 
 .cattool .organization-name {
     display: none;
+}
+
+.ui.primary.button.button-modal.warning-button.orange.margin.left-10.right-20 {
+    height: 43px;
+    padding: 1px 10px;
+    font-size: 15px;
 }
 
 /*****************************/
