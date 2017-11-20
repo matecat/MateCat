@@ -4956,4 +4956,10 @@ img.ui-user-top-image-general {
     display: none;
 }
 
+.ui.primary.button.button-modal.warning-button.orange.margin.left-10.right-20 {
+    height: 43px;
+    padding: 1px 10px;
+    font-size: 15px;
+}
+
 /*****************************/
