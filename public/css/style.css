@@ -1960,8 +1960,8 @@ body.cattool .searchbox .block.right {
     display: block
 }
 
-.filtering {
-    padding-top: 140px
+body.filtering {
+    padding-top: 50px
 }
 
 .replace-box {

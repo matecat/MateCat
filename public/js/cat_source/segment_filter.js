@@ -2,7 +2,7 @@
 SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
-    return ReviewImproved.enabled();
+    return ReviewImproved.enabled() || ReviewExtended.enabled();
 }
 
 if (SegmentFilter.enabled())
@@ -101,7 +101,7 @@ if (SegmentFilter.enabled())
         },
 
         restore : function( data ) {
-            debugger  // TODO, find who calls this
+            // debugger  // TODO, find who calls this
             window.segment_filter_panel.setState( this.getStoredState().reactState ) ;
             $(document).trigger('segment-filter-submit');
         },
