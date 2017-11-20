@@ -100,7 +100,7 @@ class Routes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadOriginal&" . Utils::buildQueryString( $params );
+        return "$host/?action=downloadOriginal&" . http_build_query( $params, null, null, PHP_QUERY_RFC3986 ) ;
     }
 
 
@@ -118,7 +118,7 @@ class Routes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadFile&" . Utils::buildQueryString( $params );
+        return "$host/?action=downloadFile&" . http_build_query( $params, null, null, PHP_QUERY_RFC3986 );
     }
 
     public static function revise( $project_name, $id_job, $password, $source, $target, $options = array() ) {

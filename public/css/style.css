@@ -222,6 +222,15 @@ section.opened .warnings {
     display: block;
 }
 
+.warnings,
+section.opened .warnings:empty{
+    display: none;
+}
+
+section.opened .warnings {
+    display: block;
+}
+
 .warnings:last-child {
     margin-bottom: 25px;
 }

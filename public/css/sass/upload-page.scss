@@ -1224,7 +1224,7 @@ button.ui-button::-moz-focus-inner {
         width: 96% !important;
     }
     .mgmt-table-mt select {
-        width: 210px !important;
+        //width: 210px !important;
         .item-key-name {
             width: 160px;
         }
@@ -1254,9 +1254,9 @@ button.ui-button::-moz-focus-inner {
         font-size: 17px !important;
     }
 
-    .mgmt-table-mt select {
+   /* .mgmt-table-mt select {
         width: 190px !important;
-    }
+    }*/
 
     .translate-box:not(.settings) {
         margin: 20px 12px 0px 0px !important;
@@ -1649,7 +1649,7 @@ body {
     margin: 0;
 }
 
-.translate-box select, .mgmt-table-mt select {
+.translate-box select {
     width: 257px;
     height: 37px;
     padding: 5px;
@@ -2191,11 +2191,6 @@ header {
     font-size: 16px;
     margin: 10px 0 5px 0;
     color: #333;
-}
-
-.popup-tm h3 {
-    text-align: left;
-    font-size: 20px;
 }
 
 .popup .header {

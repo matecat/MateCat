@@ -10,6 +10,7 @@
 namespace Features;
 
 
+use ArrayObject;
 use Constants_Engines;
 use Contribution\ContributionStruct;
 use Contribution\Set;
@@ -181,6 +182,52 @@ class Mmt extends BaseFeature {
         }
 
         return $keyList;
+
+    }
+
+    /**
+     * @param ArrayObject $projectStructure
+     */
+    public function validateProjectCreation( ArrayObject $projectStructure ){
+
+        $engine = Engine::getInstance( $projectStructure[ 'mt_engine' ] );
+        if( $engine instanceof Engines_MMT ){
+            /**
+             * @var $availableLangs
+             * <code>
+             *  {
+             *     "en":["it"],
+             *     "de":["en"]
+             *  }
+             * </code>
+             */
+            $availableLangs = $engine->getAvailableLanguages();
+            $target_language_list = $projectStructure['target_language']->getArrayCopy();
+            $source_language = $projectStructure[ 'source_language' ];
+
+            $found = true;
+            foreach( $availableLangs as $source => $availableTargets ){
+                list( $mSourceCode, ) = explode( "-", $source_language );
+                if( $source == $mSourceCode ){
+                    foreach( $target_language_list as $_matecatTarget ){
+                        list( $mTargetCode, ) = explode( "-", $_matecatTarget );
+                        if( in_array( $mTargetCode, $availableTargets ) ){
+                            $found &= true;
+                        } else {
+                            $found &= false;
+                        }
+                    }
+                }
+            }
+
+            if( !$found ){
+                //Force fallback to MyMemory if MMT does not support the language pair
+                //Warning For Multi Lingual projects, this disable MMT for all languages ever if one language is supported, because MateCat at moment
+                // does not support the management of different engines per JOB in the creation phase.
+                $projectStructure[ 'mt_engine' ] = 1;
+            }
+
+        }
 
     }
 
