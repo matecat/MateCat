@@ -56,6 +56,12 @@ class MMTServiceApi {
         $this->license = $license;
     }
 
+    /* - Instance --------------------------------------------------------------------------------------------------- */
+
+    public function getAvailableLanguages(){
+        return $this->send('GET', "$this->baseUrl/languages");
+    }
+
     /* - User ------------------------------------------------------------------------------------------------------- */
 
     public function signup($name, $email, $stripeToken) {

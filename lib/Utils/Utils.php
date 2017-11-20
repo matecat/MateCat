@@ -567,19 +567,5 @@ class Utils {
 		return $job_owner;
 	}
 
-    /**
-     * //TODO replace with http_build_query and PHP_QUERY_RFC3986 flag @see http://us.php.net/manual/en/function.http-build-query.php
-     * @param $params
-     * @return string
-     * @deprecated in this implementation
-     */
-	public static function buildQueryString( $params ) {
-        $querystring = implode('&', array_map(function($key, $value) {
-            return "$key=" . urlencode( $value ) ;
-        }, array_keys( $params ), $params ));
-
-        return $querystring ;
-    }
-
 }
 
