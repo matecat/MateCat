@@ -2541,7 +2541,7 @@ display: block;
 }
 
 .mgmt-panel h3 {
-    margin: 10px 0;
+    margin: 0 15px 10px;
     font-size: 20px;
 }
 
@@ -4975,4 +4975,13 @@ img.ui-user-top-image-general {
 
 .inactive-tm-container {
     display: inline-block;
+    margin-top: 10px;
+}
+
+.inactive-tm-container table#inactivetm {
+    margin-top: 10px;
+}
+
+.inactive-tm-container .notification-message {
+    margin-top: 40px !important;
 }
