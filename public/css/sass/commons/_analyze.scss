@@ -43,9 +43,9 @@ body.analyze{
             background: #f3f3f3;
             .left-analysis {
                 padding-top: 20px;
+                padding-left: 30px;
                 top: 14px;
                 position: relative;
-                left: 20px;
                 width: 55% !important;
                 height: 205px;
                 .h1 {
@@ -58,7 +58,7 @@ body.analyze{
                     position: relative;
                     top: 0;
                     z-index: 2;
-                    left: -48px;
+                    left: -45px;
                     max-width: 100%;
                     min-width: 0;
                     background-color: #d7d8dc;
@@ -86,7 +86,7 @@ body.analyze{
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
-                        padding-left: 18px;
+                        padding-left: 15px;
                     }
                 }
                 .project-create {
@@ -251,7 +251,7 @@ body.analyze{
             padding: 45px 15px 15px;
             background-color: #f3f3f3;
             margin: 0 -1rem 0;
-            .compare-table{
+            .compare-table {
                 background-color: #d7d8dc;
                 margin-bottom: 1px;
                 .updated-count {
@@ -280,7 +280,6 @@ body.analyze{
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
-                    padding: 0 0 0 20px;
                     &.splitted {
                         width: 78%;
                     }
@@ -531,6 +530,7 @@ body.analyze{
             line-height: 35px;
             top: 1px;
             text-align: left;
+            margin-right: 5px;
         }
 
         .source-target {
@@ -614,7 +614,7 @@ body.analyze{
                                 .head-chunk {
                                     transition: 0.3s ease;
                                     background-color: #ffffff;
-                                    padding: 8px 20px;
+                                    padding: 8px 15px;
                                     position: relative;
                                     z-index: 4;
                                     text-align: left;
