@@ -175,7 +175,8 @@ class MultiCurlHandler {
             Log::doLog( "$tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
 
             if ( $this->verbose ) {
-                Log::doLog("$tokenHash options: " . var_export( $this->curl_options_requests[ $tokenHash ], true ) ) ;
+
+                Log::doLog("$tokenHash options: " . var_export( @$this->curl_options_requests[ $tokenHash ], true ) ) ;
 
                 if ( $this->hasError( $tokenHash ) ) {
                     Log::doLog("$tokenHash error: " . var_export( $this->getError($tokenHash), true ) ) ;

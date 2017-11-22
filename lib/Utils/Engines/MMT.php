@@ -67,6 +67,16 @@ class Engines_MMT extends Engines_AbstractEngine {
         );
     }
 
+    /**
+     * Get the available languages in MMT
+     *
+     * @return mixed
+     */
+    public function getAvailableLanguages(){
+        $client = $this->_getClient();
+        return $client->getAvailableLanguages();
+    }
+
     public function get( $_config ) {
 
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
