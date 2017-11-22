@@ -203,6 +203,13 @@ var SegmentActions = {
         });
     },
 
+    activateTab: function (sid, tab) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_TAB,
+            sid: sid,
+            data: tab
+        });
+    },
 
 
     /************ Revise ***************/

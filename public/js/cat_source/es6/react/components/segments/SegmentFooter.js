@@ -95,6 +95,7 @@ class SegmentFooter extends React.Component {
         this.createFooter = this.createFooter.bind(this);
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
+        this.openTab = this.openTab.bind(this);
     }
 
     registerTab(tabName, visible, open) {
@@ -188,13 +189,25 @@ class SegmentFooter extends React.Component {
         }
     }
 
-    changeTab(e) {
-        e.preventDefault();
+    openTab(sid, tabCode) {
+        // Todo: refactoring, no jquery
+        if (this.props.sid === sid ) {
+            let e = {
+                target: $(this.footerRef).find('.tab-switcher-' + tabCode),
+                preventDefault: function () {}
+            };
+            this.changeTab(e);
+        }
+    }
 
-        var section = $(e.target).closest('section');
-        var tab_class = $(e.target).closest('li').data('tab-class');
-        var code = $(e.target).closest('li').data('code');
-        var li = $(e.target).closest('li');
+    changeTab(e) {
+
+        // Todo: refactoring, no jquery
+        e.preventDefault();
+        let section = $(e.target).closest('section');
+        let tab_class = $(e.target).closest('li').data('tab-class');
+        let code = $(e.target).closest('li').data('code');
+        let li = $(e.target).closest('li');
 
         $('.sub-editor', section).removeClass('open');
         $('.' + tab_class, section).addClass('open');
@@ -216,12 +229,14 @@ class SegmentFooter extends React.Component {
         console.log("Mount SegmentFooter" + this.props.sid);
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
+        SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
     }
 
     componentWillUnmount() {
         console.log("Unmount SegmentFooter" + this.props.sid);
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
+        SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
     }
 
     componentWillMount() {
@@ -243,6 +258,7 @@ class SegmentFooter extends React.Component {
                 var active_class = tab.open ? 'active' : '';
                 var label = <li
                     key={ tab.code }
+                    ref={(elem)=> this[tab.code] = elem}
                     className={ hidden_class + " " + active_class + " tab-switcher tab-switcher-" + tab.code }
                     id={"segment-" + this.props.sid + tab.code}
                     data-tab-class={ tab.tab_class }

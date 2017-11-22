@@ -34,5 +34,6 @@ module.exports = keyMirror({
     OPEN_ISSUES_PANEL: null,
     CLOSE_ISSUES_PANEL: null,
     ADD_SEGMENT_VERSIONS_ISSUES: null,
-    ADD_SEGMENT_VERSION_ISSUE: null
+    ADD_SEGMENT_VERSION_ISSUE: null,
+    OPEN_TAB: null
 });

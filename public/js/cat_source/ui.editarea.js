@@ -6,9 +6,6 @@ $.extend( UI, {
         $("#outer").on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
             e.preventDefault();
             UI.preOpenConcordance();
-        }).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
-            e.preventDefault();
-            UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {

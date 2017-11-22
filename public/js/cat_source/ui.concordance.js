@@ -27,7 +27,7 @@ $.extend(UI, {
 		});
 	},
 	openConcordance: function() {
-		$('.editor .submenu .tab-switcher-cc a').click();
+		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'cc');
 		$('.editor .cc-search .input').text('');
 		$('.editor .concordances .results').empty();
 		var searchField = (this.currentSearchInTarget) ? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
@@ -55,7 +55,7 @@ $.extend(UI, {
 			if($('.sub-editor.concordances .more').length) {
 				$('.sub-editor.concordances .more').text('More');
 			} else {
-				$('.sub-editor.concordances', segment).append('<br class="clear"><a href="#" class="more">More</a>');				
+				$('.sub-editor.concordances', UI.currentSegment).append('<br class="clear"><a href="#" class="more">More</a>');
 			}
 			this.custom.extended_concordance = false;
 			this.saveCustomization();
@@ -65,26 +65,26 @@ $.extend(UI, {
 			if($('.sub-editor.concordances .more').length) {
 				$('.sub-editor.concordances .more').text('Fewer');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Fewer</a>');
+				$('.sub-editor.concordances', UI.currentSegment).append('<a href="#" class="more">Fewer</a>');
 			}
 			this.custom.extended_concordance = true;
 			this.saveCustomization();
 		}
 	},
 	renderConcordances: function(d, in_target) {
-		segment = this.currentSegment;
-		segment_id = this.currentSegmentId;
+		var segment = this.currentSegment;
+		var segment_id = this.currentSegmentId;
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
             $.each(d.data.matches, function(index) {
                 if ((this.segment === '') || (this.translation === ''))
                     return;
-                prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+                var prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
 
                 var disabled = (this.id == '0') ? true : false;
                 var cb = this.created_by;
-                cl_suggestion = UI.getPercentuageClass(this.match);
+                var cl_suggestion = UI.getPercentuageClass(this.match);
 
                 var leftTxt = (in_target) ? this.translation : this.segment;
                 leftTxt = UI.decodePlaceholdersToText( leftTxt );
@@ -99,7 +99,7 @@ $.extend(UI, {
                 $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
 			if(UI.custom.extended_concordance) {
-				UI.setExtendedConcordances(true);			
+				UI.setExtendedConcordances(true);
 			} else {
 				UI.setExtendedConcordances(false);
 			}
@@ -109,7 +109,8 @@ $.extend(UI, {
 		}
 
 		$('.cc-search', this.currentSegment).removeClass('loading');
-		this.setDeleteSuggestion(segment);
+		// TODO: why this call?
+		// this.setDeleteSuggestion(segment);
 	}
 });
 

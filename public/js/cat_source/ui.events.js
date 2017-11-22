@@ -637,17 +637,6 @@ $.extend(UI, {
 			UI.body.removeClass('justdone');
 		});
 
-
-		$("section .close").bind('keydown', 'Shift+tab', function(e) {
-			e.preventDefault();
-			$(this).parents('section').find('a.translated').focus();
-		});
-
-		$("a.translated").bind('keydown', 'tab', function(e) {
-			e.preventDefault();
-			$(this).parents('section').find('.close').focus();
-		});
-
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
 			if (UI.currentSegment) {
