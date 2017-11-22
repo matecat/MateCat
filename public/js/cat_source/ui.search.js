@@ -501,7 +501,7 @@ $.extend(UI, {
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
 					this.gotoSearchResultAfter({
@@ -558,15 +558,16 @@ $.extend(UI, {
 			var seg = $('section' + wh).has("mark.searchMarker");
 			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			var found = false;
-
+			var self = this;
 			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
 					} else {
 						found = true;
-						$("html,body").animate({
-							scrollTop: $(this).offset().top - 200
-						}, 500);
+                        self.scrollSegment($(this));
+						// $("html,body").animate({
+						// 	scrollTop: $(this).offset().top - 200
+						// }, 500);
 						setTimeout(function() {
 							UI.goingToNext = false;
 						}, 500);
