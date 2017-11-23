@@ -42,9 +42,7 @@ class AssignToTranslator extends React.Component {
         }
     }
 
-
-
-    componentDidMount () {
+    initDate() {
         let self = this;
         let today = new Date();
         $(this.dateInput).calendar({
@@ -54,9 +52,14 @@ class AssignToTranslator extends React.Component {
                 calendar: 'calendar-outsource'
             },
             onChange: function (date, text, mode) {
+                if (text === "") return false;
                 self.checkSendToTranslatorButton();
             },
         });
+    }
+
+    initTime() {
+        let self = this;
         let time = 12;
         if (this.props.job.get('translator')) {
             let date = APP.getGMTDate(this.props.job.get('translator').get('delivery_timestamp') * 1000);
@@ -70,17 +73,16 @@ class AssignToTranslator extends React.Component {
         $(this.dropdownTime).dropdown('set selected', parseInt(time));
     }
 
+    componentDidMount () {
+        let self = this;
+        this.initDate();
+        this.initTime();
+    }
+
     componentWillUnmount() {}
 
     componentDidUpdate() {
-        let today = new Date();
-        $(this.dateInput).calendar({
-            type: 'date',
-            minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-            className: {
-                calendar: 'calendar-outsource'
-            }
-        });
+        this.initDate();
     }
 
     render() {
