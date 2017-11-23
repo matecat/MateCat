@@ -168,20 +168,20 @@ class glossaryController extends ajaxController {
         if ( $this->automatic ) {
             $tmp_result = array();
             foreach ( $TMS_RESULT as $k => $val ) {
-                if ( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ) {
+                // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+                if ( ( $res = mb_stripos( $this->segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
                     unset( $TMS_RESULT[ $k ] );
                 } else {
                     $tmp_result[ $k ] = $res;
                 }
-
-
             }
             asort( $tmp_result );
             $tmp_result = array_keys( $tmp_result );
 
             $ordered_Result = array();
             foreach ( $tmp_result as $glossary_matches ) {
-                $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+                $_k = preg_replace( '/\xE2\x80\x8B$/', '', $glossary_matches ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+                $ordered_Result[ $_k ] = $TMS_RESULT[ $glossary_matches ];
             }
             $TMS_RESULT = $ordered_Result;
         }
