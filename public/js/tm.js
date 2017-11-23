@@ -1889,6 +1889,11 @@
             if (type == 'tmx') {
                 label = '<p class="pull-left">Select TMX file to import</p>';
                 format = '.tmx';
+                if ($(elem).parents('tr').find('.uploadfile').length > 0 ) {
+                    // $(elem).parents('tr').find('.uploadfile').slideToggle();
+                    $(elem).closest("tr").find('.action a').addClass('disabled');
+                    return;
+                }
             } else if (type == 'glossary') {
                 label = '<p class="pull-left">Select glossary in XLSX format ' +
                         '   <a href="http://www.matecat.com/support/managing-language-resources/add-glossary/" target="_blank">(How-to)</a>' +
