@@ -17,7 +17,7 @@ class Engine {
      */
     public static function getInstance( $id ) {
 
-        if ( is_null( $id ) || $id == '' ) {
+        if ( !is_numeric( $id ) ) {
             throw new Exception( "Missing id engineRecord", -1 );
         }
 
