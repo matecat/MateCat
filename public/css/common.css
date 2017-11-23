@@ -2411,7 +2411,7 @@ display: block;
 }
 
 .mgmt-panel h3 {
-    margin: 10px 0;
+    margin: 0 15px 10px;
     font-size: 20px;
 }
 
@@ -2420,7 +2420,7 @@ display: block;
 
 .mgmt-panel p {
     margin: 0 0 20px;
-    line-height: 30px;
+    line-height: 34px;
 }
 
 p.required {
@@ -2954,11 +2954,12 @@ text-align: left;
 .mgmt-panel .block
 {
 	margin: 5px 0 10px 0;
-text-align: right;
-clear: both;
+    text-align: right;
+    clear: both;
+    width: 100%;
 }
 .addrow-gl {
-padding: 0 25px;
+    padding: 0 25px;
 }
 input#new-tm-key {
     width: 85%;
@@ -3335,7 +3336,7 @@ display: none;
     transition: 0.3s ease-in-out;
 }
 
-.mgmt-panel .tm-warning-message {
+.mgmt-panel .notification-message {
     margin-top: 70px !important;
 }
 
@@ -3350,7 +3351,7 @@ display: none;
 }
 
 p.tm-warning-message {
-    margin-top: 50px !important;
+    margin-top: 60px !important;
 }
 
 .tm-success-message {
@@ -4838,3 +4839,24 @@ img.ui-user-top-image-general {
 }
 
 /*****************************/
+
+
+.active-tm-container, .inactive-tm-container, .mgmt-container {
+    margin: 0 auto;
+    width: 1039px;
+    margin-top: 0px;
+    text-align: left;
+}
+
+.inactive-tm-container {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.inactive-tm-container table#inactivetm {
+    margin-top: 10px;
+}
+
+.inactive-tm-container .notification-message {
+    margin-top: 40px !important;
+}

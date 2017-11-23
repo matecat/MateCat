@@ -112,7 +112,11 @@
                     var props = {
                         modalName: 'mmt-message-modal',
                         text: 'MMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
-                        'To provide the best results, <b>the following data will be synchronized with your private MMT engine:</b><ul><li> - Private translation memories uploaded to MateCat</li><li> - All segments translated or revised in MateCat</li></ul>To stop data from being synchronized, please delete the MMT engine from your list of available engines in MateCat. </br></br>',
+                        'To provide the best results, <b>the following data will be synchronized with your private MMT engine:</b>' +
+                        '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
+                        '<li>Private translation memories uploaded to MateCat</li>' +
+                        '<li>All segments translated or revised in MateCat</li></ul>' +
+                        'To stop data from being synchronized, please delete the MMT engine from your list of available engines in MateCat.',
                         successText: "Continue",
                         successCallback: function() {
                             UI.addMTEngine(provider, providerName);
