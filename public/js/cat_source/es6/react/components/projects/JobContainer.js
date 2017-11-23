@@ -404,7 +404,7 @@ class JobContainer extends React.Component {
                     <i className="icon-uniE96B icon" />
                     There are <span style={{fontWeight: 'bold'}}>{openThreads}</span> open threads
                 </a>;
-            }getHours()
+            }
         }
         return icon;
 
