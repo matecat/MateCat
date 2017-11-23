@@ -2843,6 +2843,7 @@ td.action .btn {
   border-radius: 2px 0 0 2px;
     padding: 5px 20px 0 20px !important;
     box-sizing: content-box;
+    text-align: center;
 }
 
 td.action .btn:hover {  -moz-box-shadow: 0 1px 2px #ccc;
