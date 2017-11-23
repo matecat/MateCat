@@ -404,7 +404,7 @@ class JobContainer extends React.Component {
                     <i className="icon-uniE96B icon" />
                     There are <span style={{fontWeight: 'bold'}}>{openThreads}</span> open threads
                 </a>;
-            }
+            }getHours()
         }
         return icon;
 
@@ -491,7 +491,9 @@ class JobContainer extends React.Component {
         } else if (this.props.job.get('translator')) {
             let email = this.props.job.get('translator').get('email');
 
-            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
+            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny"
+                                     ref={(tooltip) => this.emailTooltip = tooltip}
+                                     onClick={this.openOutsourceModal.bind(this, true, false)}>
                                     {email}
                                 </div>;
         } else {
