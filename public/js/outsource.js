@@ -25,7 +25,7 @@ $.extend(UI, {
             var oldDate = new Date(job.translator.delivery_date);
             if (oldDate.getTime() !== newDate.getTime()) {
                 message = this.shareToTranslatorDateChangeNotification(mail, oldDate, newDate);
-            } else if (job.translator !== mail) {
+            } else if (job.translator.email !== mail) {
                 message = this.shareToTranslatorMailChangeNotification(mail);
             } else {
                 message = this.shareToTranslatorNotification(mail, job);
