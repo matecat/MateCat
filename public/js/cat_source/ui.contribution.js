@@ -67,7 +67,7 @@ $.extend(UI, {
         try {
             var currentSegment  = new UI.Segment( current );
         } catch (e) {
-            console.error("Error, Missing segments in the UI");
+            console.error("Error, get Contribution");
             return;
         }
         var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));

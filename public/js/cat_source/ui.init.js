@@ -82,6 +82,7 @@ $.extend(UI, {
                 case 'download':
                     var interval = setTimeout(function () {
                         $('#downloadProject').trigger('click');
+                        clearInterval(interval);
                     }, 300);
                     APP.removeParam('action');
                     break;
@@ -104,9 +105,6 @@ $.extend(UI, {
                             clearInterval(interval);
                         }
                     }, 500);
-                    setTimeout(function () {
-
-                    });
                     APP.removeParam('action');
                     break;
             }

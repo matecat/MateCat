@@ -101,6 +101,8 @@
                 if(!this.noGlossary) this.getGlossary(segment.el, true, 2);
             }
 
+            this.editStart = new Date();
+
             $(window).trigger({
                 type: "segmentOpened",
                 segment: segment
