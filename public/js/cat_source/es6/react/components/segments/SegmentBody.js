@@ -129,6 +129,7 @@ class SegmentBody extends React.Component {
                     <a href="#" title={status_change_title}
                        className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}/>
                 </div>
+                <div className="triangle-text"></div>
             </div>
         )
     }
