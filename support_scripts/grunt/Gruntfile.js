@@ -555,7 +555,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);

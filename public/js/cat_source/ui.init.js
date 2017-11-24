@@ -249,7 +249,7 @@ UI.SegmentFooter.registerTab({
     }
 });
 
-if ( config.translationMatchesTabEnabled ) {
+if ( config.translation_matches_enabled ) {
     UI.SegmentFooter.registerTab({
         code                : 'tm',
         tab_class           : 'matches',
