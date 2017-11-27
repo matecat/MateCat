@@ -1170,6 +1170,16 @@
     ,
         {
             "localized":[{
+                "en":"Odia"
+            }],
+            "isocode":"ory",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ory-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Palauan"
             }],
             "isocode":"pau",
