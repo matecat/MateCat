@@ -16,8 +16,8 @@ class AssignToTranslator extends React.Component {
         let date = $(this.dateInput).calendar('get date');
         let time = $(this.dropdownTime).dropdown('get value');
         date.setHours(time[0]);
-        date.setMinutes(date.getMinutes() + (2 - parseFloat(this.state.timezone)) * 60);
-        let timestamp = (new Date(date)).getTime();
+        // TODO : Change this line when the time change
+        date.setMinutes(date.getMinutes() + (1 - parseFloat(this.state.timezone)) * 60);
 
         let email = this.email.value;
 
@@ -27,6 +27,7 @@ class AssignToTranslator extends React.Component {
 
     GmtSelectChanged(value) {
         $.cookie( "matecat_timezone" , value);
+        this.checkSendToTranslatorButton();
         this.setState({
             timezone: value
         });
@@ -41,29 +42,57 @@ class AssignToTranslator extends React.Component {
         }
     }
 
-    componentDidMount () {
+    initDate() {
+        let self = this;
         let today = new Date();
         $(this.dateInput).calendar({
             type: 'date',
             minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
             className: {
                 calendar: 'calendar-outsource'
+            },
+            onChange: function (date, text, mode) {
+                if (text === "") return false;
+                self.checkSendToTranslatorButton();
+            },
+        });
+    }
+
+    initTime() {
+        let self = this;
+        let time = 12;
+        if (this.props.job.get('translator')) {
+            let date = APP.getGMTDate(this.props.job.get('translator').get('delivery_timestamp') * 1000);
+            time =  date.time.split(":")[0];
+        }
+        $(this.dropdownTime).dropdown({
+            onChange: function(value, text, $selectedItem) {
+                self.checkSendToTranslatorButton();
             }
         });
-        $(this.dropdownTime).dropdown();
+        $(this.dropdownTime).dropdown('set selected', parseInt(time));
+    }
+
+    componentDidMount () {
+        let self = this;
+        this.initDate();
+        this.initTime();
     }
 
     componentWillUnmount() {}
 
-    componentDidUpdate() {}
+    componentDidUpdate() {
+        this.initDate();
+    }
 
     render() {
-        let date = '';
+        let date = new Date();
         let translatorEmail = '';
         let delivery = '';
         if (this.props.job.get('translator')) {
             let delivery =  APP.fromDateToString(this.props.job.get('translator').get('delivery_timestamp') * 1000);
-            date =  delivery.day + ' ' + delivery.month + ' ' + delivery.year + ' at ' + delivery.time;
+            // date =  delivery.day + ' ' + delivery.month + ' ' + delivery.year + ' at ' + delivery.time;
+            date = new Date(this.props.job.get('translator').get('delivery_timestamp') * 1000);
             translatorEmail = this.props.job.get('translator').get('email');
         }
         return <div className="assign-job-translator sixteen wide column">
@@ -84,7 +113,7 @@ class AssignToTranslator extends React.Component {
                                         <label>Delivery date</label>
                                         <div className="ui calendar" ref={(date) => this.dateInput = date}>
                                             <div className="ui input">
-                                                <input type="text" placeholder="Date" defaultValue={new Date()}
+                                                <input type="text" placeholder="Date" value={date}
                                                        onChange={this.checkSendToTranslatorButton.bind(this)}/>
                                             </div>
                                         </div>

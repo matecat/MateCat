@@ -243,7 +243,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
-                    
+
                     basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/review_extended.js',
                     basePath + 'cat_source/review_extended.*.js',
@@ -570,7 +570,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-browserify');
-    // grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);

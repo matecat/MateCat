@@ -1,10 +1,10 @@
 /*
-	Component: ui.contribution
+ Component: ui.contribution
  */
 
-if ( config.translation_matches_enabled ) {
+if (config.translation_matches_enabled) {
 
-    $('html').on('copySourceToTarget', 'section', function() {
+    $('html').on('copySourceToTarget', 'section', function () {
         UI.setChosenSuggestion(0);
     });
 
@@ -129,7 +129,7 @@ $.extend(UI, {
             }
 
             // `next` and `untranslated next` are the same
-            if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
+            if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
                 return $.Deferred().resolve();
             }
 
@@ -347,12 +347,12 @@ $.extend(UI, {
 
                 $.each($.parseHTML($(ss).html()), function (index) {
 
-                    if(this.nodeName == '#text') {
-                        suggestionSourceText += this.data;
-                    } else {
-                        suggestionSourceText += this.innerText;
-                    }
-                });
+                        if (this.nodeName == '#text') {
+                            suggestionSourceText += this.data;
+                        } else {
+                            suggestionSourceText += this.innerText;
+                        }
+                    });
 
                 $(this).find('.suggestion_source').html(
                     UI.dmp.diff_prettyHtml(
@@ -367,4 +367,5 @@ $.extend(UI, {
 
 
     });
-} ;
+}
+;
