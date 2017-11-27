@@ -131,6 +131,10 @@ class EditLog_EditLogModel {
         return CatUtils::getFastStatsForJob( $wStruct );
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function getEditLogData() {
 
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
@@ -178,7 +182,10 @@ class EditLog_EditLogModel {
                     $seg->toArray()
             );
 
-            $displaySeg->suggestion_match .= "%";
+            if( !empty( $displaySeg->suggestion_match ) ){
+                $displaySeg->suggestion_match .= "%";
+            }
+
             $displaySeg->job_id               = $this->jid;
             $tte                              = CatUtils::parse_time_to_edit( $displaySeg->time_to_edit );
             $displaySeg->display_time_to_edit = "$tte[1]m:$tte[2]s";
