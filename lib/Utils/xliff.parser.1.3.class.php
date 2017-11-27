@@ -209,6 +209,7 @@ class Xliff_Parser {
 						unset($temp);
 
 						$this->getTarget( $xliff, $i, $j, $trans_unit );
+						$this->getSDLStatus( $xliff, $i, $j, $trans_unit );
 
                         $this->evalNotes($xliff, $i, $j, $trans_unit);
 
@@ -383,7 +384,7 @@ class Xliff_Parser {
 
     private function evalNotes(&$xliff, $i, $j, $trans_unit) {
         $temp = null;
-        preg_match_all('|<note.*>(.+?)</note>|si', $trans_unit, $temp);
+        preg_match_all('|<note.*?>(.+?)</note>|si', $trans_unit, $temp);
         $matches = array_values( $temp[1] );
         if ( count($matches) > 0 ) {
             foreach($matches as $match) {
@@ -404,6 +405,7 @@ class Xliff_Parser {
     private function isJSON( $noteField ){
         try {
             $noteField = $this->cleanCDATA( $noteField );
+            if( empty( $noteField ) ) throw new Exception();
             json_decode( $noteField );
             Utils::raiseJsonExceptionError();
         } catch ( Exception $exception ){
@@ -419,19 +421,58 @@ class Xliff_Parser {
 
     private function getTarget( &$xliff, $i, $j, $trans_unit ) {
 
-        preg_match( '|<target.*?>(.+?)</target>|si', $trans_unit, $temp );
-        if ( isset( $temp[ 1 ] ) ) {
-            $temp[ 1 ] = self::fix_non_well_formed_xml( $temp[ 1 ] );
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = $temp[ 1 ];
+        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[0] . '</trans-unit>';
+
+        libxml_use_internal_errors( true );
+        $dDoc = new DOMDocument();
+        $trg_xml_valid = @$dDoc->loadXML( "<root>$trans_unit</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG);
+        $targetList = $dDoc->getElementsByTagName( 'target' );
+
+        if ( $trg_xml_valid === false ) {
+
+            $errorList = libxml_get_errors();
+            Log::doLog("Invalid target found, fallback to old implementation to get the content by regular expression");
+            Log::doLog("<trans-unit $trans_unit");
+            Log::doLog($errorList);
+
+            //fallback to old regexp wrong implementation
+            preg_match( '|<target[^>]*?>(.*?)</target>|si', $trans_unit, $temp );
+            if ( isset( $temp[ 1 ] ) ) {
+                $temp[ 1 ] = self::fix_non_well_formed_xml( $temp[ 1 ] );
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = $temp[ 1 ];
+            }
+
+        } elseif( $targetList->length ){
+
+            $tmpTarget = '';
+            foreach( $targetList as $target ){
+                /** @var $target DOMElement|DOMNode */
+                $childNodes = $target->hasChildNodes();
+                if( $target->parentNode->nodeName == 'trans-unit' && !empty( $childNodes ) ){
+
+                    //Loop sui child nodes, concatena il saveXML e escludi target by tagName
+                    foreach( $target->childNodes as $node ){
+                        $tmpTarget .= $dDoc->saveXML( $node );
+                    }
+
+                }
+            }
+
+            if( !empty( $tmpTarget ) ){
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tmpTarget );
+            }
+
         }
 
+    }
+
+    private function getSDLStatus( &$xliff, $i, $j, $trans_unit ){
         //['attr']['translate']
         //<sdl:seg id="4" locked="true"
         preg_match( '|<sdl:seg.*?(locked).*?>.+?</sdl:seg>|si', $trans_unit, $temp );
         if ( isset( $temp[ 1 ] ) ) {
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'locked' ] = true;
         }
-
     }
 
 }
