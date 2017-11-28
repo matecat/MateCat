@@ -846,10 +846,12 @@ UI = {
             // }
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-			    var next = UI.findNextSegment(UI.startSegmentId);
-			    if (next) {
-                    this.gotoSegment(next.attr('data-split-original-id'));
-                }
+                setTimeout(function () {
+                    var next = UI.findNextSegment(UI.startSegmentId);
+                    if (next) {
+                        UI.gotoSegment(next.attr('data-split-original-id'));
+                    }
+                }, 100);
 			}
 
 			if (options.applySearch) {

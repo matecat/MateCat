@@ -58,8 +58,9 @@ if ( ReviewExtended.enabled() ) {
 
             trackChanges: function (editarea) {
                 var segmentId = UI.getSegmentId($(editarea));
+                var segmentFid = UI.getSegmentFileId($(editarea));
                 var text = UI.postProcessEditarea($(editarea).closest('section'), '.editarea');
-                SegmentActions.updateTranslation(segmentId, htmlEncode(text));
+                SegmentActions.updateTranslation(segmentFid, segmentId, htmlEncode(text));
             },
 
             submitIssues: function (sid, data, diff) {

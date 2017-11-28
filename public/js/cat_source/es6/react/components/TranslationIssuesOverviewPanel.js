@@ -18,9 +18,6 @@ class TranslationIssuesOverviewPanel extends React.Component {
     closePanelClick(e, data) {
         this.props.closePanel();
     }
-    // getInitialState() {
-    //     return this.getStateFromSid( this.props.sid );
-    // }
 
     componentWillReceiveProps ( nextProps ) {
         if (this.props.reviewType === "improved") {
@@ -141,25 +138,13 @@ class TranslationIssuesOverviewPanel extends React.Component {
     getListVersionsReviewExtended() {
         if (this.state.versions.length > 0) {
 
-            return this.state.versions.map( function(v) {
-                let key = 'version-' + v.id + '-' + this.props.sid ;
-
-                return (
-                    <ReviewTranslationDiffVersion
-                        diff={v.diff}
-                        sid={this.state.segment.sid}
-                        key={key}
-                        versionNumber={v.version_number}
-                        isCurrent={false}
-                        translation={v.translation}
-                        previousVersion={this.findPreviousVersion(v.version_number).translation}
-                        decodeTextFn={UI.decodeText}
-                        reviewType={this.props.reviewType}
-                        issues={v.issues}
-                        isReview={this.props.isReview}
-                    />
-                );
-            }.bind(this) );
+            return <ReviewTranslationDiffVersion
+                versions={this.state.versions}
+                segment={this.state.segment}
+                decodeTextFn={UI.decodeText}
+                reviewType={this.props.reviewType}
+                isReview={this.props.isReview}
+            />
         } else {
             return <h3>No version has been created for this segment</h3>;
         }
@@ -183,7 +168,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                     </div>
                 ) : (null) }
 
-            {fullList}
+                {fullList}
         </div>
         ;
     }

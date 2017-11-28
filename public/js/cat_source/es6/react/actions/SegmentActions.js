@@ -158,11 +158,12 @@ var SegmentActions = {
             className: className
         });
     },
-    updateTranslation: function (sid, editAreaText) {
+    updateTranslation: function (fid, sid, editAreaText) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_TRANSLATION,
+            fid: fid,
             id: sid,
-            text: editAreaText
+            translation: editAreaText
         });
     },
     /************ FOOTER ***************/

@@ -28,7 +28,8 @@ class SegmentTranslationIssue {
             'translation_version' => $record->translation_version,
             'target_text'         => $record->target_text,
             'penalty_points'      => $record->penalty_points,
-            'rebutted_at'         => $this->getDateValue( $record->rebutted_at )
+            'rebutted_at'         => $this->getDateValue( $record->rebutted_at ),
+            'diff'                => $record->getDiff()
         );
         return $row;
     }

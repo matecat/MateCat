@@ -132,22 +132,26 @@ class ReviewIssueSelectionPanel extends React.Component{
                     );
                 }.bind(this) ); 
             }
-        }.bind(this)); 
+        }.bind(this));
 
         let buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send');
 
         return <div className="review-issue-selection-panel">
 
-        <h3>Error selection</h3> 
-       
+            <h3>Error selection</h3>
+            { this.props.selections ? (
+                <p>You selected "
+                    <span className="error-selection-highlight">{this.props.selection.selected_string}</span>
+                    " from segment {this.props.sid}</p>
 
-        <p>You selected "<span className="error-selection-highlight">{this.props.selection.selected_string}</span>" from segment {this.props.sid}</p>
-        <h4>Select issue type</h4>
-        <table className="review-issue-category-list">
-        <tbody>
-            {categoryComponents}
-        </tbody>
-        </table> 
+            ): (null)}
+
+            <h4>Select issue type</h4>
+            <table className="review-issue-category-list">
+                <tbody>
+                    {categoryComponents}
+                </tbody>
+            </table>
 
 
         <div className="review-issue-terminal">
@@ -163,7 +167,7 @@ class ReviewIssueSelectionPanel extends React.Component{
                     className={this.buttonClasses()}>{buttonLabel}</button>
             </div>
         </div>
-        </div> 
+        </div>
     }
 }
 

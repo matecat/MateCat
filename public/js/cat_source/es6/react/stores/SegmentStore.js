@@ -273,18 +273,19 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            var trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            var source = SegmentStore.replaceSource(action.id, action.fid, action.source);
+            let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
         case SegmentConstants.UPDATE_TRANSLATION:
-            SegmentStore.emitChange(action.actionType, action.id, action.text);
+            let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);

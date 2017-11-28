@@ -191,7 +191,9 @@ if (SegmentFilter.enabled())
         closeFilter : function() {
             UI.body.removeClass('filtering');
             UI.body.removeClass('sampling-enabled');
-            $('.muted').removeClass('muted');
+            SegmentActions.addClassToSegment(-1, 'muted');
+
+            // $('.muted').removeClass('muted');
 
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;

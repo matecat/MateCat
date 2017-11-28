@@ -1,28 +1,42 @@
 let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
 let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
 let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
 class ReviewTranslationDiffVersion extends React.Component {
 
 
     constructor(props) {
         super(props);
+        this.originalTranslation = this.props.segment.translation;
         this.state = {
+            translation: this.props.segment.translation,
+            addIssue: false,
             selectionObj: null,
             diffPatch: null
         };
 
     }
 
-    getMarkupForTrackChanges() {
-        return { __html : trackChangesHTMLFromDiffArray(this.props.diff) };
+    trackChanges(sid, editareaText) {
+        if (this.props.segment.sid === sid) {
+            this.setState({
+                translation: editareaText,
+            });
+        }
     }
 
-    translationMarkup () {
-        return { __html : UI.decodePlaceholdersToText( this.props.translation ) };
+    openAddIssue() {
+        this.setState({
+            addIssue: true,
+            selectionObj: null,
+            diffPatch: null
+        });
     }
 
     textSelected(data, diffPatch) {
         this.setState({
+            addIssue: true,
             selectionObj: data,
             diffPatch: diffPatch
         });
@@ -30,6 +44,7 @@ class ReviewTranslationDiffVersion extends React.Component {
 
     removeSelection() {
         this.setState({
+            addIssue: false,
             selectionObj: null,
             diffPatch: null
         });
@@ -43,52 +58,50 @@ class ReviewTranslationDiffVersion extends React.Component {
         this.removeSelection();
     }
 
-    getTrackChangesForCurrentVersion () {
-        if ( this.state.segment.version_number != '0' ) {
-            // no track changes possibile for first version
-            let previous = this.findPreviousVersion( this.state.segment.version_number );
-            return trackChangesHTML(
-                UI.clenaupTextFromPleaceholders(previous.translation),
-                UI.clenaupTextFromPleaceholders(
-                    window.cleanupSplitMarker( this.state.segment.translation )
-                ));
-        }
+    getAllIssues () {
+        let issues = [];
+        this.props.versions.forEach(function (version) {
+            if ( !_.isEmpty(version.issues) ) {
+                issues = issues.concat(version.issues);
+            }
+        });
+        return issues;
+    }
+
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.UPDATE_TRANSLATION, this.trackChanges.bind(this));
+    }
+
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.UPDATE_TRANSLATION, this.trackChanges);
     }
 
     render () {
-
-        let versionLabel;
-
-        if ( this.props.isCurrent ) {
-            versionLabel = sprintf('Version %s (current)', this.props.versionNumber );
-        } else {
-            versionLabel = sprintf('Version %s', this.props.versionNumber );
-        }
-
+        let issues = this.getAllIssues();
         return <div className="review-version-wrapper">
             <div className="review-translation-version" >
                 <div className="review-version-header">
-                    <h3>{versionLabel}</h3>
+                    <h3>Live changes</h3>
                 </div>
-
                 <div className="collapsable">
-                    <h4> Translation </h4>
-                    <div ref={(elem)=>this.highlightArea=elem} className="ui ignore message muted issueHighlightArea"
-                         dangerouslySetInnerHTML={this.translationMarkup()} />
-                    <h4> Changes from previous version </h4>
+
                     <ReviewVersionDiff
-                        sid={this.props.sid}
                         textSelectedFn={this.textSelected.bind(this)}
                         removeSelection={this.removeSelection.bind(this)}
+                        previousVersion={this.originalTranslation}
+                        translation={this.state.translation}
+                        segment={this.props.segment}
                         decodeTextFn={UI.decodeText}
-                        diff={this.props.diff}
-                        versionNumber={this.props.versionNumber}
-                        translation={this.props.translation}
-                        previousVersion={this.props.previousVersion}
-                        selectable={this.props.isReview}
+                        selectable={true}
                     />
 
-                    {this.state.selectionObj  ? (
+                    <div className="review-add-issues-button-container">
+                        <a className="ui primary button small"
+                           onClick={this.openAddIssue.bind(this)}
+                        >Add Issue</a>
+                    </div>
+
+                    {this.state.addIssue  ? (
                         <div className="error-type">
                             <ReviewIssueSelectionPanel
                                 sid={this.props.sid}
@@ -104,9 +117,9 @@ class ReviewTranslationDiffVersion extends React.Component {
                             issueMouseEnter={this.issueMouseEnter.bind(this)}
                             issueMouseLeave={this.issueMouseLeave.bind(this)}
                             reviewType={this.props.reviewType}
-                            issues={this.props.issues}
-                            sid={this.props.sid}
-                            versionNumber={this.props.versionNumber} />
+                            issues={issues}
+                            sid={this.props.segment.sid}
+                        />
                     )}
 
 
