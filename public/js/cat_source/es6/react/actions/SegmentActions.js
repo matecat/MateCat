@@ -11,7 +11,7 @@
 
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var SegmentConstants = require('../constants/SegmentConstants');
-
+var SegmentStore = require('../stores/SegmentStore');
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -160,7 +160,7 @@ var SegmentActions = {
     },
     updateTranslation: function (fid, sid, editAreaText) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.UPDATE_TRANSLATION,
+            actionType: SegmentConstants.TRANSLATION_EDITED,
             fid: fid,
             id: sid,
             translation: editAreaText
@@ -247,6 +247,11 @@ var SegmentActions = {
 
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
+    },
+
+    sendNewTranslationIssue: function (sid, data, diff) {
+        let segment = SegmentStore.getSegmentById(sid, UI.getSegmentFileId(UI.getSegmentById(sid))).toJS();
+        return UI.sendNewTranslationIssue(segment, data, diff);
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {

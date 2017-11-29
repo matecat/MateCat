@@ -2089,6 +2089,35 @@ UI = {
         return $(area).text();
     },
 
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div)
+        $div.html(text);
+        var divs = $div.find( 'div' );
+
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
+            $div.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $div.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $div.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $div.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+        }
+
+        $div.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $div.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+
+        return $div.text();
+    },
+
+    /**
+     * Method overwritten in the file ui.contribution.js
+     */
     processContributions : function() {
     },
 

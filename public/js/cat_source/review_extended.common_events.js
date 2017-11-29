@@ -12,5 +12,4 @@ if (ReviewExtended.enabled()) {
             UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         }
     });
-
 }

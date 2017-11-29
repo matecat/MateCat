@@ -24,18 +24,28 @@ if ( ReviewExtended.enabled() ) {
                 $(document).trigger('review:unopenableSegment', section);
                 return false;
             },
-            submitIssue: function (sid, data_array, diff) {
+            submitIssue: function (sid, data_array, diff, version) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 
 
                 var deferreds = _.map(data_array, function (data) {
                     data.diff = diff;
+                    if ( !_.isUndefined(version) ) {
+                        data.version = version;
+                    }
                     return API.SEGMENT.sendSegmentVersionIssue(sid, data)
                 });
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
                 });
+            },
+
+            sendNewTranslationIssue: function(segment, data_array, diff) {
+                return API.SEGMENT.setTranslation(segment)
+                    .done(function (response) {
+                        ReviewExtended.submitIssue(segment.sid, data_array, diff, response.translation.version_number);
+                    });
             },
 
             submitComment : function(id_segment, id_issue, data) {
@@ -53,18 +63,21 @@ if ( ReviewExtended.enabled() ) {
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
             registerReviseTab: function () {
-                SegmentActions.registerTab('review2', true, true);
+                return false;
             },
 
             trackChanges: function (editarea) {
                 var segmentId = UI.getSegmentId($(editarea));
                 var segmentFid = UI.getSegmentFileId($(editarea));
-                var text = UI.postProcessEditarea($(editarea).closest('section'), '.editarea');
-                SegmentActions.updateTranslation(segmentFid, segmentId, htmlEncode(text));
+                SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html());
             },
 
             submitIssues: function (sid, data, diff) {
                 return ReviewExtended.submitIssue(sid, data, diff);
+            },
+
+            sendNewTranslationIssue: function (segment, data, diff) {
+                return ReviewExtended.sendNewTranslationIssue(segment, data, diff);
             },
 
             getSegmentVersionsIssuesHandler(event) {

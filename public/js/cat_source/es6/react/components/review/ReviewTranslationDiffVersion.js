@@ -13,15 +13,18 @@ class ReviewTranslationDiffVersion extends React.Component {
             translation: this.props.segment.translation,
             addIssue: false,
             selectionObj: null,
-            diffPatch: null
+            diffPatch: null,
+            versionNumber: this.props.versions[0].version_number
         };
 
     }
 
     trackChanges(sid, editareaText) {
+        let text = htmlEncode(UI.prepareTextToSend(editareaText));
         if (this.props.segment.sid === sid) {
             this.setState({
-                translation: editareaText,
+                versionNumber: null,
+                translation: text,
             });
         }
     }
@@ -68,12 +71,23 @@ class ReviewTranslationDiffVersion extends React.Component {
         return issues;
     }
 
+    componentWillReceiveProps (nextProps) {
+        this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));
+        this.setState({
+            translation: this.originalTranslation,
+            addIssue: false,
+            selectionObj: null,
+            diffPatch: null,
+            versionNumber: nextProps.versions[0].version_number
+        });
+    }
+
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.UPDATE_TRANSLATION, this.trackChanges.bind(this));
+        SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind(this));
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.UPDATE_TRANSLATION, this.trackChanges);
+        SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges);
     }
 
     render () {
@@ -104,12 +118,14 @@ class ReviewTranslationDiffVersion extends React.Component {
                     {this.state.addIssue  ? (
                         <div className="error-type">
                             <ReviewIssueSelectionPanel
-                                sid={this.props.sid}
+                                sid={this.props.segment.sid}
                                 selection={this.state.selectionObj}
-                                segmentVersion={this.props.versionNumber}
+                                segmentVersion={this.state.versionNumber}
                                 diffPatch={this.state.diffPatch}
                                 closeSelectionPanel={this.removeSelection.bind(this)}
                                 submitIssueCallback={this.removeSelection.bind(this)}
+                                reviewType={this.props.reviewType}
+                                segment={this.props.segment}
                             />
                         </div>
                     ) : (

@@ -175,12 +175,18 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
-        xEditarea = $('#segment-' + id_segment + '-editarea');
-        xSegment = $('#segment-' + id_segment);
-        if(d.original == '') d.original = xEditarea.text();
-        if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
-        UI.setReviewErrorData(d.error_data);
-        UI.trackChanges(xEditarea);
+        if ( Review.type === 'simple' ) {
+            var xEditarea = $('#segment-' + id_segment + '-editarea');
+            var xSegment = $('#segment-' + id_segment);
+            if( d.original === '' ) {
+                d.original = xEditarea.text();
+            }
+            if( !xSegment.find('.original-translation').length ) {
+                xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
+            }
+            UI.setReviewErrorData(d.error_data);
+            UI.trackChanges(xEditarea);
+        }
     });
 
     $.extend(UI, {
