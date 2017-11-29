@@ -210,15 +210,12 @@ $.extend(UI, {
 			var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
 			var brEnd = $('br.end', UI.currentSegment ).detach();
 
+            var newhtml = UI.editarea.html() + missingTags[i];
 			//add tags into the target segment
 			for(var i = 0; i < missingTags.length; i++){
-				var addTagClosing = false;
-
-				UI.editarea.html(
-					UI.editarea.html() + missingTags[i]
-				);
+				newhtml = newhtml + missingTags[i];
 			}
-
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
 			//add again undoCursorPlaceholder
 			UI.editarea.append(undoCursorPlaceholder )
 					   .append(brEnd);
@@ -258,6 +255,8 @@ $.extend(UI, {
             }
             saveSelection();
 
+
+            // Todo: refactor this part
             var editareaClone = UI.editarea.clone();
             editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
             editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));

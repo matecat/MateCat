@@ -266,7 +266,7 @@ if (true)
             UI.startGlossaryMark = '<mark class="inGlossary">';
             UI.endGlossaryMark = '</mark>';
             markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
-            sourceString = $( '.editor .source' ).html();
+            var sourceString = $( '.editor .source' ).html();
 
             $.each( UI.intervalsUnion, function ( index ) {
                 if ( this === UI.lastIntervalUnionAnalysed ) return;
@@ -274,14 +274,14 @@ if (true)
                 added = markLength * index;
                 sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
                 sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
-                $( '.editor .source' ).html( sourceString );
+                SegmentActions.replaceSourceText(UI.getSegmentId(UI.currentSegment) , UI.getSegmentFileId(UI.currentSegment), sourceString)
             } );
             UI.lastIntervalUnionAnalysed = null;
-
-            $( '.editor .source mark mark' ).each( function () {
-                $( this ).replaceWith( $( this ).html() );
-            } );
-
+            setTimeout(function () {
+                $( '.editor .source mark mark' ).each( function () {
+                    $( this ).replaceWith( $( this ).html() );
+                } );
+            }, 100);
             $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( UI.currentSegment ) } );
 
         },
