@@ -1,6 +1,6 @@
-let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
+let ReviewIssuesContainer = require('../review_improved/ReviewIssuesContainer').default;
 let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
-let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
+let ReviewIssueSelectionPanel = require('../review_improved/ReviewIssueSelectionPanel').default;
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
 class ReviewTranslationDiffVersion extends React.Component {

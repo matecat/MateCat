@@ -5,6 +5,9 @@
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function initReactComponents() {
         SegmentActions.mountTranslationIssues();
+        setTimeout(function () {
+            SegmentActions.openIssuesPanel(UI.getSegmentId({sid: UI.currentSegment}));
+        });
     });
 
     $(document).on('translation:change', function(e, data) {

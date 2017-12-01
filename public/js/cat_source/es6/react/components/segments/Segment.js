@@ -8,7 +8,7 @@ let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
-let TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
+let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
 let Immutable = require('immutable');
 
 class Segment extends React.Component {
@@ -99,7 +99,7 @@ class Segment extends React.Component {
     }
 
     addClass(sid, newClass) {
-        if (this.props.segment.sid == sid) {
+        if (this.props.segment.sid == sid || sid === -1) {
             let self = this;
             let classes = this.state.segment_classes.slice();
             if (newClass.indexOf(' ') > 0) {
@@ -122,7 +122,7 @@ class Segment extends React.Component {
     }
 
     removeClass(sid, className) {
-        if (this.props.segment.sid == sid) {
+        if (this.props.segment.sid == sid || sid === -1) {
             let classes = this.state.segment_classes.slice();
             let removeFn = function (item) {
                 let index = classes.indexOf(item);

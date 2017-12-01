@@ -11,11 +11,11 @@ class ReviewIssueSelectionPanel extends React.Component{
     }
 
     autoShortLabel(label) {
-        return label; 
+        return label;
     }
 
     issueCategories() {
-        return JSON.parse(config.lqa_nested_categories).categories ; 
+        return JSON.parse(config.lqa_nested_categories).categories ;
     }
 
     severitySelected( category, event ) {
@@ -30,7 +30,7 @@ class ReviewIssueSelectionPanel extends React.Component{
 
         this.setState({
             selections : selections ,
-            submitDisabled : Object.keys( selections ).length == 0 
+            submitDisabled : Object.keys( selections ).length == 0
         });
 
     }
@@ -47,55 +47,30 @@ class ReviewIssueSelectionPanel extends React.Component{
 
     sendClick() {
         if ( this.state.submitDisabled ) {
-            return; 
+            return;
         }
 
         this.setState({ submitDone: true, submitDisabled : true });
 
-        let message = $(this.textarea).val();
+        var message = $(this.textarea).val();
 
-        let data;
+        let data =  _.map( this.state.selections, function(item,key) {
+            return {
+                'id_category'         : key,
+                'severity'            : item,
+                'target_text'         : this.props.selection.selected_string,
+                'start_node'          : this.props.selection.start_node,
+                'start_offset'        : this.props.selection.start_offset,
+                'end_node'            : this.props.selection.end_node,
+                'end_offset'          : this.props.selection.end_offset,
+                'comment'             : message,
+                'version'             : this.props.segmentVersion,
+            };
+        }.bind(this) );
 
-        if ( this.props.selection ) {
-            data =  _.map( this.state.selections, function(item,key) {
-                return {
-                    'id_category'         : key,
-                    'severity'            : item,
-                    'target_text'         : this.props.selection.selected_string,
-                    'start_node'          : this.props.selection.start_node,
-                    'start_offset'        : this.props.selection.start_offset,
-                    'end_node'            : this.props.selection.end_node,
-                    'end_offset'          : this.props.selection.end_offset,
-                    'comment'             : message,
-                    'version'             : this.props.segmentVersion,
-                };
-            }.bind(this) );
-        } else {
-            data =  _.map( this.state.selections, function(item,key) {
-                return {
-                    'id_category'         : key,
-                    'severity'            : item,
-                    'target_text'         : "",
-                    'start_node'          : 0,
-                    'start_offset'        : 0,
-                    'end_node'            : 0,
-                    'end_offset'          : 0,
-                    'comment'             : message,
-                    'version'             : this.props.segmentVersion,
-                };
-            }.bind(this) );
-        }
-
-        if ( this.props.segmentVersion ) {
-            SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
-                .done( this.props.submitIssueCallback )
-                .fail( this.handleFail.bind(this) ) ;
-        } else if ( this.props.reviewType === "extended" ) {
-            SegmentActions.sendNewTranslationIssue(this.props.sid, data, this.props.diffPatch)
-                .done( this.props.submitIssueCallback )
-                .fail( this.handleFail.bind(this) ) ;
-        }
-
+        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
+            .done( this.props.submitIssueCallback )
+            .fail( this.handleFail.bind(this) ) ;
     }
 
     handleFail() {
@@ -109,13 +84,13 @@ class ReviewIssueSelectionPanel extends React.Component{
         }
     }
     render() {
-        var categoryComponents = []; 
+        var categoryComponents = [];
         var withSeverities = 0;
 
         this.issueCategories().forEach(function(category, i) {
             var selectedValue = "";
 
-            if ( this.state.selections[ category.id ] ) { 
+            if ( this.state.selections[ category.id ] ) {
                 selectedValue = this.state.selections[ category.id ] ;
             }
 
@@ -126,7 +101,7 @@ class ReviewIssueSelectionPanel extends React.Component{
             }
 
             categoryComponents.push(
-                <ReviewIssueCategorySelector 
+                <ReviewIssueCategorySelector
                     key={k}
                     focus={withSeverities == 1}
                     severitySelected={this.severitySelected.bind(this)}
@@ -142,12 +117,12 @@ class ReviewIssueSelectionPanel extends React.Component{
                     var kk = 'category-selector-' + key ;
                     var selectedValue = "";
 
-                    if ( this.state.selections[ category.id ] ) { 
+                    if ( this.state.selections[ category.id ] ) {
                         selectedValue = this.state.selections[ category.id ] ;
                     }
 
                     categoryComponents.push(
-                        <ReviewIssueCategorySelector 
+                        <ReviewIssueCategorySelector
                             key={kk}
                             focus={withSeverities == 1}
                             selectedValue={selectedValue}
@@ -155,7 +130,7 @@ class ReviewIssueSelectionPanel extends React.Component{
                             nested={true}
                             category={category}  />
                     );
-                }.bind(this) ); 
+                }.bind(this) );
             }
         }.bind(this));
 
@@ -164,34 +139,30 @@ class ReviewIssueSelectionPanel extends React.Component{
         return <div className="review-issue-selection-panel">
 
             <h3>Error selection</h3>
-            { this.props.selections ? (
-                <p>You selected "
-                    <span className="error-selection-highlight">{this.props.selection.selected_string}</span>
-                    " from segment {this.props.sid}</p>
 
-            ): (null)}
 
+            <p>You selected "<span className="error-selection-highlight">{this.props.selection.selected_string}</span>" from segment {this.props.sid}</p>
             <h4>Select issue type</h4>
             <table className="review-issue-category-list">
                 <tbody>
-                    {categoryComponents}
+                {categoryComponents}
                 </tbody>
             </table>
 
 
-        <div className="review-issue-terminal">
+            <div className="review-issue-terminal">
             <textarea ref={(textarea)=>this.textarea = textarea} data-minheight="40" data-maxheight="90"
-                className=""
-                placeholder="Write a comment..."
-                />
+                      className=""
+                      placeholder="Write a comment..."
+            />
 
-            <div className="review-issue-buttons-right">
-                {this.props.closeSelectionPanel ? (<button onClick={this.closePanel.bind(this)}
-                                                           className="ui button small">Close</button>) : (null)}
-                <button onClick={this.sendClick.bind(this)}
-                    className={this.buttonClasses()}>{buttonLabel}</button>
+                <div className="review-issue-buttons-right">
+                    {this.props.closeSelectionPanel ? (<button onClick={this.closePanel.bind(this)}
+                                                               className="ui button small">Close</button>) : (null)}
+                    <button onClick={this.sendClick.bind(this)}
+                            className={this.buttonClasses()}>{buttonLabel}</button>
+                </div>
             </div>
-        </div>
         </div>
     }
 }
