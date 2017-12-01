@@ -12,7 +12,7 @@ class OutsourceVendor extends React.Component {
             : {};
         this.state = {
             outsource: false,
-            revision: true,
+            revision: false,
             chunkQuote: null,
             outsourceConfirmed: (!!this.props.job.get('outsource')),
             extendedView: this.props.extendedView,
