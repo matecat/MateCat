@@ -54,48 +54,24 @@ class ReviewIssueSelectionPanel extends React.Component{
 
         let message = $(this.textarea).val();
 
-        let data;
+        let data =  _.map( this.state.selections, function(item,key) {
+            return {
+                'id_category'         : key,
+                'severity'            : item,
+                'target_text'         : this.props.selection.selected_string,
+                'start_node'          : this.props.selection.start_node,
+                'start_offset'        : this.props.selection.start_offset,
+                'end_node'            : this.props.selection.end_node,
+                'end_offset'          : this.props.selection.end_offset,
+                'comment'             : message,
+                'version'             : this.props.segmentVersion,
+            };
+        }.bind(this) );
 
-        if ( this.props.selection ) {
-            data =  _.map( this.state.selections, function(item,key) {
-                return {
-                    'id_category'         : key,
-                    'severity'            : item,
-                    'target_text'         : this.props.selection.selected_string,
-                    'start_node'          : this.props.selection.start_node,
-                    'start_offset'        : this.props.selection.start_offset,
-                    'end_node'            : this.props.selection.end_node,
-                    'end_offset'          : this.props.selection.end_offset,
-                    'comment'             : message,
-                    'version'             : this.props.segmentVersion,
-                };
-            }.bind(this) );
-        } else {
-            data =  _.map( this.state.selections, function(item,key) {
-                return {
-                    'id_category'         : key,
-                    'severity'            : item,
-                    'target_text'         : "",
-                    'start_node'          : 0,
-                    'start_offset'        : 0,
-                    'end_node'            : 0,
-                    'end_offset'          : 0,
-                    'comment'             : message,
-                    'version'             : this.props.segmentVersion,
-                };
-            }.bind(this) );
-        }
 
-        if ( this.props.segmentVersion ) {
-            SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
-                .done( this.props.submitIssueCallback )
-                .fail( this.handleFail.bind(this) ) ;
-        } else if ( this.props.reviewType === "extended" ) {
-            SegmentActions.sendNewTranslationIssue(this.props.sid, data, this.props.diffPatch)
-                .done( this.props.submitIssueCallback )
-                .fail( this.handleFail.bind(this) ) ;
-        }
-
+        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
+            .done( this.props.submitIssueCallback )
+            .fail( this.handleFail.bind(this) ) ;
     }
 
     handleFail() {

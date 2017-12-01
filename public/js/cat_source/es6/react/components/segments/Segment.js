@@ -8,7 +8,7 @@ let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
-let TranslationIssuesSideButtons = require('../TranslationIssuesSideButton').default;
+let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
 let Immutable = require('immutable');
 
 class Segment extends React.Component {

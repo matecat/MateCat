@@ -1,5 +1,5 @@
-let ReviewTranslationDiffVersion = require("./review/ReviewTranslationDiffVersion").default;
-let ReviewTranslationVersion = require("./review/ReviewTranslationVersion").default;
+let ReviewTranslationDiffVersion = require("../review_extended/ReviewTranslationDiffVersion").default;
+let ReviewTranslationVersion = require("../review_improved/ReviewTranslationVersion").default;
 class TranslationIssuesOverviewPanel extends React.Component {
     
     

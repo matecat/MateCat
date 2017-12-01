@@ -12,8 +12,8 @@ window.MC.SegmentMainButtons = require('./components/SegmentMainButtons').defaul
 window.classnames = require('classnames');
 
 window.ReviewSidePanel = require('./components/review/ReviewSidePanel').default ;
-window.ReviewTranslationIssueCommentsContainer = require('./components/review/ReviewTranslationIssueCommentsContainer').default ;
-window.ReviewIssueCategorySelector = require('./components/review/ReviewIssueCategorySelector').default ;
+window.ReviewTranslationIssueCommentsContainer = require('./components/review_improved/ReviewTranslationIssueCommentsContainer').default ;
+window.ReviewIssueCategorySelector = require('./components/review_improved/ReviewIssueCategorySelector').default ;
 window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
 
 
