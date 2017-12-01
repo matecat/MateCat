@@ -1,5 +1,40 @@
+.review-extended-panel {
+    position: absolute;
+    background: #efeef4 !important;
+    padding: 15px;
+    .re-track-changes-box {
+        .re-header-track {
+            .re-track-changes {
+                background: #fff;
+                padding: 5px 10px;
+                min-height: 65px;
+                font-size: 18px;
+                .added {
+                    background: #b0ffb3;
+                    text-decoration: none;
+                }
+                .deleted {
+                    background: #ffc7ca;
+                    text-decoration: line-through;
+                }
+                &::selection {
+                    background-color: #FFFF00;
+                }
+                &.no-select {
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    -khtml-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+                }
+            }
+        }
 
-.tab.review {
+    }
+}
+
+/*.tab.review {
     .track-changes {
         .segment-diff-container::selection, span::selection, br::selection {
             -webkit-user-select: none;
@@ -52,9 +87,9 @@
         }
     }
 
-}
+}*/
 
-#review-side-panel.review-extended-panel {
+/*#review-side-panel.review-extended-panel {
     h4 {
         margin: 0 0 0 15px;
     }
@@ -107,10 +142,15 @@
             }
         }
     }
-}
+}*/
 
 /*******************/
+/*
 .review-add-issues-button-container {
     text-align: right;
     margin-bottom: 20px;
 }
+*/
+
+
+/* Nuovo SCSS per panel right */
