@@ -99,7 +99,7 @@ class Segment extends React.Component {
     }
 
     addClass(sid, newClass) {
-        if (this.props.segment.sid == sid || sid === -1) {
+        if ( this.props.segment.sid == sid || sid === -1 || sid.indexOf(this.props.segment.sid) !== -1 ) {
             let self = this;
             let classes = this.state.segment_classes.slice();
             if (newClass.indexOf(' ') > 0) {
@@ -122,7 +122,7 @@ class Segment extends React.Component {
     }
 
     removeClass(sid, className) {
-        if (this.props.segment.sid == sid || sid === -1) {
+        if ( this.props.segment.sid == sid || sid === -1 || sid.indexOf(this.props.segment.sid) !== -1 ) {
             let classes = this.state.segment_classes.slice();
             let removeFn = function (item) {
                 let index = classes.indexOf(item);

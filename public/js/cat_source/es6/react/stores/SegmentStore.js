@@ -249,6 +249,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
+        case SegmentConstants.ADD_SEGMENTS_CLASS:
+            SegmentStore.emitChange(action.actionType, action.sidList, action.newClass);
+            break;
         case SegmentConstants.REMOVE_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
