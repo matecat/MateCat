@@ -166,12 +166,14 @@ if (SegmentFilter.enabled())
 
             if ( this.getStoredState().serverData ) {
                 var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
+                    SegmentActions.addClassToSegment(i, 'muted');
                     return '#segment-' + i ;
                 });
                 var selector = 'section:not( ' + ids + ')';
 
                 UI.body.addClass('sampling-enabled');
-                $( selector ).addClass('muted');
+
+                // $( selector ).addClass('muted');
 
                 setTimeout( function() {
                     tryToFocusLastSegment();
@@ -191,7 +193,7 @@ if (SegmentFilter.enabled())
         closeFilter : function() {
             UI.body.removeClass('filtering');
             UI.body.removeClass('sampling-enabled');
-            SegmentActions.addClassToSegment(-1, 'muted');
+            SegmentActions.removeClassToSegment(-1, 'muted');
 
             // $('.muted').removeClass('muted');
 
