@@ -169,11 +169,7 @@ if (SegmentFilter.enabled())
                     SegmentActions.addClassToSegment(i, 'muted');
                     return '#segment-' + i ;
                 });
-                var selector = 'section:not( ' + ids + ')';
-
                 UI.body.addClass('sampling-enabled');
-
-                // $( selector ).addClass('muted');
 
                 setTimeout( function() {
                     tryToFocusLastSegment();
@@ -194,9 +190,6 @@ if (SegmentFilter.enabled())
             UI.body.removeClass('filtering');
             UI.body.removeClass('sampling-enabled');
             SegmentActions.removeClassToSegment(-1, 'muted');
-
-            // $('.muted').removeClass('muted');
-
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );
