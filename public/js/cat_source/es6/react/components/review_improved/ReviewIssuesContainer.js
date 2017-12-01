@@ -1,3 +1,4 @@
+let ReviewTranslationIssue =  require("../review_improved/ReviewTranslationIssue").default;
 class ReviewIssuesContainer extends React.Component {
 
     constructor(props) {

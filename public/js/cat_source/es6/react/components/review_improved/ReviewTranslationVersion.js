@@ -1,68 +1,101 @@
+let ReviewIssuesContainer = require('./ReviewIssuesContainer').default;
+class ReviewTranslationVersion extends React.Component {
 
-class ReviewTranslationIssue extends React.Component{
 
     constructor(props) {
         super(props);
         this.state = {
-            issue : MateCat.db
-                .segment_translation_issues.by('id', this.props.issueId )
+            collapsed : this.props.isCurrent == false
         };
+
     }
 
-    categoryLabel() {
-        var id_category = this.state.issue.id_category ;
-        config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[").replace(/\]"/g, "]").replace(/\"\{/g, "{").replace(/\}"/g, "}")
-        return _( JSON.parse( config.lqa_flat_categories ))
-            .select(function(e) {
-                return parseInt(e.id) == id_category ;
-            }).first().label
+    componentWillReceiveProps (nextProps) {
+        this.setState({ collapsed : !nextProps.isCurrent, trackChanges : false });
     }
 
-    deleteIssue(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        ReviewImproved.deleteIssue(this.state.issue);
+    issueMouseEnter ( issue, event, reactid ) {
+        let node = $( this.highlightArea ) ;
+        ReviewImproved.highlightIssue( issue, node );
     }
-    render() {
-        var category_label = this.categoryLabel();
-        var formatted_date = moment( this.state.issue.created_at ).format('lll');
 
-        var commentLine = null;
-        var comment = this.state.issue.comment ;
+    issueMouseLeave () {
+        let selection = document.getSelection();
+        selection.removeAllRanges();
+    }
 
-        if ( comment ) {
-            commentLine = <div className="review-issue-thread-entry">
-                <strong>Comment:</strong> { comment }</div>;
+    translationMarkup () {
+        return { __html : UI.decodePlaceholdersToText( this.props.translation ) };
+    }
+
+    toggleTrackChanges (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({trackChanges : !this.state.trackChanges });
+    }
+
+    getMarkupForTrackChanges () {
+        return { __html :  this.props.trackChangesMarkup  };
+    }
+
+    render () {
+        let cs = classnames({
+            collapsed : this.state.collapsed,
+            'review-translation-version' : true
+        });
+        let versionLabel;
+
+        if ( this.props.isCurrent ) {
+            versionLabel = sprintf('Version %s (current)', this.props.versionNumber );
+        } else {
+            versionLabel = sprintf('Version %s', this.props.versionNumber );
         }
 
-        var deleteIssue ;
 
-        if ( config.isReview ) {
-            deleteIssue = <a href="#" className="cancel-project"
-                             onClick={this.deleteIssue.bind(this)}>Delete issue</a>;
+        let styleForVersionText = {
+            display: this.state.trackChanges ? 'none' : 'block'
+        };
+        let styleForTrackChanges = {
+            display: this.state.trackChanges ? 'block' : 'none'
+        };
+
+        let labelForToggle = this.state.trackChanges ? 'Issues' : 'Track changes' ;
+        let trackChangesLink
+        if ( this.props.trackChangesMarkup ) {
+            trackChangesLink = <a href="#" onClick={this.toggleTrackChanges.bind(this)}
+                                  className="review-track-changes-toggle">{labelForToggle}</a>;
         }
 
-        return <div className="review-issue-detail"
-                    onMouseEnter={this.props.issueMouseEnter.bind(null, this.state.issue) }
-                    onMouseLeave={this.props.issueMouseLeave}
-                    onClick={this.props.issueMouseEnter.bind(null, this.state.issue)} >
-            <h4>Issue # {this.props.progressiveNumber} </h4> <span className="review-issue-date">{formatted_date} </span>
-            <br />
-            <span className="review-issue-severity">{this.state.issue.severity} - </span><span className="review-issue-label">{category_label} </span>
-            <br />
-            <div className="review-issue-comment">
-                {commentLine}
+        return <div className="review-version-wrapper">
+            <div className={cs} >
+                <div className="review-version-header">
+                    <h3>{versionLabel}</h3>
+                    {trackChangesLink}
+                </div>
+
+                <div className="collapsable">
+
+                    <div ref={(elem)=>this.highlightArea=elem} className="ui ignore message muted-text-box issueHighlightArea" style={styleForVersionText}
+                         dangerouslySetInnerHTML={this.translationMarkup()} />
+
+                    <div style={styleForTrackChanges}
+                         className="ui ignore message muted-text-box review-track-changes-box"
+                         dangerouslySetInnerHTML={this.getMarkupForTrackChanges()} />
+
+
+
+                    <ReviewIssuesContainer
+                        issueMouseEnter={this.issueMouseEnter.bind(this)}
+                        issueMouseLeave={this.issueMouseLeave.bind(this)}
+                        reviewType={this.props.reviewType}
+                        sid={this.props.sid}
+                        versionNumber={this.props.versionNumber} />
+                </div>
             </div>
+        </div>
+            ;
 
-            <ReviewTranslationIssueCommentsContainer
-                sid={this.props.sid}
-                issueId={this.props.issueId}
-                reviewType={this.props.reviewType}
-            />
-
-            {deleteIssue}
-        </div>;
     }
 }
 
-export default ReviewTranslationIssue ;
+export default ReviewTranslationVersion;
