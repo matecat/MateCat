@@ -166,6 +166,10 @@ class getContributionController extends ajaxController {
                 $config[ 'get_mt' ] = false;
             }
 
+            if( $this->jobData->only_private_tm ){
+                $config[ 'onlyprivate' ] = true;
+            }
+
             $_TMS = $this->id_tms;
         } else if ( $this->id_tms == 0 && $this->id_mt_engine == 1 ) {
 

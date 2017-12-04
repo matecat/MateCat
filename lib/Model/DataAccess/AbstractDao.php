@@ -508,6 +508,7 @@ abstract class DataAccess_AbstractDao {
      * @param array                                                    $options
      *
      * @return bool
+     * @throws \Exceptions\ValidationError
      */
     public static function updateStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
         $struct->ensureValid();
