@@ -5,6 +5,7 @@ use Constants_ProjectStatus;
 use FeatureSet;
 use FilesStorage;
 use PDO;
+use Projects_MetadataDao;
 use \TaskRunner\Commons\AbstractDaemon,
     \TaskRunner\Commons\QueueElement,
     TaskRunner\Commons\Context,
@@ -370,7 +371,23 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
+    /**
+     * @param      $pid
+     * @param      $equivalentWordMapping
+     * @param bool $perform_Tms_Analysis
+     *
+     * @return mixed
+     * @throws Exception
+     */
     protected function _insertFastAnalysis( $pid, $equivalentWordMapping, $perform_Tms_Analysis = true ) {
+
+        /**
+         * Ensure we have fresh data from master node
+         */
+        Database::obtain()->getConnection()->beginTransaction();
+        $projectStruct = \Projects_ProjectDao::findById( $pid );
+        $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
+        Database::obtain()->getConnection()->commit();
 
         $db   = Database::obtain();
         $data = array();
@@ -560,9 +577,11 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'tm_keys' ]          = $this->actual_project_row[ 'tm_keys' ];
                 $queue_element[ 'id_tms' ]           = $this->actual_project_row[ 'id_tms' ];
                 $queue_element[ 'id_mt_engine' ]     = $this->actual_project_row[ 'id_mt_engine' ];
+                $queue_element[ 'features' ]         = $projectFeaturesString;
+                $queue_element[ 'only_private' ]     = $this->actual_project_row[ 'only_private_tm' ];
 
-                $queue_element[ 'context_before' ] = @$this->segments[ $k -1 ][ 'segment' ];
-                $queue_element[ 'context_after' ]  = @$this->segments[ $k +1 ][ 'segment' ];
+                $queue_element[ 'context_before' ]   = @$this->segments[ $k -1 ][ 'segment' ];
+                $queue_element[ 'context_after' ]    = @$this->segments[ $k +1 ][ 'segment' ];
 
                 /**
                  * remove some unuseful fields
@@ -768,7 +787,7 @@ HD;
         }
 
         $query = "
-        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE status_analysis = :project_status $and_InstanceId
