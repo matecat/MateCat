@@ -73,7 +73,7 @@
                 }
             });
             $("#mt_engine_int").change(function() {
-                $('#add-mt-provider-cancel').hide();
+                // $('#add-mt-provider-cancel').hide();
                 $('#mt-provider-details .error').empty();
 
                 $(".insert-tm").show();
@@ -111,10 +111,12 @@
                 if (provider === 'mmt') {
                     var props = {
                         modalName: 'mmt-message-modal',
-                        text: 'MMT is an adaptive machine translation system that learns from your translation memories ' +
-                        'and corrections. To provide the best results,<strong>the following data will be synchronised with your ' +
-                        'private MMT engine</strong>: <ul><li>Private translation memories uploaded to MateCat</li><li>All segments translated or revised in MateCat </li></ul>' +
-                        'To stop data from being synchronised, please delete the MMT engine from your list of available engines in MateCat.',
+                        text: 'MMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
+                        'To provide the best results, <b>the following data will be synchronized with your private MMT engine:</b>' +
+                        '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
+                        '<li>Private translation memories uploaded to MateCat</li>' +
+                        '<li>All segments translated or revised in MateCat</li></ul>' +
+                        'To stop data from being synchronized, please delete the MMT engine from your list of available engines in MateCat.',
                         successText: "Continue",
                         successCallback: function() {
                             UI.addMTEngine(provider, providerName);
@@ -131,9 +133,11 @@
                 }
             });
             $('#add-mt-provider-cancel').click(function(e) {
-                console.log('clicked add-mt-provider-cancel');
                 $(".add-mt-engine").show();
                 $(".insert-tm").addClass('hide');
+                $('#mt_engine_int').val('none').trigger('change');
+                $(".insert-tm").addClass('hide').removeAttr('style');
+                $('#add-mt-provider-cancel').show();
             });
             $('#add-mt-provider-cancel-int').click(function(e) {
                 $(".add-mt-engine").show();
@@ -1127,12 +1131,14 @@
                 UI.clearTMPanel();
             }
             if(!APP.isCattool) return;
-            data = this.extractTMdataFromTable();
+            var data = this.extractTMdataFromTable();
+            var getPublicMatches = $( '#activetm' ).find( 'tr.mymemory .lookup input' ).is( ':checked' );
             APP.doRequest({
                 data: {
                     action: 'updateJobKeys',
                     job_id: config.job_id,
                     job_pass: config.password,
+                    get_public_matches: getPublicMatches,
                     data: data
                 },
                 error: function() {
@@ -2010,6 +2016,11 @@
                 placement : 's',
             });
 
+            var myMemoryLookupCheck = $('#activetm tr.mymemory .lookup div');
+            myMemoryLookupCheck.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Check to get public contributions.</div>");
+            myMemoryLookupCheck.powerTip({
+                placement : 's',
+            });
 
         },
 

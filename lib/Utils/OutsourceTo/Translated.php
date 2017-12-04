@@ -120,13 +120,16 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $this->_outsource_login_url_ko      = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
         $this->_outsource_url_confirm       = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
-        $this->_curlOptions = array(    CURLOPT_HEADER         => false,
-                                        CURLOPT_RETURNTRANSFER => true,
-                                        CURLOPT_HEADER         => 0,
-                                        CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                                        CURLOPT_CONNECTTIMEOUT => 10,
-                                        CURLOPT_SSL_VERIFYPEER => true,
-                                        CURLOPT_SSL_VERIFYHOST => 2 );
+        $this->_curlOptions = [
+                CURLOPT_HEADER         => 0,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HTTPGET        => true,
+                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5
+        ];
     }
 
 
@@ -218,18 +221,20 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // NOTE: the vendor returns an error in case words = 0 -> make sure $words is at least 1
             $words = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
 
-            $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=outsourced&cid=htsdemo&p=htsdemo5" .
-                "&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_words=$words" .
-                "&matecat_jid=" . $job[ 'jid' ] . "&matecat_jpass=" . $job[ 'jpassword' ] . "&of=json";
+            $url = "http://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
+                    'f'             => 'outsourced',
+                    'cid'           => 'htsdemo',
+                    'p'             => 'htsdemo5',
+                    'matecat_pid'   => $this->pid,
+                    'matecat_ppass' => $this->ppassword,
+                    'matecat_words' => $words,
+                    'matecat_jid'   => $job[ 'jid' ],
+                    'matecat_jpass' => $job[ 'jpassword' ],
+                    'of'            => 'json'
+            ], PHP_QUERY_RFC3986 );
 
-            $curl_opt = array(
-                    CURLOPT_HTTPGET        => true,
-                    CURLOPT_TIMEOUT        => 15,
-                    CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                    CURLOPT_CONNECTTIMEOUT => 5
-            );
+            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced" );
 
-            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced", $curl_opt );
         }
 
 
@@ -325,20 +330,27 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // and provide a MySQL -like date format. E.g. "1989-10-15 18:24:00"
             $fixedDeliveryDateForQuote = ( $this->fixedDelivery > 0 ) ? date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 ) : "0";
 
-            $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target" .
-                "&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$words&df=matecat&matecat_pid=" . $this->pid .
-                "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . urlencode($volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ]) .
-                "&subject=$subject&jt=R&fd=" . urlencode( $fixedDeliveryDateForQuote ) . "&of=json";
-
-            $curl_opt = array(
-                    CURLOPT_HTTPGET        => true,
-                    CURLOPT_TIMEOUT        => 15,
-                    CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                    CURLOPT_CONNECTTIMEOUT => 5
-            );
+            $url = "http://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
+                    'f'             => 'quote',
+                    'cid'           => 'htsdemo',
+                    'p'             => 'htsdemo5',
+                    's'             => $source,
+                    't'             => $target,
+                    'pn'            => "MATECAT_{$job['jid']}-{$job['jpassword']}",
+                    'w'             => $words,
+                    'df'            => 'matecat',
+                    'matecat_pid'   => $this->pid,
+                    'matecat_ppass' => $this->ppassword,
+                    'matecat_pname' => $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ],
+                    'subject'       => $subject,
+                    'jt'            => 'R',
+                    'fd'            => $fixedDeliveryDateForQuote,
+                    'of'            => 'json'
+            ], PHP_QUERY_RFC3986 );
 
             Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
-            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery, $curl_opt );
+            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
+
         }
 
 

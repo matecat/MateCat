@@ -29,6 +29,8 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
     protected $_isAnalysis   = false;
     protected $_skipAnalysis = false;
 
+    protected $featureSet ;
+
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
         $this->className    = get_class( $this );
@@ -42,6 +44,7 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
+        $this->featureSet = new FeatureSet() ;
     }
 
     /**
