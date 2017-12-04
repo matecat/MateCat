@@ -1506,7 +1506,7 @@ font-size: 18px;
 
 #sign-in-o,
 #sign-in-o-mt {
-padding: 5px 10px 10px;
+padding: 5px 10px 0px;
 margin: 0 auto;
 width: 200px;
 text-align: center;
