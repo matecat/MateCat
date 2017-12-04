@@ -25,6 +25,7 @@ header {
     transition: margin-top 200ms ease-out;
     -webkit-transition: margin-top 200ms ease-out;
     box-sizing: content-box;
+    min-width: 1024px;
 }
 
 body.login header {
@@ -262,6 +263,15 @@ section.opened .warnings {
 .cattool .breadcrumbs {
     padding: 17px 0 4px 15px;
 }
+@media only screen and (max-width: 1060px)  {
+    .cattool .breadcrumbs {
+        font-size: 12px;
+    }
+    .cattool .breadcrumbs #pname {
+        margin-left: -9px;
+    }
+}
+
 
 .cattool #quality-report {
     margin: 3px -10px 0px 10px !important;
@@ -316,10 +326,6 @@ section.opened .warnings {
 
 .breadcrumbs #pname .details {
     float: left;
-}
-
-.breadcrumbs span {
-    display: inline-block;
 }
 
 .logo {

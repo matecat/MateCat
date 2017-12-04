@@ -17,22 +17,12 @@ if ( ReviewExtended.enabled() ) {
     (function (ReviewExtended, $,undefined) {
 
         $.extend(ReviewExtended, {
-            evalOpenableSegment: function (section) {
-                if (isTranslated(section)) return true;
-                var sid = UI.getSegmentId(section);
-                alertNotTranslatedYet(sid);
-                $(document).trigger('review:unopenableSegment', section);
-                return false;
-            },
-            submitIssue: function (sid, data_array, diff, version) {
+            submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 
 
                 var deferreds = _.map(data_array, function (data) {
                     data.diff = diff;
-                    if ( !_.isUndefined(version) ) {
-                        data.version = version;
-                    }
                     return API.SEGMENT.sendSegmentVersionIssue(sid, data)
                 });
 
@@ -94,28 +84,28 @@ if ( ReviewExtended.enabled() ) {
                     });
             },
 
-            clickOnApprovedButton: function (e, button) {
-                // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-                // because of the event is triggered even on download button
-                e.preventDefault();
-                var goToNextNotApproved = ($(button).hasClass('approved') ) ? false : true;
-
-                $('.sub-editor.review .error-type').removeClass('error');
-
-                UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
-
-                if (UI.currentSegment.data('modified')) {
-                    SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
-                    SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
-                    UI.currentSegment.data('modified', false);
-                } else {
-                    if (goToNextNotApproved) {
-                        UI.openNextTranslated();
-                    } else {
-                        UI.gotoNextSegment();
-                    }
-                }
-            },
+            // clickOnApprovedButton: function (e, button) {
+            //     // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+            //     // because of the event is triggered even on download button
+            //     e.preventDefault();
+            //     var goToNextNotApproved = ($(button).hasClass('approved') ) ? false : true;
+            //
+            //     $('.sub-editor.review .error-type').removeClass('error');
+            //
+            //     UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
+            //
+            //     if (UI.currentSegment.data('modified')) {
+            //         SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
+            //         SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+            //         UI.currentSegment.data('modified', false);
+            //     } else {
+            //         if (goToNextNotApproved) {
+            //             UI.openNextTranslated();
+            //         } else {
+            //             UI.gotoNextSegment();
+            //         }
+            //     }
+            // },
 
             deleteTranslationIssue : function( context ) {
                 console.debug('delete issue', context);

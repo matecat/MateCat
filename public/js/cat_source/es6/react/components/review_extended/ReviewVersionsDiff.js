@@ -228,7 +228,7 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     applyWrapper(sid, issue) {
-        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.translation_version)) {
+        if ( this.props.segment.sid === sid ) {
             this.restoreSelection(issue);
         }
     }
