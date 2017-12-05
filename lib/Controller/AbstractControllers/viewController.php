@@ -352,6 +352,10 @@ abstract class viewController extends controller {
         return $this->logged_user;
     }
 
+    public function getUser(){
+        return $this->logged_user;
+    }
+
     /**
      * @return string
      */
