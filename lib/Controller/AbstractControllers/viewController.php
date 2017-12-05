@@ -352,6 +352,10 @@ abstract class viewController extends controller {
         return $this->logged_user;
     }
 
+    /**
+     * @deprecated TODO remove in the next Release ( plugin compatibility method )
+     * @return Users_UserStruct
+     */
     public function getUser(){
         return $this->logged_user;
     }
