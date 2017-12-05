@@ -204,14 +204,12 @@ body.searchActive #filterSwitch {
     clear: left;
     color: #D65959;
     float: left;
-    position: relative;
     margin-left: -10px;
-    padding: 2px 0;
     font-size: 14px;
     max-width: 50%;
-    text-align: left;
-    margin-bottom: 0px;
+    margin-top: 12px;
     display: none;
+    margin-bottom: 0;
 }
 
 .warnings,
@@ -2646,10 +2644,10 @@ body.archived section .text {
     /*color: #fff;*/
 }
 
-section.readonly .status-container,
+/*section.readonly .status-container,
 body.archived section .status-container {
-    /*display: none;*/
-}
+    display: none;
+}*/
 
 .editarea div:last-child {
     margin-bottom: -22px !important;
@@ -2657,16 +2655,15 @@ body.archived section .status-container {
 
 .editor .editarea {
     width: 100%;
-    height: 96% !important;
     font-size: 18px;
-    color: #000;
     margin: -2px 0 5px -11px;
-    border: 1px solid #727272;
-    box-shadow: inset 0 1px 2px #ccc;
-    -webkit-box-shadow: inset 0 1px 2px #ccc;
     word-break: normal;
     font-variant-ligatures: none;
     line-height: 27px;
+    box-shadow: inset 0 1px 3px #ddd;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    outline: none;
+    padding: 5px 10px;
 }
 .editor.editarea
 .highlighted1{
@@ -2718,10 +2715,13 @@ border-color: transparent;
 	background-color: #fff !important;
 }*/
 .editarea:hover {
-    border: 1px solid #666;
-    cursor: text;
-    color: #000;
+    border-color: rgba(34, 36, 38, 0.35);
+    box-shadow: none;
+}
 
+.editarea:focus {
+    border: 1px solid #96C8DA;
+    box-shadow: inset 0px 0px 2px 2px #96C8DA;
 }
 
 body.rtl-target .editor .editarea span {
@@ -5374,9 +5374,9 @@ section:hover .segment-side-buttons {
     margin-right: 11px;
 }
 
-*, *:before, *:after {
+/**, *:before, *:after {
     box-sizing: content-box;
-}
+}*/
 
 /*Editor Toggle*/
 .editor .toggle {
