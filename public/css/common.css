@@ -1495,7 +1495,7 @@ font-size: 18px;
 
 #sign-in-o,
 #sign-in-o-mt {
-padding: 5px 10px 10px;
+padding: 10px 10px 0px;
 margin: 0 auto;
 width: 200px;
 text-align: center;
@@ -2549,7 +2549,7 @@ display: block;
 .addrow label {float:left;}
 
 .mgmt-panel p {
-    margin: 0 0 20px;
+    margin: 136px 0 20px;
     line-height: 34px;
 }
 

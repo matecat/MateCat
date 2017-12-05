@@ -276,18 +276,23 @@ body.analyze{
                 }
                 .title-job {
                     display: inline-block;
-                    width: 26%;
+                    width: 28%;
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
+                    padding-right: 0;
+                    margin-right: 0;
                     &.splitted {
                         width: 78%;
+                        .job-id {
+                            min-width: unset;
+                        }
                     }
 
                 }
                 .titles-compare {
                     display: inline-block;
-                    width: 52%;
+                    width: 50%;
                     text-align: center;
                     padding-left: 0;
                     padding-right: 0;
@@ -388,11 +393,11 @@ body.analyze{
                                 }
                                 @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                     .source-target {
-                                        max-width: 70% !important;
+                                        max-width: 71% !important;
                                         .source-box{
                                             &.no-split {
-                                                max-width: 41%;
-                                                min-width: 30px;
+                                                max-width: 47%;
+                                                min-width: 60px;
                                                 vertical-align: middle;
                                                 overflow: hidden;
                                                 text-overflow: ellipsis;
@@ -400,11 +405,6 @@ body.analyze{
                                         }
                                     }
                                 }
-                                /*@media only screen and (max-width: 991px) and (min-width: 768px) {
-                                    .source-target {
-                                        max-width: 70% !important;
-                                    }
-                                }*/
                             }
                         }
                     }
@@ -523,7 +523,7 @@ body.analyze{
         }
         .job-id {
             display: inline-block;
-            min-width: 70px;
+            min-width: 22%;
             color: #969696;
             font-size: 14px;
             position: relative;
@@ -534,10 +534,9 @@ body.analyze{
         }
 
         .source-target {
-            min-width: 167px;
             display: inline-block;
             font-weight: bold;
-            max-width: 70%;
+            max-width: 76%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -571,8 +570,8 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 50%;
-                    min-width: 30px;
+                    max-width: 46%;
+                    min-width: 90px;
                     vertical-align: middle;
                     white-space: nowrap;
                     overflow: hidden;
