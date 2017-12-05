@@ -101,7 +101,7 @@
                 .issues-list {
                     .issue {
                         background: #FFFFFF;
-                        padding: 5px 10px;
+                        padding: 5px 5px 5px 10px;
                         .issue-head {
                             width: 50%;
                             display: inline-block;
@@ -116,7 +116,7 @@
                         .issue-activity-icon {
                             width: 50%;
                             display: inline-block;
-                            vertical-align: middle;
+                            vertical-align: top;
                             text-align: right;
                             button {
                                 padding: 3px;

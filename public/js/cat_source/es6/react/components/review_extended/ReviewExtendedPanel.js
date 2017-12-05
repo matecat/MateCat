@@ -99,7 +99,7 @@ class ReviewExtendedPanel extends React.Component{
                                 </div>
                             </div>
                             <div className="selected-text">
-                                <div></div>
+                                <div className="selected">Ciao come stai?</div>
                             </div>
                         </div>
                     </div>
