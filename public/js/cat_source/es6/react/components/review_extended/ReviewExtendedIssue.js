@@ -20,7 +20,7 @@ class ReviewExtendedIssue extends React.Component{
     deleteIssue(event) {
         event.preventDefault();
         event.stopPropagation();
-        ReviewImproved.deleteIssue(this.props.issue);
+        SegmentActions.deleteIssue(this.props.issue)
     }
     render() {
         let category_label = this.categoryLabel();
