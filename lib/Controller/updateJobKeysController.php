@@ -10,12 +10,12 @@
 class updateJobKeysController extends ajaxController {
 
     private $job_id;
-
     private $job_pass;
 
     private $tm_keys;
+    private $only_private;
 
-    private $jobData = array();
+    private $jobData = [];
 
     public function __construct() {
 
@@ -24,23 +24,29 @@ class updateJobKeysController extends ajaxController {
         //Session Enabled
 
         //define input filters
-        $filterArgs = array(
-                'job_id'   => array(
+        $filterArgs = [
+                'job_id'       => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
-                ),
-                'job_pass' => array(
+                ],
+                'job_pass'     => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'data'         => [
+                        'filter' => FILTER_UNSAFE_RAW,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+        ];
 
         //filter input
         $_postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //assign variables
-        $this->job_id   = $_postInput[ 'job_id' ];
-        $this->job_pass = $_postInput[ 'job_pass' ];
-        $this->tm_keys  = $_POST[ 'data' ]; // this will be filtered inside the TmKeyManagement class
+        $this->job_id       = $_postInput[ 'job_id' ];
+        $this->job_pass     = $_postInput[ 'job_pass' ];
+        $this->tm_keys      = $_postInput[ 'data' ]; // this will be filtered inside the TmKeyManagement class
+        $this->only_private = !$_postInput[ 'get_public_matches' ];
 
         //check for eventual errors on the input passed
         $this->result[ 'errors' ] = array();
@@ -58,8 +64,8 @@ class updateJobKeysController extends ajaxController {
             );
         }
 
-        //get job data
-        $this->jobData = getJobData( $this->job_id, $this->job_pass );
+        //get Job Info, we need only a row of job
+        $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->job_id, $this->job_pass );
 
         //Check if user can access the job
         $pCheck = new AjaxPasswordCheck();
@@ -165,6 +171,9 @@ class updateJobKeysController extends ajaxController {
             Log::doLog('After:');
             Log::doLog(json_encode($totalTmKeys));
             TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $totalTmKeys );
+
+            $this->jobData[ 'only_private_tm' ] = $this->only_private;
+            Jobs_JobDao::updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm' ] ] );
 
             $this->result['data'] = 'OK';
 

@@ -24,7 +24,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 #logoutlink,
 .reset-password,
 #resendlink {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     text-decoration: underline;
     float: left;
     cursor: pointer;
@@ -37,6 +37,15 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 #resendlink {
     float: none;
+}
+
+
+
+a.ui.primary.right.floated.button.tiny.register-ok {
+    border: 1px solid black;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    padding: 6px 19px;
 }
 
 #welcomebox {
@@ -384,6 +393,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     background: #f8f8f8;
     border-left: 1px solid #ccc;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .login-container-right h2,
@@ -592,6 +602,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .register-modal {
     padding: 25px 15%;
+    text-align: center;
 }
 
 .register-modal h2 {
@@ -650,7 +661,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .matecat-modal-header {
     text-align: left;
-    min-height: 30px;
+    min-height: 47px;
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
@@ -680,7 +691,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     border-radius: 0 0 4px 4px;
     margin: 0 auto;
     overflow: hidden;
-
+    text-align: left;
 }
 
 /* Modal Footer */
@@ -1023,6 +1034,9 @@ div#matecat-modal p {
 .matecat-modal-content {
     font-size: 16px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
+    /*.matecat-modal-header {
+        min-height: 40px;
+    }*/
     .matecat-modal-top {
         background-color: #ffffff;
         /*border-bottom: 1px solid #cccccc;*/
