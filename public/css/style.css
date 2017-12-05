@@ -135,18 +135,19 @@ body.searchActive #filterSwitch {
 .qa-conflicts-issues-counter,
 .qa-lexiqa-counter {
     position: absolute;
-    border: 1px solid #fff;
-    font-weight: bold;
     color: #fff;
     background: #e20001;
-    padding: 0px 4px;
-    /*   margin:18px 5px 0px 0px !important;*/
-    margin-left: 14px;
+    margin-left: 20px;
     margin-top: -2px;
-    text-align: right;
-    font-size: 11px;
     -moz-border-radius: 10px;
     border-radius: 10px;
+    border: 1px solid #fff;
+    display: block;
+    font-size: 12px;
+    padding: 0 5px;
+    text-align: center;
+    height: 17px;
+    line-height: 1.5;
 }
 
 .numbererror:empty {
