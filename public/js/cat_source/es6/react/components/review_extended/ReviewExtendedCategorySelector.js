@@ -30,17 +30,19 @@ class ReviewExtendedCategorySelector extends React.Component{
             select = <select
                 ref="select"
                 value={this.state.value}
+				className="ui dropdown"
                 autoFocus={this.props.focus}
                 onChange={this.props.severitySelected.bind(null, this.props.category)}
                 name="severities">
                 {full_severities}
             </select>
         }
-
-        return <div>
-            {this.props.category.label}
-            { select }
-        </div> ;
+		return <div className="error-item">
+			<div className="error-name">{this.props.category.label}</div>
+			<div className="error-level">
+				{ select }
+			</div>
+		</div>;
     }
 }
 

@@ -87,16 +87,19 @@ class ReviewExtendedIssuePanel extends React.Component{
         }.bind(this));
 
 
-        return <div className="review-issue-selection-panel">
-
-            <h3>Error List</h3>
-
-            {/*<p>You selected "<span className="error-selection-highlight">{this.props.selection.selected_string}</span>" from segment {this.props.sid}</p>*/}
-            <div className="review-issue-category-list">
-                {categoryComponents}
-            </div>
-
-        </div>
+            return<div className="re-create-issue">
+				<div className="ui accordion">
+					<h4 className="title active">
+						Error list <i className="dropdown icon"/>
+					</h4>
+					{/*<div className="issues-scroll">
+						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
+					</div>*/}
+					<div className="error-list active">
+						{categoryComponents}
+					</div>
+				</div>
+			</div>
     }
 }
 
