@@ -1,5 +1,5 @@
 
-class ReviewIssueCategorySelector extends React.Component{
+class ReviewExtendedCategorySelector extends React.Component{
 
     constructor(props) {
         super(props);
@@ -17,7 +17,7 @@ class ReviewIssueCategorySelector extends React.Component{
         // It may happen for a category to come with no severities. In this case
         // the category should be considered to be a header for the nested
         // subcategories. Don't print the select box if no severity is found.
-        let select = null;
+        var select = null;
 
         if ( this.props.category.severities ) {
             var default_severity = <option key={'value-'} value="" >---</option>;
@@ -33,17 +33,15 @@ class ReviewIssueCategorySelector extends React.Component{
                 autoFocus={this.props.focus}
                 onChange={this.props.severitySelected.bind(null, this.props.category)}
                 name="severities">
-            {full_severities}
+                {full_severities}
             </select>
         }
 
-        return <tr>
-        <td>{this.props.category.label}</td>
-        <td>
+        return <div>
+            {this.props.category.label}
             { select }
-        </td>
-        </tr> ; 
+        </div> ;
     }
 }
 
-export default ReviewIssueCategorySelector;
+export default ReviewExtendedCategorySelector;

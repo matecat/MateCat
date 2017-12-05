@@ -65,6 +65,16 @@ var SegmentActions = {
                 id: sid,
                 newClass: newClass
             });
+        }, 0);
+    },
+
+    addClassToSegments: function (sidList, newClass) {
+        setTimeout( function () {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.ADD_SEGMENTS_CLASS,
+                sidList: sidList,
+                newClass: newClass
+            });
         }, 0)
     },
 

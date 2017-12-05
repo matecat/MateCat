@@ -1,118 +1,130 @@
+let ReviewExtendedIssuesContainer = require('./ReviewExtendedIssuesContainer').default;
+let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
+let ReviewExtendedIssuePanel = require('./ReviewExtendedIssuePanel').default;
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+
 class ReviewExtendedPanel extends React.Component{
 
     constructor(props) {
         super(props);
+        this.originalTranslation = this.props.segment.translation;
         this.state = {
-
+            translation: this.props.segment.translation,
+            addIssue: false,
+            selectionObj: null,
+            diffPatch: null,
+            versionNumber: this.props.segment.versions[0].version_number
         };
 
     }
 
+    trackChanges(sid, editareaText) {
+        let text = htmlEncode(UI.prepareTextToSend(editareaText));
+        if (this.props.segment.sid === sid) {
+            this.setState({
+                translation: text,
+            });
+        }
+    }
+
+    textSelected(data, diffPatch) {
+        this.setState({
+            addIssue: true,
+            selectionObj: data,
+            diffPatch: diffPatch
+        });
+    }
+
+    removeSelection() {
+        this.setState({
+            addIssue: false,
+            selectionObj: null,
+            diffPatch: null
+        });
+    }
+
+    issueMouseEnter ( issue, event, reactid ) {
+        SegmentActions.showSelection(this.props.sid, issue);
+    }
+
+    issueMouseLeave () {
+        this.removeSelection();
+    }
+
+    getAllIssues () {
+        let issues = [];
+        this.props.segment.versions.forEach(function (version) {
+            if ( !_.isEmpty(version.issues) ) {
+                issues = issues.concat(version.issues);
+            }
+        });
+        return issues;
+    }
+
+    componentWillReceiveProps (nextProps) {
+        this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));
+        this.setState({
+            translation: this.originalTranslation,
+            addIssue: false,
+            selectionObj: null,
+            diffPatch: null,
+            versionNumber: nextProps.segment.versions[0].version_number
+        });
+    }
 
     componentDidMount() {
-        //TODO: togliere l'inizializzazione generica
-        $('.ui.accordion')
-            .accordion()
-        ;
-        $('.ui.dropdown')
-            .dropdown()
-        ;
+        SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind(this));
     }
 
     componentWillUnmount() {
-
+        SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges);
     }
 
-    render() {
-        return <div className="re-track-changes-box">
-            <div className="re-header-track">
-                <h4>Revise Track changes</h4>
-                <div className="explain-selection">
-                    Select a <div className="selected start-end">word</div> or <div className="selected start-end">more words</div> to create a specific inssue card
-                </div>
-                <div className="re-track-changes head">
-                    Prova <span className="deleted"> per track</span> changes <span className="added">che bella</span> la vita
-                </div>
-            </div>
-            <div className="error-list-box">
-                <div className="ui accordion">
-                    <h4 className="title active">
-                        Error list <i className="dropdown icon" />
-                    </h4>
-                    {/*<div className="issues-scroll">
-                        <a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
-                    </div>*/}
-                    <div className="error-list active">
+    render () {
+        let issues = this.getAllIssues();
+        return <div className="review-issues-overview-panel">
+            <div className="review-version-wrapper">
+                <div className="review-translation-version" >
+                    <div className="review-version-header">
+                        <h3>Live changes</h3>
+                    </div>
+                    <div className="collapsable">
 
-                        <div className="error-item">
-                            <div className="error-name">Error 1</div>
-                            <div className="error-level">
-                                <select className="ui dropdown">
-                                    <option value="0">Neutral</option>
-                                    <option value="1">Minor</option>
-                                    <option value="2">Major</option>
-                                    <option value="2">Critical</option>
-                                </select>
-                            </div>
+                        <ReviewVersionDiff
+                            textSelectedFn={this.textSelected.bind(this)}
+                            removeSelection={this.removeSelection.bind(this)}
+                            previousVersion={this.originalTranslation}
+                            translation={this.state.translation}
+                            segment={this.props.segment}
+                            decodeTextFn={UI.decodeText}
+                            selectable={this.props.isReview}
+                        />
+
+
+                        <div className="error-type">
+                            <ReviewExtendedIssuePanel
+                                sid={this.props.segment.sid}
+                                selection={this.state.selectionObj}
+                                segmentVersion={this.state.versionNumber}
+                                diffPatch={this.state.diffPatch}
+                                submitIssueCallback={this.removeSelection.bind(this)}
+                                reviewType={this.props.reviewType}
+                                segment={this.props.segment}
+                            />
                         </div>
-
-                        <div className="error-item">
-                            <div className="error-name">Error 1</div>
-                            <div className="error-level">
-                                <select className="ui dropdown">
-                                    <option value="0">Neutral</option>
-                                    <option value="1">Minor</option>
-                                    <option value="2">Major</option>
-                                    <option value="2">Critical</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="error-item">
-                            <div className="error-name">Error 1</div>
-                            <div className="error-level">
-                                <select className="ui dropdown">
-                                    <option value="0">Neutral</option>
-                                    <option value="1">Minor</option>
-                                    <option value="2">Major</option>
-                                    <option value="2">Critical</option>
-                                </select>
-                            </div>
-                        </div>
-
+                        <ReviewExtendedIssuesContainer
+                            issueMouseEnter={this.issueMouseEnter.bind(this)}
+                            issueMouseLeave={this.issueMouseLeave.bind(this)}
+                            reviewType={this.props.reviewType}
+                            issues={issues}
+                            sid={this.props.segment.sid}
+                        />
                     </div>
                 </div>
             </div>
-            <div className="issues">
-                <h4>Issues</h4>
-                <div className="issues-list">
-                    <div className="issue">
-                        <div className="issue-head">
-                            {/*<div className="issue-number">(3)</div>*/}
-                            <div className="issue-title">Terminology:</div>
-                            <div className="issue-severity">Major</div>
-                        </div>
-                        <div className="issue-activity-icon">
-                            <div className="icon-buttons">
-                                <button><i className="icon-eye icon" /></button>
-                                <button><i className="icon-uniE96E icon" /></button>
-                                <button><i className="icon-trash-o icon" /></button>
-                            </div>
-                        </div>
-                        <div className="selected-text">
-                            <b>Selected text</b>:<div className="selected">Ciao come stai?</div>
-                        </div>
-                    </div>
-                    <div className="re-track-changes">
-                        <span className="deleted"> per track</span> changes <span className="added">che bella</span> la vita
-                    </div>
-                    <div className="issue-date">
-                        <i>(Nov 28, 2017 at 4:35 PM)</i>
-                    </div>
-                </div>
-            </div>
-
         </div>;
+
     }
 }
 

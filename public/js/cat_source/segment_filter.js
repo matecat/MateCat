@@ -166,9 +166,16 @@ if (SegmentFilter.enabled())
 
             if ( this.getStoredState().serverData ) {
                 var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
-                    SegmentActions.addClassToSegment(i, 'muted');
-                    return '#segment-' + i ;
+                    return  '#segment-' + i  ;
                 });
+                var selector = 'section:not( ' + ids + ')';
+
+                UI.body.addClass('sampling-enabled');
+                let elements = $( selector );
+                ids = $.map( elements, function(i) {
+                    return  UI.getSegmentId(i) ;
+                });
+                SegmentActions.addClassToSegment(ids, 'muted');
                 UI.body.addClass('sampling-enabled');
 
                 setTimeout( function() {

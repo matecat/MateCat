@@ -10,7 +10,6 @@ class ReviewVersionsDiff extends React.Component {
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
-        this.pippo = "pippo + " + Math.floor((Math.random() * 100) + 1);
         this.applyWrapper = this.applyWrapper.bind(this);
     }
 
@@ -228,7 +227,7 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     applyWrapper(sid, issue) {
-        if (this.props.sid === sid && this.props.versionNumber === parseInt(issue.translation_version)) {
+        if ( this.props.segment.sid === sid ) {
             this.restoreSelection(issue);
         }
     }
@@ -250,12 +249,10 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount " + this.pippo);
         SegmentStore.addListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
     }
 
     componentWillUnmount() {
-        console.log("Unmount " + this.pippo);
         SegmentStore.removeListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
     }
     componentWillMount() {}
@@ -269,7 +266,6 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     render() {
-        console.log("Render " + this.pippo);
         let diffHTML = this.getDiffHtml();
         let diffClass = classnames({
             "ui ignored message segment-diff-container": true,
