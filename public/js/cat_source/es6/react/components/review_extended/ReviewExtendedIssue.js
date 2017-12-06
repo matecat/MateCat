@@ -47,7 +47,7 @@ class ReviewExtendedIssue extends React.Component{
 					onClick={this.props.issueMouseEnter.bind(null, this.props.issue)} >
 			<div className="issue">
 				<div className="issue-head">
-					<div className="issue-number">({this.props.progressiveNumber})</div>
+					{/*<div className="issue-number">({this.props.progressiveNumber})</div>*/}
 					<div className="issue-title">{category_label}:</div>
 					<div className="issue-severity">{this.props.issue.severity}</div>
 				</div>
