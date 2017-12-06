@@ -198,9 +198,10 @@ class ReviewVersionsDiff extends React.Component {
     getDiffHtml() {
         if (this.props.diff && this.props.diff.length > 0) {
             return trackChangesHTMLFromDiffArray(this.props.diff);
-        } else {
+        } else if (this.props.previousVersion && this.props.translation) {
             return trackChangesHTML(this.props.previousVersion, this.props.translation);
         }
+        return "";
     }
 
     getDiffPatch() {
