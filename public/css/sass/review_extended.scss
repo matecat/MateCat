@@ -27,6 +27,9 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-create-issue {
 			.accordion {
+				h4{
+					cursor: pointer;
+				}
 				.title {
 					&.active {
 
