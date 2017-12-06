@@ -34,14 +34,6 @@ class ReviewExtendedPanel extends React.Component {
 		});
 	}
 
-	issueMouseEnter(issue, event, reactid) {
-		SegmentActions.showSelection(this.props.sid, issue);
-	}
-
-	issueMouseLeave() {
-		this.removeSelection();
-	}
-
 	getAllIssues() {
 		let issues = [];
 		this.props.segment.versions.forEach(function (version) {
@@ -80,11 +72,9 @@ class ReviewExtendedPanel extends React.Component {
 			/>
 
 			<ReviewExtendedIssuesContainer
-				issueMouseEnter={this.issueMouseEnter.bind(this)}
-				issueMouseLeave={this.issueMouseLeave.bind(this)}
 				reviewType={this.props.reviewType}
 				issues={issues}
-				sid={this.props.segment.sid}
+				segment={this.props.segment}
 			/>
 
 		</div>;
