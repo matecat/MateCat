@@ -18,10 +18,6 @@ class ReviewVersionsDiffContainer extends React.Component {
 		};
     }
 
-	issueMouseEnter(issue, event, reactid) {
-		SegmentActions.showSelection(this.props.sid, issue);
-	}
-
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
 		if (this.props.segment.sid === sid) {

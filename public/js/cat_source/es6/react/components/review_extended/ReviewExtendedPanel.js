@@ -1,11 +1,6 @@
-import ReviewVersionsDiff from "./ReviewVersionsDiff";
-
 let ReviewExtendedIssuesContainer = require('./ReviewExtendedIssuesContainer').default;
 let ReviewVersionDiffContainer = require('./ReviewVersionsDiffContainer').default;
-let ReviewVersionDiff = require('./ReviewVersionsDiff').default;
 let ReviewExtendedIssuePanel = require('./ReviewExtendedIssuePanel').default;
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
 
 class ReviewExtendedPanel extends React.Component {
 
