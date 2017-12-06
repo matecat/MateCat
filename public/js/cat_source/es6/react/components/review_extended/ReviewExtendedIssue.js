@@ -46,7 +46,7 @@ class ReviewExtendedIssue extends React.Component {
 		return <div className="issue-item">
 			<div className="issue">
 				<div className="issue-head">
-					<div className="issue-number">({this.props.progressiveNumber})</div>
+					{/*<div className="issue-number">({this.props.progressiveNumber})</div>*/}
 					<div className="issue-title">{category_label}:</div>
 					<div className="issue-severity">{this.props.issue.severity}</div>
 				</div>
