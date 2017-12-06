@@ -11,29 +11,34 @@ class ReviewVersionsDiffContainer extends React.Component {
         super(props);
 		this.originalTranslation = this.props.segment.translation;
 		this.state = {
-			translation: this.props.segment.translation,
 			selectionObj: null,
-			diffPatch: null,
-			sid: this.props.segment.sid
+			sid: this.props.segment.sid,
+			diffPatch: this.getDiffPatch(this.originalTranslation)
 		};
     }
 
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
 		if (this.props.segment.sid === sid) {
+			let newDiff = this.getDiffPatch(editareaText)
 			this.setState({
-				translation: text,
+				diffPatch: newDiff
 			});
 		}
 	}
 
+	getDiffPatch(newTranslation) {
+			return getDiffPatch(this.originalTranslation, newTranslation);
+	}
+
 	componentWillReceiveProps(nextProps) {
-		this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));
-		this.setState({
-			translation: this.originalTranslation,
+		this.originalTranslation = nextProps.segment.translation;
+		/*this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));*/
+		this.state = {
 			selectionObj: null,
-			diffPatch: null
-		});
+			sid: nextProps.segment.sid,
+			diffPatch: this.getDiffPatch(this.originalTranslation)
+		};
 	}
 
     componentDidMount() {
@@ -55,8 +60,7 @@ class ReviewVersionsDiffContainer extends React.Component {
 					<ReviewVersionDiff
 						textSelectedFn={this.props.textSelectedFn}
 						removeSelection={this.props.removeSelection}
-						previousVersion={this.originalTranslation}
-						translation={this.state.translation}
+						diffPatch={this.state.diffPatch}
 						segment={this.props.segment}
 						decodeTextFn={UI.decodeText}
 						selectable={this.props.selectable}

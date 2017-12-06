@@ -7,15 +7,14 @@ class ReviewVersionsDiff extends React.Component {
 
     constructor(props) {
         super(props);
-        this.originalTranslation = this.props.translation;
     }
 
     textSelected(event) {
         if (this.props.textSelectedFn && this.props.selectable) {
             let selection = window.getSelection();
-            if (this.textSelectedInsideSelectionArea(selection, $(this.diffElem))) {
+            if (this.textSelectedInsideSelectionArea(selection, $(this.diffPatchElem))) {
                 let data = this.getSelectionData(selection);
-                this.props.textSelectedFn(data, this.getDiffPatch());
+                this.props.textSelectedFn(data);
             } else {
                 this.props.removeSelection();
             }
@@ -29,7 +28,7 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     getSelectionData(selection) {
-        let containerEl = $(this.diffElem)[0];
+        let containerEl = $(this.diffPatchElem)[0];
         if (selection.rangeCount > 0) {
             var range = selection.getRangeAt(0);
             return {
@@ -196,26 +195,11 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     getDiffHtml() {
-        if (this.props.diff && this.props.diff.length > 0) {
-            return trackChangesHTMLFromDiffArray(this.props.diff);
-        } else if (this.props.previousVersion && this.props.translation) {
-            return trackChangesHTML(this.props.previousVersion, this.props.translation);
-        }
-        return "";
-    }
-
-    getDiffPatch() {
-        if (this.props.diff && this.props.diff.length > 0) {
-            return this.props.diff;
+        if (this.props.diffPatch && this.props.diffPatch.length > 0) {
+            return trackChangesHTMLFromDiffArray(this.props.diffPatch);
         } else {
-            return getDiffPatch(this.props.previousVersion, this.props.translation);
-        }
-    }
-
-    componentWillMount() {}
-
-    componentDidUpdate() {
-
+        	return ''
+		}
     }
 
     allowHTML(string) {
@@ -234,7 +218,7 @@ class ReviewVersionsDiff extends React.Component {
 		}else{
 			classes = diffClass;
 		}
-        return <div className={classes} ref={(node)=>this.diffElem=node}
+        return <div className={classes} ref={(node)=>this.diffPatchElem=node}
                   dangerouslySetInnerHTML={ this.allowHTML(diffHTML) }
                   onMouseUp={this.textSelected.bind(this)}/>
     }
