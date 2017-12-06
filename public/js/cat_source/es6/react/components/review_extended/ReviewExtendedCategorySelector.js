@@ -13,6 +13,10 @@ class ReviewExtendedCategorySelector extends React.Component{
         this.setState({ value: nextProps.selectedValue });
     }
 
+    componentDidMount(){
+    	$(this.selectRef).dropdown();
+	}
+
     render() {
         // It may happen for a category to come with no severities. In this case
         // the category should be considered to be a header for the nested
@@ -28,7 +32,7 @@ class ReviewExtendedCategorySelector extends React.Component{
             var full_severities = [default_severity].concat( severities );
 
             select = <select
-                ref="select"
+                ref={(input) => { this.selectRef = input;}}
                 value={this.state.value}
 				className="ui dropdown"
                 autoFocus={this.props.focus}

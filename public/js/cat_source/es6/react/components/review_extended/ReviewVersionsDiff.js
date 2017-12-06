@@ -3,8 +3,6 @@
 
  */
 let React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
 class ReviewVersionsDiff extends React.Component {
 
     constructor(props) {

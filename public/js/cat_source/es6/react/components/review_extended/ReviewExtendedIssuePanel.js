@@ -101,6 +101,10 @@ class ReviewExtendedIssuePanel extends React.Component{
 				</div>
 			</div>
     }
+    componentDidMount(){
+		/*$('.ui.accordion').accordion()*/
+
+	}
 }
 
 ReviewExtendedIssuePanel.defaultProps = {
