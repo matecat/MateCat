@@ -60,7 +60,8 @@ class ReviewExtendedPanel extends React.Component {
 				segment={this.props.segment}
 				selectable={this.props.isReview}
 			/>
-			<ReviewExtendedIssuePanel
+
+			{this.props.isReview? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
 				selection={this.state.selectionObj}
 				segmentVersion={this.state.versionNumber}
@@ -68,11 +69,11 @@ class ReviewExtendedPanel extends React.Component {
 				submitIssueCallback={this.removeSelection.bind(this)}
 				reviewType={this.props.reviewType}
 				segment={this.props.segment}
-			/>
-
+			/>): (null)}
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
 				issues={issues}
+				isReview={this.props.isReview}
 				segment={this.props.segment}
 			/>
 

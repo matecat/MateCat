@@ -102,6 +102,7 @@ class ReviewExtendedIssuePanel extends React.Component{
 			</div>
     }
     componentDidMount(){
+    	//TODO: montare l'accordion delle issues
 		/*$('.ui.accordion').accordion()*/
 
 	}
