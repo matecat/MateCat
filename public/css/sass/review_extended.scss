@@ -2,12 +2,15 @@
     position: absolute;
     background: #efeef4 !important;
     padding: 15px;
+	h4 {
+		padding-left: 10px;
+	}
 	.re-wrapper{
 		.re-version-diff {
 			.re-header-track {
 
 				.explain-selection {
-
+					padding: 0 0 0 10px;
 				}
 			}
 
@@ -26,6 +29,7 @@
 					.error-item {
 						border-top: 1px solid rgba(34, 36, 38, 0.15);
 						line-height: 44px;
+						padding: 0 0 0 10px;
 						.error-name {
 							display: inline-block;
 							width: 50%;
@@ -36,7 +40,6 @@
 						&:hover {
 							.error-level {
 								display: inline-block;
-								cursor: pointer;
 								width: 50%;
 								text-align: right;
 								.ui.dropdown {
