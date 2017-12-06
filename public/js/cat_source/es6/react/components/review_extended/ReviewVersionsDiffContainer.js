@@ -71,6 +71,7 @@ class ReviewVersionsDiffContainer extends React.Component {
 						segment={this.props.segment}
 						decodeTextFn={UI.decodeText}
 						selectable={this.props.selectable}
+						customClass={'head'}
 					/>
 				</div>
 			</div>

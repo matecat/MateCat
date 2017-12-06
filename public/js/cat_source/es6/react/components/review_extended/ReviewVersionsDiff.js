@@ -224,12 +224,18 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     render() {
+		let classes;
         let diffHTML = this.getDiffHtml();
         let diffClass = classnames({
-            "ui ignored message segment-diff-container": true,
-            "no-select": !this.props.selectable
+            "re-track-changes": true,
+            "no-select": !this.props.selectable,
         });
-        return <div className={diffClass} ref={(node)=>this.diffElem=node}
+        if(this.props.customClass){
+			classes = [diffClass,this.props.customClass].join(' ');
+		}else{
+			classes = diffClass;
+		}
+        return <div className={classes} ref={(node)=>this.diffElem=node}
                   dangerouslySetInnerHTML={ this.allowHTML(diffHTML) }
                   onMouseUp={this.textSelected.bind(this)}/>
     }
