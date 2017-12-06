@@ -13,7 +13,6 @@ class ReviewVersionsDiff extends React.Component {
         this.applyWrapper = this.applyWrapper.bind(this);
     }
 
-
     textSelected(event) {
         if (this.props.textSelectedFn && this.props.selectable) {
             let selection = window.getSelection();
