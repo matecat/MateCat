@@ -4,7 +4,7 @@ class ReviewExtendedIssue extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			extendDiffView: true
+			extendDiffView: false
 		};
 
 	}
@@ -26,6 +26,11 @@ class ReviewExtendedIssue extends React.Component {
 		event.stopPropagation();
 		SegmentActions.deleteIssue(this.props.issue)
 	}
+	setExtendedDiffView(event){
+		event.preventDefault();
+		event.stopPropagation();
+		this.setState({extendDiffView : !this.state.extendDiffView})
+	}
 
 	render() {
 		let category_label = this.categoryLabel();
@@ -37,34 +42,27 @@ class ReviewExtendedIssue extends React.Component {
 				<strong>Comment:</strong> {comment}</div>;
 		}
 
-		let deleteIssue;
-
-		if (config.isReview) {
-			deleteIssue = <button onClick={this.deleteIssue.bind(this)}><i className="icon-trash-o icon"/></button>;
-		}
-
 		return <div className="issue-item">
 			<div className="issue">
 				<div className="issue-head">
-					{/*<div className="issue-number">({this.props.progressiveNumber})</div>*/}
-					<div className="issue-title">{category_label}: </div>
-					<div className="issue-severity">{this.props.issue.severity}</div>
+					<p><b>{category_label}</b>: {this.props.issue.severity}</p>
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
-						<button><i className="icon-eye icon"/></button>
+						<button onClick={this.setExtendedDiffView.bind(this)}><i className="icon-eye icon"/></button>
 						<button><i className="icon-uniE96E icon"/></button>
-						{this.props.isReview ? (deleteIssue): (null)}
+						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)}><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
 				</div>
-				<div className="selected-text">
-					<b>Selected text</b>:
-					<div className="selected">{this.props.issue.target_text}</div>
-				</div>
+				{this.props.issue.target_text ?
+					(<div className="selected-text">
+						<p><b>Selected text</b>: <span className="selected">{this.props.issue.target_text}</span></p>
+					</div>):(null)}
+
 			</div>
 			{this.state.extendDiffView ?
 				<ReviewVersionDiff
-					diff={this.props.issue.diff}
+					diffPatch={this.props.issue.diff}
 					segment={this.props.segment}
 					decodeTextFn={UI.decodeText}
 					selectable={false}

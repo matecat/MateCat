@@ -15,15 +15,14 @@ class ReviewVersionsDiffContainer extends React.Component {
 			sid: this.props.segment.sid,
 			diffPatch: this.getDiffPatch(this.originalTranslation)
 		};
+		this.props.updateDiffDataFn(this.state.diffPatch);
     }
 
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
 		if (this.props.segment.sid === sid) {
 			let newDiff = this.getDiffPatch(editareaText)
-			this.setState({
-				diffPatch: newDiff
-			});
+			this.props.updateDiffDataFn(newDiff);
 		}
 	}
 
