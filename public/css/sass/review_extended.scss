@@ -1,13 +1,26 @@
+#review-side-panel h4 {
+	margin: unset;
+}
+
+h1, h2, h3, h4, h5, a, input {
+	font-family: Calibri, Arial, Helvetica, sans-serif !important;
+}
 .review-extended-panel {
     position: absolute;
     background: #efeef4 !important;
-    padding: 15px;
+	padding: 10px 15px 0;
+	h4 {
+		padding: 10px;
+	}
 	.re-wrapper{
+		.re-version-diff, .re-create-issue, .re-issues {
+			padding-top: 25px;
+		}
 		.re-version-diff {
 			.re-header-track {
 
 				.explain-selection {
-
+					padding: 10px 10px 0;
 				}
 			}
 
@@ -24,8 +37,9 @@
 				}
 				.error-list {
 					.error-item {
-						border-top: 1px solid rgba(34, 36, 38, 0.15);
-						line-height: 44px;
+						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+						line-height: 40px;
+						padding: 0 0 0 10px;
 						.error-name {
 							display: inline-block;
 							width: 50%;
@@ -36,7 +50,6 @@
 						&:hover {
 							.error-level {
 								display: inline-block;
-								cursor: pointer;
 								width: 50%;
 								text-align: right;
 								.ui.dropdown {
@@ -62,9 +75,6 @@
 								}
 							}
 						}
-						&:last-child {
-							border-bottom: 1px solid rgba(34, 36, 38, 0.15);
-						}
 					}
 				}
 			}
@@ -72,7 +82,7 @@
 		.re-issues {
 			.issues-list {
 				.issue-item {
-					margin: 15px 0 10px;
+
 					&:last-child {
 						padding-bottom: 50px;
 					}
@@ -178,7 +188,6 @@
         &.head {
             min-height: 65px;
             box-shadow: none !important;
-            margin-bottom: 15px;
         }
     }
     .selected {

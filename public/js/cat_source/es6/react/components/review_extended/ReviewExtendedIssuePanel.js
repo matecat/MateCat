@@ -89,8 +89,8 @@ class ReviewExtendedIssuePanel extends React.Component{
 
             return<div className="re-create-issue">
 				<div className="ui accordion">
-					<h4 className="title active">
-						Error list <i className="dropdown icon"/>
+					<h4>
+						Error list <i className="icon-sort-down icon "/>
 					</h4>
 					{/*<div className="issues-scroll">
 						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
