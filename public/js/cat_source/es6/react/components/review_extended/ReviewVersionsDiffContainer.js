@@ -57,16 +57,6 @@ class ReviewVersionsDiffContainer extends React.Component {
         return <div className="re-version-diff">
 				<div className="re-header-track">
 					<h4>Revise Track changes</h4>
-					{this.props.selectable? (
-						<div className="explain-selection">
-							Select a
-							<div className="selected start-end">word</div>
-							or
-							<div className="selected start-end">more words</div>
-							to create a specific inssue card
-						</div>
-					): (null)}
-
 					<ReviewVersionDiff
 						textSelectedFn={this.props.textSelectedFn}
 						removeSelection={this.props.removeSelection}
@@ -76,6 +66,16 @@ class ReviewVersionsDiffContainer extends React.Component {
 						selectable={this.props.selectable}
 						customClass={'head'}
 					/>
+
+					{this.props.selectable? (
+						<div className="explain-selection">
+							Select a
+							<div className="selected start-end">word</div>
+							or
+							<div className="selected start-end">more words</div>
+							to create a specific inssue card
+						</div>
+					): (null)}
 				</div>
 			</div>
     }
