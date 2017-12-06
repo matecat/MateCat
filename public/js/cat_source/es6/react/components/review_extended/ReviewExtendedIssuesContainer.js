@@ -40,8 +40,6 @@ class ReviewExtendedIssuesContainer extends React.Component {
                 let prog = sorted_issues.length - index;
 
                 return <ReviewExtendedIssue
-                    issueMouseEnter={this.props.issueMouseEnter}
-                    issueMouseLeave={this.props.issueMouseLeave}
                     sid={this.props.sid}
                     progressiveNumber={prog}
                     issue={item}

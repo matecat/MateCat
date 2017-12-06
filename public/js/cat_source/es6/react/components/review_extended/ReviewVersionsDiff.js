@@ -10,9 +10,7 @@ class ReviewVersionsDiff extends React.Component {
     constructor(props) {
         super(props);
         this.originalTranslation = this.props.translation;
-        this.applyWrapper = this.applyWrapper.bind(this);
     }
-
 
     textSelected(event) {
         if (this.props.textSelectedFn && this.props.selectable) {
@@ -199,39 +197,6 @@ class ReviewVersionsDiff extends React.Component {
         }
     }
 
-
-    restoreSelection( savedSel) {
-        if (!savedSel)
-            return;
-        let containerEl = $(this.diffElem)[0];
-        var range = document.createRange();
-
-        var startNodeOffset, endNodeOffset;
-        startNodeOffset = this.getNodeAndOffsetAt(containerEl, parseInt(savedSel.start_offset));
-        endNodeOffset = this.getNodeAndOffsetAt(containerEl, parseInt(savedSel.end_offset));
-
-        range.setStart(startNodeOffset.node, startNodeOffset.offset);
-        range.setEnd(endNodeOffset.node, endNodeOffset.offset);
-
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    getWrappers(newDiff) {
-        return this.state.selectionWrappers.filter(function (wrapper) {
-            let text = newDiff.substring(wrapper.start_offset, wrapper.end_offset);
-            return (text === wrapper.selected_string)
-        });
-
-    }
-
-    applyWrapper(sid, issue) {
-        if ( this.props.segment.sid === sid ) {
-            this.restoreSelection(issue);
-        }
-    }
-
     getDiffHtml() {
         if (this.props.diff && this.props.diff.length > 0) {
             return trackChangesHTMLFromDiffArray(this.props.diff);
@@ -248,13 +213,6 @@ class ReviewVersionsDiff extends React.Component {
         }
     }
 
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
-    }
-
-    componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.SHOW_SELECTION, this.applyWrapper);
-    }
     componentWillMount() {}
 
     componentDidUpdate() {
@@ -266,12 +224,18 @@ class ReviewVersionsDiff extends React.Component {
     }
 
     render() {
+		let classes;
         let diffHTML = this.getDiffHtml();
         let diffClass = classnames({
-            "ui ignored message segment-diff-container": true,
-            "no-select": !this.props.selectable
+            "re-track-changes": true,
+            "no-select": !this.props.selectable,
         });
-        return <div className={diffClass} ref={(node)=>this.diffElem=node}
+        if(this.props.customClass){
+			classes = [diffClass,this.props.customClass].join(' ');
+		}else{
+			classes = diffClass;
+		}
+        return <div className={classes} ref={(node)=>this.diffElem=node}
                   dangerouslySetInnerHTML={ this.allowHTML(diffHTML) }
                   onMouseUp={this.textSelected.bind(this)}/>
     }
