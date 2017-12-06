@@ -7,25 +7,28 @@ class ReviewExtendedPanel extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			addIssue: false,
-			versionNumber: this.props.segment.versions[0].version_number
+			versionNumber: this.props.segment.versions[0].version_number,
+			selectionObj: null,
+			diffPatch: null,
 		};
 
 	}
 
-	textSelected(data, diffPatch) {
+	textSelected(data) {
 		this.setState({
-			addIssue: true,
-			selectionObj: data,
+			selectionObj: data
+		});
+	}
+
+	updateDiffData(diffPatch){
+		this.setState({
 			diffPatch: diffPatch
 		});
 	}
 
 	removeSelection() {
 		this.setState({
-			addIssue: false,
-			selectionObj: null,
-			diffPatch: null
+			selectionObj: null
 		});
 	}
 
@@ -52,6 +55,7 @@ class ReviewExtendedPanel extends React.Component {
 		return <div className="re-wrapper">
 			<ReviewVersionDiffContainer
 				textSelectedFn={this.textSelected.bind(this)}
+				updateDiffDataFn={this.updateDiffData.bind(this)}
 				removeSelection={this.removeSelection.bind(this)}
 				segment={this.props.segment}
 				selectable={this.props.isReview}
