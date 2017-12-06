@@ -41,6 +41,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
                 return <ReviewExtendedIssue
                     sid={this.props.sid}
+					isReview={this.props.isReview}
                     progressiveNumber={prog}
                     issue={item}
                     key={item.id}

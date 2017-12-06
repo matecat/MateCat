@@ -54,7 +54,7 @@ class ReviewExtendedIssue extends React.Component {
 					<div className="icon-buttons">
 						<button><i className="icon-eye icon"/></button>
 						<button><i className="icon-uniE96E icon"/></button>
-						{deleteIssue}
+						{this.props.isReview ? (deleteIssue): (null)}
 					</div>
 				</div>
 				<div className="selected-text">

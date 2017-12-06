@@ -34,11 +34,11 @@ class ReviewVersionsDiffContainer extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		this.originalTranslation = nextProps.segment.translation;
 		/*this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));*/
-		this.state = {
+		this.setState({
 			selectionObj: null,
 			sid: nextProps.segment.sid,
 			diffPatch: this.getDiffPatch(this.originalTranslation)
-		};
+		});
 	}
 
     componentDidMount() {
@@ -66,13 +66,16 @@ class ReviewVersionsDiffContainer extends React.Component {
 						selectable={this.props.selectable}
 						customClass={'head'}
 					/>
-					<div className="explain-selection">
-						Select a
-						<div className="selected start-end">word</div>
-						or
-						<div className="selected start-end">more words</div>
-						to create a specific inssue card
-					</div>
+
+					{this.props.selectable? (
+						<div className="explain-selection">
+							Select a
+							<div className="selected start-end">word</div>
+							or
+							<div className="selected start-end">more words</div>
+							to create a specific inssue card
+						</div>
+					): (null)}
 				</div>
 			</div>
     }
