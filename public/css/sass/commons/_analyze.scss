@@ -284,9 +284,6 @@ body.analyze{
                     margin-right: 0;
                     &.splitted {
                         width: 78%;
-                        .job-id {
-                            min-width: unset;
-                        }
                     }
 
                 }
@@ -396,7 +393,7 @@ body.analyze{
                                         max-width: 71% !important;
                                         .source-box{
                                             &.no-split {
-                                                max-width: 47%;
+                                                max-width: 50%;
                                                 min-width: 60px;
                                                 vertical-align: middle;
                                                 overflow: hidden;
@@ -523,7 +520,6 @@ body.analyze{
         }
         .job-id {
             display: inline-block;
-            min-width: 22%;
             color: #969696;
             font-size: 14px;
             position: relative;
@@ -531,6 +527,7 @@ body.analyze{
             top: 1px;
             text-align: left;
             margin-right: 5px;
+            min-width: 70px;
         }
 
         .source-target {
@@ -570,7 +567,7 @@ body.analyze{
                 display: inline-block;
                 line-height: 30px;
                 &.no-split {
-                    max-width: 46%;
+                    max-width: 50%;
                     min-width: 90px;
                     vertical-align: middle;
                     white-space: nowrap;
@@ -739,7 +736,6 @@ body.analyze{
 
         @media only screen and (max-width: 1199px) and (min-width: 992px) {
             .left-box {
-               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -782,7 +778,6 @@ body.analyze{
 
         @media only screen and (max-width: 991px) and (min-width: 768px) {
             .left-box {
-                /*width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -821,7 +816,6 @@ body.analyze{
 
         @media only screen and (max-width: 767px) {
             .left-box {
-               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
