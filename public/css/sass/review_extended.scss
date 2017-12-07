@@ -197,9 +197,10 @@ h1, h2, h3, h4, h5, a, input {
             user-select: none;
         }
         &.head {
-            min-height: 65px;
-            box-shadow: none !important;
+			min-height: 65px;
+			box-shadow: none !important;
 			padding: 10px;
+			background: #f3f3f3;
         }
     }
     .selected {
