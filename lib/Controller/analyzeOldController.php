@@ -218,4 +218,9 @@ class analyzeOldController extends viewController {
         }
     }
 
+    public function getProject()
+    {
+        return $this->project;
+    }
+
 }
