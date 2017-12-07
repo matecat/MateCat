@@ -69,9 +69,9 @@ class ReviewVersionsDiffContainer extends React.Component {
 					{this.props.selectable? (
 						<div className="explain-selection">
 							Select a
-							<div className="selected start-end">word</div>
+							<span className="selected"> word </span>
 							or
-							<div className="selected start-end">more words</div>
+							<span className="selected"> more words </span>
 							to create a specific inssue card
 						</div>
 					): (null)}

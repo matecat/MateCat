@@ -6,36 +6,36 @@ h1, h2, h3, h4, h5, a, input {
 	font-family: Calibri, Arial, Helvetica, sans-serif !important;
 }
 .review-extended-panel {
-    position: absolute;
-    background: #efeef4 !important;
-	padding: 10px 15px 0;
+	position: absolute !important;
+	background: #efeef4 !important;
 	h4 {
 		padding: 10px;
 	}
 	.re-wrapper{
-		.re-version-diff, .re-create-issue, .re-issues {
-			padding-top: 25px;
-		}
 		.re-version-diff {
+			box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+			position: relative;
+			background: #f3f3f3;
+			padding: 10px;
 			.re-header-track {
 
 				.explain-selection {
-					padding: 10px 10px 0;
+					padding: 5px 10px 0;
 				}
 			}
 
 		}
 		.re-create-issue {
+			padding: 10px;
+			background: #FFFFFF;
 			.accordion {
 				h4{
 					cursor: pointer;
 				}
-				.title {
-					&.active {
-
-					}
-					&.issues-scroll {
-
+				.create-issue-title {
+					i.icon-sort-up.icon {
+					position: relative;
+					top: 5px;
 					}
 				}
 				.error-list {
@@ -78,11 +78,15 @@ h1, h2, h3, h4, h5, a, input {
 								}
 							}
 						}
+						&:last-child {
+							border-bottom: none;
+						}
 					}
 				}
 			}
 		}
 		.re-issues {
+			padding: 10px;
 			.issues-list {
 				.issue-item {
 
@@ -114,19 +118,23 @@ h1, h2, h3, h4, h5, a, input {
 								text-align: center;
 								margin-right: 5px;
 								background: transparent;
-								box-shadow: 0px 0px 0px 1px #BCBCBC inset;
+								box-shadow: 0 0 0 1px #BCBCBC inset;
 								border: none;
 								color: grey;
 								outline: none;
+								&.re-active {
+									background: #e9e9e9;
+									color: #333333;
+								}
 								&:hover {
-									box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.35) inset;
+									box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset;
 									color: #333333;
 								}
 								&:active {
 									background: #e3e3e3;
 								}
 								&:focus {
-									box-shadow: 0px 0px 0px 1px #96C8DA inset;
+									box-shadow: 0 0 0 1px #96C8DA inset;
 								}
 								&:last-child {
 									margin-right: 0;
@@ -191,6 +199,7 @@ h1, h2, h3, h4, h5, a, input {
         &.head {
             min-height: 65px;
             box-shadow: none !important;
+			padding: 10px;
         }
     }
     .selected {
