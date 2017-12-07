@@ -2021,12 +2021,6 @@
                 placement : 's',
             });
 
-            var myMemoryLookupCheck = $('#activetm tr.mymemory .lookup div');
-            myMemoryLookupCheck.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Check to get public contributions.</div>");
-            myMemoryLookupCheck.powerTip({
-                placement : 's',
-            });
-
         },
 
         setLanguageTooltipLXQ: function () {
