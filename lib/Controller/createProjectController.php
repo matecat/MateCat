@@ -17,6 +17,7 @@ class createProjectController extends ajaxController {
     private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
+    private $only_private;
 
     private $metadata;
     private $lang_handler ;
@@ -57,6 +58,7 @@ class createProjectController extends ajaxController {
                 'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
+                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
 
         );
 
@@ -75,17 +77,16 @@ class createProjectController extends ajaxController {
 
         //if a string is sent by the client, transform it into a valid array
         if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
-            $__postInput[ 'private_tm_key' ] = array(
-                    array(
+            $__postInput[ 'private_tm_key' ] = [
+                    [
                             'key'  => trim($__postInput[ 'private_tm_key' ]),
                             'name' => null,
                             'r'    => true,
                             'w'    => true
-                    )
-            );
-        }
-        else {
-            $__postInput[ 'private_tm_key' ] = array();
+                    ]
+            ];
+        } else {
+            $__postInput[ 'private_tm_key' ] = [];
         }
 
         if ( $array_keys ) { // some keys are selected from panel
@@ -96,7 +97,7 @@ class createProjectController extends ajaxController {
                         && $__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
                     //same key was get from keyring, remove
-                    $__postInput[ 'private_tm_key' ] = array();
+                    $__postInput[ 'private_tm_key' ] = [];
                 }
             }
 
@@ -109,7 +110,7 @@ class createProjectController extends ajaxController {
             $private_keyList = $__postInput[ 'private_tm_key' ];
         }
 
-        $__postPrivateTmKey = array_filter( $private_keyList, array( "self", "sanitizeTmKeyArr" ) );
+        $__postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
 
         // NOTE: This is for debug purpose only,
         // NOTE: Global $_POST Overriding from CLI
@@ -127,6 +128,7 @@ class createProjectController extends ajaxController {
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
+        $this->only_private            = !$__postInput[ 'get_public_matches' ];
 
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
@@ -135,15 +137,15 @@ class createProjectController extends ajaxController {
         }
 
         if ( empty( $this->file_name ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Missing file name." );
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file name." ];
         }
 
         if ( empty( $this->job_subject ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Missing job subject." );
+            $this->result[ 'errors' ][] = [ "code" => -5, "message" => "Missing job subject." ];
         }
 
         if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0 ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
+            $this->result[ 'errors' ][] = [ "code" => -6, "message" => "invalid pretranslate_100 value" ];
         }
 
 
@@ -162,6 +164,9 @@ class createProjectController extends ajaxController {
      * setProjectFeatures
      *
      * @param $__postInput
+     *
+     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\ValidationError
      */
 
     private function setProjectFeatures( $__postInput ){
@@ -321,6 +326,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+        $projectStructure[ 'only_private' ]         = $this->only_private;
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;

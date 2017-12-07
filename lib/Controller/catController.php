@@ -480,11 +480,12 @@ class catController extends viewController {
             $this->template->fileCounter         = $this->fileCounter;
         }
 
-        $this->template->owner_email   = $this->job_owner;
-        $this->template->jobOwnerIsMe  = ( $this->logged_user->email == $this->job_owner );
-        $this->template->job_not_found = $this->job_not_found;
-        $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
-        $this->template->job_cancelled = $this->job_cancelled;
+        $this->template->owner_email        = $this->job_owner;
+        $this->template->jobOwnerIsMe       = ( $this->logged_user->email == $this->job_owner );
+        $this->template->get_public_matches = ( !$this->job->only_private_tm );
+        $this->template->job_not_found      = $this->job_not_found;
+        $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_cancelled      = $this->job_cancelled;
 
         $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;

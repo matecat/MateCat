@@ -1,6 +1,6 @@
 .after-open-outsource {
     border-left: 2px solid #09beec;
-    padding-left: 17px !important;
+    padding-left: 13px !important;
 }
 .outsource-container {
     padding: 0px !important;
@@ -14,9 +14,7 @@
     .outsource-header {
         padding: 5px 40px !important;
         z-index: 1;
-        .job-id {
-            margin-right: 5px;
-        }
+        .job-id {}
         .source-target {
             .source-box, .target-box {
                 width: unset !important;
