@@ -17,7 +17,6 @@ class Constants_Engines {
     const TAUYOU	       = 'Tauyou';
     const MICROSOFT_HUB    = 'MicrosoftHub';
     const IP_TRANSLATOR    = 'IPTranslator';
-    const DEEPLINGO        = 'DeepLingo';
     const APERTIUM         = 'Apertium';
     const ALTLANG	       = 'Altlang';
     const LETSMT           = 'LetsMT';
@@ -31,7 +30,6 @@ class Constants_Engines {
             self::TAUYOU           => self::TAUYOU,
             self::MICROSOFT_HUB    => self::MICROSOFT_HUB,
             self::IP_TRANSLATOR    => self::IP_TRANSLATOR,
-            self::DEEPLINGO        => self::DEEPLINGO,
             self::APERTIUM         => self::APERTIUM,
             self::ALTLANG          => self::ALTLANG,
             self::LETSMT           => self::LETSMT,

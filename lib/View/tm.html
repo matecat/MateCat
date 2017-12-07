@@ -283,7 +283,6 @@
                                                 <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">MMT</option>
                                                 <option value="altlang">AltLang</option>
                                                 <option value="apertium">Apertium</option>
-                                                <option value="deeplingo" >DeepLingo</option>
                                                 <option value="iptranslator" >IPTranslator from Iconic</option>
                                                 <option value="microsofthub">Microsoft Translator Hub</option>
                                                 <option value="moses" >Moses</option>
@@ -546,7 +545,6 @@
     <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="mt_engines.html/template-mmt" />
     <div metal:use-macro="mt_engines.html/template-microsofthub" />
     <div metal:use-macro="mt_engines.html/template-iptranslator" />
-    <div metal:use-macro="mt_engines.html/template-deeplingo" />
     <div metal:use-macro="mt_engines.html/template-moses" />
     <div metal:use-macro="mt_engines.html/template-tauyou" />
     <div metal:use-macro="mt_engines.html/template-letsmt" />
