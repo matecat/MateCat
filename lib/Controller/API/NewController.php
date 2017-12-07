@@ -24,6 +24,16 @@ set_time_limit( 300 );
 class NewController extends ajaxController {
 
     /**
+     * @var boolean
+     */
+    private $only_private;
+
+    /**
+     * @var int
+     */
+    private $pretranslate_100;
+
+    /**
      * @var Langs_Languages
      */
     private $lang_handler;
@@ -161,6 +171,7 @@ class NewController extends ajaxController {
                 'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
         ];
 
         $filterArgs = $this->featureSet->filter('filterNewProjectInputFilters', $filterArgs ) ;
@@ -174,6 +185,8 @@ class NewController extends ajaxController {
             $__postInput[ 'mt_engine' ] = 1;
         }
 
+        //default get all public matches from TM
+        $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
 
         foreach ( $__postInput as $key => $val ) {
             $__postInput[ $key ] = urldecode( $val );
@@ -217,8 +230,6 @@ class NewController extends ajaxController {
             $this->lexiqa             = $__postInput[ 'lexiqa' ];
             $this->speech2text        = $__postInput[ 'speech2text' ];
             $this->tag_projection     = $__postInput[ 'tag_projection' ];
-            $this->project_completion = $__postInput[ 'project_completion' ];
-
             $this->project_completion = $__postInput[ 'project_completion' ];
 
             $this->validateMetadataParam( $__postInput );
@@ -609,6 +620,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->owner;
         $projectStructure[ 'metadata' ]             = $this->metadata ;
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
+        $projectStructure[ 'only_private' ]         = $this->only_private;
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
