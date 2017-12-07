@@ -248,7 +248,7 @@ APP.getCreateProjectParams = function() {
         dqf_industry                : dqf.dqf_industry,
         dqf_process                 : dqf.dqf_process,
         dqf_quality_level           : dqf.dqf_quality_level,
-        only_private                : !$( '#activetm').find('tr.mymemory .lookup input' ).is( ':checked' )
+        get_public_matches          : $( '#activetm').find('tr.mymemory .lookup input' ).is( ':checked' )
 	} ;
 };
 
