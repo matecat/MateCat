@@ -56,11 +56,11 @@ if ( Review.enabled() )
             },
 
             trackChanges: function (editarea) {
-                var source = UI.currentSegment.find('.original-translation').text();
+                var source = UI.currentSegment.find('.original-translation').html();
                 source = UI.clenaupTextFromPleaceholders( source );
 
-                var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
-                var diffHTML = trackChangesHTML( source, target );
+                var target = $(editarea).text();
+                var diffHTML = trackChangesHTML( source, htmlEncode(target) );
 
                 $('.editor .sub-editor.review .track-changes p').html( diffHTML );
             },
@@ -175,18 +175,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
-        if ( Review.type === 'simple' ) {
-            var xEditarea = $('#segment-' + id_segment + '-editarea');
-            var xSegment = $('#segment-' + id_segment);
-            if( d.original === '' ) {
-                d.original = xEditarea.text();
-            }
-            if( !xSegment.find('.original-translation').length ) {
-                xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
-            }
-            UI.setReviewErrorData(d.error_data);
-            UI.trackChanges(xEditarea);
-        }
+        UI.addOriginalTranslation(d, id_segment);
     });
 
     $.extend(UI, {
@@ -203,39 +192,22 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
                 }
             });
         },
-        trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment
-                    .find('.original-translation').text()
-                    .replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
-
-            UI.dmp.diff_cleanupSemantic( diff ) ;
-
-            diffTxt = '';
-            $.each(diff, function (index) {
-
-                if(this[0] == -1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="deleted"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else if(this[0] == 1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="added"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else {
-                    diffTxt += this[1];
-                }
-                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
-            });
+        /**
+         *
+         * @param d Data response from the SetCurrentSegment request
+         * @param id_segment
+         */
+        addOriginalTranslation: function (d, id_segment) {
+            var xEditarea = $('#segment-' + id_segment + '-editarea');
+            if (d.original !== '') {
+                SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+            }
+            if ( Review.type === 'simple') {
+                UI.setReviewErrorData(d.error_data);
+                setTimeout(function () {
+                    UI.trackChanges(xEditarea);
+                }, 100);
+            }
         },
 
         setReviewErrorData: function (d) {

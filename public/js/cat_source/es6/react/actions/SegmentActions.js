@@ -142,6 +142,21 @@ var SegmentActions = {
             fid: fid,
         });
     },
+    /**
+     * Set the original translation of a segment.
+     * Used to create the revision trackChanges
+     * @param sid
+     * @param fid
+     * @param originalTranslation
+     */
+    addOriginalTranslation: function (sid, fid, originalTranslation) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
+            id: sid,
+            fid: fid,
+            originalTranslation: originalTranslation
+        });
+    },
 
     /******************* EditArea ************/
     highlightEditarea: function(sid) {

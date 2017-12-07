@@ -9,11 +9,11 @@ class ReviewVersionsDiffContainer extends React.Component {
 
     constructor(props) {
         super(props);
-		this.originalTranslation = this.props.segment.translation;
 		this.state = {
 			selectionObj: null,
-			sid: this.props.segment.sid,
-			diffPatch: this.getDiffPatch(this.originalTranslation)
+            originalTranslation: this.props.segment.translation,
+            translation: this.props.segment.translation,
+			diffPatch: this.getDiffPatch(this.props.segment.translation, this.props.segment.translation)
 		};
 		this.props.updateDiffDataFn(this.state.diffPatch);
     }
@@ -21,31 +21,53 @@ class ReviewVersionsDiffContainer extends React.Component {
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
 		if (this.props.segment.sid === sid) {
-			let newDiff = this.getDiffPatch(editareaText)
+			let newDiff = this.getDiffPatch(this.state.originalTranslation, text);
 			this.props.updateDiffDataFn(newDiff);
+            this.setState({
+                translation: text,
+                diffPatch: newDiff
+            });
 		}
 	}
 
-	getDiffPatch(newTranslation) {
-			return getDiffPatch(this.originalTranslation, newTranslation);
+    setOriginalTranslation(sid, translation) {
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                originalTranslation: translation,
+                diffPatch: this.getDiffPatch(translation, this.state.translation)
+            });
+            this.props.updateDiffDataFn(this.state.diffPatch);
+        }
+    }
+
+	getDiffPatch(originalTranslation, newTranslation) {
+        return getDiffPatch(originalTranslation, newTranslation);
 	}
 
 	componentWillReceiveProps(nextProps) {
-		this.originalTranslation = nextProps.segment.translation;
-		/*this.originalTranslation = htmlEncode(UI.prepareTextToSend(nextProps.segment.translation));*/
-		this.setState({
-			selectionObj: null,
-			sid: nextProps.segment.sid,
-			diffPatch: this.getDiffPatch(this.originalTranslation)
-		});
+        if ( this.props.segment.sid !== nextProps.segment.sid ) {
+            this.originalTranslation = nextProps.segment.translation;
+            let newDiff = this.getDiffPatch(nextProps.segment.translation, htmlEncode(UI.prepareTextToSend(nextProps.segment.translation)))
+            this.setState({
+                selectionObj: null,
+                originalTranslation: nextProps.segment.translation,
+                translation: nextProps.segment.translation,
+                segment: nextProps.segment,
+                diffPatch: newDiff
+            });
+            this.props.updateDiffDataFn(newDiff);
+		}
+
 	}
 
     componentDidMount() {
 		SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind(this));
+		SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation.bind(this));
     }
 
     componentWillUnmount() {
 		SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges);
+		SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 
     allowHTML(string) {

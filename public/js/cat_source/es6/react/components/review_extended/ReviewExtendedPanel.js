@@ -44,7 +44,6 @@ class ReviewExtendedPanel extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		this.setState({
-			addIssue: false,
 			versionNumber: nextProps.segment.versions[0].version_number
 		});
 	}
