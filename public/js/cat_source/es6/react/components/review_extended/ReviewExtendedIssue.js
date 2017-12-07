@@ -41,6 +41,7 @@ class ReviewExtendedIssue extends React.Component {
 			commentLine = <div className="review-issue-thread-entry">
 				<strong>Comment:</strong> {comment}</div>;
 		}
+		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
 
 		return <div className="issue-item">
 			<div className="issue">
@@ -49,7 +50,7 @@ class ReviewExtendedIssue extends React.Component {
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
-						<button onClick={this.setExtendedDiffView.bind(this)}><i className="icon-eye icon"/></button>
+						<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)}><i className="icon-eye icon"/></button>
 						<button><i className="icon-uniE96E icon"/></button>
 						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)}><i className="icon-trash-o icon"/></button>): (null)}
 					</div>

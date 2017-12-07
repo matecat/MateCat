@@ -80,10 +80,10 @@ body.manage {
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
-                margin-left: 20px;
+                margin-left: 17px;
                 display: inline-block;
                 vertical-align: text-bottom;
-                min-width: 78px;
+                min-width: 73px;
                 color: #5a5a5a;
             }
             .ui.form .field :disabled {
@@ -344,7 +344,7 @@ body.manage {
                         .chunk {
                             transition: 0.3s ease;
                             background-color: #ffffff;
-                            padding: 8px 19px;
+                            padding: 8px 15px;
                             &.outsource-container {
                             }
                             /*&.after-outsource-container {

@@ -99,7 +99,7 @@ class ReviewExtendedIssuePanel extends React.Component{
 
             return<div className="re-create-issue">
 				<div className="ui accordion">
-					<h4 onClick={this.toggleList.bind(this)}>
+					<h4 className="create-issue-title" onClick={this.toggleList.bind(this)}>
 						Error list <i className={dropDownIcon}/>
 					</h4>
 					{/*<div className="issues-scroll">
