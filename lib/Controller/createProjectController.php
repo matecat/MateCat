@@ -133,7 +133,7 @@ class createProjectController extends ajaxController {
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
-        $this->only_private            = !$__postInput[ 'get_public_matches' ];
+        $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
 
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
