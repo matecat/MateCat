@@ -22,6 +22,8 @@ class ReviewExtendedIssuePanel extends React.Component{
     sendIssue(category, severity) {
 
         let data = [];
+        let deferred = $.Deferred();
+        let self = this;
 
         let issue = {
             'id_category'         : category.id,
@@ -43,10 +45,22 @@ class ReviewExtendedIssuePanel extends React.Component{
         }
 
         data.push(issue);
+        if(this.props.isDiffChanged){
+        	let segment = this.props.segment;
+        	segment.translation = this.props.newtranslation;
+			API.SEGMENT.setTranslation(segment).done(function(){
+				deferred.resolve();
+			});
+		}else{
+        	deferred.resolve();
+		}
 
-        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
-            .done( this.props.submitIssueCallback )
-            .fail( this.handleFail.bind(this) ) ;
+		deferred.then(function () {
+			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
+				.done( self.props.submitIssueCallback )
+				.fail( self.handleFail.bind(self) ) ;
+		})
+
     }
 
     handleFail() {
