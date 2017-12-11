@@ -1,7 +1,5 @@
 <?php
 
-use Engines\MMT\MMTServiceApi;
-
 /**
  * Created by PhpStorm.
  * User: Hashashiyyin
@@ -71,6 +69,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * Get the available languages in MMT
      *
      * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
      */
     public function getAvailableLanguages(){
         $client = $this->_getClient();
@@ -88,7 +87,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         $text = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $text, @$_config[ 'mt_context' ], $_keys );
+        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $text, @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
 
         if( !empty( $translation[ 'translation' ] ) ){
             $this->result = ( new Engines_Results_MyMemory_Matches(
@@ -187,6 +186,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @param bool $fileName
      *
      * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
      */
     public function import( $filePath, $key, $fileName = false ) {
 
@@ -220,13 +220,14 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      *
-     * @param $file \SplFileObject
-     * @param $source string
+     * @param $file    \SplFileObject
+     * @param $source  string
      * @param $targets string[]
      *
      * @return mixed
      * @internal param array $langPairs
      *
+     * @throws \Engines\MMT\MMTServiceApiException
      */
     public function getContext( \SplFileObject $file,  $source, $targets  ) {
 
@@ -265,6 +266,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * Call to check the license key validity
      * @return Engines_Results_MMT_ExceptionError
+     * @throws \Engines\MMT\MMTServiceApiException
      */
     public function checkAccount(){
         $client = $this->_getClient();
@@ -278,6 +280,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @param $keyList TmKeyManagement_MemoryKeyStruct[]
      *
      * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
      */
     public function activate( Array $keyList ){
 
@@ -347,7 +350,8 @@ class Engines_MMT extends Engines_AbstractEngine {
      * when MyMemory TagProjection will be public
      *
      * @param $config
-     * @return Engines_Results_MMT_TagProjectionResponse
+     *
+     * @return array|Engines_Results_MMT_TagProjectionResponse
      */
     public function getTagProjection( $config ){
 
