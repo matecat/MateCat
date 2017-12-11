@@ -25,7 +25,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $job_type;
     public $total_time_to_edit;
     public $avg_post_editing_effort;
-    public $id_job_to_revise;
+    public $only_private_tm;
     public $last_opened_segment;
     public $id_tms;
     public $id_mt_engine;
@@ -200,11 +200,13 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * Returns the project struct, caching the result on the instance to avoid
      * unnecessary queries.
      *
+     * @param int $ttl
+     *
      * @return \Projects_ProjectStruct
      */
-    public function getProject() {
-        return $this->cachable( __function__, $this, function ( $job ) {
-            return Projects_ProjectDao::findById( $job->id_project, 60 * 60 * 24 );
+    public function getProject( $ttl = 86400 ) {
+        return $this->cachable( __function__, $this, function ( $job ) use ( $ttl ){
+            return Projects_ProjectDao::findById( $job->id_project, $ttl );
         } );
     }
 

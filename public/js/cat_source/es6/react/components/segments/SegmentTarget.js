@@ -14,9 +14,11 @@ class SegmentTarget extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translation : this.props.segment.translation
+            translation : this.props.segment.translation,
+            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation : this.props.segment.translation)
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
+        this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
     }
@@ -25,6 +27,13 @@ class SegmentTarget extends React.Component {
         if (this.props.segment.sid == sid) {
             this.setState({
                 translation: translation
+            });
+        }
+    }
+    setOriginalTranslation(sid, translation) {
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                originalTranslation: translation
             });
         }
     }
@@ -58,11 +67,13 @@ class SegmentTarget extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         this.afterRenderActions();
 
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 
     componentWillMount() {
@@ -141,7 +152,7 @@ class SegmentTarget extends React.Component {
                                     />
 
                                     {s2tMicro}
-
+                                    <div className="original-translation" style={{display: 'none'}} dangerouslySetInnerHTML={ this.allowHTML(this.state.originalTranslation) }/>
                                     <div className="toolbar">
                                         <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}/>
                                         {tagModeButton}

@@ -27,6 +27,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
             UI.closeSearch();
 
             $('body').addClass('side-tools-opened review-side-panel-opened');
+            window.dispatchEvent(new Event('resize'));
             hackIntercomButton( true );
 
             var segment = UI.Segment.findEl( data.sid );
@@ -54,6 +55,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
                     UI.scrollSegment( UI.currentSegment );
                 }, 100 );
             }
+            window.dispatchEvent(new Event('resize'));
         },
 
         deleteIssue : function( issue ) {

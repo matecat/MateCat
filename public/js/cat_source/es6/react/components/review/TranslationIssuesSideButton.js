@@ -1,5 +1,5 @@
-let SegmentStore = require('../stores/SegmentStore');
-let SegmentConstants = require('../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let SegmentConstants = require('../../constants/SegmentConstants');
 
 class TranslationIssuesSideButton extends React.Component{
 
@@ -81,9 +81,9 @@ class TranslationIssuesSideButton extends React.Component{
     render() {
         var plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
-            return (<div onClick={this.handleClick.bind(this)}><div className="review-triangle"></div><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
         } else  {
-            return (<div onClick={this.handleClick.bind(this)}><div className="review-triangle"></div><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
         }
 
     }

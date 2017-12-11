@@ -1,5 +1,4 @@
-let ReviewTranslationDiffVersion = require("./review/ReviewTranslationDiffVersion").default;
-let ReviewTranslationVersion = require("./review/ReviewTranslationVersion").default;
+let ReviewTranslationVersion = require("../review_improved/ReviewTranslationVersion").default;
 class TranslationIssuesOverviewPanel extends React.Component {
     
     
@@ -18,9 +17,6 @@ class TranslationIssuesOverviewPanel extends React.Component {
     closePanelClick(e, data) {
         this.props.closePanel();
     }
-    // getInitialState() {
-    //     return this.getStateFromSid( this.props.sid );
-    // }
 
     componentWillReceiveProps ( nextProps ) {
         if (this.props.reviewType === "improved") {
@@ -138,41 +134,9 @@ class TranslationIssuesOverviewPanel extends React.Component {
 
     }
 
-    getListVersionsReviewExtended() {
-        if (this.state.versions.length > 0) {
-
-            return this.state.versions.map( function(v) {
-                let key = 'version-' + v.id + '-' + this.props.sid ;
-
-                return (
-                    <ReviewTranslationDiffVersion
-                        diff={v.diff}
-                        sid={this.state.segment.sid}
-                        key={key}
-                        versionNumber={v.version_number}
-                        isCurrent={false}
-                        translation={v.translation}
-                        previousVersion={this.findPreviousVersion(v.version_number).translation}
-                        decodeTextFn={UI.decodeText}
-                        reviewType={this.props.reviewType}
-                        issues={v.issues}
-                        isReview={this.props.isReview}
-                    />
-                );
-            }.bind(this) );
-        } else {
-            return <h3>No version has been created for this segment</h3>;
-        }
-    }
-
     render() {
-        let fullList = '';
+        let fullList = this.getListVersionsReviewImproved();
 
-        if (this.props.reviewType === "improved") {
-            fullList = this.getListVersionsReviewImproved();
-        } else if (this.props.reviewType === "extended") {
-            fullList = this.getListVersionsReviewExtended();
-        }
 
         return <div className="review-issues-overview-panel">
                 { this.props.reviewType === "improved" ? (
@@ -183,7 +147,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
                     </div>
                 ) : (null) }
 
-            {fullList}
+                {fullList}
         </div>
         ;
     }

@@ -449,7 +449,7 @@ APP = {
     },
 
     fitText: function ( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ) {
-        if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
+        if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 4;
         if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
             $( child ).attr( 'data-originalText', $( child ).text() );
         }
@@ -477,10 +477,10 @@ APP = {
 
         child.text( actualTextLow + '[...]' + actualTextHi );
 
-        var test = true;
+        var loop = true;
         // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
-        while ( container.height() >= limitHeight && test == true ) {
-            test = this.fitText(container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi);
+        while ( container.height() >= limitHeight && loop == true ) {
+            loop = this.fitText(container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi);
         }
         return false;
 

@@ -1,7 +1,8 @@
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
-let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
-let TranslationIssuesOverviewPanel = require('../TranslationIssuesOverviewPanel').default;
+let ReviewIssueSelectionPanel = require('../review_improved/ReviewIssueSelectionPanel').default;
+let TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default;
+let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
 class ReviewSidePanel extends React.Component{
 
     constructor(props) {
@@ -90,14 +91,12 @@ class ReviewSidePanel extends React.Component{
             }
         } else {
             if (this.props.reviewType === "extended" && this.state.segment && this.state.visible) {
-                innerPanel = <div className="review-side-inner1">
-                    <TranslationIssuesOverviewPanel
+                innerPanel =<ReviewExtendedPanel
                         reviewType={this.props.reviewType}
                         segment={this.state.segment}
                         sid={this.state.segment.sid}
                         isReview={this.props.isReview}
-                    />
-                </div>;
+                    />;
             }
         }
 

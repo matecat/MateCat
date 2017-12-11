@@ -22,6 +22,23 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $target_text ;
     public $rebutted_at ;
 
+    protected $_diff;
+
+    /**
+     * @return mixed
+     */
+    public function getDiff(){
+        return $this->_diff;
+    }
+
+    /**
+     * @param mixed $diff
+     */
+    public function setDiff($diff){
+        $this->_diff = $diff;
+        return $this;
+    }
+
     public function setDefaults() {
         // set the translation reading the version number on the
         // segment translation

@@ -1506,8 +1506,8 @@ LXQ.init  = function () {
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), seg ));
                             var target_val = $(".targetarea", seg).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, true, LXQ.shouldHighlighWarningsForSegment( seg ), false, seg );
-                            $(".targetarea", seg).html(target_val);
-                            $( ".source", seg ).html( source_val );
+                            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(seg), UI.getSegmentFileId(seg), target_val);
+                            SegmentActions.replaceSourceText(UI.getSegmentId(seg), UI.getSegmentFileId(seg), source_val);
                             LXQ.buildPowertipDataForSegment( seg );
                             QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(seg);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));

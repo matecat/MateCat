@@ -5,6 +5,11 @@
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function initReactComponents() {
         SegmentActions.mountTranslationIssues();
+        setTimeout(function () {
+            if (config.isReview) {
+                SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
+            }
+        });
     });
 
     $(document).on('translation:change', function(e, data) {
@@ -12,5 +17,4 @@ if (ReviewExtended.enabled()) {
             UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         }
     });
-
 }

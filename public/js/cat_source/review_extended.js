@@ -17,13 +17,6 @@ if ( ReviewExtended.enabled() ) {
     (function (ReviewExtended, $,undefined) {
 
         $.extend(ReviewExtended, {
-            evalOpenableSegment: function (section) {
-                if (isTranslated(section)) return true;
-                var sid = UI.getSegmentId(section);
-                alertNotTranslatedYet(sid);
-                $(document).trigger('review:unopenableSegment', section);
-                return false;
-            },
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 
@@ -36,6 +29,13 @@ if ( ReviewExtended.enabled() ) {
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
                 });
+            },
+
+            sendNewTranslationIssue: function(segment, data_array, diff) {
+                return API.SEGMENT.setTranslation(segment)
+                    .done(function (response) {
+                        ReviewExtended.submitIssue(segment.sid, data_array, diff, response.translation.version_number);
+                    });
             },
 
             submitComment : function(id_segment, id_issue, data) {
@@ -53,17 +53,22 @@ if ( ReviewExtended.enabled() ) {
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
             registerReviseTab: function () {
-                SegmentActions.registerTab('review2', true, true);
+                return false;
             },
 
             trackChanges: function (editarea) {
                 var segmentId = UI.getSegmentId($(editarea));
-                var text = UI.postProcessEditarea($(editarea).closest('section'), '.editarea');
-                SegmentActions.updateTranslation(segmentId, htmlEncode(text));
+                var segmentFid = UI.getSegmentFileId($(editarea));
+                var originalTranslation = UI.currentSegment.find('.original-translation').html();
+                SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
             },
 
             submitIssues: function (sid, data, diff) {
                 return ReviewExtended.submitIssue(sid, data, diff);
+            },
+
+            sendNewTranslationIssue: function (segment, data, diff) {
+                return ReviewExtended.sendNewTranslationIssue(segment, data, diff);
             },
 
             getSegmentVersionsIssuesHandler(event) {
@@ -80,28 +85,28 @@ if ( ReviewExtended.enabled() ) {
                     });
             },
 
-            clickOnApprovedButton: function (e, button) {
-                // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-                // because of the event is triggered even on download button
-                e.preventDefault();
-                var goToNextNotApproved = ($(button).hasClass('approved') ) ? false : true;
-
-                $('.sub-editor.review .error-type').removeClass('error');
-
-                UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
-
-                if (UI.currentSegment.data('modified')) {
-                    SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
-                    SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
-                    UI.currentSegment.data('modified', false);
-                } else {
-                    if (goToNextNotApproved) {
-                        UI.openNextTranslated();
-                    } else {
-                        UI.gotoNextSegment();
-                    }
-                }
-            },
+            // clickOnApprovedButton: function (e, button) {
+            //     // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+            //     // because of the event is triggered even on download button
+            //     e.preventDefault();
+            //     var goToNextNotApproved = ($(button).hasClass('approved') ) ? false : true;
+            //
+            //     $('.sub-editor.review .error-type').removeClass('error');
+            //
+            //     UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
+            //
+            //     if (UI.currentSegment.data('modified')) {
+            //         SegmentActions.openIssuesPanel({ sid: UI.getSegmentId(UI.currentSegment) });
+            //         SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+            //         UI.currentSegment.data('modified', false);
+            //     } else {
+            //         if (goToNextNotApproved) {
+            //             UI.openNextTranslated();
+            //         } else {
+            //             UI.gotoNextSegment();
+            //         }
+            //     }
+            // },
 
             deleteTranslationIssue : function( context ) {
                 console.debug('delete issue', context);

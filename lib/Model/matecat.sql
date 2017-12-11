@@ -345,7 +345,7 @@ CREATE TABLE `jobs` (
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
   `total_time_to_edit` bigint(20) DEFAULT '0',
-  `id_job_to_revise` int(11) DEFAULT NULL,
+  `only_private_tm` int(11) NOT NULL DEFAULT '0',
   `last_opened_segment` int(11) DEFAULT NULL,
   `id_tms` int(11) DEFAULT '1',
   `id_mt_engine` int(11) DEFAULT '1',
@@ -378,7 +378,7 @@ CREATE TABLE `jobs` (
   `avg_post_editing_effort` float DEFAULT '0',
   `total_raw_wc` bigint(20) DEFAULT '1',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
-  KEY `id_job_to_revise` (`id_job_to_revise`),
+  KEY `id_job_to_revise` (`only_private_tm`),
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `owner` (`owner`),
   KEY `id_translator` (`id_translator`),
@@ -1125,7 +1125,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-28 13:48:18
+-- Dump completed on 2017-12-11 13:39:29
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1281,6 +1281,7 @@ INSERT INTO `phinxlog` VALUES (20170712141010,'2017-09-26 19:09:23','2017-09-26 
 INSERT INTO `phinxlog` VALUES (20170720100436,'2017-09-26 19:09:23','2017-09-26 19:09:24');
 INSERT INTO `phinxlog` VALUES (20170829075926,'2017-09-26 19:09:24','2017-09-26 19:09:24');
 INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 19:09:25');
+INSERT INTO `phinxlog` VALUES (20171129152525,'2017-11-30 12:39:09','2017-11-30 12:39:13');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1292,4 +1293,4 @@ INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-28 13:48:18
+-- Dump completed on 2017-12-11 13:39:29
