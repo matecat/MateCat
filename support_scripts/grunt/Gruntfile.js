@@ -283,6 +283,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
+                    basePath + 'lib/base64.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
