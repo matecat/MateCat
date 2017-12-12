@@ -20,7 +20,7 @@ class ReviewVersionsDiffContainer extends React.Component {
 
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
-		if (this.props.segment.sid === sid) {
+		if (this.props.segment.sid === sid && this.state.translation !== text) {
 			let newDiff = this.getDiffPatch(this.state.originalTranslation, text);
 			this.props.updateDiffDataFn(newDiff,text);
             this.setState({
