@@ -42,7 +42,11 @@ h1, h2, h3, h4, h5, a, input {
 					.error-item {
 						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
 						line-height: 40px;
-						padding: 0 0 0 10px;
+						padding: 0 10px;
+						transition: background .2s ease-in;
+						&:hover{
+							background: #f3f3f3;
+						}
 						.error-name {
 							display: inline-block;
 							width: 50%;
@@ -88,15 +92,19 @@ h1, h2, h3, h4, h5, a, input {
 		.re-issues {
 			padding: 10px;
 			.issues-list {
+				position: relative;
 				.issue-item {
-
 					&:last-child {
 						padding-bottom: 50px;
 					}
+
 					.issue {
 						background: #FFFFFF;
 						padding: 5px 5px 5px 10px;
 						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+						&.in-transition{
+							background: #0000ff;
+						}
 						.issue-head {
 							width: 50%;
 							display: inline-block;

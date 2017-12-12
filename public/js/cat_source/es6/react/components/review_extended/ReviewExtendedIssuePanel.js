@@ -43,7 +43,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.send_node = 0;
             issue.end_offset = 0;
         }
-		
+
         if(this.props.isDiffChanged){
         	let segment = this.props.segment;
         	segment.translation = this.props.newtranslation;
