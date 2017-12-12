@@ -4,8 +4,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            submitDisabled : true,
-			listIsOpen: true
+            submitDisabled : true
         };
 
     }
@@ -49,7 +48,7 @@ class ReviewExtendedIssuePanel extends React.Component{
         	segment.translation = this.props.newtranslation;
 			API.SEGMENT.setTranslation(segment)
 				.done(function(response){
-					issue.version = response.translation.version_number;
+					issue.version = response.translation.version_
 					deferred.resolve();
 				})
 				.fail( self.handleFail.bind(self) ) ;
@@ -57,8 +56,9 @@ class ReviewExtendedIssuePanel extends React.Component{
         	deferred.resolve();
 		}
 
+		data.push(issue);
+
 		deferred.then(function () {
-			data.push(issue);
 			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
 				.done( self.props.submitIssueCallback )
 				.fail( self.handleFail.bind(self) ) ;
@@ -73,9 +73,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     toggleList(){
-    	this.setState({
-			listIsOpen: !this.state.listIsOpen
-		})
+		$(this.listElm).slideToggle('fast');
 	}
     render() {
         let categoryComponents = [];
@@ -122,11 +120,9 @@ class ReviewExtendedIssuePanel extends React.Component{
 					{/*<div className="issues-scroll">
 						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
 					</div>*/}
-					{this.state.listIsOpen ?
-						(<div className="error-list active">
-							{categoryComponents}
-						</div>) : (null)}
-
+					<div className="error-list active" ref={(node)=>this.listElm=node}>
+						{categoryComponents}
+					</div>
 				</div>
 			</div>
     }
