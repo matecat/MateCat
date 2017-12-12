@@ -96,6 +96,36 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * This method is used for help to rebuild result from MyMemory.
+     * Because when in CURL you send something using method POST and value's param start with "@"
+     * he assume you are sending a file.
+     *
+     * Passing prefix you left before, this method, rebuild result putting prefix at start of translated phrase.
+     *
+     * @param $prefix
+     *
+     * @return array
+     */
+    private function rebuildResult( $prefix ) {
+
+        if ( !empty( $this->result->responseData[ 'translatedText' ] ) ) {
+            $this->result->responseData[ 'translatedText' ] = $prefix . $this->result->responseData[ 'translatedText' ];
+        }
+
+        if ( !empty( $this->result->matches ) ) {
+            $matches_keys = [ 'raw_segment', 'segment', 'translation', 'raw_translation' ];
+            foreach ( $this->result->matches as $match ) {
+                foreach ( $matches_keys as $match_key ) {
+                    $match->$match_key = $prefix . $match->$match_key;
+                }
+            }
+        }
+
+        return $this->result;
+
+    }
+
+    /**
      * @param $_config
      *
      * @return array
@@ -105,27 +135,33 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
+            $_config[ 'segment' ] = str_replace( "$segment_file_chr[1]", "", $_config[ 'segment' ] );
+        }
 
-        $parameters                  = [];
-        $parameters[ 'q' ]           = $_config[ 'segment' ];
-        $parameters[ 'langpair' ]    = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]          = $_config[ 'email' ];
-        $parameters[ 'mt' ]          = $_config[ 'get_mt' ];
-        $parameters[ 'numres' ]      = $_config[ 'num_result' ];
+
+        $_config[ 'segment' ] = ltrim( $_config[ 'segment' ], "@-" );
+
+        $parameters               = [];
+        $parameters[ 'q' ]        = $_config[ 'segment' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
+        $parameters[ 'numres' ]   = $_config[ 'num_result' ];
 
         ( @$_config[ 'onlyprivate' ] ? $parameters[ 'onlyprivate' ] = 1 : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
         ( @$_config[ 'mt_only' ] ? $parameters[ 'mtonly' ] = '1' : null );
 
-        if( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ){
-            $parameters[ 'context_after' ]  = $_config[ 'context_after' ];
-            $parameters[ 'context_before' ] = $_config[ 'context_before' ];
+        if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
+            $parameters[ 'context_after' ]  = ltrim( $_config[ 'context_after' ], "@-" );
+            $parameters[ 'context_before' ] = ltrim( $_config[ 'context_before' ], "@-" );
         }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
             }
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
@@ -133,8 +169,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
 
 
-        $parameters = $this->featureSet->filter('filterMyMemoryGetParameters', $parameters ) ;
+        $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters );
         $this->call( $function, $parameters, true );
+
+        if ( isset( $segment_file_chr[ 1 ] ) ) {
+            $this->rebuildResult( $segment_file_chr[ 1 ] );
+        }
+
 
         return $this->result;
 
@@ -147,22 +188,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function set( $_config ) {
 
-        $parameters                     = [];
-        $parameters[ 'seg' ]            = $_config[ 'segment' ];
-        $parameters[ 'tra' ]            = $_config[ 'translation' ];
-        $parameters[ 'tnote' ]          = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ]       = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]             = $_config[ 'email' ];
-        $parameters[ 'prop' ]           = $_config[ 'prop' ];
+        $parameters               = [];
+        $parameters[ 'seg' ]      = ltrim( $_config[ 'segment' ] );
+        $parameters[ 'tra' ]      = ltrim( $_config[ 'translation' ] );
+        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
-        if( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ){
-            $parameters[ 'context_after' ]  = $_config[ 'context_after' ];
-            $parameters[ 'context_before' ] = $_config[ 'context_before' ];
+        if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
+            $parameters[ 'context_after' ]  = ltrim( $_config[ 'context_after' ], "@-" );
+            $parameters[ 'context_before' ] = ltrim( $_config[ 'context_before' ], "@-" );
         }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
             }
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
