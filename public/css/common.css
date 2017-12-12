@@ -4984,3 +4984,19 @@ img.ui-user-top-image-general {
 .inactive-tm-container .notification-message {
     margin-top: 40px !important;
 }
+
+#activetm td.activate {
+    display: none;
+}
+
+#inactivetm td.update.text-center.check {
+    display: none;
+}
+
+#activetm td.description {
+    width: 545px !important;
+}
+
+#inactivetm td.description {
+    width: 545px !important;
+}
