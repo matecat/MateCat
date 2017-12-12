@@ -685,7 +685,7 @@
                 row.find('.addtmx').removeAttr('style');
             }
             row.detach();
-            $("#inactivetm").append(row);
+            $("#inactivetm").prepend(row);
 
             row.css('display', 'block');
 
@@ -704,6 +704,7 @@
             if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
             row.addClass('mine');
             row.find('td.lookup input, td.update input').attr('checked', true);
+            row.find('td.lookup input, td.update input').prop('checked', true);
             row.css('display', 'block');
 
             //update datatable struct
