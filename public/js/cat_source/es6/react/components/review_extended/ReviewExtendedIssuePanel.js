@@ -43,19 +43,22 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.send_node = 0;
             issue.end_offset = 0;
         }
-
-        data.push(issue);
+		
         if(this.props.isDiffChanged){
         	let segment = this.props.segment;
         	segment.translation = this.props.newtranslation;
-			API.SEGMENT.setTranslation(segment).done(function(){
-				deferred.resolve();
-			});
+			API.SEGMENT.setTranslation(segment)
+				.done(function(response){
+					issue.version = response.translation.version_number;
+					deferred.resolve();
+				})
+				.fail( self.handleFail.bind(self) ) ;
 		}else{
         	deferred.resolve();
 		}
 
 		deferred.then(function () {
+			data.push(issue);
 			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
 				.done( self.props.submitIssueCallback )
 				.fail( self.handleFail.bind(self) ) ;
