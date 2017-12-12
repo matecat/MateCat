@@ -31,6 +31,12 @@ h1, h2, h3, h4, h5, a, input {
 			.accordion {
 				h4{
 					cursor: pointer;
+					-webkit-touch-callout: none;
+					-webkit-user-select: none;
+					-khtml-user-select: none;
+					-moz-user-select: none;
+					-ms-user-select: none;
+					user-select: none;
 				}
 				.create-issue-title {
 					i.icon-sort-up.icon {
@@ -40,28 +46,6 @@ h1, h2, h3, h4, h5, a, input {
 				}
 
 				.error-list {
-					/*overflow: hidden;
-					position: relative;
-					&.transition-enter {
-						max-height: 0px;
-						padding-top:0px !important;
-						padding-bottom: 0 !important;
-					}
-
-					&.transition-enter.transition-enter-active {
-						max-height: 300px;
-						-webkit-transition: max-height .3s ease;
-					}
-					&.transition-leave{
-						max-height: 300px;
-					}
-					&.transition-leave-active {
-						max-height: 0px;
-						padding-top:0px !important;
-						padding-bottom: 0 !important;
-						-webkit-transition: max-height .3s ease;
-					}*/
-
 					.error-item {
 						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
 						line-height: 40px;
