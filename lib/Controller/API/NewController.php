@@ -23,6 +23,16 @@ set_time_limit( 300 );
 class NewController extends ajaxController {
 
     /**
+     * @var boolean
+     */
+    private $only_private;
+
+    /**
+     * @var int
+     */
+    private $pretranslate_100;
+
+    /**
      * @var Langs_Languages
      */
     private $lang_handler;
@@ -146,6 +156,7 @@ class NewController extends ajaxController {
                 'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -156,6 +167,9 @@ class NewController extends ajaxController {
         if ( !isset( $__postInput[ 'mt_engine' ] ) || is_null( $__postInput[ 'mt_engine' ] ) ) {
             $__postInput[ 'mt_engine' ] = 1;
         }
+
+        //default get all public matches from TM
+        $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
 
         foreach ( $__postInput as $key => $val ) {
             $__postInput[ $key ] = urldecode( $val );
@@ -590,6 +604,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->owner;
         $projectStructure[ 'metadata' ]             = $this->metadata ;
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
+        $projectStructure[ 'only_private' ]         = $this->only_private;
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;

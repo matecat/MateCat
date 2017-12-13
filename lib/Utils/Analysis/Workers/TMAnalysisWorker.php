@@ -49,20 +49,15 @@ class TMAnalysisWorker extends AbstractWorker {
     protected $featureSet ;
 
     /**
-     * @var \Projects_ProjectStruct
-     */
-    protected $project ;
-
-    /**
      * Concrete Method to start the activity of the worker
      *
      * @param AbstractElement $queueElement
      *
      * @return void
      *
-     * @throws EmptyElementException
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
         
@@ -71,11 +66,8 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * Ensure we have fresh data from master node
          */
-        Database::obtain()->getConnection()->beginTransaction();
-        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
         $this->featureSet = new \FeatureSet() ;
-        $this->featureSet->loadForProject( $this->project ) ;
-        Database::obtain()->getConnection()->commit();
+        $this->featureSet->loadFromString( $queueElement->params->features );
 
         //reset matches vector
         $this->_matches = null;
@@ -381,11 +373,11 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMatches( QueueElement $queueElement ){
 
-        $_config              = array();
-        $_config[ 'segment' ] = $queueElement->params->segment;
-        $_config[ 'source' ]  = $queueElement->params->source;
-        $_config[ 'target' ]  = $queueElement->params->target;
-        $_config[ 'email' ]   = \INIT::$MYMEMORY_TM_API_KEY;
+        $_config                  = [];
+        $_config[ 'segment' ]     = $queueElement->params->segment;
+        $_config[ 'source' ]      = $queueElement->params->source;
+        $_config[ 'target' ]      = $queueElement->params->target;
+        $_config[ 'email' ]       = \INIT::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ] = $queueElement->params->context_before;
         $_config[ 'context_after' ]  = $queueElement->params->context_after;
@@ -419,6 +411,10 @@ class TMAnalysisWorker extends AbstractWorker {
                  * Don't get MT contribution from MyMemory ( Custom MT )
                  */
                 $_config[ 'get_mt' ] = false;
+            }
+
+            if( $queueElement->params->only_private ){
+                $_config[ 'onlyprivate' ] = true;
             }
 
             $tms_enabled = true;
@@ -707,6 +703,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $_project_id
      *
      * @throws ReQueueException
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _tryToCloseProject( $_project_id ) {
 
@@ -730,7 +727,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
             try {
-                $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
+                $this->featureSet->run( 'beforeTMAnalysisCloseProject', $_project_id );
             } catch(\Exception $e) {
                 $this->_queueHandler->getRedisClient()->del( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id );
                 $this->_doLog("Requeueing project_id $_project_id because of error {$e->getMessage()}");
@@ -765,6 +762,10 @@ class TMAnalysisWorker extends AbstractWorker {
      * When a segment has an error or was re-queued too much times we want to force it as analyzed
      *
      * @param $elementQueue QueueElement
+     *
+     * @throws Exception
+     * @throws ReQueueException
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 

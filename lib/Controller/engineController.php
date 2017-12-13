@@ -165,20 +165,6 @@ class engineController extends ajaxController {
 
                 break;
 
-            case strtolower( Constants_Engines::DEEPLINGO ):
-
-                /**
-                 * Create a record of type IPTranslator
-                 */
-                $newEngineStruct = EnginesModel_DeepLingoStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
-                break;
             case strtolower( Constants_Engines::APERTIUM ):
 
                 /**

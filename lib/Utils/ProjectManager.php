@@ -120,6 +120,7 @@ class ProjectManager {
                             'uid'                  => null,
                             'skip_lang_validation' => false,
                             'pretranslate_100'     => 0,
+                            'only_private'         => 0,
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => [],
@@ -1045,6 +1046,7 @@ class ProjectManager {
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
             $newJob->total_raw_wc      = $this->files_word_count;
+            $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 

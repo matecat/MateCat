@@ -1131,12 +1131,14 @@
                 UI.clearTMPanel();
             }
             if(!APP.isCattool) return;
-            data = this.extractTMdataFromTable();
+            var data = this.extractTMdataFromTable();
+            var getPublicMatches = $( '#activetm' ).find( 'tr.mymemory .lookup input' ).is( ':checked' );
             APP.doRequest({
                 data: {
                     action: 'updateJobKeys',
                     job_id: config.job_id,
                     job_pass: config.password,
+                    get_public_matches: getPublicMatches,
                     data: data
                 },
                 error: function() {
@@ -2013,7 +2015,6 @@
             mymemoryChecks.powerTip({
                 placement : 's',
             });
-
 
         },
 

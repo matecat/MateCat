@@ -172,6 +172,7 @@ class Xliff_Parser {
 						// Getting Source and Target raw content
 						unset($temp);
 
+						//TODO BUG <ph id="10" x="&lt;endcmp/>&quot;&gt;{10}</ph>
 						preg_match('|<source.*?>(.*?)</source>|si', $trans_unit, $temp);
 						// just in case of a <source />
 						if (!isset($temp[1])) {

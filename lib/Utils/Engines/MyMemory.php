@@ -98,19 +98,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @param $_config
      *
-     * @return Engines_Results_MyMemory_TMS
+     * @return array
+     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\ValidationError
      */
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
-        $parameters               = array();
-        $parameters[ 'q' ]        = $_config[ 'segment' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
-        $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
-        $parameters[ 'numres' ]   = $_config[ 'num_result' ];
+        $parameters                  = [];
+        $parameters[ 'q' ]           = $_config[ 'segment' ];
+        $parameters[ 'langpair' ]    = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]          = $_config[ 'email' ];
+        $parameters[ 'mt' ]          = $_config[ 'get_mt' ];
+        $parameters[ 'numres' ]      = $_config[ 'num_result' ];
 
+        ( @$_config[ 'onlyprivate' ] ? $parameters[ 'onlyprivate' ] = 1 : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
         ( @$_config[ 'mt_only' ] ? $parameters[ 'mtonly' ] = '1' : null );
