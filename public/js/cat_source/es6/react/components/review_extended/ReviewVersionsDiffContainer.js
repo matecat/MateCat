@@ -15,14 +15,14 @@ class ReviewVersionsDiffContainer extends React.Component {
             translation: this.props.segment.translation,
 			diffPatch: this.getDiffPatch(this.props.segment.translation, this.props.segment.translation)
 		};
-		this.props.updateDiffDataFn(this.state.diffPatch);
+		this.props.updateDiffDataFn(this.state.diffPatch,this.props.segment.translation);
     }
 
 	trackChanges(sid, editareaText) {
 		let text = htmlEncode(UI.prepareTextToSend(editareaText));
-		if (this.props.segment.sid === sid) {
+		if (this.props.segment.sid === sid && this.state.translation !== text) {
 			let newDiff = this.getDiffPatch(this.state.originalTranslation, text);
-			this.props.updateDiffDataFn(newDiff);
+			this.props.updateDiffDataFn(newDiff,text);
             this.setState({
                 translation: text,
                 diffPatch: newDiff
@@ -36,7 +36,7 @@ class ReviewVersionsDiffContainer extends React.Component {
                 originalTranslation: translation,
                 diffPatch: this.getDiffPatch(translation, this.state.translation)
             });
-            this.props.updateDiffDataFn(this.state.diffPatch);
+            this.props.updateDiffDataFn(this.state.diffPatch,this.props.segment.translation);
         }
     }
 
@@ -55,7 +55,7 @@ class ReviewVersionsDiffContainer extends React.Component {
                 segment: nextProps.segment,
                 diffPatch: newDiff
             });
-            this.props.updateDiffDataFn(newDiff);
+            this.props.updateDiffDataFn(newDiff,nextProps.segment.translation);
 		}
 
 	}

@@ -92,17 +92,33 @@ class Editarea extends React.Component {
             UI.editAreaClick(event.currentTarget);
         }
     }
+
+    emitTrackChanges(){
+		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )){
+			UI.trackChanges(this.editAreaRef);
+		}
+	}
+
     onInputEvent(e) {
         UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
+        this.emitTrackChanges();
     }
     onKeyDownEvent(e) {
+    	//on textarea the event of ctrz+z have a preventDefault.
+		//We added this lines for fix the bug
+		//TODO:delete preventDefault on ui.events.js
+		if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) ) {
+			this.emitTrackChanges();
+		}
         UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
     }
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e);
+		this.emitTrackChanges();
     }
     onPasteEvent(e) {
         UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
+		this.emitTrackChanges();
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
