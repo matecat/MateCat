@@ -243,13 +243,13 @@ $.extend(UI, {
 		$('.search-display .found .warning').remove();
 	},
 	updateSearchDisplayCount: function(segment) {
-		numRes = $('.search-display .numbers .results');
-		currRes = parseInt(numRes.text());
-		newRes = (currRes == 0)? 0 : currRes - 1;
-		numRes.text(newRes);
+		var numRes = $('.search-display .numbers .results'),
+			currRes = parseInt(numRes.text()),
+			newRes = (currRes == 0)? 0 : currRes - 1;
+			numRes.text(newRes);
 		if (($('.targetarea mark.searchMarker', segment).length - 1) === 0) {
-			numSeg = $('.search-display .numbers .segments');
-			currSeg = parseInt(numSeg.text());
+			var numSeg = $('.search-display .numbers .segments'),
+			currSeg = parseInt(numSeg.text()),
 			newSeg = (currSeg == 0)? 0 : currSeg - 1;
 			numSeg.text(newSeg);
 		}

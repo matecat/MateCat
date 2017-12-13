@@ -740,12 +740,11 @@ $.extend(UI, {
                     var numSpacesBefore = $('.space-marker', UI.editarea).length;
 					saveSelection();
 
-					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
-					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-
-                    sbIndex = 0;
+					var parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
+					var isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+					var parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
+					var isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
+                    var sbIndex = 0;
                     var translation = $.parseHTML(UI.editarea.html());
                     $.each(translation, function(index) {
                         if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
@@ -918,7 +917,7 @@ $.extend(UI, {
 
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
-					UI.resetSearch();
+					/*UI.resetSearch();*/
 				}
 			}
 			// if (e.which == 32) { // space
