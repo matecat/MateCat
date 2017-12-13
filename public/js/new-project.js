@@ -408,6 +408,11 @@ $.extend(UI.UPLOAD_PAGE, {
             fullTextSearch: 'exact',
         });
 
+        $('#project-subject').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+        });
+
 
         $('.tmx-select .tm-info-title .icon').popup({
             html: "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +

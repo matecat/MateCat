@@ -47,10 +47,12 @@
 
 .translate-box.tmx-select,
 .translate-box.source,
-.translate-box.target {
+.translate-box.target,
+.translated-box.subject {
 
     #source-lang,
-    #target-lang {
+    #target-lang,
+    #project-subject{
         width: 230px ;
     }
     #tmx-select {
