@@ -10,8 +10,9 @@ class ReviewExtendedPanel extends React.Component {
 			versionNumber: this.props.segment.versions[0].version_number,
 			selectionObj: null,
 			diffPatch: null,
+			isDiffChanged: false,
+			newtranslation: this.props.segment.translation
 		};
-
 	}
 
 	textSelected(data) {
@@ -19,13 +20,24 @@ class ReviewExtendedPanel extends React.Component {
 			selectionObj: data
 		});
 	}
-
-	updateDiffData(diffPatch){
+	updateDiffData(diffPatch, newTranslation){
+		//detect if diff is changed.
+		let isDiffChanged = false;
+		if(this.props.segment.translation !== newTranslation){
+			isDiffChanged = true;
+		}
 		this.setState({
-			diffPatch: diffPatch
+			diffPatch: diffPatch,
+			newtranslation: newTranslation,
+			isDiffChanged: isDiffChanged
 		});
 	}
 
+	setDiffStatus(status){
+		this.setState({
+			diffStatus: status
+		});
+	}
 	removeSelection() {
 		this.setState({
 			selectionObj: null
@@ -65,8 +77,10 @@ class ReviewExtendedPanel extends React.Component {
 				selection={this.state.selectionObj}
 				segmentVersion={this.state.versionNumber}
 				diffPatch={this.state.diffPatch}
+				isDiffChanged={this.state.isDiffChanged}
 				submitIssueCallback={this.removeSelection.bind(this)}
 				reviewType={this.props.reviewType}
+				newtranslation={this.state.newtranslation}
 				segment={this.props.segment}
 			/>): (null)}
 			<ReviewExtendedIssuesContainer

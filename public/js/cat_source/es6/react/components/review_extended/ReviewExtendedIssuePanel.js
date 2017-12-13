@@ -4,8 +4,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            submitDisabled : true,
-			listIsOpen: true
+            submitDisabled : true
         };
 
     }
@@ -22,6 +21,8 @@ class ReviewExtendedIssuePanel extends React.Component{
     sendIssue(category, severity) {
 
         let data = [];
+        let deferred = $.Deferred();
+        let self = this;
 
         let issue = {
             'id_category'         : category.id,
@@ -42,11 +43,27 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.end_offset = 0;
         }
 
-        data.push(issue);
+        if(this.props.isDiffChanged){
+        	let segment = this.props.segment;
+        	segment.translation = this.props.newtranslation;
+			API.SEGMENT.setTranslation(segment)
+				.done(function(response){
+					issue.version = response.translation.version_
+					deferred.resolve();
+				})
+				.fail( self.handleFail.bind(self) ) ;
+		}else{
+        	deferred.resolve();
+		}
 
-        SegmentActions.submitIssue(this.props.sid, data, this.props.diffPatch)
-            .done( this.props.submitIssueCallback )
-            .fail( this.handleFail.bind(this) ) ;
+		data.push(issue);
+
+		deferred.then(function () {
+			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
+				.done( self.props.submitIssueCallback )
+				.fail( self.handleFail.bind(self) ) ;
+		})
+
     }
 
     handleFail() {
@@ -56,9 +73,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     toggleList(){
-    	this.setState({
-			listIsOpen: !this.state.listIsOpen
-		})
+		$(this.listElm).slideToggle('fast');
 	}
     render() {
         let categoryComponents = [];
@@ -105,11 +120,9 @@ class ReviewExtendedIssuePanel extends React.Component{
 					{/*<div className="issues-scroll">
 						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
 					</div>*/}
-					{this.state.listIsOpen ?
-						(<div className="error-list active">
-							{categoryComponents}
-						</div>) : (null)}
-
+					<div className="error-list active" ref={(node)=>this.listElm=node}>
+						{categoryComponents}
+					</div>
 				</div>
 			</div>
     }
