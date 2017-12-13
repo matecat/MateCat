@@ -136,11 +136,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
-            $_config[ 'segment' ] = str_replace( "$segment_file_chr[1]", "", $_config[ 'segment' ] );
+            $_config[ 'segment' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
         }
-
-
-        $_config[ 'segment' ] = ltrim( $_config[ 'segment' ], "@-" );
 
         $parameters               = [];
         $parameters[ 'q' ]        = $_config[ 'segment' ];
@@ -189,8 +186,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function set( $_config ) {
 
         $parameters               = [];
-        $parameters[ 'seg' ]      = ltrim( $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = ltrim( $_config[ 'translation' ] );
+        $parameters[ 'seg' ]      = ltrim( $_config[ 'segment' ], "@-" );
+        $parameters[ 'tra' ]      = ltrim( $_config[ 'translation' ], "@-" );
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
