@@ -139,6 +139,7 @@ class Mmt extends BaseFeature {
      * @param Jobs_JobStruct         $jobStruct
      *
      * @return mixed
+     * @throws Exception
      */
     public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, Jobs_JobStruct $jobStruct ){
 
@@ -155,6 +156,7 @@ class Mmt extends BaseFeature {
 
             $mt_context = @array_pop( ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' ) );
             $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
+            $config[ 'job_id' ] = $jobStruct->id;
 
         }
 

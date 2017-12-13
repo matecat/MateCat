@@ -30,6 +30,12 @@ class CatUtils {
     const nbspPlaceholderClass  = '_A0';
     const nbspPlaceholderRegex  = '/\#\#\$_A0\$\#\#/g';
 
+    const xliffTagHtmlOpenTag   = '##$_3C$##'; // Character < : &lt;
+    const xliffTagHtmlOpenTagRegex   = '/\#\#\$_3C\$\#\#/g';
+
+    const xliffTagHtmlCloseTag        = '##$_3E$##'; // Character > : &gt;
+    const xliffTagHtmlCloseTagRegex   = '/\#\#\$_3E\$\#\#/g';
+
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
     public static function isCJK( $langCode ){
@@ -144,7 +150,8 @@ class CatUtils {
 
         if( !function_exists( 'callback_decode' ) ){
             function callback_decode( $matches ) {
-                return LTPLACEHOLDER . base64_decode( $matches[1] ) . GTPLACEHOLDER;
+                $_match =  base64_decode( $matches[1] );
+                return LTPLACEHOLDER . $_match . GTPLACEHOLDER;
             }
         }
 
@@ -157,6 +164,12 @@ class CatUtils {
 
     private static function restore_xliff_tags($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/[\'"]base64:(.+)[\'"]/U', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/[\'"]base64:(.+)[\'"]/U', '"' . base64_decode( $tag_attribute[ 1 ] ) . '"', $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(GTPLACEHOLDER, ">", $segment);
         return $segment;
@@ -164,6 +177,12 @@ class CatUtils {
 
     public static function restore_xliff_tags_for_view($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/(&lt;.+?&gt;)/', $segment, $html, PREG_SET_ORDER );
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/(&lt;.+?&gt;)/', 'base64:' . base64_encode( $tag_attribute[ 1 ] ), $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
