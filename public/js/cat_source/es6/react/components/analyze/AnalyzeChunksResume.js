@@ -168,7 +168,8 @@ class AnalyzeChunksResume extends React.Component {
                     let obj = self.props.jobsInfo[indexJob].chunks[0];
                     let password = obj.jpassword;
                     let total_raw = obj.total_raw_word_count_print;
-                    let total_standard = jobAnalysis.get('totals').first().get('standard_word_count').get(1);
+                    let total_standard = (jobAnalysis.get('totals').first().get('standard_word_count')) ?
+                        jobAnalysis.get('totals').first().get('standard_word_count').get(1) : 0;
 
                     let chunkJob = self.props.project.get('jobs').find(function (job) {
                         return job.get('id') == self.props.jobsInfo[indexJob].jid ;
