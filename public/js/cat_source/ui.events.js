@@ -729,6 +729,16 @@ $.extend(UI, {
                 // }
             }
 
+            //check if inside search
+			if (UI.body.hasClass('searchActive')) {
+            	var el = this;
+            	setTimeout(function(){
+					UI.rebuildSearchSegmentMarkers(el);
+				},100)
+
+			}
+
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
