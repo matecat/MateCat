@@ -124,7 +124,8 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.shouldEmptyTargetElement( segmentRecord )) {
                     Speech2Text.finalTranscript = '';
-                    Speech2Text.targetElement.html('');
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), '');
+                    // Speech2Text.targetElement.html('');
                 } else {
 
                     Speech2Text.finalTranscript = Speech2Text.targetElement.html() + ' ';
@@ -187,10 +188,10 @@ Speech2Text.init  = function () {
                 }
 
                 if (!Speech2Text.isStopingRecognition) {
-                    Speech2Text.targetElement.html(
-                        Speech2Text.linebreak(Speech2Text.finalTranscript)
+                    var html  = Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript)
-                    );
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), html);
+
                     UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
             },

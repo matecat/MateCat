@@ -846,10 +846,12 @@ UI = {
             // }
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-			    var next = UI.findNextSegment(UI.startSegmentId);
-			    if (next) {
-                    this.gotoSegment(next.attr('data-split-original-id'));
-                }
+                setTimeout(function () {
+                    var next = UI.findNextSegment(UI.startSegmentId);
+                    if (next) {
+                        UI.gotoSegment(next.attr('data-split-original-id'));
+                    }
+                }, 100);
 			}
 
 			if (options.applySearch) {
@@ -2087,6 +2089,35 @@ UI = {
         return $(area).text();
     },
 
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        var divs = $div.find( 'div' );
+
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
+            $div.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $div.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $div.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $div.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+        }
+
+        $div.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $div.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+
+        return $div.text();
+    },
+
+    /**
+     * Method overwritten in the file ui.contribution.js
+     */
     processContributions : function() {
     },
 
@@ -2364,21 +2395,28 @@ UI = {
 		var ind = 0;
 		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
-
-		this.editarea.html(this.undoStack[ind]);
-		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
-		$('.undoCursorPlaceholder').remove();
-
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), this.undoStack[ind]);
+        // this.editarea.html(this.undoStack[ind]);
+        setTimeout(function () {
+            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+            $('.undoCursorPlaceholder').remove();
+        }, 100);
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
         SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
-		this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
-        // $('.undoCursorPlaceholder').remove();
-		if (this.undoStackPosition > 0)
-			this.undoStackPosition--;
+        var html = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), html);
+        setTimeout(function () {
+            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+            $('.undoCursorPlaceholder').remove();
+        }, 100);
+		// this.editarea.html();
+		if (this.undoStackPosition > 0) {
+            this.undoStackPosition--;
+        }
         SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},

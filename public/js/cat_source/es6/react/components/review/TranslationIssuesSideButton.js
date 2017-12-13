@@ -1,5 +1,5 @@
-let SegmentStore = require('../stores/SegmentStore');
-let SegmentConstants = require('../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+let SegmentConstants = require('../../constants/SegmentConstants');
 
 class TranslationIssuesSideButton extends React.Component{
 

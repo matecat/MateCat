@@ -179,7 +179,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     replaceSource(sid, fid, source) {
         var index = this.getSegmentIndex(sid, fid);
         var trans = this.removeLockTagsFromString(source);
-        this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
+        this._segments[fid] = this._segments[fid].setIn([index, 'source'], trans);
         return trans;
     },
 
@@ -187,6 +187,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
     },
+
+    setSegmentOriginalTranslation(sid, fid, translation) {
+        var index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'original_translation'], translation);
+    },
+
     removeLockTagsFromString(str) {
         return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
@@ -249,6 +255,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
+        case SegmentConstants.ADD_SEGMENTS_CLASS:
+            SegmentStore.emitChange(action.actionType, action.sidList, action.newClass);
+            break;
         case SegmentConstants.REMOVE_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
@@ -273,18 +282,19 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            var trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            var source = SegmentStore.replaceSource(action.id, action.fid, action.source);
+            let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
-        case SegmentConstants.UPDATE_TRANSLATION:
-            SegmentStore.emitChange(action.actionType, action.id, action.text);
+        case SegmentConstants.TRANSLATION_EDITED:
+            let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
@@ -307,6 +317,10 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid)
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
+            SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, action.id, action.originalTranslation);
             break;
         case SegmentConstants.RENDER_REVISE_ISSUES:
             SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);

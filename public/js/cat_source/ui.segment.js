@@ -447,7 +447,7 @@
             SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
         },
         setCurrentSegment: function(closed) {
-            reqArguments = arguments;
+            var reqArguments = arguments;
             var id_segment = this.currentSegmentId;
             if (closed) {
                 id_segment = 0;

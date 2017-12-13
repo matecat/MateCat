@@ -296,17 +296,17 @@ $.extend( UI, {
 
     },
     keyPressEditAreaEventHandler: function (e) {
-        if (e.ctrlKey || e.shiftKey){
-            return;
-        }
-        if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
+        // if (e.ctrlKey || e.shiftKey){
+        //     return;
+        // }
+        if( (e.which == 60) && (UI.taglockEnabled) ) { // opening tag sign
             if($('.tag-autocomplete').length) {
                 e.preventDefault();
                 return false;
             }
             UI.openTagAutocompletePanel();
         }
-        if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
+        if( (e.which == 62) && (UI.taglockEnabled) ) { // closing tag sign
             if($('.tag-autocomplete').length) {
                 e.preventDefault();
                 return false;
@@ -318,7 +318,8 @@ $.extend( UI, {
                 UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
 
                 if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-                    UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
+                    var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>')
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
                 }
                 UI.checkAutocompleteTags();
             }

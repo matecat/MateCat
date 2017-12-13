@@ -46,6 +46,7 @@
             // if ((!this.readonly)&&(!getNormally)) {
             //     $('#segment-' + segment.id + ' .alternatives .overflow').hide();
             // }
+            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor opened');
 
             if (!this.readonly) {
                 var self = this;
@@ -78,10 +79,6 @@
             }
 
             this.opening = false;
-
-
-            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor opened');
-            // SegmentActions.addClassToSegment(UI.getSegmentId(this.currentSegment), 'opened');
 
             if (!this.readonly) {
                 /* Check if is right-to-left language, because there is a bug that make

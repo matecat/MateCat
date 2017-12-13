@@ -2,37 +2,20 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
     constructor(props) {
         super(props);
-        if (this.props.reviewType === "improved") {
-            this.state = {
-                sendLabel : 'Send',
-                sendDisabled : true,
-                replying : false,
-                comments : MateCat.db.segment_translation_issue_comments.findObjects({
-                    'id_issue' : this.props.issueId
-                }),
-                rebutLabel : 'Send and Rebut',
-                rebutDisabled : true,
-                rebutVisible : true,
-                undoRebutLabel : 'Undo Rebut',
-                undoRebutDisabled : false,
-                undoRebutVisible : false
-            };
-        } else if (this.props.reviewType === "extended") {
-            this.state = {
-                sendLabel : 'Send',
-                sendDisabled : true,
-                replying : false,
-                comments : [],
-                rebutLabel : 'Send and Rebut',
-                rebutDisabled : true,
-                rebutVisible : true,
-                undoRebutLabel : 'Undo Rebut',
-                undoRebutDisabled : false,
-                undoRebutVisible : false
-            };
-        }
-
-
+        this.state = {
+            sendLabel : 'Send',
+            sendDisabled : true,
+            replying : false,
+            comments : MateCat.db.segment_translation_issue_comments.findObjects({
+                'id_issue' : this.props.issueId
+            }),
+            rebutLabel : 'Send and Rebut',
+            rebutDisabled : true,
+            rebutVisible : true,
+            undoRebutLabel : 'Undo Rebut',
+            undoRebutDisabled : false,
+            undoRebutVisible : false
+        };
     }
 
 
@@ -93,31 +76,23 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
     }
 
     componentDidMount() {
-        if (this.props.reviewType === "improved") {
-            MateCat.db.addListener('segment_translation_issue_comments',
-                ['insert', 'delete'], this.commentsChanged.bind(this));
-            ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+        MateCat.db.addListener('segment_translation_issue_comments',
+            ['insert', 'delete'], this.commentsChanged.bind(this));
+        ReviewImproved.loadComments(this.props.sid, this.props.issueId);
 
-            var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
-            this.checkIssue( issue );
+        var issue = MateCat.db.segment_translation_issues.by( 'id', parseInt(this.props.issueId) );
+        this.checkIssue( issue );
 
-            MateCat.db.addListener('segment_translation_issues',
-                ['insert', 'update', 'delete'], this.issueChanged.bind(this));
-        } else if (this.props.reviewType === "extended") {
-
-        }
+        MateCat.db.addListener('segment_translation_issues',
+            ['insert', 'update', 'delete'], this.issueChanged.bind(this));
 
     }
     componentWillUnmount() {
-        if (this.props.reviewType === "improved") {
-            MateCat.db.removeListener('segment_translation_issue_comments',
-                ['insert', 'delete'], this.commentsChanged);
+        MateCat.db.removeListener('segment_translation_issue_comments',
+            ['insert', 'delete'], this.commentsChanged);
 
-            MateCat.db.removeListener('segment_translation_issues',
-                ['insert', 'update', 'delete'], this.issueChanged);
-        } else if (this.props.reviewType === "extended") {
-
-        }
+        MateCat.db.removeListener('segment_translation_issues',
+            ['insert', 'update', 'delete'], this.issueChanged);
 
     }
     handleFail() {
@@ -242,19 +217,17 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
 
             var rebutButton;
 
-            if ( !config.isReview && this.state.rebutVisible && this.props.reviewType === "improved") {
-                var rebutButtonClasses = classnames({
-                    'ui' : true,
-                    'red' : true,
-                    'button' : true,
-                    'small' : true,
-                    'disabled' : this.state.rebutDisabled
-                });
-                rebutButton =
-                    <a onClick={this.rebutClick.bind(this)} className={rebutButtonClasses}>
-                        {this.state.rebutLabel}
-                    </a>;
-            }
+            var rebutButtonClasses = classnames({
+                'ui' : true,
+                'red' : true,
+                'button' : true,
+                'small' : true,
+                'disabled' : this.state.rebutDisabled
+            });
+            rebutButton =
+                <a onClick={this.rebutClick.bind(this)} className={rebutButtonClasses}>
+                    {this.state.rebutLabel}
+                </a>;
 
             terminal = <div className="review-issue-comment-reply">
                 <div className="review-issue-comment-reply-text">

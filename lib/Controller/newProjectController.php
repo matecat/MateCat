@@ -285,6 +285,8 @@ class newProjectController extends viewController {
         $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
 
+        //this can be overridden by plugins to enable/disable the default flag on MyMemory lookup
+        $this->template->get_public_matches = true;
 
         $this->template->user_keys = $this->keyList;
         $this->template->user_keys_obj = json_encode( array_map( function( $tmKeyStruct ){

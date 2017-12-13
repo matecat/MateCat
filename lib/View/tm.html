@@ -69,7 +69,14 @@
                                             <div class="status"></div>
                                         </td>
                                         <td class="activate text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
-                                        <td class="lookup text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
+
+                                        <tal:block tal:condition="php: page == 'cattool'">
+                                            <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="disabled php: !jobOwnerIsMe; checked php: get_public_matches "/></div></td>
+                                        </tal:block>
+                                        <tal:block tal:condition="php: page == 'home'">
+                                            <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="checked php: get_public_matches " /></div></td>
+                                        </tal:block>
+
                                         <td class="update text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
                                         <td class="description">
                                             <div class="mymemory-descr" data-descr="MyMemory: Collaborative translation memory shared with all MateCat users.">MyMemory: Collaborative translation memory shared with all MateCat users.</div>
@@ -276,7 +283,6 @@
                                                 <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">MMT</option>
                                                 <option value="altlang">AltLang</option>
                                                 <option value="apertium">Apertium</option>
-                                                <option value="deeplingo" >DeepLingo</option>
                                                 <option value="iptranslator" >IPTranslator from Iconic</option>
                                                 <option value="microsofthub">Microsoft Translator Hub</option>
                                                 <option value="moses" >Moses</option>
@@ -410,7 +416,7 @@
                             </table>
                             <tal:block tal:condition="php: empty(logged_user)">
                                 <tal:block tal:condition="php: page == 'home'">
-                                <p><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
+                                <p style="margin-top: 138px;"><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
                                 </tal:block>
                             </tal:block>
                         </div>
@@ -539,7 +545,6 @@
     <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="mt_engines.html/template-mmt" />
     <div metal:use-macro="mt_engines.html/template-microsofthub" />
     <div metal:use-macro="mt_engines.html/template-iptranslator" />
-    <div metal:use-macro="mt_engines.html/template-deeplingo" />
     <div metal:use-macro="mt_engines.html/template-moses" />
     <div metal:use-macro="mt_engines.html/template-tauyou" />
     <div metal:use-macro="mt_engines.html/template-letsmt" />

@@ -11,7 +11,7 @@
 
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var SegmentConstants = require('../constants/SegmentConstants');
-
+var SegmentStore = require('../stores/SegmentStore');
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -63,6 +63,16 @@ var SegmentActions = {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.ADD_SEGMENT_CLASS,
                 id: sid,
+                newClass: newClass
+            });
+        }, 0);
+    },
+
+    addClassToSegments: function (sidList, newClass) {
+        setTimeout( function () {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.ADD_SEGMENTS_CLASS,
+                sidList: sidList,
                 newClass: newClass
             });
         }, 0)
@@ -132,6 +142,21 @@ var SegmentActions = {
             fid: fid,
         });
     },
+    /**
+     * Set the original translation of a segment.
+     * Used to create the revision trackChanges
+     * @param sid
+     * @param fid
+     * @param originalTranslation
+     */
+    addOriginalTranslation: function (sid, fid, originalTranslation) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
+            id: sid,
+            fid: fid,
+            originalTranslation: originalTranslation
+        });
+    },
 
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
@@ -158,11 +183,12 @@ var SegmentActions = {
             className: className
         });
     },
-    updateTranslation: function (sid, editAreaText) {
+    updateTranslation: function (fid, sid, editAreaText) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.UPDATE_TRANSLATION,
+            actionType: SegmentConstants.TRANSLATION_EDITED,
+            fid: fid,
             id: sid,
-            text: editAreaText
+            translation: editAreaText
         });
     },
     /************ FOOTER ***************/
@@ -246,6 +272,11 @@ var SegmentActions = {
 
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
+    },
+
+    sendNewTranslationIssue: function (sid, data, diff) {
+        let segment = SegmentStore.getSegmentById(sid, UI.getSegmentFileId(UI.getSegmentById(sid))).toJS();
+        return UI.sendNewTranslationIssue(segment, data, diff);
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {

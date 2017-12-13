@@ -1,5 +1,5 @@
 
-class ReviewIssueCategorySelector extends React.Component{
+class ReviewExtendedCategorySelector extends React.Component{
 
     constructor(props) {
         super(props);
@@ -12,6 +12,10 @@ class ReviewIssueCategorySelector extends React.Component{
     componentWillReceiveProps(nextProps) {
         this.setState({ value: nextProps.selectedValue });
     }
+
+    componentDidMount(){
+    	$(this.selectRef).dropdown();
+	}
 
     render() {
         // It may happen for a category to come with no severities. In this case
@@ -28,22 +32,22 @@ class ReviewIssueCategorySelector extends React.Component{
             var full_severities = [default_severity].concat( severities );
 
             select = <select
-                ref="select"
+                ref={(input) => { this.selectRef = input;}}
                 value={this.state.value}
+				className="ui dropdown"
                 autoFocus={this.props.focus}
                 onChange={this.props.severitySelected.bind(null, this.props.category)}
                 name="severities">
-            {full_severities}
+                {full_severities}
             </select>
         }
-
-        return <tr>
-        <td>{this.props.category.label}</td>
-        <td>
-            { select }
-        </td>
-        </tr> ; 
+		return <div className="error-item">
+			<div className="error-name">{this.props.category.label}</div>
+			<div className="error-level">
+				{ select }
+			</div>
+		</div>;
     }
 }
 
-export default ReviewIssueCategorySelector;
+export default ReviewExtendedCategorySelector;

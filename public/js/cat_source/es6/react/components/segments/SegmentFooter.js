@@ -11,7 +11,6 @@ var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
 var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 var SegmentTabRevise = require('./SegmentFooterTabRevise').default;
-var SegmentTabRevise2 = require('./SegmentFooterTabRevise2').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
@@ -72,15 +71,6 @@ class SegmentFooter extends React.Component {
             review : {
                 label : 'Revise',
                 code : 'review',
-                tab_class : 'review',
-                enabled : false,
-                visible : false,
-                open : false,
-                elements : []
-            },
-            review2 : {
-                label : 'Revise',
-                code : 'review2',
                 tab_class : 'review',
                 enabled : false,
                 visible : false,
@@ -164,17 +154,6 @@ class SegmentFooter extends React.Component {
                 break;
             case 'review':
                 return <SegmentTabRevise
-                    key={"container_" + tab.code}
-                    code = {tab.code}
-                    active_class = {open_class}
-                    tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}
-                    translation={this.props.segment.translation}
-                    segment={this.props.segment}
-                    decodeTextFn={this.props.decodeTextFn}/>;
-                break;
-            case 'review2':
-                return <SegmentTabRevise2
                     key={"container_" + tab.code}
                     code = {tab.code}
                     active_class = {open_class}
