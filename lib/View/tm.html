@@ -51,10 +51,10 @@
                                     <thead>
                                     <tr>
                                         <th class="dragrow"></th>
-                                        <th class="activate">Enabled</th>
+                                       <!-- <th class="activate">Enabled</th>-->
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
-                                        <th class="description">Description</th>
+                                        <th class="description"><!--Description--></th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner"></th>
                                         <th class="action"></th>
@@ -74,7 +74,7 @@
                                             <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="disabled php: !jobOwnerIsMe; checked php: get_public_matches "/></div></td>
                                         </tal:block>
                                         <tal:block tal:condition="php: page == 'home'">
-                                            <td class="lookup text-center check"><div><input type="checkbox" checked="true" /></div></td>
+                                            <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="checked php: get_public_matches " /></div></td>
                                         </tal:block>
 
                                         <td class="update text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
@@ -174,7 +174,7 @@
                                 </table>
                             </div>
                             <div class="inactive-tm-container">
-                                <h3 class="pull-left">Inactive Resources</h3>
+                                <h3 class="pull-left" style="position: relative; margin-top: 5px;">Inactive Resources</h3>
 
                                 <tal:block tal:condition="php: empty(logged_user)">
                                     <p><a id='sign-in-o' href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
@@ -191,7 +191,7 @@
                                     <p class="tm-error-message notification-message" style="display: none;">  </p>
                                     <p class="tm-success-message activetm notification-message" style="display: none;">  </p>
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
-                                        <thead>
+                                        <!--<thead>
                                         <tr>
                                             <th class="dragrow"></th>
                                             <th class="activate">Enable</th>
@@ -202,7 +202,7 @@
                                             <th class="owner">Owner</th>
                                             <th class="action">Actions</th>
                                         </tr>
-                                        </thead>
+                                        </thead>-->
                                         <tbody class="list">
 
 
