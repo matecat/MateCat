@@ -47,7 +47,7 @@ class catController extends viewController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    public $project ;
 
     private $translation_engines;
 
