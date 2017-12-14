@@ -184,6 +184,8 @@ $.extend(UI, {
 	},
 
 	updateSearchDisplay: function() {
+		var res,resNumString,numbers;
+
 		if ((this.searchMode == 'onlyStatus')) {
 			res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
 			resNumString = (res == 1) ? '' : 's';
@@ -238,13 +240,13 @@ $.extend(UI, {
 		$('.search-display .found .warning').remove();
 	},
 	updateSearchDisplayCount: function(segment) {
-		numRes = $('.search-display .numbers .results');
-		currRes = parseInt(numRes.text());
-		newRes = (currRes == 0)? 0 : currRes - 1;
-		numRes.text(newRes);
-		if (($('.targetarea mark.searchMarker', segment).length - 1) === 0) {
-			numSeg = $('.search-display .numbers .segments');
-			currSeg = parseInt(numSeg.text());
+		var numRes = $('.search-display .numbers .results'),
+			currRes = parseInt(numRes.text()),
+			newRes = (currRes == 0)? 0 : currRes - 1;
+			numRes.text(newRes);
+		if (($('.targetarea mark.searchMarker', segment).length - 1) <= 0) {
+			var numSeg = $('.search-display .numbers .segments'),
+			currSeg = parseInt(numSeg.text()),
 			newSeg = (currSeg == 0)? 0 : currSeg - 1;
 			numSeg.text(newSeg);
 		}
@@ -435,6 +437,30 @@ $.extend(UI, {
 			$(this).replaceWith($(this).html());
 		});
 		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
+	},
+	rebuildSearchSegmentMarkers: function(el) {
+		var querySearchString = this.searchParams.target,
+			segment = $(el),
+			markers = $(el).find('mark.searchMarker'),
+			self = this;
+
+		//check if there are markers inside the segment
+		if(markers){
+			//cycle markers
+			$(markers).each(function() {
+				//if the content of marker is different from querySearch
+				//remove tag mark and reposition the cursors
+
+				if($(this).text() != querySearchString){
+					pasteHtmlAtCaret('<span class="currentCursorPositionForReplace"></span>'); //set a tag where there is the cursors
+					$(this).replaceWith($(this).html()); //remove tag mark
+					setCursorPosition($('.currentCursorPositionForReplace')[0]); //reposition of the cursors
+					$('.currentCursorPositionForReplace').remove(); //remove tag
+
+					self.updateSearchDisplayCount(segment);
+				}
+			});
+		}
 	},
 	gotoNextResultItem: function(unmark) {
 		var p = this.searchParams;
