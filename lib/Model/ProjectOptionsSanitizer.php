@@ -101,62 +101,65 @@ class ProjectOptionsSanitizer {
      * @return array
      */
     public function sanitize() {
-        $this->sanitized = $this->options ;
+        $this->sanitized = $this->options;
 
-        if ( isset( $this->options['speech2text'] ) ) {
-            $this->sanitizeSpeech2Text() ;
+        if ( isset( $this->options[ 'speech2text' ] ) ) {
+            $this->sanitizeSpeech2Text();
         }
 
-        if( isset( $this->options['tag_projection'] ) ){
+        if ( isset( $this->options[ 'tag_projection' ] ) ) {
             $this->sanitizeTagProjection();
         }
 
-        if( isset( $this->options['lexiqa'] ) ){
+        if ( isset( $this->options[ 'lexiqa' ] ) ) {
             $this->sanitizeLexiQA();
+        }
+
+        if ( isset( $this->options[ 'due_date' ] ) ) {
+            $this->sanitizeDueDate();
         }
 
         $this->sanitizeSegmentationRule();
 
         $this->convertBooleansToInt();
 
-        return $this->sanitized ; 
+        return $this->sanitized;
     }
 
     private function convertBooleansToInt() {
-        foreach($this->boolean_keys as $key) {
+        foreach ( $this->boolean_keys as $key ) {
             if ( isset( $this->sanitized [ $key ] ) ) {
-                $this->sanitized[ $key ] = (int) $this->sanitized[ $key ] ;
+                $this->sanitized[ $key ] = (int)$this->sanitized[ $key ];
             }
         }
     }
 
     private function sanitizeSegmentationRule() {
-        $rules = array( 'patent', 'paragraph' );
+        $rules = [ 'patent', 'paragraph' ];
 
         if (
-            array_key_exists('segmentation_rule', $this->options ) &&
-            in_array( $this->options['segmentation_rule'], $rules )
+                array_key_exists( 'segmentation_rule', $this->options ) &&
+                in_array( $this->options[ 'segmentation_rule' ], $rules )
         ) {
-            $this->sanitized['segmentation_rule'] = $this->options['segmentation_rule'];
-        }
-        else {
-            unset( $this->sanitized['segmentation_rule'] );
+            $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
+        } else {
+            unset( $this->sanitized[ 'segmentation_rule' ] );
         }
     }
 
     // No special sanitization for speech2text required
     private function sanitizeSpeech2Text() {
-        $this->sanitized['speech2text'] = !!$this->options['speech2text'] ;
+        $this->sanitized[ 'speech2text' ] = !!$this->options[ 'speech2text' ];
     }
 
     /**
      * If Lexiqa is requested to be enabled, then check if language is in combination
      */
     private function sanitizeLexiQA() {
-        if ( $this->options['lexiqa'] == TRUE && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
-            $this->sanitized['lexiqa'] = TRUE;
+        if ( $this->options[ 'lexiqa' ] == true && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
+            $this->sanitized[ 'lexiqa' ] = true;
         } else {
-            $this->sanitized['lexiqa'] = FALSE;
+            $this->sanitized[ 'lexiqa' ] = false;
         }
     }
 
@@ -169,6 +172,16 @@ class ProjectOptionsSanitizer {
         } else {
             $this->sanitized['tag_projection'] = FALSE;
 
+        }
+    }
+
+    private function sanitizeDueDate() {
+        $date = Utils::mysqlTimestamp($this->options['due_date']);
+        $d = \DateTime::createFromFormat( "Y-m-d H:i:s", $date );
+        if ( $d && $d->format( "Y-m-d H:i:s" ) == $date ) {
+            $this->sanitized[ 'due_date' ] = $date;
+        } else {
+            throw new Exception( "Due date is not a valid format. Please fill with timestamp format" );
         }
     }
 

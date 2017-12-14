@@ -73,7 +73,7 @@ class NewController extends ajaxController {
     private $private_tm_user = null;
     private $private_tm_pass = null;
 
-    protected $new_keys = array();
+    protected $new_keys = [];
 
     private $owner = "";
 
@@ -84,41 +84,43 @@ class NewController extends ajaxController {
      */
     private $current_user;
 
-    private $lexiqa = false;
-    private $speech2text = false;
-    private $tag_projection = false;
-    private $project_completion = false ;
+    private $lexiqa             = false;
+    private $speech2text        = false;
+    private $tag_projection     = false;
+    private $project_completion = false;
 
     private $projectFeatures = [];
 
-    private $metadata = array();
+    private $metadata = [];
 
     const MAX_NUM_KEYS = 5;
 
-    private static $allowed_seg_rules = array(
+    private static $allowed_seg_rules = [
             'standard', 'patent', ''
-    );
+    ];
 
-    protected $api_output = array(
+    protected $api_output = [
             'status'  => 'FAIL',
             'message' => 'Untraceable error (sorry, not mapped)'
-    );
+    ];
 
     /**
      * @var \Teams\TeamStruct
      */
     protected $team;
 
-    protected $id_team ;
+    protected $id_team;
 
-    protected $projectStructure ;
+    protected $projectStructure;
 
     /**
      * @var ProjectManager
      */
-    protected $projectManager ;
+    protected $projectManager;
 
-    protected $postInput ;
+    protected $postInput;
+
+    private $due_date;
 
     public function __construct() {
 
@@ -142,6 +144,7 @@ class NewController extends ajaxController {
                 'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'tms_engine'         => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => [ 'default' => 1, 'min_range' => 0 ]
@@ -200,12 +203,13 @@ class NewController extends ajaxController {
         $this->source_lang  = $__postInput[ 'source_lang' ];
         $this->target_lang  = $__postInput[ 'target_lang' ];
 
-        $this->tms_engine       = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
-        $this->mt_engine        = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
-        $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
-        $this->owner            = $__postInput[ 'owner_email' ];
-        $this->id_team          = $__postInput[ 'id_team' ];
+        $this->tms_engine = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
+        $this->mt_engine  = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
+        $this->seg_rule   = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject    = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner      = $__postInput[ 'owner_email' ];
+        $this->id_team    = $__postInput[ 'id_team' ];
+        $this->due_date   = (is_null($__postInput[ 'due_date' ])?null:Utils::mysqlTimestamp($__postInput['due_date']));
 
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
@@ -618,19 +622,20 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'metadata' ]             = $this->metadata ;
-        $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
+        $projectStructure[ 'metadata' ]             = $this->metadata;
+        $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
         $projectStructure[ 'only_private' ]         = $this->only_private;
 
-        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
+        $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
+        $projectStructure[ 'due_date' ]  = $this->due_date;
 
         if ( $this->current_user ) {
-            $projectStructure[ 'userIsLogged' ]  = true;
-            $projectStructure[ 'uid' ]           = $this->current_user->getUid();
-            $projectStructure[ 'id_customer' ]   = $this->current_user->getEmail();
-            $projectStructure[ 'owner' ]         = $this->current_user->getEmail();
-            $this->projectManager->setTeam( $this->team ) ;
+            $projectStructure[ 'userIsLogged' ] = true;
+            $projectStructure[ 'uid' ]          = $this->current_user->getUid();
+            $projectStructure[ 'id_customer' ]  = $this->current_user->getEmail();
+            $projectStructure[ 'owner' ]        = $this->current_user->getEmail();
+            $this->projectManager->setTeam( $this->team );
         }
 
         //set features override

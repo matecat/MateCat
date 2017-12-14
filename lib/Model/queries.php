@@ -1415,11 +1415,12 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
     $data[ 'id_assignee' ]       = $projectStructure[ 'id_assignee' ];
     $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
+    $data[ 'due_date' ]          = !is_null( $projectStructure[ 'due_date' ] ) ? $projectStructure[ 'due_date' ] : null;
 
     $db = Database::obtain();
     $db->begin();
     $projectId = $db->insert( 'projects', $data );
-    $project = Projects_ProjectDao::findById( $projectId );
+    $project   = Projects_ProjectDao::findById( $projectId );
     $db->commit();
     return $project;
 
