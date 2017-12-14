@@ -16,8 +16,10 @@ abstract class controller {
 
     /**
      * @var Users_UserStruct
+     * @deprecated Use getUser method instead
      */
     protected $logged_user;
+
     protected $uid;
     protected $userIsLogged = false;
     protected $userMail;
