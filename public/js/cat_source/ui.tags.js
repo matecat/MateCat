@@ -538,15 +538,14 @@ $.extend(UI, {
             ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
         }
 
-        var tagOriginal = htmlEncode($tag.data('original'));
         $('.rangySelectionBoundary', editareaClone).remove();
         $('.rangySelectionBoundary', $tag).remove();
+        $('br.end', $tag).remove();
         $('.tag-autocomplete-endcursor', editareaClone).after(ph);
-        $('.tag-autocomplete-endcursor', editareaClone).before(tagOriginal);
+        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html());
         $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
         UI.closeTagAutocompletePanel();
-        var text = UI.prepareTextToSend(editareaClone.html());
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), text);
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
         setTimeout(function () {
             restoreSelection();
         });
@@ -564,22 +563,8 @@ $.extend(UI, {
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         var area = $( selector, context ).clone();
-        var divs = area.find( 'div' );
+        area = this.transformPlaceholdersHtml(area);
 
-        if( divs.length ){
-            divs.each(function(){
-                $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-            });
-        } else {
-            area.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            area.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            area.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            area.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-        }
-
-        area.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        area.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         area.find('span.space-marker').replaceWith(' ');
         area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
         area = this.encodeTagsWithHtmlAttribute(area);
@@ -590,7 +575,32 @@ $.extend(UI, {
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        var divs = $div.find( 'div' );
+        $div = this.transformPlaceholdersHtml($div);
+
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    /**
+     * It does the same as postProcessEditarea function but does not remove the cursor span
+     * @param text
+     * @returns {*}
+     */
+
+    cleanTextFromPlaceholdersSpan: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        div = this.transformPlaceholdersHtml($div);
+        $div.find('span.space-marker').replaceWith(' ');
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    transformPlaceholdersHtml: function ($elem) {
+        var divs = $elem.find( 'div' );
 
         if( divs.length ){
             divs.each(function(){
@@ -598,18 +608,16 @@ $.extend(UI, {
                 $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
             });
         } else {
-            $div.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            $div.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $div.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $div.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+            $elem.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $elem.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $elem.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $elem.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
         }
 
-        $div.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        $div.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
-        $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
-        $div = this.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
+        $elem.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $elem.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+
+        return $elem;
     },
 
     /**
