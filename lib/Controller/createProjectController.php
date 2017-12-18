@@ -18,6 +18,7 @@ class createProjectController extends ajaxController {
     private $disable_tms_engine_flag;
     private $pretranslate_100;
     private $only_private;
+    private $due_date;
 
     private $metadata;
     private $lang_handler ;
@@ -44,6 +45,7 @@ class createProjectController extends ajaxController {
                 'source_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'target_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'job_subject'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'due_date'        => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
 
@@ -129,6 +131,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
+        $this->due_date                = ( $__postInput[ 'due_date' ] === false ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
 
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
@@ -327,6 +330,8 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
         $projectStructure[ 'only_private' ]         = $this->only_private;
+        $projectStructure[ 'due_date' ]         = $this->due_date;
+
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
