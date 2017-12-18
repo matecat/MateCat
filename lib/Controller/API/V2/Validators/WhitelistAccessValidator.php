@@ -35,7 +35,7 @@ class WhitelistAccessValidator extends Base {
 
     }
 
-    public function validate() {
+    public function _validate() {
 
         #Block all not whitelisted IPs
         $ipWhiteList = [

@@ -15,10 +15,10 @@ class FilterDefinition {
      * @var array
      */
     private $filter_data;
-    /**
-     * @param array $fitler_data
-     */
 
+    /**
+     * @param array $filter_data
+     */
     public function __construct( array $filter_data ) {
         $this->filter_data = $filter_data;
     }

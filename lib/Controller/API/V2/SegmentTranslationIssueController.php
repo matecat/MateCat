@@ -3,15 +3,12 @@
 namespace API\V2  ;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
-use Bootstrap;
 use Features\ReviewImproved;
 use LQA\EntryDao as EntryDao ;
 use Database;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
-    private $chunk ;
-    private $project ;
     /**
      * @var Validators\SegmentTranslationIssue
      */
@@ -107,10 +104,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     protected function afterConstruct() {
         $this->validator = new Validators\SegmentTranslationIssue( $this->request );
-    }
-
-    protected function validateRequest() {
-        $this->validator->validate();
+        $this->appendValidator( $this->validator );
     }
 
     private function getVersionNumber() {
