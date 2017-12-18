@@ -1379,8 +1379,11 @@ LXQ.init  = function () {
                             target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
 
                             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
-                            if ( callback != null )
-                                restoreSelection();
+                            if ( callback != null ) {
+                                setTimeout(function () {
+                                    restoreSelection();
+                                });
+                            }
                             SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             LXQ.reloadPowertip( segment );
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));

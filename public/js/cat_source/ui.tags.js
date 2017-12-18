@@ -76,14 +76,15 @@ $.extend(UI, {
 
 
     transformTextForLockTags: function ( tx ) {
-        var brTx1 = (UI.isFirefox) ? "<_plh_ class=\"locked\" contenteditable=\"false\">$1</_plh_>" : "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
-        var brTx2 = (UI.isFirefox) ? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
+        var brTx2 =  "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 
         tx = tx.replace( /<span/gi, "<_plh_" )
             .replace( /<\/span/gi, "</_plh_" )
             .replace( /&lt;/gi, "<" )
             .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTx1 )
             .replace( /(<(g|x|bx|ex|bpt|ept|ph.*?|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /(<(ph.*?)\sid[^<“]*?\/>)/gi, brTx1 )
             .replace( /</gi, "&lt;" )
             .replace( /\&lt;_plh_/gi, "<span" )
             .replace( /\&lt;\/_plh_/gi, "</span" )
@@ -98,15 +99,52 @@ $.extend(UI, {
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
-        if ( UI.isFirefox ) {
-            tx = tx.replace( /(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
-        } else {
-            tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
-        }
 
+        tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
         tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
+        tx = this.transformTagsWithHtmlAttribute(tx);
         return tx;
+    },
+
+    /**
+     * Used to transform special ph tags that may contain html within the equiv-text attribute.
+     * Example: &lt;ph id="2" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9JnF1b3Q7c3BhbmNsYXNzJnF1b3Q7IGlkPSZxdW90OzEwMDAmcXVvdDsgJmd0Ow=="/&gt;
+     * The attribute is encoded in base64
+     * @param tx
+     * @returns {*}
+     */
+    transformTagsWithHtmlAttribute: function (tx) {
+        try {
+            tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
+            });
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
+                return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
+            });
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "</span>";
+            });
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'>" + Base64.decode(text) + "</span>";
+            });
+            return tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
+        }
+
+
+    },
+
+    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+        if ( segment.length == 0 ) return ;
+
+        var sourceTags = htmlDecode($('.source', segment).data('original'))
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+        this.sourceTags = sourceTags || [];
+        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 
     detectTagType: function (area) {
@@ -386,6 +424,7 @@ $.extend(UI, {
 		return added;
 	},
 	openTagAutocompletePanel: function() {
+        var self = this;
         if(!UI.sourceTags.length) return false;
         $('.tag-autocomplete-marker').remove();
 
@@ -406,8 +445,9 @@ $.extend(UI, {
             }, []);
         };
         UI.sourceTags = arrayUnique(UI.sourceTags);
-        $.each(UI.sourceTags, function(index) {
-            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
+        $.each(UI.sourceTags, function(index, text) {
+            var textDecoded = UI.transformTextForLockTags(text);
+            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
         $('.tag-autocomplete').css('top', offset.top + addition);
         $('.tag-autocomplete').css('left', offset.left);
@@ -472,7 +512,126 @@ $.extend(UI, {
     checkXliffTagsInText: function (text) {
         var reg = this.getXliffRegExpression();
         return reg.test(text);
-    }
+    },
+    /**
+     * Call from UI. events when clicking on a menu item to add tags
+     * @param tag: the jquery object of the chosen tag
+     */
+    chooseTagAutocompleteOption: function ($tag) {
+        if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
+        }
+        saveSelection();
+
+        // Todo: refactor this part
+        var editareaClone = UI.editarea.clone();
+        editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+        editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
+        var ph = "";
+        if($('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
+            ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
+        }
+
+        $('.rangySelectionBoundary', editareaClone).remove();
+        $('.rangySelectionBoundary', $tag).remove();
+        $('br.end', $tag).remove();
+        $('.tag-autocomplete-endcursor', editareaClone).after(ph);
+        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html());
+        $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
+        UI.closeTagAutocompletePanel();
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        setTimeout(function () {
+            restoreSelection();
+        });
+        UI.segmentQA(UI.currentSegment);
+    },
+    /**
+     *
+     * This function is used before the text is sent to the server or to transform editArea content.
+     * @return Return a cloned element without tag inside
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
+    postProcessEditarea: function(context, selector) {
+        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
+        var area = $( selector, context ).clone();
+        area = this.transformPlaceholdersHtml(area);
+
+        area.find('span.space-marker').replaceWith(' ');
+        area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        area = this.encodeTagsWithHtmlAttribute(area);
+        return area.text();
+    },
+
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        $div = this.transformPlaceholdersHtml($div);
+
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    /**
+     * It does the same as postProcessEditarea function but does not remove the cursor span
+     * @param text
+     * @returns {*}
+     */
+
+    cleanTextFromPlaceholdersSpan: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        div = this.transformPlaceholdersHtml($div);
+        $div.find('span.space-marker').replaceWith(' ');
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    transformPlaceholdersHtml: function ($elem) {
+        var divs = $elem.find( 'div' );
+
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
+            $elem.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $elem.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $elem.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $elem.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+        }
+
+        $elem.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $elem.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+
+        return $elem;
+    },
+
+    /**
+     * This function is called to return the tag inside ph attribute 'equiv-text' to base64
+     * @param $elem
+     * @returns {*}
+     */
+    encodeTagsWithHtmlAttribute: function ($elem) {
+        $elem.find('.inside-attribute').each(function () {
+            var encodedText = $(this).data('original');
+            $(this).text(encodedText);
+        });
+        return $elem;
+    },
 
 });
 

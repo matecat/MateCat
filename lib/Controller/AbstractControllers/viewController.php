@@ -411,4 +411,16 @@ abstract class viewController extends controller {
         return $this->project;
     }
 
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @return $this
+     */
+    public function setProject( $project ) {
+        $this->project = $project;
+
+        return $this;
+    }
+
 }

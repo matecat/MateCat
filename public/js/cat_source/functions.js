@@ -89,18 +89,22 @@ function truncate_filename(n, len) {
 }
 
 function insertNodeAtCursor(node) {
-	var range, html;
-	if (window.getSelection && window.getSelection().getRangeAt) {
-		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
-			range = window.getSelection().getRangeAt(0);
-			range.insertNode(node);
-			setCursorAfterNode(range, node);
-		} 
-	} else if (document.selection && document.selection.createRange) {
-		range = document.selection.createRange();
-		html = (node.nodeType == 3) ? node.data : node.outerHTML;
-		range.pasteHTML(html);
-	}
+    try {
+        var range, html;
+        if (window.getSelection && window.getSelection().getRangeAt) {
+            if ((window.getSelection().type == 'Caret') || (UI.isFirefox)) {
+                range = window.getSelection().getRangeAt(0);
+                range.insertNode(node);
+                setCursorAfterNode(range, node);
+            }
+        } else if (document.selection && document.selection.createRange) {
+            range = document.selection.createRange();
+            html = (node.nodeType == 3) ? node.data : node.outerHTML;
+            range.pasteHTML(html);
+        }
+    } catch (e) {
+        console.error("Fail to insert node at cursor", e);
+    }
 }
 
 function setCursorAfterNode(range, node) {

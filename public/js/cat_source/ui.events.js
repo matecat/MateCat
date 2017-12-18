@@ -250,36 +250,8 @@ $.extend(UI, {
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
 
-            if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-                setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-            }
-            saveSelection();
+			UI.chooseTagAutocompleteOption($(this));
 
-
-            // Todo: refactor this part
-            var editareaClone = UI.editarea.clone();
-            editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
-            editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
-            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
-            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-            editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-            editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
-
-            var ph = "";
-			if($('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
-                ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
-			}
-
-			$('.rangySelectionBoundary', editareaClone).remove();
-			$('.tag-autocomplete-endcursor', editareaClone).after(ph);
-			$('.tag-autocomplete-endcursor', editareaClone).before(htmlEncode($(this).text()));
-            $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
-			UI.closeTagAutocompletePanel();
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
-			setTimeout(function () {
-                restoreSelection();
-            });
-            UI.segmentQA(UI.currentSegment);
 		});
 
 		$(window).on('mousedown', function(e) {

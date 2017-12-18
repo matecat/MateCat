@@ -3726,6 +3726,11 @@ section.modified.editor .status {
     cursor: pointer;
 }
 
+span.locked.tag-html-container-open,
+span.locked.tag-html-container-close {
+    display: none;
+}
+
 .editarea .locked,
 .source .locked,
 .ice-locked .targetarea .locked,
@@ -3741,6 +3746,8 @@ section.modified.editor .status {
 .locked.mismatch-old {
     color: red !important;
 }
+
+
 
 .editarea .locked.order-error,
 .source .locked.order-error {

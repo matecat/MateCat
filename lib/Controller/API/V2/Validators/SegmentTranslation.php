@@ -26,7 +26,11 @@ class SegmentTranslation extends Base {
         return $this;
     }
 
-    public function validate() {
+    /**
+     * @return mixed|void
+     * @throws NotFoundError
+     */
+    protected function _validate() {
         $this->ensureSegmentExists();
         $this->ensureTranslationExists();
     }

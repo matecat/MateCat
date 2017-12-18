@@ -16,7 +16,7 @@ $klein->respond( '/utils/pee', function () {
         $instance->finalize();
     } catch ( Exception $e ) {
         $controllerInstance = new CustomErrorPage();
-        $controllerInstance->setTemplate( "badConfiguration.html" );
+        $controllerInstance->setTemplate( "404.html" );
         $controllerInstance->setCode( 404 );
         $controllerInstance->doAction();
         die(); // do not complete klein response, set 404 header in render404 instead of 200

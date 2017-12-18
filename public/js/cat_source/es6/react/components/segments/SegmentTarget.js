@@ -14,7 +14,7 @@ class SegmentTarget extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translation : this.props.segment.translation,
+            translation : this.props.segment.decoded_translation,
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation : this.props.segment.translation)
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
@@ -89,9 +89,9 @@ class SegmentTarget extends React.Component {
 
     render() {
         var textAreaContainer = "";
+        let translation = this.state.translation;
 
         if (this.props.isReviewImproved) {
-            let translation = this.decodeTranslation(this.props.segment, this.state.translation);
             textAreaContainer = <div data-mount="segment_text_area_container">
                                     <div className="textarea-container" onClick={this.onClickEvent.bind(this)}>
                                         <div className="targetarea issuesHighlightArea errorTaggingArea" dangerouslySetInnerHTML={ this.allowHTML(translation) }/>
@@ -99,7 +99,6 @@ class SegmentTarget extends React.Component {
                                 </div>
 
         } else {
-            var translation = this.decodeTranslation(this.props.segment, this.state.translation);
             var s2tMicro = "";
             var tagModeButton = "";
 
