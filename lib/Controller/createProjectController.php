@@ -131,7 +131,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
-        $this->due_date            = ( is_null( $__postInput[ 'due_date' ] ) ? null : date("Y-m-d H:i:s", $__postInput[ 'due_date' ]) );
+        $this->due_date                = ( $__postInput[ 'due_date' ] === false ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
 
         $this->__setMetadataFromPostInput( $__postInput ) ;
 

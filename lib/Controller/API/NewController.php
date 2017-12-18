@@ -209,7 +209,7 @@ class NewController extends ajaxController {
         $this->subject    = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
         $this->owner      = $__postInput[ 'owner_email' ];
         $this->id_team    = $__postInput[ 'id_team' ];
-        $this->due_date   = (is_null($__postInput[ 'due_date' ])?null:Utils::mysqlTimestamp($__postInput['due_date']));
+        $this->due_date = ( $__postInput[ 'due_date' ] === false ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
 
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int)!!$__postInput[ 'pretranslate_100' ];

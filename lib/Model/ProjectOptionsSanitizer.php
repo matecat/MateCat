@@ -114,10 +114,6 @@ class ProjectOptionsSanitizer {
             $this->sanitizeLexiQA();
         }
 
-        if ( isset( $this->options[ 'due_date' ] ) ) {
-            $this->sanitizeDueDate();
-        }
-
         $this->sanitizeSegmentationRule();
 
         $this->convertBooleansToInt();
@@ -171,16 +167,6 @@ class ProjectOptionsSanitizer {
         } else {
             $this->sanitized[ 'tag_projection' ] = false;
 
-        }
-    }
-
-    private function sanitizeDueDate() {
-        $date = Utils::mysqlTimestamp($this->options['due_date']);
-        $d = \DateTime::createFromFormat( "Y-m-d H:i:s", $date );
-        if ( $d && $d->format( "Y-m-d H:i:s" ) == $date ) {
-            $this->sanitized[ 'due_date' ] = $date;
-        } else {
-            throw new Exception( "Due date is not a valid format. Please fill with timestamp format" );
         }
     }
 
