@@ -1,78 +1,77 @@
 <?php
 
 class ProjectOptionsSanitizer {
-    
-    private $options ; 
-    private $sanitized = array();  
-    
-    private $source_lang ;
-    private $target_lang ;
 
-    private $boolean_keys = array('speech2text', 'lexiqa', 'tag_projection');
+    private $options;
+    private $sanitized = [];
 
-    public static $lexiQA_allowed_languages = array(
-        'zh-CN',
-        'da-DK',
-        'en-GB',
-        'en-US',
-        'et-EE',
-        'fr-FR',
-        'fr-CA',
-        'de-DE',
-        'el-GR',
-        'it-IT',
-        'lv-LV',
-        'lt-LT',
-        'nb-NO',
-        'pl-PL',
-        'pt-PT',
-        'pt-BR',
-        'ru-RU',
-        'es-ES',
-        'es-CO',
-        'es-MX',
-        'sv-SE',
-        'tr-TR',
-        'uk-UA'
-    );
+    private $source_lang;
+    private $target_lang;
+
+    private $boolean_keys = [ 'speech2text', 'lexiqa', 'tag_projection' ];
+
+    public static $lexiQA_allowed_languages = [
+            'zh-CN',
+            'da-DK',
+            'en-GB',
+            'en-US',
+            'et-EE',
+            'fr-FR',
+            'fr-CA',
+            'de-DE',
+            'el-GR',
+            'it-IT',
+            'lv-LV',
+            'lt-LT',
+            'nb-NO',
+            'pl-PL',
+            'pt-PT',
+            'pt-BR',
+            'ru-RU',
+            'es-ES',
+            'es-CO',
+            'es-MX',
+            'sv-SE',
+            'tr-TR',
+            'uk-UA'
+    ];
     /**
      * All combinations of languages for Tag Ptojection
      */
-    public static $tag_projection_allowed_languages = array(
-        'en-de' => 'English - German',
-        'en-es' => 'English - Spanish',
-        'en-fr' => 'English - French',
-        'en-it' => 'English - Italian',
-        'en-pt' => 'English - Portuguese',
-        'en-ru' => 'English - Russian',
-        'en-cs' => 'English - Czech',
-        'en-nl' => 'English - Dutch',
-        'en-fi' => 'English - Finnish',
-        'en-pl' => 'English - Polish',
-        'en-da' => 'English - Danish',
-        'en-sv' => 'English - Swedish',
-        'en-el' => 'English - Greek',
-        'en-hu' => 'English - Hungarian',
-        'en-lt' => 'English - Lithuanian',
-        'en-ja' => 'English - Japanese',
-        'en-et' => 'English - Estonian',
-        'en-sk' => 'English - Slovak',
-        'de-it' => 'German - Italian',
-        'de-fr' => 'German - French',
-        'fr-it' => 'French - Italian',
-        'fr-nl' => 'French - Dutch',
-        'it-es' => 'Italian - Spanish',
-        'nl-fi' => 'Dutch - Finnish',
-        'da-sv' => 'Danish - Swedish',
-        'nl-pt' => 'Dutch - Portuguese',
-        'zh-en' => 'Chinese - English',
-        'cs-de' => 'Czech - German',
-    );
+    public static $tag_projection_allowed_languages = [
+            'en-de' => 'English - German',
+            'en-es' => 'English - Spanish',
+            'en-fr' => 'English - French',
+            'en-it' => 'English - Italian',
+            'en-pt' => 'English - Portuguese',
+            'en-ru' => 'English - Russian',
+            'en-cs' => 'English - Czech',
+            'en-nl' => 'English - Dutch',
+            'en-fi' => 'English - Finnish',
+            'en-pl' => 'English - Polish',
+            'en-da' => 'English - Danish',
+            'en-sv' => 'English - Swedish',
+            'en-el' => 'English - Greek',
+            'en-hu' => 'English - Hungarian',
+            'en-lt' => 'English - Lithuanian',
+            'en-ja' => 'English - Japanese',
+            'en-et' => 'English - Estonian',
+            'en-sk' => 'English - Slovak',
+            'de-it' => 'German - Italian',
+            'de-fr' => 'German - French',
+            'fr-it' => 'French - Italian',
+            'fr-nl' => 'French - Dutch',
+            'it-es' => 'Italian - Spanish',
+            'nl-fi' => 'Dutch - Finnish',
+            'da-sv' => 'Danish - Swedish',
+            'nl-pt' => 'Dutch - Portuguese',
+            'zh-en' => 'Chinese - English',
+            'cs-de' => 'Czech - German',
+    ];
 
 
-
-    public function __construct( $input_options ) { 
-        $this->options = $input_options ; 
+    public function __construct( $input_options ) {
+        $this->options = $input_options;
     }
 
     /**
@@ -81,17 +80,17 @@ class ProjectOptionsSanitizer {
      */
     public function setLanguages( $source, $target ) {
         if ( is_string( $target ) ) {
-            $target = array( $target ) ; 
-        } elseif ( method_exists($target, 'getArrayCopy') ) {
+            $target = [ $target ];
+        } elseif ( method_exists( $target, 'getArrayCopy' ) ) {
             $target = $target->getArrayCopy();
         }
 
-        if ( !is_array($target)) {
-            throw new Exception('Target should be an array');
+        if ( !is_array( $target ) ) {
+            throw new Exception( 'Target should be an array' );
         }
 
-        $this->source_lang = $source ;
-        $this->target_lang = $target ;
+        $this->source_lang = $source;
+        $this->target_lang = $target;
     }
 
     /**
@@ -167,10 +166,10 @@ class ProjectOptionsSanitizer {
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
-            $this->sanitized['tag_projection'] = TRUE;
+        if ( $this->options[ 'tag_projection' ] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
+            $this->sanitized[ 'tag_projection' ] = true;
         } else {
-            $this->sanitized['tag_projection'] = FALSE;
+            $this->sanitized[ 'tag_projection' ] = false;
 
         }
     }
@@ -188,36 +187,36 @@ class ProjectOptionsSanitizer {
     private function checkSourceAndTargetAreInCombination( $langs ) {
         $this->__ensureLanguagesAreSet();
 
-        $all_langs = array_merge( $this->target_lang, array($this->source_lang) );
+        $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
 
-        $all_langs = array_unique( $all_langs ) ;
+        $all_langs = array_unique( $all_langs );
 
-        $found = count( array_intersect( $langs, $all_langs ) ) ;
-        return $found == 2 ;
+        $found = count( array_intersect( $langs, $all_langs ) );
+        return $found == 2;
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
         $this->__ensureLanguagesAreSet();
 
-        $lang_combination = array();
-        $found = false;
-        foreach ($this->target_lang as $value) {
-            array_push($lang_combination, explode('-',$value)[0] . '-' . explode('-',$this->source_lang)[0]);
-            array_push($lang_combination, explode('-',$this->source_lang)[0] . '-' . explode('-',$value)[0]);
+        $lang_combination = [];
+        $found            = false;
+        foreach ( $this->target_lang as $value ) {
+            array_push( $lang_combination, explode( '-', $value )[ 0 ] . '-' . explode( '-', $this->source_lang )[ 0 ] );
+            array_push( $lang_combination, explode( '-', $this->source_lang )[ 0 ] . '-' . explode( '-', $value )[ 0 ] );
         }
 
-        foreach ($lang_combination as $langPair) {
-            if (array_key_exists($langPair, $langs)) {
+        foreach ( $lang_combination as $langPair ) {
+            if ( array_key_exists( $langPair, $langs ) ) {
                 $found = true;
                 break;
             }
         }
-        return $found ;
+        return $found;
     }
 
     private function __ensureLanguagesAreSet() {
-        if (is_null( $this->target_lang ) || is_null( $this->source_lang ) ) {
-            throw  new Exception('Trying to sanitize options, but languages are not set') ;
+        if ( is_null( $this->target_lang ) || is_null( $this->source_lang ) ) {
+            throw  new Exception( 'Trying to sanitize options, but languages are not set' );
         }
     }
 
