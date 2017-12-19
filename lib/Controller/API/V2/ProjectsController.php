@@ -38,6 +38,31 @@ class ProjectsController extends KleinController {
 
     }
 
+    public function setDueDate(){
+        $this->updateDueDate();
+    }
+
+    public function updateDueDate(){
+        $this->project = $this->projectValidator->getProject();
+
+        if ( array_key_exists("due_date", $this->params)) {
+
+            $due_date= \Utils::mysqlTimestamp($this->params['due_date']);
+            $project_dao = new \Projects_ProjectDao;
+            $project_dao->updateField($this->project, "due_date", $due_date);
+        }
+
+        $this->response->json( $this->project->toArray( ) ) ;
+    }
+
+    public function deleteDueDate(){
+        $this->project = $this->projectValidator->getProject();
+
+        $project_dao = new \Projects_ProjectDao;
+        $project_dao->updateField($this->project, "due_date", NULL);
+        $this->response->json( $this->project->toArray( ) ) ;
+    }
+
     protected function afterConstruct() {
         $this->projectValidator = new ProjectPasswordValidator( $this );
         $this->appendValidator( $this->projectValidator );
