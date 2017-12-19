@@ -9,7 +9,7 @@ use ActivityLog\ActivityLogStruct;
  */
 class editlogController extends viewController {
 
-    protected $project;
+    public $project;
     private   $jid      = "";
     private   $password = "";
     private   $start_id;

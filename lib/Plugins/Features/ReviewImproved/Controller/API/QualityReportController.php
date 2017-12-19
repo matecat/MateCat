@@ -10,22 +10,33 @@ namespace Features\ReviewImproved\Controller\API;
 
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
+use Chunks_ChunkStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
-use LQA\ChunkReviewDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 
 class QualityReportController extends KleinController
 {
 
     /**
-     * @var ChunkPasswordValidator
+     * @var Chunks_ChunkStruct
      */
-    protected $validator;
+    protected $chunk;
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return $this
+     */
+    public function setChunk( $chunk ) {
+        $this->chunk = $chunk;
+
+        return $this;
+    }
 
     private $model ;
 
     public function show() {
-        $this->model = new QualityReportModel( $this->validator->getChunk() );
+        $this->model = new QualityReportModel( $this->chunk );
         $this->model->setDateFormat('c');
 
         $this->response->json( array(
@@ -35,7 +46,7 @@ class QualityReportController extends KleinController
 
     public function versions() {
         $dao = new ArchivedQualityReportDao();
-        $versions = $dao->getAllByChunk( $this->validator->getChunk() ) ;
+        $versions = $dao->getAllByChunk( $this->chunk ) ;
         $response = array();
 
         foreach( $versions as $version ) {
@@ -52,11 +63,12 @@ class QualityReportController extends KleinController
     }
 
     protected function afterConstruct() {
-        $this->validator = new ChunkPasswordValidator( $this->request );
+        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Controller = $this;
+        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
+            $Controller->setChunk( $Validator->getChunk() );
+        } );
+        $this->appendValidator( $Validator );
     }
 
-    protected function validateRequest() {
-        $this->validator->validate();
-
-    }
 }

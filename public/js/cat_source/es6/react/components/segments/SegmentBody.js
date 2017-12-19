@@ -57,8 +57,6 @@ class SegmentBody extends React.Component {
                 UI.closeTagAutocompletePanel();
             }
 
-            UI.evalCurrentSegmentTranslationAndSourceTags(segment);
-
             if (UI.hasSourceOrTargetTags(segment)) {
                 segment.addClass('hasTagsToggle');
 

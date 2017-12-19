@@ -30,12 +30,6 @@ class CatUtils {
     const nbspPlaceholderClass  = '_A0';
     const nbspPlaceholderRegex  = '/\#\#\$_A0\$\#\#/g';
 
-    const xliffTagHtmlOpenTag   = '##$_3C$##'; // Character < : &lt;
-    const xliffTagHtmlOpenTagRegex   = '/\#\#\$_3C\$\#\#/g';
-
-    const xliffTagHtmlCloseTag        = '##$_3E$##'; // Character > : &gt;
-    const xliffTagHtmlCloseTagRegex   = '/\#\#\$_3E\$\#\#/g';
-
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
     public static function isCJK( $langCode ){

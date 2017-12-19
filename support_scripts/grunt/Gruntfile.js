@@ -278,6 +278,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
+                    basePath + 'lib/base64.min.js',
                     basePath + 'lib/moment.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',

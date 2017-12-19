@@ -404,4 +404,23 @@ abstract class viewController extends controller {
         $this->template->flashMessages = $messages ;
     }
 
+    /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->project;
+    }
+
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @return $this
+     */
+    public function setProject( $project ) {
+        $this->project = $project;
+
+        return $this;
+    }
+
 }

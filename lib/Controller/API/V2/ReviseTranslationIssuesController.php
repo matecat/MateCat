@@ -21,10 +21,6 @@ class ReviseTranslationIssuesController extends KleinController {
         );
     }
 
-    public function validateRequest() {
-        parent::validateRequest();
-    }
-
     public function index() {
         $records = ( new Translations_TranslationVersionDao() )->setCacheTTL(0)
                 ->getVersionsForRevision(

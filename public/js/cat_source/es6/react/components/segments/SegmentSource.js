@@ -12,7 +12,7 @@ class SegmentSource extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            source : this.props.segment.segment
+            source : this.props.segment.decoded_source
 
         };
         this.createEscapedSegment = this.createEscapedSegment.bind(this);
@@ -88,13 +88,12 @@ class SegmentSource extends React.Component {
 
     render() {
         var escapedSegment = this.createEscapedSegment();
-        var source = this.decodeTextSource(this.props.segment, this.state.source);
         return (
             <div className={"source item"}
                  tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
                  data-original={escapedSegment}
-                 dangerouslySetInnerHTML={ this.allowHTML(source) }/>
+                 dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }/>
         )
     }
 }

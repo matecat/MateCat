@@ -69,15 +69,6 @@ UI = {
         $(document).trigger('segment:activate', { segment: segment } );
 	},
 
-    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
-        if ( segment.length == 0 ) return ;
-
-        var sourceTags = $('.source', segment).html()
-            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
-        this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
-    },
-
 	cacheObjects: function( editarea_or_segment ) {
         var segment;
         if ( editarea_or_segment instanceof UI.Segment ) {
@@ -906,7 +897,7 @@ UI = {
 	updateSegments: function(segments) {
 		$.each(segments, function() {
 			seg = $('#segment-' + this.sid);
-			$(UI.targetContainerSelector() + ', .area', seg).text(this.translation);
+			SegmentActions.replaceEditAreaTextContent(this.sid, UI.getSegmentFileId(seg), this.translation);
 			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
 			UI.setStatus(seg, status);
 		});
@@ -1365,7 +1356,7 @@ UI = {
 
     },
 	chunkedSegmentsLoaded: function() {
-		return $('section.readonly').length;
+		return $('section.readonly:not(.ice-locked)').length;
 	},
     formatSelection: function(op) {
         var str = getSelectionHtml();
@@ -2053,66 +2044,6 @@ UI = {
 
     targetContainerSelector : function() {
         return '.targetarea';
-    },
-
-    /**
-     *
-     * This function is used before the text is sent to the server.
-     *
-     *
-     * @param context
-     * @param selector
-     * @returns {*|jQuery}
-     */
-    postProcessEditarea: function(context, selector) {
-        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
-        var area = $( selector, context ).clone();
-        var divs = $( area ).find( 'div' );
-
-        if( divs.length ){
-            divs.each(function(){
-                $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-            });
-        } else {
-            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-        }
-
-        $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
-        $(area).find('span.space-marker').replaceWith(' ');
-        $(area).find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
-
-        return $(area).text();
-    },
-
-    prepareTextToSend: function (text) {
-        var div =  document.createElement('div');
-        var $div = $(div);
-        $div.html(text);
-        var divs = $div.find( 'div' );
-
-        if( divs.length ){
-            divs.each(function(){
-                $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-            });
-        } else {
-            $div.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            $div.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $div.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $div.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-        }
-
-        $div.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        $div.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
-        $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
-
-        return $div.text();
     },
 
     /**

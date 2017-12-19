@@ -36,7 +36,7 @@ class analyzeOldController extends viewController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    public $project ;
 
     /**
      * @var Chunks_ChunkStruct
@@ -216,11 +216,6 @@ class analyzeOldController extends viewController {
         } else {
             $this->template->showModalBoxLogin = false;
         }
-    }
-
-    public function getProject()
-    {
-        return $this->project;
     }
 
 }

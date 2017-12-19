@@ -163,7 +163,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             $('.editor .sub-editor.review').addClass('open');
         }
     }).on('input', '.editor .editarea', function() {
-        UI.trackChanges(this);
+        /*UI.trackChanges(this);*/
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {

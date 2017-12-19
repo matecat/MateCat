@@ -40,6 +40,14 @@ $.extend( UI, {
             // }
         }
 
+        //check if inside search
+        if (UI.body.hasClass('searchActive')) {
+            var el = this;
+            setTimeout(function(){
+                UI.rebuildSearchSegmentMarkers(el);
+            },100)
+        }
+
         if ((code == 8) || (code == 46)) { // backspace e canc(mac)
             if ($('.selected', $(this)).length) {
                 e.preventDefault();
@@ -318,7 +326,7 @@ $.extend( UI, {
                 UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
 
                 if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-                    var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>')
+                    var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>');
                     SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
                 }
                 UI.checkAutocompleteTags();

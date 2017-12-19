@@ -6,7 +6,7 @@ function doSearchQuery( Array $queryParams ) {
     $key = $queryParams[ 'key' ]; //no escape: not related with Database
 
 //    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
-    $src = $queryParams[ 'src' ] ;
+    $src = $queryParams[ 'src' ];
 
     // in the database at the target we have not html entities but normal quotes
     //so we have do not escape the translations
@@ -107,8 +107,8 @@ function doSearchQuery( Array $queryParams ) {
 
 //	Log::doLog($query);
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -120,9 +120,9 @@ function doSearchQuery( Array $queryParams ) {
 
     //    Log::doLog($results);
 
-    $vector = array( 'sidlist' => array(), 'count' => '0' );
+    $vector = [ 'sidlist' => [], 'count' => '0' ];
     foreach ( $results as $occurrence ) {
-        $vector[ 'sidlist' ][ ] = $occurrence[ 'id' ];
+        $vector[ 'sidlist' ][] = $occurrence[ 'id' ];
     }
 
     $vector[ 'count' ] = @$rollup[ 'count' ]; //can be null, suppress warning
@@ -135,7 +135,7 @@ function doSearchQuery( Array $queryParams ) {
         //empty search values removed
         //ROLLUP counter rules!
         if ( $vector[ 'count' ] == 0 ) {
-            $vector[ 'sidlist' ] = array();
+            $vector[ 'sidlist' ] = [];
             $vector[ 'count' ]   = 0;
         }
     }
@@ -214,7 +214,7 @@ function doReplaceAll( Array $queryParams ) {
 //	Log::doLog( $resultSet );
 //	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
-    $sqlBatch = array();
+    $sqlBatch = [];
     foreach ( $resultSet as $key => $tRow ) {
 
 //        Log::doLog( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier" );
@@ -298,34 +298,34 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  */
 function getJobData( $id_job, $password = null ) {
 
-    $fields = array(
-        'id',
-        'id_project',
-        'source',
-        'target',
-        'id_mt_engine',
-        'id_tms',
-        'id_translator',
-        'tm_keys',
-        'status_owner AS status',
-        'status_owner',
-        'password',
-        'job_first_segment',
-        'job_last_segment',
-        'create_date',
-        'owner',
-        'new_words',
-        'draft_words',
-        'translated_words',
-        'approved_words',
-        'rejected_words',
-        'subject',
-        'payable_rates',
-        'total_time_to_edit', 
-        'avg_post_editing_effort'
-    );
+    $fields = [
+            'id',
+            'id_project',
+            'source',
+            'target',
+            'id_mt_engine',
+            'id_tms',
+            'id_translator',
+            'tm_keys',
+            'status_owner AS status',
+            'status_owner',
+            'password',
+            'job_first_segment',
+            'job_last_segment',
+            'create_date',
+            'owner',
+            'new_words',
+            'draft_words',
+            'translated_words',
+            'approved_words',
+            'rejected_words',
+            'subject',
+            'payable_rates',
+            'total_time_to_edit',
+            'avg_post_editing_effort'
+    ];
 
-    $query = "SELECT " . implode(', ', $fields) . " FROM jobs WHERE id = %u";
+    $query = "SELECT " . implode( ', ', $fields ) . " FROM jobs WHERE id = %u";
 
     if ( !empty( $password ) ) {
         $query .= " AND password = '%s' ";
@@ -356,8 +356,8 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
 
     $db = Database::obtain();
     try {
-        $db->query(sprintf($query, $db->escape($tmKeysString), (int)$job_id, $job_password));
-    } catch( PDOException $e ) {
+        $db->query( sprintf( $query, $db->escape( $tmKeysString ), (int)$job_id, $job_password ) );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         throw new Exception( $e->getMessage(), -$e->getCode() );
     }
@@ -386,9 +386,9 @@ function getFirstSegmentOfFilesInJob( $jid ) {
 }
 
 function getWarning( $jid, $jpassword ) {
-    $db  = Database::obtain();
-    $jid = $db->escape( $jid );
-    $status_new = Constants_TranslationStatus::STATUS_NEW ;
+    $db         = Database::obtain();
+    $jid        = $db->escape( $jid );
+    $status_new = Constants_TranslationStatus::STATUS_NEW;
 
     $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
@@ -437,8 +437,8 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
 ";
 
     try {
-        $results = $db->fetch_array($sql);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $sql );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -465,8 +465,8 @@ function getMTForTMXExport( $jid, $jPassword ) {
             AND suggestion_source in ('MT','MT-')
 ";
     try {
-        $results = $db->fetch_array($sql);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $sql );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -495,30 +495,34 @@ function getTMForTMXExport( $jid, $jPassword ) {
 ";
 
     try {
-        $results = $db->fetch_array($sql);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $sql );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
 
-    foreach( $results as $key => $value ){
+    foreach ( $results as $key => $value ) {
 
         //we already extracted a 100% match by definition
-        if( in_array( $value['status'], array(
-                    Constants_TranslationStatus::STATUS_TRANSLATED,
-                    Constants_TranslationStatus::STATUS_APPROVED
-                )
-            )
-        ) continue;
+        if ( in_array( $value[ 'status' ], [
+                        Constants_TranslationStatus::STATUS_TRANSLATED,
+                        Constants_TranslationStatus::STATUS_APPROVED
+                ]
+        )
+        ) {
+            continue;
+        }
 
-        $suggestions_array = json_decode( $value['suggestions_array'] );
-        foreach( $suggestions_array as $_k => $_sugg ){
+        $suggestions_array = json_decode( $value[ 'suggestions_array' ] );
+        foreach ( $suggestions_array as $_k => $_sugg ) {
 
             //we want the highest value of TM and we must exclude the MT
-            if( strpos( $_sugg->created_by, 'MT' ) !== false ) continue;
+            if ( strpos( $_sugg->created_by, 'MT' ) !== false ) {
+                continue;
+            }
 
             //override the content of the result with the fuzzy matches
-            $results[ $key ][ 'segment' ] = $_sugg->segment;
+            $results[ $key ][ 'segment' ]     = $_sugg->segment;
             $results[ $key ][ 'translation' ] = $_sugg->translation;
             $results[ $key ][ '_created_by' ] = 'MateCat_OmegaT_Export';
 
@@ -528,7 +532,9 @@ function getTMForTMXExport( $jid, $jPassword ) {
         }
 
         //if no TM found unset the result
-        if( !isset( $results[ $key ][ '_created_by' ] ) ) unset( $results[ $key ] );
+        if ( !isset( $results[ $key ][ '_created_by' ] ) ) {
+            unset( $results[ $key ] );
+        }
 
     }
 
@@ -542,7 +548,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
         $select_translation = " if (st.status='NEW', '', st.translation) as translation ";
     }
     //$where_status ="";
-    $query   = "select
+    $query = "select
 		f.filename, f.mime_type, s.id as sid, s.segment, s.internal_id,
 		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, s.xliff_ext_succ_tags as succ_tags,
 		s.xliff_mrk_ext_prec_tags as mrk_prev_tags, s.xliff_mrk_ext_succ_tags as mrk_succ_tags,
@@ -557,10 +563,10 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 			where j.id=$jid and j.password='$password' and f.id=$id_file 
 
 			";
-    $db      = Database::obtain();
+    $db    = Database::obtain();
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -587,10 +593,10 @@ function getSegmentsInfo( $jid, $password ) {
 			inner join files f on f.id=fj.id_file
 			where j.id=$jid and j.password='$password' ";
 
-    $db      = Database::obtain();
+    $db = Database::obtain();
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -624,12 +630,12 @@ function getFirstSegmentId( $jid, $password ) {
  * @return array
  * @throws Exception
  */
-function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
+function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options = [] ) {
 
     $optional_fields = null;
-    if ( isset( $options['optional_fields'] ) ) {
+    if ( isset( $options[ 'optional_fields' ] ) ) {
         $optional_fields = ', ';
-        $optional_fields .= implode(', ', $options['optional_fields']);
+        $optional_fields .= implode( ', ', $options[ 'optional_fields' ] );
     }
 
     $queryAfter = "
@@ -696,7 +702,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     switch ( $where ) {
         case 'after':
-            $subQuery = sprintf( $queryAfter , $step * 2 );
+            $subQuery = sprintf( $queryAfter, $step * 2 );
             break;
         case 'before':
             $subQuery = sprintf( $queryBefore, $step * 2 );
@@ -763,11 +769,11 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
             ORDER BY sid ASC
 ";
 
-    $db      = Database::obtain();
+    $db = Database::obtain();
 
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
     }
     return $results;
@@ -809,8 +815,8 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
     $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
-    $jStructs = Jobs_JobDao::getById( $jid );
-    $filtered = array_filter( $jStructs, function( $item ) use ( $jpassword ) {
+    $jStructs   = Jobs_JobDao::getById( $jid );
+    $filtered   = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
         return $item->password == $jpassword;
     } );
     $currentJob = array_pop( $filtered );
@@ -831,7 +837,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 			GROUP_CONCAT( distinct id_segment ) AS involved_id,
 			IF( password = '{$currentJob->password}' AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
 				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end($jStructs)->job_last_segment . "
+				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end( $jStructs )->job_last_segment . "
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
@@ -911,9 +917,9 @@ function addTranslation( array $_Translation ) {
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = {$_Translation['translation']},
                 translation_date = {$_Translation['translation_date']},
-                warning = {$_Translation[ 'warning' ]}" ;
+                warning = {$_Translation[ 'warning' ]}";
 
-    if ( array_key_exists('version_number', $_Translation) ) {
+    if ( array_key_exists( 'version_number', $_Translation ) ) {
         $query .= "\n, version_number = {$_Translation['version_number']}";
     }
 
@@ -923,7 +929,7 @@ function addTranslation( array $_Translation ) {
     }
 
     if ( empty( $_Translation[ 'translation' ] ) && !is_numeric( $_Translation[ 'translation' ] ) ) {
-        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found after DB Escape: \n\n " . var_export( array_merge( array( 'db_query' => $query ), $_POST ), true );
+        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found after DB Escape: \n\n " . var_export( array_merge( [ 'db_query' => $query ], $_POST ), true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
         throw new PDOException( $msg );
@@ -932,8 +938,8 @@ function addTranslation( array $_Translation ) {
 //    Log::doLog( $query );
 
     try {
-        $db->query($query);
-    } catch( PDOException $e ) {
+        $db->query( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         throw new PDOException( "Error occurred storing (UPDATE) the translation for the segment {$_Translation['id_segment']} - Error: {$e->getCode()}" );
     }
@@ -966,7 +972,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
      * so we have to set an additional status when the requested status to propagate is TRANSLATE
      */
     $additional_status = '';
-    if( $params['status'] == Constants_TranslationStatus::STATUS_TRANSLATED ){
+    if ( $params[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED ) {
         $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
 ";
     }
@@ -994,8 +1000,8 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
 
 
     try {
-        $totals = $db->fetch_array($queryTotals);
-    } catch( PDOException $e ) {
+        $totals = $db->fetch_array( $queryTotals );
+    } catch ( PDOException $e ) {
         throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
                 -$e->getCode() );
@@ -1003,40 +1009,40 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
 
     $dao = new Translations_SegmentTranslationDao();
     try {
-        $segmentsForPropagation = $dao->getSegmentsForPropagation( array(
+        $segmentsForPropagation = $dao->getSegmentsForPropagation( [
                 'id_segment'        => $_idSegment,
                 'job_first_segment' => $job_data[ 'job_first_segment' ],
                 'job_last_segment'  => $job_data[ 'job_last_segment' ],
                 'segment_hash'      => $params[ 'segment_hash' ],
                 'id_job'            => $params[ 'id_job' ]
-        ), $params['status'] );
-    } catch( PDOException $e ) {
+        ], $params[ 'status' ] );
+    } catch ( PDOException $e ) {
         throw new Exception(
-                sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(),  $e->getMessage() ),
+                sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(), $e->getMessage() ),
                 -$e->getCode()
         );
     }
 
-    $propagated_ids = array();
+    $propagated_ids = [];
 
     if ( !empty( $segmentsForPropagation ) ) {
 
-        $propagated_ids = array_map(function( Translations_SegmentTranslationStruct $translation ) {
-            return $translation->id_segment ;
+        $propagated_ids = array_map( function ( Translations_SegmentTranslationStruct $translation ) {
+            return $translation->id_segment;
         }, $segmentsForPropagation );
 
         try {
 
-            $place_holders_fields = array();
+            $place_holders_fields = [];
             foreach ( $params as $key => $value ) {
-                $place_holders_fields[ ] = "$key = ?";
+                $place_holders_fields[] = "$key = ?";
             }
             $place_holders_fields = implode( ",", $place_holders_fields );
-            $place_holders_id = implode( ',', array_fill( 0, count( $propagated_ids ), '?' ) );
+            $place_holders_id     = implode( ',', array_fill( 0, count( $propagated_ids ), '?' ) );
 
             $values = array_merge(
                     array_values( $params ),
-                    array( $params[ 'id_job' ] ),
+                    [ $params[ 'id_job' ] ],
                     $propagated_ids
             );
 
@@ -1064,19 +1070,19 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
 
     }
 
-    return array( 'totals' => $totals, 'propagated_ids' => $propagated_ids );
+    return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids ];
 }
 
 function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
-    $data                          = array();
+    $data                          = [];
     $data[ 'last_opened_segment' ] = $id_segment;
 
     $where = "id = $id_job AND password = '$password'";
 
     $db = Database::obtain();
     try {
-        $affectedRows = $db->update('jobs', $data, $where);
-    } catch( PDOException $e ) {
+        $affectedRows = $db->update( 'jobs', $data, $where );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1197,12 +1203,14 @@ function getLastSegmentIDs( $id_job ) {
 		ORDER BY translation_date DESC LIMIT 10
 		";
 
-    $db      = Database::obtain();
+    $db = Database::obtain();
     try {
         //sometimes we can have broken projects in our Database that are not related to a job id
         //the query that extract the projects info returns a null job id for these projects, so skip the exception
         $results = $db->fetch_array( $query );
-    } catch( Exception $e ){ $results = null; }
+    } catch ( Exception $e ) {
+        $results = null;
+    }
 
     return $results;
 }
@@ -1241,7 +1249,7 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 }
 
 function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
-    
+
     $query = "SELECT id_segment as sid, status,translation from segment_translations
 		WHERE
 		id_segment BETWEEN $first_segment AND $last_segment
@@ -1359,13 +1367,13 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
 
 function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ) {
 
-    $statusWeight = array(
+    $statusWeight = [
             Constants_TranslationStatus::STATUS_NEW        => 10,
             Constants_TranslationStatus::STATUS_DRAFT      => 10,
             Constants_TranslationStatus::STATUS_REJECTED   => 10,
             Constants_TranslationStatus::STATUS_TRANSLATED => 40,
             Constants_TranslationStatus::STATUS_APPROVED   => 50
-    );
+    ];
 
     $nSegment = null;
     if ( isset( $results[ 0 ][ 'id' ] ) ) {
@@ -1383,7 +1391,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
             }
         }
         // If there aren't transleted segments in the next elements -> check starting from the first
-        if (!$nSegment) {
+        if ( !$nSegment ) {
             foreach ( $results as $seg ) {
                 if ( $seg[ 'status' ] == null ) {
                     $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
@@ -1403,7 +1411,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
 function insertProject( ArrayObject $projectStructure ) {
-    $data                        = array();
+    $data                        = [];
     $data[ 'id' ]                = $projectStructure[ 'id_project' ];
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
     $data[ 'id_team' ]           = $projectStructure[ 'id_team' ];
@@ -1415,11 +1423,12 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
     $data[ 'id_assignee' ]       = $projectStructure[ 'id_assignee' ];
     $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
+    $data[ 'due_date' ]          = !is_null( $projectStructure[ 'due_date' ] ) ? $projectStructure[ 'due_date' ] : null;
 
     $db = Database::obtain();
     $db->begin();
     $projectId = $db->insert( 'projects', $data );
-    $project = Projects_ProjectDao::findById( $projectId );
+    $project   = Projects_ProjectDao::findById( $projectId );
     $db->commit();
     return $project;
 
@@ -1443,7 +1452,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
 
     if ( empty( $user_id ) ) {
 
-        $data                       = array();
+        $data                       = [];
         $data[ 'username' ]         = $projectStructure[ 'private_tm_user' ];
         $data[ 'email' ]            = '';
         $data[ 'password' ]         = $projectStructure[ 'private_tm_pass' ];
@@ -1461,7 +1470,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
 }
 
 function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
-    $data                         = array();
+    $data                         = [];
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
     $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
@@ -1471,17 +1480,17 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
     $db = Database::obtain();
 
     try {
-        $idFile = $db->insert('files', $data);
+        $idFile = $db->insert( 'files', $data );
     } catch ( PDOException $e ) {
         Log::doLog( "Database insert error: {$e->getMessage()} " );
-        throw new Exception( "Database insert file error: {$e->getMessage()} ", - $e->getCode() );
+        throw new Exception( "Database insert file error: {$e->getMessage()} ", -$e->getCode() );
     }
 
     return $idFile;
 }
 
 function insertFilesJob( $id_job, $id_file ) {
-    $data              = array();
+    $data              = [];
     $data[ 'id_job' ]  = (int)$id_job;
     $data[ 'id_file' ] = (int)$id_file;
 
@@ -1635,45 +1644,46 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
  * @param $search_target
  * @param $search_status
  * @param $search_only_completed
+ *
  * @return array
  */
 function conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
         $search_status, $search_only_completed
 ) {
-    $conditions = array() ;
-    $data = array() ;
+    $conditions = [];
+    $data       = [];
 
     if ( $search_in_pname ) {
-        $conditions[] = " p.name LIKE :project_name ";
-        $data['project_name'] =  "%$search_in_pname%";
+        $conditions[]           = " p.name LIKE :project_name ";
+        $data[ 'project_name' ] = "%$search_in_pname%";
     }
 
     if ( $search_source ) {
-        $conditions[] = " j.source = :source ";
-        $data['source'] =  $search_source ;
+        $conditions[]     = " j.source = :source ";
+        $data[ 'source' ] = $search_source;
     }
 
     if ( $search_target ) {
-        $conditions[] = " j.target = :target  " ;
-        $data['target'] = $search_target ;
+        $conditions[]     = " j.target = :target  ";
+        $data[ 'target' ] = $search_target;
     }
 
     if ( $search_status ) {
-        $conditions[] = " j.status_owner = :owner_status " ;
-        $data['owner_status'] = $search_status ;
+        $conditions[]           = " j.status_owner = :owner_status ";
+        $data[ 'owner_status' ] = $search_status;
     }
 
     if ( $search_only_completed ) {
-        $conditions[]  = " j.completed = 1 ";
+        $conditions[] = " j.completed = 1 ";
     }
 
 
-    return array( $conditions, $data )  ;
+    return [ $conditions, $data ];
 }
 
 /**
- * @param Users_UserStruct                  $user
+ * @param Users_UserStruct  $user
  * @param                   $start                int
  * @param                   $step                 int
  * @param                   $search_in_pname      string
@@ -1698,26 +1708,25 @@ function getProjects( Users_UserStruct $user, $start, $step,
 ) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
-        $search_in_pname, $search_source, $search_target,
-        $search_status, $search_only_completed
-    ) ;
+            $search_in_pname, $search_source, $search_target,
+            $search_status, $search_only_completed
+    );
 
     if ( $project_id ) {
-        $conditions[] = " p.id = :project_id " ;
-        $data['project_id'] = $project_id ;
+        $conditions[]         = " p.id = :project_id ";
+        $data[ 'project_id' ] = $project_id;
     }
 
     if ( !is_null( $team ) ) {
-        $conditions[] = " p.id_team = :id_team " ;
-        $data [ 'id_team' ] = $team->id ;
+        $conditions[]       = " p.id_team = :id_team ";
+        $data [ 'id_team' ] = $team->id;
     }
 
     if ( $no_assignee ) {
-        $conditions[] = " p.id_assignee IS NULL " ;
-    }
-    elseif ( !is_null( $assignee ) ) {
-        $conditions[] = " p.id_assignee = :id_assignee " ;
-        $data ['id_assignee'] = $assignee->uid ;
+        $conditions[] = " p.id_assignee IS NULL ";
+    } elseif ( !is_null( $assignee ) ) {
+        $conditions[]           = " p.id_assignee = :id_assignee ";
+        $data [ 'id_assignee' ] = $assignee->uid;
     }
 
     $where_query = implode( " AND ", $conditions );
@@ -1735,7 +1744,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
     $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
     $stmt->execute( $data );
 
-    return array_map( function( $d ){
+    return array_map( function ( $d ) {
         return $d[ 'id' ];
     }, $stmt->fetchAll( PDO::FETCH_ASSOC ) );
 
@@ -1749,39 +1758,38 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
 ) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
-        $search_in_pname, $search_source, $search_target,
-        $search_status, $search_only_completed
-    ) ;
+            $search_in_pname, $search_source, $search_target,
+            $search_status, $search_only_completed
+    );
 
 
-    $query  = " SELECT COUNT( distinct id_project ) AS c
+    $query = " SELECT COUNT( distinct id_project ) AS c
     FROM projects p
     INNER JOIN jobs j ON j.id_project = p.id
 
-    " ;
+    ";
 
 
     if ( !is_null( $team ) ) {
-        $conditions[] = " p.id_team = :id_team " ;
-        $data [ 'id_team' ] = $team->id ;
+        $conditions[]       = " p.id_team = :id_team ";
+        $data [ 'id_team' ] = $team->id;
     }
 
     if ( $no_assignee ) {
-        $conditions[] = " p.id_assignee IS NULL " ;
-    }
-    elseif ( !is_null( $assignee ) ) {
-        $conditions[] = " p.id_assignee = :id_assignee " ;
-        $data ['id_assignee'] = $assignee->uid ;
+        $conditions[] = " p.id_assignee IS NULL ";
+    } elseif ( !is_null( $assignee ) ) {
+        $conditions[]           = " p.id_assignee = :id_assignee ";
+        $data [ 'id_assignee' ] = $assignee->uid;
     }
 
     if ( count( $conditions ) ) {
         $query = $query . " AND " . implode( " AND ", $conditions );
     }
 
-    $stmt = Database::obtain()->getConnection()->prepare( $query ) ;
-    $stmt->execute( $data ) ;
+    $stmt = Database::obtain()->getConnection()->prepare( $query );
+    $stmt->execute( $data );
 
-    return $stmt->fetchAll() ;
+    return $stmt->fetchAll();
 }
 
 /**
@@ -1830,10 +1838,10 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			ORDER BY j.id, j.job_last_segment
 			";
 
-    $db      = Database::obtain();
+    $db = Database::obtain();
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1844,7 +1852,7 @@ function initializeWordCount( WordCount_Struct $wStruct ) {
 
     $db = Database::obtain();
 
-    $data                       = array();
+    $data                       = [];
     $data[ 'new_words' ]        = $wStruct->getNewWords();
     $data[ 'draft_words' ]      = $wStruct->getDraftWords();
     $data[ 'translated_words' ] = $wStruct->getTranslatedWords();
@@ -1853,8 +1861,8 @@ function initializeWordCount( WordCount_Struct $wStruct ) {
 
     $where = " id = " . (int)$wStruct->getIdJob() . " AND password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
     try {
-        $db->update('jobs', $data, $where);
-    } catch( PDOException $e ) {
+        $db->update( 'jobs', $data, $where );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1889,8 +1897,8 @@ function updateWordCount( WordCount_Struct $wStruct ) {
                   AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
 
     try {
-        $db->query($query);
-    } catch( PDOException $e ) {
+        $db->query( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1900,12 +1908,13 @@ function updateWordCount( WordCount_Struct $wStruct ) {
 }
 
 /**
- * @param $job_id int
- * @param $jobPass string
+ * @param $job_id            int
+ * @param $jobPass           string
  * @param $segmentTimeToEdit int
+ *
  * @return int|mixed
  */
-function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
+function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ) {
     $db = Database::obtain();
 
     //Update in Transaction
@@ -1916,15 +1925,15 @@ function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
 
     try {
         $db->query(
-            sprintf(
-                $query,
-                (int)$segmentTimeToEdit,
-                (int)$job_id,
-                $jobPass
-            )
+                sprintf(
+                        $query,
+                        (int)$segmentTimeToEdit,
+                        (int)$job_id,
+                        $jobPass
+                )
         );
 
-    } catch( PDOException $e ) {
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1936,20 +1945,20 @@ function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
 function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     // query  da incorporare nella changeProjectStatus
     $db                             = Database::obtain();
-    $data                           = array();
+    $data                           = [];
     $data[ 'tm_analysis_wc' ]       = $pid_eq_words;
     $data[ 'standard_analysis_wc' ] = $pid_standard_words;
     $where                          = " id =$pid";
     try {
-        $affectedRows = $db->update('projects', $data, $where);
-    } catch( PDOException $e ) {
+        $affectedRows = $db->update( 'projects', $data, $where );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
     return $affectedRows;
 }
 
-function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
+function changeProjectStatus( $pid, $status, $if_status_not = [] ) {
 
     $db = Database::obtain();
 
@@ -1963,10 +1972,10 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     }
     try {
 
-        $affectedRows = $db->update('projects', $data, $where);
+        $affectedRows = $db->update( 'projects', $data, $where );
         Projects_ProjectDao::destroyCacheById( $pid );
 
-    } catch( PDOException $e ) {
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2080,7 +2089,7 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         //Needed to address the query to the master database if exists
         \Database::obtain()->begin();
 
-        $results = $db->fetch_array($query);
+        $results = $db->fetch_array( $query );
         $db->getConnection()->commit();
     } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
@@ -2096,8 +2105,8 @@ function setJobCompleteness( $jid, $is_completed ) {
     $db    = Database::obtain();
     $query = "update jobs set completed=$is_completed where id=$jid";
     try {
-        $result = $db->query_first($query);
-    } catch( PDOException $e ) {
+        $result = $db->query_first( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $query );
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
@@ -2114,7 +2123,7 @@ function setJobCompleteness( $jid, $is_completed ) {
  *
  * @return array
  */
-function getArchivableJobs( $jobs = array() ) {
+function getArchivableJobs( $jobs = [] ) {
     $db    = Database::obtain();
     $query =
             "
@@ -2136,12 +2145,12 @@ function getArchivableJobs( $jobs = array() ) {
 
     try {
         $results = $db->fetch_array(
-            sprintf(
-                $query,
-                implode(", ", $jobs)
-            )
+                sprintf(
+                        $query,
+                        implode( ", ", $jobs )
+                )
         );
-    } catch( PDOException $e ) {
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2176,7 +2185,7 @@ function getMaxJobUntilDaysAgo( $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
     return $last_id;
 }
 
-function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
+function batchArchiveJobs( $jobs = [], $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
 
     $query_archive_jobs = "
         UPDATE jobs
@@ -2184,9 +2193,9 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
             WHERE %s
             AND last_update < ( curdate() - INTERVAL %u DAY )";
 
-    $tuple_of_double_indexes = array();
+    $tuple_of_double_indexes = [];
     foreach ( $jobs as $job ) {
-        $tuple_of_double_indexes[ ] = sprintf( "( id = %u AND password = '%s' )", $job[ 'id' ], $job[ 'password' ] );
+        $tuple_of_double_indexes[] = sprintf( "( id = %u AND password = '%s' )", $job[ 'id' ], $job[ 'password' ] );
     }
 
     $q_archive = sprintf(
@@ -2197,8 +2206,8 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     $db = Database::obtain();
     try {
-        $db->query($q_archive);
-    } catch( PDOException $e ) {
+        $db->query( $q_archive );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }

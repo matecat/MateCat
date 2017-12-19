@@ -62,8 +62,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var newSegments = [];
         $.each(segments, function (index) {
             var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+            var segment = this;
             if(splittedSourceAr.length > 1) {
-                var segment = this;
                 var splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
                     splitGroup.push(segment.sid + '-' + (i + 1));
@@ -78,6 +78,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
+                        decoded_source:  UI.decodeText(segment, splittedSourceAr[i]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
@@ -85,6 +86,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         status: status,
                         time_to_edit: "0",
                         translation: translation,
+                        decoded_translation:  UI.decodeText(segment, segment.translation),
                         version: segment.version,
                         warning: "0",
                         tagged: false
@@ -93,6 +95,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     segData = null;
                 });
             } else {
+                segment.decoded_translation =  UI.decodeText(segment, segment.translation);
+                segment.decoded_source =  UI.decodeText(segment, segment.segment);
                 newSegments.push(this);
             }
 
@@ -121,18 +125,27 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
             newSegments.forEach(function (element) {
                 element.split_group = splitGroup;
+                element.decoded_translation =  UI.decodeText(element, element.translation);
+                element.decoded_source =  UI.decodeText(element, element.segment);
             });
 
             newSegments = Immutable.fromJS(newSegments);
             this._segments[fid] = this._segments[fid].splice(index, 1, ...newSegments);
         } else {
-            this.removeSplit(oldSid, newSegments, fid);
+            this.removeSplit(oldSid, newSegments, fid, splitGroup);
         }
     },
 
-    removeSplit(oldSid, newSegments, fid) {
+    removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
         var elementsToRemove = [];
+
+        newSegments.forEach(function (element) {
+            element.split_group = splitGroup;
+            element.decoded_translation =  UI.decodeText(element, element.translation);
+            element.decoded_source =  UI.decodeText(element, element.segment);
+        });
+
         newSegments = Immutable.fromJS(newSegments);
         var indexes = [];
         this._segments[fid].map(function (segment, index) {
@@ -174,13 +187,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid, fid);
         var trans = this.removeLockTagsFromString(translation);
         this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
-        return trans;
+        return translation;
     },
     replaceSource(sid, fid, source) {
         var index = this.getSegmentIndex(sid, fid);
         var trans = this.removeLockTagsFromString(source);
-        this._segments[fid] = this._segments[fid].setIn([index, 'source'], trans);
-        return trans;
+        this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
+        return source;
     },
 
     setSegmentAsTagged(sid, fid) {
@@ -194,7 +207,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     removeLockTagsFromString(str) {
-        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
+        return UI.cleanTextFromPlaceholdersSpan(str);
     },
 
     addSegmentVersions(fid, sid, versions) {
