@@ -1,5 +1,6 @@
 <?php
-use ConnectedServices\GDrive as GDrive ;
+
+use ConnectedServices\GDrive as GDrive;
 use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
@@ -21,17 +22,17 @@ class createProjectController extends ajaxController {
     private $due_date;
 
     private $metadata;
-    private $lang_handler ;
+    private $lang_handler;
 
     /**
      * @var \Teams\TeamStruct
      */
-    private $team ;
+    private $team;
 
     /**
      * @var FeatureSet
      */
-    private $projectFeatures ;
+    private $projectFeatures;
 
     public function __construct() {
 
@@ -39,35 +40,35 @@ class createProjectController extends ajaxController {
         parent::sessionStart();
         parent::__construct();
 
-        $filterArgs = array(
+        $filterArgs = [
                 'file_name'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'source_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'target_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'job_subject'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'due_date'        => [ 'filter' => FILTER_VALIDATE_INT ],
+                'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
 
-                'private_tm_user'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'private_tm_pass'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'lang_detect_files'  => [
+                'private_tm_user'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'private_tm_pass'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'lang_detect_files' => [
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
                 ],
-                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  ],
+                'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
 
-        );
+        ];
 
         $this->checkLogin( false );
         $this->setupSystemWideFeatures();
 
-        $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
+        $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -81,7 +82,7 @@ class createProjectController extends ajaxController {
         if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
             $__postInput[ 'private_tm_key' ] = [
                     [
-                            'key'  => trim($__postInput[ 'private_tm_key' ]),
+                            'key'  => trim( $__postInput[ 'private_tm_key' ] ),
                             'name' => null,
                             'r'    => true,
                             'w'    => true
@@ -107,8 +108,7 @@ class createProjectController extends ajaxController {
             $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
 
 
-        }
-        else {
+        } else {
             $private_keyList = $__postInput[ 'private_tm_key' ];
         }
 
@@ -131,9 +131,9 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
-        $this->due_date                = ( empty($__postInput[ 'due_date' ]) ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
+        $this->due_date                = ( empty( $__postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
 
-        $this->__setMetadataFromPostInput( $__postInput ) ;
+        $this->__setMetadataFromPostInput( $__postInput );
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -158,7 +158,7 @@ class createProjectController extends ajaxController {
         $this->__validateUserMTEngine();
 
         if ( $this->userIsLogged ) {
-            $this->__setTeam( $__postInput['id_team'] );
+            $this->__setTeam( $__postInput[ 'id_team' ] );
         }
 
     }
@@ -172,10 +172,10 @@ class createProjectController extends ajaxController {
      * @throws \Exceptions\ValidationError
      */
 
-    private function setProjectFeatures( $__postInput ){
+    private function setProjectFeatures( $__postInput ) {
         // change project features
 
-        if( !empty( $__postInput[ 'project_completion' ] ) ){
+        if ( !empty( $__postInput[ 'project_completion' ] ) ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
             $this->projectFeatures[] = $feature;
@@ -183,7 +183,7 @@ class createProjectController extends ajaxController {
 
         $this->projectFeatures = $this->featureSet->filter(
                 'filterCreateProjectFeatures', $this->projectFeatures, $__postInput
-        ) ;
+        );
     }
 
     public function doAction() {
@@ -192,7 +192,7 @@ class createProjectController extends ajaxController {
             return false;
         }
 
-        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
+        $arFiles = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
 
         $default_project_name = $arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
@@ -272,40 +272,40 @@ class createProjectController extends ajaxController {
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
-        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
-        $newArFiles = array();
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $newArFiles = [];
 
-        foreach($arFiles as $__fName){
-           if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+        foreach ( $arFiles as $__fName ) {
+            if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-               $fs = new FilesStorage();
-               $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
+                $fs = new FilesStorage();
+                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
 
-               $linkFiles = scandir( $uploadDir );
+                $linkFiles = scandir( $uploadDir );
 
-               //fetch cache links, created by converter, from upload directory
-               foreach ( $linkFiles as $storedFileName ) {
-                   //check if file begins with the name of the zip file.
-                   // If so, then it was stored in the zip file.
-                   if(strpos($storedFileName, $__fName) !== false &&
-                           substr($storedFileName,0, strlen($__fName)) == $__fName ){
-                       //add file name to the files array
-                       $newArFiles[] = $storedFileName;
-                   }
-               }
+                //fetch cache links, created by converter, from upload directory
+                foreach ( $linkFiles as $storedFileName ) {
+                    //check if file begins with the name of the zip file.
+                    // If so, then it was stored in the zip file.
+                    if ( strpos( $storedFileName, $__fName ) !== false &&
+                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
+                        //add file name to the files array
+                        $newArFiles[] = $storedFileName;
+                    }
+                }
 
-           } else { //this file was not in a zip. Add it normally
+            } else { //this file was not in a zip. Add it normally
 
-               if( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ){
-                   $newArFiles[ ] = $__fName;
-               }
+                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
+                    $newArFiles[] = $__fName;
+                }
 
-           }
+            }
         }
 
         $arFiles = $newArFiles;
 
-        \Log::doLog( '------------------------------');
+        \Log::doLog( '------------------------------' );
         \Log::doLog( $arFiles );
 
         FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
@@ -330,20 +330,20 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
         $projectStructure[ 'only_private' ]         = $this->only_private;
-        $projectStructure[ 'due_date' ]         = $this->due_date;
+        $projectStructure[ 'due_date' ]             = $this->due_date;
 
 
-        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
+        $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
 
         //TODO enable from CONFIG
-        $projectStructure[ 'metadata' ]             = $this->metadata;
+        $projectStructure[ 'metadata' ] = $this->metadata;
 
         if ( $this->userIsLogged ) {
-            $projectStructure[ 'userIsLogged' ]  = true;
-            $projectStructure[ 'uid' ]           = $this->uid;
-            $projectStructure[ 'id_customer' ]   = $this->userMail;
-            $projectStructure[ 'owner' ]         = $this->userMail ;
+            $projectStructure[ 'userIsLogged' ] = true;
+            $projectStructure[ 'uid' ]          = $this->uid;
+            $projectStructure[ 'id_customer' ]  = $this->userMail;
+            $projectStructure[ 'owner' ]        = $this->userMail;
             $projectManager->setTeam( $this->team ); // set the team object to avoid useless query
         }
 
@@ -357,7 +357,7 @@ class createProjectController extends ajaxController {
         Queue::sendProject( $projectStructure );
 
         $this->__clearSessionFiles();
-        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
+        $this->__assignLastCreatedPid( $projectStructure[ 'id_project' ] );
 
         $this->result[ 'data' ] = [
                 'id_project' => $projectStructure[ 'id_project' ],
@@ -371,64 +371,64 @@ class createProjectController extends ajaxController {
      */
     private function setupSystemWideFeatures() {
         if ( $this->userIsLogged ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email );
         }
     }
 
     private function __addFilterForMetadataInput( $filterArgs ) {
-        $filterArgs = array_merge( $filterArgs, array(
-            'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'segmentation_rule'  => [
-                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-        ));
+        $filterArgs = array_merge( $filterArgs, [
+                'lexiqa'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'segmentation_rule' => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+        ] );
 
         $filterArgs = $this->featureSet->filter( 'filterCreateProjectInputFilters', $filterArgs );
 
-        return $filterArgs ;
+        return $filterArgs;
     }
 
 
     private function __assignLastCreatedPid( $pid ) {
-        $_SESSION['redeem_project'] = FALSE ;
-        $_SESSION['last_created_pid'] = $pid  ;
+        $_SESSION[ 'redeem_project' ]   = false;
+        $_SESSION[ 'last_created_pid' ] = $pid;
     }
 
     private function __validateTargetLangs() {
         $targets = explode( ',', $this->target_language );
-        $targets = array_map('trim',$targets);
-        $targets = array_unique($targets);
+        $targets = array_map( 'trim', $targets );
+        $targets = array_unique( $targets );
 
         if ( empty( $targets ) ) {
-            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => "Missing target language." ];
         }
 
         try {
             foreach ( $targets as $target ) {
-                $this->lang_handler->validateLanguage( $target ) ;
+                $this->lang_handler->validateLanguage( $target );
             }
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => $e->getMessage() ];
         }
 
-        $this->target_language = implode(',', $targets);
+        $this->target_language = implode( ',', $targets );
     }
 
     private function __validateSourceLang() {
         try {
-            $this->lang_handler->validateLanguage( $this->source_language ) ;
+            $this->lang_handler->validateLanguage( $this->source_language );
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
+            $this->result[ 'errors' ][] = [ "code" => -3, "message" => $e->getMessage() ];
         }
     }
 
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session() ;
-            $gdriveSession->clearFiles() ;
+            $gdriveSession = new GDrive\Session();
+            $gdriveSession->clearFiles();
         }
     }
 
@@ -446,18 +446,26 @@ class createProjectController extends ajaxController {
      * @param $__postInput
      */
     private function __setMetadataFromPostInput( $__postInput ) {
-        $options = array() ;
+        $options = [];
 
-        if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
-        if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
-        if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
-        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
+        if ( isset( $__postInput[ 'lexiqa' ] ) ) {
+            $options[ 'lexiqa' ] = $__postInput[ 'lexiqa' ];
+        }
+        if ( isset( $__postInput[ 'speech2text' ] ) ) {
+            $options[ 'speech2text' ] = $__postInput[ 'speech2text' ];
+        }
+        if ( isset( $__postInput[ 'tag_projection' ] ) ) {
+            $options[ 'tag_projection' ] = $__postInput[ 'tag_projection' ];
+        }
+        if ( isset( $__postInput[ 'segmentation_rule' ] ) ) {
+            $options[ 'segmentation_rule' ] = $__postInput[ 'segmentation_rule' ];
+        }
 
-        $this->metadata = $options ;
+        $this->metadata = $options;
 
-        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
-            'input' => $__postInput
-        ));
+        $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
+                'input' => $__postInput
+        ] );
     }
 
     /**
@@ -469,28 +477,27 @@ class createProjectController extends ajaxController {
      */
     private function __setTeam( $id_team = null ) {
         if ( is_null( $id_team ) ) {
-            $this->team = $this->logged_user->getPersonalTeam() ;
-        }
-        else {
+            $this->team = $this->logged_user->getPersonalTeam();
+        } else {
             // check for the team to be allowed
-            $dao = new \Teams\MembershipDao() ;
-            $team = $dao->findTeamByIdAndUser($id_team, $this->logged_user) ;
+            $dao  = new \Teams\MembershipDao();
+            $team = $dao->findTeamByIdAndUser( $id_team, $this->logged_user );
 
             if ( !$team ) {
-                throw new Exception('Team and user memberships do not match') ;
-            }
-            else {
-                $this->team = $team ;
+                throw new Exception( 'Team and user memberships do not match' );
+            } else {
+                $this->team = $team;
             }
         }
     }
 
     private function __validateUserMTEngine() {
 
-        if( array_search( $this->mt_engine, [ 0, 1 ] ) === false ){
+        if ( array_search( $this->mt_engine, [ 0, 1 ] ) === false ) {
 
-            if( !$this->userIsLogged ) {
-                $this->result[ 'errors' ][]    = array( "code" => -2, "message" => "Invalid MT Engine." );
+            if ( !$this->userIsLogged ) {
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
+
                 return;
             }
 
@@ -498,10 +505,10 @@ class createProjectController extends ajaxController {
             $engineQuery->id  = $this->mt_engine;
             $engineQuery->uid = $this->uid;
             $enginesDao       = new EnginesModel_EngineDAO();
-            $engine            = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
+            $engine           = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
 
-            if ( empty( $engine ) ){
-                $this->result[ 'errors' ][]    = array( "code" => -2, "message" => "Invalid MT Engine." );
+            if ( empty( $engine ) ) {
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
             }
 
         }
