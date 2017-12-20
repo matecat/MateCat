@@ -1,7 +1,3 @@
-/*
- Component: ui.review2
- */
-
 ReviewExtended = {
     enabled : function() {
         return Review.type === 'extended' ;
