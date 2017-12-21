@@ -76,6 +76,10 @@ class ProjectUrls {
         return array( 'urls' => $this->formatted );
     }
 
+    public function getData(){
+        return $this->data;
+    }
+
 
     private function downloadOriginalUrl($record) {
         return \Routes::downloadOriginal(
