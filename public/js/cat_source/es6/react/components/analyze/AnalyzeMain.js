@@ -99,7 +99,7 @@ class AnalyzeMain extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return ( !nextState.project.equals(this.state.project) ||
+        return ( nextState.project && !nextState.project.equals(this.state.project) ||
         !nextState.volumeAnalysis.equals(this.state.volumeAnalysis) ||
         nextState.showAnalysis !== this.state.showAnalysis ||
         nextState.intervalId !== this.state.intervalId ||

@@ -47,7 +47,7 @@ class catController extends viewController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    public $project ;
 
     private $translation_engines;
 
@@ -64,21 +64,18 @@ class catController extends viewController {
     private $review_password = "";
 
     /**
-     * @var FeatureSet
-     */
-    private $projectFeatures ;
-
-    /**
      * @var WordCount_Struct
      */
     private $wStruct ;
 
+    protected $templateName = "index.html";
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
-        parent::__construct( false );
+        parent::__construct();
 
-        parent::makeTemplate( "index.html" );
+        parent::makeTemplate( $this->templateName );
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -103,8 +100,7 @@ class catController extends viewController {
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->projectFeatures = new FeatureSet();
-        $this->projectFeatures->loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project ) ;
 
     }
 
@@ -123,7 +119,7 @@ class catController extends viewController {
      */
     private function findJobByIdAndPassword() {
         if ( self::isRevision() ) {
-            $this->password = $this->projectFeatures->filter(
+            $this->password = $this->featureSet->filter(
                 'filter_review_password_to_job_password',
                 $this->password,
                 $this->jid
@@ -135,8 +131,8 @@ class catController extends viewController {
     }
 
     public function doAction() {
-        $this->projectFeatures->run('catControllerDoActionStart', $this);
-        $this->checkLoginRequiredAndRedirect() ;
+
+        $this->featureSet->run('beginDoAction', $this);
 
         try {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
@@ -571,10 +567,13 @@ class catController extends viewController {
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
+        //Maybe some plugin want disable the Split from the config
+        $this->template->splitSegmentEnabled = var_export(true, true);
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
-        $this->projectFeatures->appendDecorators(
+        $this->featureSet->appendDecorators(
             'CatDecorator',
             $this,
             $this->template

@@ -11,16 +11,9 @@ window.MC.SegmentMainButtons = require('./components/SegmentMainButtons').defaul
 
 window.classnames = require('classnames');
 
-window.TranslationIssuesSideButton = require('./components/TranslationIssuesSideButton').default ;
-
-window.ReviewSidePanel = require('./components/ReviewSidePanel').default ;
-window.TranslationIssuesOverviewPanel = require('./components/TranslationIssuesOverviewPanel').default ;
-window.ReviewTranslationVersion = require('./components/ReviewTranslationVersion').default ;
-window.ReviewIssuesContainer = require('./components/ReviewIssuesContainer').default ;
-window.ReviewTranslationIssue = require('./components/ReviewTranslationIssue').default ;
-window.ReviewTranslationIssueCommentsContainer = require('./components/ReviewTranslationIssueCommentsContainer').default ;
-window.ReviewIssueSelectionPanel = require('./components/ReviewIssueSelectionPanel').default ;
-window.ReviewIssueCategorySelector = require('./components/ReviewIssueCategorySelector').default ;
+window.ReviewSidePanel = require('./components/review/ReviewSidePanel').default ;
+window.ReviewTranslationIssueCommentsContainer = require('./components/review_improved/ReviewTranslationIssueCommentsContainer').default ;
+window.ReviewIssueCategorySelector = require('./components/review_improved/ReviewIssueCategorySelector').default ;
 window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
 
 
@@ -65,7 +58,8 @@ window.DQFModal = require('./modals/DQFModal').default;
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
-
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
-
+window.SegmentActions = require('./actions/SegmentActions');
+window.SegmentStore = require('./stores/SegmentStore');
+window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
 

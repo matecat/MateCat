@@ -45,7 +45,12 @@ class ProjectPasswordValidator extends Base {
         parent::__construct( $controller->getRequest() );
     }
 
-    public function validate() {
+    /**
+     * @return bool|mixed
+     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundError
+     */
+    public function _validate() {
 
         $this->project = Projects_ProjectDao::findByIdAndPassword(
                 $this->id_project,

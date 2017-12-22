@@ -1,14 +1,15 @@
 <div class="textarea-container">
 
   <span class="loader"></span>
-  <div class="{{editarea_classes_string}}"
+
+  <div class="editarea-container" id="editarea-container-{{segment.sid}}"></div>
+  <!--<div class="{{editarea_classes_string}}"
        {{#if readonly}} contenteditable="false" {{/if}}
                         spellcheck="true"
                         lang="{{lang}}"
                         id="segment-{{segment.sid}}-editarea"
                         data-sid="{{segment.sid}}"
-                        >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>
-
+                        >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>-->
   {{#if s2t_enabled}}
   <div class="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
         <div class="micBg"></div>
@@ -43,9 +44,5 @@
       <li class="capitalize" title="Capitalized"></li>
     </ul>
   </div>
-
-  <p class="save-warning" title="Segment modified but not saved"></p>
-
-  
 
 </div>

@@ -28,7 +28,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <script>
         /*<![CDATA[*/
         config = {} ;
-        config.swagger_host = '<?php echo INIT::$HTTPHOST ?>';
+        config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
         /*]]>*/
     </script>
 

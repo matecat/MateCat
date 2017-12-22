@@ -348,50 +348,55 @@ class Utils {
     /**
      * Call the output in JSON format
      *
+     * @param bool $raise
+     *
+     * @throws Exception
      */
-    public static function raiseJsonExceptionError() {
+    public static function raiseJsonExceptionError( $raise = true ) {
 
         if ( function_exists( "json_last_error" ) ) {
-            switch ( json_last_error() ) {
+
+            $error = json_last_error();
+
+            switch ( $error ) {
                 case JSON_ERROR_NONE:
-//              	  Log::doLog(' - No errors');
+                    $msg = null; # - No errors
                     break;
                 case JSON_ERROR_DEPTH:
                     $msg = ' - Maximum stack depth exceeded';
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, JSON_ERROR_DEPTH);
                     break;
                 case JSON_ERROR_STATE_MISMATCH:
                     $msg = ' - Underflow or the modes mismatch';
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, JSON_ERROR_STATE_MISMATCH);
                     break;
                 case JSON_ERROR_CTRL_CHAR:
                     $msg =  ' - Unexpected control character found' ;
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, JSON_ERROR_CTRL_CHAR);
                     break;
                 case JSON_ERROR_SYNTAX:
                     $msg = ' - Syntax error, malformed JSON' ;
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, JSON_ERROR_SYNTAX);
                     break;
                 case JSON_ERROR_UTF8:
                     $msg =  ' - Malformed UTF-8 characters, possibly incorrectly encoded';
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, JSON_ERROR_UTF8);
                     break;
                 default:
                     $msg =  ' - Unknown error';
-                    Log::doLog( $msg );
-                    throw new Exception( $msg, 6);
                     break;
             }
+
+            Log::doLog( $msg );
+            if( $raise && $error != JSON_ERROR_NONE ){
+                throw new Exception( $msg, $error );
+            }
+
         }
 
     }
 
+    //Array_column() is not supported on PHP 5.4, so i'll rewrite it
 	public static function array_column( array $input, $column_key, $index_key = null ) {
+
+        if ( function_exists( 'array_column' ) ) {
+            return array_column( $input, $column_key, $index_key );
+        }
 
 		$result = array();
 		foreach ( $input as $k => $v ) {

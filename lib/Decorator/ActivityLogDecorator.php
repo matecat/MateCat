@@ -15,7 +15,7 @@ class ActivityLogDecorator {
 
         $this->controller = $controller;
         $this->template = $template;
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = $controller->getFeatureSet();
 
     }
 
@@ -120,8 +120,8 @@ class ActivityLogDecorator {
         }
 
         $this->template->isLoggedIn    = $this->controller->isLoggedIn();
-        $this->template->logged_user   = ( $this->controller->getLoggedUser() !== false ) ? $this->controller->getLoggedUser()->shortName() : "";
-        $this->template->extended_user = ( $this->controller->getLoggedUser() !== false ) ? trim( $this->controller->getLoggedUser()->fullName() ) : "";
+        $this->template->logged_user   = ( $this->controller->getUser() !== false ) ? $this->controller->getUser()->shortName() : "";
+        $this->template->extended_user = ( $this->controller->getUser() !== false ) ? trim( $this->controller->getUser()->fullName() ) : "";
         $this->template->outputContent = $outputContent;
         $this->template->projectID     = $this->controller->project_data[ 0 ][ 'pid' ];
         $this->template->projectName   = $this->controller->project_data[ 0 ][ 'pname' ];

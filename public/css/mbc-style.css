@@ -522,8 +522,11 @@ a.mbc-close-icon:hover {
   display: block;
   font-size: 11px;
   font-weight: bold;
-  padding: 0px 6px;
+  padding: 0px 7px;
   text-align: center;
+  width: 8px;
+  height: 15px;
+  line-height: 1.5;
 }
 
 /*

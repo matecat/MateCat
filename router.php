@@ -25,8 +25,6 @@ function route( $path, $method, $controller, $action ) {
     } );
 }
 
-Features::loadRoutes( $klein );
-
 $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception $exception ) {
     // TODO: still need to catch fatal errors here with 500 code
     $klein->response()->noCache();
@@ -82,5 +80,6 @@ require './lib/Routes/api_v1_routes.php';
 require './lib/Routes/api_v2_routes.php';
 require './lib/Routes/gdrive_routes.php';
 require './lib/Routes/utils_routes.php';
+Features::loadRoutes( $klein );
 
 $klein->dispatch();

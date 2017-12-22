@@ -92,20 +92,10 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      *
      * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
      */
-    public static function getByJobIdProjectAndIdJob( $id_project, $id_job ) {
+    public static function getByIdProjectAndIdJob( $id_project, $id_job ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job" );
         return ( new self() )->_fetchObject( $stmt, new Chunks_ChunkStruct(), [ 'id_project' => $id_project, 'id_job' => $id_job ] );
-    }
-
-    protected function _buildResult( $array_result ) {
-        // TODO
-         $result = array();
-         foreach($array_result as $record) {
-             $result[] = new Chunks_ChunkStruct( $record );
-         }
-
-        // return $result;
     }
 
 }

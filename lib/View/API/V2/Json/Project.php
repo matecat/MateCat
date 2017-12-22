@@ -73,7 +73,8 @@ class Project {
                 'features'             => implode( ",", $data->getFeatures()->getCodes() ),
                 'is_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
                 'is_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
-                'remote_file_service'  => $data->getRemoteFileServiceName()
+                'remote_file_service'  => $data->getRemoteFileServiceName(),
+                'due_date'             => Utils::api_timestamp( $data->due_date )
         ];
 
         return $projectOutputFields;

@@ -127,7 +127,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
                         if ( d.errors[0].code == -1 ) {
                             UI.noGlossary = true;
@@ -135,9 +134,7 @@ if (true)
                     }
                     n = this[0];
                     UI.processLoadedGlossary( d, this );
-
-                    $( n ).addClass( 'glossary-loaded' );
-
+                    SegmentActions.addClassToSegment(UI.getSegmentId(n), 'glossary-loaded');
                     // I store for the current
                     if ( this[1] == 0 ) {
                         UI.cachedGlossaryData = d;
@@ -155,7 +152,6 @@ if (true)
 
             storeGlossaryData( segment, d.data.matches ) ;
 
-            // XXX: this variable `next` was intentionally left global, changing to local breaks glossary updates
             next = context[1];
 
             // TODO: refactor this to avoid timeout check
@@ -270,7 +266,7 @@ if (true)
             UI.startGlossaryMark = '<mark class="inGlossary">';
             UI.endGlossaryMark = '</mark>';
             markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
-            sourceString = $( '.editor .source' ).html();
+            var sourceString = $( '.editor .source' ).html();
 
             $.each( UI.intervalsUnion, function ( index ) {
                 if ( this === UI.lastIntervalUnionAnalysed ) return;
@@ -278,14 +274,14 @@ if (true)
                 added = markLength * index;
                 sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
                 sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
-                $( '.editor .source' ).html( sourceString );
+                SegmentActions.replaceSourceText(UI.getSegmentId(UI.currentSegment) , UI.getSegmentFileId(UI.currentSegment), sourceString)
             } );
             UI.lastIntervalUnionAnalysed = null;
-
-            $( '.editor .source mark mark' ).each( function () {
-                $( this ).replaceWith( $( this ).html() );
-            } );
-
+            setTimeout(function () {
+                $( '.editor .source mark mark' ).each( function () {
+                    $( this ).replaceWith( $( this ).html() );
+                } );
+            }, 100);
             $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( UI.currentSegment ) } );
 
         },
@@ -375,13 +371,10 @@ if (true)
                             this.comment = this.source_note;
                         }
 
-                        cl_suggestion = UI.getPercentuageClass( this.match );
                         var leftTxt = this.segment;
-                        leftTxt = leftTxt.replace( /\#\{/gi, "<mark>" );
-                        leftTxt = leftTxt.replace( /\}\#/gi, "</mark>" );
+
                         var rightTxt = this.translation;
-                        rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
-                        rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+
                         var commentOriginal = this.comment;
                         if (commentOriginal) {
                             commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
@@ -464,15 +457,14 @@ if (true)
             } );
         },
         copyGlossaryItemInEditarea: function ( item ) {
-            translation = item.find( '.translation' ).text();
+            var translation = item.find( '.translation' ).text();
             $( '.editor .editarea .focusOut' ).before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
-            this.lockTags( this.editarea );
-            range = window.getSelection().getRangeAt( 0 );
+            var range = window.getSelection().getRangeAt( 0 );
             var tempCopyGlossPlaceholder = $( '.editor .editarea .tempCopyGlossaryPlaceholder' );
-            node = tempCopyGlossPlaceholder[0];
+            var node = tempCopyGlossPlaceholder[0];
             setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
-            this.highlightEditarea();
+            SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         },
         updateGlossary: function (elem$) {
             var self = this;
@@ -538,10 +530,6 @@ if (true)
 
             return  APP.doRequest( {
                 data: data,
-                context: [
-                    UI.currentSegment,
-                    next
-                ],
                 error: function () {
                     UI.failedConnection( 0, 'glossary' );
                 },

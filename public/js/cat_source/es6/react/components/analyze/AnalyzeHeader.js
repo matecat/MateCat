@@ -241,28 +241,29 @@ class AnalyzeHeader extends React.Component {
     render() {
         let analysisStateHtml = this.getAnalysisStateHtml();
         let wordsCountHtml = this.getWordscount();
+        let projectName = (this.props.project.get('name')) ? this.props.project.get('name') : "";
         return <div className="project-header ui grid">
-                    <div className="left-analysis nine wide column">
-                        <h1>Volume Analysis</h1>
-                        <div className="ui ribbon label">
-                            <div className="project-name" title="Project name"> {this.props.project.get('name')} </div>
-                        </div>
-                        {analysisStateHtml}
-                    </div>
+            <div className="left-analysis nine wide column">
+                <h1>Volume Analysis</h1>
+                <div className="ui ribbon label">
+                    <div className="project-name" title="Project name"> {projectName} </div>
+                </div>
+                {analysisStateHtml}
+            </div>
 
-                    <div className="seven wide right floated column">
-                        {wordsCountHtml}
-                    </div>
-                    <CSSTransitionGroup component="div" className="progress sixteen wide column"
-                                        transitionName="transition"
-                                        transitionEnterTimeout={500}
-                                        transitionLeaveTimeout={500}
-                    >
-                        {this.getProgressBar()}
-                    </CSSTransitionGroup>
+            <div className="seven wide right floated column">
+                {wordsCountHtml}
+            </div>
+            <CSSTransitionGroup component="div" className="progress sixteen wide column"
+                                transitionName="transition"
+                                transitionEnterTimeout={500}
+                                transitionLeaveTimeout={500}
+            >
+                {this.getProgressBar()}
+            </CSSTransitionGroup>
 
 
-            </div>;
+        </div>;
 
 
     }

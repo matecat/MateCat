@@ -23,9 +23,14 @@ class SegmentTranslation extends Base {
 
     public function setPassword( $password ) {
         $this->password = $password  ;
+        return $this;
     }
 
-    public function validate() {
+    /**
+     * @return mixed|void
+     * @throws NotFoundError
+     */
+    protected function _validate() {
         $this->ensureSegmentExists();
         $this->ensureTranslationExists();
     }

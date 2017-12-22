@@ -6,10 +6,12 @@
  *
  */
 
+use AbstractControllers\IController;
+
 /**
  * Abstract Class controller
  */
-abstract class controller {
+abstract class controller implements IController {
 
     protected $model;
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
@@ -24,11 +26,33 @@ abstract class controller {
     protected $userIsLogged = false;
     protected $userMail;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet() {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featuresSet ) {
+        $this->featureSet = $featuresSet;
+
+        return $this;
+    }
 
     /**
      * @return Users_UserStruct
      */
-    public function getLoggedUser() {
+    public function getUser() {
         return $this->logged_user;
     }
 

@@ -815,6 +815,34 @@ $(function () {
                     }
                 },
             },
+            "/v2/teams/{id_team}/projects" : {
+                "get": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Get the list of projects in a team",
+                    "description": "Get the list of projects in a team.",
+                    "parameters" : [
+                        {
+                            "name"     : "id_team",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
             "/v2/teams/{id_team}/projects/{id_project}" : {
                 "get": {
                     "tags": [

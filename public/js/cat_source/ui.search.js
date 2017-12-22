@@ -176,18 +176,13 @@ $.extend(UI, {
 					return false;
 				}
 				UI.unmountSegments();
-				UI.render();
+                UI.render({
+                    firstLoad: false
+                });
 			}
 		});
 	},
-	checkSearchStrings: function() {
-		s = this.searchParams.source;
-		if (s.match(/[<\>]/gi)) { // there is a tag in source
-			this.disableTagMark();
-		} else {
-			this.enableTagMark();
-		}
-	},
+
 	updateSearchDisplay: function() {
 		var res,resNumString,numbers;
 
@@ -532,7 +527,7 @@ $.extend(UI, {
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
 					this.gotoSearchResultAfter({
@@ -577,6 +572,7 @@ $.extend(UI, {
 						var seg2scroll = this.nextUnloadedResultSegment();
 						UI.unmountSegments();
 						this.render({
+							firstLoad: false,
 							applySearch: true,
 							segmentToScroll: seg2scroll
 						});
@@ -588,15 +584,16 @@ $.extend(UI, {
 			var seg = $('section' + wh).has("mark.searchMarker");
 			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			var found = false;
-
+			var self = this;
 			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
 					} else {
 						found = true;
-						$("html,body").animate({
-							scrollTop: $(this).offset().top - 200
-						}, 500);
+                        self.scrollSegment($(this));
+						// $("html,body").animate({
+						// 	scrollTop: $(this).offset().top - 200
+						// }, 500);
 						setTimeout(function() {
 							UI.goingToNext = false;
 						}, 500);
@@ -620,6 +617,7 @@ $.extend(UI, {
 					seg2scroll = this.nextUnloadedResultSegment();
 					UI.unmountSegments();
 					this.render({
+						firstLoad: false,
 						applySearch: true,
 						segmentToScroll: seg2scroll
 					});

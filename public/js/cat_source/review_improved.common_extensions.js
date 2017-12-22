@@ -27,7 +27,18 @@ if ( ReviewImproved.enabled() ) {
                 status = 'rebutted' ;
             }
             return status;
-        }
+        },
+
+        getSegmentVersionsIssuesHandler: function (event) {
+            // TODO Uniform behavior of ReviewExtended and ReviewImproved
+            let sid = event.segment.absId;
+            let fid = UI.getSegmentFileId(event.segment.el);
+            let versions = [];
+            SegmentActions.addTranslationIssuesToSegment(fid, sid, versions);
+        },
+        submitComment : function(id_segment, id_issue, data) {
+            return ReviewImproved.submitComment(id_segment, id_issue, data)
+        },
     });
 })(jQuery, window);
 }

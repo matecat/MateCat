@@ -49,6 +49,9 @@ class oauthResponseHandlerController extends viewController{
     public function setTemplateVars()
     {
         // TODO: Implement setTemplateVars() method.
+        if ( isset( $_SESSION['wanted_url'] ) ) {
+            $this->template->wanted_url = $_SESSION['wanted_url'] ;
+        }
     }
 
     protected function _processSuccessfulOAuth() {

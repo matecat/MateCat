@@ -919,51 +919,6 @@
 
 <div id="uploadCallback"></div>
 
-
-<script type="text/javascript">
-
-    // script per il funzionamento del dropdown menu del profilo utente
-
-    function DropDown( el ) {
-        this.dd = el;
-        this.initEvents();
-    }
-    DropDown.prototype = {
-        initEvents: function () {
-            var obj = this;
-
-            obj.dd.on( 'click', function ( event ) {
-                $( this ).toggleClass( 'active' );
-                event.stopPropagation();
-            } );
-        }
-    }
-
-    $( ".open-more" ).click( function () {
-        $(".hide-payoff").hide();
-        $( ".learnmore" ).slideToggle( "700", function () {
-            // Animation complete.
-        } );
-    } );
-    $( ".learnmore .open-more" ).click( function () {
-        $(".hide-payoff").show();
-       
-    } );
-
-    $( function () {
-
-        var dd = new DropDown( $( '#dd' ) );
-
-        $( document ).click( function () {
-            // all dropdowns
-            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
-        } );
-
-    } );
-
-</script>
-
-
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
 

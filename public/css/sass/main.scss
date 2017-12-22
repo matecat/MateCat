@@ -1,3 +1,9 @@
+@import "vendor_mc/semantic/matecat_semantic";
+
+@import "commons/matecat_fonts";
+@import "commons/icons";
+@import "commons/buttons";
+
 @import 'common-main';
 @import '../style';
 @import '../mbc-style';
@@ -6,9 +12,8 @@
 @import '../segment-notes';
 @import '../project-completion-feature';
 @import '../editlog';
-@import 'review_improved' ;
 @import 'segment_filter' ;
-
+@import 'revise';
 
 @import 'cattool';
 

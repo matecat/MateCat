@@ -27,6 +27,10 @@ class ConversionHandler {
     protected $uploadedFiles;
     public $uploadError = false;
 
+    /**
+     * @var FeatureSet
+     */
+    public $features;
 
     public function __construct() {
         $this->result = array(
@@ -35,6 +39,7 @@ class ConversionHandler {
     }
 
     public function doAction() {
+
 
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
         $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
@@ -50,74 +55,38 @@ class ConversionHandler {
             return -1;
         }
 
+        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+
         //XLIFF Conversion management
-        //cyclomatic complexity 9999999 ..... but it works, for now.
-        try {
+        $fileMustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $file_path, $forceXliff );
 
-            $fileType = DetectProprietaryXliff::getInfo( $file_path );
+        switch ( $fileMustBeConverted ) {
 
-            if ( DetectProprietaryXliff::isXliffExtension() || DetectProprietaryXliff::getMemoryFileType() ) {
+            case true:
+                //Continue with conversion
+                break;
+            case false:
+                $this->result[ 'code' ]     = 1; // OK for client, do not convert
+                $this->result[ 'errors' ][] = [ "code" => 0, "message" => "OK" ];
+                return 0;
+                break;
+            case -1:
+            default:
+                /**
+                 * Application misconfiguration.
+                 * upload should not be happened, but if we are here, raise an error.
+                 * @see upload.class.php
+                 */
+                unlink( $file_path );
+                $this->result[ 'code' ]     = -7; // No Good, Default
+                $this->result[ 'errors' ][] = [
+                        "code"    => -7,
+                        "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                        'debug'   => FilesStorage::basename_fix( $this->file_name )
+                ];
+                return -1;
+                break;
 
-                if ( !empty(INIT::$FILTERS_ADDRESS) ) {
-
-                    //conversion enforce
-                    if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
-
-                        //if file is not proprietary AND Enforce is disabled
-                        //we take it as is
-                        if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
-                            $this->result[ 'code' ] = 1; // OK for client
-
-                            //This file has to be linked to cache!
-                            return 0; //ok don't convert a standard sdlxliff
-                        }
-
-                    } else {
-
-                        // if conversion enforce is active
-                        // we force all xliff files but not files produced by
-                        // SDL Studio or by the MateCAT converters, because we
-                        // can handle them
-                        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter'
-                                || $fileType[ 'proprietary_short_name' ] == 'trados'
-                                || DetectProprietaryXliff::getMemoryFileType() ) {
-                            $this->result[ 'code' ]     = 1; // OK for client
-                            $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
-
-                            return 0; //ok don't convert a standard sdlxliff
-                        }
-
-                    }
-
-                } elseif ( $fileType[ 'proprietary' ] ) {
-
-                    unlink( $file_path );
-                    $this->result[ 'code' ]     = -7; // No Good, Default
-                    $this->result[ 'errors' ][] = array(
-                            "code"    => -7,
-                            "message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                            'debug'   => FilesStorage::basename_fix( $this->file_name )
-                    );
-
-                    return -1;
-
-                } elseif ( !$fileType[ 'proprietary' ] ) {
-
-                    $this->result[ 'code' ]     = 1; // OK for client
-                    $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
-
-                    return 0; //ok don't convert a standard sdlxliff
-
-                }
-
-            }
-
-        } catch ( Exception $e ) { //try catch not used because of exception no more raised
-            $this->result[ 'code' ]     = -8; // No Good, Default
-            $this->result[ 'errors' ][] = array( "code" => -8, "message" => $e->getMessage() );
-            Log::doLog( $e->getMessage() );
-
-            return -1;
         }
 
         //compute hash to locate the file in the cache
@@ -477,5 +446,14 @@ class ConversionHandler {
         $this->stopOnFileException = $stopOnFileException;
     }
 
+    /**
+     * @param FeatureSet $features
+     *
+     * @return $this
+     */
+    public function setFeatures( FeatureSet $features ) {
+        $this->features = $features;
+        return $this;
+    }
 
 }

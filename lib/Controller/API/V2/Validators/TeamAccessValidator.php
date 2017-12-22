@@ -24,7 +24,7 @@ class TeamAccessValidator extends Base {
         parent::__construct( $controller->getRequest() );
     }
 
-    public function validate() {
+    public function _validate() {
 
         $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndUser(
                 $this->request->id_team, $this->controller->getUser()

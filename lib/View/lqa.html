@@ -1,0 +1,298 @@
+<!doctype html>
+<html dir="ltr" lang="it-IT">
+<!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title >LQA - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+    <link rel="icon" href="${basepath}public/img/favicon.ico" />
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+
+    <tal:block  tal:repeat="css_url css_resources">
+        <link rel="stylesheet" tal:attributes="href css_url"></link>
+    </tal:block>
+
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
+    <script type="text/javascript">
+        /*<![CDATA[*/
+
+        var getStackTrace = function() {
+            var obj = {};
+            var stack;
+            //Error.captureStackTrace works on Firefox and Chrome
+            //the else for Safari
+            if (typeof Error.captureStackTrace === "function")
+                Error.captureStackTrace(obj, getStackTrace);
+            else if (stack = new Error().stack)
+                obj.stack = stack;
+            return obj.stack;
+        };
+        var config = {
+            is_cattool : true,
+            basepath: '${basepath | string:/}',
+            maxFileSize: ${maxFileSize},
+            maxTMXFileSize: ${maxTMXFileSize},
+            maxNumSegments: ${maxNumSegments},
+            id_customer: '${id_customer | string:unknown_customer}',
+            private_customer: '${private_customer | string:0}',
+            first_job_segment: '${first_job_segment}',
+            last_job_segment: '${last_job_segment}',
+            server_load_time: '${load_time}',
+            tms_enabled: ${tms_enabled | string:true},
+            mt_enabled: ${mt_enabled | string:true},
+            id_job: '${jid}',
+            get job_id() {
+                console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
+                return this.id_job ;
+            },
+            password: '${password}',
+            source_rfc: '${source_code}',
+            target_rfc: '${target_code}',
+            targetIsCJK: ${targetIsCJK|string:false},
+            ownerIsMe: ${jobOwnerIsMe},
+            time_to_edit_enabled: ${time_to_edit_enabled},
+            build_number: '${build_number}',
+            warningPollingInterval: '${warningPollingInterval}',
+            segmentQACheckInterval: '${segmentQACheckInterval}',
+            firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
+            fileCounter: ${structure php: fileCounter },
+            taglockEnabled: ${taglockEnabled | string:1},
+            tagLockCustomizable: ${tagLockCustomizable},
+            alternativesEnabled: true,
+            brPlaceholdEnabled: '${brPlaceholdEnabled}',
+            survey: false,
+            isReview: ${isReview | string: false},
+            isLQA: true,
+            reviewType: '${review_type}',
+            enableReview: true,
+            stat_quality: ${structure php: stat_quality },
+            offlineModeEnabled: true,
+            splitSegmentEnabled: ${splitSegmentEnabled},
+            copySourceInterval: ${copySourceInterval},
+            project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
+            status_labels : JSON.parse( '${status_labels}' ),
+            searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
+            isGDriveProject : ${isGDriveProject|string:false},
+            remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
+            translation_matches_enabled : ${translation_matches_enabled} ,
+
+            /**
+             * We proose that lxq_server is in a configuration file
+             * lxq_license: {lxq_license},
+             *
+             * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+             * @see http://www.lexiqa.net
+             *
+             */
+            lxq_license: '${lxq_license | string:}',
+            lxq_partnerid: '${lxq_partnerid | string:}',
+            lxq_enabled:  ${lxq_enabled},
+            lexiqa_languages: ${lexiqa_languages | string:[]},
+            lexiqaServer: '${lexiqaServer | string:}',
+
+            qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
+            qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+            support_mail : '${support_mail}',
+            qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+            speech2text_enabled: ${speech2text_enabled | string:false},
+            tag_projection_enabled: ${tag_projection_enabled | string:false},
+            tag_projection_languages: ${tag_projection_languages},
+            languages_array : ${languages_array},
+            segmentation_rule : '${segmentation_rule}'
+        };
+
+        var renderStart = new Date();
+        /*]]>*/
+    </script>
+
+    <script tal:condition="true:isReview" type="text/javascript">
+        config.review_password = '${review_password}';
+
+    </script>
+
+    <script tal:condition="true:review_improved" type="text/javascript">
+
+        /*<![CDATA[*/
+        // TODO: remove the nested one, should be nested on the client.
+        config.lqa_nested_categories = '${lqa_categories}';
+        config.lqa_flat_categories = '${lqa_flat_categories}';
+        /*]]>*/
+
+    </script>
+
+    <script type="text/javascript">
+        /*<![CDATA[*/
+        config.overall_quality_class = '${overall_quality_class}';
+        config.quality_report_href = '${quality_report_href}';
+
+        config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+        /*]]>*/
+
+    </script>
+
+    <script tal:condition="true:comments_enabled" type="text/javascript">
+        /*<![CDATA[*/
+        config.comments_enabled = true;
+        config.sse_base_url = '${sse_base_url}';
+        /*]]>*/
+    </script>
+
+    <script tal:condition="true:project_completion_feature_enabled" type="text/javascript">
+        /*<![CDATA[*/
+        config.job_marked_complete = ${job_marked_complete|false};
+        config.job_completion_current_phase = '${job_completion_current_phase}' ;
+        config.last_completion_event_id = ${job_completion_last_event_id|string: null};
+        config.chunk_completion_undoable = ${chunk_completion_undoable};
+        /*]]>*/
+    </script>
+
+    <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
+        /*<![CDATA[*/
+        config.lfPlaceholder = '${lfPlaceholder | null}';
+        config.crPlaceholder = '${crPlaceholder | null}';
+        config.crlfPlaceholder = '${crlfPlaceholder | null}';
+        config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
+        config.crPlaceholderClass = '${crPlaceholderClass | null}';
+        config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
+        config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
+        config.crPlaceholderRegex = ${crPlaceholderRegex | null};
+        config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
+
+        config.tabPlaceholder       = '${tabPlaceholder | null}';
+        config.tabPlaceholderClass  = '${tabPlaceholderClass | null}';
+        config.tabPlaceholderRegex  = ${tabPlaceholderRegex | null};
+
+        config.nbspPlaceholder       = '${nbspPlaceholder | null}';
+        config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
+        config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
+        /*]]>*/
+    </script>
+
+    <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
+
+    <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+
+    <tal:block tal:condition="php: INIT::$LXQ_LICENSE" >
+        <script src="${lexiqaServer | null}/js/lxqlicense.js"></script>
+    </tal:block>
+
+    <tal:block tal:condition="true:use_compiled_assets" >
+        <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
+    </tal:block>
+
+    <tal:block tal:condition="not:use_compiled_assets" >
+        <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/common.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
+    </tal:block>
+
+</head>
+<body tal:condition="php:supportedBrowser EQ 0">
+<div  metal:use-macro="unsupported_browser.html/unsupported"/>
+</body>
+
+<body class="cattool lqa-page ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
+      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
+
+<header metal:use-macro="header.html/main_header"/>
+
+<div class="main-container">
+    <div data-mount="review-side-panel"></div>
+    <div id="plugin-mount-point"></div>
+    <div id="outer"></div>
+</div>
+
+<div class="notifications-wrapper"></div>
+
+<footer>
+    <div class="wrapper">
+
+        <nav>
+            <ul>
+                <li><a class="link-manage-page" href="/manage/">Manage</a></li>
+
+                <tal:block tal:condition="footer_show_revise_link">
+                    <li><a
+                            href="${basepath}revise/${pname}/${source_code}-${target_code}/${jid}-${password}">Revise</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="footer_show_translate_link">
+                    <li><a
+                            href="${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}">Translate</a></li>
+                </tal:block>
+
+                <li><a id="edit_log_link" tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="${editLogClass}"><span>Editing Log</span></a></li>
+                <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
+            </ul>
+
+        </nav>
+
+
+        <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
+            <div class="meter" style="width:10%">
+
+                <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
+            </div>
+            <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
+            <ul class="statistics-core">
+
+                <li id="stat-eqwords">
+                    <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
+                        <span tal:condition="not: isCJK">Words</span>
+                        <span tal:condition="isCJK">Characters</span>
+                    </a>
+                    <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
+                        <span tal:condition="not: isCJK">Words</span>
+                        <span tal:condition="isCJK">Characters</span>
+                    </tal:block>
+                    <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                </li>
+                <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+            </ul>
+            <ul class="statistics-details">
+                <li id="stat-wph" title="Based on last 10 segments performance">Speed:
+                    <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
+                </li>
+                <li id="stat-completion">Completed in:
+                    <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
+                </li>
+            </ul>
+        </div>
+
+        <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
+            <p class="progress">Calculating word count...</p>
+        </div>
+
+    </div> <!-- .wrapper -->
+</footer>
+
+<div metal:use-macro="tm.html/tm_panel"></div>
+
+<a id="segmentPointer" href="#" title="Go to the active segment"></a>
+
+
+<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+
+</body>
+
+<template id="tpl-taglock-customize" tal:condition="true:tagLockCustomizable">
+    <a href="#" class="tagLockCustomize" title="Toggle Tag Lock"></a>
+</template>
+
+<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+
+<div metal:use-macro="common.html/footer_includes" />
+
+<script tal:condition="exists:dqf_user_status">
+    <tal:block>
+        /*<![CDATA[*/
+        config.dqf_user_status = '${dqf_user_status}' ;
+        /*]]>*/
+    </tal:block>
+</script>
+
+</html>

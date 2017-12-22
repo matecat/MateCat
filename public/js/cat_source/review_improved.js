@@ -14,43 +14,15 @@
 ReviewImproved = window.ReviewImproved || {};
 
 ReviewImproved.enabled = function() {
-    return Review.type == 'improved';
-}
+    return Review.type === 'improved';
+};
 
 if ( ReviewImproved.enabled() )
 (function($, ReviewImproved, undefined) {
 
-    /**
-     * Split segment feature is not compatible with ReviewImproved.
-     */
-    window.config.splitSegmentEnabled = false;
 
-    var mountpoint ;
-
-    $(function() {
-        mountpoint = $('[data-mount=review-side-panel]')[0];
-    });
 
     $.extend( ReviewImproved, {
-
-        deleteIssue : function( issue ) {
-            var message = sprintf(
-                "You are about to delete the issue on string '%s' posted on %s." ,
-                issue.target_text,
-                moment( issue.created_at ).format('lll')
-            );
-
-            APP.confirm({
-                name : 'Confirm issue deletion',
-                callback : 'deleteTranslationIssue',
-                msg: message,
-                okTxt: 'Yes delete this issue',
-                context: JSON.stringify({
-                    id_segment : issue.id_segment,
-                    id_issue : issue.id
-                })
-            });
-        },
 
         highlightIssue : function(issue, node) {
             var selection = document.getSelection();
@@ -89,18 +61,8 @@ if ( ReviewImproved.enabled() )
             });
         },
         submitComment : function(id_segment, id_issue, data) {
-            var replies_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
-                config.id_job, config.password,
-                id_segment,
-                id_issue
-            );
-
-            return $.ajax({
-                url: replies_path,
-                type: 'POST',
-                data : data
-            }).done( function( data ) {
+            return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
+                .done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
 
                 if( data.issue ) {
@@ -129,56 +91,7 @@ if ( ReviewImproved.enabled() )
                 }
             });
         },
-        unmountPanelComponent : function() {
-            ReactDOM.unmountComponentAtNode( mountpoint );
-        },
 
-        mountPanelComponent : function() {
-            ReactDOM.render(
-                React.createElement( ReviewSidePanel, {closePanel: this.closePanel} ),
-                mountpoint );
-        },
-
-        openPanel : function(data) {
-            UI.closeSearch();
-
-            $('body').addClass('side-tools-opened review-side-panel-opened');
-            hackIntercomButton( true );
-
-            $(document).trigger('review-panel:opened', data);
-
-            var segment = UI.Segment.findEl( data.sid );
-            segment.find( UI.targetContainerSelector() ).click();
-
-            window.setTimeout( function(data) {
-                var el = UI.Segment.find( data.sid ).el ;
-
-                if ( UI.currentSegmentId != data.sid ) {
-                    UI.focusSegment( el );
-                }
-
-                UI.scrollSegment( el );
-            }, 500, data);
-        },
-
-        closePanel : function() {
-            $(document).trigger('review-panel:closed');
-
-            hackIntercomButton( false );
-
-            $('body').removeClass('side-tools-opened review-side-panel-opened');
-
-            if ( UI.currentSegment ) {
-                setTimeout( function() {
-                    UI.scrollSegment( UI.currentSegment );
-                }, 100 );
-            }
-        }
-    });
-})(jQuery, ReviewImproved);
-
-if ( ReviewImproved.enabled() ) {
-    $.extend(ReviewImproved, {
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);
@@ -195,7 +108,8 @@ if ( ReviewImproved.enabled() ) {
                 });
         }
     });
-}
+})(jQuery, ReviewImproved);
+
 
 /**
  * Review page
@@ -213,8 +127,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         submitIssue : function(sid, data_array) {
             var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, sid);
-            var segment = UI.Segment.find( sid );
-            
+
             var deferreds = _.map( data_array, function( data ) {
                 return $.post( path, data )
                 .done(function( data ) {

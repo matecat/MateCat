@@ -2,7 +2,7 @@
 SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
-    return ReviewImproved.enabled();
+    return ReviewImproved.enabled() || ReviewExtended.enabled();
 }
 
 if (SegmentFilter.enabled())
@@ -101,7 +101,7 @@ if (SegmentFilter.enabled())
         },
 
         restore : function( data ) {
-            debugger  // TODO, find who calls this
+            // debugger  // TODO, find who calls this
             window.segment_filter_panel.setState( this.getStoredState().reactState ) ;
             $(document).trigger('segment-filter-submit');
         },
@@ -149,6 +149,7 @@ if (SegmentFilter.enabled())
                 }
 
                 return UI.render({
+                    firstLoad: false,
                     segmentToOpen: segmentToOpen
                 }).done( afterRenderCallback ) ;
             })
@@ -165,12 +166,17 @@ if (SegmentFilter.enabled())
 
             if ( this.getStoredState().serverData ) {
                 var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
-                    return '#segment-' + i ;
+                    return  '#segment-' + i  ;
                 });
                 var selector = 'section:not( ' + ids + ')';
 
                 UI.body.addClass('sampling-enabled');
-                $( selector ).addClass('muted');
+                let elements = $( selector );
+                ids = $.map( elements, function(i) {
+                    return  UI.getSegmentId(i) ;
+                });
+                SegmentActions.addClassToSegment(ids, 'muted');
+                UI.body.addClass('sampling-enabled');
 
                 setTimeout( function() {
                     tryToFocusLastSegment();
@@ -190,8 +196,7 @@ if (SegmentFilter.enabled())
         closeFilter : function() {
             UI.body.removeClass('filtering');
             UI.body.removeClass('sampling-enabled');
-            $('.muted').removeClass('muted');
-
+            SegmentActions.removeClassToSegment(-1, 'muted');
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );

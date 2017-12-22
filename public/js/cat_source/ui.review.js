@@ -22,7 +22,6 @@ $.extend( UI, {
 });
 
 if ( Review.enabled() )
-(function(Review, $, undefined) {
 
     var alertNotTranslatedYet = function( sid ) {
         APP.confirm({
@@ -33,69 +32,76 @@ if ( Review.enabled() )
             context: sid,
             msg: UI.alertNotTranslatedMessage
         });
-    }
+    };
 
-    $.extend(Review, {
-        evalOpenableSegment : function(section) {
-            if ( isTranslated(section) ) return true ;
-            var sid = UI.getSegmentId( section );
-            alertNotTranslatedYet( sid ) ;
-            $(document).trigger('review:unopenableSegment', section);
-            return false ;
-        },
-    });
 
-    $.extend(UI, {
+    (function(Review, $, undefined) {
 
-        alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated segments can be revised.",
+        $.extend(Review, {
+            evalOpenableSegment : function(section) {
+                if ( isTranslated(section) ) return true ;
+                var sid = UI.getSegmentId( section );
+                alertNotTranslatedYet( sid ) ;
+                $(document).trigger('review:unopenableSegment', section);
+                return false ;
+            },
+        });
 
-        trackChanges: function (editarea) {
-            var source = UI.currentSegment.find('.original-translation').text();
-            source = UI.clenaupTextFromPleaceholders( source );
+        $.extend(UI, {
 
-            var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
-            var diffHTML = trackChangesHTML( source, target );
+            alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
-            $('.editor .sub-editor.review .track-changes p').html( diffHTML );
-        },
+            registerReviseTab: function () {
+                SegmentActions.registerTab('review', true, true);
+            },
 
-        setReviewErrorData: function (d) {
-            $.each(d, function (index) {
+            trackChanges: function (editarea) {
+                var source = UI.currentSegment.find('.original-translation').html();
+                source = UI.clenaupTextFromPleaceholders( source );
 
-                if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
-                if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
+                var target = $(editarea).text();
+                var diffHTML = trackChangesHTML( source, htmlEncode(target) );
 
-            });
+                $('.editor .sub-editor.review .track-changes p').html( diffHTML );
+            },
 
-        },
+            setReviewErrorData: function (d) {
+                $.each(d, function (index) {
 
-        openNextTranslated: function (sid) {
-            sid = sid || UI.currentSegmentId;
-            var el = $('#segment-' + sid);
+                    if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
+                    if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
+                    if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
+                    if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
+                    if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
 
-            var translatedList = [];
-            // find in next segments in the current file
-            if(el.nextAll('.status-translated').length) {
-                translatedList = el.nextAll('.status-translated');
-                if( translatedList.length ) {
-                    translatedList.first().find(UI.targetContainerSelector()).click();
-                }
-            // find in next segments in the next files
-            } else if(el.parents('article').nextAll('section.status-translated').length) {
-
-                file = el.parents('article');
-                file.nextAll('section.status-translated').each(function () {
-                    if (!$(this).is(UI.currentSegment)) {
-                        translatedList = $(this);
-                        translatedList.first().find(UI.targetContainerSelector()).click();
-                        return false;
-                    }
                 });
-            // else find from the beginning of the currently loaded segments in all files
-            } else if ($('section.status-translated').length) {
+
+            },
+
+            openNextTranslated: function (sid) {
+                sid = sid || UI.currentSegmentId;
+                var el = $('#segment-' + sid);
+
+                var translatedList = [];
+                // find in next segments in the current file
+                if(el.nextAll('.status-translated').length) {
+                    translatedList = el.nextAll('.status-translated');
+                    if( translatedList.length ) {
+                        translatedList.first().find(UI.targetContainerSelector()).click();
+                    }
+                    // find in next segments in the next files
+                } else if(el.parents('article').nextAll('section.status-translated').length) {
+
+                    file = el.parents('article');
+                    file.nextAll('section.status-translated').each(function () {
+                        if (!$(this).is(UI.currentSegment)) {
+                            translatedList = $(this);
+                            translatedList.first().find(UI.targetContainerSelector()).click();
+                            return false;
+                        }
+                    });
+                    // else find from the beginning of the currently loaded segments in all files
+                } else if ($('section.status-translated').length) {
                     $('section.status-translated').each(function () {
                         if (!$(this).is(UI.currentSegment)) {
                             translatedList = $(this);
@@ -103,30 +109,30 @@ if ( Review.enabled() )
                             return false;
                         }
                     });
-            } else { // find in not loaded segments or go to the next approved
-                // Go to the next segment saved before
-                var callback = function() {
-                    $(window).off('modalClosed');
-                    //Check if the next is inside the view, if not render the file
-                    var next = UI.Segment.findEl(UI.nextUntranslatedSegmentIdByServer);
-                    if (next.length > 0) {
-                        UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+                } else { // find in not loaded segments or go to the next approved
+                    // Go to the next segment saved before
+                    var callback = function() {
+                        $(window).off('modalClosed');
+                        //Check if the next is inside the view, if not render the file
+                        var next = UI.Segment.findEl(UI.nextUntranslatedSegmentIdByServer);
+                        if (next.length > 0) {
+                            UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+                        } else {
+                            UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
+                        }
+                    };
+                    // If the modal is open wait the close event
+                    if( $(".modal[data-type='confirm']").length ) {
+                        $(window).on('modalClosed', function(e) {
+                            callback();
+                        });
                     } else {
-                        UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
-                    }
-                };
-                // If the modal is open wait the close event
-                if( $(".modal[data-type='confirm']").length ) {
-                    $(window).on('modalClosed', function(e) {
                         callback();
-                    });
-                } else {
-                    callback();
+                    }
                 }
             }
-        }
-    });
-})(Review, jQuery);
+        });
+    })(Review, jQuery);
 
 /**
  * Events
@@ -134,69 +140,14 @@ if ( Review.enabled() )
  * Only bind events for specific review type
  */
 
-if ( Review.enabled() && Review.type == 'simple' ) {
-
-    UI.SegmentFooter.registerTab({
-        code                : 'review',
-        tab_class           : 'review',
-        label               : 'Revise',
-        activation_priority : 60,
-        tab_position        : 50,
-        is_enabled    : function(segment) {
-            return true;
-        },
-        tab_markup          : function(segment) {
-            return this.label ;
-        },
-        content_markup      : function(segment) {
-            return $('#tpl-review-tab').html();
-        },
-        is_hidden    : function(segment) {
-            return false;
-        },
-    });
+if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )) {
 
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
             $(this).find('.tab-switcher-review').click();
         }
-    }).on('start', function() {
-
-        // temp
-        config.stat_quality = [
-            {
-                "type":"Typing",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Translation",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Terminology",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Language Quality",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            },
-            {
-                "type":"Style",
-                "allowed":5,
-                "found":1,
-                "vote":"Excellent"
-            }
-        ];
     }).on('buttonsCreation', 'section', function() {
-        UI.overrideButtonsForRevision();
+            UI.overrideButtonsForRevision();
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
 
@@ -212,7 +163,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             $('.editor .sub-editor.review').addClass('open');
         }
     }).on('input', '.editor .editarea', function() {
-        UI.trackChanges(this);
+        /*UI.trackChanges(this);*/
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
@@ -224,12 +175,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
-        xEditarea = $('#segment-' + id_segment + '-editarea');
-        xSegment = $('#segment-' + id_segment);
-        if(d.original == '') d.original = xEditarea.text();
-        if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
-        UI.setReviewErrorData(d.error_data);
-        UI.trackChanges(xEditarea);
+        UI.addOriginalTranslation(d, id_segment);
     });
 
     $.extend(UI, {
@@ -246,39 +192,22 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 }
             });
         },
-        trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment
-                .find('.original-translation').text()
-                    .replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
-
-            UI.dmp.diff_cleanupSemantic( diff ) ;
-
-            diffTxt = '';
-            $.each(diff, function (index) {
-
-                if(this[0] == -1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="deleted"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else if(this[0] == 1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="added"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else {
-                    diffTxt += this[1];
-                }
-                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
-            });
+        /**
+         *
+         * @param d Data response from the SetCurrentSegment request
+         * @param id_segment
+         */
+        addOriginalTranslation: function (d, id_segment) {
+            var xEditarea = $('#segment-' + id_segment + '-editarea');
+            if (d.original !== '') {
+                SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+            }
+            if ( Review.type === 'simple') {
+                UI.setReviewErrorData(d.error_data);
+                setTimeout(function () {
+                    UI.trackChanges(xEditarea);
+                }, 100);
+            }
         },
 
         setReviewErrorData: function (d) {
@@ -304,8 +233,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             e.preventDefault();
             var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
             UI.tempDisablingReadonlyAlert = true;
-            UI.hideEditToolbar();
-            UI.currentSegment.removeClass('modified');
+            SegmentActions.removeClassToSegment(UI.getSegmentId( UI.currentSegment ), 'modified');
             UI.currentSegment.data('modified', false);
 
 

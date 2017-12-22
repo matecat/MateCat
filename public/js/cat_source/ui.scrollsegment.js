@@ -2,7 +2,7 @@
 
     var segment ;
 
-    var scrollSelector = 'html,body'; 
+    UI.scrollSelector = 'html,body';
 
     var tryToRenderAgain = function( segment, highlight ) {
         UI.unmountSegments();
@@ -10,7 +10,8 @@
         var id_segment = segment.selector.split('-')[1];
 
         UI.render({
-            segmentToScroll: id_segment,
+            firstLoad: false,
+            segmentToScroll: id_segment, 
             highlight : highlight 
         });
         
@@ -68,14 +69,14 @@
     var doDirectScroll = function( segment, highlight, quick ) {
         var pointSpeed = (quick)? 0 : 500;
 
-        var scrollPromise = animateScroll( segment, pointSpeed ) ;
+        var scrollPromise = UI.animateScroll( segment, pointSpeed ) ;
         scrollPromise.done( function() {
             UI.goingToNext = false;
         });
         
         if ( highlight ) { 
             scrollPromise.done( function() {
-                UI.highlightEditarea( segment ) ;
+                SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
             }); 
         }
         
@@ -117,7 +118,7 @@
      * @returns Deferred
      */
     var animateScroll = function( segment, speed ) {
-        var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
+        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
         var pos ;
         var prev = segment.prev('section') ;
 
@@ -138,10 +139,11 @@
         }, speed);
 
         return scrollAnimation.promise() ; 
-    }
+    };
 
     $.extend(UI, {
         scrollSegment : scrollSegment,
+        animateScroll: animateScroll
     });
 
 })(window, $, UI, undefined);

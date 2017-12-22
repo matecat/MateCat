@@ -13,6 +13,8 @@ use WorkerClient ;
 
 class QaCheckGlossary extends BaseFeature {
 
+    const FEATURE_CODE = 'qa_check_blacklist';
+
     const GLOSSARY_SCOPE = 'glossary';
 
     public function postTMSegmentAnalyzed( $params ) {

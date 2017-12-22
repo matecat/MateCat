@@ -4,16 +4,27 @@ namespace API\V2;
 
 
 use API\V2\Validators\ChunkPasswordValidator;
+use Chunks_ChunkStruct;
 
 class ChunkOptionsController extends KleinController {
 
     /**
-     * @var Validators\ChunkPasswordValidator
+     * @var Chunks_ChunkStruct
      */
-    private $validator;
+    protected $chunk;
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return $this
+     */
+    public function setChunk( $chunk ) {
+        $this->chunk = $chunk;
+        return $this;
+    }
 
     public function update() {
-        $chunk_options_model = new \ChunkOptionsModel( $this->validator->getChunk() ) ; 
+        $chunk_options_model = new \ChunkOptionsModel( $this->chunk ) ;
         
         $chunk_options_model->setOptions( $this->filteredParams() ) ;
         $chunk_options_model->save(); 
@@ -22,11 +33,12 @@ class ChunkOptionsController extends KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new Validators\ChunkPasswordValidator( $this->request );
-    }
-
-    protected function validateRequest() {
-        $this->validator->validate();
+        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Controller = $this;
+        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
+            $Controller->setChunk( $Validator->getChunk() );
+        } );
+        $this->appendValidator( $Validator );
     }
 
     protected function filteredParams() {
