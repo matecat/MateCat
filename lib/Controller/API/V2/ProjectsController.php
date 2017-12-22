@@ -72,6 +72,12 @@ class ProjectsController extends KleinController {
 
         $project_dao = new \Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
+
+        if ( empty( $this->user ) ) {
+            $formatted = new ProjectAnonymous();
+        } else {
+            $formatted = new Project();
+        }
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
