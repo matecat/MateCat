@@ -150,6 +150,7 @@ body.searchActive #filterSwitch {
     width: 8px;
     height: 15px;
     line-height: 1.5;
+    box-sizing: content-box;
 }
 
 .numbererror:empty {

@@ -331,5 +331,18 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                         }
                   });
 </script>
+
+<?php
+
+$reflect  = new ReflectionClass( 'CustomPage' );
+$instance = $reflect->newInstanceArgs( [] );
+
+$featureSet = new FeatureSet();
+$featureSet->loadFromUserEmail( $instance->getUser()->email );
+$appendJS = $featureSet->filter( 'overloadAPIDocs', [] );
+echo implode( "\n", $appendJS );
+
+?>
+
 </body>
 </html>
