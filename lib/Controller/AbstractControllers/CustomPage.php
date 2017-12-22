@@ -8,7 +8,7 @@
  */
 
 
-class CustomErrorPage extends viewController {
+class CustomPage extends viewController {
 
     /**
      * @var integer

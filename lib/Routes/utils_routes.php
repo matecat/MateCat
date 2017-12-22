@@ -15,7 +15,7 @@ $klein->respond( '/utils/pee', function () {
         $instance->doAction();
         $instance->finalize();
     } catch ( Exception $e ) {
-        $controllerInstance = new CustomErrorPage();
+        $controllerInstance = new CustomPage();
         $controllerInstance->setTemplate( "404.html" );
         $controllerInstance->setCode( 404 );
         $controllerInstance->doAction();
