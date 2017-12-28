@@ -12,7 +12,7 @@
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
-        padding: 5px 40px !important;
+        padding: 5px 35px 5px 40px !important;
         z-index: 1;
         .job-id {}
         .source-target {
@@ -31,6 +31,14 @@
             text-decoration: none !important;
             font-weight: 700;
             font-size: 16px;
+        }
+        .project-subject {
+            display: inline-block;
+            line-height: 30px;
+            position: relative;
+            top: 2px;
+            font-size: 16px;
+            float: right;
         }
     }
     &.transitionOutsource-enter {
