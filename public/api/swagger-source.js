@@ -457,7 +457,7 @@ $(function () {
                         "application/json"
                     ],
                     "summary": "Update due date",
-                    "description": "Update due date given project",
+                    "description": "Update due date given a project",
                     "parameters": [
                         {
                             "name": "id_project",
@@ -506,7 +506,7 @@ $(function () {
                         "Project"
                     ],
                     "summary": "Delete due date",
-                    "description": "Delete due date given project",
+                    "description": "Delete due date given a project",
                     "parameters": [
                         {
                             "name": "id_project",
