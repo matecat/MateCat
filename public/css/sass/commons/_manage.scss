@@ -359,7 +359,7 @@ body.manage {
                             }
                             .job-id {
                                 float: left;
-                                min-width: 78px;
+                                min-width: 73px;
                                 color: #969696;
                                 font-size: 13px;
                                 position: relative;
@@ -367,15 +367,14 @@ body.manage {
                                 top: 1px;
                             }
                             .source-target {
-                                min-width: 140px;
+                                min-width: 145px;
                                 float: left;
-                                margin-right: 10px;
                                 font-weight: bold;
                                 position: relative;
                                 top: 1px;
-                                .source-box {
+                                .source-box, .target-box {
                                     float: left;
-                                    max-width: 60px;
+                                    max-width: 65px;
                                     min-width: 60px;
                                     white-space: nowrap;
                                     overflow: hidden;
@@ -393,17 +392,6 @@ body.manage {
                                         margin-right: 0;
                                     }
                                 }
-                                .target-box {
-                                    float: left;
-                                    width: 60px;
-                                    white-space: nowrap;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    line-height: 30px;
-                                }
-                            }
-                            .progress-bar {
-
                             }
                             .tm-job,
                             .activity-icon-single{
@@ -491,8 +479,6 @@ body.manage {
                                 }
                                 .job-to-translator {
                                     display: inline-block;
-                                    margin-right: 0;
-                                    margin-left: 10px;
                                     vertical-align: text-bottom;
                                     color: #969696;
                                     width: 125px;
@@ -500,9 +486,8 @@ body.manage {
                                     overflow: hidden;
                                     text-overflow: ellipsis;
                                     line-height: 20px;
-                                    margin-top: 5px;
                                     transition: 0.3s ease;
-
+                                    margin: 5px 0 0 5px;
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         width: 200px;
                                     }
