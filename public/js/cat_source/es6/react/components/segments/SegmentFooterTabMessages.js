@@ -35,7 +35,7 @@ class SegmentFooterTabMessages extends React.Component {
                 } else if (typeof item.json === "string") {
                     let converter = new showdown.Converter();
                     let text = converter.makeHtml( item.json );
-                    let html = <div key={"note-json" + index} className="note" style={{whiteSpace: "pre"}} dangerouslySetInnerHTML={self.allowHTML(text)}/>
+                    let html = <div key={"note-json" + index} className="note" style={{whiteSpace: "pre"}} dangerouslySetInnerHTML={self.allowHTML(text)}/>;
                     notesHtml.push(html);
                 }
             });

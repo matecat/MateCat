@@ -141,7 +141,7 @@ abstract class viewController extends controller {
     public function __construct() {
 
 	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-	        $controllerInstance = new CustomErrorPage();
+	        $controllerInstance = new CustomPage();
 	        $controllerInstance->setTemplate( "badConfiguration.html" );
 	        $controllerInstance->setCode( 503 );
 	        $controllerInstance->doAction();

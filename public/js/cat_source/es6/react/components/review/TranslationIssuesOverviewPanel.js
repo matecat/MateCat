@@ -140,7 +140,7 @@ class TranslationIssuesOverviewPanel extends React.Component {
 
         return <div className="review-issues-overview-panel">
                 { this.props.reviewType === "improved" ? (
-                    <div className="review-original-target-wrapper sidebar-block">
+                    <div className="review-version-wrapper">
                         <h3>Original target</h3>
                         <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
                         <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>

@@ -63,8 +63,8 @@ class FilterController extends KleinController {
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );
             $get = $Controller->getRequest()->paramsGet();
-            $filter = new FilterDefinition( $get['filter'] );
-            if (! $filter->isValid() ) {
+            $this->filter = new FilterDefinition( $get['filter'] );
+            if (! $this->filter->isValid() ) {
                 throw new ValidationError('Filter is invalid');
             }
         } );

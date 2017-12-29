@@ -446,18 +446,6 @@ section:not(.opened) .revise-button-counter {
     top:2px;
 }
 
-.review-original-target-wrapper {
-    background: #d6ffe1;
-    position: fixed;
-    width: 22%;
-    padding: 15px;
-    margin-bottom: 100px;
-   .ui.ignored.message {
-       &:hover {
-           background: #d6ffe1;
-       }
-   }
-}
 
 .review-version-wrapper {
     background: #f8f8f9;
@@ -482,9 +470,6 @@ section:not(.opened) .revise-button-counter {
                 
             }
         }
-    }
-    &:nth-child(2) {
-        margin-top: 116px;
     }
 }
 

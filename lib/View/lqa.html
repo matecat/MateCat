@@ -3,8 +3,7 @@
 <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title tal:condition="not:isReview">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-    <title tal:condition="true:isReview">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+    <title >LQA - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
     <link rel="icon" href="${basepath}public/img/favicon.ico" />
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
@@ -63,11 +62,12 @@
             brPlaceholdEnabled: '${brPlaceholdEnabled}',
             survey: false,
             isReview: ${isReview | string: false},
+            isLQA: true,
             reviewType: '${review_type}',
             enableReview: true,
             stat_quality: ${structure php: stat_quality },
             offlineModeEnabled: true,
-            splitSegmentEnabled: true,
+            splitSegmentEnabled: ${splitSegmentEnabled},
             copySourceInterval: ${copySourceInterval},
             project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
             status_labels : JSON.parse( '${status_labels}' ),
@@ -184,7 +184,7 @@
         <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-        <script src="${basepath}public/js/build/revise.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
     </tal:block>
 
 </head>
@@ -192,17 +192,15 @@
 <div  metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 
-<body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
+<body class="cattool lqa-page ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
 <header metal:use-macro="header.html/main_header"/>
 
 <div class="main-container">
     <div data-mount="review-side-panel"></div>
-    <div id="outer">
-
-    </div>
-    <div id="plugin-mount-point"/>
+    <div id="plugin-mount-point"></div>
+    <div id="outer"></div>
 </div>
 
 <div class="notifications-wrapper"></div>
@@ -243,10 +241,14 @@
             <ul class="statistics-core">
 
                 <li id="stat-eqwords">
-                    <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
+                    <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
                         <span tal:condition="not: isCJK">Words</span>
                         <span tal:condition="isCJK">Characters</span>
                     </a>
+                    <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
+                        <span tal:condition="not: isCJK">Words</span>
+                        <span tal:condition="isCJK">Characters</span>
+                    </tal:block>
                     <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                 </li>
                 <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
@@ -277,61 +279,6 @@
 
 </body>
 
-<template id="tpl-review-tab">
-
-    <div class="error-type">
-        <h3>Select the type of issue</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>None</th>
-                <th>Enhancement</th>
-                <th>Error</th>
-                <th><a class="tooltip">?<span>Error that changes the meaning of the segment</span></a></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><input type="radio" name="t1" value="0" /></td>
-                <td><input type="radio" name="t1" value="1" /></td>
-                <td><input type="radio" name="t1" value="2" /></td>
-                <td class="align-left">Tag issues (mismatches, whitespaces)</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="t2" value="0" /></td>
-                <td><input type="radio" name="t2" value="1" /></td>
-                <td><input type="radio" name="t2" value="2" /></td>
-                <td class="align-left">Translation errors (mistranslation, additions/omissions)</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="t3" value="0" /></td>
-                <td><input type="radio" name="t3" value="1" /></td>
-                <td><input type="radio" name="t3" value="2" /></td>
-                <td class="align-left">Terminology and translation consistency</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="t4" value="0" /></td>
-                <td><input type="radio" name="t4" value="1" /></td>
-                <td><input type="radio" name="t4" value="2" /></td>
-                <td class="align-left">Language quality (grammar, punctuation, spelling)</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="t5" value="0" /></td>
-                <td><input type="radio" name="t5" value="1" /></td>
-                <td><input type="radio" name="t5" value="2" /></td>
-                <td class="align-left">Style (readability, consistent style and tone)</td>
-            </tr>
-
-            </tbody>
-        </table>
-
-    </div>
-
-    <div class="track-changes">
-        <h3>Revision (track changes)</h3>
-        <p></p>
-    </div>
-</template>
 <template id="tpl-taglock-customize" tal:condition="true:tagLockCustomizable">
     <a href="#" class="tagLockCustomize" title="Toggle Tag Lock"></a>
 </template>
