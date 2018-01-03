@@ -165,7 +165,7 @@
                 <div class="divider"></div>
                 <div class="scrolling menu">
                     <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
-                        <div class="item custom" tal:condition="language/selected" dat-selected="true" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="language/selected" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
                         <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
                     </tal:block>
 
