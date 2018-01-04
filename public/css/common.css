@@ -123,7 +123,7 @@ footer li {
 	float: left;
 }
 footer nav li, footer ul.external-links li {
-    height: 12px;
+    height: 18px;
     padding-top: 0px;
     border-right: 1px solid #fff;
     margin-top: 5px;
@@ -135,19 +135,15 @@ ul.statistics-details {
     width: 33%;
     float: none;
     border: none;
-    padding: 0 5px;
-    padding-top: 0px;
-    margin-top: -5px;
-
+    height: unset;
 }
 
 
 ul.statistics-details li {
-		    border-right: 1px solid #fff;
-border-left: 1px solid #fff;
-padding-top: 0px;
-margin-top: 5px;
-height: 12px;
+    border-right: 1px solid #fff;
+    border-left: 1px solid #fff;
+    padding-top: 0px;
+    height: 16px;
 }
 
 ul.statistics-details li:first-child {
