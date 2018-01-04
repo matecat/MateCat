@@ -237,6 +237,14 @@ var SegmentActions = {
         });
     },
 
+    renderPreview: function ( sid, data ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.RENDER_PREVIEW,
+            sid: sid,
+            data: data
+        });
+    },
+
 
     /************ Revise ***************/
     showSelection: function (sid, data) {

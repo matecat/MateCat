@@ -5,6 +5,25 @@ div.segment-notes ul.graysmall li {
 div.segment-notes ul.graysmall li span.note-label {
     font-weight: bold;
 }
+
+.segments-notes-container {
+    float: left;
+}
+.segments-preview-footer {
+    float: left;
+    padding: 20px;
+}
+.segments-preview-container {
+    width: 350px;
+    max-height: 300px;
+    cursor: pointer;
+    overflow-y: auto;
+}
+
+.segments-preview-container img {
+    width: 100%;
+}
+
 .segments-notes-container div.note {
     text-align: left;
     padding: 20px;
