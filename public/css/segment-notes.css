@@ -18,6 +18,9 @@ div.segment-notes ul.graysmall li span.note-label {
     max-height: 300px;
     cursor: pointer;
     overflow-y: auto;
+    background: url(../../img/loading.gif) 50% no-repeat;
+    background-size: 30px 30px;
+    min-height: 200px;
 }
 
 .segments-preview-container img {
