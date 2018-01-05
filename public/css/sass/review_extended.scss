@@ -61,13 +61,12 @@ h1, h2, h3, h4, h5, a, input {
 							display: none;
 						}
 						&:hover{
-							background: #f3f3f3;
 							.error-level {
 								display: inline-block;
 								width: 25%;
 								text-align: right;
 								.ui.dropdown {
-									min-width: 110px;
+									min-width: 105px;
 									padding: 6px 6px 6px 15px;
 									margin: 0;
 									border: none;
