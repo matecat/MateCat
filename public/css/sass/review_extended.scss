@@ -51,23 +51,23 @@ h1, h2, h3, h4, h5, a, input {
 						line-height: 40px;
 						padding: 0 10px;
 						transition: background .2s ease-in;
-						&:hover{
-							background: #f3f3f3;
-						}
 						.error-name {
+							width: 75%;
 							display: inline-block;
-							width: 50%;
+							line-height: 20px;
+							vertical-align: middle;
 						}
 						.error-level {
 							display: none;
 						}
-						&:hover {
+						&:hover{
+							background: #f3f3f3;
 							.error-level {
 								display: inline-block;
-								width: 50%;
+								width: 25%;
 								text-align: right;
 								.ui.dropdown {
-									min-width: 88px;
+									min-width: 110px;
 									padding: 6px 6px 6px 15px;
 									margin: 0;
 									border: none;

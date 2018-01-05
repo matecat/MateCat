@@ -2657,14 +2657,13 @@ body.archived section .status-container {
 .editor .editarea {
     width: 100%;
     font-size: 18px;
-    margin: -2px 0 5px -11px;
+    margin: -5px 0 5px -11px;
     word-break: normal;
     font-variant-ligatures: none;
     line-height: 27px;
     box-shadow: inset 0 1px 3px #ddd;
     border: 1px solid rgba(34, 36, 38, 0.15);
     outline: none;
-    padding: 5px 10px;
 }
 .editor.editarea
 .highlighted1{
