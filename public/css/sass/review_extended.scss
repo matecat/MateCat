@@ -183,12 +183,14 @@ h1, h2, h3, h4, h5, a, input {
 			}
 		}
 	}
+	.re-track-changes, .re-add-comment {
+		padding: 5px 10px;
+		font-size: 18px;
+		box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+		background: #FFFFFF;
+		color: #787878;
+	}
     .re-track-changes {
-        padding: 5px 10px;
-        font-size: 18px;
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-        background: #FFFFFF;
-        color: #787878;
         .added {
             background: #b0ffb3;
             text-decoration: none;
