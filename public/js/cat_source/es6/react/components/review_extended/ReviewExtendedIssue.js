@@ -62,12 +62,15 @@ class ReviewExtendedIssue extends React.Component {
 
 			</div>
 			<div className="re-add-comment">
-				<div className="field">
-					<input type="text" name="first-name" placeholder="First Name" />
-				</div>
-				<div className="field">
-					<input type="text" name="first-name" placeholder="First Name" />
-				</div>
+				<form className="ui form">
+					<div className="field">
+						<input className="re-comment-input" type="text" name="first-name" placeholder="Add a comment + press Enter" />
+					</div>
+				</form>
+			</div>
+			<div className="re-comment-list">
+				<div className="re-comment"><span className="re-revisor">Revisor: </span>Questo è un commento del revisore</div>
+				<div className="re-comment"><span className="re-translator">Translator </span>Questa è una risposta del traduttore</div>
 			</div>
 			{this.state.extendDiffView ?
 				<ReviewVersionDiff
