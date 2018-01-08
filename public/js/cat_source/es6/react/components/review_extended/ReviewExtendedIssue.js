@@ -4,7 +4,9 @@ class ReviewExtendedIssue extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			extendDiffView: false
+			extendDiffView: false,
+            sendDisabled : true,
+            rebutDisabled: true
 		};
 
 	}
@@ -31,6 +33,45 @@ class ReviewExtendedIssue extends React.Component {
 		event.stopPropagation();
 		this.setState({extendDiffView : !this.state.extendDiffView})
 	}
+
+
+    handleCommentChange(event) {
+        var text = event.target.value,
+        	disabled = true;
+
+        if ( text.length > 0 ) {
+            disabled = false;
+        }
+        this.setState({
+            comment_text : text,
+            sendDisabled : disabled,
+        });
+    }
+
+	addComment(){
+
+        // send action invokes ReviewImproved function
+        if ( !this.state.comment_text || this.state.comment_text.length === 0 ) {
+            return ;
+        }
+
+        var data = {
+            rebutted : true,
+            message : this.state.comment_text,
+            source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
+        };
+
+        this.setState({sendDisabled : true});
+
+        SegmentActions
+            .submitComment( this.props.sid, this.props.issueId, data )
+            .fail( this.handleFail );
+	}
+
+    handleFail() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendDisabled : false });
+    }
 
 	render() {
 		let category_label = this.categoryLabel();
