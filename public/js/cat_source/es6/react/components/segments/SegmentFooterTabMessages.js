@@ -10,6 +10,9 @@ class SegmentFooterTabMessages extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            previews: null
+        };
     }
 
     getNotes() {
@@ -49,29 +52,60 @@ class SegmentFooterTabMessages extends React.Component {
         return notesHtml;
     }
 
+    renderPreview(sid, previewsData) {
+        let self = this;
+        if ( this.props.id_segment === sid) {
+            let segments = previewsData.segments;
+            let segmentInfo = segments.find(function ( segment ) {
+                return segment.segment === parseInt(self.props.id_segment)
+            });
+            if (segmentInfo.previews.length > 0) {
+                this.setState({
+                    previews: segmentInfo.previews
+                });
+            }
+        }
+    }
+
+    openPreview() {
+        UI.openPreview();
+    }
+
     componentDidMount() {
         console.log("Mount SegmentFooterMessages" + this.props.id_segment);
-
+        SegmentStore.addListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview.bind(this));
     }
 
     componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview);
         console.log("Unmount SegmentFooterMessages" + this.props.id_segment);
-
     }
 
-    componentWillMount() {
+    componentWillMount() {}
 
-    }
     allowHTML(string) {
         return { __html: string };
     }
 
     render() {
-
+        let backgroundSrc = "";
+        if (this.state.previews && this.state.previews.length > 0) {
+            let preview = this.state.previews[0];
+            backgroundSrc =  preview.path + preview.file_index ;
+        }
         return  <div key={"container_" + this.props.code}
                     className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
                     id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
                 <div className="overflow">
+                    {this.state.previews ? (
+                        <div className="segments-preview-footer">
+                            <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
+                                <img src={backgroundSrc}/>
+                            </div>
+                            <span> 1 of {this.state.previews.length} previews for this segment</span>
+                        </div>
+                    ) : (null)}
+
                     <div className="segment-notes-container">
                         <div className="segment-notes-panel-body">
                             <div className="segments-notes-container">

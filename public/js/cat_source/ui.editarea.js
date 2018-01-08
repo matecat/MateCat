@@ -26,7 +26,7 @@ $.extend( UI, {
     },
     keydownEditAreaEventHandler: function (e) {
 
-        if (e.ctrlKey || e.shiftKey){
+        if (e.ctrlKey || e.shiftKey || e.metaKey){
             return;
         }
         var code = e.which || e.keyCode;

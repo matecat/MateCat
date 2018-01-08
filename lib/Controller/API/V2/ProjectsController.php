@@ -57,8 +57,14 @@ class ProjectsController extends KleinController {
             $project_dao = new \Projects_ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
+        if ( empty( $this->user ) ) {
+            $formatted = new ProjectAnonymous();
+        } else {
+            $formatted = new Project();
+        }
 
-        $this->response->json( $this->project->toArray() );
+        //$this->response->json( $this->project->toArray() );
+        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
     public function deleteDueDate() {
@@ -66,7 +72,13 @@ class ProjectsController extends KleinController {
 
         $project_dao = new \Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
-        $this->response->json( $this->project->toArray() );
+
+        if ( empty( $this->user ) ) {
+            $formatted = new ProjectAnonymous();
+        } else {
+            $formatted = new Project();
+        }
+        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
     protected function afterConstruct() {

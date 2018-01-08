@@ -5,6 +5,37 @@ div.segment-notes ul.graysmall li {
 div.segment-notes ul.graysmall li span.note-label {
     font-weight: bold;
 }
+
+.segments-notes-container {
+    float: left;
+}
+.segments-preview-footer {
+    float: left;
+    padding: 20px;
+}
+.segments-preview-container {
+    width: 408px;
+    max-height: 300px;
+    min-height: 200px;
+    background-image: url(../../img/loading.gif);
+    background-size: 30px 30px;
+    background-repeat: no-repeat;
+    background-position: 50%;
+    overflow-y: auto;
+    cursor: pointer;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+    margin-bottom: 5px;
+}
+
+.segments-preview-container:hover {
+    box-shadow: 0 0 0 #e0e0e0, 0 0 8px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.24);
+    transition: 0.2s ease;
+}
+
+.segments-preview-container img {
+    width: 100%;
+}
+
 .segments-notes-container div.note {
     text-align: left;
     padding: 20px;
