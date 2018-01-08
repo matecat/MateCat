@@ -218,6 +218,13 @@ h1, h2, h3, h4, h5, a, input {
 			padding: 10px;
         }
     }
+	.re-comment-input {
+		border-radius: 20px;
+		padding: 5px;
+		&:focus {
+			border-radius: 20px;
+		}
+	}
     .selected {
 		display: inline-block;
 		background-color: #FFFF00;
