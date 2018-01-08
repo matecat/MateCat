@@ -407,6 +407,135 @@ $(function () {
                     }
                 }
             },
+            "/v2/projects/{id_project}/{password}/due_date": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Create due date",
+                    "description": "Create due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "Date you want to set as due date. Date must be in the future",
+                            "required": true,
+                            "type": "integer"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "put": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "consumes":[
+                        "application/json"
+                    ],
+                    "summary": "Update due date",
+                    "description": "Update due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "body",
+                            "description": "Date you want to set as due date. Date must be in the future",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "required":[ "due_date" ],
+                                "properties":{
+                                    "due_date": { "type": "integer" },
+                                }
+
+                            }
+                        }
+
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "delete": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Delete due date",
+                    "description": "Delete due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
                 "post": {
                     "tags": [
