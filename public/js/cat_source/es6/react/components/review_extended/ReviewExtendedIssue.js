@@ -73,24 +73,6 @@ class ReviewExtendedIssue extends React.Component {
 				<i>({formatted_date})</i>
 			</div>
 		</div>
-		/*return <div className="review-issue-detail"
-					onMouseEnter={this.props.issueMouseEnter.bind(null, this.props.issue) }
-					onMouseLeave={this.props.issueMouseLeave}
-					onClick={this.props.issueMouseEnter.bind(null, this.props.issue)} >
-			<h4>Issue # {this.props.progressiveNumber} </h4> <span className="review-issue-date">{formatted_date} </span>
-			<br />
-			<span className="review-issue-severity">{this.props.issue.severity} - </span><span className="review-issue-label">{category_label} </span>
-			<br />
-			<div className="review-issue-comment">
-				{commentLine}
-			</div>
-
-			{/!*<ReviewTranslationIssueCommentsContainer*!/}
-				{/!*sid={this.props.segment.sid}*!/}
-				{/!*issueId={this.props.issueId} />*!/}
-
-			{deleteIssue}
-		</div>;*/
 	}
 }
 
