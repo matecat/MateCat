@@ -102,7 +102,7 @@ class SegmentFooterTabMessages extends React.Component {
                             <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
                                 <img src={backgroundSrc}/>
                             </div>
-                            <span> 1 of {this.state.previews.length} previews</span>
+                            <span> 1 of {this.state.previews.length} previews for this segment</span>
                         </div>
                     ) : (null)}
 
