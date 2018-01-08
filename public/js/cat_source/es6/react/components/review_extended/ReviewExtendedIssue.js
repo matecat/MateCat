@@ -61,6 +61,14 @@ class ReviewExtendedIssue extends React.Component {
 					</div>):(null)}
 
 			</div>
+			<div className="re-add-comment">
+				<div className="field">
+					<input type="text" name="first-name" placeholder="First Name" />
+				</div>
+				<div className="field">
+					<input type="text" name="first-name" placeholder="First Name" />
+				</div>
+			</div>
 			{this.state.extendDiffView ?
 				<ReviewVersionDiff
 					diffPatch={this.props.issue.diff}
