@@ -69,8 +69,8 @@ class ReviewExtendedIssue extends React.Component {
 				</form>
 			</div>
 			<div className="re-comment-list">
-				<div className="re-comment"><span className="re-revisor">Revisor: </span>Questo è un commento del revisore</div>
-				<div className="re-comment"><span className="re-translator">Translator </span>Questa è una risposta del traduttore</div>
+				<p className="re-comment"><span className="re-revisor">Revisor </span><span className="issue-last-comment"><i>(Jan 19, 10.45 PM): </i></span> Questo è un commento del revisore</p>
+				<p className="re-comment"><span className="re-translator">Translator </span><span className="issue-last-comment"><i>(Jan 19, 10.30 PM): </i></span> Questa è una risposta del traduttore</p>
 			</div>
 			{this.state.extendDiffView ?
 				<ReviewVersionDiff
@@ -79,29 +79,13 @@ class ReviewExtendedIssue extends React.Component {
 					decodeTextFn={UI.decodeText}
 					selectable={false}
 				/> : null}
-
+			{/*<div className="issue-last-action">
+				<span><b>Last comment: </b></span>Jan 19, 10.30 PM
+			</div>*/}
 			<div className="issue-date">
-				<i>({formatted_date})</i>
+				<i>{formatted_date}</i>
 			</div>
 		</div>
-		/*return <div className="review-issue-detail"
-					onMouseEnter={this.props.issueMouseEnter.bind(null, this.props.issue) }
-					onMouseLeave={this.props.issueMouseLeave}
-					onClick={this.props.issueMouseEnter.bind(null, this.props.issue)} >
-			<h4>Issue # {this.props.progressiveNumber} </h4> <span className="review-issue-date">{formatted_date} </span>
-			<br />
-			<span className="review-issue-severity">{this.props.issue.severity} - </span><span className="review-issue-label">{category_label} </span>
-			<br />
-			<div className="review-issue-comment">
-				{commentLine}
-			</div>
-
-			{/!*<ReviewTranslationIssueCommentsContainer*!/}
-				{/!*sid={this.props.segment.sid}*!/}
-				{/!*issueId={this.props.issueId} />*!/}
-
-			{deleteIssue}
-		</div>;*/
 	}
 }
 
