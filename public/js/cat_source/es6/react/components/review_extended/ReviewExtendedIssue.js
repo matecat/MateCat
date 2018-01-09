@@ -4,7 +4,10 @@ class ReviewExtendedIssue extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			extendDiffView: false
+			extendDiffView: false,
+			commentView: false,
+            sendDisabled : true,
+            rebutDisabled: true
 		};
 
 	}
@@ -29,19 +32,107 @@ class ReviewExtendedIssue extends React.Component {
 	setExtendedDiffView(event){
 		event.preventDefault();
 		event.stopPropagation();
-		this.setState({extendDiffView : !this.state.extendDiffView})
+		this.setState({
+			extendDiffView : !this.state.extendDiffView,
+            commentView : false
+		})
+	}
+    setCommentView(event){
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({
+            extendDiffView : false,
+			commentView : !this.state.commentView
+        })
+	}
+
+    handleCommentChange(event) {
+        var text = event.target.value,
+        	disabled = true;
+
+        if ( text.length > 0 ) {
+            disabled = false;
+        }
+        this.setState({
+            comment_text : text,
+            sendDisabled : disabled,
+        });
+    }
+
+	addComment(e){
+		e.preventDefault();
+		let self = this;
+        // send action invokes ReviewImproved function
+        if ( !this.state.comment_text || this.state.comment_text.length === 0 ) {
+            return ;
+        }
+
+        var data = {
+            rebutted : true,
+            message : this.state.comment_text,
+            source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
+        };
+
+        this.setState({sendDisabled : true});
+
+        SegmentActions
+            .submitComment( this.props.issue.id_segment, this.props.issue.id, data )
+			.done(function (  ) {
+				self.setState({
+					comment_text: ''
+				})
+            })
+            .fail( this.handleFail );
+	}
+
+    handleFail() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendDisabled : false });
+    }
+    generateHtmlCommentLines(){
+		let array = [];
+        let comments = this.props.issue.comments
+        for(let n in comments){
+            let comment = comments[n];
+            if(comment.source_page == 1){
+                array.push(<div key={comment.id} className="re-comment"><span className="re-revisor">Translator: </span>{comment.comment}</div>)
+            }else if(comment.source_page == 2){
+                array.push(<div key={comment.id} className="re-comment"><span className="re-revisor">Revisor: </span>{comment.comment}</div>)
+            }
+        }
+        if(array.length > 0 ){
+            array = array.reverse();
+        }
+        return array;
 	}
 
 	render() {
 		let category_label = this.categoryLabel();
 		let formatted_date = moment(this.props.issue.created_at).format('lll');
 
-		let commentLine = null;
-		if (this.props.issue.comment) {
-			commentLine = <div className="review-issue-thread-entry">
-				<strong>Comment:</strong> {comment}</div>;
-		}
 		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
+        let commentViewButtonClass = (this.state.commentView ? "re-active" : "");
+
+        //START comments html section
+		let htmlCommentLines = this.generateHtmlCommentLines();
+		let renderHtmlCommentLines = '';
+		if(htmlCommentLines.length> 0){
+			renderHtmlCommentLines = <div className="re-comment-list">
+                {htmlCommentLines}
+            </div>;
+		}
+
+		let commentSection = <div className="comments-view">
+				<div className="re-add-comment">
+					<form className="ui form" onSubmit={this.addComment.bind(this)}>
+						<div className="field">
+							<input className="re-comment-input" value={this.state.comment_text} type="text" name="first-name" placeholder="Add a comment + press Enter" onChange={this.handleCommentChange.bind(this)} />
+						</div>
+					</form>
+				</div>
+				{renderHtmlCommentLines}
+			</div>;
+        //END comments html section
 
 		return <div className="issue-item">
 			<div className="issue">
@@ -51,7 +142,7 @@ class ReviewExtendedIssue extends React.Component {
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
 						<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)}><i className="icon-eye icon"/></button>
-						<button><i className="icon-uniE96E icon"/></button>
+						<button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)}><i className="icon-uniE96E icon"/></button>
 						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)}><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
 				</div>
@@ -61,17 +152,10 @@ class ReviewExtendedIssue extends React.Component {
 					</div>):(null)}
 
 			</div>
-			<div className="re-add-comment">
-				<form className="ui form">
-					<div className="field">
-						<input className="re-comment-input" type="text" name="first-name" placeholder="Add a comment + press Enter" />
-					</div>
-				</form>
-			</div>
-			<div className="re-comment-list">
-				<p className="re-comment"><span className="re-revisor">Revisor </span><span className="issue-last-comment"><i>(Jan 19, 10.45 PM): </i></span> Questo è un commento del revisore</p>
-				<p className="re-comment"><span className="re-translator">Translator </span><span className="issue-last-comment"><i>(Jan 19, 10.30 PM): </i></span> Questa è una risposta del traduttore</p>
-			</div>
+
+			{this.state.commentView ? commentSection: null}
+
+
 			{this.state.extendDiffView ?
 				<ReviewVersionDiff
 					diffPatch={this.props.issue.diff}
@@ -79,9 +163,7 @@ class ReviewExtendedIssue extends React.Component {
 					decodeTextFn={UI.decodeText}
 					selectable={false}
 				/> : null}
-			{/*<div className="issue-last-action">
-				<span><b>Last comment: </b></span>Jan 19, 10.30 PM
-			</div>*/}
+
 			<div className="issue-date">
 				<i>{formatted_date}</i>
 			</div>
