@@ -28,85 +28,13 @@ h1, h2, h3, h4, h5, a, input {
 			}
 
 		}
-		.re-create-issue {
-			padding: 10px;
-			background: #FFFFFF;
-			.accordion {
-				h4{
-					cursor: pointer;
-					-webkit-touch-callout: none;
-					-webkit-user-select: none;
-					-khtml-user-select: none;
-					-moz-user-select: none;
-					-ms-user-select: none;
-					user-select: none;
-				}
-				.create-issue-title {
-					i.icon-sort-up.icon {
-					position: relative;
-					top: 5px;
-					}
-				}
-
-				.error-list {
-					.error-item {
-						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
-						line-height: 40px;
-						padding: 0 10px;
-						transition: background .2s ease-in;
-						.error-name {
-							width: 75%;
-							display: inline-block;
-							line-height: 20px;
-							vertical-align: middle;
-						}
-						.error-level {
-							display: none;
-						}
-						&:hover{
-							.error-level {
-								display: inline-block;
-								width: 25%;
-								text-align: right;
-								.ui.dropdown {
-									min-width: 105px;
-									padding: 6px 6px 6px 15px;
-									margin: 0;
-									border: none;
-									height: 100%;
-									box-shadow: 0 0 1px 1px #c6c6c6;
-									min-height: unset;
-									vertical-align: middle;
-									.text {
-										box-shadow: unset;
-										background: unset;
-									}
-									.dropdown.icon {
-										margin: 0;
-										padding: 0;
-										height: 0;
-										min-height: 0;
-										line-height: 8px;
-									}
-								}
-							}
-						}
-						&:last-child {
-							border-bottom: none;
-						}
-					}
-				}
-			}
-		}
 		.re-issues {
 			padding: 10px;
+			overflow: scroll;
+			max-height: 260px;
 			.issues-list {
 				position: relative;
 				.issue-item {
-					&:last-child {
-						padding-bottom: 50px;
-					}
-
 					.issue {
 						background: #FFFFFF;
 						padding: 5px 5px 5px 10px;
@@ -176,15 +104,88 @@ h1, h2, h3, h4, h5, a, input {
 						}
 					}
 					.issue-date {
-						text-align: right;
-						padding-right: 5px;
-						margin: 5px 0;
 						color: gray;
 						font-size: 12px;
+						padding: 3px 5px 5px;
+						text-align: right;
 					}
 				}
 			}
 		}
+		.re-create-issue {
+			padding: 10px;
+			background: #efeef4;
+			border-top: 6px solid #ffb158;
+			box-shadow: -2px -6px 30px 0px #bdbdbd;
+			position: relative;
+			.accordion {
+				h4{
+					cursor: pointer;
+					-webkit-touch-callout: none;
+					-webkit-user-select: none;
+					-khtml-user-select: none;
+					-moz-user-select: none;
+					-ms-user-select: none;
+					user-select: none;
+				}
+				.create-issue-title {
+					i.icon-sort-up.icon {
+					position: relative;
+					top: 5px;
+					}
+				}
+
+				.error-list {
+					.error-item {
+						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+						line-height: 40px;
+						padding: 0 10px;
+						transition: background .2s ease-in;
+						.error-name {
+							width: 75%;
+							display: inline-block;
+							line-height: 20px;
+							vertical-align: middle;
+						}
+						.error-level {
+							display: none;
+						}
+						&:hover{
+							.error-level {
+								display: inline-block;
+								width: 25%;
+								text-align: right;
+								.ui.dropdown {
+									min-width: 105px;
+									padding: 6px 6px 6px 15px;
+									margin: 0;
+									border: none;
+									height: 100%;
+									box-shadow: 0 0 1px 1px #c6c6c6;
+									min-height: unset;
+									vertical-align: middle;
+									.text {
+										box-shadow: unset;
+										background: unset;
+									}
+									.dropdown.icon {
+										margin: 0;
+										padding: 0;
+										height: 0;
+										min-height: 0;
+										line-height: 8px;
+									}
+								}
+							}
+						}
+						&:last-child {
+							border-bottom: none;
+						}
+					}
+				}
+			}
+		}
+
 	}
 	.re-track-changes, .re-add-comment, .re-comment-list {
 		padding: 5px 10px;
@@ -234,10 +235,13 @@ h1, h2, h3, h4, h5, a, input {
 	.re-comment-list {
 		font-size: 14px;
 		.re-revisor {
-			color: #7cc576;
+			color: #00b76c;
 		}
 		.re-translator {
 			color: #0997bc;
+		}
+		.re-comment-date{
+			font-size: 13px;
 		}
 	}
     .selected {

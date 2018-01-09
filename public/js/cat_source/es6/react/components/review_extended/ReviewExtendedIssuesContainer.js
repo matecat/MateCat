@@ -54,12 +54,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
             issues = <div className="review-no-issues">No issues on this version</div>;
         }
 
-        /*return <div className={cs} >
-            {issues}
-        </div>;*/
-
         return <div className="re-issues">
-			<h4>Issues</h4>
+			<h4>Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>
 			<div className="issues-list">
 				{issues}
 			</div>
