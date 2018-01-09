@@ -101,9 +101,7 @@ class ReviewExtendedIssue extends React.Component {
             }
         }
         if(array.length > 0 ){
-            array.sort(function(a,b){
-                return b-a;
-            });
+            array = array.reverse();
         }
         return array;
 	}
