@@ -114,7 +114,10 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-create-issue {
 			padding: 10px;
-			background: #FFFFFF;
+			background: #efeef4;
+			border-top: 6px solid #ffb158;
+			box-shadow: -2px -6px 30px 0px #bdbdbd;
+			position: relative;
 			.accordion {
 				h4{
 					cursor: pointer;
