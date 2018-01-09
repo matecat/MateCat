@@ -138,6 +138,7 @@ class catController extends viewController {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
             // function and not-found handled via exception.
             $this->findJobByIdAndPassword();
+            $this->featureSet->run('manageProjectType', $this);
         } catch( NotFoundError $e ){
             $this->job_not_found = true;
             return;
