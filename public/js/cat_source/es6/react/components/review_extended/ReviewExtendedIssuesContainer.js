@@ -4,18 +4,29 @@ class ReviewExtendedIssuesContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            animateFirstIssue: false
         };
 
     }
 
 
 
-    componentWillReceiveProps ( nextProps ) {
-
+    componentWillReceiveProps ( props ) {
+        if(props.issues.length > this.props.issues.length ){
+            this.setState({
+                animateFirstIssue: true
+            })
+        }
     }
 
-    componentDidMount () {
+    componentDidUpdate () {
+        if(this.state.animateFirstIssue){
+            $('.issue-item:first-child .issue')
+                .transition('jiggle');
+            this.setState({
+                animateFirstIssue: false
+            })
+        }
 
     }
 
