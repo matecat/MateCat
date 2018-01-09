@@ -200,7 +200,9 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
         addOriginalTranslation: function (d, id_segment) {
             var xEditarea = $('#segment-' + id_segment + '-editarea');
             if (d.original !== '') {
-                SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+                setTimeout(function (  ) {
+                    SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+                });
             }
             if ( Review.type === 'simple') {
                 UI.setReviewErrorData(d.error_data);
