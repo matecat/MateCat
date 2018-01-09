@@ -72,6 +72,13 @@ class ReviewExtendedPanel extends React.Component {
 				selectable={this.props.isReview}
 			/>
 
+			<ReviewExtendedIssuesContainer
+				reviewType={this.props.reviewType}
+				issues={issues}
+				isReview={this.props.isReview}
+				segment={this.props.segment}
+			/>
+
 			{this.props.isReview? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
 				selection={this.state.selectionObj}
@@ -83,12 +90,6 @@ class ReviewExtendedPanel extends React.Component {
 				newtranslation={this.state.newtranslation}
 				segment={this.props.segment}
 			/>): (null)}
-			<ReviewExtendedIssuesContainer
-				reviewType={this.props.reviewType}
-				issues={issues}
-				isReview={this.props.isReview}
-				segment={this.props.segment}
-			/>
 
 		</div>;
 	}

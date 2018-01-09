@@ -165,7 +165,7 @@ class ReviewExtendedIssue extends React.Component {
 				/> : null}
 
 			<div className="issue-date">
-				<i>({formatted_date})</i>
+				<i>{formatted_date}</i>
 			</div>
 		</div>
 	}

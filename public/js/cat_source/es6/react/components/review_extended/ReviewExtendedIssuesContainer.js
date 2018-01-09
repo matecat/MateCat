@@ -59,7 +59,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
         </div>;*/
 
         return <div className="re-issues">
-			<h4>Issues</h4>
+			<h4>Issues <span>(4)</span></h4>
 			<div className="issues-list">
 				{issues}
 			</div>
