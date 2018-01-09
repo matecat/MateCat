@@ -177,6 +177,11 @@ class CatUtils {
             $segment = preg_replace( '/(&lt;.+?&gt;)/', 'base64:' . base64_encode( $tag_attribute[ 1 ] ), $segment, 1 );
         }
 
+        preg_match_all( '/({.+?})/', $segment, $html, PREG_SET_ORDER );
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/({.+?})/', 'base64:' . base64_encode( $tag_attribute[ 1 ] ), $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;

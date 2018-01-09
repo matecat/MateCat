@@ -30,10 +30,10 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-issues {
 			padding: 10px;
-			overflow: scroll;
-			max-height: 260px;
 			.issues-list {
 				position: relative;
+				overflow-y: scroll;
+				max-height: 260px;
 				.issue-item {
 					.issue {
 						background: #FFFFFF;
