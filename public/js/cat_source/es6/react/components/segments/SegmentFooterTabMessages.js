@@ -102,7 +102,14 @@ class SegmentFooterTabMessages extends React.Component {
                             <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
                                 <img src={backgroundSrc}/>
                             </div>
-                            <span> 1 of {this.state.previews.length} previews</span>
+                            <div className="tab-preview-screenshot">
+                                <button className="preview-button previous">
+                                    <i className="icon icon-chevron-left" /> </button>
+                                <div className="n-segments-available">2 / 3</div>
+                                <button className="preview-button next">
+                                    <i className="icon icon-chevron-right" /></button>
+                                <div className="text-n-segments-available">available screens for this segment</div>
+                            </div>
                         </div>
                     ) : (null)}
 

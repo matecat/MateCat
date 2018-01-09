@@ -1,3 +1,6 @@
+#review-side-panel {
+	overflow: auto !important;
+}
 #review-side-panel h4 {
 	margin: unset;
 }
@@ -51,23 +54,22 @@ h1, h2, h3, h4, h5, a, input {
 						line-height: 40px;
 						padding: 0 10px;
 						transition: background .2s ease-in;
-						&:hover{
-							background: #f3f3f3;
-						}
 						.error-name {
+							width: 75%;
 							display: inline-block;
-							width: 50%;
+							line-height: 20px;
+							vertical-align: middle;
 						}
 						.error-level {
 							display: none;
 						}
-						&:hover {
+						&:hover{
 							.error-level {
 								display: inline-block;
-								width: 50%;
+								width: 25%;
 								text-align: right;
 								.ui.dropdown {
-									min-width: 88px;
+									min-width: 105px;
 									padding: 6px 6px 6px 15px;
 									margin: 0;
 									border: none;
@@ -184,12 +186,14 @@ h1, h2, h3, h4, h5, a, input {
 			}
 		}
 	}
+	.re-track-changes, .re-add-comment, .re-comment-list {
+		padding: 5px 10px;
+		font-size: 18px;
+		box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+		background: #FFFFFF;
+		color: #787878;
+	}
     .re-track-changes {
-        padding: 5px 10px;
-        font-size: 18px;
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-        background: #FFFFFF;
-        color: #787878;
         .added {
             background: #b0ffb3;
             text-decoration: none;
@@ -217,6 +221,25 @@ h1, h2, h3, h4, h5, a, input {
 			padding: 10px;
         }
     }
+	.re-add-comment {
+		.re-comment-input {
+			border-radius: 20px !important;
+			padding: 5px 10px !important;
+			margin: 5px 0 !important;
+			&:focus {
+				border-radius: 20px;
+			}
+		}
+	}
+	.re-comment-list {
+		font-size: 14px;
+		.re-revisor {
+			color: #7cc576;
+		}
+		.re-translator {
+			color: #0997bc;
+		}
+	}
     .selected {
 		display: inline-block;
 		background-color: #FFFF00;

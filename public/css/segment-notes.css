@@ -11,10 +11,10 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 .segments-preview-footer {
     float: left;
-    padding: 20px;
+    padding: 20px 20px 10px;
 }
 .segments-preview-container {
-    width: 400px;
+    width: 408px;
     max-height: 300px;
     min-height: 200px;
     background-image: url(../../img/loading.gif);
@@ -24,10 +24,12 @@ div.segment-notes ul.graysmall li span.note-label {
     overflow-y: auto;
     cursor: pointer;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+    margin-bottom: 10px;
 }
 
 .segments-preview-container:hover {
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 0 0 #e0e0e0, 0 0 8px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.24);
+    transition: 0.2s ease;
 }
 
 .segments-preview-container img {
@@ -51,4 +53,34 @@ div.segment-notes ul.graysmall li span.note-label {
 
 .note-label {
     font-weight: bold;
+}
+
+
+
+.tab-preview-screenshot button {
+    font-size: 14px;
+    text-align: center;
+    margin: 0 3px;
+    border-radius: 2px;
+    border: 1px solid #C6C6C6;
+    cursor: pointer;
+    color: #666666;
+    outline: none;
+    position: relative;
+}
+
+.tab-preview-screenshot button:hover {
+    color: #000000;
+}
+
+.tab-preview-screenshot button i {
+    position: relative;
+    top: 2px;
+    margin: 0;
+}
+
+.preview-button, .n-segments-available, .text-n-segments-available {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 100;
 }
