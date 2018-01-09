@@ -59,7 +59,7 @@ class SegmentFooterTabMessages extends React.Component {
             let segmentInfo = segments.find(function ( segment ) {
                 return segment.segment === parseInt(self.props.id_segment)
             });
-            if (segmentInfo.previews.length > 0) {
+            if (segmentInfo.previews && segmentInfo.previews.length > 0) {
                 this.setState({
                     previews: segmentInfo.previews
                 });
