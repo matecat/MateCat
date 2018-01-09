@@ -48,18 +48,17 @@ class ReviewExtendedIssuesContainer extends React.Component {
                 />
 
             }.bind(this) );
-
-        }
-        else {
-            issues = <div className="review-no-issues">No issues on this version</div>;
         }
 
-        return <div className="re-issues">
-			<h4>Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>
-			<div className="issues-list">
-				{issues}
-			</div>
-		</div>;
+        if(this.props.issues.length > 0){
+            return <div className="re-issues">
+                <h4>Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>
+                <div className="issues-list">
+                    {issues}
+                </div>
+            </div>;
+        }
+        return "";
 
     }
 }
