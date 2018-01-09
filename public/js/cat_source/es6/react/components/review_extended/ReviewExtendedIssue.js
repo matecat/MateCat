@@ -91,13 +91,16 @@ class ReviewExtendedIssue extends React.Component {
     }
     generateHtmlCommentLines(){
 		let array = [];
-        let comments = this.props.issue.comments
+        let comments = this.props.issue.comments,
+			comment_date;
         for(let n in comments){
-            let comment = comments[n];
+            let comment = comments[n]
+			comment_date = moment(comment.create_date).format('lll');
+
             if(comment.source_page == 1){
-                array.push(<div key={comment.id} className="re-comment"><span className="re-revisor">Translator: </span>{comment.comment}</div>)
+				array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }else if(comment.source_page == 2){
-                array.push(<div key={comment.id} className="re-comment"><span className="re-revisor">Revisor: </span>{comment.comment}</div>)
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }
         }
         if(array.length > 0 ){
