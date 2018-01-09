@@ -1,3 +1,6 @@
+#review-side-panel {
+	overflow: auto !important;
+}
 #review-side-panel h4 {
 	margin: unset;
 }
@@ -183,7 +186,7 @@ h1, h2, h3, h4, h5, a, input {
 			}
 		}
 	}
-	.re-track-changes, .re-add-comment {
+	.re-track-changes, .re-add-comment, .re-comment-list {
 		padding: 5px 10px;
 		font-size: 18px;
 		box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -218,11 +221,23 @@ h1, h2, h3, h4, h5, a, input {
 			padding: 10px;
         }
     }
-	.re-comment-input {
-		border-radius: 20px;
-		padding: 5px;
-		&:focus {
-			border-radius: 20px;
+	.re-add-comment {
+		.re-comment-input {
+			border-radius: 20px !important;
+			padding: 5px 10px !important;
+			margin: 5px 0 !important;
+			&:focus {
+				border-radius: 20px;
+			}
+		}
+	}
+	.re-comment-list {
+		font-size: 14px;
+		.re-revisor {
+			color: #7cc576;
+		}
+		.re-translator {
+			color: #0997bc;
 		}
 	}
     .selected {
