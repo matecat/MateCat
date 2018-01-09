@@ -4,18 +4,29 @@ class ReviewExtendedIssuesContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            animateFirstIssue: false
         };
 
     }
 
 
 
-    componentWillReceiveProps ( nextProps ) {
-
+    componentWillReceiveProps ( props ) {
+        if(props.issues.length > this.props.issues.length ){
+            this.setState({
+                animateFirstIssue: true
+            })
+        }
     }
 
-    componentDidMount () {
+    componentDidUpdate () {
+        if(this.state.animateFirstIssue){
+            $('.issue-item:first-child .issue')
+                .transition('jiggle');
+            this.setState({
+                animateFirstIssue: false
+            })
+        }
 
     }
 
@@ -48,22 +59,17 @@ class ReviewExtendedIssuesContainer extends React.Component {
                 />
 
             }.bind(this) );
-
-        }
-        else {
-            issues = <div className="review-no-issues">No issues on this version</div>;
         }
 
-        /*return <div className={cs} >
-            {issues}
-        </div>;*/
-
-        return <div className="re-issues">
-			<h4>Issues <span>(4)</span></h4>
-			<div className="issues-list">
-				{issues}
-			</div>
-		</div>;
+        if(this.props.issues.length > 0){
+            return <div className="re-issues">
+                <h4>Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>
+                <div className="issues-list">
+                    {issues}
+                </div>
+            </div>;
+        }
+        return "";
 
     }
 }

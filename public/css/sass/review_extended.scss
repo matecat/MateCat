@@ -30,10 +30,10 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-issues {
 			padding: 10px;
-			overflow: scroll;
-			max-height: 260px;
 			.issues-list {
 				position: relative;
+				overflow-y: scroll;
+				max-height: 260px;
 				.issue-item {
 					.issue {
 						background: #FFFFFF;
@@ -158,7 +158,7 @@ h1, h2, h3, h4, h5, a, input {
 						padding: 0 10px;
 						transition: background .2s ease-in;
 						.error-name {
-							width: 75%;
+							width: 65%;
 							display: inline-block;
 							line-height: 20px;
 							vertical-align: middle;
@@ -169,7 +169,7 @@ h1, h2, h3, h4, h5, a, input {
 						&:hover{
 							.error-level {
 								display: inline-block;
-								width: 25%;
+								width: 35%;
 								text-align: right;
 								.ui.dropdown {
 									min-width: 105px;
@@ -256,6 +256,9 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-translator {
 			color: #0997bc;
+		}
+		.re-comment-date{
+			font-size: 13px;
 		}
 	}
     .selected {
