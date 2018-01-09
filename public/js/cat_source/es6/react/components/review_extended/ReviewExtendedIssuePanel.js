@@ -4,18 +4,14 @@ class ReviewExtendedIssuePanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            submitDisabled : true
+            submitDisabled : true,
+            listIsOpen: true
         };
 
     }
 
     issueCategories() {
         return JSON.parse(config.lqa_nested_categories).categories ;
-    }
-
-    severitySelected( category, event ) {
-        let severity = $(ReactDOM.findDOMNode( event.target )).val() ;
-        this.sendIssue(category, severity);
     }
 
     sendIssue(category, severity) {
@@ -74,6 +70,9 @@ class ReviewExtendedIssuePanel extends React.Component{
 
     toggleList(){
 		$(this.listElm).slideToggle('fast');
+		this.setState({
+            listIsOpen: !this.state.listIsOpen
+        })
 	}
     render() {
         let categoryComponents = [];
@@ -88,7 +87,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             categoryComponents.push(
                 <ReviewExtendedCategorySelector
                     key={'category-selector-' + i}
-                    severitySelected={this.severitySelected.bind(this)}
+                    sendIssue={this.sendIssue.bind(this)}
                     selectedValue={selectedValue}
                     nested={false}
                     category={category} />);
@@ -103,7 +102,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                         <ReviewExtendedCategorySelector
                             key={kk}
                             selectedValue={selectedValue}
-                            severitySelected={this.severitySelected.bind(this)}
+                            sendIssue={this.sendIssue.bind(this)}
                             nested={true}
                             category={category}  />
                     );
