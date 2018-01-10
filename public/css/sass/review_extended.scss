@@ -3,6 +3,8 @@
 }
 #review-side-panel h4 {
 	margin: unset;
+	box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+	background: #ffffff;
 }
 
 h1, h2, h3, h4, h5, a, input {
@@ -16,11 +18,8 @@ h1, h2, h3, h4, h5, a, input {
 	}
 	.re-wrapper{
 		.re-version-diff {
-			box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 			position: relative;
-			background: #f3f3f3;
 			padding: 10px;
-			z-index: 1;
 			.re-header-track {
 
 				.explain-selection {
@@ -29,21 +28,17 @@ h1, h2, h3, h4, h5, a, input {
 			}
 		}
 		.re-issues {
-			padding: 10px;
+			padding: 10px 10px 0;
+			overflow-y: auto;
+			background: #dedde4;
 			.issues-list {
 				position: relative;
-				overflow-y: auto;
 				max-height: 260px;
 				.issue-item {
 					.issue {
 						background: #FFFFFF;
 						padding: 5px 5px 5px 10px;
-						box-shadow: inset 0 0 1px #6b6b6b;
-						border-radius: 0;
-						border: 0;
-						&.in-transition{
-							background: #0000ff;
-						}
+						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 						.issue-head {
 							width: 50%;
 							display: inline-block;
@@ -130,10 +125,7 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-create-issue {
 			padding: 10px;
-			background: #ffffff;
-			border-top: 1px solid #d8d6e0;
 			position: relative;
-			box-shadow: 0px -3px 10px -3px rgba(0,0,0,0.24);
 			.accordion {
 				h4{
 					cursor: pointer;
@@ -153,10 +145,10 @@ h1, h2, h3, h4, h5, a, input {
 
 				.error-list {
 					.error-item {
-						border-bottom: 1px solid rgba(34, 36, 38, 0.15);
 						line-height: 40px;
 						padding: 0 10px;
-						transition: background .2s ease-in;
+						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+						background: #ffffff;
 						.error-name {
 							width: 65%;
 							display: inline-block;
@@ -165,33 +157,33 @@ h1, h2, h3, h4, h5, a, input {
 						}
 						.error-level {
 							display: none;
+							width: 35%;
+							text-align: right;
+							.ui.dropdown {
+								min-width: 105px;
+								padding: 6px 6px 6px 15px;
+								margin: 0;
+								border: none;
+								height: 100%;
+								box-shadow: 0 0 1px 1px #c6c6c6;
+								min-height: unset;
+								vertical-align: middle;
+								.text {
+									box-shadow: unset;
+									background: unset;
+								}
+								.dropdown.icon {
+									margin: 0;
+									padding: 0;
+									height: 0;
+									min-height: 0;
+									line-height: 8px;
+								}
+							}
 						}
 						&:hover{
 							.error-level {
 								display: inline-block;
-								width: 35%;
-								text-align: right;
-								.ui.dropdown {
-									min-width: 105px;
-									padding: 6px 6px 6px 15px;
-									margin: 0;
-									border: none;
-									height: 100%;
-									box-shadow: 0 0 1px 1px #c6c6c6;
-									min-height: unset;
-									vertical-align: middle;
-									.text {
-										box-shadow: unset;
-										background: unset;
-									}
-									.dropdown.icon {
-										margin: 0;
-										padding: 0;
-										height: 0;
-										min-height: 0;
-										line-height: 8px;
-									}
-								}
 							}
 						}
 						&:last-child {
@@ -206,10 +198,9 @@ h1, h2, h3, h4, h5, a, input {
 	.re-track-changes, .re-add-comment, .re-comment-list {
 		padding: 5px 10px;
 		font-size: 18px;
-		background: #FFFFFF;
+		background: #f0f2f5;
 		color: #787878;
-		box-shadow: inset 0 0 1px #6b6b6b;
-		margin-top: -1px;
+		box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 	}
     .re-track-changes {
         .added {
@@ -235,7 +226,6 @@ h1, h2, h3, h4, h5, a, input {
         }
         &.head {
             min-height: 65px;
-            box-shadow: none !important;
 			padding: 10px;
         }
     }
@@ -251,6 +241,7 @@ h1, h2, h3, h4, h5, a, input {
 	}
 	.re-comment-list {
 		font-size: 14px;
+		background: #ffffff;
 		.re-comment {
 			margin-bottom: 0;
 			.re-revisor {
