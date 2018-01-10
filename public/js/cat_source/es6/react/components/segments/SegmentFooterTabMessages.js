@@ -5,13 +5,16 @@
 let React = require('react');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
+let WrapperLoader =         require("../../common/WrapperLoader").default;
 let showdown = require( "showdown" );
 class SegmentFooterTabMessages extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            previews: null
+            previews: null,
+            currentIndexPreview: 0,
+            loadingImage: false
         };
     }
 
@@ -67,6 +70,13 @@ class SegmentFooterTabMessages extends React.Component {
         }
     }
 
+    navigationBetweenPreviews(offset){
+        this.setState({
+            currentIndexPreview: this.state.currentIndexPreview + offset,
+            loadingImage: true
+        })
+    }
+
     openPreview() {
         UI.openPreview();
     }
@@ -90,7 +100,7 @@ class SegmentFooterTabMessages extends React.Component {
     render() {
         let backgroundSrc = "";
         if (this.state.previews && this.state.previews.length > 0) {
-            let preview = this.state.previews[0];
+            let preview = this.state.previews[this.state.currentIndexPreview];
             backgroundSrc =  preview.path + preview.file_index ;
         }
         return  <div key={"container_" + this.props.code}
@@ -101,12 +111,13 @@ class SegmentFooterTabMessages extends React.Component {
                         <div className="segments-preview-footer">
                             <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
                                 <img src={backgroundSrc}/>
+                                {this.state.loadingImage ? <WrapperLoader /> : null}
                             </div>
                             <div className="tab-preview-screenshot">
-                                <button className="preview-button previous">
+                                <button className="preview-button previous" onClick={this.navigationBetweenPreviews.bind(this,-1)} disabled={this.state.currentIndexPreview === 0}>
                                     <i className="icon icon-chevron-left" /> </button>
-                                <div className="n-segments-available">2 / 3</div>
-                                <button className="preview-button next">
+                                <div className="n-segments-available">{this.state.currentIndexPreview+1} / {this.state.previews.length}</div>
+                                <button className="preview-button next" onClick={this.navigationBetweenPreviews.bind(this,1)} disabled={this.state.previews.length === this.state.currentIndexPreview+1}>
                                     <i className="icon icon-chevron-right" /></button>
                                 <div className="text-n-segments-available">available screens for this segment</div>
                             </div>
@@ -122,6 +133,18 @@ class SegmentFooterTabMessages extends React.Component {
                     </div>
                 </div>
             </div>
+    }
+
+    componentDidUpdate(){
+        let self = this;
+        if(this.state.loadingImage){
+            $('.segments-preview-container').imagesLoaded( function() {
+                console.log('Image loaded');
+                self.setState({
+                    loadingImage: false
+                })
+            });
+        }
     }
 }
 
