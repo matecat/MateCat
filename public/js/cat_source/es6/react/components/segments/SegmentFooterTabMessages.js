@@ -71,8 +71,9 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     navigationBetweenPreviews(offset){
+        let newIndex = this.state.currentIndexPreview + offset - this.state.previews.length * Math.floor((this.state.currentIndexPreview + offset) / this.state.previews.length);
         this.setState({
-            currentIndexPreview: this.state.currentIndexPreview + offset,
+            currentIndexPreview: newIndex,
             loadingImage: true
         })
     }
@@ -98,11 +99,22 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     render() {
-        let backgroundSrc = "";
+        let backgroundSrc = "",
+            controls = "";
         if (this.state.previews && this.state.previews.length > 0) {
             let preview = this.state.previews[this.state.currentIndexPreview];
             backgroundSrc =  preview.path + preview.file_index ;
+
+            controls =  <div className="tab-preview-screenshot">
+                <button className="preview-button previous" onClick={this.navigationBetweenPreviews.bind(this,-1)}>
+                    <i className="icon icon-chevron-left" /> </button>
+                <div className="n-segments-available">{this.state.currentIndexPreview+1} / {this.state.previews.length}</div>
+                <button className="preview-button next" onClick={this.navigationBetweenPreviews.bind(this,1)}>
+                    <i className="icon icon-chevron-right" /></button>
+                <div className="text-n-segments-available">available screens for this segment</div>
+            </div>;
         }
+
         return  <div key={"container_" + this.props.code}
                     className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
                     id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
@@ -113,14 +125,9 @@ class SegmentFooterTabMessages extends React.Component {
                                 <img src={backgroundSrc}/>
                                 {this.state.loadingImage ? <WrapperLoader /> : null}
                             </div>
-                            <div className="tab-preview-screenshot">
-                                <button className="preview-button previous" onClick={this.navigationBetweenPreviews.bind(this,-1)} disabled={this.state.currentIndexPreview === 0}>
-                                    <i className="icon icon-chevron-left" /> </button>
-                                <div className="n-segments-available">{this.state.currentIndexPreview+1} / {this.state.previews.length}</div>
-                                <button className="preview-button next" onClick={this.navigationBetweenPreviews.bind(this,1)} disabled={this.state.previews.length === this.state.currentIndexPreview+1}>
-                                    <i className="icon icon-chevron-right" /></button>
-                                <div className="text-n-segments-available">available screens for this segment</div>
-                            </div>
+
+                            {this.state.previews.length > 1 ? controls : null}
+
                         </div>
                     ) : (null)}
 
