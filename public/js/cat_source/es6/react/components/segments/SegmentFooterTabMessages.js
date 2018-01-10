@@ -54,7 +54,7 @@ class SegmentFooterTabMessages extends React.Component {
 
     renderPreview(sid, previewsData) {
         let self = this;
-        if ( this.props.id_segment === sid) {
+        if ( this.props.id_segment === sid && previewsData) {
             let segments = previewsData.segments;
             let segmentInfo = segments.find(function ( segment ) {
                 return segment.segment === parseInt(self.props.id_segment)
