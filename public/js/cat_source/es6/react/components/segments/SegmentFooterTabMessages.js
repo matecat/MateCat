@@ -5,6 +5,7 @@
 let React = require('react');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
+let WrapperLoader =         require("../../common/WrapperLoader").default;
 let showdown = require( "showdown" );
 class SegmentFooterTabMessages extends React.Component {
 
@@ -12,7 +13,8 @@ class SegmentFooterTabMessages extends React.Component {
         super(props);
         this.state = {
             previews: null,
-            currentIndexPreview: 0
+            currentIndexPreview: 0,
+            loadingImage: false
         };
     }
 
@@ -70,7 +72,8 @@ class SegmentFooterTabMessages extends React.Component {
 
     navigationBetweenPreviews(offset){
         this.setState({
-            currentIndexPreview: this.state.currentIndexPreview + offset
+            currentIndexPreview: this.state.currentIndexPreview + offset,
+            loadingImage: true
         })
     }
 
@@ -108,6 +111,7 @@ class SegmentFooterTabMessages extends React.Component {
                         <div className="segments-preview-footer">
                             <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
                                 <img src={backgroundSrc}/>
+                                {this.state.loadingImage ? <WrapperLoader /> : null}
                             </div>
                             <div className="tab-preview-screenshot">
                                 <button className="preview-button previous" onClick={this.navigationBetweenPreviews.bind(this,-1)} disabled={this.state.currentIndexPreview === 0}>
@@ -131,10 +135,16 @@ class SegmentFooterTabMessages extends React.Component {
             </div>
     }
 
-    componentWillUpdate(){
-        $('.segments-preview-container').imagesLoaded( function() {
-            // images have loaded
-        });
+    componentDidUpdate(){
+        let self = this;
+        if(this.state.loadingImage){
+            $('.segments-preview-container').imagesLoaded( function() {
+                console.log('Image loaded');
+                self.setState({
+                    loadingImage: false
+                })
+            });
+        }
     }
 }
 

@@ -27,7 +27,6 @@
     "grunt-strip": "^0.2.1",
     "grunt-text-replace": "^0.4.0",
     "handlebars": "^4.0.5",
-    "imagesloaded": "^4.1.4",
     "immutable": "^3.8.2",
     "jquery": "^1.11.0",
     "keymirror": "^0.1.1",
