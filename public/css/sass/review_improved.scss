@@ -8,7 +8,7 @@ body.review-side-panel-opened article {
     -webkit-perspective: 1000;
     -webkit-transition: width .2s ease;
     transition: width .2s ease;
-    width: 71.5%;
+    width: 70%;
 }
 
 section.reviewImproved.opened {
@@ -247,7 +247,7 @@ section {
     position: fixed;
     top: 0;
     right: 0;
-    width: 22%;
+    width: 25%;
     z-index: 1;
     min-width: 215px;
     margin-top: 49px;
@@ -473,19 +473,6 @@ section:not(.opened) .revise-button-counter {
     }
 }
 
-.review-triangle {
-    display:none;
-    border-top: 10px solid #f7f7f7;
-    border-left: 12px solid transparent;
-    -webkit-filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.2));
-    filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.2));
-        margin-left: -10px;
-    margin-top: 10px;
-}
-
-.review-side-panel-opened section.opened .review-triangle  {
-     display:block;
-}
 
 /* code to hide scroll of the body */
 .review-side-panel-opened {

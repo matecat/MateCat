@@ -27,6 +27,7 @@
     "grunt-strip": "^0.2.1",
     "grunt-text-replace": "^0.4.0",
     "handlebars": "^4.0.5",
+    "immutable": "^3.8.2",
     "jquery": "^1.11.0",
     "keymirror": "^0.1.1",
     "lodash": "^4.2.1",
@@ -39,8 +40,8 @@
     "react-addons-css-transition-group": "^15.6.2",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.0.0",
-    "sprintf": "^0.1.5",
-    "showdown": "^1.8.0"
+    "showdown": "^1.8.0",
+    "sprintf": "^0.1.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -237,6 +237,14 @@ var SegmentActions = {
         });
     },
 
+    renderPreview: function ( sid, data ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.RENDER_PREVIEW,
+            sid: sid,
+            data: data
+        });
+    },
+
 
     /************ Revise ***************/
     showSelection: function (sid, data) {
@@ -262,6 +270,13 @@ var SegmentActions = {
         });
     },
 
+    showIssuesMessage: function ( sid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SHOW_ISSUE_MESSAGE,
+            sid: sid,
+        });
+    },
+
     renderReviseErrors: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_REVISE_ISSUES,
@@ -272,11 +287,6 @@ var SegmentActions = {
 
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
-    },
-
-    sendNewTranslationIssue: function (sid, data, diff) {
-        let segment = SegmentStore.getSegmentById(sid, UI.getSegmentFileId(UI.getSegmentById(sid))).toJS();
-        return UI.sendNewTranslationIssue(segment, data, diff);
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {

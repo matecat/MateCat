@@ -4,7 +4,8 @@ class ReviewExtendedIssuePanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            submitDisabled : true
+            submitDisabled : true,
+            listIsOpen: true
         };
 
     }
@@ -13,13 +14,8 @@ class ReviewExtendedIssuePanel extends React.Component{
         return JSON.parse(config.lqa_nested_categories).categories ;
     }
 
-    severitySelected( category, event ) {
-        let severity = $(ReactDOM.findDOMNode( event.target )).val() ;
-        this.sendIssue(category, severity);
-    }
-
     sendIssue(category, severity) {
-
+        this.props.setCreationIssueLoader(true);
         let data = [];
         let deferred = $.Deferred();
         let self = this;
@@ -46,9 +42,10 @@ class ReviewExtendedIssuePanel extends React.Component{
         if(this.props.isDiffChanged){
         	let segment = this.props.segment;
         	segment.translation = this.props.newtranslation;
+        	segment.status = 'approved';
 			API.SEGMENT.setTranslation(segment)
 				.done(function(response){
-					issue.version = response.translation.version_
+					issue.version = response.translation.version;
 					deferred.resolve();
 				})
 				.fail( self.handleFail.bind(self) ) ;
@@ -59,6 +56,8 @@ class ReviewExtendedIssuePanel extends React.Component{
 		data.push(issue);
 
 		deferred.then(function () {
+		    SegmentActions.removeClassToSegment(self.props.sid, "modified");
+            UI.currentSegment.data('modified', false);
 			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
 				.done( self.props.submitIssueCallback )
 				.fail( self.handleFail.bind(self) ) ;
@@ -68,12 +67,16 @@ class ReviewExtendedIssuePanel extends React.Component{
 
     handleFail() {
         genericErrorAlertMessage() ;
+        this.props.setCreationIssueLoader(false);
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
 
     toggleList(){
 		$(this.listElm).slideToggle('fast');
+		this.setState({
+            listIsOpen: !this.state.listIsOpen
+        })
 	}
     render() {
         let categoryComponents = [];
@@ -88,7 +91,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             categoryComponents.push(
                 <ReviewExtendedCategorySelector
                     key={'category-selector-' + i}
-                    severitySelected={this.severitySelected.bind(this)}
+                    sendIssue={this.sendIssue.bind(this)}
                     selectedValue={selectedValue}
                     nested={false}
                     category={category} />);
@@ -103,7 +106,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                         <ReviewExtendedCategorySelector
                             key={kk}
                             selectedValue={selectedValue}
-                            severitySelected={this.severitySelected.bind(this)}
+                            sendIssue={this.sendIssue.bind(this)}
                             nested={true}
                             category={category}  />
                     );

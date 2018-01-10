@@ -130,6 +130,16 @@ if ( Review.enabled() )
                         callback();
                     }
                 }
+            },
+            /**
+             * This method is overwritten by the review extended in which you must check whether issues have been created before leaving a modified segment.
+             * This is not the case for other revision types.
+             * @param sid
+             * @param fid
+             * @returns {boolean}
+             */
+            checkSegmentIssues: function ( sid, fid ) {
+                return true;
             }
         });
     })(Review, jQuery);
@@ -200,7 +210,9 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
         addOriginalTranslation: function (d, id_segment) {
             var xEditarea = $('#segment-' + id_segment + '-editarea');
             if (d.original !== '') {
-                SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+                setTimeout(function (  ) {
+                    SegmentActions.addOriginalTranslation(id_segment, UI.getSegmentFileId($('#segment-' + id_segment)), d.original);
+                });
             }
             if ( Review.type === 'simple') {
                 UI.setReviewErrorData(d.error_data);
@@ -231,9 +243,10 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
             // because of the event is triggered even on download button
             e.preventDefault();
+            var sid = UI.currentSegmentId;
             var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
             UI.tempDisablingReadonlyAlert = true;
-            SegmentActions.removeClassToSegment(UI.getSegmentId( UI.currentSegment ), 'modified');
+            SegmentActions.removeClassToSegment(sid, 'modified');
             UI.currentSegment.data('modified', false);
 
 
@@ -242,7 +255,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
 
             var original = UI.currentSegment.find('.original-translation').text();
-            var sid = UI.currentSegmentId;
+
             var err = $('.sub-editor.review .error-type');
             var err_typing = $(err).find('input[name=t1]:checked').val();
             var err_translation = $(err).find('input[name=t2]:checked').val();
