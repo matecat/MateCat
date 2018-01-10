@@ -15,7 +15,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     sendIssue(category, severity) {
-
+        this.props.setCreationIssueLoader(true);
         let data = [];
         let deferred = $.Deferred();
         let self = this;
@@ -66,6 +66,7 @@ class ReviewExtendedIssuePanel extends React.Component{
 
     handleFail() {
         genericErrorAlertMessage() ;
+        this.props.setCreationIssueLoader(false);
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }

@@ -13,7 +13,8 @@ class ReviewExtendedPanel extends React.Component {
 			diffPatch: null,
 			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
-			showAddIssueMessage: false
+			issueInCreation: false,
+            showAddIssueMessage: false
 		};
 	}
 
@@ -31,7 +32,7 @@ class ReviewExtendedPanel extends React.Component {
 		this.setState({
 			diffPatch: diffPatch,
 			newtranslation: newTranslation,
-			isDiffChanged: isDiffChanged,
+			isDiffChanged: isDiffChanged
 		});
 	}
 
@@ -41,6 +42,7 @@ class ReviewExtendedPanel extends React.Component {
 		});
 	}
 	removeSelection() {
+        this.setCreationIssueLoader(false);
 		this.setState({
 			selectionObj: null
 		});
@@ -56,8 +58,14 @@ class ReviewExtendedPanel extends React.Component {
 		return issues;
 	}
 
+	setCreationIssueLoader(inCreation){
+		this.setState({
+			issueInCreation: inCreation
+		})
+	}
+
     showIssuesMessage() {
-	    this.setState({
+        this.setState({
             showAddIssueMessage: true
         });
     }
@@ -95,6 +103,7 @@ class ReviewExtendedPanel extends React.Component {
             ) : (null)}
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
+				loader={this.state.issueInCreation}
 				issues={issues}
 				isReview={this.props.isReview}
 				segment={this.props.segment}
@@ -110,6 +119,7 @@ class ReviewExtendedPanel extends React.Component {
 				reviewType={this.props.reviewType}
 				newtranslation={this.state.newtranslation}
 				segment={this.props.segment}
+                setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
 			/>): (null)}
 
 		</div>;
