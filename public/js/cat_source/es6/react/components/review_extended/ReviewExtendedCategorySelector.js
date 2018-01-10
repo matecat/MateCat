@@ -17,7 +17,7 @@ class ReviewExtendedCategorySelector extends React.Component{
     	$(this.selectRef).dropdown();
 	}
     onChangeSelect(){
-        let severity = $(this.selectRef).val()
+        let severity = $(this.selectRef).data('value');
         if(severity){
             this.props.sendIssue(this.props.category, severity);
             $(this.selectRef).dropdown('clear');
@@ -30,22 +30,25 @@ class ReviewExtendedCategorySelector extends React.Component{
         var select = null;
 
         if ( this.props.category.severities ) {
-            var default_severity = <option key={'value-'} value="" >---</option>;
             var severities = this.props.category.severities.map(function(severity, i) {
-                return <option key={'value-' + severity.label} value={severity.label}>{severity.label}</option> ;
+                return <div onClick={this.onChangeSelect.bind(this)}
+                            className="item"  key={'value-' + severity.label}
+                            data-value={severity.label}>
+                        {severity.label}
+                    </div> ;
             }.bind(this));
 
-            var full_severities = [default_severity].concat( severities );
-
-            select = <select
+            select = <div className="ui icon top right pointing dropdown button"
                 ref={(input) => { this.selectRef = input;}}
-                value={this.state.value}
-				className="ui dropdown"
+                data-value={this.state.value}
                 autoFocus={this.props.focus}
-                onChange={this.onChangeSelect.bind(this)}
                 name="severities">
-                {full_severities}
-            </select>
+                <i className="icon-sort-down icon" />
+                <div className="menu">
+                    {severities}
+                </div>
+
+            </div>
         }
 		return <div className="error-item">
 			<div className="error-name">{this.props.category.label}</div>

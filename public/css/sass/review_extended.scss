@@ -4,8 +4,6 @@
 }
 #review-side-panel h4 {
 	margin: unset;
-	box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-	background: #ffffff;
 }
 
 h1, h2, h3, h4, h5, a, input {
@@ -32,6 +30,12 @@ h1, h2, h3, h4, h5, a, input {
 			padding: 10px 10px 0;
 			overflow-y: auto;
 			background: #dedde4;
+			position: relative;
+			.issues-list-title {
+				margin-bottom: 5px;
+				padding-left: 10px;
+				font-weight: 700;
+			}
 			.issues-list {
 				position: relative;
 				max-height: 260px;
@@ -162,44 +166,31 @@ h1, h2, h3, h4, h5, a, input {
 						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 						background: #ffffff;
 						.error-name {
-							width: 65%;
+							width: 80%;
 							display: inline-block;
 							line-height: 20px;
 							vertical-align: middle;
 						}
 						.error-level {
-							display: none;
-							width: 35%;
+							/*display: none;*/
+							display: inline-block;
+							width: 20%;
 							text-align: right;
 							.ui.dropdown {
-								min-width: 105px;
-								padding: 6px 6px 6px 15px;
-								margin: 0;
-								border: none;
-								height: 100%;
-								box-shadow: 0 0 1px 1px #c6c6c6;
-								min-height: unset;
+								width: 30px;
+								height: 30px;
 								vertical-align: middle;
-								.text {
-									box-shadow: unset;
-									background: unset;
+								padding: 0;
+								text-align: center;
+								background: transparent;
+								/*line-height: 30px;*/
+								i {
+									vertical-align: middle;
 								}
-								.dropdown.icon {
-									margin: 0;
-									padding: 0;
-									height: 0;
-									min-height: 0;
-									line-height: 8px;
+								&:hover {
+									box-shadow: inset 0 0 1px black;
 								}
 							}
-						}
-						&:hover{
-							.error-level {
-								display: inline-block;
-							}
-						}
-						&:last-child {
-							border-bottom: none;
 						}
 					}
 				}
@@ -237,8 +228,9 @@ h1, h2, h3, h4, h5, a, input {
             user-select: none;
         }
         &.head {
-            min-height: 65px;
+			min-height: 65px;
 			padding: 10px;
+			word-wrap: break-word;
         }
     }
 	.re-add-comment {
