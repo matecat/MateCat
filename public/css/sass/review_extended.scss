@@ -21,20 +21,20 @@ h1, h2, h3, h4, h5, a, input {
 			position: relative;
 			background: #f3f3f3;
 			padding: 10px;
+			z-index: 1;
 			.re-header-track {
 
 				.explain-selection {
 					padding: 5px 10px 0;
 				}
 			}
-
 		}
 		.re-issues {
 			padding: 10px;
 			position: relative;
 			.issues-list {
 				position: relative;
-				overflow-y: scroll;
+				overflow-y: auto;
 				max-height: 260px;
 				.issue-item {
 					.issue {
@@ -253,14 +253,17 @@ h1, h2, h3, h4, h5, a, input {
 	}
 	.re-comment-list {
 		font-size: 14px;
-		.re-revisor {
-			color: #00b76c;
-		}
-		.re-translator {
-			color: #0997bc;
-		}
-		.re-comment-date{
-			font-size: 13px;
+		.re-comment {
+			margin-bottom: 0;
+			.re-revisor {
+				color: #00b76c;
+			}
+			.re-translator {
+				color: #0997bc;
+			}
+			.re-comment-date{
+				font-size: 13px;
+			}
 		}
 	}
     .selected {
