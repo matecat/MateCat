@@ -1,4 +1,5 @@
 let ReviewExtendedIssue =  require("./ReviewExtendedIssue").default;
+let WrapperLoader =         require("../../common/WrapperLoader").default;
 class ReviewExtendedIssuesContainer extends React.Component {
 
     constructor(props) {
@@ -40,7 +41,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
         let cs = classnames({
             'review-issues-container' : true,
         });
-        let issues;
+        let issues,
+            loaderHtml = '';
 
         if (this.props.issues.length > 0 ) {
             let sorted_issues = this.props.issues.sort(function(a,b) {
@@ -60,9 +62,9 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
             }.bind(this) );
         }
-
         if(this.props.issues.length > 0){
             return <div className="re-issues">
+                {this.props.loader ? <WrapperLoader /> : null}
                 <h4>Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>
                 <div className="issues-list">
                     {issues}
