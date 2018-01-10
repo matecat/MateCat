@@ -59,12 +59,20 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
         },
 
         deleteIssue : function( issue ) {
-            var message = sprintf(
-                "You are about to delete the issue on string <span style='font-style: italic;'>'%s'</span> " +
-                "posted on %s." ,
-                issue.target_text,
-                moment( issue.created_at ).format('lll')
-            );
+            var message = '';
+            if ( issue.target_text ) {
+                message = sprintf(
+                    "You are about to delete the issue on string <span style='font-style: italic;'>'%s'</span> " +
+                    "posted on %s." ,
+                    issue.target_text,
+                    moment( issue.created_at ).format('lll')
+                );
+            } else {
+                message = sprintf(
+                    "You are about to delete the issue posted on %s." ,
+                    moment( issue.created_at ).format('lll')
+                );
+            }
 
             APP.confirm({
                 name : 'Confirm issue deletion',
