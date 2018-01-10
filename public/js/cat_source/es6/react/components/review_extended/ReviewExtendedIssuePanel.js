@@ -80,10 +80,10 @@ class ReviewExtendedIssuePanel extends React.Component{
 	}
     render() {
         let categoryComponents = [];
-		let dropDownIcon = "icon-sort-up icon";
+		/*let dropDownIcon = "icon-sort-up icon";
 		if(this.state.listIsOpen){
 			dropDownIcon = "icon-sort-down icon";
-		}
+		}*/
 
         this.issueCategories().forEach(function(category, i) {
             let selectedValue = "";
@@ -118,7 +118,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             return<div className="re-create-issue">
 				<div className="ui accordion">
 					<h4 className="create-issue-title" onClick={this.toggleList.bind(this)}>
-						Error list <i className={dropDownIcon}/>
+						Error list
 					</h4>
 					{/*<div className="issues-scroll">
 						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
