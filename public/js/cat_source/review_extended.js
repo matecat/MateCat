@@ -79,7 +79,7 @@ if ( ReviewExtended.enabled() ) {
                     SegmentActions.showIssuesMessage(sid);
                     return;
                 }
-                originalClickOnApprovedButton.apply(this);
+                originalClickOnApprovedButton.apply(this, [e , button]);
             },
 
             deleteTranslationIssue : function( context ) {
