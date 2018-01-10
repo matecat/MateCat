@@ -1,5 +1,6 @@
 #review-side-panel {
 	overflow: auto !important;
+	padding-bottom: 84px;
 }
 #review-side-panel h4 {
 	margin: unset;
@@ -30,6 +31,7 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-issues {
 			padding: 10px;
+			position: relative;
 			.issues-list {
 				position: relative;
 				overflow-y: scroll;
