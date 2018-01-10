@@ -79,7 +79,7 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     openPreview() {
-        UI.openPreview();
+        UI.openPreview(this.props.id_segment,this.state.previews[this.state.currentIndexPreview].file_index);
     }
 
     componentDidMount() {
