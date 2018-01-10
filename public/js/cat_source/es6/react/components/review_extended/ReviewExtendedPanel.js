@@ -97,8 +97,8 @@ class ReviewExtendedPanel extends React.Component {
 				selectable={this.props.isReview}
 			/>
             {this.state.showAddIssueMessage ? (
-              <div>
-                  In order to Approve the segment you need to add an Issue
+              <div className="re-warning-not-added-issue">
+				  <p>In order to Approve the segment you need to add an Issue from Error list</p>
               </div>
             ) : (null)}
 			<ReviewExtendedIssuesContainer

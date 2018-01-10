@@ -149,12 +149,12 @@ class ReviewExtendedIssue extends React.Component {
 						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)}><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
 				</div>
-				{this.props.issue.target_text ?
-					(<div className="selected-text">
-						<p><b>Selected text</b>: <span className="selected">{this.props.issue.target_text}</span></p>
-					</div>):(null)}
 
 			</div>
+			{this.props.issue.target_text ?
+				(<div className="selected-text">
+					<p><b>Selected text</b>: <span className="selected">{this.props.issue.target_text}</span></p>
+				</div>):(null)}
 
 			{this.state.commentView ? commentSection: null}
 
