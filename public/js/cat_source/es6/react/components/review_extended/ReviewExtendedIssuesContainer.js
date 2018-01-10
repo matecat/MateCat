@@ -12,8 +12,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
 
 
-    componentWillReceiveProps ( props ) {
-        if(props.issues.length > this.props.issues.length ){
+    componentWillReceiveProps ( nextProps ) {
+        if(nextProps.issues.length > this.props.issues.length && this.props.segment.sid === nextProps.segment.sid){
             this.setState({
                 animateFirstIssue: true
             })

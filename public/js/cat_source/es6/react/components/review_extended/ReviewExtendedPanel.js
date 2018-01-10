@@ -1,6 +1,7 @@
 let ReviewExtendedIssuesContainer = require('./ReviewExtendedIssuesContainer').default;
 let ReviewVersionDiffContainer = require('./ReviewVersionsDiffContainer').default;
 let ReviewExtendedIssuePanel = require('./ReviewExtendedIssuePanel').default;
+let SegmentConstants = require('../../constants/SegmentConstants');
 
 class ReviewExtendedPanel extends React.Component {
 
@@ -12,7 +13,8 @@ class ReviewExtendedPanel extends React.Component {
 			diffPatch: null,
 			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
-			issueInCreation: false
+			issueInCreation: false,
+            showAddIssueMessage: false
 		};
 	}
 
@@ -61,11 +63,27 @@ class ReviewExtendedPanel extends React.Component {
 			issueInCreation: inCreation
 		})
 	}
+
+    showIssuesMessage() {
+        this.setState({
+            showAddIssueMessage: true
+        });
+    }
+
 	componentWillReceiveProps(nextProps) {
 		this.setState({
-			versionNumber: nextProps.segment.versions[0].version_number
+			versionNumber: nextProps.segment.versions[0].version_number,
+            showAddIssueMessage: false
 		});
 	}
+
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.SHOW_ISSUE_MESSAGE, this.showIssuesMessage.bind(this));
+    }
+
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.SHOW_ISSUE_MESSAGE, this.showIssuesMessage);
+    }
 
 	render() {
 		let issues = this.getAllIssues();
@@ -78,7 +96,11 @@ class ReviewExtendedPanel extends React.Component {
 				segment={this.props.segment}
 				selectable={this.props.isReview}
 			/>
-
+            {this.state.showAddIssueMessage ? (
+              <div>
+                  In order to Approve the segment you need to add an Issue
+              </div>
+            ) : (null)}
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
 				loader={this.state.issueInCreation}

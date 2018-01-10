@@ -233,6 +233,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return this._segments[fid].get(index);
     },
 
+    getSegmentByIdToJS(sid, fid) {
+        return this._segments[fid].find(function (seg) {
+            return seg.get('sid') == sid;
+        }).toJS();
+
+    },
+
     getAllSegments: function () {
         var result = [];
         $.each(this._segments, function(key, value) {
