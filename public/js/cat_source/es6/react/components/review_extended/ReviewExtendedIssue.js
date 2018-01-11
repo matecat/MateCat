@@ -185,6 +185,12 @@ class ReviewExtendedIssue extends React.Component {
 			</div>
 		</div>
 	}
+
+    componentDidUpdate(){
+		if(this.state.commentView){
+			$(this.el).find('.re-comment-input')[0].focus();
+		}
+	}
 }
 
 export default ReviewExtendedIssue;

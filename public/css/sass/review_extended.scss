@@ -28,9 +28,11 @@ h1, h2, h3, h4, h5, a, input {
 		}
 		.re-issues {
 			padding: 10px 10px 0;
-			overflow-y: auto;
 			background: #dedde4;
 			position: relative;
+			.re-issues-inner{
+				overflow-y: auto;
+			}
 			.issues-list-title {
 				margin-bottom: 5px;
 				padding-left: 10px;
