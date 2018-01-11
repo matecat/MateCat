@@ -138,8 +138,8 @@ if ( Review.enabled() )
              * @param fid
              * @returns {boolean}
              */
-            checkSegmentIssues: function ( sid, fid ) {
-                return true;
+            segmentIsModified: function ( sid ) {
+                return false;
             }
         });
     })(Review, jQuery);
