@@ -48,7 +48,8 @@ if ( ReviewExtended.enabled() ) {
             trackChanges: function (editarea) {
                 var segmentId = UI.getSegmentId($(editarea));
                 var segmentFid = UI.getSegmentFileId($(editarea));
-                var originalTranslation = UI.currentSegment.find('.original-translation').html();
+                var currentSegment =  UI.getSegmentById(segmentId)
+                var originalTranslation = currentSegment.find('.original-translation').html();
                 SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
             },
 
@@ -91,11 +92,13 @@ if ( ReviewExtended.enabled() ) {
                     parsed.id_segment,
                     parsed.id_issue
                 );
+                var issue_id = parsed.id_issue;
                 var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment));
                 $.ajax({
                     url: issue_path,
                     type: 'DELETE'
                 }).done( function( data ) {
+                    SegmentActions.confirmDeletedIssue(parsed.id_segment,issue_id);
                     UI.getSegmentVersionsIssues(parsed.id_segment, fid);
                 });
             },

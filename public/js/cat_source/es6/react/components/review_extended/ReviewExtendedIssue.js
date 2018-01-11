@@ -1,4 +1,5 @@
 let ReviewVersionDiff =  require("./ReviewVersionsDiff").default;
+let SegmentConstants = require('../../constants/SegmentConstants');
 class ReviewExtendedIssue extends React.Component {
 
 	constructor(props) {
@@ -28,6 +29,12 @@ class ReviewExtendedIssue extends React.Component {
 		event.preventDefault();
 		event.stopPropagation();
 		SegmentActions.deleteIssue(this.props.issue)
+	}
+	confirmDeletedIssue(sid,data){
+		let issue_id = data;
+		if(sid === this.props.issue.id_segment && issue_id === this.props.issue.id){
+			$(this.el).transition('fade left');
+		}
 	}
 	setExtendedDiffView(event){
 		event.preventDefault();
@@ -108,7 +115,13 @@ class ReviewExtendedIssue extends React.Component {
         }
         return array;
 	}
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.ISSUE_DELETED, this.confirmDeletedIssue.bind(this));
+    }
 
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.ISSUE_DELETED, this.confirmDeletedIssue);
+    }
 	render() {
 		let category_label = this.categoryLabel();
 		let formatted_date = moment(this.props.issue.created_at).format('lll');
@@ -137,7 +150,7 @@ class ReviewExtendedIssue extends React.Component {
 			</div>;
         //END comments html section
 
-		return <div className="issue-item">
+		return <div className="issue-item" ref={(node)=>this.el=node}>
 			<div className="issue">
 				<div className="issue-head">
 					<p><b>{category_label}</b>: {this.props.issue.severity}</p>
