@@ -312,6 +312,14 @@ var SegmentActions = {
         UI.deleteIssue(issue);
     },
 
+    confirmDeletedIssue: function (sid,issue_id) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ISSUE_DELETED,
+            sid: sid,
+            data: issue_id
+        });
+    },
+
     submitComment: function (sid, idIssue, data) {
         return UI.submitComment(sid, idIssue, data);
     }
