@@ -106,8 +106,9 @@ if ( ReviewExtended.enabled() ) {
             segmentIsModified: function ( sid ) {
                 var segmentFid = UI.getSegmentFileId(UI.currentSegment);
                 var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
-                var versionTranslation = htmlDecode(segment.versions[0].translation);
-                if (UI.currentSegment.hasClass('modified') && versionTranslation !== UI.getSegmentTarget(UI.currentSegment)) {
+                var versionTranslation = $('<div/>').html(UI.transformTagsWithHtmlAttribute(segment.versions[0].translation)).text();
+
+                if (UI.currentSegment.hasClass('modified') && versionTranslation.trim() !== UI.getSegmentTarget(UI.currentSegment).trim()) {
                     return true;
                 }
                 return false;
