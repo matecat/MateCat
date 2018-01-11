@@ -296,7 +296,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
                     '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
                     this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
                     ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-                div.find('.approved').parent().prepend(htmlButton);
+                div.html(htmlButton + div.html());
             }
             UI.segmentButtons = div.html();
         }
