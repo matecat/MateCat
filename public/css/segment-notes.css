@@ -68,6 +68,7 @@ div.segment-notes ul.graysmall li span.note-label {
     color: #666666;
     outline: none;
     position: relative;
+    background-color: transparent;
 }
 
 .tab-preview-screenshot button:hover {
