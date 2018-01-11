@@ -185,13 +185,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     replaceTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid, fid);
-        var trans = this.removeLockTagsFromString(translation);
+        var trans = htmlEncode(this.removeLockTagsFromString(translation));
         this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
         return translation;
     },
     replaceSource(sid, fid, source) {
         var index = this.getSegmentIndex(sid, fid);
-        var trans = this.removeLockTagsFromString(source);
+        var trans = htmlEncode(this.removeLockTagsFromString(source));
         this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
         return source;
     },

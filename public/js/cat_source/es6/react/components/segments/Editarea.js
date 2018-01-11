@@ -135,6 +135,12 @@ class Editarea extends React.Component {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
             nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation)
     }
+    componentDidUpdate() {
+        let self = this;
+        setTimeout(function (  ) {
+            self.emitTrackChanges();
+        });
+    }
     render() {
         let lang = '';
         let readonly = false;
