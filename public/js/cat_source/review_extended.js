@@ -92,11 +92,13 @@ if ( ReviewExtended.enabled() ) {
                     parsed.id_segment,
                     parsed.id_issue
                 );
+                var issue_id = parsed.id_issue;
                 var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment));
                 $.ajax({
                     url: issue_path,
                     type: 'DELETE'
                 }).done( function( data ) {
+                    SegmentActions.confirmDeletedIssue(parsed.id_segment,issue_id);
                     UI.getSegmentVersionsIssues(parsed.id_segment, fid);
                 });
             },
