@@ -73,8 +73,7 @@ if ( ReviewExtended.enabled() ) {
             clickOnApprovedButton: function (e, button) {
                 e.preventDefault();
                 var sid = UI.currentSegmentId;
-                var segmentFid = UI.getSegmentFileId(UI.currentSegment);
-                if ( UI.currentSegment.hasClass('modified') && !UI.checkSegmentIssues(sid, segmentFid)) {
+                if ( UI.segmentIsModified(sid)) {
                     SegmentActions.openIssuesPanel({ sid: sid });
                     SegmentActions.showIssuesMessage(sid);
                     return;
@@ -104,8 +103,13 @@ if ( ReviewExtended.enabled() ) {
                 return ReviewExtended.submitComment(id_segment, id_issue, data)
             },
 
-            checkSegmentIssues: function ( sid, fid ) {
-                var segment = SegmentStore.getSegmentByIdToJS(sid, fid);
+            segmentIsModified: function ( sid ) {
+                var segmentFid = UI.getSegmentFileId(UI.currentSegment);
+                var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
+                var versionTranslation = htmlDecode(segment.versions[0].translation);
+                if (UI.currentSegment.hasClass('modified') && versionTranslation !== UI.getSegmentTarget(UI.currentSegment)) {
+                    return true;
+                }
                 return false;
             }
 
