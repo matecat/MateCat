@@ -23,7 +23,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     componentDidUpdate () {
         if(this.state.animateFirstIssue){
             $('.issue-item:first-child .issue')
-                .transition('jiggle');
+                .transition('pulse');
             this.setState({
                 animateFirstIssue: false
             })
