@@ -46,7 +46,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
         if (this.props.issues.length > 0 ) {
             let sorted_issues = this.props.issues.sort(function(a,b) {
-                return parseInt( a.id ) < parseInt( b.id );
+                return parseInt( a.id ) - parseInt( b.id );
             });
 
             issues = sorted_issues.map(function( item, index ) {
@@ -64,11 +64,14 @@ class ReviewExtendedIssuesContainer extends React.Component {
         }
         if(this.props.issues.length > 0){
             return <div className="re-issues">
-                {this.props.loader ? <WrapperLoader /> : null}
-                <div className="issues-list-title">Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></div>
-                <div className="issues-list">
-                    {issues}
+                <div className="re-issues-inner">
+                    {this.props.loader ? <WrapperLoader /> : null}
+                    <div className="issues-list-title">Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></div>
+                    <div className="issues-list">
+                        {issues}
+                    </div>
                 </div>
+
             </div>;
         }
         return "";
