@@ -209,6 +209,7 @@ class ReviewVersionsDiff extends React.Component {
     render() {
 		let classes;
         let diffHTML = this.getDiffHtml();
+        diffHTML = UI.transformTextForLockTags(diffHTML);
         let diffClass = classnames({
             "re-track-changes": true,
             "no-select": !this.props.selectable,
