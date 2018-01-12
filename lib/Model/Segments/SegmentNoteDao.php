@@ -24,18 +24,6 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
             foreach ( $json_segment_ids as $id_segment ) {
                 foreach ( $json_entries as $json ) {
-                    $json_decoded = json_decode($json);
-                    foreach($json_decoded->previews as &$preview){
-                        if ( isset( $preview->previousPreview ) ) {
-                            $preview->previousPreview = preg_replace( "/^__previews\//", "", $preview->previousPreview );
-                        }
-
-                        if ( isset( $preview->nextPreview ) ) {
-                            $preview->nextPreview = preg_replace( "/^__previews\//", "", $preview->nextPreview );
-                        }
-                    }
-                    $json = json_encode($json_decoded);
-
                     $insert_values[] = array( $id_segment, $internal_id, null, $json );
                 }
             }
