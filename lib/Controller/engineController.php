@@ -392,9 +392,9 @@ class engineController extends ajaxController {
 
             $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
             $config              = $newTestCreatedMT->getConfigStruct();
-            $config[ 'q' ] = "Hello World";
-            $config[ 'source' ]  = "en";
-            $config[ 'target' ]  = "fr";
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
 
             $mt_result = $newTestCreatedMT->get( $config );
 
