@@ -201,14 +201,14 @@ $.extend(UI, {
             SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
 
             // UI.setDeleteSuggestion(segment);
-            UI.setContributionSourceDiff(segment);
+            // UI.setContributionSourceDiff(segment);
             //If Tag Projection is enable I take out the tags from the contributions
-            if (!UI.enableTagProjection) {
-                UI.markSuggestionTags(segment);
-            }
+            // if (!UI.enableTagProjection) {
+            //     UI.markSuggestionTags(segment);
+            // }
             if (editareaLength === 0) {
 
-                    UI.setChosenSuggestion(1, segment);
+                UI.setChosenSuggestion(1, segment);
 
                 translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
@@ -339,7 +339,7 @@ $.extend(UI, {
         });
 
         $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
-            percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
+            var percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
             if(percent > 74) {
                 var ss = $(this).find('.suggestion_source');
 

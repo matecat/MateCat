@@ -79,7 +79,8 @@ $.extend(UI, {
         var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
         var brTx2 =  "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 
-        tx = tx.replace( /<span/gi, "<_plh_" )
+        tx = tx.replace( /&amp;/gi, "&" )
+            .replace( /<span/gi, "<_plh_" )
             .replace( /<\/span/gi, "</_plh_" )
             .replace( /&lt;/gi, "<" )
             .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTx1 )
@@ -96,6 +97,10 @@ $.extend(UI, {
             .replace( /\&lt;br \/>/gi, "<br />" )
             .replace( /\&lt;mark/gi, "<mark" )
             .replace( /\&lt;\/mark/gi, "</mark" )
+            .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
+            .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
+            .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
+            .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
