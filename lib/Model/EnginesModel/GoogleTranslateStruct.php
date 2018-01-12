@@ -22,7 +22,7 @@ class EnginesModel_GoogleTranslateStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "https://translation.googleapis.com/";
+    public $base_url = "https://translation.googleapis.com";
 
     /**
      * @var string

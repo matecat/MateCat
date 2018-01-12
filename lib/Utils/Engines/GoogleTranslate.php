@@ -9,8 +9,10 @@
 
 class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
+    use \Engines\Traits\FormatResponse;
+
     protected $_config = array(
-            'q'     => null,
+            'q'           => null,
             'source'      => null,
             'target'      => null,
     );
@@ -29,28 +31,29 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
      */
     protected function _decode( $rawValue ) {
 
+        $all_args =  func_get_args();
+        $all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];
+
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
-            if ( isset($decoded[ "data" ] )) {
-                return $decoded;
+            if ( isset( $decoded[ "data" ] ) ) {
+                return $this->_composeResponseAsMatch( $all_args, $decoded );
             } else {
-                $decoded = array(
-                        'error' => array(
-                                'code' => $decoded[ "code" ],
+                $decoded = [
+                        'error' => [
+                                'code'    => $decoded[ "code" ],
                                 'message' => $decoded[ "message" ]
-                        )
-                );
+                        ]
+                ];
             }
         } else {
             $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
-            if ( isset( $resp[ "code" ] ) && isset( $resp[ "message" ] )) {
-                $rawValue[ "error" ][ "code" ] = $resp[ "code" ];
-                $rawValue[ "error" ][ "message" ] = $resp[ "message" ];
+            if ( isset( $resp[ "error" ][ "code" ] ) && isset( $resp[ "error" ][ "message" ] ) ) {
+                $rawValue[ "error" ][ "code" ]    = $resp[ "error" ][ "code" ];
+                $rawValue[ "error" ][ "message" ] = $resp[ "error" ][ "message" ];
             }
             $decoded = $rawValue; // already decoded in case of error
         }
-
-
 
         return $decoded;
 
@@ -58,14 +61,13 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     public function get( $_config ) {
 
-
         $parameters = array();
         if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
-        $parameters['target'] = $_config['target'];
-        $parameters['source'] = $_config['source'];
-        $parameters['q'] = $this->_preserveSpecialStrings($_config['q']);
+        $parameters['target'] = $this->_fixLangCode( $_config['target'] );
+        $parameters['source'] = $this->_fixLangCode( $_config['source'] );
+        $parameters['q'] = $this->_preserveSpecialStrings($_config['segment']);
 
         $this->_setAdditionalCurlParams(
                 array(
