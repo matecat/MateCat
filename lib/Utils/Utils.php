@@ -490,7 +490,7 @@ class Utils {
 		//suggestion is coming from a public TM
 		if ( strtolower( $sug_source ) == 'matecat' ) {
 
-			$description = "Public TM";
+			$description = Constants::PUBLIC_TM ;
 
 		} elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
 
@@ -521,35 +521,32 @@ class Utils {
 
 			}
 
+            if ( empty( $description ) ) {
+                $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
+            }
+
 		}
 
 		/**
 		 * if the description is empty, get cascading default descriptions
 		 */
 		if ( empty( $description ) ) {
-			$description = self::getDefaultKeyDescription( $key, $job_tm_keys, $job_owner );
-		}
-
-		if ( empty( $description ) ) {
-			$description = "No description available"; //this should never be
+			$description = Constants::PUBLIC_TM ;
 		}
 
 		return $description;
 	}
 
-	/**
-	 * if the description is empty, get cascading default descriptions
-	 *
-	 * First get the job key description, if empty, get the job owner email
-	 *
-	 * @param $key
-	 *
-	 * @return null|string
-	 * @throws Exception
-	 */
-	public static function getDefaultKeyDescription( $key, $job_tm_keys, $job_owner ){
-
-		$description = null;
+    /**
+     * Returns description for a key. If not found then default to "Private TM".
+     *
+     * @param $key
+     * @param $job_tm_keys
+     *
+     * @return null|string
+     */
+	public static function getDefaultKeyDescription( $key, $job_tm_keys ){
+		$description = Constants::PRIVATE_TM ;
 
 		$ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $job_tm_keys ) );
 
@@ -561,10 +558,7 @@ class Utils {
 			}
 		}
 
-		//return if something was found, avoid other computations
-		if ( !empty( $description ) ) return $description;
-
-		return $job_owner;
+		return $description ;
 	}
 
 }
