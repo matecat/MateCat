@@ -28,6 +28,7 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     processContributions(matches, fieldTest) {
+        var self = this;
         var matchesProcessed = [];
         // SegmentActions.createFooter(this.props.id_segment);
         $.each(matches, function(index) {
@@ -60,15 +61,22 @@ class SegmentFooterTabMatches extends React.Component {
                 item.percentText = this.match;
             } else {
                 item.quality = parseInt(this.quality);
-                item.percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
+                item.percentClass = (this.quality > 98)? 'per-green' : (this.quality == 98)? 'per-red' : 'per-gray';
                 item.percentText = 'MT';
             }
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment);
-            item.translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
+            item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(this.segment));
+            item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
+            item.sourceDiff = item.suggestionDecodedHtml;
+            if (this.match !== "MT" && parseInt(this.match) > 74) {
+                let sourceDecoded = $( "<div/>" ).html( UI.transformTagsWithHtmlAttribute( self.props.segment.segment ) ).text();
+                let matchDecoded = $( "<div/>" ).html( UI.transformTagsWithHtmlAttribute( this.segment ) ).text();
+                var diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
+                item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
+            }
             matchesProcessed.push(item);
         });
         return matchesProcessed;
@@ -151,7 +159,7 @@ class SegmentFooterTabMatches extends React.Component {
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-source'}
                                 className="suggestion_source"
-                                dangerouslySetInnerHTML={ self.allowHTML(match.suggestionDecodedHtml) } >
+                                dangerouslySetInnerHTML={ self.allowHTML(match.sourceDiff) } >
                             </span>
                         </li>
                         <li className="b sugg-target">
