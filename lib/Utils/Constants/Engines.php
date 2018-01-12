@@ -23,6 +23,7 @@ class Constants_Engines {
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
+    const GOOGLE_TRANSLATE = 'GoogleTranslate';
 
     protected static $ENGINES_LIST = [
             self::MY_MEMORY        => self::MY_MEMORY,
@@ -35,6 +36,7 @@ class Constants_Engines {
             self::LETSMT           => self::LETSMT,
             self::SMART_MATE       => self::SMART_MATE,
             self::YANDEX_TRANSLATE => self::YANDEX_TRANSLATE,
+            self::GOOGLE_TRANSLATE => self::GOOGLE_TRANSLATE,
     ];
 
     /**
