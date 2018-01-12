@@ -3,6 +3,7 @@ let SegmentStore = require('../../stores/SegmentStore');
 let ReviewIssueSelectionPanel = require('../review_improved/ReviewIssueSelectionPanel').default;
 let TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default;
 let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
+let WrapperLoader = require('../../common/WrapperLoader').default;
 class ReviewSidePanel extends React.Component{
 
     constructor(props) {
@@ -10,7 +11,8 @@ class ReviewSidePanel extends React.Component{
         this.state = {
             visible: false,
             sid: null,
-            selection : null
+            selection : null,
+            loader: true
         };
 
     }
@@ -35,6 +37,12 @@ class ReviewSidePanel extends React.Component{
 
     closePanelClick(e, data) {
         this.props.closePanel();
+    }
+
+    setLoader(boolean){
+        this.setState({
+            loader: boolean
+        })
     }
 
     componentDidMount() {
@@ -96,11 +104,13 @@ class ReviewSidePanel extends React.Component{
                         segment={this.state.segment}
                         sid={this.state.segment.sid}
                         isReview={this.props.isReview}
+                        setParentLoader={this.setLoader.bind(this)}
                     />;
             }
         }
 
         return <div className={classes} id="review-side-panel">
+            {this.state.loader && this.props.reviewType === "extended" ? <WrapperLoader /> : null}
             {this.props.reviewType === "extended" ? (
                 <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
             ) : (null)}
