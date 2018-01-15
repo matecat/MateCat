@@ -73,7 +73,7 @@ class Features {
                 if ( $fileInfo->isDir() && $fileInfo->getBasename()[ 0 ] != '.' ) {
 
                     $manifest = @include_once( $fileInfo->getPathname() . DIRECTORY_SEPARATOR . 'manifest.php' );
-                    if ( !empty( $manifest ) ) {
+                    if ( !empty( $manifest ) ) { //Autoload external plugins
 
                         static::$_INSTANCE->PLUGIN_PATHS[] = $fileInfo->getPathname() . DIRECTORY_SEPARATOR . "lib";
                         static::$_INSTANCE->VALID_CODES[] = $manifest[ 'FEATURE_CODE' ];
@@ -156,7 +156,23 @@ class Features {
 
         if ( array_search( $plugin_code, $instance->VALID_CODES ) !== false ) {
 
+            //try to load external plugins classes
             $cls = $instance->PLUGIN_CLASSES[ $plugin_code ];
+
+            //check if the plugin class is found
+            if( !$cls ){
+                /**
+                 * If external plugin class is not defined ( no manifest or no plugin installed )
+                 * Try to load MateCat core plugins, so they can install it's own routes
+                 *
+                 * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
+                 *             Ex: http://xxxx/plugins/review_improved/quality_report/xxx/xxxxxxx
+                 *             should be something like
+                 *             http://xxxx/review_improved/quality_report/xxx/xxxxxxx
+                 */
+                $cls = '\\Features\\' .  Utils::underscoreToCamelCase( $plugin_code );
+            }
+
             $klein->with( "/plugins/$plugin_code", function () use ( $cls, $klein ) {
                 /**
                  * @var $cls BaseFeature
