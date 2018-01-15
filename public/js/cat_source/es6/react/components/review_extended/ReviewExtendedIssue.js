@@ -105,11 +105,9 @@ class ReviewExtendedIssue extends React.Component {
 			comment_date = moment(comment.create_date).format('lll');
 
             if(comment.source_page == 1){
-				array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>: </i></span>{comment.comment}</p>)
-				// array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+				array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }else if(comment.source_page == 2){
-                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>: </i></span>{comment.comment}</p>)
-                // array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }
         }
         if(array.length > 0 ){

@@ -72,10 +72,11 @@ class SegmentFooterTabMatches extends React.Component {
             item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = $( "<div/>" ).html( UI.transformTagsWithHtmlAttribute( self.props.segment.segment ) ).text();
-                let matchDecoded = $( "<div/>" ).html( UI.transformTagsWithHtmlAttribute( this.segment ) ).text();
-                var diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
+                let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
+                let matchDecoded = UI.removePhTagsWithEquivTextIntoText( this.segment );
+                let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
+                item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
             }
             matchesProcessed.push(item);
         });
