@@ -1737,7 +1737,7 @@ div.mt-error-key {
     color: red;
     padding: 5px 0 10px;
     margin-left: 7px;
-    position: absolute;
+    clear: both;
 }
 
 .mgmt-table-mt .uploadtm.btn-ok {
@@ -2735,11 +2735,11 @@ body.filterOpen .searchbox
 }
 
 .insert-tm label {
-    text-align: right;
     font-size: 16px;
     display: inline-block;
     margin-top: 20px;
     margin-bottom: 5px;
+    width: 100%;
 }
 
 .insert-tm input {
