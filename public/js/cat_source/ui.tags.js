@@ -142,6 +142,30 @@ $.extend(UI, {
 
 
     },
+    /**
+     * To transform text with the' ph' tags that have the attribute' equival-text' into text only, without html
+     */
+    removePhTagsWithEquivTextIntoText: function ( tx ) {
+        try {
+            tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                return "";
+            });
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                return Base64.decode(text);
+            });
+            return tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in removePhTagsWithEquivTextIntoText function");
+        }
+    },
 
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;

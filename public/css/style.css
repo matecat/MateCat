@@ -2304,7 +2304,7 @@ background:#fff;
     background: url(../img/loading.gif) 0 0 no-repeat !important;
     position: absolute;
     left: -47px;
-    bottom: -40px;
+    bottom: -30px;
     display: none;
     background-size: 20px 20px !important;
 }
