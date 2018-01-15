@@ -156,22 +156,18 @@ class Features {
 
         if ( array_search( $plugin_code, $instance->VALID_CODES ) !== false ) {
 
-            //try to load external plugins classes
-            $cls = $instance->PLUGIN_CLASSES[ $plugin_code ];
-
-            //check if the plugin class is found
-            if( !$cls ){
-                /**
-                 * If external plugin class is not defined ( no manifest or no plugin installed )
-                 * Try to load MateCat core plugins, so they can install it's own routes
-                 *
-                 * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
-                 *             Ex: http://xxxx/plugins/review_improved/quality_report/xxx/xxxxxxx
-                 *             should be something like
-                 *             http://xxxx/review_improved/quality_report/xxx/xxxxxxx
-                 */
-                $cls = '\\Features\\' .  Utils::underscoreToCamelCase( $plugin_code );
-            }
+            /**
+             * Try to load external plugins classes and fallback to internal plugin code in case of failure
+             *
+             * If external plugin class is not defined ( no manifest or no plugin installed )
+             * Try to load MateCat core plugins, so they can install it's own routes
+             *
+             * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
+             *             Ex: http://xxxx/plugins/review_improved/quality_report/xxx/xxxxxxx
+             *             should be something like
+             *             http://xxxx/review_improved/quality_report/xxx/xxxxxxx
+             */
+            $cls = static::getPluginClass( $plugin_code );
 
             $klein->with( "/plugins/$plugin_code", function () use ( $cls, $klein ) {
                 /**
