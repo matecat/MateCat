@@ -172,14 +172,10 @@ class CatUtils {
     public static function restore_xliff_tags_for_view($segment) {
         $segment = self::__decode_tag_attributes( $segment );
 
-        preg_match_all( '/(&lt;.+?&gt;)/', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '/equiv-text\s*?=\s*?["\'](.*?)["\']/', $segment, $html, PREG_SET_ORDER );
         foreach( $html as $tag_attribute ){
-            $segment = preg_replace( '/(&lt;.+?&gt;)/', 'base64:' . base64_encode( $tag_attribute[ 1 ] ), $segment, 1 );
-        }
-
-        preg_match_all( '/({.+?})/', $segment, $html, PREG_SET_ORDER );
-        foreach( $html as $tag_attribute ){
-            $segment = preg_replace( '/({.+?})/', 'base64:' . base64_encode( $tag_attribute[ 1 ] ), $segment, 1 );
+            //replace subsequent elements excluding already encoded
+            $segment = preg_replace( '/equiv-text\s*?=["\'](?!base64:)(.*?)["\']/', 'equiv-text="base64:' . base64_encode( $tag_attribute[ 1 ] ) . "\"", $segment, 1 );
         }
 
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);

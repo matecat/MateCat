@@ -194,21 +194,10 @@ class Xliff_Parser {
                         if (isset($temp[1]))
                             $xliff['files'][$i]['trans-units'][$j]['attr']['approved'] = filter_var( $temp[1], FILTER_VALIDATE_BOOLEAN );
 
-						// Getting Source and Target raw content
-						unset($temp);
+                        unset($temp);
 
-						//TODO BUG <ph id="10" x="&lt;endcmp/>&quot;&gt;{10}</ph>
-						preg_match('|<source.*?>(.*?)</source>|si', $trans_unit, $temp);
-						// just in case of a <source />
-						if (!isset($temp[1])) {
-							$temp[1] = '';
-						}
-						$temp[1] = $this->fix_non_well_formed_xml($temp[1]);
-						$xliff['files'][$i]['trans-units'][$j]['source']['raw-content'] = $temp[1];
-
-
-						unset($temp);
-
+                        // Getting Source and Target raw content
+                        $this->getSource( $xliff, $i, $j, $trans_unit );
 						$this->getTarget( $xliff, $i, $j, $trans_unit );
 						$this->getSDLStatus( $xliff, $i, $j, $trans_unit );
 
@@ -217,6 +206,8 @@ class Xliff_Parser {
 						// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 
                         unset( $temp );
+
+                        //TODO improve with DOM
                         preg_match( '|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp );
                         if ( isset( $temp[ 1 ] ) ) {
 
@@ -383,21 +374,21 @@ class Xliff_Parser {
 		
 	}
 
-    private function evalNotes(&$xliff, $i, $j, $trans_unit) {
+    private function evalNotes( &$xliff, $i, $j, $trans_unit ) {
         $temp = null;
-        preg_match_all('|<note.*?>(.+?)</note>|si', $trans_unit, $temp);
-        $matches = array_values( $temp[1] );
-        if ( count($matches) > 0 ) {
-            foreach($matches as $match) {
+        preg_match_all( '|<note.*?>(.+?)</note>|si', $trans_unit, $temp );
+        $matches = array_values( $temp[ 1 ] );
+        if ( count( $matches ) > 0 ) {
+            foreach ( $matches as $match ) {
 
                 $note = [];
-                if( $this->isJSON( $match ) ){
+                if ( $this->isJSON( $match ) ) {
                     $note[ 'json' ] = $this->cleanCDATA( $match );
                 } else {
                     $note[ 'raw-content' ] = $this->fix_non_well_formed_xml( $match );
                 }
 
-                $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'notes' ][] = $note;
 
             }
         }
@@ -420,50 +411,101 @@ class Xliff_Parser {
         return $cleanXMLContent->__toString();
     }
 
-    private function getTarget( &$xliff, $i, $j, $trans_unit ) {
+    /**
+     * @param $xliff
+     * @param $i
+     * @param $j
+     * @param $trans_unit
+     */
+    private function getSource( &$xliff, $i, $j, $trans_unit ) {
+        try {
+            $tagContent = $this->_getTagContent( 'source', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagContent );
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Source Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
 
-        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[0] . '</trans-unit>';
+    /**
+     * @param $xliff
+     * @param $i
+     * @param $j
+     * @param $trans_unit
+     */
+    private function getTarget( &$xliff, $i, $j, $trans_unit ) {
+        try {
+            $tagContent = $this->_getTagContent( 'target', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagContent );
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Target Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    /**
+     * Extract tag content using DOM ( fallback to old implementation on failure )
+     *
+     * @param $tagName
+     * @param $trans_unit
+     *
+     * @return string
+     * @throws UnexpectedValueException
+     */
+    private function _getTagContent( $tagName, $trans_unit ) {
+
+        /**
+         * Rebuild the trans-unit tag integrity after preg_split
+         */
+        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[ 0 ] . '</trans-unit>';
 
         libxml_use_internal_errors( true );
-        $dDoc = new DOMDocument();
-        $trg_xml_valid = @$dDoc->loadXML( "<root>$trans_unit</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG);
-        $targetList = $dDoc->getElementsByTagName( 'target' );
+        $dDoc          = new DOMDocument();
+        $trg_xml_valid = @$dDoc->loadXML( "<root>$trans_unit</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG );
+
+        /**
+         * Get all tags by their name
+         */
+        $tagList = $dDoc->getElementsByTagName( $tagName );
 
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
-            Log::doLog("Invalid target found, fallback to old implementation to get the content by regular expression");
-            Log::doLog("<trans-unit $trans_unit");
-            Log::doLog($errorList);
+            Log::doLog( "Invalid target found, fallback to old implementation to get the content by regular expression" );
+            Log::doLog( "<trans-unit $trans_unit" );
+            Log::doLog( $errorList );
 
             //fallback to old regexp wrong implementation
-            preg_match( '|<target[^>]*?>(.*?)</target>|si', $trans_unit, $temp );
-            if ( isset( $temp[ 1 ] ) ) {
-                $temp[ 1 ] = self::fix_non_well_formed_xml( $temp[ 1 ] );
-                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = $temp[ 1 ];
-            }
+            $regexp = "|<{$tagName}[^>]*?>(.*?)</{$tagName}>|si";
 
-        } elseif( $targetList->length ){
+            preg_match( $regexp, $trans_unit, $temp );
+            $tmpTag = $temp[ 1 ];
 
-            $tmpTarget = '';
-            foreach( $targetList as $target ){
-                /** @var $target DOMElement|DOMNode */
-                $childNodes = $target->hasChildNodes();
-                if( $target->parentNode->nodeName == 'trans-unit' && !empty( $childNodes ) ){
+        } elseif ( $tagList->length ) {
 
-                    //Loop sui child nodes, concatena il saveXML e escludi target by tagName
-                    foreach( $target->childNodes as $node ){
-                        $tmpTarget .= $dDoc->saveXML( $node );
+            $tmpTag = '';
+            foreach ( $tagList as $_tag ) {
+                /** @var $_tag DOMElement|DOMNode */
+                $childNodes = $_tag->hasChildNodes();
+
+                //<alt-trans> has also <source> and <target> tags inside, we want only those of the <trans-unit>
+                if ( $_tag->parentNode->nodeName == 'trans-unit' && !empty( $childNodes ) ) {
+
+                    //Loop on the child nodes, saveXML concatenation
+                    foreach ( $_tag->childNodes as $node ) {
+                        $tmpTag .= $dDoc->saveXML( $node );
                     }
 
                 }
             }
 
-            if( !empty( $tmpTarget ) ){
-                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tmpTarget );
-            }
-
         }
+
+        if ( empty( $tmpTag ) ) {
+            throw new UnexpectedValueException( "The content of the tag $tagName is empty." );
+        }
+
+        return $tmpTag;
 
     }
 

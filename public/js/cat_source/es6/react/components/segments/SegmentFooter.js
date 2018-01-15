@@ -117,7 +117,9 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    id_segment = {this.props.sid}
+                    segment = {this.props.segment}
+                />;
                 break;
             case 'cc':
                 return <SegmentTabConcordance
