@@ -482,26 +482,27 @@ class Utils {
 		$sug_source = $match[ 'created_by' ];
 		$key        = $match[ 'memory_key' ];
 
-		//suggestion is coming from a public TM
 		if ( strtolower( $sug_source ) == 'matecat' ) {
-
+		    // Enter this case if created_by is matecat, we show PUBLIC_TM
 			$description = Constants::PUBLIC_TM ;
 
 		} elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-
+		    // This case if for other sources from MyMemory that are public but we must
+            // show the specific name of the source.
 			$description = $sug_source;
 
 		} elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-			// MyMemory returns the key of the match
+			// This condition is for md5 keys
             $description = self::keyNameFromUserKeyring( $uid, $key ) ;
+
+            if ( empty( $description ) ) {
+                $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
+            }
 		}
 
-		/**
-		 * if the description is empty so far, show owner's name
-		 */
 		if ( empty( $description ) ) {
-            $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
-		}
+		    $description = Constants::PUBLIC_TM ;
+        }
 
 		return $description;
 	}
