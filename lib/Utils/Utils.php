@@ -487,55 +487,57 @@ class Utils {
 		$sug_source = $match[ 'created_by' ];
 		$key        = $match[ 'memory_key' ];
 
-		//suggestion is coming from a public TM
 		if ( strtolower( $sug_source ) == 'matecat' ) {
-
+		    // Enter this case if created_by is matecat, we show PUBLIC_TM
 			$description = Constants::PUBLIC_TM ;
 
 		} elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-
+		    // This case if for other sources from MyMemory that are public but we must
+            // show the specific name of the source.
 			$description = $sug_source;
 
 		} elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-
-			//MyMemory returns the key of the match
-
-			if ( $uid !== null ) { //user is logged and uid is set
-
-				//check if the user can see the key.
-				$memoryKey              = new TmKeyManagement_MemoryKeyStruct();
-				$memoryKey->uid         = $uid;
-				$memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
-				$memoryKey->tm_key->key = $key;
-
-				$memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-				$currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-
-				if ( count( $currentUserMemoryKey ) > 0 ) {
-
-					//the current user owns the key: show its description
-					$currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-					$description          = $currentUserMemoryKey->tm_key->name;
-
-				}
-
-			}
+			// This condition is for md5 keys
+            $description = self::keyNameFromUserKeyring( $uid, $key ) ;
 
             if ( empty( $description ) ) {
                 $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
             }
-
 		}
 
-		/**
-		 * if the description is empty, get cascading default descriptions
-		 */
 		if ( empty( $description ) ) {
-			$description = Constants::PUBLIC_TM ;
-		}
+		    $description = Constants::PUBLIC_TM ;
+        }
 
 		return $description;
 	}
+
+	public static function keyNameFromUserKeyring( $uid, $key ) {
+	    if ( $uid === null ) {
+	        return null ;
+        }
+
+        //check if the user can see the key.
+        $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKey->uid         = $uid;
+        $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+        $memoryKey->tm_key->key = $key;
+
+        $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
+        if ( count( $currentUserMemoryKey ) >  0 ) {
+            $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+            $name = trim($currentUserMemoryKey->tm_key->name);
+
+            if ( empty($name) ) {
+                $name = Constants::NO_DESCRIPTION_TM ;
+            }
+
+            return $name ;
+        }
+
+        return null ;
+    }
 
     /**
      * Returns description for a key. If not found then default to "Private TM".
@@ -546,17 +548,23 @@ class Utils {
      * @return null|string
      */
 	public static function getDefaultKeyDescription( $key, $job_tm_keys ){
-		$description = Constants::PRIVATE_TM ;
-
 		$ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $job_tm_keys ) );
+		$description = Constants::NO_DESCRIPTION_TM ;
 
 		//search the current key
 		$currentKey = null;
 		for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-			if ( $ownerKeys[ $i ]->key == $key ) {
+		    $name = trim( $ownerKeys[ $i ]->name );
+
+			if ( $ownerKeys[ $i ]->key == $key && !empty($name) )  {
 				$description = $ownerKeys[ $i ]->name;
 			}
+
 		}
+
+        if ( empty( $description ) ) {
+            $description = Constants::NO_DESCRIPTION_TM ;
+        }
 
 		return $description ;
 	}
