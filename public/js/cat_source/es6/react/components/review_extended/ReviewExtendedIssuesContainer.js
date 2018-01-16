@@ -45,8 +45,10 @@ class ReviewExtendedIssuesContainer extends React.Component {
             loaderHtml = '';
 
         if (this.props.issues.length > 0 ) {
-            let sorted_issues = this.props.issues.sort(function(a,b) {
-                return parseInt( a.id ) - parseInt( b.id );
+            let sorted_issues = this.props.issues.sort(function(a, b) {
+                a = new Date(a.created_at);
+                b = new Date(b.created_at);
+                return a>b ? -1 : a<b ? 1 : 0;
             });
 
             issues = sorted_issues.map(function( item, index ) {

@@ -7,12 +7,13 @@ class ReviewVersionsDiff extends React.Component {
 
     constructor(props) {
         super(props);
+        this.handleDocumentClick = this.handleDocumentClick.bind(this);
     }
 
     textSelected(event) {
         if (this.props.textSelectedFn && this.props.selectable) {
             let selection = window.getSelection();
-            if (this.textSelectedInsideSelectionArea(selection, $(this.diffPatchElem))) {
+            if (selection.focusNode.textContent && this.textSelectedInsideSelectionArea(selection, $(this.diffPatchElem))) {
                 let data = this.getSelectionData(selection);
                 this.props.textSelectedFn(data);
             } else {
@@ -39,6 +40,14 @@ class ReviewVersionsDiff extends React.Component {
         }
         else {
             return null;
+        }
+    }
+    handleDocumentClick(evt)  {
+        evt.stopPropagation();
+        const area = ReactDOM.findDOMNode(this.diffPatchElem);
+
+        if (this.diffPatchElem && !area.contains(evt.target) ) {
+            this.textSelected(evt)
         }
     }
     /*
@@ -204,6 +213,14 @@ class ReviewVersionsDiff extends React.Component {
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    componentDidMount () {
+        window.addEventListener('click', this.handleDocumentClick);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('click', this.handleDocumentClick);
     }
 
     render() {
