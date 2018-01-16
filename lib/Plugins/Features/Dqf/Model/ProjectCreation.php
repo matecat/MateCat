@@ -89,6 +89,11 @@ class ProjectCreation {
         $this->_submitProjectFiles();
         $this->_submitReviewSettings();
         $this->_submitSourceSegments();
+        $this->_saveCompletion();
+    }
+
+    protected function _saveCompletion() {
+        $this->project->setMetadata('dqf_master_project_creation_completed_at', time() );
     }
 
     protected function _createProject() {
@@ -184,6 +189,8 @@ class ProjectCreation {
             }
             $this->_saveSegmentsList( $result->segmentList ) ;
         }
+
+        $this->project->setMetadata('dqf_source_segments_submitted', $this->reviewSettings->dqfId ) ;
     }
 
     protected function _saveSegmentsList( $segmentList ) {
