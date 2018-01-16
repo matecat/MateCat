@@ -1871,7 +1871,7 @@ div.mt-error-key {
     color: red;
     padding: 5px 0 10px;
     margin-left: 7px;
-    position: absolute;
+    clear: both;
 }
 
 .mgmt-table-mt .uploadtm.btn-ok {
@@ -2542,7 +2542,7 @@ display: block;
 }
 
 .mgmt-panel h3 {
-    margin: 0 15px 10px;
+    margin: 0 11px 10px;
     font-size: 20px;
 }
 
@@ -2888,11 +2888,12 @@ body.filterOpen .searchbox
 }
 
 .insert-tm label {
-    text-align: right;
     font-size: 16px;
     display: inline-block;
     margin-top: 20px;
     margin-bottom: 5px;
+    width: 100%;
+    padding-left: 9px;
 }
 
 .insert-tm input {
@@ -2902,7 +2903,7 @@ body.filterOpen .searchbox
     overflow: initial;
     text-overflow: initial;
     width: 100%;
-    padding: 8px 5px;
+    padding: 8px 8px;
     border-radius: 2px;
     -webkit-box-shadow: inset 0 1px 3px #ddd;
     box-shadow: inset 0 1px 3px #ddd;
@@ -5000,4 +5001,8 @@ img.ui-user-top-image-general {
 
 #inactivetm td.description {
     width: 545px !important;
+}
+
+.mgmt-mt th.privatekey {
+    padding-left: 9px;
 }

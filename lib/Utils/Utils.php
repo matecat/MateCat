@@ -492,45 +492,46 @@ class Utils {
 			$description = $sug_source;
 
 		} elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-
-			//MyMemory returns the key of the match
-
-			if ( $uid !== null ) { //user is logged and uid is set
-
-				//check if the user can see the key.
-				$memoryKey              = new TmKeyManagement_MemoryKeyStruct();
-				$memoryKey->uid         = $uid;
-				$memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
-				$memoryKey->tm_key->key = $key;
-
-				$memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-				$currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-
-				if ( count( $currentUserMemoryKey ) > 0 ) {
-
-					//the current user owns the key: show its description
-					$currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-					$description          = $currentUserMemoryKey->tm_key->name;
-
-				}
-
-			}
-
-            if ( empty( $description ) ) {
-                $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
-            }
-
+			// MyMemory returns the key of the match
+            $description = self::keyNameFromUserKeyring( $uid, $key ) ;
 		}
 
 		/**
-		 * if the description is empty, get cascading default descriptions
+		 * if the description is empty so far, show owner's name
 		 */
 		if ( empty( $description ) ) {
-			$description = Constants::PUBLIC_TM ;
+            $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
 		}
 
 		return $description;
 	}
+
+	public static function keyNameFromUserKeyring( $uid, $key ) {
+	    if ( $uid === null ) {
+	        return null ;
+        }
+
+        //check if the user can see the key.
+        $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKey->uid         = $uid;
+        $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+        $memoryKey->tm_key->key = $key;
+
+        $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
+        if ( count( $currentUserMemoryKey ) >  0 ) {
+            $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+            $name = trim($currentUserMemoryKey->tm_key->name);
+
+            if ( empty($name) ) {
+                $name = Constants::NO_DESCRIPTION_TM ;
+            }
+
+            return $name ;
+        }
+
+        return null ;
+    }
 
     /**
      * Returns description for a key. If not found then default to "Private TM".
@@ -541,17 +542,23 @@ class Utils {
      * @return null|string
      */
 	public static function getDefaultKeyDescription( $key, $job_tm_keys ){
-		$description = Constants::PRIVATE_TM ;
-
 		$ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $job_tm_keys ) );
+		$description = Constants::NO_DESCRIPTION_TM ;
 
 		//search the current key
 		$currentKey = null;
 		for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-			if ( $ownerKeys[ $i ]->key == $key ) {
+		    $name = trim( $ownerKeys[ $i ]->name );
+
+			if ( $ownerKeys[ $i ]->key == $key && !empty($name) )  {
 				$description = $ownerKeys[ $i ]->name;
 			}
+
 		}
+
+        if ( empty( $description ) ) {
+            $description = Constants::NO_DESCRIPTION_TM ;
+        }
 
 		return $description ;
 	}
