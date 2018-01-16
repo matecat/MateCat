@@ -155,7 +155,15 @@ class Segment extends React.Component {
     }
     setSegmentStatus(sid, status) {
         if (this.props.segment.sid == sid) {
+            let classes = this.state.segment_classes.slice(0);
+            let index = classes.indexOf("status-" + this.state.status);
+
+            if (index >= 0) {
+                classes.splice(index, 1);
+            }
+
             this.setState({
+                segment_classes: classes,
                 status: status
             });
         }
