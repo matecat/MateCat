@@ -47,10 +47,16 @@ class ReviewExtendedIssue extends React.Component {
     setCommentView(event){
         event.preventDefault();
         event.stopPropagation();
+        let self = this;
+        if(!this.state.commentView){
+        	setTimeout(function (  ) {
+                $(self.el).find('.re-comment-input')[0].focus();
+            }, 100);
+        }
         this.setState({
             extendDiffView : false,
 			commentView : !this.state.commentView
-        })
+        });
 	}
 
     handleCommentChange(event) {
@@ -122,6 +128,9 @@ class ReviewExtendedIssue extends React.Component {
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.ISSUE_DELETED, this.confirmDeletedIssue);
     }
+    componentDidUpdate(){
+
+    }
 	render() {
 		let category_label = this.categoryLabel();
 		let formatted_date = moment(this.props.issue.created_at).format('lll');
@@ -185,12 +194,6 @@ class ReviewExtendedIssue extends React.Component {
 				<i>{formatted_date}</i>
 			</div>
 		</div>
-	}
-
-    componentDidUpdate(){
-		if(this.state.commentView){
-			$(this.el).find('.re-comment-input')[0].focus();
-		}
 	}
 }
 
