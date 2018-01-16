@@ -37,7 +37,9 @@ class WhitelistAccessValidator extends Base {
                 "/^10\.3\.15\..*/",
                 "/^149\.7\.212\..*/",
                 "/^2\.229\.60\.78/",
-                "/^127\.0\.0\..*/"
+                "/^127\.0\.0\..*/",
+                "/^93\.43\.95\.132/",
+
         ];
 
         if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
