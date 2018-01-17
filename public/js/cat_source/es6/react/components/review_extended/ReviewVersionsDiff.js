@@ -13,7 +13,7 @@ class ReviewVersionsDiff extends React.Component {
     textSelected(event) {
         if (this.props.textSelectedFn && this.props.selectable) {
             let selection = window.getSelection();
-            if (selection.focusNode.textContent && this.textSelectedInsideSelectionArea(selection, $(this.diffPatchElem))) {
+            if (selection.focusNode && this.textSelectedInsideSelectionArea(selection, $(this.diffPatchElem))) {
                 let data = this.getSelectionData(selection);
                 this.props.textSelectedFn(data);
             } else {
