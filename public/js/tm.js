@@ -1975,7 +1975,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 'n',
+                placement : 's',
                 mouseOnToPopup: true
 
             });
