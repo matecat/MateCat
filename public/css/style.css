@@ -5312,7 +5312,6 @@ section.loaded .footer .tab.open {
     text-decoration: none;
     right: -8%;
     width: 8%;
-    z-index: 1 !important;
 }
 
 section:hover .segment-side-buttons {
