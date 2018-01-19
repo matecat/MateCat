@@ -288,7 +288,7 @@ $.extend(UI, {
         }
     },
     checkTagProximity: function () {
-        if(UI.editarea.html() == '') return false;
+        if(!UI.editarea || UI.editarea.html() == '') return false;
 
         var selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
@@ -491,7 +491,7 @@ $.extend(UI, {
 	},
 
     hasSourceOrTargetTags: function ( segment ) {
-        return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
+        return ( $(segment).find( '.locked' ).length > 0 || (UI.sourceTags && UI.sourceTags.length > 0) )
     },
     hasMissingTargetTags: function ( segment ) {
         if ( segment.length == 0 ) return ;
