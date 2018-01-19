@@ -1290,7 +1290,6 @@ margin-left: 10px;
 {
 	width: 45px;
 	border-right: 1px solid #003366;
-	background: transparent url(../img/g.png) 0 5px no-repeat;
 	border-radius: 0 0 0 6px;
     }
 
@@ -2408,7 +2407,7 @@ display: block;
 }
 
 .mgmt-panel h3 {
-    margin: 0 15px 10px;
+    margin: 0 11px 10px;
     font-size: 20px;
 }
 
@@ -2740,6 +2739,7 @@ body.filterOpen .searchbox
     margin-top: 20px;
     margin-bottom: 5px;
     width: 100%;
+    padding-left: 9px;
 }
 
 .insert-tm input {
@@ -2749,7 +2749,7 @@ body.filterOpen .searchbox
     overflow: initial;
     text-overflow: initial;
     width: 100%;
-    padding: 8px 5px;
+    padding: 8px 8px;
     border-radius: 2px;
     -webkit-box-shadow: inset 0 1px 3px #ddd;
     box-shadow: inset 0 1px 3px #ddd;
@@ -4873,4 +4873,8 @@ img.ui-user-top-image-general {
 
 #inactivetm td.description {
     width: 545px !important;
+}
+
+.mgmt-mt th.privatekey {
+    padding-left: 9px;
 }

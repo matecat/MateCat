@@ -94,7 +94,7 @@ class ReviewVersionsDiffContainer extends React.Component {
 							<span className="selected"> word </span>
 							or
 							<span className="selected"> phrase </span>
-                            to create an issue card  that will be linked the issue category you select.
+                            to associate an issue to a specific portion of the text (optional).
 						</div>
 					): (null)}
 				</div>

@@ -4,8 +4,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            submitDisabled : true,
-            listIsOpen: true
+            submitDisabled : true
         };
 
     }
@@ -71,13 +70,6 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
-
-    toggleList(){
-		$(this.listElm).slideToggle('fast');
-		this.setState({
-            listIsOpen: !this.state.listIsOpen
-        })
-	}
     render() {
         let categoryComponents = [];
 		/*let dropDownIcon = "icon-sort-up icon";
@@ -117,7 +109,7 @@ class ReviewExtendedIssuePanel extends React.Component{
 
             return<div className="re-create-issue">
 				<div className="ui accordion">
-					<h4 className="create-issue-title" onClick={this.toggleList.bind(this)}>
+					<h4 className="create-issue-title">
 						Error list
 					</h4>
 					{/*<div className="issues-scroll">

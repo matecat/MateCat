@@ -17,5 +17,5 @@ class Constants {
     const OAUTH_TOKEN_KEY_FILE = '/inc/oauth-token-key.txt';
 
     const PUBLIC_TM  = "Public TM";
-    const PRIVATE_TM = "Private TM";
+    const NO_DESCRIPTION_TM = "No description";
 }
