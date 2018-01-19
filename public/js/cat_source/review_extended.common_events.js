@@ -9,7 +9,7 @@ if (ReviewExtended.enabled()) {
         }
 
         setTimeout(function () {
-            if (config.isReview) {
+            if (config.isReview && UI.currentSegment) {
                 SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
             }
         });

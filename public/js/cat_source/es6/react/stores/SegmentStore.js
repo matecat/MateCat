@@ -49,9 +49,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     updateAll: function(segments, fid, where) {
         console.time("Time: updateAll segments"+fid);
         if ( this._segments[fid] && where === "before" ) {
-            this._segments[fid] = this._segments[fid].unshift(Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if( this._segments[fid] && where === "after" ) {
-            this._segments[fid] = this._segments[fid].push(Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
             this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
@@ -263,7 +263,7 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid, action.where);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid].toJS(), action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);

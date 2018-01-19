@@ -628,6 +628,7 @@
             }
             return false ;
         },
+
         // unlockIceSegment: function (elem) {
         //     var section = elem.closest('section');
         //     var icon = section.find('.ice-locked-icon .unlock-button');
