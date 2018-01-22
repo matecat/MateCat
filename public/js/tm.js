@@ -68,14 +68,14 @@
                 if($(this).val() == 0) {
                     $('table.mgmt-mt tr.activemt').removeClass('activemt');
                 } else {
-                    checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
+                    var checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
                     UI.activateMT(checkbox);
                 }
             });
             $("#mt_engine_int").change(function() {
                 // $('#add-mt-provider-cancel').hide();
                 $('#mt-provider-details .error').empty();
-
+                $('#add-mt-provider-confirm').addClass('disabled');
                 $(".insert-tm").show();
                 var provider = $(this).val();
                 if(provider == 'none') {
@@ -1980,7 +1980,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 'n',
+                placement : 's',
                 mouseOnToPopup: true
 
             });
