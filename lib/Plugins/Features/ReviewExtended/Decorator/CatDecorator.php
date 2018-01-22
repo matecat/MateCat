@@ -16,7 +16,7 @@ class CatDecorator extends ReviewImproved\Decorator\CatDecorator {
         parent::decorate();
 
         $this->template->review_type = 'extended' ;
-        $this->template->segmentFilterEnabled = false;
+        $this->template->segmentFilterEnabled = true;
     }
 
 }

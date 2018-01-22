@@ -36,10 +36,24 @@ if ( ReviewExtended.enabled() ) {
             },
         });
 
-
+        let originalRender = UI.render;
         $.extend(UI, {
 
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
+
+            render: function (  ) {
+                var promise = (new $.Deferred() ).resolve();
+                originalRender.apply(this);
+                this.downOpts = {
+                    offset: '100%',
+                    context: $('#outer')
+                };
+                this.upOpts = {
+                    offset: '-40%',
+                    context: $('#outer')
+                };
+                return promise;
+            },
 
             registerReviseTab: function () {
                 return false;

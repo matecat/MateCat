@@ -134,6 +134,11 @@
             pos = segment.offset().top - commonOffset ;
         }
 
+        var segmentOpen = $('section.editor');
+        if ( segmentOpen.length && UI.getSegmentId(segment) !== UI.getSegmentId($('section.editor'))) {
+            pos = pos - segmentOpen.find('.footer').height();
+        }
+
         scrollAnimation.animate({
             scrollTop: pos
         }, speed);
