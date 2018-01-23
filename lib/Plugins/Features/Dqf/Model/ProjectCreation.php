@@ -190,7 +190,7 @@ class ProjectCreation {
             $this->_saveSegmentsList( $result->segmentList ) ;
         }
 
-        $this->project->setMetadata('dqf_source_segments_submitted', $this->reviewSettings->dqfId ) ;
+        $this->project->setMetadata('dqf_source_segments_submitted', 1) ;
     }
 
     protected function _saveSegmentsList( $segmentList ) {
