@@ -76,6 +76,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $query = "SELECT
             s.id,
             s.segment AS source,
+            s.internal_id,
             st.translation AS translation,
             st.time_to_edit,
             st.suggestion,

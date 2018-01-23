@@ -21,6 +21,11 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     /**
      * @var string
      */
+    public $internal_id;
+
+    /**
+     * @var string
+     */
     public $translation;
 
     /**
