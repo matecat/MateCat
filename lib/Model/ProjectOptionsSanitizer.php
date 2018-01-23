@@ -11,29 +11,40 @@ class ProjectOptionsSanitizer {
     private $boolean_keys = [ 'speech2text', 'lexiqa', 'tag_projection' ];
 
     public static $lexiQA_allowed_languages = [
+            'sq-AL',
+            'ar-SA',
             'zh-CN',
             'da-DK',
+            'nl-NL',
             'en-GB',
             'en-US',
             'et-EE',
+            'fi-FI',
             'fr-FR',
             'fr-CA',
             'de-DE',
+            'de-CH',
             'el-GR',
+            'id-ID',
             'it-IT',
+            'ko-KR',
             'lv-LV',
             'lt-LT',
+            'ms-MY',
             'nb-NO',
             'pl-PL',
             'pt-PT',
             'pt-BR',
+            'ro-RO',
             'ru-RU',
             'es-ES',
             'es-CO',
             'es-MX',
             'sv-SE',
+            'th-TH',
             'tr-TR',
             'uk-UA'
+
     ];
     /**
      * All combinations of languages for Tag Ptojection

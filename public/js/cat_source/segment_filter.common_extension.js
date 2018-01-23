@@ -120,6 +120,7 @@ if ( SegmentFilter.enabled() )
                 segments.forEach(function (segment,index) {
                     if (filterArray.indexOf(segment.sid) === -1) {
                         SegmentActions.addClassToSegment(segment.sid, 'muted');
+                        SegmentActions.removeClassToSegment(segment.sid, 'editor opened');
                     }
                 })
             }
