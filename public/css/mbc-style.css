@@ -13,8 +13,7 @@
 .mbc-comment-balloon-inner {
   background: #f7f7f7;
   box-shadow: 0 1px 2px 0px rgba(0,0,0,0.3);
-  padding-top: 20px;
-  margin-top: -45px;  
+  margin-top: -45px;
 }
 
 section.editor .mbc-comment-balloon-inner {
@@ -244,7 +243,7 @@ a.mbc-new-message-link:hover {
   color: #323232;
   font-weight: bold;
   margin-bottom: 4px;
-  padding: 2px 5px 2px 0;
+  padding: 12px 5px 2px 0;
 }
 /*
  Anonymous label

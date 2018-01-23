@@ -2393,20 +2393,6 @@ section .header .context:hover {
     display: block !important
 }
 
-.greenborder {
-    border-top: 2px solid #00a651;
-    background: url(../img/pointgreen.gif) 0 0px no-repeat;
-}
-
-.orangeborder {
-    border-bottom: 2px solid #FF6600;
-}
-
-.greenborder img {
-    margin: 0px 0 0 -2px;
-    position: absolute;
-}
-
 .smart-suggestion-target {
     border: 2px solid #00a651;
     -moz-border-radius: 2px;
@@ -5005,7 +4991,6 @@ body.hideMatches .submenu li.footerSwitcher {
     -o-transform: scaleY(-1);
     -webkit-transform: scaleY(-1);
     transform: scaleY(-1);
-    filter: FlipV;
     -ms-filter: "FlipV";
     border-bottom: 1px solid #666666;
     border-top: 1px solid #3aa9dd;
@@ -5050,7 +5035,6 @@ section.loaded .footer .tab.open {
     text-decoration: none;
     right: -8%;
     width: 8%;
-    z-index: 1 !important;
 }
 
 section:hover .segment-side-buttons {
@@ -5317,9 +5301,9 @@ section:hover .segment-side-buttons {
     margin-right: 11px;
 }
 
-/**, *:before, *:after {
-    box-sizing: content-box;
-}*/
+.tmx-import-slider {
+    width: 110px !important;
+}
 
 /*Editor Toggle*/
 .editor .toggle {

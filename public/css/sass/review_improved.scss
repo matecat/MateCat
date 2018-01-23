@@ -247,9 +247,9 @@ section {
     position: fixed;
     top: 0;
     right: 0;
-    width: 25%;
-    z-index: 1;
-    min-width: 215px;
+    width: 22%;
+    z-index: 10;
+    min-width:215px;
     margin-top: 49px;
     text-align: left;
     overflow: scroll;
@@ -467,7 +467,7 @@ section:not(.opened) .revise-button-counter {
             }
 
             .muted-text-box {
-                
+
             }
         }
     }

@@ -86,12 +86,11 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
-        $text = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $text, @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
+        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
 
         if( !empty( $translation[ 'translation' ] ) ){
             $this->result = ( new Engines_Results_MyMemory_Matches(
-                    $this->_resetSpecialStrings( $text ),
+                    $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
