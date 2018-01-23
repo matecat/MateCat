@@ -188,7 +188,7 @@ class updateJobKeysController extends ajaxController {
     }
 
     private function jobOwnerIsMe() {
-        return $this->userIsLogged && $this->jobData['owner'] == $this->getLoggedUser()->email ;
+        return $this->userIsLogged && $this->jobData['owner'] == $this->getUser()->email ;
     }
 
 } 

@@ -8,7 +8,7 @@ body.review-side-panel-opened article {
     -webkit-perspective: 1000;
     -webkit-transition: width .2s ease;
     transition: width .2s ease;
-    width: 70%;
+    width: 69%;
 }
 
 section.reviewImproved.opened {
@@ -250,7 +250,6 @@ section {
     width: 25%;
     z-index: 1;
     min-width: 215px;
-    margin-top: 49px;
     text-align: left;
     overflow: scroll;
     .muted-text-box {
@@ -467,7 +466,7 @@ section:not(.opened) .revise-button-counter {
             }
 
             .muted-text-box {
-                
+
             }
         }
     }
