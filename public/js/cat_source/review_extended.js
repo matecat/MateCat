@@ -41,9 +41,9 @@ if ( ReviewExtended.enabled() ) {
 
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
-            render: function (  ) {
+            render: function ( options ) {
                 var promise = (new $.Deferred() ).resolve();
-                originalRender.apply(this);
+                originalRender.call(this, options);
                 this.downOpts = {
                     offset: '100%',
                     context: $('#outer')
