@@ -3248,7 +3248,7 @@ section.modified.editor .status {
     border: 1px solid #ADADAD;
     text-align: left;
     top: 0;
-    margin: 50px 0 0 -200px;
+    margin: 50px -3px 0 -200px;
     width: auto;
     background: #f7f7f7;
     width: 143px;
@@ -3268,7 +3268,7 @@ section.modified.editor .status {
 
 .editor .statusmenu {
     top: 0;
-    margin: 100px 0 0 -200px;
+    margin: 100px -3px 0 -200px;
 }
 
 .statusmenu li {
@@ -3701,7 +3701,7 @@ span.locked.tag-html-container-close {
     }
 
     .text .item, .white li {
-        width: 46.67% !important;
+        width: 46% !important;
     }
 
     .track-changes {
