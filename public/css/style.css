@@ -3985,9 +3985,11 @@ p.percent {
     border-top: 1px dotted #ccc;
 }
 
+/*
 body.filterOpen #outer {
-    /*    margin-top: 95px; */
+    margin-top: 80px !important;
 }
+*/
 
 .save-warning {
     display: none;
