@@ -264,7 +264,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-ui-1.12.1.min.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/js.cookie.js',
-                    basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
