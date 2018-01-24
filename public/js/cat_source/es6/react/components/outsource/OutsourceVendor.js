@@ -8,7 +8,7 @@ class OutsourceVendor extends React.Component {
 
     constructor(props) {
         super(props);
-        let changesRates = (!_.isUndefined($.cookie( "matecat_changeRates")) ) ? $.parseJSON( $.cookie( "matecat_changeRates"))
+        let changesRates = (!_.isUndefined(Cookies.get( "matecat_changeRates")) ) ? $.parseJSON( Cookies.get( "matecat_changeRates"))
             : {};
         this.state = {
             outsource: false,
@@ -16,7 +16,7 @@ class OutsourceVendor extends React.Component {
             chunkQuote: null,
             outsourceConfirmed: (!!this.props.job.get('outsource')),
             extendedView: this.props.extendedView,
-            timezone: $.cookie( "matecat_timezone"),
+            timezone: Cookies.get( "matecat_timezone"),
             changeRates: changesRates,
             jobOutsourced: (!!this.props.job.get('outsource')),
             errorPastDate: false,
@@ -108,11 +108,11 @@ class OutsourceVendor extends React.Component {
     }
 
     getCurrentCurrency() {
-        let currency = $.cookie( "matecat_currency");
+        let currency = Cookies.get( "matecat_currency");
         if (!_.isUndefined(currency)) {
             return currency;
         } else {
-            $.cookie( "matecat_currency", 'EUR');
+            Cookies.set( "matecat_currency", 'EUR');
             return 'EUR';
         }
     }
@@ -133,7 +133,7 @@ class OutsourceVendor extends React.Component {
     }
 
     changeTimezone(value) {
-        $.cookie( "matecat_timezone" , value);
+        Cookies.set( "matecat_timezone" , value);
         this.setState({
             timezone: value
         });
@@ -141,19 +141,19 @@ class OutsourceVendor extends React.Component {
 
     getChangeRates() {
         let self = this;
-        let changeRates = $.cookie( "matecat_changeRates");
+        let changeRates = Cookies.get( "matecat_changeRates");
         if( _.isUndefined(changeRates)) {
             API.OUTSOURCE.fetchChangeRates().done(function (response) {
                 self.setState({
                     changeRates: $.parseJSON(response.data)
                 });
-                $.cookie( "matecat_changeRates",  response.data  , { expires: 1 });
+                Cookies.set( "matecat_changeRates",  response.data  , { expires: 1 });
             });
         }
     }
 
     onCurrencyChange(value) {
-        $.cookie("matecat_currency", value);
+        Cookies.set("matecat_currency", value);
         let quote = this.state.chunkQuote.set('currency', value);
         this.setState({
             chunkQuote: quote
@@ -744,7 +744,7 @@ class OutsourceVendor extends React.Component {
                 },
             });
 
-            let currencyToShow = $.cookie( "matecat_currency" );
+            let currencyToShow = Cookies.get( "matecat_currency" );
             $(this.currencySelect).dropdown('set selected', currencyToShow);
             $(this.currencySelect).dropdown({
                 onChange: function(value, text, $selectedItem) {

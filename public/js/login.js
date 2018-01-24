@@ -99,7 +99,7 @@ $.extend(APP, {
             e.stopPropagation();
             UI.closeTMPanel();
             APP.openLoginModal();
-            $.cookie('tmpanel-open', 1, { path: '/' });
+            Cookies.set('tmpanel-open', 1, { path: '/' });
             return false;
         } );
 

@@ -26,7 +26,7 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
-    $(document).on('ready', function() {
+    $(document).ready(function() {
         ReviewImproved.mountPanelComponent();
     });
 

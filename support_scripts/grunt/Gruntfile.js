@@ -260,16 +260,16 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
-                    basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/jquery-ui.js',
+                    basePath + 'lib/jquery-3.3.1.min.js',
+                    basePath + 'lib/jquery-ui-1.12.1.min.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
-                    basePath + 'lib/jquery.cookie.js',
+                    basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
-                    basePath + 'lib/waypoints.min.js',
+                    basePath + 'lib/jquery.waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
@@ -288,7 +288,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
 
-                    basePath + 'lib/jquery.cookie.js',
+                    basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     // <!-- The Templates plugin is included to render the upload/download listings -->

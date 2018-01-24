@@ -30,7 +30,7 @@ UI = {
         if (this.initTM) {
             this.initTM();
         }
-        if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
+        if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
 

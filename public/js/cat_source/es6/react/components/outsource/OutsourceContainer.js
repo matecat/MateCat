@@ -20,10 +20,10 @@ class OutsourceContainer extends React.Component {
     }
 
     checkTimezone() {
-        var timezoneToShow = $.cookie( "matecat_timezone" );
+        var timezoneToShow = Cookies.get( "matecat_timezone" );
         if ( !timezoneToShow) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-            $.cookie( "matecat_timezone" , timezoneToShow);
+            Cookies.set( "matecat_timezone" , timezoneToShow);
         }
     }
 
