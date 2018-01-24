@@ -264,7 +264,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-ui-1.12.1.min.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/js.cookie.js',
-                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
@@ -289,7 +288,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
 
                     basePath + 'lib/js.cookie.js',
-                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     // <!-- The Templates plugin is included to render the upload/download listings -->
                     basePath + 'lib/fileupload/tmpl.min.js',

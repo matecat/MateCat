@@ -368,30 +368,30 @@
             $(document).ready(function() {
 
                 UI.setTMsortable();
-                $("#inactivetm").tablesorter({
-                    textExtraction: function(node) {
-                        // extract data from markup and return it
-                        if($(node).hasClass('privatekey')) {
-                            return $(node).text();
-                        } else {
-                            return $(node).text();
-                        }
-                    },
-                    headers: {
-                        4: {
-                            sorter: true
-                        },
-                        5: {
-                            sorter: false
-                        },
-                        6: {
-                            sorter: false
-                        },
-                        7: {
-                            sorter: false
-                        }
-                    }
-                });
+                // $("#inactivetm").tablesorter({
+                //     textExtraction: function(node) {
+                //         // extract data from markup and return it
+                //         if($(node).hasClass('privatekey')) {
+                //             return $(node).text();
+                //         } else {
+                //             return $(node).text();
+                //         }
+                //     },
+                //     headers: {
+                //         4: {
+                //             sorter: true
+                //         },
+                //         5: {
+                //             sorter: false
+                //         },
+                //         6: {
+                //             sorter: false
+                //         },
+                //         7: {
+                //             sorter: false
+                //         }
+                //     }
+                // });
                 UI.checkCreateTmKeyFromQueryString();
                 UI.checkOpenTabFromParameters();
             });
