@@ -63,7 +63,7 @@ class SignupController extends AbstractStatefulKleinController  {
 
     public function authForPasswordReset() {
         try {
-            Signup::confirm( $this->request->param('token') ) ;
+
             $reset = new PasswordReset( $this->request->param('token'), $_SESSION ) ;
             $reset->authenticateUser();
 
