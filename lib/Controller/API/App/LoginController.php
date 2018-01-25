@@ -8,10 +8,9 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
+use AuthCookie;
 use Users\RedeemableProject;
-
-Use AuthCookie ;
+use Users_UserDao;
 
 class LoginController extends AbstractStatefulKleinController  {
 
@@ -22,24 +21,23 @@ class LoginController extends AbstractStatefulKleinController  {
     }
 
     public function login() {
-        $params = filter_var_array( $this->request->params(), array(
-            'email' => FILTER_SANITIZE_EMAIL,
-            'password' => FILTER_SANITIZE_STRING
-        ));
+        $params = filter_var_array( $this->request->params(), [
+                'email'    => FILTER_SANITIZE_EMAIL,
+                'password' => FILTER_SANITIZE_STRING
+        ] );
 
-        $dao = new \Users_UserDao() ;
-        $user = $dao->getByEmail( $params['email'] ) ;
+        $dao  = new Users_UserDao();
+        $user = $dao->getByEmail( $params[ 'email' ] );
 
-        if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
-            \AuthCookie::setCredentials($user->email, $user->uid ) ;
+        if ( $user && ( !is_null( $user->email_confirmed_at ) || !is_null( $user->oauth_access_token ) ) && $user->passwordMatch( $params[ 'password' ] ) ) {
+            AuthCookie::setCredentials( $user->email, $user->uid );
 
-            $project = new RedeemableProject( $user, $_SESSION ) ;
+            $project = new RedeemableProject( $user, $_SESSION );
 
             $project->tryToRedeem();
-            $this->response->code( 200 ) ;
-        }
-        else {
-            $this->response->code( 404 ) ;
+            $this->response->code( 200 );
+        } else {
+            $this->response->code( 404 );
         }
 
     }
