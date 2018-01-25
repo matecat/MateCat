@@ -32,6 +32,10 @@ class CatUtils {
 
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
+    public static function isCJK( $langCode ){
+        return array_key_exists( explode( '-', $langCode )[0], self::$cjk ) ;
+    }
+
     // ----------------------------------------------------------------
 
     public static function placeholdamp($s) {
@@ -41,7 +45,7 @@ class CatUtils {
 
     public static function restoreamp($s) {
         $pattern = "#" . AMPPLACEHOLDER . "#";
-        $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
+        $s = preg_replace($pattern, self::unicode2chr("&"), $s);
         return $s;
     }
 
@@ -224,7 +228,7 @@ class CatUtils {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
 
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -326,10 +330,10 @@ class CatUtils {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
 
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( self::nbspPlaceholder, Utils::unicode2chr(0Xa0) , $segment );
+        $segment = str_replace( self::nbspPlaceholder, self::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -819,6 +823,18 @@ class CatUtils {
 
     public static function htmlentitiesFromUnicode( $str ){
         return "&#" . self::fastUnicode2ord( $str[1] ) . ";";
+    }
+
+    // multibyte string manipulation functions
+    // source : http://stackoverflow.com/questions/9361303/can-i-get-the-unicode-value-of-a-character-or-vise-versa-with-php
+    // original source : PHPExcel libary (http://phpexcel.codeplex.com/)
+    // get the char from unicode code
+    public static function unicode2chr( $o ) {
+        if ( function_exists( 'mb_convert_encoding' ) ) {
+            return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
+        } else {
+            return chr( intval( $o ) );
+        }
     }
 
     /**

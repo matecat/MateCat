@@ -131,7 +131,11 @@ class EditLog_EditLogModel {
         return CatUtils::getFastStatsForJob( $wStruct );
     }
 
-    public function getEditLogData( $use_ter_diff = false ) {
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getEditLogData() {
 
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
         $data       = $editLogDao->setNumSegs( self::$segments_per_page )->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
@@ -158,7 +162,6 @@ class EditLog_EditLogModel {
         $stat_rwc                    = array();
         $stat_valid_tte              = array();
         $stat_pee                    = array();
-        $stat_ter                    = array();
 
         $output_data = array();
         foreach ( $data as $seg ) {
@@ -179,7 +182,10 @@ class EditLog_EditLogModel {
                     $seg->toArray()
             );
 
-            $displaySeg->suggestion_match .= "%";
+            if( !empty( $displaySeg->suggestion_match ) ){
+                $displaySeg->suggestion_match .= "%";
+            }
+
             $displaySeg->job_id               = $this->jid;
             $tte                              = CatUtils::parse_time_to_edit( $displaySeg->time_to_edit );
             $displaySeg->display_time_to_edit = "$tte[1]m:$tte[2]s";
@@ -190,8 +196,8 @@ class EditLog_EditLogModel {
             if ( $seg->raw_word_count < 1 ) {
                 $displaySeg->raw_word_count = 1;
             }
+
             $displaySeg->raw_word_count = round($displaySeg->raw_word_count);
-            //todo: remove this
             $displaySeg->secs_per_word = $seg->getSecsPerWord();
 
             if ( ( $displaySeg->secs_per_word < self::EDIT_TIME_SLOW_CUT ) &&
@@ -221,37 +227,12 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc .= "%";
 
-            $lh   = Langs_Languages::getInstance();
-            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg->job_target ) );
-
             $sug_for_diff = CatUtils::placehold_xliff_tags( $seg->suggestion );
             $tra_for_diff = CatUtils::placehold_xliff_tags( $seg->translation );
 
-            //with this patch we have warnings when accessing indexes
-            if ( $use_ter_diff ) {
-                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-            } else {
-                $ter = array();
-            }
-
-            $displaySeg->ter = @$ter[ 1 ] * 100;
-            $stat_ter[]      = $displaySeg->ter * $seg->raw_word_count;
-            $displaySeg->ter = round( @$ter[ 1 ] * 100 ) . "%";
-            $diff_ter        = @$ter[ 0 ];
-
             if ( $seg->suggestion <> $seg->translation ) {
-
-                //force use of third party ter diff
-                if ( $use_ter_diff ) {
-                    $displaySeg->diff = $diff_ter;
-                } else {
-                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
-                    // we will use diff_PE until ter_diff will not work properly
-                    $displaySeg->diff = $diff_PE;
-                }
-
-                //$seg[ 'diff_ter' ] = $diff_ter;
-
+                // we will use diff_PE until ter_diff will not work properly
+                $displaySeg->diff = MyMemory::diff_html( $sug_for_diff, $tra_for_diff, !CatUtils::isCJK( $seg->job_target ) );
             } else {
                 $displaySeg->diff = '';
             }
@@ -284,7 +265,7 @@ class EditLog_EditLogModel {
                     '\r',
                     '\r\n',
                     '\t',
-                    Utils::unicode2chr( 0Xa0 ),
+                    CatUtils::unicode2chr( 0Xa0 ),
             );
             $displaySeg->source_csv      = preg_replace( $array_patterns, $array_replacements_csv, $seg->source );
             $displaySeg->translation_csv = preg_replace( $array_patterns, $array_replacements_csv, $seg->translation );
@@ -308,7 +289,7 @@ class EditLog_EditLogModel {
             $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
             $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
 
-
+            //NOT USED //TODO REMOVE FROM Dao, Struct, MyMemory-Match, and Re-USE the field in database for raw_word_count ?!?
             if ( $seg->mt_qe == 0 ) {
                 $displaySeg->mt_qe = 'N/A';
             }
@@ -324,13 +305,15 @@ class EditLog_EditLogModel {
 
         $stats[ 'valid-word-count' ] = round($globalStats[ 'raw_words' ]);
 
-        //TODO: this will not work anymore
+        //TODO: this will not work anymore, this is calculated on 50 segments
+        //FIXME: [ BUG ] this is calculated on 50 segments, slow and fast segments are only related to the 50 selected segments,
+        //FIXME:    sould be moved it in global stats, but this requires an additional maybe heavy query ( depending on how big is the job )
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
-        if ( $stats[ 'edited-word-count' ] > 0 ) { //FIXME [ BUG ] this is calculated on 50 segments, slow and fast segments are only related to the 50 selected segments
+        if ( $stats[ 'edited-word-count' ] > 0 ) {
             $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
-            $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
+
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
         $stats[ 'tm-words' ]        = 100 - $stats[ 'mt-words' ];
         $stats[ 'total-valid-tte' ] = round( $globalStats[ 'tot_tte' ] );

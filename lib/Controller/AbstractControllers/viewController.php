@@ -353,6 +353,14 @@ abstract class viewController extends controller implements IController {
     }
 
     /**
+     * @deprecated TODO remove in the next Release ( plugin compatibility method )
+     * @return Users_UserStruct
+     */
+    public function getUser(){
+        return $this->logged_user;
+    }
+
+    /**
      * @return string
      */
     public function getAuthUrl(){

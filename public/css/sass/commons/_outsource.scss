@@ -1,6 +1,6 @@
 .after-open-outsource {
     border-left: 2px solid #09beec;
-    padding-left: 17px !important;
+    padding-left: 13px !important;
 }
 .outsource-container {
     padding: 0px !important;
@@ -12,11 +12,9 @@
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
-        padding: 5px 45px !important;
+        padding: 5px 40px !important;
         z-index: 1;
-        .job-id {
-            margin-right: 0;
-        }
+        .job-id {}
         .source-target {
             .source-box, .target-box {
                 width: unset !important;
@@ -166,7 +164,7 @@
         width: 100%;
         .title {
             display: inline-block;
-            padding: 15px 15px 15px 30px;
+            padding: 15px 15px 15px 25px;
             font-size: 20px;
             font-weight: 700;
             width: 25%;
@@ -256,7 +254,7 @@
     }
     .open-job-box {
         background-color: #d7d8dc;
-        padding: 35px 30px 25px 45px;
+        padding: 35px 30px 25px 40px;
         width: 100%;
         cursor: auto;
         .title {
@@ -324,7 +322,7 @@
         cursor: auto;
         .outsource-to-vendor {
             .payment-service {
-                padding: 5px 15px 15px;
+                padding: 5px 10px 15px;
                 .service-box {
                     display: inline-block;
                     padding: 0 10px 0 15px;
@@ -366,7 +364,7 @@
                         border-right: 1px solid black;
                         display: inline-block;
                         vertical-align: middle;
-                        padding: 0 0 0 15px;
+                        padding: 0 0 0 10px;
                         .left, .right {
                             display: inline-block;
                             margin: 0;
@@ -904,7 +902,7 @@
             min-height: 125px;
             .reduced-boxes {
                 .container-reduced {
-                    padding: 0 15px;
+                    padding: 0 10px;
                     width: 82%;
                     display: inline-block;
                     vertical-align: top;

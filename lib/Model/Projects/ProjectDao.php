@@ -16,9 +16,17 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee and id_team = :id_team ;
     ";
 
+    /**
+     * @var string
+     */
     protected static $_sql_massive_self_assignment = "
         UPDATE projects SET id_assignee = :id_assignee , id_team = :personal_team WHERE id_team = :id_team ;
     ";
+
+    /**
+     * @var string
+     */
+    protected static $_sql_get_projects_for_team = "SELECT * FROM projects WHERE id_team = :id_team ";
 
     /**
      * @param $project
@@ -109,12 +117,25 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $id_team
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function findByTeamId( $id_team, $ttl = 0 ){
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_sql_get_projects_for_team );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_team' => $id_team ] );
+    }
+
+    /**
      * @param int $id_job
      * @param int $ttl
      *
      * @return Projects_ProjectStruct
      */
-    static function findByJobId( $id_job, $ttl = 0 ) {
+    public static function findByJobId( $id_job, $ttl = 0 ) {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT projects.* FROM projects " .

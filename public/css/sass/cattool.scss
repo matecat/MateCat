@@ -21,7 +21,6 @@ Styles from other css files should be ported over time.
   text-decoration: none;
   right: -8%;
   width: 8%;
-  z-index: 999;
 }
 
 
@@ -73,6 +72,14 @@ section:hover .segment-side-buttons {
   display: inline-block;
   text-align: center;
   position: relative;
+}
+
+//ICE MATCH
+.ice-locked .footer,
+.ice-locked .buttons,
+.ice-locked .copy,
+.ice-locked .loader {
+  display: none !important;
 }
 
 

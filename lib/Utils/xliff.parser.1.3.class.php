@@ -168,10 +168,19 @@ class Xliff_Parser {
 						if (isset($temp[1]))
 							$xliff['files'][$i]['trans-units'][$j]['attr']['translate'] = $temp[1];
 
+                        /**
+                         * Approved
+                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                         */
+                        unset($temp);
+                        preg_match('|approved\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
+                        if (isset($temp[1]))
+                            $xliff['files'][$i]['trans-units'][$j]['attr']['approved'] = filter_var( $temp[1], FILTER_VALIDATE_BOOLEAN );
 
 						// Getting Source and Target raw content
 						unset($temp);
 
+						//TODO BUG <ph id="10" x="&lt;endcmp/>&quot;&gt;{10}</ph>
 						preg_match('|<source.*?>(.*?)</source>|si', $trans_unit, $temp);
 						// just in case of a <source />
 						if (!isset($temp[1])) {

@@ -1170,6 +1170,16 @@
     ,
         {
             "localized":[{
+                "en":"Odia"
+            }],
+            "isocode":"ory",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ory-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Palauan"
             }],
             "isocode":"pau",
@@ -1290,6 +1300,16 @@
             "enabled":true,
             "rtl":true,
             "rfc3066code":"rhg-MM"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Rohingyalish"
+            }],
+            "isocode":"rhl",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"rhl-MM"
         }
     ,
         {

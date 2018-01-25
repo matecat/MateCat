@@ -96,18 +96,27 @@ class MembershipDao extends \DataAccess_AbstractDao {
     /**
      * Finds an team in user scope.
      *
-     * @param                   $id
+     * @param int               $id
      * @param \Users_UserStruct $user
      *
      * @return null|TeamStruct
      */
     public function findTeamByIdAndUser( $id, \Users_UserStruct $user ) {
+        $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+        return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $user->uid, $id ] )[ 0 ] );
+    }
 
-        $stmt = $this->getConnection()->getConnection()->prepare( self::$_query_team_from_uid_and_id );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new TeamStruct() ) );
-        $stmt->execute( array( $user->uid, $id ) );
-
-        return static::resultOrNull( $stmt->fetch() );
+    /**
+     * Cache deletion for @see MembershipDao::findTeamByIdAndUser
+     *
+     * @param int               $id
+     * @param \Users_UserStruct $user
+     *
+     * @return bool|int
+     */
+    public function destroyCacheTeamByIdAndUser( $id, \Users_UserStruct $user ) {
+        $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+        return $this->_destroyObjectCache( $stmt, [ $user->uid, $id ] );
     }
 
     /**
@@ -130,8 +139,8 @@ class MembershipDao extends \DataAccess_AbstractDao {
         );
 
         foreach ( $members as $member ) {
-            $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 10 * 24 )->getByUid( $member->uid ) );
-            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 10 * 24 )->getAllByUid( $member->uid ) );
+            $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $member->uid ) );
+            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUid( $member->uid ) );
         }
 
         return $members;

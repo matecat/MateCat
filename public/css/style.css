@@ -19,7 +19,7 @@ header {
     left: 0;
     width: 100%;
     position: fixed;
-    z-index: 999999999;
+    z-index: 12;
     border-bottom: 1px solid #333;
     padding: 0;
     margin-top: -34px;
@@ -135,18 +135,19 @@ body.searchActive #filterSwitch {
 .qa-conflicts-issues-counter,
 .qa-lexiqa-counter {
     position: absolute;
-    border: 1px solid #fff;
-    font-weight: bold;
     color: #fff;
     background: #e20001;
-    padding: 0px 4px;
-    /*   margin:18px 5px 0px 0px !important;*/
-    margin-left: 14px;
+    margin-left: 20px;
     margin-top: -2px;
-    text-align: right;
-    font-size: 11px;
     -moz-border-radius: 10px;
     border-radius: 10px;
+    border: 1px solid #fff;
+    display: block;
+    font-size: 12px;
+    padding: 0 5px;
+    text-align: center;
+    height: 17px;
+    line-height: 1.5;
 }
 
 .numbererror:empty {
@@ -210,6 +211,15 @@ body.searchActive #filterSwitch {
     margin-bottom: 0px;
 }
 
+.warnings,
+section.opened .warnings:empty{
+    display: none;
+}
+
+section.opened .warnings {
+    display: block;
+}
+
 .warnings:last-child {
     margin-bottom: 25px;
 }
@@ -222,9 +232,6 @@ body.searchActive #filterSwitch {
     color: #D65959 !important;
 }
 
-.warnings:empty {
-    display: none;
-}
 
 .mismatch .warnings {
     display: block
@@ -545,7 +552,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     text-align: center;
     display: block;
     font-size: 12px;
-    z-index: 999;
+    z-index: 1;
     color: #aaa;
     text-decoration: none;
     cursor: default;
@@ -1385,8 +1392,7 @@ body.cattool:not(.editing) article {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
-    padding: 5px 0 0px 0;
-    margin-bottom: 9px;
+    padding: 5px 0 9px 0;
     color: #000
 }
 
@@ -2405,10 +2411,9 @@ body.cattool .searchbox .block.right {
     font-size: 11px;
     background: #999;
     padding: 4px 8px;
-
     left: 46%;
     position: absolute;
-    z-index: 10;
+    z-index: 12;
 }
 
 .close {
@@ -2503,20 +2508,6 @@ section .header .context:hover {
     display: block !important
 }
 
-.greenborder {
-    border-top: 2px solid #00a651;
-    background: url(../img/pointgreen.gif) 0 0px no-repeat;
-}
-
-.orangeborder {
-    border-bottom: 2px solid #FF6600;
-}
-
-.greenborder img {
-    margin: 0px 0 0 -2px;
-    position: absolute;
-}
-
 .smart-suggestion-target {
     border: 2px solid #00a651;
     -moz-border-radius: 2px;
@@ -2565,7 +2556,7 @@ section .text .warning {
 
 textarea, .editarea {
     position: relative;
-    z-index: 99;
+    z-index: 0;
 }
 
 section.status-new .editarea {
@@ -2577,7 +2568,7 @@ section.status-new.opened .editarea {
 }
 
 section.editor {
-    z-index: 10000;
+    z-index: 1;
     position: relative;
     height: 100%;
 }
@@ -2781,7 +2772,7 @@ body.rtl-target .editor .editarea span {
 
 .source {
     position: relative;
-    z-index: 999;
+    z-index: 0;
     /*word-break: break-all;*/
 }
 
@@ -3273,7 +3264,7 @@ section.readonly:hover .ice-locked-label {
     right: 0;
     border-left: 1px solid #ccc;
     margin: 0px 0px 0px 0 !important;
-    z-index: 99;
+    z-index: 0;
     border-bottom: 1px solid #ccc
 }
 
@@ -3288,7 +3279,7 @@ body.archived section .status-container a.status:hover {
     position: absolute;
     right: 0;
     height: 97%;
-    padding-bottom: 15px;
+    padding-bottom: 7px;
     background: #f5f5f5;
     top: 3%;
     margin: -6px 0 0 0 !important;
@@ -4981,8 +4972,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr:hover {
-    -webkit-box-shadow: inset 0px 2px 5px #666;
-    box-shadow: inset 0px 2px 5px #666;
+    background: #ededed;
 
 }
 
@@ -5039,9 +5029,9 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
     margin: 2px 5px 1px 5px;
 }
 
-.addtmx-tr:hover {
+/*.addtmx-tr:hover {
     border: 1px solid #000;
-}
+}*/
 
 .fileupload {
     margin-right: 10px;
@@ -5263,7 +5253,6 @@ body.hideMatches .submenu li.footerSwitcher {
     -o-transform: scaleY(-1);
     -webkit-transform: scaleY(-1);
     transform: scaleY(-1);
-    filter: FlipV;
     -ms-filter: "FlipV";
     border-bottom: 1px solid #666666;
     border-top: 1px solid #3aa9dd;
@@ -5308,7 +5297,6 @@ section.loaded .footer .tab.open {
     text-decoration: none;
     right: -8%;
     width: 8%;
-    z-index: 999;
 }
 
 section:hover .segment-side-buttons {
@@ -5567,10 +5555,6 @@ section:hover .segment-side-buttons {
     margin-right: 11px;
 }
 
-.action {
-
 .tmx-import-slider {
     width: 110px !important;
-}
-
 }

@@ -641,11 +641,12 @@ class downloadFileController extends downloadController {
 
     /**
      * @param $zipFileName
-     * @param $internalFiles ZipContentObject[]
+     * @param $newInternalZipFiles ZipContentObject[]
      *
      * @return string
+     * @throws Exception
      */
-    public function reBuildZipContent( $zipFileName, $internalFiles ) {
+    public function reBuildZipContent( $zipFileName, $newInternalZipFiles ) {
 
         $project = Projects_ProjectDao::findById( $this->jobInfo[ 'id_project' ] );
 
@@ -664,31 +665,45 @@ class downloadFileController extends downloadController {
             //rebuild the real name of files in the zip archive
             foreach ( $zip->treeList as $filePath ) {
 
-                $realPath = str_replace(
+                $realZipFilePath = str_replace(
                         array(
                                 ZipArchiveExtended::INTERNAL_SEPARATOR,
                                 FilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ),
                         array( DIRECTORY_SEPARATOR, "" ),
                         $filePath );
-                $realPath = ltrim( $realPath, "/" );
+                $realZipFilePath = ltrim( $realZipFilePath, "/" );
 
                 //remove the tmx from the original zip ( we want not to be exported as preview )
-                if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'tmx' ) {
-                    $zip->deleteName( $realPath );
+                if( FilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                    $zip->deleteName( $realZipFilePath );
                     continue;
                 }
 
                 //fix the file names inside the zip file, so we compare with our files
                 // and if matches we can substitute them with the converted ones
-//                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
-                foreach ( $internalFiles as $index => $internalFile ) {
-//                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
-                    $_tmpRealPath = str_replace( array( " ", " " ), "_", $realPath );
-                    if( $internalFile->output_filename == $_tmpRealPath ) {
-                        $zip->deleteName( $realPath );
-                        if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'pdf' ) $realPath .= '.docx';
-                        $zip->addFromString( $realPath, $internalFile->getContent() );
+                foreach ( $newInternalZipFiles as $index => $newInternalZipFile ) {
+
+                    $_tmpRealZipFilePath = str_replace( array( " ", " " ), "_", $realZipFilePath );
+
+                    if( $this->forceXliff ){
+                        $declaredOutputFileName = preg_replace( '/\.xlf|\.xliff|\.sdlxliff$/', '', $newInternalZipFile->output_filename );
+                        $isTheSameFile = ( $declaredOutputFileName == $_tmpRealZipFilePath );
+                    } else {
+                        $isTheSameFile = ( $newInternalZipFile->output_filename == $_tmpRealZipFilePath );
+                    }
+
+                    if( $isTheSameFile ) {
+
+                        $zip->deleteName( $realZipFilePath );
+                        if( FilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
+                            $realZipFilePath .= '.docx';
+                        } elseif( $this->forceXliff ){
+                            $realZipFilePath = $newInternalZipFile->output_filename;
+                        }
+
+                        $zip->addFromString( $realZipFilePath, $newInternalZipFile->getContent() );
+
                     }
                 }
 

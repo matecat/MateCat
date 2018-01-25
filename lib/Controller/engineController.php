@@ -165,20 +165,6 @@ class engineController extends ajaxController {
 
                 break;
 
-            case strtolower( Constants_Engines::DEEPLINGO ):
-
-                /**
-                 * Create a record of type IPTranslator
-                 */
-                $newEngineStruct = EnginesModel_DeepLingoStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
-                break;
             case strtolower( Constants_Engines::APERTIUM ):
 
                 /**
@@ -271,6 +257,20 @@ class engineController extends ajaxController {
                  * Create a record of type YandexTranslate
                  */
                 $newEngineStruct = EnginesModel_YandexTranslateStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::GOOGLE_TRANSLATE ):
+
+                /**
+                 * Create a record of type GoogleTranslate
+                 */
+                $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
                 $newEngineStruct->uid                                 = $this->uid;
@@ -388,6 +388,22 @@ class engineController extends ajaxController {
             // Do a simple translation request so that the system wakes up by the time the user needs it for translating
             $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
             $newTestCreatedMT->wakeUp();
+        } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
+
+            $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
+            $config              = $newTestCreatedMT->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $newTestCreatedMT->get( $config );
+
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
+                $engineDAO->delete( $newCreatedDbRowStruct );
+
+                return;
+            }
         } else {
 
             try {

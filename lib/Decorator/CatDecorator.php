@@ -95,6 +95,7 @@ class CatDecorator {
 
         $this->template->chunk_completion_undoable = true ;
         $this->template->translation_matches_enabled = true ;
+        $this->template->allow_link_to_analysis = true ;
     }
 
     /**

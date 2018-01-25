@@ -80,10 +80,10 @@ body.manage {
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
-                margin-left: 20px;
+                margin-left: 17px;
                 display: inline-block;
                 vertical-align: text-bottom;
-                min-width: 78px;
+                min-width: 73px;
                 color: #5a5a5a;
             }
             .ui.form .field :disabled {
@@ -344,7 +344,7 @@ body.manage {
                         .chunk {
                             transition: 0.3s ease;
                             background-color: #ffffff;
-                            padding: 8px 19px;
+                            padding: 8px 15px;
                             &.outsource-container {
                             }
                             /*&.after-outsource-container {
@@ -491,8 +491,8 @@ body.manage {
                                 }
                                 .job-to-translator {
                                     display: inline-block;
-                                    margin-right: 0;
-                                    margin-left: 10px;
+                                    margin-right: 5px;
+                                    margin-left: 5px;
                                     vertical-align: text-bottom;
                                     color: #969696;
                                     width: 125px;
@@ -504,17 +504,18 @@ body.manage {
                                     transition: 0.3s ease;
 
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                                        width: 200px;
+                                        width: fit-content;
+                                        max-width: 178px;
                                     }
                                     a {
                                         text-decoration: underline;
                                         font-weight: 700;
-                                        &:hover {
+                                        /*&:hover {
                                             text-decoration: none;
-                                        }
+                                        }*/
                                     }
                                     &.not-assigned {
-                                        width: 140px;
+                                        width: fit-content;
                                     }
                                 }
                                 &:hover .job-to-translator{
@@ -547,10 +548,6 @@ body.manage {
                                         margin-left: 5px;
                                         font-size: 13px;
                                     }
-                                    /*@media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }*/
-
 
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         display: none;
@@ -577,11 +574,12 @@ body.manage {
                                         padding: 4px;
                                         background-color: #d6d6d6;
                                         margin-top: 3px;
-                                        border-radius: 15px;
+                                        margin-bottom: 2px;
                                         position: relative;
-                                        line-height: 0px;
+                                        line-height: 0;
                                         right: 3px;
                                         font-size: 15px;
+                                        color: #ffffff;
                                     }
                                     &:hover .ui.cancel {
                                         background-color: #cccccc !important;
@@ -590,6 +588,17 @@ body.manage {
                                 }
                                 &:hover .item {
                                     display: inline-block;
+                                }
+                                &:hover {
+                                    .translator {
+                                        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                        transition: 0.3s ease;
+                                        cursor: pointer;
+                                        border-radius: 2px;
+                                        a {
+                                            text-decoration: none;
+                                        }
+                                    }
                                 }
                             }
                             .open-translate {

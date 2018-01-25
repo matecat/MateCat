@@ -1,19 +1,19 @@
 /*
-	Component: ui.contribution
+ Component: ui.contribution
  */
 
-if ( config.translation_matches_enabled ) {
+if (config.translation_matches_enabled) {
 
-    $('html').on('copySourceToTarget', 'section', function() {
+    $('html').on('copySourceToTarget', 'section', function () {
         UI.setChosenSuggestion(0);
     });
 
-    $(document).on('afterFooterCreation', function(e, segment) {
-        UI.appendAddTMXButton( segment );
+    $(document).on('afterFooterCreation', function (e, segment) {
+        UI.appendAddTMXButton(segment);
     });
 
     $.extend(UI, {
-        chooseSuggestion: function(w) {
+        chooseSuggestion: function (w) {
             var ulDataItem = '.editor .tab.matches ul[data-item=';
             this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
                 $('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w);
@@ -23,7 +23,7 @@ if ( config.translation_matches_enabled ) {
             this.highlightEditarea();
             this.disableTPOnSegment();
         },
-        copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
+        copySuggestionInEditarea: function (segment, translation, editarea, match, decode, auto, which) {
             if (typeof (decode) == "undefined") {
                 decode = false;
             }
@@ -40,19 +40,19 @@ if ( config.translation_matches_enabled ) {
 
                 this.saveInUndoStack('copysuggestion');
 
-                if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
+                if (!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 
                 // XXX we are modifing the APP state so that MateCat will know that the object is changed
                 // in particular this is needed for the Speech2Text to know that the newly added text is coming
                 // from a 100% match.
-                var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
-                if ( segmentObj ) {
+                var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId(segment));
+                if (segmentObj) {
                     segmentObj.suggestion_match = match.replace('%', '');
-                    MateCat.db.segments.update( segmentObj );
+                    MateCat.db.segments.update(segmentObj);
                 }
 
-                $(editarea).html( translation );
-                $(document).trigger('contribution:copied', { translation: translation, segment: segment });
+                $(editarea).html(translation);
+                $(document).trigger('contribution:copied', {translation: translation, segment: segment});
 
                 $(editarea).addClass('fromSuggestion');
 
@@ -80,7 +80,7 @@ if ( config.translation_matches_enabled ) {
                 translation: translation
             });
         },
-        getContribution: function(segment, next) {
+        getContribution: function (segment, next) {
             var txt;
             var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 
@@ -106,7 +106,7 @@ if ( config.translation_matches_enabled ) {
             var id = current.attr('id');
             var id_segment = id.split('-')[1];
 
-            if( config.brPlaceholdEnabled ) {
+            if (config.brPlaceholdEnabled) {
                 txt = this.postProcessEditarea(current, '.source');
             } else {
                 txt = $('.source', current).text();
@@ -127,7 +127,7 @@ if ( config.translation_matches_enabled ) {
             }
 
             // `next` and `untranslated next` are the same
-            if( (next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId) ) {
+            if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
                 return $.Deferred().resolve();
             }
 
@@ -148,33 +148,33 @@ if ( config.translation_matches_enabled ) {
                     context_after: contextAfter
                 },
                 context: $('#' + id),
-                error: function() {
+                error: function () {
                     UI.failedConnection(0, 'getContribution');
                 },
-                success: function(d) {
+                success: function (d) {
                     if (d.errors.length)
                         UI.processErrors(d.errors, 'getContribution');
                     UI.getContribution_success(d, this);
                 },
-                complete: function() {
+                complete: function () {
                     UI.getContribution_complete(current);
                 }
             });
         },
-        getContribution_complete: function(n) {
+        getContribution_complete: function (n) {
             $(".loader", n).removeClass('loader_on');
         },
-        appendAddTMXButton : function( segment ) {
+        appendAddTMXButton: function (segment) {
             $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add private resources</a></div>');
         },
-        getContribution_success: function(d, segment) {
+        getContribution_success: function (d, segment) {
             this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-            this.appendAddTMXButton( segment );
+            this.appendAddTMXButton(segment);
             this.processContributions(d, segment);
             this.segmentQA(segment);
         },
-        processContributions: function(d, segment) {
-            if(!d) return true;
+        processContributions: function (d, segment) {
+            if (!d) return true;
             this.renderContributions(d, segment);
             this.lockTags(this.editarea);
             this.saveInUndoStack();
@@ -187,56 +187,56 @@ if ( config.translation_matches_enabled ) {
             this.renderContributionErrors(d.errors, segment);
         },
 
-      renderContributions: function(d, segment) {
-        if(!d) return true;
+        renderContributions: function (d, segment) {
+            if (!d) return true;
 
-        var isActiveSegment = $(segment).hasClass('editor');
-        var editarea = $('.editarea', segment);
+            var isActiveSegment = $(segment).hasClass('editor');
+            var editarea = $('.editarea', segment);
 
-        if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
-          var editareaLength = editarea.text().trim().length;
-          if (isActiveSegment) {
-            editarea.removeClass("indent");
-          } else {
-            if (editareaLength === 0)
-              editarea.addClass("indent");
-          }
-          var translation = d.data.matches[0].translation;
-          var perc_t = $(".percentuage", segment).attr("title");
+            if (d.data.hasOwnProperty('matches') && d.data.matches.length) {
+                var editareaLength = editarea.text().trim().length;
+                if (isActiveSegment) {
+                    editarea.removeClass("indent");
+                } else {
+                    if (editareaLength === 0)
+                        editarea.addClass("indent");
+                }
+                var translation = d.data.matches[0].translation;
+                var perc_t = $(".percentuage", segment).attr("title");
 
-          $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
-          var match = d.data.matches[0].match;
+                $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
+                var match = d.data.matches[0].match;
 
-          var segment_id = segment.attr('id');
-          $(segment).addClass('loaded');
-          $('.sub-editor.matches .overflow', segment).empty();
+                var segment_id = segment.attr('id');
+                $(segment).addClass('loaded');
+                $('.sub-editor.matches .overflow', segment).empty();
 
-          $.each(d.data.matches, function(index) {
+                $.each(d.data.matches, function (index) {
 
-            if ((this.segment === '') || (this.translation === '')) return;
+                    if ((this.segment === '') || (this.translation === '')) return;
 
-            var disabled = (this.id == '0') ? true : false;
-            var cb = this.created_by;
+                    var disabled = (this.id == '0') ? true : false;
+                    var cb = this.created_by;
 
-            if ("sentence_confidence" in this &&
-                (
-                    this.sentence_confidence !== "" &&
-                    this.sentence_confidence !== 0 &&
-                    this.sentence_confidence != "0" &&
-                    this.sentence_confidence !== null &&
-                    this.sentence_confidence !== false &&
-                    typeof this.sentence_confidence != 'undefined'
-                    )
-                ) {
-                    suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-                } else if (this.match != 'MT') {
-              suggestion_info = this.last_update_date;
-            } else {
-              suggestion_info = '';
-            }
+                    if ("sentence_confidence" in this &&
+                        (
+                            this.sentence_confidence !== "" &&
+                            this.sentence_confidence !== 0 &&
+                            this.sentence_confidence != "0" &&
+                            this.sentence_confidence !== null &&
+                            this.sentence_confidence !== false &&
+                            typeof this.sentence_confidence != 'undefined'
+                        )
+                    ) {
+                        suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
+                    } else if (this.match != 'MT') {
+                        suggestion_info = this.last_update_date;
+                    } else {
+                        suggestion_info = '';
+                    }
 
-            percentClass = UI.getPercentuageClass(this.match);
-            percentText = this.match;
+                    percentClass = UI.getPercentuageClass(this.match);
+                    percentText = this.match;
 
 
                     if (!$('.sub-editor.matches', segment).length) {
@@ -246,7 +246,7 @@ if ( config.translation_matches_enabled ) {
                     // before doing a enanched view you will need to add a data-original tag
                     //
                     suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
-                    translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
+                    translationDecodedHtml = UI.decodePlaceholdersToText(this.translation, true, segment_id, 'contribution translation');
 
                     //If Tag Projection is enable I take out the tags from the contributions
                     // if (UI.currentSegmentTPEnabled) {
@@ -256,7 +256,7 @@ if ( config.translation_matches_enabled ) {
 
                     var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
                         this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
-                        '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
+                            '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
                         '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
                         suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
                         '<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
@@ -268,10 +268,9 @@ if ( config.translation_matches_enabled ) {
 
                     toAppend.find('li:first').data('original', this.segment);
 
-                    $('.sub-editor.matches .overflow', segment).append( toAppend );
+                    $('.sub-editor.matches .overflow', segment).append(toAppend);
 
                 });
-
 
 
                 UI.setDeleteSuggestion(segment);
@@ -298,11 +297,11 @@ if ( config.translation_matches_enabled ) {
                         }
                     }
 
-                    var copySuggestion = function() {
+                    var copySuggestion = function () {
                         UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
                     };
-                    if ( UI.autoCopySuggestionEnabled() &&
-                        ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
+                    if (UI.autoCopySuggestionEnabled() &&
+                        ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed(match)) || !Speech2Text.enabled() )
                     ) {
                         copySuggestion();
                     }
@@ -319,76 +318,76 @@ if ( config.translation_matches_enabled ) {
                 if (UI.debug)
                     console.log('no matches');
 
-          $(segment).addClass('loaded');
+                $(segment).addClass('loaded');
 
-          if((config.mt_enabled)&&(!config.id_translator)) {
+                if ((config.mt_enabled) && (!config.id_translator)) {
                     $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
                 } else {
                     $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
                 }
-        }
-        $(window).trigger('renderContribution:complete', segment);
+            }
+            $(window).trigger('renderContribution:complete', segment);
 
-      },
+        },
         autoCopySuggestionEnabled: function () {
             return true;
         },
-            renderContributionErrors: function(errors, segment) {
-                $('.tab.sub-editor.matches .engine-errors', segment).empty();
-                $('.tab.sub-editor.matches .engine-errors', segment).hide();
-                $.each(errors, function(){
-                    var percentClass = "";
-                    var messageClass = "";
-                    var imgClass = "";
-                    var  messageTypeText = '';
-                    if(this.code == '-2001') {
-                        console.log('ERROR -2001');
-                        percentClass = "per-red";
-                        messageClass = 'error';
-                        imgClass = 'error-img';
-                        messageTypeText = 'Error: ';
-                    }
-                    else if (this.code == '-2002') {
-                        console.log('WARNING -2002');
-                        percentClass = "per-orange";
-                        messageClass = 'warning';
-                        imgClass = 'warning-img';
-                        messageTypeText = 'Warning: ';
-                    }
-                    else {
-                        return;
-                    }
-                    $('.tab.sub-editor.matches .engine-errors', segment).show();
-                    var percentText = this.created_by_type;
-                    var suggestion_info = '';
-                    var cb = this.created_by;
+        renderContributionErrors: function (errors, segment) {
+            $('.tab.sub-editor.matches .engine-errors', segment).empty();
+            $('.tab.sub-editor.matches .engine-errors', segment).hide();
+            $.each(errors, function () {
+                var percentClass = "";
+                var messageClass = "";
+                var imgClass = "";
+                var messageTypeText = '';
+                if (this.code == '-2001') {
+                    console.log('ERROR -2001');
+                    percentClass = "per-red";
+                    messageClass = 'error';
+                    imgClass = 'error-img';
+                    messageTypeText = 'Error: ';
+                }
+                else if (this.code == '-2002') {
+                    console.log('WARNING -2002');
+                    percentClass = "per-orange";
+                    messageClass = 'warning';
+                    imgClass = 'warning-img';
+                    messageTypeText = 'Warning: ';
+                }
+                else {
+                    return;
+                }
+                $('.tab.sub-editor.matches .engine-errors', segment).show();
+                var percentText = this.created_by_type;
+                var suggestion_info = '';
+                var cb = this.created_by;
 
-                    $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
-                            '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
-                            '</span></li></ul>');
-                });
-            },
-        setDeleteSuggestion: function(segment) {
+                $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                    '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
+                    '</span></li></ul>');
+            });
+        },
+        setDeleteSuggestion: function (segment) {
 
-            $('.sub-editor.matches .overflow a.trash', segment).click(function(e) {
+            $('.sub-editor.matches .overflow a.trash', segment).click(function (e) {
                 e.preventDefault();
 
                 var source, target;
 
                 var ul = $(this).parents('.graysmall');
 
-                if( config.brPlaceholdEnabled ){
+                if (config.brPlaceholdEnabled) {
 
                     source = $('.sugg-source', ul).data('original');
-                    source = htmlDecode( source );
+                    source = htmlDecode(source);
 
-                    target = UI.postProcessEditarea( ul, '.translation' );
+                    target = UI.postProcessEditarea(ul, '.translation');
                     console.log('source 1: ', source);
 
                 } else {
 
                     source = $('.sugg-source', ul).data('original');
-                    source = htmlDecode( source );
+                    source = htmlDecode(source);
 
                     target = $('.translation', ul).text();
                     console.log('source 2: ', source);
@@ -409,70 +408,70 @@ if ( config.translation_matches_enabled ) {
                         tra: target,
                         id_translator: config.id_translator
                     },
-                    error: function() {
+                    error: function () {
                         UI.failedConnection(0, 'deleteContribution');
                     },
-                    success: function(d) {
+                    success: function (d) {
                         UI.setDeleteSuggestion_success(d);
                     }
                 });
             });
         },
-        setDeleteSuggestion_success: function(d) {
+        setDeleteSuggestion_success: function (d) {
             if (d.errors.length)
                 this.processErrors(d.errors, 'setDeleteSuggestion');
             if (this.debug)
                 console.log('match deleted');
 
-            $(".editor .matches .graysmall").each(function(index) {
+            $(".editor .matches .graysmall").each(function (index) {
                 $(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
                 $(this).attr('data-item', index + 1);
-    //			UI.reinitMMShortcuts();
+                //			UI.reinitMMShortcuts();
             });
         },
-        reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
+        reinitMMShortcuts: function () {//console.log('reinitMMShortcuts');
             var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
             $('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
-            $("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
+            $("body, .editarea").bind('keydown.alt1', keys + '+1', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('1');
-            }).bind('keydown.alt2', keys + '+2', function(e) {
+            }).bind('keydown.alt2', keys + '+2', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('2');
-            }).bind('keydown.alt3', keys + '+3', function(e) {
+            }).bind('keydown.alt3', keys + '+3', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('3');
-            }).bind('keydown.alt4', keys + '+4', function(e) {
+            }).bind('keydown.alt4', keys + '+4', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('4');
-            }).bind('keydown.alt5', keys + '+5', function(e) {
+            }).bind('keydown.alt5', keys + '+5', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('5');
-            }).bind('keydown.alt6', keys + '+6', function(e) {
+            }).bind('keydown.alt6', keys + '+6', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 UI.chooseSuggestion('6');
             });
         },
-        setChosenSuggestion: function(w, segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
+        setChosenSuggestion: function (w, segment) {
+            var currentSegment = (segment) ? segment : UI.currentSegment;
             currentSegment.find('.editarea').data('lastChosenSuggestion', w);
         },
         setContributionSourceDiff: function (segment) {
             var sourceText = '';
             var suggestionSourceText = '';
             var html = $(segment).find('.source').html();
-            var parsed = $.parseHTML( html ) ;
+            var parsed = $.parseHTML(html);
 
-            if ( parsed == null ) return;
+            if (parsed == null) return;
 
-            $.each( parsed, function (index) {
-                if(this.nodeName == '#text') {
+            $.each(parsed, function (index) {
+                if (this.nodeName == '#text') {
                     sourceText += this.data;
                 } else {
                     sourceText += this.innerText;
@@ -481,14 +480,14 @@ if ( config.translation_matches_enabled ) {
 
             $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
                 percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
-                if(percent > 74) {
+                if (percent > 74) {
                     var ss = $(this).find('.suggestion_source');
 
                     suggestionSourceText = '';
 
                     $.each($.parseHTML($(ss).html()), function (index) {
 
-                        if(this.nodeName == '#text') {
+                        if (this.nodeName == '#text') {
                             suggestionSourceText += this.data;
                         } else {
                             suggestionSourceText += this.innerText;
@@ -508,4 +507,5 @@ if ( config.translation_matches_enabled ) {
 
 
     });
-} ;
+}
+;

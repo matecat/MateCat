@@ -21,5 +21,14 @@ abstract class AbstractModelViewDecorator {
      *
      * @return mixed
      */
-    abstract public function decorate( PHPTALWithAppend $template ) ;
+
+    abstract public function decorate( $template ) ;
+
+    public function setTempalteVarsBefore( $template ) {
+        $template->googleDriveEnabled =  Bootstrap::isGDriveConfigured();
+    }
+
+    public function setTemplateVarsAfter( $template ) {
+
+    }
 }

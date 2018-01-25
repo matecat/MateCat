@@ -61,11 +61,11 @@ if (true)
             if ( ($( dad ).next().hasClass( 'glossary-item' )) || (!$( dad ).next().length) ) {
                 $( dad ).remove();
                 numLabel = $( '.tab-switcher-gl a .number', UI.currentSegment );
-                num = parseInt( numLabel.attr( 'data-num' ) ) - 1;
-                if ( num ) {
-                    $( numLabel ).text( '(' + num + ')' ).attr( 'data-num', num );
+                num = parseInt( numLabel.data( 'num' ) ) - 1;
+                if ( num > 0 ) {
+                    $( numLabel ).text( '(' + num + ')' ).data('num', num );
                 } else {
-                    $( numLabel ).text( '' ).attr( 'data-num', 0 );
+                    $( numLabel ).text( '' ).data( 'num', 0 );
                 }
             }
         },
@@ -104,6 +104,7 @@ if (true)
             $( '.gl-search', n ).addClass( 'loading' );
             if ( config.tms_enabled ) {
                 $( '.sub-editor.glossary .overflow .results', n ).empty();
+                $( '.tab-switcher-gl a .number', n ).data('num', 0);
                 $( '.sub-editor.glossary .overflow .graysmall.message', n ).empty();
             }
             txt = (entireSegment) ? htmlDecode( $( '.text .source', n ).attr( 'data-original' ) ) : view2rawxliff( $( '.gl-search .search-source', n ).text() );
@@ -167,13 +168,13 @@ if (true)
                 }
             }
             var numMatches = Object.size( d.data.matches );
-            var existingMatches = (segment.el.hasClass('glossary-loaded')) ? 0 : $( '.tab-switcher-gl a .number', segment.el ).data('num');
+            var existingMatches = (!segment.el.hasClass('glossary-loaded')) ? 0 : $( '.tab-switcher-gl a .number', segment.el ).data('num');
             numMatches = ( existingMatches && existingMatches > 0) ? existingMatches + numMatches : numMatches;
             if ( numMatches ) {
                 UI.renderGlossary( d, segment.el );
-                $( '.tab-switcher-gl a .number', segment.el ).text( ' (' + numMatches + ')' ).attr( 'data-num', numMatches );
+                $( '.tab-switcher-gl a .number', segment.el ).text( ' (' + numMatches + ')' ).data( 'num' , numMatches );
             } else {
-                $( '.tab-switcher-gl a .number', segment.el ).text( '' ).attr( 'data-num', 0 );
+                $( '.tab-switcher-gl a .number', segment.el ).text( '' ).data( 'num', 0 );
             }
         },
 

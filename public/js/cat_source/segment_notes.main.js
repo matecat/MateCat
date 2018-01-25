@@ -56,6 +56,7 @@ if ( SegmentNotes.enabled() )
         $.each(notes, function() {
             var li = $('<li/>');
             var label = $('<span class="note-label">Note: </span>');
+
             var text = $('<span />').html( this.note );
 
             li .append( label ) .append( text ) ;
@@ -71,7 +72,7 @@ if ( SegmentNotes.enabled() )
         var output = '' ;
 
         if ( notes != null ) {
-            output = buildNotesForm(segment.absoluteId, notes) ;
+            output = SegmentNotes.buildNotesForm(segment.absoluteId, notes) ;
         }
         return output;
     }
@@ -83,7 +84,8 @@ if ( SegmentNotes.enabled() )
     // exports
     $.extend(SegmentNotes, {
         registerSegments : registerSegments,
-        panelHTML : panelHTML
+        panelHTML : panelHTML,
+        buildNotesForm: buildNotesForm
     }); 
 
 

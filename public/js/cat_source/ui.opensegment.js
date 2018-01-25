@@ -83,8 +83,6 @@
             this.currentSegment.addClass('opened');
 
             this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
-
-            this.fillCurrentSegmentWarnings(this.globalWarnings, true);
             // this.setNextWarnedSegment();
 
             this.focusEditarea = setTimeout(function() {

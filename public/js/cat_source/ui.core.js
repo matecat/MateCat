@@ -2051,9 +2051,9 @@ UI = {
 	 *
 	 * @returns {undefined}
 	 */
-	fillCurrentSegmentWarnings: function(warningDetails, global) {
+	fillCurrentSegmentWarnings: function(segment, warningDetails, global) {
 		if ( !global ) {
-            UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
+            UI.fillWarnings(segment, $.parseJSON(warningDetails.warnings));
 		}
 	},
 
@@ -2108,12 +2108,7 @@ UI = {
 
                 //check for errors
                 if (UI.globalWarnings) {
-
                     UI.renderQAPanel();
-
-                    if (openingSegment)
-                        UI.fillCurrentSegmentWarnings(data.details, true);
-
                 }
 
                 // check for messages
@@ -2188,16 +2183,16 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-  segmentLexiQA: function(_segment) {
-    var segment = _segment;
-    //new API?
-    if (_segment.raw) {
-      segment = _segment.raw
-    }
-    var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-    var id_segment = UI.getSegmentId(segment);
-    LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
-  },
+    segmentLexiQA: function (_segment) {
+        var segment = _segment;
+        //new API?
+        if (_segment.raw) {
+            segment = _segment.raw
+        }
+        var translation = $('.editarea', segment).text().replace(/\uFEFF/g, '');
+        var id_segment = UI.getSegmentId(segment);
+        LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
+    },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2246,7 +2241,7 @@ UI = {
             $('.editor .editarea .order-error').removeClass('order-error');
 					}
           else {
-              UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+              UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
               UI.markTagMismatch(d.details);
               delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
               segment.el.removeClass('waiting_for_check_result');

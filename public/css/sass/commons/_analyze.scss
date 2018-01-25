@@ -43,9 +43,9 @@ body.analyze{
             background: #f3f3f3;
             .left-analysis {
                 padding-top: 20px;
+                padding-left: 30px;
                 top: 14px;
                 position: relative;
-                left: 20px;
                 width: 55% !important;
                 height: 205px;
                 .h1 {
@@ -58,7 +58,7 @@ body.analyze{
                     position: relative;
                     top: 0;
                     z-index: 2;
-                    left: -48px;
+                    left: -45px;
                     max-width: 100%;
                     min-width: 0;
                     background-color: #d7d8dc;
@@ -86,7 +86,7 @@ body.analyze{
                         overflow: hidden;
                         text-overflow: ellipsis;
                         top: 1px;
-                        padding-left: 18px;
+                        padding-left: 15px;
                     }
                 }
                 .project-create {
@@ -251,7 +251,7 @@ body.analyze{
             padding: 45px 15px 15px;
             background-color: #f3f3f3;
             margin: 0 -1rem 0;
-            .compare-table{
+            .compare-table {
                 background-color: #d7d8dc;
                 margin-bottom: 1px;
                 .updated-count {
@@ -276,11 +276,12 @@ body.analyze{
                 }
                 .title-job {
                     display: inline-block;
-                    width: 26%;
+                    width: 28%;
                     line-height: 50px;
                     text-align: left;
                     font-size: 17px;
-                    padding: 0 0 0 20px;
+                    padding-right: 0;
+                    margin-right: 0;
                     &.splitted {
                         width: 78%;
                     }
@@ -288,7 +289,7 @@ body.analyze{
                 }
                 .titles-compare {
                     display: inline-block;
-                    width: 52%;
+                    width: 50%;
                     text-align: center;
                     padding-left: 0;
                     padding-right: 0;
@@ -389,11 +390,11 @@ body.analyze{
                                 }
                                 @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                     .source-target {
-                                        max-width: 70% !important;
+                                        max-width: 71% !important;
                                         .source-box{
                                             &.no-split {
-                                                max-width: 41%;
-                                                min-width: 30px;
+                                                max-width: 50%;
+                                                min-width: 60px;
                                                 vertical-align: middle;
                                                 overflow: hidden;
                                                 text-overflow: ellipsis;
@@ -401,11 +402,6 @@ body.analyze{
                                         }
                                     }
                                 }
-                                /*@media only screen and (max-width: 991px) and (min-width: 768px) {
-                                    .source-target {
-                                        max-width: 70% !important;
-                                    }
-                                }*/
                             }
                         }
                     }
@@ -524,20 +520,20 @@ body.analyze{
         }
         .job-id {
             display: inline-block;
-            min-width: 70px;
             color: #969696;
             font-size: 14px;
             position: relative;
             line-height: 35px;
             top: 1px;
             text-align: left;
+            margin-right: 5px;
+            min-width: 70px;
         }
 
         .source-target {
-            min-width: 167px;
             display: inline-block;
             font-weight: bold;
-            max-width: 70%;
+            max-width: 76%;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -572,7 +568,7 @@ body.analyze{
                 line-height: 30px;
                 &.no-split {
                     max-width: 50%;
-                    min-width: 30px;
+                    min-width: 90px;
                     vertical-align: middle;
                     white-space: nowrap;
                     overflow: hidden;
@@ -614,7 +610,7 @@ body.analyze{
                                 .head-chunk {
                                     transition: 0.3s ease;
                                     background-color: #ffffff;
-                                    padding: 8px 20px;
+                                    padding: 8px 15px;
                                     position: relative;
                                     z-index: 4;
                                     text-align: left;
@@ -740,7 +736,6 @@ body.analyze{
 
         @media only screen and (max-width: 1199px) and (min-width: 992px) {
             .left-box {
-               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -783,7 +778,6 @@ body.analyze{
 
         @media only screen and (max-width: 991px) and (min-width: 768px) {
             .left-box {
-                /*width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;
@@ -822,7 +816,6 @@ body.analyze{
 
         @media only screen and (max-width: 767px) {
             .left-box {
-               /* width: 12%;*/
                 padding-left: 0 !important;
                 .job-id {
                     min-width: 65px;

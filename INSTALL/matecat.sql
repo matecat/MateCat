@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.19, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
@@ -177,13 +177,13 @@ CREATE TABLE `connected_services` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `dqf_child_projects_map`
+-- Table structure for table `dqf_projects_map`
 --
 
-DROP TABLE IF EXISTS `dqf_child_projects_map`;
+DROP TABLE IF EXISTS `dqf_projects_map`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `dqf_child_projects_map` (
+CREATE TABLE `dqf_projects_map` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_job` bigint(20) NOT NULL,
   `password` varchar(50) NOT NULL,
@@ -194,6 +194,8 @@ CREATE TABLE `dqf_child_projects_map` (
   `dqf_parent_uuid` varchar(255) DEFAULT NULL,
   `archive_date` datetime DEFAULT NULL,
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `project_type` varchar(50) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `first_last_segment` (`first_segment`,`last_segment`) USING BTREE
@@ -345,7 +347,7 @@ CREATE TABLE `jobs` (
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
   `total_time_to_edit` bigint(20) DEFAULT '0',
-  `id_job_to_revise` int(11) DEFAULT NULL,
+  `only_private_tm` int(11) NOT NULL DEFAULT '0',
   `last_opened_segment` int(11) DEFAULT NULL,
   `id_tms` int(11) DEFAULT '1',
   `id_mt_engine` int(11) DEFAULT '1',
@@ -378,7 +380,7 @@ CREATE TABLE `jobs` (
   `avg_post_editing_effort` float DEFAULT '0',
   `total_raw_wc` bigint(20) DEFAULT '1',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
-  KEY `id_job_to_revise` (`id_job_to_revise`),
+  KEY `id_job_to_revise` (`only_private_tm`),
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `owner` (`owner`),
   KEY `id_translator` (`id_translator`),
@@ -624,6 +626,7 @@ CREATE TABLE `projects` (
   `pretranslate_100` int(1) DEFAULT '0',
   `id_qa_model` int(11) DEFAULT NULL,
   `id_assignee` int(10) unsigned DEFAULT NULL,
+  `due_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
@@ -825,6 +828,8 @@ CREATE TABLE `segment_translation_versions` (
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `propagated_from` bigint(20) DEFAULT NULL,
   `time_to_edit` int(11) DEFAULT NULL,
+  `is_review` tinyint(4) NOT NULL DEFAULT '0',
+  `raw_diff` text,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
@@ -934,7 +939,8 @@ DROP TABLE IF EXISTS `sequences`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sequences` (
   `id_segment` bigint(20) unsigned NOT NULL,
-  `id_project` bigint(20) unsigned NOT NULL
+  `id_project` bigint(20) unsigned NOT NULL,
+  `id_dqf_project` bigint(20) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1125,7 +1131,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-16 16:29:14
+-- Dump completed on 2018-01-25 13:11:59
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1192,7 +1198,7 @@ GRANT DROP ON `matecat`.`jobs_stats` TO 'PEEWorker'@'%' IDENTIFIED BY 'matecat02
 
 USE `matecat`;
 
--- MySQL dump 10.13  Distrib 5.7.19, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat_old
 -- ------------------------------------------------------
@@ -1280,7 +1286,13 @@ INSERT INTO `phinxlog` VALUES (20170711124125,'2017-09-26 19:09:22','2017-09-26 
 INSERT INTO `phinxlog` VALUES (20170712141010,'2017-09-26 19:09:23','2017-09-26 19:09:23');
 INSERT INTO `phinxlog` VALUES (20170720100436,'2017-09-26 19:09:23','2017-09-26 19:09:24');
 INSERT INTO `phinxlog` VALUES (20170829075926,'2017-09-26 19:09:24','2017-09-26 19:09:24');
+INSERT INTO `phinxlog` VALUES (20170904190313,'2017-12-18 13:33:08','2017-12-18 13:33:09');
+INSERT INTO `phinxlog` VALUES (20170905114929,'2017-12-18 13:33:09','2017-12-18 13:33:09');
 INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 19:09:25');
+INSERT INTO `phinxlog` VALUES (20171004154445,'2017-12-18 13:33:09','2017-12-18 13:33:10');
+INSERT INTO `phinxlog` VALUES (20171106115121,'2017-12-18 13:33:10','2017-12-18 13:33:12');
+INSERT INTO `phinxlog` VALUES (20171129152525,'2017-11-30 12:39:09','2017-11-30 12:39:13');
+INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 16:48:14');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1292,4 +1304,4 @@ INSERT INTO `phinxlog` VALUES (20170926170329,'2017-09-26 19:09:24','2017-09-26 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-16 16:29:14
+-- Dump completed on 2018-01-25 13:11:59

@@ -17,13 +17,13 @@ class Constants_Engines {
     const TAUYOU	       = 'Tauyou';
     const MICROSOFT_HUB    = 'MicrosoftHub';
     const IP_TRANSLATOR    = 'IPTranslator';
-    const DEEPLINGO        = 'DeepLingo';
     const APERTIUM         = 'Apertium';
     const ALTLANG	       = 'Altlang';
     const LETSMT           = 'LetsMT';
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
+    const GOOGLE_TRANSLATE = 'GoogleTranslate';
 
     protected static $ENGINES_LIST = [
             self::MY_MEMORY        => self::MY_MEMORY,
@@ -31,12 +31,12 @@ class Constants_Engines {
             self::TAUYOU           => self::TAUYOU,
             self::MICROSOFT_HUB    => self::MICROSOFT_HUB,
             self::IP_TRANSLATOR    => self::IP_TRANSLATOR,
-            self::DEEPLINGO        => self::DEEPLINGO,
             self::APERTIUM         => self::APERTIUM,
             self::ALTLANG          => self::ALTLANG,
             self::LETSMT           => self::LETSMT,
             self::SMART_MATE       => self::SMART_MATE,
             self::YANDEX_TRANSLATE => self::YANDEX_TRANSLATE,
+            self::GOOGLE_TRANSLATE => self::GOOGLE_TRANSLATE,
     ];
 
     /**

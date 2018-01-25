@@ -299,12 +299,12 @@ class JobContainer extends React.Component {
     }
 
     getTMIcon() {
-        if (JSON.parse(this.props.job.get('private_tm_key')).length) {
-            let keys = JSON.parse(this.props.job.get('private_tm_key'));
+        if (this.props.job.get('private_tm_key').size) {
+            let keys = this.props.job.get('private_tm_key');
             let tooltipText = '';
             keys.forEach(function (key, i) {
-                let descript = (key.name) ? key.name : "Private TM and Glossary";
-                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
+                let descript = (key.get('name')) ? key.get('name') : "Private TM and Glossary";
+                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.get('key') + ')</div>';
                 tooltipText =  tooltipText + item;
             });
             return  <a className=" ui icon basic button tm-keys" data-html={tooltipText} data-variation="tiny"
@@ -491,7 +491,9 @@ class JobContainer extends React.Component {
         } else if (this.props.job.get('translator')) {
             let email = this.props.job.get('translator').get('email');
 
-            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
+            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny"
+                                     ref={(tooltip) => this.emailTooltip = tooltip}
+                                     onClick={this.openOutsourceModal.bind(this, true, false)}>
                                     {email}
                                 </div>;
         } else {
@@ -590,7 +592,8 @@ class JobContainer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress) {
+        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress
+            || nextState.openOutsource !== this.state.openOutsource) {
             this.updated = true;
         }
         return (!nextProps.job.equals(this.props.job) ||
@@ -611,7 +614,7 @@ class JobContainer extends React.Component {
                 $(self.dropdown).dropdown({
                     belowOrigin: true
                 });
-            }, 2000);
+            }, 500);
             self.updated = false;
         }
         if (prevState.openOutsource && this.chunkRow) {
