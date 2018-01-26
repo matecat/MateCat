@@ -273,6 +273,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/rangy-selectionsaverestore.js',
                     basePath + 'lib/moment.min.js',
                     basePath + 'lib/lokijs.min.js',
+                    basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
@@ -284,7 +285,8 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
-
+                    basePath + 'lib/lodash.min.js',
+                    basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     // <!-- The Templates plugin is included to render the upload/download listings -->
@@ -323,10 +325,7 @@ module.exports = function(grunt) {
 
             common: {
                 src: [
-                    basePath + 'lib/lodash.min.js',
-                    basePath + 'lib/sprintf.min.js',
                     basePath + 'common.js',
-
                     basePath + 'user_store.js',
                     basePath + 'login.js'
                 ],
