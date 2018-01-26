@@ -24,9 +24,13 @@ class SegmentFooterTabMessages extends React.Component {
         if (this.props.notes) {
             this.props.notes.forEach(function (item, index) {
                 if (item.note && item.note !== "") {
+                    let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/gmi;
+                    let note = item.note.replace(regExpUrl, function ( match, text ) {
+                        return '<a href="'+ text +'" target="_blank">' + text + '</a>';
+                    });
                     let html = <div className="note" key={"note-" + index}>
                         <span className="note-label">Note: </span>
-                        <span> {item.note} </span>
+                        <span dangerouslySetInnerHTML={self.allowHTML(note)}/>
                     </div>;
                     notesHtml.push(html);
                 } else if (item.json && typeof item.json === "object" && Object.keys(item.json).length > 0) {
