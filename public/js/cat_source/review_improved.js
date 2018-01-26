@@ -184,7 +184,7 @@ if ( ReviewImproved.enabled() ) {
                 config.id_job, config.password);
 
             $.getJSON( path )
-                .success( function( data ) {
+                .done( function( data ) {
                     var review = data['quality-report'].chunk.review ;
 
                     window.quality_report_btn_component.setState({

@@ -177,7 +177,7 @@
             return this.tpCanActivate;
         },
         startSegmentTagProjection: function () {
-            UI.getSegmentTagsProjection().success(function(response) {
+            UI.getSegmentTagsProjection().done(function(response) {
                 if (response.errors.length) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.copyTagProjectionInCurrentSegment();
@@ -185,10 +185,10 @@
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                 }
 
-            }).error(function () {
+            }).fail(function () {
                 UI.copyTagProjectionInCurrentSegment();
                 UI.startOfflineMode();
-            }).complete(function () {
+            }).always(function () {
                 UI.setSegmentAsTagged();
                 UI.lockTags(UI.editarea);
                 UI.lockTags(UI.currentSegment.find('.source'));

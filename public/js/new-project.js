@@ -699,7 +699,7 @@ APP.handleCreationStatus = function( id_project, password ){
         } else {
             APP.postProjectCreation( data );
         }
-    }).error( function( data, statusText, xhr ){
+    }).fail( function( data, statusText, xhr ){
     	var _data = $.parseJSON( data.responseText );
         APP.postProjectCreation( _data );
     });
