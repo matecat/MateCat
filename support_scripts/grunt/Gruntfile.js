@@ -283,8 +283,8 @@ module.exports = function(grunt) {
 
             libs_upload: {
                 src: [
-                    basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
+                    basePath + 'lib/jquery-3.3.1.min.js',
+                    basePath + 'lib/jquery-ui-1.12.1.min.js',
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/js.cookie.js',
