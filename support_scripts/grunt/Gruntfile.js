@@ -261,7 +261,7 @@ module.exports = function(grunt) {
             libs: {
                 src: [
                     basePath + 'lib/jquery-3.3.1.min.js',
-                    basePath + 'lib/jquery-ui-1.12.1.min.js',
+                    basePath + 'lib/jquery-ui.min.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
@@ -284,7 +284,7 @@ module.exports = function(grunt) {
             libs_upload: {
                 src: [
                     basePath + 'lib/jquery-3.3.1.min.js',
-                    basePath + 'lib/jquery-ui-1.12.1.min.js',
+                    basePath + 'lib/jquery-ui.min.js',
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/js.cookie.js',
