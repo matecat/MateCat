@@ -42,7 +42,8 @@ class ReviewExtendedCategorySelector extends React.Component{
                 ref={(input) => { this.selectRef = input;}}
                 data-value={this.state.value}
                 autoFocus={this.props.focus}
-                name="severities">
+                name="severities"
+                title="Select severities">
                 <i className="icon-sort-down icon" />
                 <div className="menu">
                     {severities}

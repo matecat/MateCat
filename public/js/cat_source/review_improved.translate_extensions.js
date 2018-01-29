@@ -37,7 +37,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
         else if ( $('.editor .buttons .button-fixed').length ) {
             clickOnFixed(UI.currentSegmentId);
         }
-    }
+    };
 
     $.extend(ReviewImproved, {
         clickOnRebutted : clickOnRebutted,

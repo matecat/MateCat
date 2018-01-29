@@ -137,6 +137,19 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $email
+     *
+     * @return bool|int
+     */
+    public function destroyCacheByEmail( $email ){
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
+        $userQuery = new Users_UserStruct();
+        $userQuery->email = $email;
+        return $this->_destroyObjectCache( $stmt, [ 'email' => $userQuery->email ] );
+    }
+
+
+    /**
      *
      * This method is not static and used also to cache at Redis level the values for this Job
      *

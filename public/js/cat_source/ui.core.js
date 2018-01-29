@@ -653,7 +653,7 @@ UI = {
         }
     },
     fixHeaderHeightChange: function() {
-        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0);
+        var headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0);
         $('#outer').css('margin-top', headerHeight + 'px');
     },
 

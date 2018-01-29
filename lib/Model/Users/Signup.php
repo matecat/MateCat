@@ -198,12 +198,15 @@ class Signup {
      * @param Users_UserStruct $user
      *
      * @return Users_UserStruct
+     * @throws ValidationError
      */
     private static function __updateUserFields(Users_UserStruct $user) {
         $user->email_confirmed_at = Utils::mysqlTimestamp( time() ) ;
         $user->confirmation_token = null ;
 
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+        ( new Users_UserDao )->destroyCacheByEmail( $user->email );
+        ( new Users_UserDao )->destroyCacheByUid( $user->uid );
 
         return $user ;
     }
