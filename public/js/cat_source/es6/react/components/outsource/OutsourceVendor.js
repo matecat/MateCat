@@ -432,7 +432,7 @@ class OutsourceVendor extends React.Component {
 
                                                 {(showDateMessage) ? (
                                                     <div className="errors-date too-far-date" >We will deliver before the selected date
-                                                        <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                        <div className="tip" data-tooltip="This date already provides us with all the time we need to deliver quality work at the lowest price"
                                                              data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
                                                     </div>
                                                 ):('')}
