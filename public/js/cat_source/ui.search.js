@@ -280,7 +280,9 @@ $.extend(UI, {
 		window.closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
-
+            seg = options.segmentToScroll;
+            var el = $("#segment-"+seg);
+            $(el).addClass('currSearchSegment');
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
