@@ -281,8 +281,9 @@ $.extend(UI, {
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
             seg = options.segmentToScroll;
-            var el = $("#segment-"+seg);
-            $(el).addClass('currSearchSegment');
+            if ( seg ) {
+                SegmentActions.addClassToSegment(seg, 'currSearchSegment');
+            }
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
@@ -479,8 +480,8 @@ $.extend(UI, {
 			} else {
 				if (el.nextAll(status).length) {
 					nextToGo = el.nextAll(status).first();
-					$(el).removeClass('currSearchSegment');
-					nextToGo.addClass('currSearchSegment');
+                    SegmentActions.removeClassToSegment(UI.getSegmentId(el), 'currSearchSegment');
+                    SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
 					// We fit this case if the next batch of segments is to load
@@ -561,7 +562,7 @@ $.extend(UI, {
 			} else {
 				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
 					var nextToGo = $('#' + el).nextAll(status).first();
-					nextToGo.addClass('currSearchSegment');
+                    SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
 					// load new segments
