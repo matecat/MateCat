@@ -642,7 +642,6 @@ class EditLog_EditLogModel {
                 "Suggestion3-origin",
                 "Chosen-Suggestion",
                 "Statistically relevant",
-                "Translator",
                 "Trans-Unit-ID"
         ];
 
@@ -665,10 +664,9 @@ class EditLog_EditLogModel {
             $combined[ "Segment" ]                = $d->source_csv;
             $combined[ "Suggestion" ]             = $d->sug_csv;
             $combined[ "Translation" ]            = $d->translation_csv;
-            $combined[ "ID translator" ]          = $d->id_translator;
+            $combined[ "ID translator" ]          = "N/A";
             $combined[ "Chosen-Suggestion" ]      = $d->suggestion_position;
             $combined[ "Statistically relevant" ] = ( $d->stats_valid ? 1 : 0 );
-            $combined[ "Translator" ]             = "n/a";
             $combined[ "Trans-Unit-ID" ]          = $d->internal_id;
 
             if ( !empty( $d->suggestions_array ) ) {
