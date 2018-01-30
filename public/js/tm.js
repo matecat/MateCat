@@ -68,14 +68,14 @@
                 if($(this).val() == 0) {
                     $('table.mgmt-mt tr.activemt').removeClass('activemt');
                 } else {
-                    checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
+                    var checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
                     UI.activateMT(checkbox);
                 }
             });
             $("#mt_engine_int").change(function() {
                 // $('#add-mt-provider-cancel').hide();
                 $('#mt-provider-details .error').empty();
-
+                $('#add-mt-provider-confirm').addClass('disabled');
                 $(".insert-tm").show();
                 var provider = $(this).val();
                 if(provider == 'none') {
@@ -685,7 +685,7 @@
                 row.find('.addtmx').removeAttr('style');
             }
             row.detach();
-            $("#inactivetm").append(row);
+            $("#inactivetm").prepend(row);
 
             row.css('display', 'block');
 
@@ -704,6 +704,7 @@
             if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
             row.addClass('mine');
             row.find('td.lookup input, td.update input').attr('checked', true);
+            row.find('td.lookup input, td.update input').prop('checked', true);
             row.css('display', 'block');
 
             //update datatable struct
@@ -1974,7 +1975,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 'n',
+                placement : 's',
                 mouseOnToPopup: true
 
             });

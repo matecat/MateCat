@@ -172,7 +172,10 @@ class updateJobKeysController extends ajaxController {
             Log::doLog(json_encode($totalTmKeys));
             TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $totalTmKeys );
 
-            $this->jobData[ 'only_private_tm' ] = $this->only_private;
+            if ($this->jobOwnerIsMe() ) {
+                $this->jobData[ 'only_private_tm' ] = $this->only_private;
+            }
+
             Jobs_JobDao::updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm' ] ] );
 
             $this->result['data'] = 'OK';
@@ -182,6 +185,10 @@ class updateJobKeysController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
 
+    }
+
+    private function jobOwnerIsMe() {
+        return $this->userIsLogged && $this->jobData['owner'] == $this->getLoggedUser()->email ;
     }
 
 } 

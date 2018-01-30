@@ -37,6 +37,8 @@ use Users_UserStruct;
 
 class Mmt extends BaseFeature {
 
+    const FEATURE_CODE = 'mmt';
+
     protected $autoActivateOnProject = false;
 
     public static function loadRoutes(  Klein $klein  ){
@@ -93,6 +95,11 @@ class Mmt extends BaseFeature {
             $me_result = $newTestCreatedMT->checkAccount();
             Log::doLog( $me_result );
 
+            $keyList = self::_getKeyringOwnerKeys( $userStruct );
+            if( !empty( $keyList ) ){
+                $newTestCreatedMT->activate( $keyList );
+            }
+
         } catch ( Exception $e ) {
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
             throw $e;
@@ -100,8 +107,6 @@ class Mmt extends BaseFeature {
 
         $UserMetadataDao = new MetadataDao();
         $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
-        $keyList = self::_getKeyringOwnerKeys( $userStruct );
-        $newTestCreatedMT->activate( $keyList );
 
     }
 

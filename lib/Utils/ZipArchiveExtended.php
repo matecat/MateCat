@@ -274,8 +274,8 @@ class ZipArchiveExtended extends ZipArchive {
         $basename = array_pop( $path );
 
         $filenameInfo = explode( ".", $basename );
-        $extension    = $filenameInfo[ 1 ];
-        $filename     = $filenameInfo[ 0 ];
+        $extension    = array_pop( $filenameInfo );
+        $filename     = implode( ".", $filenameInfo );
         $dirname      = implode( DIRECTORY_SEPARATOR, $path );
 
         $pathInfo = array(

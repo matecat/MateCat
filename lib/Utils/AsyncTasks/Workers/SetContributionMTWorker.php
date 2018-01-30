@@ -12,23 +12,22 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionStruct,
         Engine,
         TaskRunner\Exceptions\EndQueueException,
-        TaskRunner\Exceptions\ReQueueException,
         Jobs_JobStruct;
 use Exception;
-use INIT;
+use TmKeyManagement_TmKeyManagement;
 
 class SetContributionMTWorker extends SetContributionWorker {
 
     const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
 
     protected function _loadEngine( ContributionStruct $contributionStruct ){
-        if( empty( $this->_engine ) ){
-            try {
-                $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
-            } catch( Exception $e ){
-                throw new EndQueueException( $e->getMessage(), self::ERR_NO_TM_ENGINE );
-            }
+
+        try {
+            $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
+        } catch( Exception $e ){
+            throw new EndQueueException( $e->getMessage(), self::ERR_NO_TM_ENGINE );
         }
+
     }
 
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
@@ -47,10 +46,13 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
+        //find all the job's TMs with write grants and make a contribution to them
+        $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );
+
         $config = [];
         $config[ 'keys' ] = array_map( function( $tm_key ){
-            return $tm_key[ 'key' ];
-        }, $jobStruct->getOwnerKeys() );
+            return $tm_key->key;
+        }, $tm_keys );
 
         return $config;
 
