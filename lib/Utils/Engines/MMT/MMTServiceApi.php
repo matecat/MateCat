@@ -42,7 +42,7 @@ class MMTServiceApi {
                                 $pluginVersion = null, $platform = null, $platformVersion = null) {
         $host = $host ? $host : self::DEFAULT_SERVER_HOST;
         $port = $port ? $port : self::DEFAULT_SERVER_PORT;
-        $this->baseUrl = "http://$host:$port";
+        $this->baseUrl = "https://$host:$port";
         $this->license = $license;
         $this->pluginVersion = $pluginVersion;
         $this->platform = $platform;

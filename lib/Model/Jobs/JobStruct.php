@@ -36,7 +36,16 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $status_owner;
     public $status_translator;
     public $status;
-    public $completed = 0; //Column 'completed' cannot be null
+
+    /**
+     * Column 'completed' cannot be null, moreover it is BIT(1) and
+     * PDO does not works well in this case without explicitly
+     * tell him that this is an INT.
+     * So, we can't set 0 because it will be treated as string, set it to false, it works.
+     * @see https://bugs.php.net/bug.php?id=50757
+     */
+    public $completed = false; //Column 'completed' cannot be null
+
     public $new_words;
     public $draft_words;
     public $translated_words;
