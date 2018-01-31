@@ -119,8 +119,7 @@ class getTagProjectionController extends ajaxController {
 
     public function getTagProjection() {
 
-        //FIXME For now get Directly the engine because it is not in the database and there is not a Model for it
-        $engine = new Engines_MMT( new EnginesModel_EngineStruct( [ 'type' => Constants_Engines::MT ] ) );
+        $engine = Engine::getInstance( 1 );
 
         $config                  = array();
         $config[ 'source' ]      = CatUtils::view2rawxliff( $this->source );

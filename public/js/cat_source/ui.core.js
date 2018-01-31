@@ -1074,7 +1074,7 @@ UI = {
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
-				this.markSearchResults();
+				this.markSearchResults(options);
 				if (this.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
 				} else {
