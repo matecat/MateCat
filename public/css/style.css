@@ -2817,7 +2817,7 @@ body.rtl-target .editor .editarea span {
 
 /*tab rows */
 /*.overflow{overflow-y:auto;min-height:8px;margin-bottom:-1px;position:relative;z-index:9999999999999999999999999999999;}*/
-.graysmall li {
+/*.graysmall li {
     width: 48%;
     float: left;
     margin: 2px 1px 0px 0;
@@ -2830,11 +2830,23 @@ body.rtl-target .editor .editarea span {
     cursor: text;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
+}*/
+
+.graysmall li {
+    width: 48%;
+    float: left;
+    margin: 2px 1px 0px 0;
+    padding: 12px 5px 30px 5px;
+    text-align: left;
+    list-style: none;
+    cursor: text;
+    -webkit-transition: all 100ms ease-in;
+    transition: all 100ms ease-in;
+    box-sizing: border-box;
 }
 
-.suggestion-item.graysmall > li {
-    min-height: 35px;
-    padding-bottom: 20px;
+.suggestion-item li.sugg-source {
+    padding-left: 25px;
 }
 
 .graysmall li.goto {
@@ -2861,9 +2873,13 @@ body.rtl-target .editor .editarea span {
     width: 46%;
 }
 
-.graysmall .b {
+/*.graysmall .b {
     padding-left: 12px !important;
     position: relative
+}*/
+
+.graysmall .b {
+    float: right;
 }
 
 .message li {
@@ -3427,7 +3443,7 @@ section.modified.editor .status {
 }
 
 .graysmall-details .per-yellow, .graysmall-details .per-blue, .graysmall-details .per-orange, .graysmall-details .per-green {
-    width: 26px !important;
+    width: 35px !important;
     text-align: center;
     display: block !important;
 }
@@ -3763,10 +3779,10 @@ span.locked.tag-html-container-close {
         text-indent: -85px;
     }
 
-    .graysmall .b {
-        /*padding-left:85px !important;*/
+    /*.graysmall .b {
+        !*padding-left:85px !important;*!
         width: 42% !important
-    }
+    }*/
 
     .graysmall-message {
         left: 15px !important

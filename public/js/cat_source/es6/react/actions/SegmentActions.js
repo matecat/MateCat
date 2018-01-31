@@ -89,12 +89,14 @@ var SegmentActions = {
     },
 
     setStatus: function (sid, fid, status) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_SEGMENT_STATUS,
-            id: sid,
-            fid: fid,
-            status: status
-        });
+        if ( sid && fid ) {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.SET_SEGMENT_STATUS,
+                id: sid,
+                fid: fid,
+                status: status
+            });
+        }
     },
     
     setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
