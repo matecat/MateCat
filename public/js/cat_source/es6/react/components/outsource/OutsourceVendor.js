@@ -321,6 +321,16 @@ class OutsourceVendor extends React.Component {
         }
     }
 
+    getLoaderHtml() {
+        let msg = "Choosing the best available translator...";
+        if (this.props.translatorsNumber && parseInt(this.props.translatorsNumber.asInt) > 30) {
+            msg = "Choosing the best available translator from the matching " + this.props.translatorsNumber.printable + "...";
+        }
+        return <div className="ui active inverted dimmer">
+            <div className="ui medium text loader">{msg}</div>
+        </div>
+    }
+
     getExtendedView() {
         let checkboxDisabledClass = (this.state.outsourceConfirmed) ? "disabled" : "";
         let delivery = this.getDeliveryDate();
@@ -575,9 +585,7 @@ class OutsourceVendor extends React.Component {
                 </div>
             ) : (
                 <div className="payment-details-box shadow-1">
-                    <div className="ui active inverted dimmer">
-                        <div className="ui medium text loader">Loading</div>
-                    </div>
+                    {this.getLoaderHtml()}
                 </div>
             ))}
             <div className="easy-pay-box">
@@ -710,9 +718,7 @@ class OutsourceVendor extends React.Component {
                         ) :('')}
                 </div>
             ):(
-                <div className="ui active inverted dimmer">
-                    <div className="ui medium text loader">Loading</div>
-                </div>
+                this.getLoaderHtml()
             )}
         </div>
     }
