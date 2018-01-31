@@ -450,6 +450,9 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal(showTranslatorBox, extendedView) {
+        if ( !this.state.openOutsource ) {
+            $(document).trigger('outsource-request' );
+        }
         this.setState({
             openOutsource: !this.state.openOutsource,
             showTranslatorBox: showTranslatorBox,
@@ -590,7 +593,8 @@ class JobContainer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress) {
+        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress
+            || nextState.openOutsource !== this.state.openOutsource) {
             this.updated = true;
         }
         return (!nextProps.job.equals(this.props.job) ||
@@ -611,7 +615,7 @@ class JobContainer extends React.Component {
                 $(self.dropdown).dropdown({
                     belowOrigin: true
                 });
-            }, 2000);
+            }, 500);
             self.updated = false;
         }
         if (prevState.openOutsource && this.chunkRow) {

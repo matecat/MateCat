@@ -86,12 +86,11 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
-        $text = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $text, @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
+        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
 
         if( !empty( $translation[ 'translation' ] ) ){
             $this->result = ( new Engines_Results_MyMemory_Matches(
-                    $this->_resetSpecialStrings( $text ),
+                    $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
@@ -325,9 +324,6 @@ class Engines_MMT extends Engines_AbstractEngine {
         }
 
         switch ( $functionName ) {
-            case 'tags_projection' :
-                $result_object = Engines_Results_MMT_TagProjectionResponse::getInstance( $decoded );
-                break;
             default:
                 //this case should not be reached
                 $result_object = Engines_Results_MMT_ExceptionError::getInstance( [
@@ -342,33 +338,6 @@ class Engines_MMT extends Engines_AbstractEngine {
         }
 
         return $result_object;
-
-    }
-
-    /**
-     * TODO FixMe whit the url parameter and method extracted from engine record on the database
-     * when MyMemory TagProjection will be public
-     *
-     * @param $config
-     *
-     * @return array|Engines_Results_MMT_TagProjectionResponse
-     */
-    public function getTagProjection( $config ){
-
-        $parameters           = array();
-        $parameters[ 's' ]    = $config[ 'source' ];
-        $parameters[ 't' ]    = $config[ 'target' ];
-        $parameters[ 'hint' ] = $config[ 'suggestion' ];
-
-        /*
-         * For now override the base url and the function params
-         */
-        $this->engineRecord[ 'base_url' ] = 'http://149.7.212.129:10000';
-        $this->engineRecord->others[ 'tags_projection' ] = 'tags-projection/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
-
-        $this->call( 'tags_projection', $parameters );
-
-        return $this->result;
 
     }
 
