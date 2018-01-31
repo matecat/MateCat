@@ -605,12 +605,12 @@ class EditLog_EditLogModel {
         return $this->jobData[ 'id_project' ];
     }
 
-    public function generateCSVOutput() {
+    public function genCSVTmpFile() {
         $this->setStartId( $this->jobData[ 'job_first_segment' ] );
         $this->setSegmentsPerPage( PHP_INT_MAX );
         list( $data, , ) = $this->getEditLogData();
-
-        $csvHandler = new \SplTempFileObject( -1 );
+        $filePath = tempnam("/tmp", "EditLog_");
+        $csvHandler = new \SplFileObject($filePath, "w");
         $csvHandler->setCsvControl( ';' );
 
         $csv_fields = [
@@ -698,14 +698,7 @@ class EditLog_EditLogModel {
 
         }
 
-
-        $csvHandler->rewind();
-        $output = "";
-        foreach ( $csvHandler as $row ) {
-            $output .= $row;
-        }
-
-        return $output;
+        return $filePath;
     }
 
 }

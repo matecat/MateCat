@@ -312,8 +312,7 @@ class downloadFileController extends downloadController {
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
-                    $this->featureSet->run('appendEditLogToDownload', $this, $output_content);
-                    $this->featureSet->run('appendSegmentsCommentsToDownload', $this, $output_content);
+                    $this->featureSet->run('processZIPDownloadPreview', $this, $output_content);
 
                     if ( count( $output_content ) > 1 ) {
 

@@ -52,18 +52,19 @@ class EntryDao extends \DataAccess_AbstractDao {
      * @return EntryStruct[]
      */
     public static function findAllByChunk( \Chunks_ChunkStruct $chunk ) {
-        $sql = "SELECT qa_entries.* FROM qa_entries
+        $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
             AND qa_entries.id_job = segment_translations.id_job
           JOIN jobs
             ON jobs.id = qa_entries.id_job
+          JOIN qa_categories ON qa_categories.id = qa_entries.id_category
            WHERE qa_entries.id_job = :id AND jobs.password = :password ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(array('id' => $chunk->id, 'password' => $chunk->password ));
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
         return $stmt->fetchAll();
     }
 

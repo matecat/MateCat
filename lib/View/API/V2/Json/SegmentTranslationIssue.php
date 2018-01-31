@@ -12,11 +12,13 @@ class SegmentTranslationIssue {
     public function __construct( ) {
     }
 
-    public function renderItem( EntryStruct $record ) {
+    public function renderItem( \DataAccess_AbstractDaoSilentStruct $record ) {
 
         $dao = new EntryCommentDao();
 
         $comments = $dao->findByIssueId( $record->id );
+
+        $record = new EntryStruct( $record->getArrayCopy() );
 
         $row = [
                 'comment'             => $record->comment,
@@ -40,6 +42,45 @@ class SegmentTranslationIssue {
         ];
 
         return $row;
+    }
+
+    public function genCSVTmpFile( $data ) {
+        $filePath   = tempnam( "/tmp", "SegmentsIssuesComments_" );
+        $csvHandler = new \SplFileObject( $filePath, "w" );
+        $csvHandler->setCsvControl( ';' );
+
+        $csv_fields = [
+                "ID Segment",
+                "Category",
+                "Severity",
+                "Selected Text",
+                "Message",
+                "Created At",
+        ];
+
+        $csvHandler->fputcsv( $csv_fields );
+
+        foreach ( $data as $record ) {
+
+            $dao = new EntryCommentDao();
+
+            $comments = $dao->findByIssueId( $record->id );
+            foreach ( $comments as $c ) {
+
+                $combined = array_combine( $csv_fields, array_fill( 0, count( $csv_fields ), '' ) );
+
+                $combined[ "ID Segment" ]    = $record->id_segment;
+                $combined[ "Category" ]      = $record->category_label;
+                $combined[ "Severity" ]      = $record->severity;
+                $combined[ "Selected Text" ] = $record->target_text;
+                $combined[ "Message" ]       = $c->comment;
+                $combined[ "Created At" ]    = $this->getDateValue( $c->create_date );
+                $csvHandler->fputcsv( $combined );
+            }
+
+        }
+
+        return $filePath;
     }
 
     private function decodeCategoryName( $id ) {
