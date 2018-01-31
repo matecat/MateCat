@@ -116,7 +116,7 @@ class OutsourceContainer extends React.Component {
                             <div><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</div>
                         </div>
                         <div className="project-subject">
-                            <b>Subject</b>: Certificates, diplomas, licences, cv's, etc.
+                            <b>Subject</b>: {this.props.job.get('subject')}
                         </div>
                     </div>
                     <div className="sixteen wide column shadow-1">
