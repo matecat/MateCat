@@ -68,14 +68,14 @@
                 if($(this).val() == 0) {
                     $('table.mgmt-mt tr.activemt').removeClass('activemt');
                 } else {
-                    checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
+                    var checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
                     UI.activateMT(checkbox);
                 }
             });
             $("#mt_engine_int").change(function() {
                 // $('#add-mt-provider-cancel').hide();
                 $('#mt-provider-details .error').empty();
-
+                $('#add-mt-provider-confirm').addClass('disabled');
                 $(".insert-tm").show();
                 var provider = $(this).val();
                 if(provider == 'none') {
@@ -111,12 +111,12 @@
                 if (provider === 'mmt') {
                     var props = {
                         modalName: 'mmt-message-modal',
-                        text: 'MMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
-                        'To provide the best results, <b>the following data will be synchronized with your private MMT engine:</b>' +
+                        text: 'ModernMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
+                        'To provide the best results, <b>the following data will be synchronized with your private ModernMT engine:</b>' +
                         '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
                         '<li>Private translation memories uploaded to MateCat</li>' +
                         '<li>All segments translated or revised in MateCat</li></ul>' +
-                        'To stop data from being synchronized, please delete the MMT engine from your list of available engines in MateCat.',
+                        'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in MateCat.',
                         successText: "Continue",
                         successCallback: function() {
                             UI.addMTEngine(provider, providerName);
@@ -685,7 +685,7 @@
                 row.find('.addtmx').removeAttr('style');
             }
             row.detach();
-            $("#inactivetm").append(row);
+            $("#inactivetm").prepend(row);
 
             row.css('display', 'block');
 
@@ -704,6 +704,7 @@
             if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
             row.addClass('mine');
             row.find('td.lookup input, td.update input').attr('checked', true);
+            row.find('td.lookup input, td.update input').prop('checked', true);
             row.css('display', 'block');
 
             //update datatable struct
@@ -1974,7 +1975,7 @@
 
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
-                placement : 'n',
+                placement : 's',
                 mouseOnToPopup: true
 
             });
