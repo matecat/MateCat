@@ -326,8 +326,9 @@ class OutsourceVendor extends React.Component {
         if (this.props.translatorsNumber && parseInt(this.props.translatorsNumber.asInt) > 30) {
             msg = "Choosing the best available translator from the matching " + this.props.translatorsNumber.printable + "...";
         }
-        return <div className="ui active inverted dimmer">
-            <div className="ui medium text loader">{msg}</div>
+        return <div className="translated-loader">
+            <img src="../../public/img/loading-outsource-translated.gif" />
+            <div className="text-loader-outsource">{msg}</div>
         </div>
     }
 
