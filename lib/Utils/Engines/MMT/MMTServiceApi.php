@@ -21,7 +21,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'MMTServiceApiException.php';
 class MMTServiceApi {
 
     const DEFAULT_SERVER_HOST = 'api.modernmt.eu';
-    const DEFAULT_SERVER_PORT = 80;
+    const DEFAULT_SERVER_PORT = 443;
 
     private $baseUrl;
     private $license;
@@ -373,18 +373,18 @@ class MMTServiceApi {
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($curl, CURLOPT_HEADER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
+        if( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ){
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
+             * For php >= 5.5.0 we use \CURLFile , so we can force and set safe upload to true
+             *
+             * @see MMTServiceApi::_setCulFileUpload()
              */
-            curl_setopt( $curl, CURLOPT_SAFE_UPLOAD, true );
-        } else {
-            /**
-             * Needed to correctly handle "@file_path_to_upload"
-             */
-            curl_setopt( $curl, CURLOPT_SAFE_UPLOAD, false );
+            curl_setopt($curl, CURLOPT_SAFE_UPLOAD, true);
         }
 
         if (count($headers) > 0)
