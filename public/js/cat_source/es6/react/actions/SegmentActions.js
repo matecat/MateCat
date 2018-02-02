@@ -223,11 +223,11 @@ var SegmentActions = {
             index: index
         });
     },
-    renderSegmentGlossary: function(sid, matches) {
+    renderSegmentGlossary: function(sid, segment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_GLOSSARY,
             sid: sid,
-            matches: matches
+            segment: segment
         });
     },
 
@@ -247,6 +247,40 @@ var SegmentActions = {
         });
     },
 
+    getGlossaryMatch: function ( text ) {
+        return API.SEGMENT.getGlossaryMatch(text)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'glossary' );
+        });
+    },
+
+    getGlossaryForSegment: function ( text ) {
+        return API.SEGMENT.getGlossaryForSegment(text)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'glossary' );
+            });
+    },
+
+    deleteGlossaryItem: function ( source, target ) {
+        return API.SEGMENT.deleteGlossaryItem(source, target)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'deleteGlossaryItem' );
+            });
+    },
+
+    addGlossaryItem: function ( source, target, comment ) {
+        return API.SEGMENT.addGlossaryItem(source, target, comment)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'addGlossaryItem' );
+            });
+    },
+
+    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, newComment ) {
+        return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment, newComment)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'updateGlossaryItem' );
+            });
+    },
 
     /************ Revise ***************/
     showSelection: function (sid, data) {

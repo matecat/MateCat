@@ -329,7 +329,7 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.sid, action.index);
             break;
         case SegmentConstants.RENDER_GLOSSARY:
-            SegmentStore.emitChange(action.actionType, action.sid, action.matches);
+            SegmentStore.emitChange(action.actionType, action.sid, action.segment);
             break;
         case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
             SegmentStore.emitChange(action.actionType);
