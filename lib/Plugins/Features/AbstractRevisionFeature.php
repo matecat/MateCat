@@ -247,15 +247,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param $completion_event_id
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
-        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) ) {
-            if ( $event->is_review ) {
-                $model = new ArchivedQualityReportModel( $chunk );
-                $model->saveWithUID( $event->uid );
-            }
-            else {
-                $model = new QualityReportModel( $chunk ) ;
-                $model->resetScore( $completion_event_id );
-            }
+        if ( $event->is_review ) {
+            $model = new ArchivedQualityReportModel( $chunk );
+            $model->saveWithUID( $event->uid );
+        }
+        else {
+            $model = new QualityReportModel( $chunk ) ;
+            $model->resetScore( $completion_event_id );
         }
     }
 
