@@ -5,13 +5,14 @@ namespace API\V2 ;
 use API\V2\Validators\ProjectPasswordValidator;
 use API\V2\Validators\ProjectValidator;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
+use Projects_ProjectStruct;
 
 class ProjectCompletionStatus extends KleinController {
 
     /**
-     * @var ProjectValidator
+     * @var Projects_ProjectStruct
      */
-    private $validator ;
+    private $project ;
 
     public function afterConstruct() {
 
@@ -24,17 +25,20 @@ class ProjectCompletionStatus extends KleinController {
             $validator->setFeature( 'project_completion' );
         }
 
+        $validator->onSuccess( function () use ( $validator ) {
+            $this->project = $validator->getProject();
+        } );
+
         $this->appendValidator( $validator );
 
     }
 
     public function status() {
-        // TODO: wrap everything inside a JSON formatter class
-        $model = new ProjectCompletionStatusModel( $this->validator->getProject() ) ;
 
-        $this->response->json( array(
+        $model = new ProjectCompletionStatusModel( $this->project ) ;
+        $this->response->json( [
             'project_status' => $model->getStatus()
-        ) ) ;
+        ] ) ;
     }
 
 }
