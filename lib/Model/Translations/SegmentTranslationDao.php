@@ -240,6 +240,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 'last_segment'  => $chunk->job_last_segment
         ] );
 
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount($chunk->id, $chunk->password);
+
         return $stmt->rowCount();
     }
 
