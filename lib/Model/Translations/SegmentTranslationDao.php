@@ -217,4 +217,30 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    public function setApprovedByChunk( $chunk ) {
+        $this->setStatusByChunk( $chunk, Constants_TranslationStatus::STATUS_APPROVED );
+    }
+
+    public function setTranslatedByChunk( $chunk ) {
+        return $this->setStatusByChunk( $chunk, Constants_TranslationStatus::STATUS_TRANSLATED );
+    }
+
+    private function setStatusByChunk( $chunk, $status ) {
+        $sql = "UPDATE segment_translations
+            SET status = :status
+              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'status'        => $status,
+                'id_job'        => $chunk->id,
+                'first_segment' => $chunk->job_first_segment,
+                'last_segment'  => $chunk->job_last_segment
+        ] );
+
+        return $stmt->rowCount();
+    }
+
 }
