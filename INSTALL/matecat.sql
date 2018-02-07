@@ -639,6 +639,29 @@ CREATE TABLE `projects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `qa_archived_reports`
+--
+
+DROP TABLE IF EXISTS `qa_archived_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `qa_archived_reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_by` int(11) NOT NULL,
+  `id_project` int(11) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `job_first_segment` bigint(20) unsigned NOT NULL,
+  `job_last_segment` bigint(20) unsigned NOT NULL,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `quality_report` text NOT NULL,
+  `version` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `id_job_password_idx` (`id_job`,`password`,`job_first_segment`,`job_last_segment`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `qa_categories`
 --
 
@@ -675,6 +698,7 @@ CREATE TABLE `qa_chunk_reviews` (
   `is_pass` tinyint(4) NOT NULL DEFAULT '0',
   `force_pass_at` timestamp NULL DEFAULT NULL,
   `reviewed_words_count` int(11) NOT NULL DEFAULT '0',
+  `undo_data` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_job_password` (`id_job`,`password`),
   KEY `id_project` (`id_project`),
@@ -1131,7 +1155,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-31 12:09:14
+-- Dump completed on 2018-02-06 17:41:44
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1280,7 +1304,7 @@ INSERT INTO `phinxlog` VALUES (20170410135242,'2017-04-12 13:01:28','2017-04-12 
 INSERT INTO `phinxlog` VALUES (20170428150013,'2017-05-03 13:36:24','2017-05-03 13:36:25');
 INSERT INTO `phinxlog` VALUES (20170504163201,'2017-05-04 18:38:49','2017-05-04 18:38:50');
 INSERT INTO `phinxlog` VALUES (20170511110439,'2017-07-24 11:53:46','2017-07-24 11:53:46');
-INSERT INTO `phinxlog` VALUES (20170518102926,'2017-07-24 11:55:03','2017-07-24 11:55:03');
+INSERT INTO `phinxlog` VALUES (20170518102926,'2018-02-06 16:44:29','2018-02-06 16:44:30');
 INSERT INTO `phinxlog` VALUES (20170605191514,'2017-09-26 17:09:13','2017-09-26 17:09:13');
 INSERT INTO `phinxlog` VALUES (20170711124125,'2017-09-26 19:09:22','2017-09-26 19:09:23');
 INSERT INTO `phinxlog` VALUES (20170712141010,'2017-09-26 19:09:23','2017-09-26 19:09:23');
@@ -1304,4 +1328,4 @@ INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-31 12:09:14
+-- Dump completed on 2018-02-06 17:41:44
