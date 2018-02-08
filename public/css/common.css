@@ -791,7 +791,7 @@ color:#333;}
 
 .slide-panel {
     height: 100%!important;
-    width: 1085px;
+    width: 1024px;
     margin: 0 auto;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1503,7 +1503,7 @@ float: none!important;
 div.mgmt-container {
     margin: 0 auto;
     overflow: hidden;
-    width: 1039px;
+    width: 998px;
     padding-top: 20px;
     padding-bottom: 150px;
     text-align: left;
@@ -2828,6 +2828,10 @@ padding: 2%;
 
 }
 
+td.mt-provider {
+    width: 170px;
+}
+
 
 
 td.action .btn {
@@ -2852,6 +2856,12 @@ td.action .btn:hover {  -moz-box-shadow: 0 1px 2px #ccc;
 a.btn.pull-left.addtmx.tmx-import-slider {
     padding-right: 36px !important;
     padding-left: 36px !important;
+    margin-left: 8px
+}
+
+a.pull-left.btn-ok.uploadtm {
+    margin-left: 16px;
+    width: 110px;
 }
 
 td.action .btn .text {margin:0!important;}
@@ -4841,7 +4851,7 @@ img.ui-user-top-image-general {
 
 .active-tm-container, .inactive-tm-container, .mgmt-container {
     margin: 0 auto;
-    width: 1039px;
+    width: 998px;
     margin-top: 0px;
     text-align: left;
 }
@@ -4868,7 +4878,7 @@ img.ui-user-top-image-general {
 }
 
 #activetm td.description {
-    width: 545px !important;
+    width: 505px !important;
 }
 
 #inactivetm td.description {
