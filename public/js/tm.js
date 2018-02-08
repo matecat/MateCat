@@ -1349,8 +1349,8 @@
             var tr = button.closest('tr');
             var id = tr.data("id");
             $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? ' +
-                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete" style="display: inline; margin: 0 10px;padding: 0">       <span class="text">Confirm</span>   </a>' +
-                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>').show();
+                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete" style="display: inline; margin: 0 10px;padding: 0">       <span class="text">Confirm</span>   </a>').show();
             $('.continueDeletingMT, .cancelDeletingMT').off('click');
             $('.continueDeletingMT').on('click', function(e){
                 e.preventDefault();
