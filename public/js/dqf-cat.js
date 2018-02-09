@@ -19,10 +19,9 @@
 
     function readonlyClickDisplay() {
         APP.confirm({
-            // msg: UI.messageForClickOnReadonly()
             msg      : UI.messageForClickOnReadonly(),
             callback : 'dqfConfirmSignin',
-            okTxt    : 'Ok, sign me in'
+            okTxt    : 'Ok'
         });
     }
 
