@@ -80,7 +80,7 @@ if ( ProjectCompletion.enabled() ) {
         button.removeClass('isMarkableAsComplete isMarkedComplete');
         button.addClass('notMarkedComplete');
 
-        if ( isClickableStatus( stats ) ) {
+        if ( UI.isMarkedAsCompleteClickable( stats ) ) {
             button.addClass('isMarkableAsComplete');
             button.removeAttr('disabled');
         } else {
@@ -177,7 +177,8 @@ if ( ProjectCompletion.enabled() ) {
         markAsCompleteSubmit      : markAsCompleteSubmit,
         isReadonlySegment         : isReadonlySegment,
         messageForClickOnReadonly : messageForClickOnReadonly,
-        handleClickOnReadOnly     : handleClickOnReadOnly
+        handleClickOnReadOnly     : handleClickOnReadOnly,
+        isMarkedAsCompleteClickable: isClickableStatus
     });
 
 
