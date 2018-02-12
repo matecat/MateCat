@@ -642,11 +642,14 @@ class EditLog_EditLogModel {
                 "Suggestion3-origin",
                 "Chosen-Suggestion",
                 "Statistically relevant",
-                "Trans-Unit-ID"
+                "Trans-Unit-ID",
+                "User ID",
+                "User Email"
         ];
 
         $csvHandler->fputcsv( $csv_fields );
 
+        /** @var EditLog_EditLogSegmentStruct $d */
         foreach ( $data as $d ) {
 
             $combined = array_combine( $csv_fields, array_fill( 0, count( $csv_fields ), '' ) );
@@ -668,6 +671,8 @@ class EditLog_EditLogModel {
             $combined[ "Chosen-Suggestion" ]      = $d->suggestion_position;
             $combined[ "Statistically relevant" ] = ( $d->stats_valid ? 1 : 0 );
             $combined[ "Trans-Unit-ID" ]          = $d->internal_id;
+            $combined[ "User ID" ]                = $d->uid ;
+            $combined[ "User Email" ]             = $d->email ;
 
             if ( !empty( $d->suggestions_array ) ) {
 
