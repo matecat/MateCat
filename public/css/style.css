@@ -2831,7 +2831,9 @@ body.rtl-target .editor .editarea span {
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
 }*/
-
+.concordances .graysmall li.sugg-source {
+    padding-left: 34px;
+}
 .graysmall li {
     width: 48%;
     float: left;
