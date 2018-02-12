@@ -13,7 +13,7 @@ class OutsourceContainer extends React.Component {
         this.handleDocumentClick = this.handleDocumentClick.bind(this);
         this._handleEscKey = this._handleEscKey.bind(this);
         this.checkTimezone();
-        this.retrieveTranslators();
+        // this.retrieveTranslators();
     }
 
     allowHTML(string) {
@@ -31,12 +31,13 @@ class OutsourceContainer extends React.Component {
     retrieveTranslators () {
         if (config.enable_outsource) {
             let self = this;
-            API.OUTSOURCE.getCountTranslators(this.props.job.get('sourceTxt'), this.props.job.get('targetTxt'))
-                .done(function ( data ) {
-                    self.translatorsNumber = data;
-                }).fail(function ( data ) {
-                    self.translatorsNumber = null;
-            });
+            self.translatorsNumber = null;
+            // API.OUTSOURCE.getCountTranslators(this.props.job.get('sourceTxt'), this.props.job.get('targetTxt'))
+            //     .done(function ( data ) {
+            //         self.translatorsNumber = data;
+            //     }).fail(function ( data ) {
+            //         self.translatorsNumber = null;
+            // });
         }
     }
 
