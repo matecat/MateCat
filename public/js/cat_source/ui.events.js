@@ -517,36 +517,12 @@ $.extend(UI, {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
 			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());
-		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
-			if (e.which == 13) { // enter
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 1)
-					UI.getConcordance(txt, 0);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-target').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
-        }).on('keydown', function(e) {
+		}).on('keydown', function(e) {
             if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();
                 e.stopPropagation();
             }
-		}).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 2)
-					UI.getConcordance(txt, 1);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-source').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-source').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
@@ -583,16 +559,6 @@ $.extend(UI, {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-		}).on('click', '.concordances .more', function(e) {
-			e.preventDefault();
-			tab = $(this).parents('.concordances');
-			container = $('.overflow', $(tab));
-			if($(tab).hasClass('extended')) {
-				UI.setExtendedConcordances(false);
-			} else {
-				UI.setExtendedConcordances(true);
-			}
-			$(this).parents('.matches').toggleClass('extended');
 		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
