@@ -142,7 +142,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var messageForClickOnReadonly = function( section ) {
-        if ( translateAndReadonly() ) {
+        if ( UI.translateAndReadonly()) {
             return 'This job is currently under review. Segments are in read-only mode.';
         }
         else {
@@ -178,7 +178,8 @@ if ( ProjectCompletion.enabled() ) {
         isReadonlySegment         : isReadonlySegment,
         messageForClickOnReadonly : messageForClickOnReadonly,
         handleClickOnReadOnly     : handleClickOnReadOnly,
-        isMarkedAsCompleteClickable: isClickableStatus
+        isMarkedAsCompleteClickable: isClickableStatus,
+        translateAndReadonly      : translateAndReadonly
     });
 
 
@@ -201,6 +202,11 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var checkCompletionOnReady = function (  ) {
+        translateAndReadonly() && showTranslateWarningMessage();
+        evalReviseNotice();
+    };
+
     $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
         e.preventDefault();
 
@@ -215,7 +221,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     var evalReviseNotice = function() {
-        if ( config.isReview && config.job_completion_current_phase == 'translate' ) {
+        if ( config.isReview && config.job_completion_current_phase == 'translate' && config.job_marked_complete == 0 ) {
             warningNotification = APP.addNotification({
                 type: 'warning',
                 title: 'Warning',
@@ -245,8 +251,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).on('ready',  function() {
-        translateAndReadonly() && showTranslateWarningMessage();
-        evalReviseNotice();
+        checkCompletionOnReady()
     });
 
 
