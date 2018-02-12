@@ -377,7 +377,6 @@ class XliffSAXTranslationReplacer {
                     || 'value' == $name
                     || 'bpt' == $name
                     || 'ept' == $name
-                    || 'ph' == $name
                     || 'st' == $name
                     || 'note' == $name ) { // we are closing a critical CDATA section
 
