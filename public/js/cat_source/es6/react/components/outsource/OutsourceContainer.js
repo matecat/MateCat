@@ -13,6 +13,7 @@ class OutsourceContainer extends React.Component {
         this.handleDocumentClick = this.handleDocumentClick.bind(this);
         this._handleEscKey = this._handleEscKey.bind(this);
         this.checkTimezone();
+        // this.retrieveTranslators();
     }
 
     allowHTML(string) {
@@ -24,6 +25,19 @@ class OutsourceContainer extends React.Component {
         if ( !timezoneToShow) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
             $.cookie( "matecat_timezone" , timezoneToShow);
+        }
+    }
+
+    retrieveTranslators () {
+        if (config.enable_outsource) {
+            let self = this;
+            self.translatorsNumber = null;
+            // API.OUTSOURCE.getCountTranslators(this.props.job.get('sourceTxt'), this.props.job.get('targetTxt'))
+            //     .done(function ( data ) {
+            //         self.translatorsNumber = data;
+            //     }).fail(function ( data ) {
+            //         self.translatorsNumber = null;
+            // });
         }
     }
 
@@ -144,7 +158,9 @@ class OutsourceContainer extends React.Component {
                                     <OutsourceVendor project={this.props.project}
                                                      job={this.props.job}
                                                      extendedView={this.props.extendedView}
-                                                     standardWC={this.props.standardWC}/>
+                                                     standardWC={this.props.standardWC}
+                                                     translatorsNumber={this.translatorsNumber}
+                                    />
                                 ) :(null)}
 
                         </div>
