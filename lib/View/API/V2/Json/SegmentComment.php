@@ -42,9 +42,9 @@ class SegmentComment {
         return $out;
     }
 
-    public function genCSV(){
-
-        $csvHandler = new \SplTempFileObject( -1 );
+    public function genCSVTmpFile(){
+        $filePath = tempnam("/tmp", "SegmentsComments_");
+        $csvHandler = new \SplFileObject($filePath, "w");
         $csvHandler->setCsvControl( ';' );
 
         $csv_fields = [
@@ -76,13 +76,7 @@ class SegmentComment {
         }
 
 
-        $csvHandler->rewind();
-        $output = "";
-        foreach ( $csvHandler as $row ) {
-            $output .= $row;
-        }
-
-        return $output;
+        return $filePath;
     }
 
     private function formatDate( $date ) {

@@ -7,7 +7,6 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     const TABLE = 'segment_translation_versions';
 
     public $source_page ;
-    public $uid ;
 
     protected static $primary_keys = ['id_job', 'id_segment', 'version_number'];
 

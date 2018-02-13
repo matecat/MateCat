@@ -330,7 +330,7 @@ $.extend(UI, {
 		}).on('click', 'a.status', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('click', 'section:not(.readonly, .ice-unlocked) a.status', function() {
+		}).on('click', 'section:not(.readonly, .ice-locked) a.status', function() {
 			var section = $(this).closest("section");
 			var statusMenu = $("ul.statusmenu", section);
 
@@ -509,36 +509,12 @@ $.extend(UI, {
 		}).on('click', '.alternatives a', function(e) {
 			e.preventDefault();
 			$('.editor .tab-switcher-al').click();
-		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
-			if (e.which == 13) { // enter
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 1)
-					UI.getConcordance(txt, 0);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-target').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
-        }).on('keydown', function(e) {
+		}).on('keydown', function(e) {
             if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();
                 e.stopPropagation();
             }
-		}).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 2)
-					UI.getConcordance(txt, 1);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-source').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-source').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
 		})
         // TODO : GLOSSARY -> move to component
 			.on('dblclick', '.glossary .sugg-target', function() {

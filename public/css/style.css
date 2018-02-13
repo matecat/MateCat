@@ -2837,7 +2837,9 @@ body.rtl-target .editor .editarea span {
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
 }
-
+.concordances .graysmall li.sugg-source {
+    padding-left: 34px;
+}
 .suggestion-item.graysmall > li {
     width: 48%;
     float: left;
@@ -3678,6 +3680,7 @@ span.locked.tag-html-container-close {
 
 .editarea .locked,
 .source .locked,
+.target .locked,
 .ice-locked .targetarea .locked,
 .footer .locked,
 .splitArea .locked {

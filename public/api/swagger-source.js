@@ -19,12 +19,12 @@ $(function () {
         "schemes": [
             "https"
         ],
-        "basePath": "/api",
+        //"basePath": "/api",
         "produces": [
             "application/json"
         ],
         "paths": {
-            "/new": {
+            "/api/new": {
                 "post": {
                     "tags": [
                         "Project"
@@ -120,7 +120,7 @@ $(function () {
                     }
                 }
             },
-            "/status": {
+            "/api/status": {
                 "get": {
                     "tags": [
                         "Project"
@@ -156,7 +156,7 @@ $(function () {
                     }
                 }
             },
-            "/change_project_password": {
+            "/api/change_project_password": {
                 "post": {
                     "tags": [
                         "Project"
@@ -199,7 +199,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/new": {
+            "/api/v1/new": {
                 "post": {
                     "tags": [
                         "Project"
@@ -299,7 +299,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/projects/{id_project}/{password}/creation_status": {
+            "/api/v1/projects/{id_project}/{password}/creation_status": {
                 "get": {
                     "tags": [
                         "Project"
@@ -335,7 +335,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/jobs/{id_job}/{password}/stats": {
+            "/api/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
                         "Project"
@@ -371,7 +371,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/urls": {
+            "/api/v2/projects/{id_project}/{password}/urls": {
                 "get": {
                     "tags": [
                         "Project"
@@ -407,7 +407,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/due_date": {
+            "/api/v2/projects/{id_project}/{password}/due_date": {
                 "post": {
                     "tags": [
                         "Project"
@@ -536,7 +536,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
                 "post": {
                     "tags": [
                         "Project"
@@ -575,7 +575,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translator": {
+            "/api/v2/jobs/{id_job}/{password}/translator": {
                 "get": {
                     "tags": [
                         "Job"
@@ -666,7 +666,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/comments": {
+            "/api/v2/jobs/{id_job}/{password}/comments": {
                 "get": {
                     "tags": [
                         "Job"
@@ -709,7 +709,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/quality-report": {
+            "/api/v2/jobs/{id_job}/{password}/quality-report": {
                 "get": {
                     "tags": [
                         "Project",
@@ -746,7 +746,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/teams": {
+            "/api/v2/teams": {
                 "get": {
                     "tags": [
                         "Teams",
@@ -811,7 +811,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}" : {
+            "/api/v2/teams/{id_team}" : {
                 "put": {
                     "tags": [
                         "Teams",
@@ -845,7 +845,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/members" : {
+            "/api/v2/teams/{id_team}/members" : {
                 "get": {
                     "tags": [
                         "Teams",
@@ -909,7 +909,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/members/{id_member}" : {
+            "/api/v2/teams/{id_team}/members/{id_member}" : {
                 "delete": {
                     "tags": [
                         "Teams",
@@ -944,7 +944,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/projects" : {
+            "/api/v2/teams/{id_team}/projects" : {
                 "get": {
                     "tags": [
                         "Teams",
@@ -972,7 +972,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/projects/{id_project}" : {
+            "/api/v2/teams/{id_team}/projects/{id_project}" : {
                 "get": {
                     "tags": [
                         "Teams",
@@ -1060,7 +1060,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translation-issues": {
+            "/api/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
                         "Project",
@@ -1097,7 +1097,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translation-versions": {
+            "/api/v2/jobs/{id_job}/{password}/translation-versions": {
                 "get": {
                     "tags": [
                         "Project",
@@ -1134,7 +1134,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
                 "get": {
                     "tags": [
                         "Project",
@@ -1178,7 +1178,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
                 "get": {
                     "tags": [
                         "Project",
@@ -1229,7 +1229,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
                 "post": {
                     "tags": [
                         "Project",
@@ -1351,7 +1351,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
                 "post": {
                     "tags": [
                         "Project",
@@ -1453,7 +1453,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
                 "post": {
                     "tags": [
                         "Project",
@@ -1571,7 +1571,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/options": {
+            "/api/v2/jobs/{id_job}/{password}/options": {
                 "post": {
                     "tags": [
                         "Job",
@@ -1629,7 +1629,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/import/": {
+            "/api/v2/glossaries/import/": {
                 "post": {
                     "tags": [
                         "Glossary"
@@ -1669,7 +1669,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/import/status/{tm_key}": {
+            "/api/v2/glossaries/import/status/{tm_key}": {
                 "get": {
                     "summary": "Glossary Upload status.",
                     "description": "Glossary Upload status.",
@@ -1704,7 +1704,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/export/{tm_key}": {
+            "/api/v2/glossaries/export/{tm_key}": {
                 "get": {
                     "tags": [
                         "Glossary"

@@ -34,6 +34,17 @@ if ( Review.enabled() )
         });
     };
 
+    var alertNoTranslatedSegments = function(  ) {
+        var props = {
+            text: 'There are no translated segments to revise in this job.',
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    };
+
 
     (function(Review, $, undefined) {
 
@@ -41,8 +52,11 @@ if ( Review.enabled() )
             evalOpenableSegment : function(section) {
                 if ( isTranslated(section) ) return true ;
                 var sid = UI.getSegmentId( section );
-                UI.checkTr
-                alertNotTranslatedYet( sid ) ;
+                if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0 ) {
+                    alertNoTranslatedSegments()
+                } else {
+                    alertNotTranslatedYet( sid ) ;
+                }
                 $(document).trigger('review:unopenableSegment', section);
                 return false ;
             },

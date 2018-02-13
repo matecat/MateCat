@@ -116,6 +116,16 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     public $locked;
 
     /**
+     * @var string
+     */
+    public $uid ;
+
+    /**
+     * @var string
+     */
+    public $email ;
+
+    /**
      * @return float
      */
     public function getSecsPerWord() {

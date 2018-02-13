@@ -28,7 +28,7 @@ class editlogDownloadController extends downloadController {
 
         $this->model = new EditLog_EditLogModel( $this->id_job, $this->password );
 
-        $this->outputContent = $this->model->generateCSVOutput();
+        $this->outputContent = file_get_contents($this->model->genCSVTmpFile());
 
         /**
          * Retrieve user information
