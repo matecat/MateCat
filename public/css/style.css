@@ -3673,6 +3673,7 @@ span.locked.tag-html-container-close {
 
 .editarea .locked,
 .source .locked,
+.target .locked,
 .ice-locked .targetarea .locked,
 .footer .locked,
 .splitArea .locked {

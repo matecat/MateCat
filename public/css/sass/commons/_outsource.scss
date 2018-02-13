@@ -320,6 +320,25 @@
         padding-bottom: 15px;
         padding-top: 15px;
         cursor: auto;
+        .translated-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: 0;
+            text-align: center;
+            z-index: 1000;
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
+            img {
+                width: 40px
+            }
+            .text-loader-outsource {
+                font-size: 28px;
+                margin-top: 10px;
+                font-weight: 700;
+                color: #2f587f;
+            }
+        }
         .outsource-to-vendor {
             .payment-service {
                 padding: 5px 10px 15px;
