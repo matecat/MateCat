@@ -7,10 +7,11 @@
  */
 
 namespace API\V2;
+
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
-use ProjectManager ;
+use ProjectManager;
 
 
 class JobSplitController extends KleinController {
@@ -20,7 +21,7 @@ class JobSplitController extends KleinController {
      */
     private $validator;
 
-    private $job ;
+    private $job;
 
     private $project_struct;
 
@@ -28,13 +29,13 @@ class JobSplitController extends KleinController {
 
     public function check() {
         $pStruct = $this->getSplitData();
-        $this->response->json(['data' => $pStruct['split_result']]);
+        $this->response->json( [ 'data' => $pStruct[ 'split_result' ] ] );
     }
 
     public function apply() {
         $pStruct = $this->getSplitData();
         $this->pManager->applySplit( $pStruct );
-        $this->response->json(['data' => $pStruct['split_result']]);
+        $this->response->json( [ 'data' => $pStruct[ 'split_result' ] ] );
     }
 
     private function getSplitData() {
@@ -44,13 +45,14 @@ class JobSplitController extends KleinController {
         $this->pManager->setProjectAndReLoadFeatures( $this->validator->getProject() );
 
         $pStruct = $this->pManager->getProjectStructure();
-        $jobs = $this->validator->getProject()->getJobs();
+        $jobs    = $this->validator->getProject()->getJobs();
         $this->checkSplitAccess( $jobs );
 
         $pStruct[ 'job_to_split' ]      = $this->job->id;
         $pStruct[ 'job_to_split_pass' ] = $this->request->job_password;
 
         $this->pManager->getSplitData( $pStruct, $this->request->num_split, $this->request->split_values );
+
         return $pStruct;
     }
 
@@ -58,7 +60,7 @@ class JobSplitController extends KleinController {
         $this->validator->validate();
         // TODO: additional validation to be included in a ProjectAndJob Validation object
 
-        $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
+        $this->job = \Jobs_JobDao::getById( $this->request->id_job )[ 0 ];
 
         if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id ) {
             throw new \Exceptions_RecordNotFound();
@@ -83,13 +85,13 @@ class JobSplitController extends KleinController {
             throw new Exception( "Wrong Password. Access denied", -10 );
         }
 
-        $this->project_struct->getFeatures()->run('checkSplitAccess', $jobList ) ;
+        $this->project_struct->getFeatures()->run( 'checkSplitAccess', $jobList );
     }
 
-    protected function filterJobsById(  array $jobList  ){
+    protected function filterJobsById( array $jobList ) {
 
-        $found = false;
-        $jid   = $this->job->id;
+        $found      = false;
+        $jid        = $this->job->id;
         $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
             return $jobStruct->id == $jid;
         } );

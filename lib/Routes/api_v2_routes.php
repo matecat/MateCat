@@ -6,12 +6,6 @@
  * Time: 10:08
  */
 
-/*
- * api/v2/projects/<id>/<password>/jobs/<id_job>/<password>/split/<num_split>/check
-
-api/v2/projects/<id>/<password>/jobs/<id_job>/<password>/split/<num_split>/apply
- */
-
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '',                      'GET',  'API\V2\ProjectsController',    'get'     ); //this do not show some info like teams and translators
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
