@@ -1,5 +1,6 @@
 <?php
 
+use API\V2\Exceptions\AuthenticationError;
 use Exceptions\ValidationError;
 use ProjectQueue\Queue;
 use Teams\MembershipDao;
@@ -132,8 +133,8 @@ class NewController extends ajaxController {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Authentication failed';
-
-            return -1;
+            $this->finalize ();
+            die();
         }
 
         if ( $this->current_user ) {
