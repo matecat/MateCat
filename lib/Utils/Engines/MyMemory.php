@@ -55,6 +55,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $result_object = null;
 
         switch ( $functionName ) {
+            case 'tags_projection' :
+                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded );
+                break;
             case 'api_key_check_auth_url':
                 $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded );
                 break;
@@ -798,6 +801,30 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         Log::doLog( "DETECT LANG RES:", $res );
 
         return json_decode( $res[ $tokenHash ], true );
+    }
+
+
+    /**
+     * MyMemory private endpoint
+     *
+     * @param $config
+     *
+     * @return array|Engines_Results_MyMemory_TagProjectionResponse
+     */
+    public function getTagProjection( $config ){
+
+        $parameters           = array();
+        $parameters[ 's' ]    = $config[ 'source' ];
+        $parameters[ 't' ]    = $config[ 'target' ];
+        $parameters[ 'hint' ] = $config[ 'suggestion' ];
+
+        $this->engineRecord->base_url .= ':10000';
+        $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
+
+        $this->call( 'tags_projection', $parameters );
+
+        return $this->result;
+
     }
 
 }

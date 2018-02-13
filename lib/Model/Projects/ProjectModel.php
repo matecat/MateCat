@@ -83,6 +83,7 @@ class ProjectModel {
 
         if ( isset( $this->willChange[ 'id_team' ] ) ) {
             $this->checkIdTeam();
+            $this->cleanProjectCache();
         }
 
         foreach ( $this->willChange as $field => $value ) {
@@ -214,6 +215,11 @@ class ProjectModel {
             $teamDao->destroyCacheAssignee( $teamInCacheToClean );
         }
 
+    }
+
+    private function cleanProjectCache() {
+        $projectDao = new Projects_ProjectDao();
+        $projectDao->destroyCacheById( $this->project_struct->id );
     }
 
 }
