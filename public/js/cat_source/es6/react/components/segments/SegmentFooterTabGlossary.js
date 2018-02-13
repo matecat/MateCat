@@ -25,25 +25,28 @@ class SegmentFooterTabGlossary extends React.Component {
             SegmentActions.getGlossaryForSegment(txt)
                 .done(function ( response ) {
                     //Todo: remove this if??
-                    // if ( !_.isUndefined(response) && response.errors.length ) {
-                    //     if ( response.errors[0].code === -1 ) {
-                    //         UI.noGlossary = true;
-                    //     }
-                    // }
+                    if ( !_.isUndefined(response) && response.errors.length ) {
+                        if ( response.errors[0].code === -1 ) {
+                            UI.noGlossary = true;
+                        }
+                    }
                     self.storeGlossaryData( response.data.matches );
                     self.processLoadedGlossary( response.data.matches );
-                    SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
-
-                    // todo: move it??
-                    // I store for the current
-                    // if ( next == 0 ) {
-                    //     UI.cachedGlossaryData = data;
-                    // }
+                    SegmentActions.addClassToSegment( self.props.id_segment, 'glossary-loaded' );
+                    self.setTotalMatchesInTab( response.data.matches );
+                    UI.cacheGlossaryData( response, self.props.id_segment );
                     // Todo: refactor
                     if ( !UI.body.hasClass( 'searchActive' )) {
                         UI.markGlossaryItemsInSource( response );
                     }
                 });
+        }
+    }
+
+    setTotalMatchesInTab(matches) {
+        let totalMatches = Object.size( matches );
+        if ( totalMatches > 0 ) {
+            SegmentActions.setGlossaryIndex(this.props.id_segment, totalMatches);
         }
     }
 
@@ -68,12 +71,7 @@ class SegmentFooterTabGlossary extends React.Component {
                         self.storeGlossaryData( response.data.matches );
                         self.processLoadedGlossary( response.data.matches );
                         SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
-
-                        // todo: move it??
-                        // I store for the current
-                        // if ( next == 0 ) {
-                        //     UI.cachedGlossaryData = data;
-                        // }
+                        self.setTotalMatchesInTab( response.data.matches );
                         // Todo: refactor
                         UI.markGlossaryItemsInSource( response );
                     });
@@ -87,7 +85,7 @@ class SegmentFooterTabGlossary extends React.Component {
         this.setState({
             loading: false,
             matches: matches
-        })
+        });
     }
 
     storeGlossaryData( data ) {
@@ -116,6 +114,7 @@ class SegmentFooterTabGlossary extends React.Component {
         this.setState({
             matches: matches
         });
+        self.setTotalMatchesInTab( matches );
     }
 
     updateGlossaryItem(source, e) {
@@ -200,14 +199,18 @@ class SegmentFooterTabGlossary extends React.Component {
                         let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                         UI.footerMessage( msg, UI.getSegmentById( self.props.id_segment ) );
                     }
-                    self.processLoadedGlossary( response.data.matches );
-                    UI.markGlossaryItemsInSource(response);
                     self.source.textContent = '';
                     self.target.textContent = '';
+
+                    let matches = $.extend(true, response.data.matches, self.state.matches);
                     self.setState({
+                        loading: false,
                         openComment: false,
-                        enableAddButton: false
+                        enableAddButton: false,
+                        matches: matches
                     });
+                    self.setTotalMatchesInTab( response.data.matches );
+                    UI.markGlossaryItemsInSource(response);
                 });
 
         } else {
@@ -220,6 +223,10 @@ class SegmentFooterTabGlossary extends React.Component {
 
     checkAddItemButton(source, target) {
         return source && target;
+    }
+
+    copyItemInEditArea(translation) {
+        UI.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true))
     }
 
     renderMatches() {
@@ -271,7 +278,7 @@ class SegmentFooterTabGlossary extends React.Component {
                             <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
                                   dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText( leftTxt, true ))}/>
                         </li>
-                        <li className="b sugg-target">
+                        <li className="b sugg-target" onDoubleClick={self.copyItemInEditArea.bind(this, rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
                                   data-original={UI.decodePlaceholdersToText( rightTxt, true )}
                                   dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(rightTxt, true))}

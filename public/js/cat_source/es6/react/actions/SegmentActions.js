@@ -282,6 +282,14 @@ var SegmentActions = {
             });
     },
 
+    setGlossaryIndex: function ( sid, index ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_GLOSSARY_INDEX,
+            sid: sid,
+            data: index
+        });
+    },
+
     /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({

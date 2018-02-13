@@ -40,5 +40,6 @@ module.exports = keyMirror({
     ADD_SEGMENT_VERSION_ISSUE: null,
     OPEN_TAB: null,
     RENDER_PREVIEW: null,
-    ISSUE_DELETED: null
+    ISSUE_DELETED: null,
+    ADD_GLOSSARY_INDEX: null
 });

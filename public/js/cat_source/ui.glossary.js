@@ -65,6 +65,13 @@ if (true)
             });
         },
 
+        cacheGlossaryData: function ( data, sid ) {
+
+            if ( UI.currentSegmentId == sid ) {
+                UI.cachedGlossaryData = data;
+            }
+        },
+
         /**
          * Mark the glossary matches in the source
          * @param d
@@ -236,8 +243,7 @@ if (true)
             return smallest;
         },
 
-        copyGlossaryItemInEditarea: function ( item ) {
-            var translation = item.find( '.translation' ).text();
+        copyGlossaryItemInEditarea: function ( translation ) {
             $( '.editor .editarea .focusOut' ).before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
             var range = window.getSelection().getRangeAt( 0 );
             var tempCopyGlossPlaceholder = $( '.editor .editarea .tempCopyGlossaryPlaceholder' );

@@ -515,14 +515,7 @@ $.extend(UI, {
                 e.preventDefault();
                 e.stopPropagation();
             }
-		})
-        // TODO : GLOSSARY -> move to component
-			.on('dblclick', '.glossary .sugg-target', function() {
-            UI.copyGlossaryItemInEditarea($(this));
-        })
-        /////////////////
-
-            .on('click', '.concordances .more', function(e) {
+		}).on('click', '.concordances .more', function(e) {
 			e.preventDefault();
 			tab = $(this).parents('.concordances');
 			container = $('.overflow', $(tab));
