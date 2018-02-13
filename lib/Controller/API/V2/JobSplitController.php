@@ -23,6 +23,9 @@ class JobSplitController extends KleinController {
 
     private $job;
 
+    /**
+     * @var Projects_ProjectStruct
+     */
     private $project_struct;
 
     private $pManager;
@@ -39,14 +42,11 @@ class JobSplitController extends KleinController {
     }
 
     private function getSplitData() {
-        $this->project_struct = \Projects_ProjectDao::findByIdAndPassword( $this->request->id_project, $this->request->password, 60 * 60 );
-
         $this->pManager = new ProjectManager();
         $this->pManager->setProjectAndReLoadFeatures( $this->validator->getProject() );
 
         $pStruct = $this->pManager->getProjectStructure();
-        $jobs    = $this->validator->getProject()->getJobs();
-        $this->checkSplitAccess( $jobs );
+        $this->checkSplitAccess( $this->validator->getProject()->getJobs() );
 
         $pStruct[ 'job_to_split' ]      = $this->job->id;
         $pStruct[ 'job_to_split_pass' ] = $this->request->job_password;
@@ -58,7 +58,8 @@ class JobSplitController extends KleinController {
 
     protected function validateRequest() {
         $this->validator->validate();
-        // TODO: additional validation to be included in a ProjectAndJob Validation object
+
+        $this->project_struct = \Projects_ProjectDao::findByIdAndPassword( $this->request->id_project, $this->request->password, 60 * 60 );
 
         $this->job = \Jobs_JobDao::getById( $this->request->id_job )[ 0 ];
 
@@ -74,8 +75,7 @@ class JobSplitController extends KleinController {
     /**
      * @param Jobs_JobStruct[] $jobList
      *
-     * @return Jobs_JobStruct[]
-     * @throws NotFoundException
+     * @throws Exception
      */
     protected function checkSplitAccess( array $jobList ) {
 
