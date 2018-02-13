@@ -330,7 +330,7 @@ $.extend(UI, {
 		}).on('click', 'a.status', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('click', 'section:not(.readonly, .ice-unlocked) a.status', function() {
+		}).on('click', 'section:not(.readonly, .ice-locked) a.status', function() {
 			var section = $(this).closest("section");
 			var statusMenu = $("ul.statusmenu", section);
 
