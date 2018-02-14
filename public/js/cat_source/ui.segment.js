@@ -413,6 +413,11 @@
         isReadonlySegment : function( segment ) {
             return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
         },
+
+        isUnlockedSegment: function ( segment ) {
+            let readonly = UI.isReadonlySegment(segment);
+            return (segment.ice_locked === "1" && !readonly) && UI.getFromStorage('unlocked-' + segment.sid)
+        },
         getStatusForAutoSave : function( segment ) {
             var status ;
             if (segment.hasClass('status-translated')) {

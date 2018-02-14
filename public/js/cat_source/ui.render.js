@@ -46,6 +46,10 @@ $.extend(UI, {
          * Global Translation mismatches array definition.
          */
         this.translationMismatches = [];
+        /**
+         * Global Warnings array definition.
+         */
+        this.globalWarnings = [];
 
         this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};

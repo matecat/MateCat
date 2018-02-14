@@ -60,10 +60,6 @@ $.extend(UI, {
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
-		/**
-		 * Global Warnings array definition.
-		 */
-		this.globalWarnings = [];
 		this.createJobMenu();
 		this.checkVersion();
         this.initTM();
