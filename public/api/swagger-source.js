@@ -17,7 +17,7 @@ $(function () {
         },
         "host": config.swagger_host,
         "schemes": [
-            "https"
+            "http"
         ],
         "basePath": "/api",
         "produces": [
@@ -439,6 +439,127 @@ $(function () {
                     "responses": {
                         "200": {
                             "description": "urls"
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Split Check",
+                    "description": "Check a job can be splitted",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "job_password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "num_split",
+                            "in": "path",
+                            "description": "Number of chuck you want to split",
+                            "required": true,
+                            "type": "integer"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Split",
+                            "schema": {
+                                "$ref": "#/definitions/Split"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Split Job",
+                    "description": "Check a job can be splitted",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "job_password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "num_split",
+                            "in": "path",
+                            "description": "Number of chuck you want to split",
+                            "required": true,
+                            "type": "integer"
+                        },
+                        {
+                            "name": "split_values",
+                            "in": "formData",
+                            "description": "Number of word count values of each chunk returned in split check API",
+                            "type": "array",
+                            "items": { "type": "double" }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Split",
+                            "schema": {
+                                "$ref": "#/definitions/Split"
+                            }
                         },
                         "default": {
                             "description": "Unexpected error"
@@ -2458,7 +2579,38 @@ $(function () {
                         "serve for better understanding of the error"
                     }
                 }
-            }
+            },
+
+            "Split": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "raw_word_count": "float",
+                            "eq_word_count": "float",
+                            "job_first_segment": "integer",
+                            "job_last_segment": "integer",
+                            "id": "integer",
+                            "show_in_cattool": "integer",
+                            "chunks": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "eq_word_count": "integer",
+                                        "raw_word_count": "integer",
+                                        "segment_start": "integer",
+                                        "segment_end": "integer",
+                                        "last_opened_segment": "integer",
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
         }
     };
 
