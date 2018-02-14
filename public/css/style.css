@@ -3675,7 +3675,7 @@ section.modified.editor .status {
 
 span.locked.tag-html-container-open,
 span.locked.tag-html-container-close {
-    display: none;
+    display: none !important;
 }
 
 .editarea .locked,
