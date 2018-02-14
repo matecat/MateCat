@@ -48,9 +48,9 @@
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
-                if (response.errors.length) {
+                if (response.errors) {
                     UI.processErrors(response.errors, 'getTagProjection');
-                    UI.copyTagProjectionInCurrentSegment();
+                    UI.disableTPOnSegment()
                 } else {
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                 }
@@ -157,7 +157,7 @@
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
             var source = currentSegment.find('.source').data('original');
-            source = htmlDecode(source).replace(/&quot;/g, '\"');
+            source = UI.transformTextForLockTags(source);
             source = source.replace(/\n/g , config.lfPlaceholder)
                     .replace(/\r/g, config.crPlaceholder )
                     .replace(/\r\n/g, config.crlfPlaceholder )
