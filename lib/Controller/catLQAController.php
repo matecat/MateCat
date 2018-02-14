@@ -31,7 +31,7 @@ class catLQAController extends catController {
 
     public function setTemplateVars() {
         parent::setTemplateVars();
-        $this->template->review_type = "lqa";
+        $this->template->review_type = "extended";
 
 //        $this->template->append('footer_js', \Features\Paypal\Utils\Routes::staticSrc('build/paypal-lqa-build.js') );
 //        $this->template->append('css_resources', \Features\Paypal\Utils\Routes::staticSrc('build/paypal-build.css') );
