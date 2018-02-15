@@ -86,6 +86,7 @@ class SegmentFooter extends React.Component {
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
+        this.addGlossaryIndex = this.addGlossaryIndex.bind(this);
     }
 
     registerTab(tabName, visible, open) {
@@ -211,6 +212,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
+        SegmentStore.addListener(SegmentConstants.ADD_GLOSSARY_INDEX, this.addGlossaryIndex);
     }
 
     componentWillUnmount() {
@@ -218,6 +220,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
+        SegmentStore.removeListener(SegmentConstants.ADD_GLOSSARY_INDEX, this.addGlossaryIndex);
     }
 
     componentWillMount() {
@@ -226,6 +229,18 @@ class SegmentFooter extends React.Component {
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    addGlossaryIndex(sid, index) {
+        if (this.props.sid == sid) {
+            let tabs = $.extend(true, {}, this.state.tabs);
+            if (tabs.glossary) {
+                tabs.glossary.index = index;
+                this.setState({
+                    tabs: tabs
+                })
+            }
+        }
     }
 
     render() {
@@ -246,11 +261,11 @@ class SegmentFooter extends React.Component {
                     data-code={ tab.code }
                     onClick={ self.changeTab }>
                     <a tabIndex="-1" href="#">{ tab.label }
-                        <span className={"number"}/>
+                        <span className="number">{(tab.index) ? ' (' + tab.index + ')' : ''}</span>
                     </a>
                 </li>;
                 labels.push(label);
-                var container = self.getTabContainer(tab, active_class);
+                let container = self.getTabContainer(tab, active_class);
                 containers.push(container);
             }
         }

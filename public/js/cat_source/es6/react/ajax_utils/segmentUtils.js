@@ -69,4 +69,88 @@ API.SEGMENT = {
         })
     },
 
+    getGlossaryForSegment: function ( source) {
+        var data = {
+            exec: 'get',
+            segment: source,
+            automatic: true,
+            translation: null,
+            id_job: config.job_id,
+            password: config.password
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=glossary"
+        });
+    },
+
+    getGlossaryMatch: function ( source ) {
+        var data = {
+            action: 'glossary',
+            exec: 'get',
+            segment: source,
+            automatic: false,
+            translation: null,
+            id_job: config.job_id,
+            password: config.password
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=glossary"
+        });
+    },
+
+    deleteGlossaryItem: function ( source, target ) {
+        var data = {
+            exec: 'delete',
+            segment: source,
+            translation: target,
+            id_job: config.job_id,
+            password: config.password
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=glossary"
+        });
+    },
+
+    addGlossaryItem: function ( source, target, comment ) {
+        var data = {
+            exec: 'set',
+            segment: source,
+            translation: target,
+            comment: comment,
+            id_job: config.job_id,
+            password: config.password
+        };
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=glossary"
+        });
+    },
+
+    updateGlossaryItem: function (idItem, source, target, newTranslation, comment) {
+        var data = {
+            exec: 'update',
+            segment: source,
+            translation: target,
+            newsegment: source,
+            newtranslation: newTranslation,
+            id_item: idItem,
+            comment: comment,
+            id_job: config.job_id,
+            password: config.password
+        };
+
+        return $.ajax({
+            data: data,
+            type: "POST",
+            url : "/?action=glossary"
+        });
+    }
+
 };

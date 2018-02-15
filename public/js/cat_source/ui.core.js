@@ -1313,6 +1313,7 @@ UI = {
     },
 	setProgress: function(stats) {
 		var s = stats;
+		this.projectStats = stats;
 		m = $('footer .meter');
         if( !s.ANALYSIS_COMPLETE ){
             $('#statistics' ).hide();

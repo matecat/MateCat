@@ -1642,6 +1642,7 @@ body .footer.showMatches .sub-editor.open {
 .sub-editor.glossary .gl-search.setting .set-glossary {
     background: url(../img/loading.gif);
     background-size: 20px;
+    cursor: pointer;
 }
 
 .sub-editor .cc-search .search-target,
@@ -1686,6 +1687,10 @@ body .footer.showMatches .sub-editor.open {
     clear: both;
 }
 
+.sub-editor.glossary .gl-search .gl-comment {
+    display: block;
+}
+
 .sub-editor .gl-search .set-glossary {
     float: left;
     height: 20px;
@@ -1693,6 +1698,7 @@ body .footer.showMatches .sub-editor.open {
     width: 26px;
     margin: 21px 0 0 0;
     color: #777;
+    cursor: pointer;
 }
 
 .sub-editor .gl-search .set-glossary.disabled,
@@ -2816,7 +2822,7 @@ body.rtl-target .editor .editarea span {
 
 /*tab rows */
 /*.overflow{overflow-y:auto;min-height:8px;margin-bottom:-1px;position:relative;z-index:9999999999999999999999999999999;}*/
-/*.graysmall li {
+.graysmall li {
     width: 48%;
     float: left;
     margin: 2px 1px 0px 0;
@@ -2829,11 +2835,11 @@ body.rtl-target .editor .editarea span {
     cursor: text;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-}*/
+}
 .concordances .graysmall li.sugg-source {
     padding-left: 34px;
 }
-.graysmall li {
+.suggestion-item.graysmall > li {
     width: 48%;
     float: left;
     margin: 2px 1px 0px 0;
@@ -2874,12 +2880,12 @@ body.rtl-target .editor .editarea span {
     width: 46%;
 }
 
-/*.graysmall .b {
+.graysmall .b {
     padding-left: 12px !important;
     position: relative
-}*/
+}
 
-.graysmall .b {
+.suggestion-item.graysmall .b {
     float: right;
 }
 
@@ -3668,7 +3674,7 @@ section.modified.editor .status {
 
 span.locked.tag-html-container-open,
 span.locked.tag-html-container-close {
-    display: none;
+    display: none !important;
 }
 
 .editarea .locked,
@@ -3781,10 +3787,10 @@ span.locked.tag-html-container-close {
         text-indent: -85px;
     }
 
-    /*.graysmall .b {
-        !*padding-left:85px !important;*!
-        width: 42% !important
-    }*/
+    .glossary .graysmall .b {
+        /*padding-left:85px !important;*/
+        width: 41% !important
+    }
 
     .graysmall-message {
         left: 15px !important
