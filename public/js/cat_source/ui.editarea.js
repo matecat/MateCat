@@ -354,14 +354,42 @@ $.extend( UI, {
         UI.registerQACheck();
     },
     pasteEditAreaEventHandler: function (e) {
-        console.log('paste in editarea');
 
         UI.saveInUndoStack('paste');
         $('#placeHolder').remove();
-        var node = document.createElement("div");
+        var node = document.createElement("span");
         node.setAttribute('id', 'placeHolder');
         removeSelectedText();
         insertNodeAtCursor(node);
-        handlepaste(this, e);
+        UI.handleEditAreaPaste(this, e);
+    },
+    handleEditAreaPaste(elem, e) {
+        var clonedElem = elem.cloneNode(true);
+        if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+            if (/text\/html/.test(e.clipboardData.types)) {
+                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+            }
+            else if (/text\/plain/.test(e.clipboardData.types)) {
+                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+            }
+            else {
+                txt = "";
+            }
+            $(clonedElem).find('#placeHolder').before(txt);
+            // $(clonedElem).find('#placeHolder').remove();
+            var newHtml = UI.transformTextForLockTags($(clonedElem).html());
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
+            // To restore the cursor position
+            setTimeout(function (  ) {
+                focusOnPlaceholder();
+                UI.editarea.find('#placeHolder').remove();
+            }, 200);
+            if (e.preventDefault) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            return false;
+        }
     }
+
 });
