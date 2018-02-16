@@ -367,10 +367,10 @@ $.extend( UI, {
         var clonedElem = elem.cloneNode(true);
         if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
             if (/text\/html/.test(e.clipboardData.types)) {
-                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else if (/text\/plain/.test(e.clipboardData.types)) {
-                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else {
                 txt = "";
