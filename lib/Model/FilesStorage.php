@@ -323,6 +323,15 @@ class FilesStorage {
 
     }
 
+    public function getOriginalZipDir( $projectDate, $projectID ){
+
+        $datePath = date_create( $projectDate )->format('Ymd');
+        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
+
+        return $zipDir;
+
+    }
+
     public function getHashesFromDir( $dirToScan ){
 
         //fetch cache links, created by converter, from a directory
