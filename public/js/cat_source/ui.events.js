@@ -189,12 +189,18 @@ $.extend(UI, {
 					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
 			//get target tags from the segment
-			var targetTags = $( '.targetarea', UI.currentSegment ).html()
+            var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+            targetClone.find('.locked.inside-attribute').remove();
+			var targetTags = targetClone.html()
 					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
 			if(targetTags == null ) {
 				targetTags = [];
-			}
+			} else {
+                targetTags = targetTags.map(function(elem) {
+                    return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+                });
+            }
 
 			var missingTags = sourceTags.map(function(elem) {
                 return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
@@ -213,9 +219,9 @@ $.extend(UI, {
             var newhtml = UI.editarea.html();
 			//add tags into the target segment
 			for(var i = 0; i < missingTags.length; i++){
-				newhtml = newhtml + missingTags[i];
+				newhtml = newhtml + UI.transformTextForLockTags(missingTags[i]);
 			}
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), UI.transformTextForLockTags(newhtml));
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
 			//add again undoCursorPlaceholder
 			UI.editarea.append(undoCursorPlaceholder )
 					   .append(brEnd);

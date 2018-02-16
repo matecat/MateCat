@@ -51,7 +51,11 @@ $.extend( UI, {
         if ((code == 8) || (code == 46)) { // backspace e canc(mac)
             if ($('.selected', $(this)).length) {
                 e.preventDefault();
-                $('.selected', $(this)).remove();
+                if ( $('.selected', $(this)).hasClass('inside-attribute') ) {
+                    $('.selected', $(this)).parent('span.locked').remove();
+                } else {
+                    $('.selected', $(this)).remove();
+                }
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
             } else {
