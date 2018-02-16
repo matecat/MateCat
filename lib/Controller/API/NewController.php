@@ -647,6 +647,8 @@ class NewController extends ajaxController {
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
         $projectStructure[ 'ppassword' ]  = $this->projectManager->generatePassword();
 
+        $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $this->postInput );
+
         $this->projectStructure = $projectStructure;
 
         $this->projectManager->sanitizeProjectStructure();

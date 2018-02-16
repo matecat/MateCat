@@ -736,5 +736,9 @@ class FilesStorage {
         return unlink( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" );
     }
 
+    public function getZipDir(){
+        return $this->zipDir;
+    }
+
 }
 
