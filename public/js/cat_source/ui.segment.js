@@ -48,9 +48,9 @@
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
-                if (response.errors.length) {
+                if (response.errors) {
                     UI.processErrors(response.errors, 'getTagProjection');
-                    UI.copyTagProjectionInCurrentSegment();
+                    UI.disableTPOnSegment()
                 } else {
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                 }
@@ -157,7 +157,7 @@
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
             var source = currentSegment.find('.source').data('original');
-            source = htmlDecode(source).replace(/&quot;/g, '\"');
+            source = UI.transformTextForLockTags(source);
             source = source.replace(/\n/g , config.lfPlaceholder)
                     .replace(/\r/g, config.crPlaceholder )
                     .replace(/\r\n/g, config.crlfPlaceholder )
@@ -412,6 +412,11 @@
         },
         isReadonlySegment : function( segment ) {
             return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+        },
+
+        isUnlockedSegment: function ( segment ) {
+            let readonly = UI.isReadonlySegment(segment);
+            return (segment.ice_locked === "1" && !readonly) && UI.getFromStorage('unlocked-' + segment.sid)
         },
         getStatusForAutoSave : function( segment ) {
             var status ;

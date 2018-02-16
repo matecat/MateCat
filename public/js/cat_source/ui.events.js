@@ -330,7 +330,7 @@ $.extend(UI, {
 		}).on('click', 'a.status', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('click', 'section:not(.readonly, .ice-unlocked) a.status', function() {
+		}).on('click', 'section:not(.readonly, .ice-locked) a.status', function() {
 			var section = $(this).closest("section");
 			var statusMenu = $("ul.statusmenu", section);
 
@@ -350,11 +350,7 @@ $.extend(UI, {
 			clearTimeout(UI.selectingReadonly);
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
-        }).on('dblclick', '.glossary .sugg-target', function() {
-            UI.copyGlossaryItemInEditarea($(this));
-		}).on('click', '.glossary .switch-editing', function() {
-			UI.updateGlossary($(this).closest(".graysmall"));
-		});
+        });
 
 		$("form#fileDownload").bind('submit', function(e) {
 			e.preventDefault();
@@ -513,76 +509,12 @@ $.extend(UI, {
 		}).on('click', '.alternatives a', function(e) {
 			e.preventDefault();
 			$('.editor .tab-switcher-al').click();
-		}).on('click', '.sub-editor.glossary .overflow .trash', function(e) {
-			e.preventDefault();
-			ul = $(this).parents('ul.graysmall').first();
-			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());
-		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
-			if (e.which == 13) { // enter
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 1)
-					UI.getConcordance(txt, 0);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-target').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
-        }).on('keydown', function(e) {
+		}).on('keydown', function(e) {
             if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();
                 e.stopPropagation();
             }
-		}).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 2)
-					UI.getConcordance(txt, 1);
-			} else {
-				if ($('.editor .sub-editor .cc-search .search-source').text().length > 0) {
-					$('.editor .sub-editor .cc-search .search-source').text('');
-					$('.editor .sub-editor.concordances .results').empty();
-				}
-			}
-		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				var txt = $(this).text();
-				if (txt.length > 2) {
-					var segment = $(this).parents('section').first();
-					UI.getGlossary(segment, false);
-				}
-			}
-		}).on('keydown', '.sub-editor .gl-search .search-target, .sub-editor .gl-search .comment .gl-comment', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				UI.setGlossaryItem();
-			}
-		}).on('keydown', '.sub-editor .glossary-add-comment .gl-comment', function(e) {
-			if (e.which == 13) {
-				e.preventDefault();
-				UI.addGlossaryComment($(this));
-			}
-		}).on('input', '.sub-editor .gl-search .search-target', function() {
-			gl = $(this).parents('.gl-search').find('.set-glossary');
-			if($(this).text() === '') {
-				gl.addClass('disabled');
-			} else {
-				gl.removeClass('disabled');
-			}
-		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
-			e.preventDefault();
-			UI.setGlossaryItem();
-		}).on('click', '.sub-editor .gl-search .comment a, .sub-editor .glossary-add-comment a', function(e) {
-			e.preventDefault();
-			$(this).parents('.comment, .glossary-add-comment').find('.gl-comment').toggle().focus();
-		}).on('click', 'a.close', function(e, param) {
-			e.preventDefault();
-			var save = (typeof param == 'undefined') ? 'noSave' : param;
-			UI.closeSegment(UI.currentSegment, 1, save);
 		}).on('click', '.concordances .more', function(e) {
 			e.preventDefault();
 			tab = $(this).parents('.concordances');

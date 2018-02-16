@@ -146,7 +146,6 @@ class SegmentTranslationVersionHandler {
     private function prepareDao() {
         $this->db         = Database::obtain();
         $this->dao = new Translations_TranslationVersionDao( $this->db );
-        $this->dao->uid         = $this->uid ;
         $this->dao->source_page = $this->source_page ;
 
         // TODO: ^^^ this is safe for now because we have

@@ -1,4 +1,5 @@
 ReviewExtended = {
+    firstLoad: true,
     enabled : function() {
         return Review.type === 'extended' ;
     },
@@ -13,6 +14,7 @@ if ( ReviewExtended.enabled() ) {
         var originalClickOnApprovedButton = UI.clickOnApprovedButton;
 
         $.extend(ReviewExtended, {
+
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 

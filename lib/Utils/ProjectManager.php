@@ -1601,7 +1601,7 @@ class ProjectManager {
                                     $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
 
 
-                                    if ( $this->__isTranslated( $src, $trg ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                    if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                         $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
 
@@ -1675,7 +1675,7 @@ class ProjectManager {
 
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
 
                                     $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
 
@@ -2561,9 +2561,13 @@ class ProjectManager {
      * @param $source
      * @param $target
      *
+     * @param $xliff_trans_unit
+     *
      * @return bool|mixed
+     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\ValidationError
      */
-    private function __isTranslated( $source, $target ) {
+    private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
             return true;
         } else {
@@ -2571,7 +2575,7 @@ class ProjectManager {
             $identicalSourceAndTargetIsTranslated = false;
             $identicalSourceAndTargetIsTranslated = $this->features->filter(
                     'filterIdenticalSourceAndTargetIsTranslated',
-                    $identicalSourceAndTargetIsTranslated, $this->projectStructure
+                    $identicalSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
             );
 
             return $identicalSourceAndTargetIsTranslated;

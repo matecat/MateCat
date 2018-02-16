@@ -397,16 +397,16 @@ class setTranslationController extends ajaxController {
         }
 
         $this->featureSet->run('postAddSegmentTranslation', array(
-            'chunk' => $this->chunk,
-            'is_review' => $this->isRevision(),
-            'logged_user' => $this->logged_user
+            'chunk'       =>  $this->chunk,
+            'is_review'   =>  $this->isRevision(),
+            'logged_user' =>  $this->logged_user
         ));
 
         //propagate translations
-        $TPropagation = array();
-        $propagationTotal = array(
-            'propagated_ids' => array()
-        );
+        $TPropagation     = [];
+        $propagationTotal = [
+                'propagated_ids' => []
+        ];
 
         if ( $this->propagate && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
@@ -565,13 +565,17 @@ class setTranslationController extends ajaxController {
         }
 
         try {
-            $this->featureSet->run('setTranslationCommitted', array(
-                    'translation'     => $_Translation,
-                    'old_translation' => $old_translation,
-                    'propagated_ids'  => $propagationTotal['propagated_ids'],
-                    'chunk'           => $this->chunk,
-                    'segment'         => $this->segment
-            ));
+
+            $this->featureSet->run('setTranslationCommitted', [
+                    'translation'      => $_Translation,
+                    'old_translation'  => $old_translation,
+                    'propagated_ids'   => $propagationTotal['propagated_ids'],
+                    'chunk'            => $this->chunk,
+                    'segment'          => $this->segment,
+                    'user'             => $this->getUser(),
+                    'source_page_code' => $this->_getSourcePageCode()
+            ] );
+
         } catch ( Exception $e ){
             Log::doLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
@@ -623,6 +627,13 @@ class setTranslationController extends ajaxController {
                 'status'         => $saved_translation['status']
         );
         return $translation ;
+    }
+
+    private function _getSourcePageCode() {
+        $code = $this->isRevision() ? Constants::SOURCE_PAGE_REVISION :
+                Constants::SOURCE_PAGE_TRANSLATE ;
+
+        return $this->featureSet->filter('filterSourcePageCode', $code ) ;
     }
 
     private function recountJobTotals( $old_status ) {

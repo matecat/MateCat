@@ -439,7 +439,7 @@ $.extend(UI, {
 		$('mark.searchMarker').each(function() {
 			$(this).replaceWith($(this).html());
 		});
-		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
+		$('section.currSearchSegment').removeClass('currSearchSegment');
 	},
 	rebuildSearchSegmentMarkers: function(el) {
 		var querySearchString = this.searchParams.target,

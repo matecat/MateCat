@@ -126,9 +126,6 @@ $.extend(UI, {
             tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
                 return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
             });
-            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
-                return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
-            });
             tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
                 return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "</span>";
             });

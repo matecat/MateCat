@@ -32,7 +32,7 @@ class Segment extends React.Component {
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
             showTranslationIssues: false,
-            unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('unlocked-' + this.props.segment.sid),
+            unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly
         }
     }
@@ -46,7 +46,7 @@ class Segment extends React.Component {
         }
 
         if ( this.props.segment.ice_locked === "1" && !readonly) {
-            if (UI.getFromStorage('unlocked-' + this.props.segment.sid)) {
+            if (this.state.unlocked) {
                 classes.push('ice-unlocked');
             } else {
                 classes.push('readonly');
