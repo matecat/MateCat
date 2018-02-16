@@ -569,10 +569,15 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat 476px 136px;
+    background: url(../img/matecat_watch.png) no-repeat -34px 136px;
     background-size: 23%;
     /*width: 385px;*/
     padding: 25px 96px;
+    text-align: right;
+}
+
+.forgot-password-modal p {
+    text-align: left;
 }
 
 .reset-password-modal {
