@@ -661,17 +661,30 @@ $.extend(UI, {
     },
 
     handleSourceCopyEvent: function ( e ) {
-        // var event = e;
-        //
-        // var elem = $(e.target);
-        // if ( elem.hasClass('inside-attribute') ) {
-        //
-        // }
-        // //Se vengono copiati due tag?
-        //
-        // // if (inside_atribute nel e.target) {
-        // //     prendi testo del tag e sostituiscilo con il testo del padre ($(e.target).parent().text())
-        // // }
+        var elem = $(e.target);
+        if ( elem.hasClass('inside-attribute') ) {
+            var tag = elem.parent('span.locked');
+            var cloneTag = tag.clone();
+            cloneTag.find('.inside-attribute').remove();
+            var text = cloneTag.text();
+            e.clipboardData.setData('text/plain', text);
+            e.preventDefault();
+        }
+    },
+    handleSourceDragEvent: function ( e ) {
+        var elem = $(e.target);
+        if ( elem.hasClass('inside-attribute') ) {
+            var tag = elem.parent('span.locked');
+            var cloneTag = tag.clone();
+            cloneTag.find('.inside-attribute').remove();
+            var text = htmlEncode(cloneTag.text());
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+        } else if (elem.hasClass('locked')) {
+            var text = htmlEncode(elem.text());
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+        }
     }
 
 });
