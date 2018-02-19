@@ -1606,7 +1606,7 @@ th.activate, td.activate {
 .message-share-tmx {
     font-size: 14px;
     float: left;
-    width: 565px;
+    width: 485px;
     padding-left: 12px;
     line-height: 34px;
 }
@@ -1729,7 +1729,7 @@ font-size:14px;
 
 .mgmt-tm .btn-ok {
     padding: 7px 5px !important;
-    width: 110px;
+    width: 120px;
     margin-left: 5px;
 }
 
@@ -1801,7 +1801,7 @@ td.uploadfile
 .addtmxfile.btn-ok .text,
 .addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text {
-    width: 90px;
+    /*width: 90px;*/
 }
 
 .mgmt-tm .btn-grey .text {
@@ -2348,16 +2348,16 @@ color: #999;}
 
 .slide-panel td
 {
-    padding: 15px 5px 4px 5px;
+    padding: 10px 0 10px 10px;
     background: #fff;
     vertical-align: middle;
     border-top: 1px solid #ccc;
-    box-shadow: inset 0px 1px 0px 0px #fff;
+    box-shadow: inset 0 1px 0 0 #fff;
 }
 
 .mgmt-tm td {
-    padding: 10px 0 10px 10px;
-    vertical-align: middle;
+  /*  padding: 10px 0 10px 10px;
+    vertical-align: middle;*/
     box-sizing: border-box;
 }
 
@@ -2817,7 +2817,7 @@ td.action .btn {
   cursor: pointer;
   height: 22px;
   color: #333!important;
-  width: 75px!important;
+  width: 84px!important;
   background: #dcdedf!important;
   border-radius: 2px 0 0 2px;
     padding: 5px 20px 0 20px !important;
@@ -2835,7 +2835,7 @@ td.action .btn:hover {  -moz-box-shadow: 0 1px 2px #ccc;
 a.btn.pull-left.addtmx.tmx-import-slider {
     padding-right: 36px !important;
     padding-left: 36px !important;
-    margin-left: 18px
+    margin-left: 6px
 }
 
 
@@ -4854,11 +4854,11 @@ img.ui-user-top-image-general {
 }
 
 #activetm td.description {
-    width: 505px !important;
+    width: 500px !important;
 }
 
 #inactivetm td.description {
-    width: 545px !important;
+    width: 500px !important;
 }
 
 .mgmt-mt th.privatekey {
@@ -4877,8 +4877,23 @@ a#add-mt-provider-cancel {
     margin-right: 0;
 }
 
-#activetm td.action {
+/*#activetm td.action {
     text-align: right;
     right: -10px;
     position: relative;
+}*/
+
+a.existingKey.pull-right.btn-ok.addtmxfile {
+    margin-right: 4px;
+    width: 109px;
+}
+
+a.pull-right.btn-orange-small.cancelsharetmx {
+    height: 29px;
+    position: relative;
+    top: 4px;
+    line-height: 27px;
+    margin-left: 5px;
+    margin-right: -7px;
+    width: 37px;
 }
