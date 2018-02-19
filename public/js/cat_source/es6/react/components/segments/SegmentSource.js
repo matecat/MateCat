@@ -66,6 +66,10 @@ class SegmentSource extends React.Component {
         UI.handleSourceCopyEvent(e);
     }
 
+    onDragEvent(e) {
+        UI.handleSourceDragEvent(e);
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
         this.afterRenderActions();
@@ -98,6 +102,7 @@ class SegmentSource extends React.Component {
                  data-original={escapedSegment}
                  dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }
                  onCopy={this.onCopyEvent.bind(this)}
+                 onDragStart={this.onDragEvent.bind(this)}
             />
         )
     }
