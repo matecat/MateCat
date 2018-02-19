@@ -26,7 +26,6 @@ $.extend(UI, {
 		this.dmp = new diff_match_patch();
 		this.undoStack = [];
 		this.undoStackPosition = 0;
-		this.tagSelection = false;
 		this.nextUntranslatedSegmentIdByServer = 0;
 		this.openTagPlaceholder = 'MATECAT-openTagPlaceholder-MATECAT';
 		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';

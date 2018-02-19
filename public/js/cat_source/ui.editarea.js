@@ -51,7 +51,11 @@ $.extend( UI, {
         if ((code == 8) || (code == 46)) { // backspace e canc(mac)
             if ($('.selected', $(this)).length) {
                 e.preventDefault();
-                $('.selected', $(this)).remove();
+                if ( $('.selected', $(this)).hasClass('inside-attribute') ) {
+                    $('.selected', $(this)).parent('span.locked').remove();
+                } else {
+                    $('.selected', $(this)).remove();
+                }
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
             } else {
@@ -367,17 +371,17 @@ $.extend( UI, {
         var clonedElem = elem.cloneNode(true);
         if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
             if (/text\/html/.test(e.clipboardData.types)) {
-                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else if (/text\/plain/.test(e.clipboardData.types)) {
-                txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else {
                 txt = "";
             }
+            txt = UI.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
-            // $(clonedElem).find('#placeHolder').remove();
-            var newHtml = UI.transformTextForLockTags($(clonedElem).html());
+            var newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
             // To restore the cursor position
             setTimeout(function (  ) {
@@ -391,5 +395,6 @@ $.extend( UI, {
             return false;
         }
     }
+
 
 });
