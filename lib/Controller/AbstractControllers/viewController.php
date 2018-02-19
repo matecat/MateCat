@@ -3,6 +3,7 @@
  * Created by PhpStorm.
  */
 use AbstractControllers\IController;
+use Utils;
 
 
 /**
@@ -22,22 +23,11 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * Flag to get info about browser support
-     *
-     * @var bool
-     */
-    protected $supportedBrowser = false;
-    /*
-     * The user os
-     * @var string
-     */
-    protected $userPlatform;
-    /**
      * The os platform
      *
      * @var string
      */
-    protected $browser_platform;
+    protected $platform;
     /**
      * @var Google_Client
      */
@@ -50,88 +40,15 @@ abstract class viewController extends controller {
 
     protected $login_required = false ;
 
+    protected $supportedBrowser ;
+
     /**
      * Try to identify the browser of users
      *
      * @return array
      */
     private function getBrowser() {
-        $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-
-        //First get the platform?
-        if ( preg_match( '/linux/i', $u_agent ) ) {
-            $platform = 'linux';
-        } elseif ( preg_match( '/macintosh|mac os x/i', $u_agent ) ) {
-            $platform = 'mac';
-        } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
-            $platform = 'windows';
-        } else {
-            $platform = 'Unknown';
-        }
-
-        // Next get the name of the useragent yes seperately and for good reason
-        if ( preg_match( '/MSIE|Trident|Edge/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Internet Explorer';
-            $ub    = "MSIE";
-        } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
-            $bname = 'Mozilla Firefox';
-            $ub    = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
-            $bname = 'Google Chrome';
-            $ub    = "Chrome";
-        } elseif ( preg_match( '/Opera|OPR/i', $u_agent ) ) {
-            $bname = 'Opera';
-            $ub    = "Opera";
-        } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
-            $bname = 'Netscape';
-            $ub    = "Netscape";
-        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
-            $bname = 'Mozilla Generic';
-            $ub    = "Mozillageneric";
-        } else {
-            $bname = 'Unknown';
-            $ub    = "Unknown";
-        }
-        // finally get the correct version number
-        $known   = array( 'Version', $ub, 'other' );
-        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
-        if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
-            // we have no matching number just continue
-        }
-
-        // see how many we have
-        $i = count( $matches[ 'browser' ] );
-        if ( $i != 1 ) {
-            //we will have two since we are not using 'other' argument yet
-            //see if version is before or after the name
-            if ( strripos( $u_agent, "Version" ) < strripos( $u_agent, $ub ) ) {
-                $version = $matches[ 'version' ][ 0 ];
-            } else {
-                $version = @$matches[ 'version' ][ 1 ];
-            }
-        } else {
-            $version = $matches[ 'version' ][ 0 ];
-        }
-
-        // check if we have a number
-        if ( $version == null || $version == "" ) {
-            $version = "?";
-        }
-
-        return array(
-                'userAgent' => $u_agent,
-                'name'      => $bname,
-                'version'   => $version,
-                'platform'  => $platform,
-                'pattern'   => $pattern
-        );
-
+        return Utils::getBrowser();
     }
 
     /**
@@ -202,39 +119,6 @@ abstract class viewController extends controller {
     public function isLoggedIn() {
         return $this->userIsLogged;
     }
-
-    /**
-     * Check for browser support
-     *
-     * @return bool
-     */
-    private function isSupportedWebBrowser($browser_info) {
-
-        $browser_name = strtolower( $browser_info[ 'name' ] );
-        $browser_platform = strtolower( $browser_info[ 'platform' ] );
-        $return_value = 0;
-
-        foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                // Safari supported only on Mac
-                if (stripos( "apple safari", $browser_name ) === false ||
-                    (stripos( "apple safari", $browser_name ) !== false && stripos("mac", $browser_platform) !== false) )
-                    return 1;
-            }
-        }
-
-        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
-            if ( stripos( $browser_name, $untested_browser ) !== false ) {
-                return -1;
-            }
-        }
-
-        // unsupported browsers: hack for home page
-        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
-
-        return 0;
-    }
-
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
@@ -320,9 +204,9 @@ abstract class viewController extends controller {
      *
      */
     protected function setBrowserSupport() {
-        $browser_info = $this->getBrowser();
-        $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
-        $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
+        $browser_info = Utils::getBrowser() ;
+        $this->supportedBrowser = Utils::isSupportedWebBrowser($browser_info);
+        $this->platform = strtolower( $browser_info[ 'platform' ] );
     }
 
     /**
@@ -377,11 +261,10 @@ abstract class viewController extends controller {
 
             $this->template->basepath             = INIT::$BASEURL;
             $this->template->hostpath             = INIT::$HTTPHOST;
-            $this->template->supportedBrowser     = $this->supportedBrowser;
-            $this->template->platform             = $this->userPlatform;
-            $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
             $this->template->build_number         = INIT::$BUILD_NUMBER;
             $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
+            $this->template->supportedBrowser     = $this->supportedBrowser ;
+            $this->template->platform             = $this->platform ;
 
             $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;

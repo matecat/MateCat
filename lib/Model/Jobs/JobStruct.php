@@ -312,4 +312,12 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $this->__set( $offset, null );
     }
 
+    public function isCanceled() {
+        return $this->status == Constants_JobStatus::STATUS_CANCELLED ;
+    }
+
+    public function isArchived() {
+        return $this->status == Constants_JobStatus::STATUS_ARCHIVED ;
+    }
+
 }
