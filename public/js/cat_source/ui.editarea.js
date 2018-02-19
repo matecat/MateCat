@@ -379,9 +379,10 @@ $.extend( UI, {
             else {
                 txt = "";
             }
+            txt = UI.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
             // $(clonedElem).find('#placeHolder').remove();
-            var newHtml = UI.transformTextForLockTags($(clonedElem).html());
+            var newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
             // To restore the cursor position
             setTimeout(function (  ) {
