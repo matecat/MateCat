@@ -62,6 +62,9 @@ class SegmentSource extends React.Component {
         }
     }
 
+    onCopyEvent(e) {
+        UI.handleSourceCopyEvent(e);
+    }
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
@@ -93,7 +96,9 @@ class SegmentSource extends React.Component {
                  tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
                  data-original={escapedSegment}
-                 dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }/>
+                 dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }
+                 onCopy={this.onCopyEvent.bind(this)}
+            />
         )
     }
 }

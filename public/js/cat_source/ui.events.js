@@ -169,12 +169,8 @@ $.extend(UI, {
 			}
 		});
 
-		$("body").bind('keydown', 'Ctrl+c', function() {
-			UI.tagSelection = false;
-		}).bind('keydown', 'Meta+shift+l', function() {
+		$("body").bind('keydown', 'Meta+shift+l', function() {
             UI.openLanguageResourcesPanel();
-        }).bind('keydown', 'Meta+c', function() {
-			UI.tagSelection = false;
         }).bind('keydown', 'Meta+shift+s', function(e) {
             UI.body.toggleClass('tagmode-default-extended');
         }).on('click', '.tagModeToggle', function(e) {
@@ -187,18 +183,28 @@ $.extend(UI, {
 			e.preventDefault();
 
 			//get source tags from the segment
-			var sourceTags = $( '.source', UI.currentSegment ).html()
+            var sourceClone = $( '.source', UI.currentSegment ).clone();
+            sourceClone.find('.locked.inside-attribute').remove();
+			var sourceTags = sourceClone.html()
 					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
 			//get target tags from the segment
-			var targetTags = $( '.target', UI.currentSegment ).html()
+            var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+            targetClone.find('.locked.inside-attribute').remove();
+			var targetTags = targetClone.html()
 					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
 			if(targetTags == null ) {
 				targetTags = [];
-			}
+			} else {
+                targetTags = targetTags.map(function(elem) {
+                    return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+                });
+            }
 
-			var missingTags = sourceTags;
+			var missingTags = sourceTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
 			//remove from source tags all the tags in target segment
 			for(var i = 0; i < targetTags.length; i++ ){
 				var pos = missingTags.indexOf(targetTags[i]);
@@ -210,10 +216,10 @@ $.extend(UI, {
 			var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
 			var brEnd = $('br.end', UI.currentSegment ).detach();
 
-            var newhtml = UI.editarea.html() + missingTags[i];
+            var newhtml = UI.editarea.html();
 			//add tags into the target segment
 			for(var i = 0; i < missingTags.length; i++){
-				newhtml = newhtml + missingTags[i];
+				newhtml = newhtml + UI.transformTextForLockTags(missingTags[i]);
 			}
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
 			//add again undoCursorPlaceholder
