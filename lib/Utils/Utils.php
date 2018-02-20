@@ -5,6 +5,115 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+
+    /**
+     * Check for browser support
+     *
+     * @return bool
+     */
+    public static function isSupportedWebBrowser($browser_info) {
+        $browser_name = strtolower( $browser_info[ 'name' ] );
+        $browser_platform = strtolower( $browser_info[ 'platform' ] );
+
+        foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
+            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
+                // Safari supported only on Mac
+                if (stripos( "apple safari", $browser_name ) === false ||
+                        (stripos( "apple safari", $browser_name ) !== false && stripos("mac", $browser_platform) !== false) )
+                    return 1;
+            }
+        }
+
+        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
+            if ( stripos( $browser_name, $untested_browser ) !== false ) {
+                return -1;
+            }
+        }
+
+        // unsupported browsers: hack for home page
+        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
+
+        return 0;
+    }
+
+    static public function getBrowser() {
+        $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
+
+        //First get the platform?
+        if ( preg_match( '/linux/i', $u_agent ) ) {
+            $platform = 'linux';
+        } elseif ( preg_match( '/macintosh|mac os x/i', $u_agent ) ) {
+            $platform = 'mac';
+        } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
+            $platform = 'windows';
+        } else {
+            $platform = 'Unknown';
+        }
+
+        // Next get the name of the useragent yes seperately and for good reason
+        if ( preg_match( '/MSIE|Trident|Edge/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
+            $bname = 'Internet Explorer';
+            $ub    = "MSIE";
+        } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
+            $bname = 'Mozilla Firefox';
+            $ub    = "Firefox";
+        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
+            $bname = 'Google Chrome';
+            $ub    = "Chrome";
+        } elseif ( preg_match( '/Opera|OPR/i', $u_agent ) ) {
+            $bname = 'Opera';
+            $ub    = "Opera";
+        } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
+            $bname = 'Apple Safari';
+            $ub    = "Safari";
+        } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+            $bname = 'Apple Safari';
+            $ub    = "Safari";
+        } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
+            $bname = 'Netscape';
+            $ub    = "Netscape";
+        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
+            $bname = 'Mozilla Generic';
+            $ub    = "Mozillageneric";
+        } else {
+            $bname = 'Unknown';
+            $ub    = "Unknown";
+        }
+        // finally get the correct version number
+        $known   = array( 'Version', $ub, 'other' );
+        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+        if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
+            // we have no matching number just continue
+        }
+
+        // see how many we have
+        $i = count( $matches[ 'browser' ] );
+        if ( $i != 1 ) {
+            //we will have two since we are not using 'other' argument yet
+            //see if version is before or after the name
+            if ( strripos( $u_agent, "Version" ) < strripos( $u_agent, $ub ) ) {
+                $version = $matches[ 'version' ][ 0 ];
+            } else {
+                $version = @$matches[ 'version' ][ 1 ];
+            }
+        } else {
+            $version = $matches[ 'version' ][ 0 ];
+        }
+
+        // check if we have a number
+        if ( $version == null || $version == "" ) {
+            $version = "?";
+        }
+
+        return array(
+                'userAgent' => $u_agent,
+                'name'      => $bname,
+                'version'   => $version,
+                'platform'  => $platform,
+                'pattern'   => $pattern
+        );
+    }
+
     public static function friendly_slug($string) {
         // everything to lower and no spaces begin or end
         $string = strtolower(trim($string));
