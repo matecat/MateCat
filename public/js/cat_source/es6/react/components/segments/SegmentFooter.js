@@ -11,7 +11,7 @@ var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
 var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 var SegmentTabRevise = require('./SegmentFooterTabRevise').default;
-var SegmentTabIssues = require('./SegmentFooterTabIssues').default;
+var SegmentTabIssues = require('./footer-tab-issues/SegmentFooterTabIssues').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {

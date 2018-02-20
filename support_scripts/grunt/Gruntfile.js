@@ -653,6 +653,10 @@ module.exports = function(grunt) {
         'replace:css'
     ]);
 
+    grunt.registerTask('only-react', [
+        'browserify:components',
+    ]);
+
     grunt.registerTask('test', [
         'browserify:test'
     ]);

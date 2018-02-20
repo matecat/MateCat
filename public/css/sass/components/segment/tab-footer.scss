@@ -1,0 +1,41 @@
+.editor {
+
+  .footer {
+
+    .tab {
+
+    }
+
+    .tab.issues {
+      background: #efefef!important;
+      .creation-issue-container {
+        padding: 1em;
+        .select-category, .select-severity {
+         // max-width: 250px;
+        }
+      }
+
+      .ui.dropdown {
+        .text {
+          padding: 0;
+          background: none;
+        }
+
+      }
+      .issues-list{
+        display: inline-block;
+        width: 100%;
+        margin-top: 8px;
+        text-align: right;
+        .issue{
+          display: inline-block;
+          background: #ffffff;
+          margin: 4px;
+          padding: 4px 24px 4px 4px;
+        }
+      }
+    }
+  }
+
+}
+
