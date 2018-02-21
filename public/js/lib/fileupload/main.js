@@ -30,7 +30,7 @@ UI = {
         if (this.initTM) {
             this.initTM();
         }
-        if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
+        if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
 
@@ -654,7 +654,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
 
-                        var oldDataUrl = $( 'button[role="button"]', rowClone ).data( "url" );
+                        var oldDataUrl = $( 'button[data-url]', rowClone ).data( "url" );
 
                         var newExtClass = getIconClass( fileExt );
                         $( rowClone ).find( '.preview span' ).first().attr( "class", newExtClass );
@@ -664,7 +664,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         var newDataUrl = oldDataUrl.replace( /file=[^&]+/g, "file=" + encodeURI( file['name'] ) );
 
-                        $( 'button[role="button"]', rowClone )
+                        $( 'button[data-url]', rowClone )
                                 .data( "url", newDataUrl )
                                 .attr( "data-url", newDataUrl )
                                 .removeClass( 'zip_row' );
@@ -702,7 +702,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         $( filerow ).after( rowClone );
 
-                        $( 'button[role="button"]', filerow ).addClass( "zip_row" );
+                        $( 'button[data-url]', filerow ).addClass( "zip_row" );
 
 
                     } );

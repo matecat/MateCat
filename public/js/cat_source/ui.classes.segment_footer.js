@@ -47,7 +47,7 @@ UI.SegmentFooter = function( element ) {
         // for those who want to be active
         // sort by activation priority and pick the first
 
-        var active_candidates = _.select(UI.SegmentFooter.registry, function(item) {
+        var active_candidates = _.filter(UI.SegmentFooter.registry, function(item) {
             if ( !item.is_enabled( self ) ) return false;
             if ( item.is_hidden ( self ) ) return false;
             if ( typeof item.is_active == 'function' ) {
@@ -60,7 +60,7 @@ UI.SegmentFooter = function( element ) {
             .sortBy(active_candidates, 'activation_priority')
             .reverse();
 
-        return _.first( sorted );
+        return _.head( sorted );
     }
 
 }
@@ -68,7 +68,7 @@ UI.SegmentFooter = function( element ) {
 UI.SegmentFooter.registry = [];
 UI.SegmentFooter.registerTab = function( params ) {
     // Ensure no duplicates
-    var found = _.select(this.registry, function(item) {
+    var found = _.filter(this.registry, function(item) {
         return item.code == params.code ;
     });
 
@@ -80,7 +80,7 @@ UI.SegmentFooter.registerTab = function( params ) {
 }
 
 UI.SegmentFooter.renderLabels = function( segmentFooter ) {
-    var enabled = _.select(UI.SegmentFooter.registry, function(item) {
+    var enabled = _.filter(UI.SegmentFooter.registry, function(item) {
         return item.is_enabled( segmentFooter );
     });
     var tabs = _.sortBy( enabled, 'tab_position');
@@ -106,7 +106,7 @@ UI.SegmentFooter.renderLabels = function( segmentFooter ) {
 }
 
 UI.SegmentFooter.renderBodies = function( segmentFooter ) {
-    var enabled = _.select(UI.SegmentFooter.registry, function(item) {
+    var enabled = _.filter(UI.SegmentFooter.registry, function(item) {
         return item.is_enabled( segmentFooter );
     });
     var tabs = _.sortBy( enabled, 'tab_position');

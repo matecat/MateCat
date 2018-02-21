@@ -155,7 +155,7 @@ $.extend(UI, {
             } else {
                 UI.showShareTranslatorError();
             }
-        }).error(function () {
+        }).fail(function () {
             UI.showShareTranslatorError();
         });
 

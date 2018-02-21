@@ -6,7 +6,7 @@ class AssignToTranslator extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            timezone: $.cookie( "matecat_timezone")
+            timezone: Cookies.get( "matecat_timezone")
         };
     }
 
@@ -26,7 +26,7 @@ class AssignToTranslator extends React.Component {
     }
 
     GmtSelectChanged(value) {
-        $.cookie( "matecat_timezone" , value);
+        Cookies.get( "matecat_timezone" , value);
         this.checkSendToTranslatorButton();
         this.setState({
             timezone: value

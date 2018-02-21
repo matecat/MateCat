@@ -516,7 +516,7 @@ border-bottom: 3px solid #1B5D7B!important;
 	width: 400px;
 	background: #fff;
 	border: 1px solid #333;
-	z-index: 99999999;
+	z-index: 2;
 	text-align: left;
 	padding: 0;
 	font-size:14px;

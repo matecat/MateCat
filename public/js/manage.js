@@ -164,7 +164,7 @@ UI = {
         var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
         setTimeout(function () {
-            $.cookie('tmpanel-open', 0, { path: '/' });
+            Cookies.set('tmpanel-open', 0, { path: '/' });
         }, 2000);
     },
     /**
@@ -174,7 +174,7 @@ UI = {
         var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
         setTimeout(function () {
-            $.cookie('tmpanel-open', 0, { path: '/' });
+            Cookies.set('tmpanel-open', 0, { path: '/' });
         }, 2000);
     },
 

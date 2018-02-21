@@ -11,8 +11,8 @@ export default React.createClass({
         var id_category = this.state.issue.id_category ; 
 
         return _( JSON.parse( config.lqa_flat_categories ))
-            .select(function(e) { return  e.id == id_category ; })
-            .first().label
+            .find(function(e) { return  e.id == id_category ; })
+            .label
     },
 
     deleteIssue : function(event) {

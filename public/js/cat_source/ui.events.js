@@ -213,7 +213,7 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+shift+s', function(e) {
             UI.body.toggleClass('tagmode-default-extended');
         }).on('click','#cmn-toggle-1',function(e){
-            LXQ.toogleHighlighting();
+            LXQ.toggleHighlighting();
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
             UI.toggleTagsMode(this);
@@ -350,14 +350,14 @@ $.extend(UI, {
 			UI.segmentQA(UI.currentSegment);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
-			if(typeof $.cookie('surveyedJobs') != 'undefined') {
-				var c = $.cookie('surveyedJobs');
-				surv = c.split('||')[0];
+			if(typeof Cookies.get('surveyedJobs') != 'undefined') {
+				var c = Cookies.get('surveyedJobs');
+				var surv = c.split('||')[0];
 				if(config.survey === surv) {
-					$.cookie('surveyedJobs', c + config.job_id + ',');
+                    Cookies.get('surveyedJobs', c + config.job_id + ',');
 				}
 			} else {
-				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { expires: 20, path: '/' });
+                Cookies.set('surveyedJobs', config.survey + '||' + config.job_id + ',', { expires: 20, path: '/' });
 			}
 			$('.modal.survey').remove();
 		}).on('click', '.modal.survey .popup-outer', function() {
@@ -1360,7 +1360,7 @@ $.extend(UI, {
     }
 });
 
-$(document).on('ready', function() {
+$(document).ready(function() {
 	window.quality_report_btn_component = ReactDOM.render(
 		React.createElement( Review_QualityReportButton, {
 			vote                : config.overall_quality_class,

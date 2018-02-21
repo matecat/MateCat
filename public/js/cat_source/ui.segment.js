@@ -177,7 +177,7 @@
             return this.tpCanActivate;
         },
         startSegmentTagProjection: function () {
-            UI.getSegmentTagsProjection().success(function(response) {
+            UI.getSegmentTagsProjection().done(function(response) {
                 if (response.errors.length) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.copyTagProjectionInCurrentSegment();
@@ -185,10 +185,10 @@
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                 }
 
-            }).error(function () {
+            }).fail(function () {
                 UI.copyTagProjectionInCurrentSegment();
                 UI.startOfflineMode();
-            }).complete(function () {
+            }).always(function () {
                 UI.setSegmentAsTagged();
                 UI.lockTags(UI.editarea);
                 UI.lockTags(UI.currentSegment.find('.source'));
@@ -362,7 +362,7 @@
             var originalId = segment.attr('data-split-original-id');
             var segmentBefore = (function  findBefore(segment) {
                 var before = segment.prev('section');
-                if (before.size() === 0 ) {
+                if (before.length === 0 ) {
                     return undefined;
                 }
                 else if (before.attr('data-split-original-id') !== originalId) {
@@ -391,7 +391,7 @@
             var originalId = segment.attr('data-split-original-id');
             var segmentAfter = (function findAfter(segment) {
                 var after = segment.next('section');
-                if (after.size() === 0 ) {
+                if (after.length === 0 ) {
                     return undefined;
                 }
                 else if (after.attr('data-split-original-id') !== originalId) {

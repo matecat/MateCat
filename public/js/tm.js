@@ -349,7 +349,7 @@
                 }
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
-                if (!isVisible($(".active-tm-container h3"))) {
+                if (!isVisible($(".active-tm-container thead"))) {
                     $('.active-tm-container .notification-message').addClass('fixed-msg');
                 }
                 else {
@@ -368,30 +368,30 @@
             $(document).ready(function() {
 
                 UI.setTMsortable();
-                $("#inactivetm").tablesorter({
-                    textExtraction: function(node) {
-                        // extract data from markup and return it
-                        if($(node).hasClass('privatekey')) {
-                            return $(node).text();
-                        } else {
-                            return $(node).text();
-                        }
-                    },
-                    headers: {
-                        4: {
-                            sorter: true
-                        },
-                        5: {
-                            sorter: false
-                        },
-                        6: {
-                            sorter: false
-                        },
-                        7: {
-                            sorter: false
-                        }
-                    }
-                });
+                // $("#inactivetm").tablesorter({
+                //     textExtraction: function(node) {
+                //         // extract data from markup and return it
+                //         if($(node).hasClass('privatekey')) {
+                //             return $(node).text();
+                //         } else {
+                //             return $(node).text();
+                //         }
+                //     },
+                //     headers: {
+                //         4: {
+                //             sorter: true
+                //         },
+                //         5: {
+                //             sorter: false
+                //         },
+                //         6: {
+                //             sorter: false
+                //         },
+                //         7: {
+                //             sorter: false
+                //         }
+                //     }
+                // });
                 UI.checkCreateTmKeyFromQueryString();
                 UI.checkOpenTabFromParameters();
             });
@@ -1227,7 +1227,7 @@
             $( ".popup-tm").removeClass('open').animate({right: '-1100px' }, 400);
             $(".outer-tm").hide();
             $('body').removeClass('side-popup');
-            $.cookie('tmpanel-open', 0, { path: '/' });
+            Cookies.set('tmpanel-open', 0, { path: '/' });
             if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
                 disableAnalyze();
                 if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
@@ -1294,7 +1294,7 @@
 
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
-                    var token = $.cookie( downloadToken );
+                    var token = Cookies.get( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
@@ -1302,7 +1302,7 @@
                         window.clearInterval( downloadTimer );
                         elem.removeClass( 'disabled' );
                         tr.find('.uploadloader').hide();
-                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        Cookies.set( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
                         errorKey = $( tr ).attr( 'data-key' );
                         if ( errorMsg != '' ) {
@@ -1934,23 +1934,36 @@
             $(elem).parents('tr').find('.uploadfile').slideToggle();
         },
         showErrorOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showErrorOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $( '.mgmt-container .inactive-tm-container .tm-success-message' ).html( message ).fadeIn( 100 );
+            });
         },
+
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
                 '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
