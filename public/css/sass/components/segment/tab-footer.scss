@@ -1,0 +1,53 @@
+.editor {
+
+  .footer {
+
+    .tab {
+
+    }
+
+    .tab.issues {
+      background: #efefef!important;
+      .creation-issue-container {
+        padding: 1em;
+      }
+
+      .ui.dropdown {
+        .text {
+          padding: 0;
+          background: none;
+        }
+
+      }
+      .issues-list{
+        display: inline-block;
+        width: 100%;
+        margin-top: 11px;
+        text-align: left;
+        .issue{
+          display: inline-block;
+          background: #ffffff;
+          margin: 4px;
+          position: relative;
+          padding: 8px 32px 8px 8px;
+          i{
+            position: absolute;
+            right: 6px;
+            top: 7px;
+            background: #f4f4f4;
+            padding: 4px;
+            display:none;
+            cursor: pointer;
+          }
+          &:hover{
+            i{
+              display: block;
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+
