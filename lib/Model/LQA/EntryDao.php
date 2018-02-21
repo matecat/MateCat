@@ -68,6 +68,18 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    public static function findAllBySegmentId( $id_segment ) {
+        $sql = "SELECT * FROM qa_entries
+           WHERE id_segment = :id_segment ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [ 'id_segment' => $id_segment ] );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+
+        return $stmt->fetchAll();
+    }
+
     public static function findAllByTranslationVersion($id_segment, $id_job, $version) {
         $sql = "SELECT qa_entries.*, qa_categories.label as category " .
             " FROM qa_entries " .
