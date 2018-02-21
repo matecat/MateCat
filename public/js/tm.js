@@ -1934,23 +1934,36 @@
             $(elem).parents('tr').find('.uploadfile').slideToggle();
         },
         showErrorOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showErrorOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $( '.mgmt-container .inactive-tm-container .tm-success-message' ).html( message ).fadeIn( 100 );
+            });
         },
+
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
                 '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
