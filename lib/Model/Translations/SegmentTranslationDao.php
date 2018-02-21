@@ -261,5 +261,18 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
+    public static function getSegmentsWithIssues($job_id, $segments_ids ) {
+        $where_values = $segments_ids;
+
+        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1) . '?' .") AND id_job = ?";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $where_values[] = $job_id;
+        $stmt->execute($where_values);
+
+        return $stmt->fetchAll();
+    }
+
 
 }
