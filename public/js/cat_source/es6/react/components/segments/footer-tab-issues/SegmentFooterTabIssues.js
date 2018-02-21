@@ -1,7 +1,7 @@
 var React = require( 'react' );
 var SegmentConstants = require( '../../../constants/SegmentConstants' );
 var SegmentStore = require( '../../../stores/SegmentStore' );
-let SegmentFooterTabIssuesListItem = require("./SegmentFooterTabIssuesListItem").default;
+let SegmentFooterTabIssuesListItem = require( "./SegmentFooterTabIssuesListItem" ).default;
 
 class SegmentFooterTabIssues extends React.Component {
 
@@ -18,13 +18,23 @@ class SegmentFooterTabIssues extends React.Component {
 
     componentDidMount() {
         $( this.selectIssueCategory ).dropdown();
+        $( this.selectIssueSeverity ).dropdown();
 
         SegmentStore.addListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened.bind( this ) );
+    }
+    componentDidUpdate(){
+        $( this.selectIssueSeverity ).dropdown();
+        if(this.state.categorySelected){
+            $(this.selectIssueCategoryWrapper).find('.ui.dropdown').removeClass('disabled');
+        }else{
+            $(this.selectIssueCategoryWrapper).find('.ui.dropdown').addClass('disabled');
+        }
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened );
     }
+
 
     segmentOpened( sid, segment ) {
         let issues = [];
@@ -72,7 +82,7 @@ class SegmentFooterTabIssues extends React.Component {
         UI.currentSegment.data( 'modified', false );
         SegmentActions.submitIssue( self.props.id_segment, data, [] )
             .done( response => {
-                console.log( response )
+                $( this.selectIssueSeverity ).dropdown('set selected',-1);
             } )
             .fail( response => {
                 console.log( response );
@@ -89,6 +99,7 @@ class SegmentFooterTabIssues extends React.Component {
         this.setState( {
             categorySelected: currentCategory
         } );
+
     }
 
     severityOptionChange( e ) {
@@ -111,6 +122,7 @@ class SegmentFooterTabIssues extends React.Component {
             categoryOption,
             severityOption,
             issues = [],
+            severitySelect,
             issue,
             self = this;
 
@@ -125,6 +137,10 @@ class SegmentFooterTabIssues extends React.Component {
                 categorySeverities.push( severityOption );
             } );
         }
+        severitySelect = <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
+            <option value="-1">Select severity</option>
+            {categorySeverities}
+        </select>
 
         this.state.issues.forEach( ( e, i ) => {
             issue = <SegmentFooterTabIssuesListItem key={i} issue={e} categories={this.state.categoriesIssue}/>;
@@ -150,11 +166,8 @@ class SegmentFooterTabIssues extends React.Component {
                             </div>
                             <div className="height wide column">
                                 <div className="select-severity">
-                                    <div className="field">
-                                        <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
-                                            <option value="-1">Select severity</option>
-                                            {categorySeverities}
-                                        </select>
+                                    <div className="field" ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                                        {severitySelect}
                                     </div>
                                 </div>
                             </div>

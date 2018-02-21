@@ -44,7 +44,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
             <p>
                 <b>{this.findCategory( this.props.issue.id_category ).label}:</b>
                 {this.props.issue.severity}
-                <i className="icon-trash-o" onClick={this.deleteIssue.bind(this)}>
+                <i className="icon-cancel3" onClick={this.deleteIssue.bind(this)}>
 
                 </i>
             </p>
