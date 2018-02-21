@@ -338,7 +338,7 @@ $(function () {
             "/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
-                        "Project"
+                        "Job"
                     ],
                     "summary": "Statistics",
                     "description": "Statistics",
@@ -473,7 +473,7 @@ $(function () {
                         "200": {
                             "description": "Job",
                             "schema": {
-                                "$ref": "#/definitions/ExtendedJobItem"
+                                "$ref": "#/definitions/JobTranslatorItem"
                             }
                         },
                         "default": {
@@ -528,7 +528,7 @@ $(function () {
                         "200": {
                             "description": "Job",
                             "schema": {
-                                "$ref": "#/definitions/ExtendedJobItem"
+                                "$ref": "#/definitions/JobTranslatorItem"
                             }
                         },
                         "default": {
@@ -583,7 +583,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/quality-report": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Quality Report"
                     ],
                     "summary": "Quality report",
@@ -906,7 +906,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Project translation issues",
@@ -943,7 +943,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/translation-versions": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Project translation versions",
@@ -980,7 +980,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Segment versions",
@@ -1024,7 +1024,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Get a Segment translation version",
@@ -1075,7 +1075,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Create translation issues",
@@ -1197,7 +1197,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Update translation issues",
@@ -1248,7 +1248,7 @@ $(function () {
                 },
                 "delete": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Delete a translation Issue",
@@ -1299,7 +1299,7 @@ $(function () {
             "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Add comment to a translation issue",
@@ -1369,7 +1369,7 @@ $(function () {
                 },
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Get comments",
@@ -2354,6 +2354,18 @@ $(function () {
                     "stats" : {
                         "type" : "object",
                         "$ref" : "#/definitions/Stats"
+                    }
+                }
+            },
+
+            "JobTranslatorItem" : {
+                "type" : "object",
+                "properties" : {
+                    "id": { "type" : "integer" },
+                    "password": { "type" : "password" },
+                    "translator": {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Translator"
                     }
                 }
             },

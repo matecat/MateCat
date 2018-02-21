@@ -82,7 +82,7 @@ class Mmt extends BaseFeature {
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
-            return null;
+            return $newCreatedDbRowStruct;
         }
 
         $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
@@ -107,6 +107,8 @@ class Mmt extends BaseFeature {
 
         $UserMetadataDao = new MetadataDao();
         $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
+
+        return $newCreatedDbRowStruct;
 
     }
 
@@ -279,7 +281,7 @@ class Mmt extends BaseFeature {
 
             } catch( Exception $e ){
                 Log::doLog( $e->getMessage() );
-                Log::doLog( $e->getTraceAsString() );
+                Log::doLog( $e->getTpostTMKeyCreationraceAsString() );
             }
 
         }
@@ -412,7 +414,6 @@ class Mmt extends BaseFeature {
              */
             $newEngineStruct = EnginesModel_MMTStruct::getStruct();
 
-            $newEngineStruct->name                                   = Constants_Engines::MMT;
             $newEngineStruct->uid                                    = $logged_user->uid;
             $newEngineStruct->type                                   = Constants_Engines::MT;
             $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
@@ -426,8 +427,10 @@ class Mmt extends BaseFeature {
 
     /**
      * @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
-     * @param                  $uid integer
+     * @param                  $uid              integer
      *
+     * @throws Exception
+     * @throws \Engines\MMT\MMTServiceApiException
      * @internal param Users_UserStruct $userStruct
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ){

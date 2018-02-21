@@ -2,6 +2,7 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Exceptions\NotFoundError;
+use TmKeyManagement\UserKeysModel;
 
 
 /**
@@ -33,8 +34,6 @@ class catController extends viewController {
     private $qa_data = '[]';
 
     private $qa_overall = '';
-
-    private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
     public $target_code;
     public $source_code;
@@ -225,116 +224,8 @@ class catController extends viewController {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
-        /*
-         * Take the keys of the user
-         */
-        try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->logged_user->uid ) );
-            $keyList = $_keyDao->read( $dh );
-
-        } catch ( Exception $e ) {
-            $keyList = array();
-            Log::doLog( $e->getMessage() );
-        }
-
-        $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );
-        /**
-         * Set these keys as editable for the client
-         *
-         * @var $keyList TmKeyManagement_MemoryKeyStruct[]
-         */
-        foreach ( $keyList as $_j => $key ) {
-
-            /**
-             * @var $_client_tm_key TmKeyManagement_TmKeyStruct
-             */
-
-            //create a reverse lookup
-            $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
-            $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
-
-            $this->_keyList[ 'totals' ][ $_j ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
-
-        }
-
-        /*
-         * Now take the JOB keys
-         */
-        $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
-
-        /**
-         * Start this N^2 cycle from keys of the job,
-         * these should be statistically lesser than the keys of the user
-         *
-         * @var $keyList array
-         */
-        foreach ( $job_keyList as $jobKey ) {
-
-            $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
-
-            if ( $this->isLoggedIn() && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
-
-                /*
-                 * If user has some personal keys, check for the job keys if they are present, and obfuscate
-                 * when they are not
-                 */
-                $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
-                if ( $_index_position !== false ) {
-
-                    //I FOUND A KEY IN THE JOB THAT IS PRESENT IN MY KEYRING
-                    //i'm owner?? and the key is an owner type key?
-                    if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                        $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
-                        $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
-                        $jobKey    = $jobKey->hideKey( $this->logged_user->uid );
-                    } else {
-                        if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                            // I'm not the job owner, but i know the key because it is in my keyring
-                            // so, i can upload and download TMX, but i don't want it to be removed from job
-                            // in tm.html relaxed the control to "key.edit" to enable buttons
-                            // $jobKey = $jobKey->hideKey( $uid ); // enable editing
-
-                        } else {
-                            if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
-                                //do Nothing
-                            }
-                        }
-                    }
-
-                    //copy the is_shared value from the key inside the Keyring into the key coming from job
-                    $jobKey->setShared( $reverse_lookup_user_personal_keys[ 'elements' ][ $_index_position ]->tm_key->isShared() );
-
-                    unset( $this->_keyList[ 'totals' ][ $_index_position ] );
-
-                } else {
-
-                    /*
-                     * This is not a key of that user, set right and obfuscate
-                     */
-                    $jobKey->r = true;
-                    $jobKey->w = true;
-                    $jobKey    = $jobKey->hideKey( -1 );
-
-                }
-
-                $this->_keyList[ 'job_keys' ][] = $jobKey;
-
-            } else {
-                /*
-                 * This user is anonymous or it has no keys in its keyring, obfuscate all
-                 */
-                $jobKey->r                      = true;
-                $jobKey->w                      = true;
-                $this->_keyList[ 'job_keys' ][] = $jobKey->hideKey( -1 );
-
-            }
-
-        }
-
-        //clean unordered keys
-        $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
-
+        $userKeys = new UserKeysModel($this->getUser(), $this->userRole ) ;
+        $this->template->user_keys = $userKeys->getKeys( $data[ 0 ] [ 'tm_keys' ] ) ;
 
         /**
          * Retrieve information about job errors
@@ -509,7 +400,6 @@ class catController extends viewController {
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->user_keys             = $this->_keyList;
         $this->template->job_stats             = $this->job_stats;
         $this->template->stat_quality          = $this->qa_data;
 

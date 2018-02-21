@@ -12,19 +12,80 @@ namespace API\V2\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
-use Jobs_JobStruct;
+use Chunks_ChunkStruct;
 use Langs_Languages;
 use ManageUtils;
+use TmKeyManagement_ClientTmKeyStruct;
+use Users_UserStruct;
+use Utils;
 use WordCount_Struct;
 
 class Job {
 
     /**
-     * @param $jStruct Jobs_JobStruct
+     * @var \Users_UserStruct
+     */
+    protected $user;
+
+    /**
+     * @var bool
+     */
+    protected $called_from_api = false;
+
+    /**
+     * @var TmKeyManagement_ClientTmKeyStruct[]
+     */
+    protected $keyList = [];
+
+    /**
+     * @param \Users_UserStruct $user
+     *
+     * @return $this
+     */
+    public function setUser( Users_UserStruct $user = null ) {
+        $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * @param bool $called_from_api
+     *
+     * @return $this
+     */
+    public function setCalledFromApi( $called_from_api ) {
+        $this->called_from_api = (bool)$called_from_api;
+        return $this;
+    }
+
+    /**
+     * @param Chunks_ChunkStruct $jStruct
      *
      * @return array
      */
-    public function renderItem( Jobs_JobStruct $jStruct ) {
+    protected function getKeyList( Chunks_ChunkStruct $jStruct ) {
+
+        if( empty( $this->user ) ){
+            return [];
+        }
+
+        if ( !$this->called_from_api ) {
+            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+        } else {
+            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
+        }
+
+        return ( new JobClientKeys( $out ) )->render();
+
+    }
+
+    /**
+     * @param $jStruct Chunks_ChunkStruct
+     *
+     * @return array
+     * @throws \Exception
+     * @throws \Exceptions\NotFoundError
+     */
+    public function renderItem( Chunks_ChunkStruct $jStruct ) {
 
         $outsourceInfo = $jStruct->getOutsource();
         $tStruct       = $jStruct->getTranslator();
@@ -54,16 +115,17 @@ class Job {
                 'target'                => $jStruct->target,
                 'sourceTxt'             => $lang_handler->getLocalizedName( $jStruct->source ),
                 'targetTxt'             => $lang_handler->getLocalizedName( $jStruct->target ),
-                'status'                => $jStruct->status,
+                'status'                => $jStruct->status_owner,
                 'subject'               => $jStruct->subject,
                 'owner'                 => $jStruct->owner,
-                'open_threads_count'    => $jStruct->getOpenThreadsCount(),
+                'open_threads_count'    => (int)$jStruct->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $jStruct->create_date ),
+                'created_at'            => Utils::api_timestamp( $jStruct->create_date ),
                 'create_date'           => $jStruct->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $jStruct->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
                 'pee'                   => $jStruct->getPeeForTranslatedSegments(),
-                'private_tm_key'        => $jStruct->getOwnerKeys(),
+                'private_tm_key'        => $this->getKeyList( $jStruct ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
