@@ -237,24 +237,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         return $dao->getByProjectID( $this->id_project );
     }
 
-    public function getOwnerKeys(){
-
-        $tm_keys_json = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $this->tm_keys ) );
-        $tm_keys      = array();
-        foreach ( $tm_keys_json as $tm_key_struct ) {
-            /**
-             * @var $tm_key_struct TmKeyManagement_TmKeyStruct
-             */
-            $tm_keys[] = array(
-                    "key"  => $tm_key_struct->key,
-                    "r"    => ( $tm_key_struct->r ) ? 'Lookup' : '&nbsp;',
-                    "w"    => ( $tm_key_struct->w ) ? 'Update' : '',
-                    "name" => $tm_key_struct->name
-            );
-        }
-
-        return $tm_keys;
-
+    public function getClientKeys( Users_UserStruct $user, $role ){
+        $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
+        return $uKModel->getKeys( $this->tm_keys );
     }
 
     public function getPeeForTranslatedSegments(){

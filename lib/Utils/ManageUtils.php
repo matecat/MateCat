@@ -21,6 +21,7 @@ class ManageUtils {
      *
      * @return array
      * @throws NotFoundError
+     * @throws Exception
      */
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
@@ -41,6 +42,7 @@ class ManageUtils {
         $projects = $_projects->getByIdList( $id_list );
 
         $projectRenderer = new Project( $projects );
+        $projectRenderer->setUser( $user );
         return $projectRenderer->render();
 
     }
@@ -52,6 +54,7 @@ class ManageUtils {
      *                        <b>E,g.</b> 2014-01-01 23:59:48
      *
      * @return string A formatted date
+     * @throws Exception
      */
     public static function formatJobDate( $my_date ) {
 

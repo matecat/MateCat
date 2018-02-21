@@ -9,6 +9,7 @@
 
 namespace API\V2\Json;
 
+use Chunks_ChunkStruct;
 use Constants_JobStatus;
 use Projects_ProjectStruct;
 use Utils;
@@ -26,6 +27,37 @@ class Project {
     protected $data = [];
 
     /**
+     * @var bool
+     */
+    protected $called_from_api = false;
+
+    /**
+     * @var \Users_UserStruct
+     */
+    protected $user;
+
+    /**
+     * @param \Users_UserStruct $user
+     *
+     * @return $this
+     */
+    public function setUser( $user ) {
+        $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * @param bool $called_from_api
+     *
+     * @return $this
+     */
+    public function setCalledFromApi( $called_from_api ) {
+        $this->called_from_api = (bool)$called_from_api;
+
+        return $this;
+    }
+
+    /**
      * Project constructor.
      *
      * @param Projects_ProjectStruct[] $data
@@ -39,6 +71,8 @@ class Project {
      * @param       $data Projects_ProjectStruct
      *
      * @return array
+     * @throws \Exception
+     * @throws \Exceptions\NotFoundError
      */
     public function renderItem( Projects_ProjectStruct $data ) {
 
@@ -48,12 +82,20 @@ class Project {
         $jobStatuses = [];
         if ( !empty( $jobs ) ) {
 
+            /**
+             * @var $jobJSON Job
+             */
             $jobJSON = new $this->jRenderer();
+            $jobJSON->setUser( $this->user );
+            if( $this->called_from_api ) {
+                $jobJSON->setCalledFromApi( true );
+            }
+
             foreach ( $jobs as $job ) {
                 /**
                  * @var $jobJSON Job
                  */
-                $jobJSONs[]    = $jobJSON->renderItem( $job );
+                $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ) );
                 $jobStatuses[] = $job->status_owner;
             }
 
@@ -80,6 +122,11 @@ class Project {
 
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     * @throws \Exceptions\NotFoundError
+     */
     public function render() {
         $out = [];
         foreach ( $this->data as $membership ) {

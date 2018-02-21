@@ -96,11 +96,6 @@ route(
 );
 
 route(
-    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'GET',
-    'API\V2\TranslationController', 'index'
-);
-
-route(
     '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
     'Features\SegmentFilter\Controller\API\FilterController', 'index'
 );
