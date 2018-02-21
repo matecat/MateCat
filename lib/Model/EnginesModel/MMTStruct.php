@@ -16,6 +16,11 @@
 class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
 
     /**
+     * @var string 
+     */
+    public $name = 'ModernMT';
+
+    /**
      * @var string
      */
     public $description = "ModernMT - Adaptive Neural Machine Translation.";
