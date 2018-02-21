@@ -569,10 +569,15 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat 476px 136px;
+    background: url(../img/matecat_watch.png) no-repeat -34px 136px;
     background-size: 23%;
     /*width: 385px;*/
     padding: 25px 96px;
+    text-align: right;
+}
+
+.forgot-password-modal p {
+    text-align: left;
 }
 
 .reset-password-modal {
@@ -1014,12 +1019,10 @@ div#matecat-modal p {
 .matecat-modal-content {
     font-size: 16px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
-    /*.matecat-modal-header {
-        min-height: 40px;
-    }*/
+
     .matecat-modal-top {
         background-color: #ffffff;
-        /*border-bottom: 1px solid #cccccc;*/
+      
     }
     .matecat-modal-middle,
     .matecat-modal-bottom,
@@ -1028,12 +1031,12 @@ div#matecat-modal p {
         .ui.members-list {
             min-height: 45px;
             .ui.divided.list {
-                //position: absolute;
+
                 top: 0px;
                 left: 0px;
                 bottom: 0px;
                 right: 0px;
-                //padding: 10px 15px 10px 15px;
+
                 overflow-y: auto;
                 max-height: 210px;
                 position: relative!important;
@@ -1064,7 +1067,6 @@ div#matecat-modal p {
                 .item {
                     padding: 5px 10px;
                     &:hover {
-                        //background-color: #e0e1e2;
                         .mini.ui.button.right.floated  {
                             display: inherit;
                         }
@@ -1101,13 +1103,7 @@ div#matecat-modal p {
                         color: grey;
                         margin-top: 13px;
                     }
-                    /*.content.email-member {
-                        font-size: 14px;
-                        color: gray;
-                        float: left;
-                        margin: 10px 0px 4px 0px;
-                        margin-left: 10px;
-                    }*/
+
                     .mini.ui.button.right.floated {
                         margin-top: 6px;
                         border: 1px solid #797979;
@@ -1280,8 +1276,7 @@ div#matecat-modal p {
         .ui.members-list {
             .ui.divided.list {
                 .item:first-child {
-                    //border-top: 1px solid rgba(34, 36, 38, 0.15);
-                    /*border-bottom: 1px solid rgba(34, 36, 38, 0.15);*/
+
                 }
             }
             .ui.divided.list.disabled {
@@ -1379,11 +1374,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     z-index: 100000000;
 }
 
-/*.primary {
-    font-family: Calibri, Arial, Helvetica, sans-serif;
-    !* padding: 6px 15px; *!
-    vertical-align: top;
-    font-size: 16px;
-    border: 1px solid #797979;
-    border-radius: 2px;
-}*/
+.popup.popup-confirm.confirm_checkbox {
+    .boxed {
+        padding-right: 20px;
+        padding-bottom: 15px;
+    }
+}
