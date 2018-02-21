@@ -450,6 +450,9 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal(showTranslatorBox, extendedView) {
+        if ( !this.state.openOutsource ) {
+            $(document).trigger('outsource-request' );
+        }
         this.setState({
             openOutsource: !this.state.openOutsource,
             showTranslatorBox: showTranslatorBox,
