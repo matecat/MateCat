@@ -81,7 +81,7 @@ class JobsTranslatorsController extends KleinController {
 
     protected function afterConstruct() {
         $validJob = new JobPasswordValidator( $this );
-        $this->jStruct = $validJob->getJob();
+        $this->jStruct = $validJob->getChunk();
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( $validJob );
     }

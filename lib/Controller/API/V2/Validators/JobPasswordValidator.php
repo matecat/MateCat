@@ -50,7 +50,7 @@ class JobPasswordValidator extends Base {
     /**
      * @return Jobs_JobStruct
      */
-    public function getJob() {
+    public function getChunk() {
         return $this->jStruct;
     }
 

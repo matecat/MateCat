@@ -21,10 +21,10 @@ class ChunkPasswordValidator extends Base {
     /**
      * @var \Chunks_ChunkStruct
      */
-    private $chunk ;
+    protected $chunk ;
 
-    private $id_job;
-    private $password ;
+    protected $id_job;
+    protected $password ;
 
     public function __construct( KleinController $controller ) {
 
