@@ -199,7 +199,7 @@ class SegmentFooter extends React.Component {
 
         var item = _
             .chain(this.tabs)
-            .select(function(item) { return item.code == code })
+            .filter(function(item) { return item.code == code })
             .first()
             .value();
 
