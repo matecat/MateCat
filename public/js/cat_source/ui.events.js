@@ -389,7 +389,6 @@ $.extend(UI, {
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
-
             var esc = 27 ;
 
             // ESC should close the current segment only if `article` is not
