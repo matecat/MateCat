@@ -16,10 +16,7 @@ $(function () {
             "version": "1.0.0"
         },
         "host": config.swagger_host,
-        "schemes": [
-            "http"
-        ],
-        //"basePath": "/api",
+        "schemes": ["http", "https"],
         "produces": [
             "application/json"
         ],
