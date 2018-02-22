@@ -235,7 +235,7 @@ if (SegmentFilter.enabled())
         }
     });
 
-    $(document).on('ready', function() {
+    $(document).ready( function() {
         // mount the hiddent react component by default so we can keep status
         window.segment_filter_panel = ReactDOM.render(
           React.createElement(

@@ -655,7 +655,7 @@ APP = {
             var messages = JSON.parse(config.global_message);
             $.each(messages, function () {
                 var elem = this;
-                if (typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date(this.expire) > ( new Date() ) )) {
+                if (typeof Cookies.get('msg-' + this.token) == 'undefined' && ( new Date(this.expire) > ( new Date() ) )) {
                     var notification = {
                         title: 'Notice',
                         text: this.msg,
@@ -665,7 +665,7 @@ APP = {
                         allowHtml: true,
                         closeCallback: function () {
                             var expireDate = new Date(elem.expire);
-                            $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                            Cookies.set('msg-' + elem.token, '', {expires: expireDate});
                         }
                     };
                     APP.addNotification(notification);
@@ -728,7 +728,7 @@ APP = {
             downloadTimer = window.setInterval(function () {
 
                 //check for cookie
-                var token = $.cookie( downloadToken );
+                var token = Cookies.get( downloadToken );
 
                 //if the cookie is found, download is completed
                 //remove iframe an re-enable download button
@@ -758,7 +758,7 @@ APP = {
                     }
 
                     window.clearInterval( downloadTimer );
-                    $.cookie( downloadToken, null, { path: '/', expires: -1 });
+                    Cookies.set( downloadToken, null, { path: '/', expires: -1 });
                     iFrameDownload.remove();
                 }
 

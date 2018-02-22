@@ -1599,7 +1599,10 @@ h2.payoff {
     box-shadow: none !important;
 }
 
-.delete .ui-button-text, .cancel .ui-button-text {
+.delete .ui-button-text,
+.cancel .ui-button-text,
+.delete span,
+.cancel span {
     display: none;
     color: #fff;
     text-align: left;
@@ -2679,12 +2682,6 @@ div.continue-gdrive {
 
 .btn-confirm-small {
     //height: 35px;
-}
-
-.mgmt-tm {
-    .btn-ok.share-button {
-        padding: 4px 5px !important;
-    }
 }
 
 header .nav-mc-bar .dropdown.select-org span.text {

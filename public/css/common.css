@@ -428,13 +428,15 @@ border-bottom: 3px solid #1B5D7B!important;
 {
     position: fixed;
     top: -1000px;
-    left: 134px;
+    left: 210px;
     width: 400px;
     background: #fff;
+    border: 1px solid #333;
+    z-index: 2;
     text-align: left;
     padding: 0;
-    font-size: 14px;
-    z-index: 2;
+    font-size:14px;
+    box-shadow: 0px 0px 10px #888888;
 
     }
 
@@ -2115,7 +2117,21 @@ input.email-export-tmx {
 .btn-orange-small, .btn-orange-medium {
     background: #f26522;
     width: 35px;
-    height: 33px;
+    height: 35px;
+    border: 1px solid #848689;
+    border-radius: 2px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 35px;
+}
+
+.btn-orange-medium {
+    background: #f26522;
+    width: 35px;
+    height: 35px;
     border: 1px solid #848689;
     border-radius: 2px;
     color: white;
@@ -2334,7 +2350,9 @@ margin-bottom: 10px;
 color: #999;}
 #activetm tr.ownergroup td.dragrow .status {border: none; cursor:auto;}
 #activetm tr.uploadfile td {background: #fff;}
-#inactivetm td, table.mgmt-mt td {background: #f3f3f3;}
+#inactivetm td, table.mgmt-mt td {
+    background: #f3f3f3;
+}
 .mgmt-tm th, .mgmt-mt th {
     padding: 8px 5px;
     background: #fff;
@@ -3351,9 +3369,9 @@ p.tm-warning-message {
 }
 
 .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {
-    font-size: 15px;
-    vertical-align: middle;
-}
+	font-size:15px;
+	vertical-align: middle;
+	line-height: 36px;}
 
 
 .warning-message {
@@ -4843,6 +4861,7 @@ img.ui-user-top-image-general {
 
 .inactive-tm-container .notification-message {
     margin-top: 40px !important;
+    line-height: 36px;
 }
 
 #activetm td.activate {
@@ -4864,7 +4883,6 @@ img.ui-user-top-image-general {
 .mgmt-mt th.privatekey {
     padding-left: 9px;
 }
-
 a.btn.pull-left.addtmx {
     margin-left: 5px;
 }
@@ -4881,4 +4899,19 @@ a#add-mt-provider-cancel {
     text-align: right;
     right: -10px;
     position: relative;
+}
+td.mt-provider {
+    max-width: 170px;
+    min-width: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td.engine-name div {
+    max-width: 480px;
+    min-width: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

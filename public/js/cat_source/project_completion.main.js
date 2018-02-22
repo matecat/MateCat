@@ -250,7 +250,7 @@ if ( ProjectCompletion.enabled() ) {
         evalSendButtonStatus( data.stats );
     });
 
-    $(document).on('ready',  function() {
+    $(document).ready(function() {
         checkCompletionOnReady()
     });
 
