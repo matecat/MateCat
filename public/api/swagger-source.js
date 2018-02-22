@@ -1693,6 +1693,48 @@ $(function () {
                         }
                     }
                 }
+            },
+            "/api/v2/engines/list": {
+                "get": {
+                    "tags": [
+                        "Engines"
+                    ],
+                    "summary": "Retrieve personal engine list.",
+                    "description": "Retrieve personal engine list ( Google, Microsoft, etc. ).",
+                    "parameters": [],
+                    "responses": {
+                        "200": {
+                            "description": "Engine List",
+                            "schema": {
+                                "$ref": "#/definitions/EnginesList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/keys/list": {
+                "get": {
+                    "tags": [
+                        "TM keys"
+                    ],
+                    "summary": "Retrieve private TM keys list.",
+                    "description": "Retrieve private TM keys list.",
+                    "parameters": [],
+                    "responses": {
+                        "200": {
+                            "description": "Keys List",
+                            "schema": {
+                                "$ref": "#/definitions/KeysList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
             }
         },
         "definitions": {
@@ -2420,6 +2462,54 @@ $(function () {
                     },
                     "created_by": {"type" : "integer", "required" : true },
                     "pending_invitations": { "type" : "array", "items" : "string" }
+                }
+            },
+
+            "EnginesList" : {
+                "type": "array",
+                "items" : {
+                    "$ref" : "#/definitions/Engine"
+                }
+            },
+            "Engine" : {
+                "type": "object",
+                "properties": {
+                    "id" : { "type" : "integer", "required" : true },
+                    "name": { "type" : "string", "required" : true },
+                    "type": {
+                        "type" : "string",
+                        "enum" : ["MT", "TM"],
+                        "required" : true
+                    },
+                    "description": {
+                        "type" : "string" ,
+                        "required" : true
+                    }
+                }
+            },
+
+            "KeysList" : {
+                "type": "object",
+                "properties" : {
+                    "private_keys" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/Key"
+                        }
+                    },
+                    "shared_keys" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/Key"
+                        }
+                    }
+                }
+            },
+            "Key" : {
+                "type": "object",
+                "properties": {
+                    "key" : { "type" : "string", "required" : true },
+                    "name": { "type" : "string", "required" : true },
                 }
             },
 
