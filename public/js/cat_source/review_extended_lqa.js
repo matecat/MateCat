@@ -40,7 +40,13 @@ if ( ReviewExtendedLQA.enabled() ) {
              * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
              * @param editarea
              */
-            trackChanges: function (editarea) {},
+            trackChanges: function (editarea) {
+                var segmentId = UI.getSegmentId($(editarea));
+                var segmentFid = UI.getSegmentFileId($(editarea));
+                var currentSegment =  UI.getSegmentById(segmentId)
+                var originalTranslation = currentSegment.find('.original-translation').html();
+                SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
+            },
 
             submitIssues: function (sid, data, diff) {
                 return ReviewExtendedLQA.submitIssue(sid, data, diff);
