@@ -16,15 +16,12 @@ $(function () {
             "version": "1.0.0"
         },
         "host": config.swagger_host,
-        "schemes": [
-            "http"
-        ],
-        "basePath": "/api",
+        "schemes": ["http", "https"],
         "produces": [
             "application/json"
         ],
         "paths": {
-            "/new": {
+            "/api/new": {
                 "post": {
                     "tags": [
                         "Project"
@@ -120,7 +117,7 @@ $(function () {
                     }
                 }
             },
-            "/status": {
+            "/api/status": {
                 "get": {
                     "tags": [
                         "Project"
@@ -156,7 +153,7 @@ $(function () {
                     }
                 }
             },
-            "/change_project_password": {
+            "/api/change_project_password": {
                 "post": {
                     "tags": [
                         "Project"
@@ -199,7 +196,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/new": {
+            "/api/v1/new": {
                 "post": {
                     "tags": [
                         "Project"
@@ -299,7 +296,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/projects/{id_project}/{password}/creation_status": {
+            "/api/v1/projects/{id_project}/{password}/creation_status": {
                 "get": {
                     "tags": [
                         "Project"
@@ -335,7 +332,7 @@ $(function () {
                     }
                 }
             },
-            "/v1/jobs/{id_job}/{password}/stats": {
+            "/api/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
                         "Job"
@@ -371,7 +368,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/urls": {
+            "/api/v2/projects/{id_project}/{password}/urls": {
                 "get": {
                     "tags": [
                         "Project"
@@ -407,7 +404,136 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
+            "/api/v2/projects/{id_project}/{password}/due_date": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Create due date",
+                    "description": "Create due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "Date you want to set as due date. Date must be in the future",
+                            "required": true,
+                            "type": "integer"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "put": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "consumes":[
+                        "application/json"
+                    ],
+                    "summary": "Update due date",
+                    "description": "Update due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "body",
+                            "description": "Date you want to set as due date. Date must be in the future",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "required":[ "due_date" ],
+                                "properties":{
+                                    "due_date": { "type": "integer" },
+                                }
+
+                            }
+                        }
+
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+                "delete": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Delete due date",
+                    "description": "Delete due date given a project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Project",
+                            "schema": {
+                                "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
                 "post": {
                     "tags": [
                         "Project"
@@ -446,7 +572,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check": {
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check": {
                 "post": {
                     "tags": [
                         "Project"
@@ -503,7 +629,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply": {
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply": {
                 "post": {
                     "tags": [
                         "Project"
@@ -567,7 +693,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translator": {
+            "/api/v2/jobs/{id_job}/{password}/translator": {
                 "get": {
                     "tags": [
                         "Job"
@@ -658,7 +784,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/comments": {
+            "/api/v2/jobs/{id_job}/{password}/comments": {
                 "get": {
                     "tags": [
                         "Job"
@@ -701,7 +827,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/quality-report": {
+            "/api/v2/jobs/{id_job}/{password}/quality-report": {
                 "get": {
                     "tags": [
                         "Job",
@@ -738,7 +864,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/teams": {
+            "/api/v2/teams": {
                 "get": {
                     "tags": [
                         "Teams",
@@ -803,7 +929,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}" : {
+            "/api/v2/teams/{id_team}" : {
                 "put": {
                     "tags": [
                         "Teams",
@@ -837,7 +963,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/members" : {
+            "/api/v2/teams/{id_team}/members" : {
                 "get": {
                     "tags": [
                         "Teams",
@@ -901,7 +1027,7 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/members/{id_member}" : {
+            "/api/v2/teams/{id_team}/members/{id_member}" : {
                 "delete": {
                     "tags": [
                         "Teams",
@@ -936,7 +1062,35 @@ $(function () {
                     }
                 },
             },
-            "/v2/teams/{id_team}/projects/{id_project}" : {
+            "/api/v2/teams/{id_team}/projects" : {
+                "get": {
+                    "tags": [
+                        "Teams",
+                    ],
+                    "summary": "Get the list of projects in a team",
+                    "description": "Get the list of projects in a team.",
+                    "parameters" : [
+                        {
+                            "name"     : "id_team",
+                            "type"     : "integer",
+                            "in"       : "path",
+                            "required" : true,
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Team",
+                            "schema": {
+                                "$ref": "#/definitions/ProjectItem"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                },
+            },
+            "/api/v2/teams/{id_team}/projects/{id_project}" : {
                 "get": {
                     "tags": [
                         "Teams",
@@ -1024,7 +1178,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translation-issues": {
+            "/api/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
                         "Job",
@@ -1061,7 +1215,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/translation-versions": {
+            "/api/v2/jobs/{id_job}/{password}/translation-versions": {
                 "get": {
                     "tags": [
                         "Job",
@@ -1098,7 +1252,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
                 "get": {
                     "tags": [
                         "Job",
@@ -1142,7 +1296,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
                 "get": {
                     "tags": [
                         "Job",
@@ -1193,7 +1347,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
                 "post": {
                     "tags": [
                         "Job",
@@ -1315,7 +1469,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
                 "post": {
                     "tags": [
                         "Job",
@@ -1417,7 +1571,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
+            "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
                 "post": {
                     "tags": [
                         "Job",
@@ -1535,7 +1689,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/jobs/{id_job}/{password}/options": {
+            "/api/v2/jobs/{id_job}/{password}/options": {
                 "post": {
                     "tags": [
                         "Job",
@@ -1593,7 +1747,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/import/": {
+            "/api/v2/glossaries/import/": {
                 "post": {
                     "tags": [
                         "Glossary"
@@ -1633,7 +1787,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/import/status/{tm_key}": {
+            "/api/v2/glossaries/import/status/{tm_key}": {
                 "get": {
                     "summary": "Glossary Upload status.",
                     "description": "Glossary Upload status.",
@@ -1668,7 +1822,7 @@ $(function () {
                     }
                 }
             },
-            "/v2/glossaries/export/{tm_key}": {
+            "/api/v2/glossaries/export/{tm_key}": {
                 "get": {
                     "tags": [
                         "Glossary"
