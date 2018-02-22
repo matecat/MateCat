@@ -40,6 +40,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/translation-issues', 'GET', 'API\V2\ChunkTranslationIssueController', 'index' );
     route( '/translation-versions', 'GET', '\API\V2\ChunkTranslationVersionController', 'index' );
 
+    route( '/revise/segments/[:id_segment]/translation-versions', 'GET', '\API\V2\ReviseTranslationIssuesController', 'index' );
+
     route( '/segments/[:id_segment]/translation-versions', 'GET', '\API\V2\SegmentVersion', 'index' );
     route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', 'API_V2_SegmentVersion', 'detail' );
 
