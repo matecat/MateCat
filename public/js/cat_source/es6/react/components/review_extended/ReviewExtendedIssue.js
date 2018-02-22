@@ -20,7 +20,7 @@ class ReviewExtendedIssue extends React.Component {
 			.replace(/\"\{/g, "{")
 			.replace(/\}"/g, "}");
 		return _(JSON.parse(config.lqa_flat_categories))
-			.select(function (e) {
+			.filter(function (e) {
 				return parseInt(e.id) == id_category;
 			}).first().label
 	}
