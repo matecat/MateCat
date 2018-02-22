@@ -103,7 +103,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedLQA.e
         }
     });
 
-    $(document).on('ready', function() {
+    $(document).ready(function() {
         UI.mountPanelComponent();
     });
 

@@ -630,6 +630,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   text-align: left;
   width: 210px;
   z-index: 10001;
+  display: block;
 }
 
 .side-tools-opened article.mbc-commenting-opened .mbc-comment-balloon-outer {

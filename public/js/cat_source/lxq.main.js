@@ -230,7 +230,7 @@ LXQ.init  = function () {
                 //LXQ.reloadPowertip();
             }
         };
-        $(document).on('ready', function () {
+        $(document).ready(function () {
             initConstants();
 
             var delegate = '#outer';
@@ -682,7 +682,7 @@ LXQ.init  = function () {
             text = text.replace(spcsBeforeRegex,spacesBefore+'<span id="selectionBoundary_');
             return text;
         };
-        var toogleHighlighting = function () {
+        var toggleHighlighting = function () {
             var highlights = $('#outer').find('lxqwarning#lexiqahighlight');
             $.each(highlights, function(i, element) {
                $(element).toggleClass('lxq-invisible');
@@ -1250,7 +1250,7 @@ LXQ.init  = function () {
             cleanUpHighLighting: cleanUpHighLighting,
             colors: colors,
             toogleHighlightInSegment: toogleHighlightInSegment,
-            toogleHighlighting:toogleHighlighting,
+            toggleHighlighting:toggleHighlighting,
             shouldHighlighWarningsForSegment: shouldHighlighWarningsForSegment,
             getVisibleWarningsCountForSegment:getVisibleWarningsCountForSegment,
             getIgnoredWarningsCountForSegment:getIgnoredWarningsCountForSegment,

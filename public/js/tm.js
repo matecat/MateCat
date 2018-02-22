@@ -349,7 +349,7 @@
                 }
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
-                if (!isVisible($(".active-tm-container h3"))) {
+                if (!isVisible($(".active-tm-container thead"))) {
                     $('.active-tm-container .notification-message').addClass('fixed-msg');
                 }
                 else {
@@ -368,30 +368,30 @@
             $(document).ready(function() {
 
                 UI.setTMsortable();
-                $("#inactivetm").tablesorter({
-                    textExtraction: function(node) {
-                        // extract data from markup and return it
-                        if($(node).hasClass('privatekey')) {
-                            return $(node).text();
-                        } else {
-                            return $(node).text();
-                        }
-                    },
-                    headers: {
-                        4: {
-                            sorter: true
-                        },
-                        5: {
-                            sorter: false
-                        },
-                        6: {
-                            sorter: false
-                        },
-                        7: {
-                            sorter: false
-                        }
-                    }
-                });
+                // $("#inactivetm").tablesorter({
+                //     textExtraction: function(node) {
+                //         // extract data from markup and return it
+                //         if($(node).hasClass('privatekey')) {
+                //             return $(node).text();
+                //         } else {
+                //             return $(node).text();
+                //         }
+                //     },
+                //     headers: {
+                //         4: {
+                //             sorter: true
+                //         },
+                //         5: {
+                //             sorter: false
+                //         },
+                //         6: {
+                //             sorter: false
+                //         },
+                //         7: {
+                //             sorter: false
+                //         }
+                //     }
+                // });
                 UI.checkCreateTmKeyFromQueryString();
                 UI.checkOpenTabFromParameters();
             });
@@ -1227,7 +1227,7 @@
             $( ".popup-tm").removeClass('open').animate({right: '-1100px' }, 400);
             $(".outer-tm").hide();
             $('body').removeClass('side-popup');
-            $.cookie('tmpanel-open', 0, { path: '/' });
+            Cookies.set('tmpanel-open', 0, { path: '/' });
             if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
                 disableAnalyze();
                 if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
@@ -1294,7 +1294,7 @@
 
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
-                    var token = $.cookie( downloadToken );
+                    var token = Cookies.get( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
@@ -1302,7 +1302,7 @@
                         window.clearInterval( downloadTimer );
                         elem.removeClass( 'disabled' );
                         tr.find('.uploadloader').hide();
-                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        Cookies.set( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
                         errorKey = $( tr ).attr( 'data-key' );
                         if ( errorMsg != '' ) {
@@ -1349,8 +1349,8 @@
             var tr = button.closest('tr');
             var id = tr.data("id");
             $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? ' +
-                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>' +
-                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete" style="display: inline; margin: 0 10px;padding: 0">       <span class="text">Confirm</span>   </a>').show();
+                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete">       <span class="text">Confirm</span>   </a>' +
+                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>').show();
             $('.continueDeletingMT, .cancelDeletingMT').off('click');
             $('.continueDeletingMT').on('click', function(e){
                 e.preventDefault();
@@ -1364,7 +1364,7 @@
         },
         showDeleteTmMessage: function (button) {
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-            var message = 'Do you really want to delete the resource "YYY" (XXX)? ' +
+            var message = 'Do you really want to delete this resource (<b>XXX</b>)? ' +
                     '<a class="pull-right btn-orange-medium cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
                     '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>';
             var elem = $(button).closest("table");
@@ -1373,7 +1373,7 @@
             var key = tr.find('.privatekey').text();
             var descr = tr.find('.edit-desc').data('descr');
             message = message.replace('XXX', key);
-            message = message.replace('YYY', descr);
+            // message = message.replace('YYY', descr);
             if (elem.attr("id") === "activetm") {
                 UI.showWarningOnActiveTMTable(message);
             } else {
@@ -1500,8 +1500,8 @@
         },
         renderNewMT: function (data, serverResponse) {
             var newTR =    '<tr data-id="' + serverResponse.id + '">' +
-                '    <td class="mt-provider">' + data.providerName + '</td>' +
-                '    <td class="engine-name">' + serverResponse.name + '</td>' +
+                '    <td class="mt-provider"> ' + serverResponse.name + ' </td>' +
+                '    <td class="engine-name">' + data.providerName + '</td>' +
                 '    <td class="enable-mt text-center">' +
                 '        <input type="checkbox" checked />' +
                 '    </td>' +
@@ -1934,23 +1934,36 @@
             $(elem).parents('tr').find('.uploadfile').slideToggle();
         },
         showErrorOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showErrorOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showWarningOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnActiveTMTable: function (message) {
-            $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+            });
         },
         showSuccessOnInactiveTMTable: function (message) {
-            $('.mgmt-container .inactive-tm-container .tm-success-message').html(message).fadeIn(100);
+            setTimeout(function (  ) {
+                $( '.mgmt-container .inactive-tm-container .tm-success-message' ).html( message ).fadeIn( 100 );
+            });
         },
+
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
                 '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
@@ -2056,7 +2069,7 @@
             var tr = button.closest('tr');
             var key = ( tr.length ) ? tr.data('key') : button.closest('.share-popup-container').find('.share-popup-key').text();
             var descr = ( tr.length ) ? tr.find('.edit-desc').data('descr') : button.closest('.share-popup-container').find('.share-popup-description').text();
-            var msg = 'The resource <span style="font-weight: bold">"' + descr + '" (' + key + ')' +'</span> has been shared.';
+            var msg = 'The resource <span style="font-weight: bold">' + key +'</span> has been shared.';
 
             var validateEmail = function(emails) {
                 var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

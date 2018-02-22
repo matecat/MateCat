@@ -267,23 +267,21 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
-                    basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/jquery-ui.js',
+                    basePath + 'lib/jquery-3.3.1.min.js',
+                    basePath + 'lib/jquery-ui.min.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
-                    basePath + 'lib/jquery.cookie.js',
-                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
-                    basePath + 'lib/jquery.tooltipster.min.js',
+                    basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
-                    basePath + 'lib/waypoints.min.js',
+                    basePath + 'lib/jquery.waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
                     basePath + 'lib/base64.min.js',
                     basePath + 'lib/moment.min.js',
-                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
+                    basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
                     basePath + 'lib/imagesloaded.min.js',
@@ -294,11 +292,11 @@ module.exports = function(grunt) {
 
             libs_upload: {
                 src: [
-                    basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/jquery-ui.js',  // jQuery UI 1.11
-
-                    basePath + 'lib/jquery.cookie.js',
-                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
+                    basePath + 'lib/jquery-3.3.1.min.js',
+                    basePath + 'lib/jquery-ui.min.js',
+                    basePath + 'lib/lodash.min.js',
+                    basePath + 'lib/sprintf.min.js',
+                    basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     // <!-- The Templates plugin is included to render the upload/download listings -->
                     basePath + 'lib/fileupload/tmpl.min.js',
@@ -336,10 +334,7 @@ module.exports = function(grunt) {
 
             common: {
                 src: [
-                    basePath + 'lib/lodash.min.js',
-                    basePath + 'lib/sprintf.min.js',
                     basePath + 'common.js',
-
                     basePath + 'user_store.js',
                     basePath + 'login.js'
                 ],

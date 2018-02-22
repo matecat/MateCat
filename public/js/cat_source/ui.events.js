@@ -719,7 +719,7 @@ $.extend(UI, {
 
 });
 
-$(document).on('ready', function() {
+$(document).ready(function() {
 	window.quality_report_btn_component = ReactDOM.render(
 		React.createElement( Review_QualityReportButton, {
 			vote                : config.overall_quality_class,
