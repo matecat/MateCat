@@ -9,8 +9,8 @@
 namespace Email;
 
 
+use INIT;
 use Routes;
-use Users\Signup;
 
 class SignupEmail extends AbstractEmail
 {
@@ -56,9 +56,9 @@ class SignupEmail extends AbstractEmail
     protected function _getDefaultMailConf() {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = 'noreply@matecat.com';
-        $mailConf[ 'sender' ]     = 'noreply@matecat.com';
-        $mailConf[ 'returnPath' ] = 'noreply@matecat.com';
+        $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'sender' ]     = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
         return $mailConf ;
     }

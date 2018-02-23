@@ -8,7 +8,7 @@
 
 namespace Email;
 
-use Users\Signup;
+use INIT;
 
 class  ForgotPasswordEmail extends AbstractEmail
 {
@@ -53,9 +53,9 @@ class  ForgotPasswordEmail extends AbstractEmail
     protected function _getDefaultMailConf() {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = 'noreply@matecat.com';
-        $mailConf[ 'sender' ]     = 'noreply@matecat.com';
-        $mailConf[ 'returnPath' ] = 'noreply@matecat.com';
+        $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'sender' ]     = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
         return $mailConf ;
     }
