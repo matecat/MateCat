@@ -1731,7 +1731,7 @@ font-size:14px;
 
 .mgmt-tm .btn-ok {
     padding: 7px 5px !important;
-    width: 120px;
+    width: 119px;
     margin-left: 5px;
 }
 
@@ -2140,8 +2140,6 @@ input.email-export-tmx {
     cursor: pointer;
     text-decoration: none;
     line-height: 35px;
-    position: relative;
-    margin-top: -4px;
 }
 
 .btn-orange-medium:hover,
@@ -2164,21 +2162,22 @@ input.email-export-tmx {
     color: #fff;
 }
 .btn-confirm-small {
-    color: #fff;
+    /* color: #fff; */
     background: #09beec;
     border: 1px solid #797979;
     font-weight: bold;
     text-decoration: none;
     border-radius: 2px;
-    font-size: 14px;
+    font-size: 15px;
     margin-right: 3px;
     box-sizing: border-box;
-    padding: 2.5px 5px !important;
-    width: 110px;
+    width: 120px;
+    height: 35px;
     text-align: center;
-    left: 5px;
+    left: 6px;
     position: relative;
-    top: -4px;
+    /* top: -4px; */
+    /* vertical-align: middle; */
 }
 .btn-confirm-small:hover {
     background-color: #08b3de;
@@ -2193,11 +2192,13 @@ input.email-export-tmx {
 .btn-confirm-small .text {
     color: #fff;
 }
-.cancel-tm-key-delete.cancelDelete,
-.btn-confirm-small.continueDeletingMT {
+.cancel-tm-key-delete.cancelDelete {
     margin-left: 7px;
-    margin-right: -7px;
+    margin-right: -4px;
     position: relative;
+    width: 33px;
+    height: 33px;
+    line-height: 35px;
 }
 
 .btn-orange-small.continueDletingMT {
@@ -4888,7 +4889,7 @@ a.btn.pull-left.addtmx {
 }
 
 a.pull-right.btn-grey.canceladdtmx {
-    margin-right: -9px;
+    margin-right: -6px;
 }
 
 a#add-mt-provider-cancel {
@@ -4903,17 +4904,16 @@ a#add-mt-provider-cancel {
 
 a.existingKey.pull-right.btn-ok.addtmxfile {
     margin-right: 4px;
-    width: 109px;
+    width: 108px;
 }
 
 a.pull-right.btn-orange-small.cancelsharetmx {
-    height: 29px;
+    height: 35px;
     position: relative;
-    top: 4px;
-    line-height: 27px;
-    margin-left: 5px;
-    margin-right: -7px;
-    width: 37px;
+    line-height: 35px;
+    margin-left: 4px;
+    margin-right: -6px;
+    width: 35px;
 }
 td.mt-provider {
     max-width: 170px;
@@ -4929,4 +4929,10 @@ td.engine-name div {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+a.pull-right.btn-orange-small.cancelDeletingMT.cancel-tm-key-delete {
+    width: 33px;
+    height: 33px;
+    margin-left: 20px;
 }
