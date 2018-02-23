@@ -165,7 +165,7 @@ if ( Review.enabled() )
  * Only bind events for specific review type
  */
 
-if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )) {
+if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' || Review.type === 'extended-lqa' )) {
 
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
