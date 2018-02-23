@@ -13,7 +13,7 @@ class ReviewTranslationIssue extends React.Component{
         var id_category = this.state.issue.id_category ;
         config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[").replace(/\]"/g, "]").replace(/\"\{/g, "{").replace(/\}"/g, "}")
         return _( JSON.parse( config.lqa_flat_categories ))
-            .select(function(e) {
+            .filter(function(e) {
                 return parseInt(e.id) == id_category ;
             }).first().label
     }
