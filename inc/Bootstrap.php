@@ -217,7 +217,7 @@ class Bootstrap {
                                 "errors"  => array(
                                         array(
                                                 "code"    => -1000,
-                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
+                                                "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
                                         )
                                 ), "data" => array()
                         ) );
