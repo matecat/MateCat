@@ -1,5 +1,5 @@
 if ( ReviewImproved.enabled() ) {
-    $(document).on('ready', function() {
+    $(document).ready(function() {
         // first step in the direction to not rely on HTML rendering.
         // we fetch quality-report data on page load to get the score
         // to show in quality-report button.

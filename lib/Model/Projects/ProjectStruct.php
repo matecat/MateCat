@@ -144,6 +144,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @deprecated $id_customer could not correspond to the real team/assignee
      * @return Users_UserStruct
      */
     public function getOwner() {

@@ -30,8 +30,19 @@ class ChunkController extends KleinController {
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Exceptions\NotFoundError
+     */
     public function show() {
-        $this->response->json( Chunk::renderOne( $this->chunk ) );
+
+        $format = new Chunk();
+
+        $format->setUser( $this->user );
+        $format->setCalledFromApi( true );
+
+        $this->response->json( $format->renderOne($this->chunk) );
+
     }
 
     protected function afterConstruct() {

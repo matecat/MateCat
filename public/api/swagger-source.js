@@ -16,10 +16,7 @@ $(function () {
             "version": "1.0.0"
         },
         "host": config.swagger_host,
-        "schemes": [
-            "https"
-        ],
-        //"basePath": "/api",
+        "schemes": ["http", "https"],
         "produces": [
             "application/json"
         ],
@@ -338,7 +335,7 @@ $(function () {
             "/api/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
-                        "Project"
+                        "Job"
                     ],
                     "summary": "Statistics",
                     "description": "Statistics",
@@ -575,6 +572,127 @@ $(function () {
                     }
                 }
             },
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Split Check",
+                    "description": "Check a job can be splitted",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "job_password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "num_split",
+                            "in": "path",
+                            "description": "Number of chuck you want to split",
+                            "required": true,
+                            "type": "integer"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Split",
+                            "schema": {
+                                "$ref": "#/definitions/Split"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Split Job",
+                    "description": "Check a job can be splitted",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "job_password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "num_split",
+                            "in": "path",
+                            "description": "Number of chuck you want to split",
+                            "required": true,
+                            "type": "integer"
+                        },
+                        {
+                            "name": "split_values",
+                            "in": "formData",
+                            "description": "Number of word count values of each chunk returned in split check API",
+                            "type": "array",
+                            "items": { "type": "double" }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Split",
+                            "schema": {
+                                "$ref": "#/definitions/Split"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/api/v2/jobs/{id_job}/{password}/translator": {
                 "get": {
                     "tags": [
@@ -602,7 +720,7 @@ $(function () {
                         "200": {
                             "description": "Job",
                             "schema": {
-                                "$ref": "#/definitions/ExtendedJobItem"
+                                "$ref": "#/definitions/JobTranslatorItem"
                             }
                         },
                         "default": {
@@ -657,7 +775,7 @@ $(function () {
                         "200": {
                             "description": "Job",
                             "schema": {
-                                "$ref": "#/definitions/ExtendedJobItem"
+                                "$ref": "#/definitions/JobTranslatorItem"
                             }
                         },
                         "default": {
@@ -712,7 +830,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/quality-report": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Quality Report"
                     ],
                     "summary": "Quality report",
@@ -1063,7 +1181,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/translation-issues": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Project translation issues",
@@ -1100,7 +1218,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/translation-versions": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Project translation versions",
@@ -1137,7 +1255,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Segment versions",
@@ -1181,7 +1299,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Versions"
                     ],
                     "summary": "Get a Segment translation version",
@@ -1232,7 +1350,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Create translation issues",
@@ -1354,7 +1472,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Update translation issues",
@@ -1405,7 +1523,7 @@ $(function () {
                 },
                 "delete": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Delete a translation Issue",
@@ -1456,7 +1574,7 @@ $(function () {
             "/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
                 "post": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Add comment to a translation issue",
@@ -1526,7 +1644,7 @@ $(function () {
                 },
                 "get": {
                     "tags": [
-                        "Project",
+                        "Job",
                         "Translation Issues"
                     ],
                     "summary": "Get comments",
@@ -1723,6 +1841,48 @@ $(function () {
                     "responses": {
                         "200": {
                             "description": "Glossary"
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/engines/list": {
+                "get": {
+                    "tags": [
+                        "Engines"
+                    ],
+                    "summary": "Retrieve personal engine list.",
+                    "description": "Retrieve personal engine list ( Google, Microsoft, etc. ).",
+                    "parameters": [],
+                    "responses": {
+                        "200": {
+                            "description": "Engine List",
+                            "schema": {
+                                "$ref": "#/definitions/EnginesList"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/keys/list": {
+                "get": {
+                    "tags": [
+                        "TM keys"
+                    ],
+                    "summary": "Retrieve private TM keys list.",
+                    "description": "Retrieve private TM keys list.",
+                    "parameters": [],
+                    "responses": {
+                        "200": {
+                            "description": "Keys List",
+                            "schema": {
+                                "$ref": "#/definitions/KeysList"
+                            }
                         },
                         "default": {
                             "description": "Unexpected error"
@@ -2459,6 +2619,54 @@ $(function () {
                 }
             },
 
+            "EnginesList" : {
+                "type": "array",
+                "items" : {
+                    "$ref" : "#/definitions/Engine"
+                }
+            },
+            "Engine" : {
+                "type": "object",
+                "properties": {
+                    "id" : { "type" : "integer", "required" : true },
+                    "name": { "type" : "string", "required" : true },
+                    "type": {
+                        "type" : "string",
+                        "enum" : ["MT", "TM"],
+                        "required" : true
+                    },
+                    "description": {
+                        "type" : "string" ,
+                        "required" : true
+                    }
+                }
+            },
+
+            "KeysList" : {
+                "type": "object",
+                "properties" : {
+                    "private_keys" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/Key"
+                        }
+                    },
+                    "shared_keys" : {
+                        "type" : "array",
+                        "items" : {
+                            "$ref" : "#/definitions/Key"
+                        }
+                    }
+                }
+            },
+            "Key" : {
+                "type": "object",
+                "properties": {
+                    "key" : { "type" : "string", "required" : true },
+                    "name": { "type" : "string", "required" : true },
+                }
+            },
+
             "ProjectItem" : {
                 "type" : "object" ,
                 "properties" : {
@@ -2511,6 +2719,18 @@ $(function () {
                     "stats" : {
                         "type" : "object",
                         "$ref" : "#/definitions/Stats"
+                    }
+                }
+            },
+
+            "JobTranslatorItem" : {
+                "type" : "object",
+                "properties" : {
+                    "id": { "type" : "integer" },
+                    "password": { "type" : "password" },
+                    "translator": {
+                        "type" : "object",
+                        "$ref" : "#/definitions/Translator"
                     }
                 }
             },
@@ -2615,7 +2835,38 @@ $(function () {
                         "serve for better understanding of the error"
                     }
                 }
-            }
+            },
+
+            "Split": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "raw_word_count": "float",
+                            "eq_word_count": "float",
+                            "job_first_segment": "integer",
+                            "job_last_segment": "integer",
+                            "id": "integer",
+                            "show_in_cattool": "integer",
+                            "chunks": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "eq_word_count": "integer",
+                                        "raw_word_count": "integer",
+                                        "segment_start": "integer",
+                                        "segment_end": "integer",
+                                        "last_opened_segment": "integer",
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
         }
     };
 

@@ -106,6 +106,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
      */
     public function getUserTeams(){
         $mDao = new MembershipDao();
+        $mDao->setCacheTTL( 60 * 60 * 24 );
         return $mDao->findUserTeams( $this );
     }
 
@@ -134,8 +135,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     /**
      * Returns the decoded access token.
      *
-     * @param null $field
-     *
+     * @return bool|string
      */
     public function getDecryptedOauthAccessToken() {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();

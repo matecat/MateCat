@@ -3,8 +3,8 @@
  */
 $.extend(UI, {
 	loadCustomization: function() {
-		if ($.cookie('user_customization')) {
-			this.custom = $.parseJSON($.cookie('user_customization'));
+		if (Cookies.get('user_customization')) {
+			this.custom = $.parseJSON(Cookies.get('user_customization'));
 		} else {
 			this.custom = {
 				"extended_concordance": false,
@@ -19,7 +19,7 @@ $.extend(UI, {
 		}
 	},
 	saveCustomization: function() {
-		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
+        Cookies.set('user_customization', JSON.stringify(this.custom), { expires: 3650 });
 	},
 	setShortcuts: function() {
         UI.shortcuts =  {

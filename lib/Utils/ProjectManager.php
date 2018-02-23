@@ -989,6 +989,8 @@ class ProjectManager {
                 //Exit
             }
 
+            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->fileStorage->getZipDir() );
+
         } //end zip hashes manipulation
 
     }
