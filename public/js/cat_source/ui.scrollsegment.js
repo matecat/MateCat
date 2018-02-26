@@ -2,7 +2,7 @@
 
     var segment ;
 
-    var scrollSelector = 'html,body'; 
+    UI.scrollSelector = 'html,body';
 
     var tryToRenderAgain = function( segment, highlight ) {
         UI.unmountSegments();
@@ -10,6 +10,7 @@
         var id_segment = segment.selector.split('-')[1];
 
         UI.render({
+            firstLoad: false,
             segmentToScroll: id_segment,
             highlight : highlight 
         });
@@ -68,14 +69,14 @@
     var doDirectScroll = function( segment, highlight, quick ) {
         var pointSpeed = (quick)? 0 : 500;
 
-        var scrollPromise = animateScroll( segment, pointSpeed ) ;
+        var scrollPromise = UI.animateScroll( segment, pointSpeed ) ;
         scrollPromise.done( function() {
             UI.goingToNext = false;
         });
         
         if ( highlight ) { 
             scrollPromise.done( function() {
-                UI.highlightEditarea( segment ) ;
+                SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
             }); 
         }
         
@@ -117,7 +118,7 @@
      * @returns Deferred
      */
     var animateScroll = function( segment, speed ) {
-        var scrollAnimation = $( scrollSelector ).stop();
+        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
         var pos ;
         var prev = segment.prev('section') ;
         var searchHeight = ($('.searchbox:visible').length > 0) ? $('.searchbox:visible').height() : 0;
@@ -133,17 +134,21 @@
             pos = segment.offset().top - commonOffset ;
         }
 
+        var segmentOpen = $('section.editor');
+        if ( segmentOpen.length && UI.getSegmentId(segment) !== UI.getSegmentId($('section.editor'))) {
+            pos = pos - segmentOpen.find('.footer').height();
+        }
+
         scrollAnimation.animate({
             scrollTop: pos
-        }, speed, function (  ) {
-            console.log("ANIMATE")
-        });
+        }, speed);
 
         return scrollAnimation.promise() ; 
-    }
+    };
 
     $.extend(UI, {
         scrollSegment : scrollSegment,
+        animateScroll: animateScroll
     });
 
 })(window, $, UI, undefined);

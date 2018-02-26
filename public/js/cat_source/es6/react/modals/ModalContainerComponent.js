@@ -1,3 +1,5 @@
+let PropTypes = require('prop-types');
+
 class ModalComponent extends React.Component {
 
 
@@ -46,8 +48,8 @@ class ModalComponent extends React.Component {
 }
 
 ModalComponent.propTypes = {
-    onClose: React.PropTypes.func,
-    title: React.PropTypes.string
+    onClose: PropTypes.func,
+    title: PropTypes.string
 };
 //
 // ModalComponent.defaultProps = {

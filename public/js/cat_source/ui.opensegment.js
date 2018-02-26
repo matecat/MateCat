@@ -16,8 +16,6 @@
                 return false ;
             }
 
-            this.openSegmentStart = new Date();
-
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
@@ -28,7 +26,6 @@
             }
 
             this.numOpenedSegments++;
-            this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
             this.byButton = false;
 
             this.cacheObjects( segment );
@@ -39,60 +36,35 @@
 
             if ( editarea.length > 0 ) this.saveInUndoStack('open');
 
-            this.autoSave = true;
-
-            var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-            var s2 = $('.source', segment.el).text();
-            var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
-            var isEqual = (s1 == s2);
-
-            var getNormally = isNotSimilar || isEqual;
-
-            this.activateSegment(segment, getNormally);
+            this.activateSegment(segment);
 
             segment.el.trigger('open');
             
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
-            if ((!this.readonly)&&(!getNormally)) {
-                $('#segment-' + segment.id + ' .alternatives .overflow').hide();
-            }
+            // if ((!this.readonly)&&(!getNormally)) {
+            //     $('#segment-' + segment.id + ' .alternatives .overflow').hide();
+            // }
+            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor opened');
 
             if (!this.readonly) {
                 var self = this;
-                if(getNormally) {
-                    this.getContribution(segment.el, 0).done(function() {
-                        self.setCurrentSegment()
-                    });
-                } else {
-                    // console.log('riprova dopo 3 secondi');
-                    $(segment.el).removeClass('loaded');
-                    $(".loader", segment.el).addClass('loader_on');
-                    setTimeout(function() {
-                        $('.alternatives .overflow', segment.el).show();
-                        UI.getContribution(segment.el, 0).done(function() {
-                            self.setCurrentSegment()
-                        });
-                    }, 3000);
-                }
+                this.getContribution(segment.el, 0).done(function() {
+                    self.setCurrentSegment();
+                });
             } else {
                 this.setCurrentSegment();
             }
 
-            this.currentSegment.addClass('opened');
 
             this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
-            // this.setNextWarnedSegment();
 
             this.focusEditarea = setTimeout(function() {
                 UI.editarea.focus();
                 clearTimeout(UI.focusEditarea);
                 UI.currentSegment.trigger('EditAreaFocused');
             }, 100);
-
-            this.currentIsLoaded = false;
-            this.nextIsLoaded = false;
 
             if(!this.noGlossary) this.getGlossary(segment.el, true, 0);
 
@@ -108,9 +80,6 @@
 
             this.opening = false;
 
-
-            segment.el.addClass("editor");
-
             if (!this.readonly) {
                 /* Check if is right-to-left language, because there is a bug that make
                     Chrome crash, this happens without the timer */
@@ -121,15 +90,7 @@
                 } else {
                     UI.editarea.attr('contenteditable', 'true');
                 }
-            }
 
-            this.editStart = new Date();
-
-            $(editarea).removeClass("indent");
-
-            this.lockTags();
-
-            if (!this.readonly) {
                 this.getContribution(segment.el, 1);
                 this.getContribution(segment.el, 2);
 
@@ -137,8 +98,7 @@
                 if(!this.noGlossary) this.getGlossary(segment.el, true, 2);
             }
 
-            if (this.debug)
-                console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
+            this.editStart = new Date();
 
             $(window).trigger({
                 type: "segmentOpened",

@@ -309,7 +309,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
         $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
+        $parameters[ 'snote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {

@@ -42,6 +42,43 @@ class SegmentComment {
         return $out;
     }
 
+    public function genCSVTmpFile(){
+        $filePath = tempnam("/tmp", "SegmentsComments_");
+        $csvHandler = new \SplFileObject($filePath, "w");
+        $csvHandler->setCsvControl( ';' );
+
+        $csv_fields = [
+                "ID Segment",
+                "Email",
+                "Full Name",
+                "Message",
+                "Created At",
+                "Resolved",
+                "Resolved At"
+        ];
+
+        $csvHandler->fputcsv( $csv_fields );
+
+        foreach ( $this->data as $d ) {
+
+            $combined = array_combine( $csv_fields, array_fill( 0, count( $csv_fields ), '' ) );
+
+            $combined[ "ID Segment" ]  = $d->id_segment;
+            $combined[ "Email" ]       = $d->email;
+            $combined[ "Full Name" ]   = $d->full_name;
+            $combined[ "Message" ]     = $d->message;
+            $combined[ "Created At" ]  = $this->formatDate( $d->create_date );
+            $combined[ "Resolved" ]    = ( !empty( $d->resolve_date ) ) ? "Yes" : "No";
+            $combined[ "Resolved At" ] = ( !empty( $d->resolve_date ) ) ? $this->formatDate( $d->resolve_date ) : "N/A";
+
+            $csvHandler->fputcsv( $combined );
+
+        }
+
+
+        return $filePath;
+    }
+
     private function formatDate( $date ) {
         if ( $date == null ) {
             return null ;

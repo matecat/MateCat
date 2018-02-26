@@ -21,6 +21,7 @@ use AbstractControllers\IController;
  *
  */
 abstract class AbstractDecorator {
+
     protected $controller;
 
     /**

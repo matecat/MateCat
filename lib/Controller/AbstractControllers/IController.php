@@ -9,6 +9,19 @@
 namespace AbstractControllers;
 
 
+use FeatureSet;
+
 interface IController {
+
+    public function getUser();
+
+    public function getFeatureSet();
+
+    /**
+     * @param FeatureSet $features
+     *
+     * @return mixed
+     */
+    public function setFeatureSet( FeatureSet $features );
 
 }

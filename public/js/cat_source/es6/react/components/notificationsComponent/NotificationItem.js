@@ -1,3 +1,5 @@
+let PropTypes = require('prop-types');
+
 class NotificationItem extends React.Component {
 
 
@@ -143,16 +145,16 @@ class NotificationItem extends React.Component {
 }
 
 NotificationItem.propTypes = {
-    position: React.PropTypes.string,
-    title: React.PropTypes.string.isRequired,
-    text: React.PropTypes.string.isRequired,
-    type: React.PropTypes.string,
-    autoDismiss: React.PropTypes.bool,
-    closeCallback: React.PropTypes.func,
-    openCallback: React.PropTypes.func,
-    allowHtml: React.PropTypes.bool,
-    timer: React.PropTypes.number,
-    dismissable: React.PropTypes.bool
+    position: PropTypes.string,
+    title: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+    type: PropTypes.string,
+    autoDismiss: PropTypes.bool,
+    closeCallback: PropTypes.func,
+    openCallback:PropTypes.func,
+    allowHtml:PropTypes.bool,
+    timer:PropTypes.number,
+    dismissable:PropTypes.bool
 };
 
 NotificationItem.defaultProps = {

@@ -2,19 +2,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
     var originalBindShortcuts = UI.bindShortcuts;
-
-    UI.shortcuts = UI.shortcuts || {} ;
-
-    $.extend(UI.shortcuts, {
-        "reject": {
-            "label" : "Reject translation",
-            "equivalent": "click on Rejected",
-            "keystrokes" : {
-                "standard": "ctrl+shift+down",
-                "mac": "meta+shift+down"
-            }
-        }
-    });
+    var originalSetShortcuts = UI.setShortcuts;
 
     var rejectKeyDownEvent = function(e) {
         e.preventDefault();
@@ -26,8 +14,23 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $.extend(UI, {
 
+
+
         alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated or post-edited segments can be revised. " +
          " <br />If needed, you can force the status by clicking on the coloured bar on the right of the segment ",
+
+        setShortcuts: function () {
+            originalSetShortcuts.apply(this);
+
+            UI.shortcuts.reject = {
+                "label" : "Reject translation",
+                    "equivalent": "click on Rejected",
+                    "keystrokes" : {
+                    "standard": "ctrl+shift+down",
+                        "mac": "meta+shift+down"
+                }
+            };
+        },
 
         /**
          * Search for the next translated segment to propose for revision.
@@ -151,32 +154,29 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             return translation ;
         },
-        getSegmentMarkup : function() {
-            var segmentData = arguments[0];
-            var data = UI.getSegmentTemplateData.apply( this, arguments ) ;
-
-            var section            = $( UI.getSegmentTemplate()( data ) );
-            var segment_body       = $( MateCat.Templates[ 'review_improved/segment_body' ](data) );
-            var textarea_container = MateCat.Templates[ 'review_improved/text_area_container' ](
-                {
-                    decoded_translation : data.decoded_translation
-                });
-
-            segment_body
-                .find('[data-mount="segment_text_area_container"]')
-                .html( textarea_container );
-
-            section
-                .find('[data-mount="segment_body"]')
-                .html( segment_body );
-
-            return section[0].outerHTML ;
-        },
-
-        getSegmentTemplate : function() {
-            return MateCat.Templates['review_improved/segment'];
-        },
-
+        // renderSegments: function (segments, justCreated, fid, where) {
+        //
+        //     if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+        //         if ( !this.SegmentsContainers || !this.SegmentsContainers[fid] ) {
+        //             if (!this.SegmentsContainers) {
+        //                 this.SegmentsContainers = [];
+        //             }
+        //             var mountPoint = $(".article-segments-container-" + fid)[0];
+        //             this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
+        //                 fid: fid,
+        //                 isReviewImproved: true,
+        //                 enableTagProjection: UI.enableTagProjection,
+        //                 decodeTextFn: UI.decodeText,
+        //                 tagModesEnabled: UI.tagModesEnabled,
+        //                 speech2textEnabledFn: Speech2Text.enabled,
+        //             }), mountPoint);
+        //             SegmentActions.renderSegments(segments, fid);
+        //         } else {
+        //             SegmentActions.addSegments(segments, fid, where);
+        //         }
+        //         UI.registerFooterTabs();
+        //     }
+        // },
         rejectAndGoToNext : function() {
             UI.setTranslation({
                 id_segment: UI.currentSegmentId,
@@ -213,7 +213,16 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             var section = elem.closest('section');
             section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
             UI.closeSegment(section, 1);
+        },
+
+        registerReviseTab: function () {
+            return false;
+        },
+
+        submitIssues: function (sid, data) {
+             return ReviewImproved.submitIssue(sid, data);
         }
+
     });
 
 

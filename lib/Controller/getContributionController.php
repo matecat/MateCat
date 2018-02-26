@@ -26,14 +26,7 @@ class getContributionController extends ajaxController {
      */
     private $jobData;
 
-    private $feature_set;
-
     private $__postInput = array();
-
-    /**
-     * @var Projects_ProjectStruct
-     */
-    private $project;
 
     public function __construct() {
 
@@ -70,8 +63,6 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
-
-        $this->feature_set = new FeatureSet();
 
     }
 
@@ -113,8 +104,7 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
-        $this->project = Projects_ProjectDao::findById( $this->jobData->id_project );
-        $this->feature_set->loadForProject( $this->project );
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /*
          * string manipulation strategy
@@ -254,7 +244,7 @@ class getContributionController extends ajaxController {
             $config = $mt_engine->getConfigStruct();
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
-            $config = $this->feature_set->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+            $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
 
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
@@ -403,6 +393,8 @@ class getContributionController extends ajaxController {
             //else do not rewrite the match value
         }
 
+        $match = $this->featureSet->filter( 'iceMatchRewriteForContribution', $match );
+
         return $match;
 
     }
@@ -439,11 +431,12 @@ class getContributionController extends ajaxController {
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
             $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
-            $statuses = $this->feature_set->filter('filterSetSuggestionReportStatuses', $statuses );
+            $statuses = $this->featureSet->filter('filterSetSuggestionReportStatuses', $statuses );
 
             $statuses_condition = implode(' OR ', array_map( function($status) {
                 return " status = '$status' " ;

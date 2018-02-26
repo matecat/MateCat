@@ -16,7 +16,7 @@ class Bootstrap {
     /**
      * @var FeatureSet
      */
-    private  $mandatoryFeatureSet ;
+    private $autoLoadedFeatureSet ;
 
     public static function start() {
         new self();
@@ -147,11 +147,11 @@ class Bootstrap {
     }
 
     private function initMandatoryPlugins() {
-        $this->mandatoryFeatureSet = new FeatureSet();
+        $this->autoLoadedFeatureSet = new FeatureSet();
     }
 
     private function notifyBootCompleted() {
-        $this->mandatoryFeatureSet->run('bootstrapCompleted');
+        $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
     public static function fatalErrorHandler() {
@@ -217,7 +217,7 @@ class Bootstrap {
                                 "errors"  => array(
                                         array(
                                                 "code"    => -1000,
-                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
+                                                "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
                                         )
                                 ), "data" => array()
                         ) );
@@ -373,13 +373,11 @@ class Bootstrap {
             }
         }
 
-        if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
-            set_include_path( get_include_path() .
-                    PATH_SEPARATOR .
-                    implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS )
-            );
-        }
+        Features::setIncludePath();
 
+        if (!empty( INIT::$MANDATORY_PLUGINS ) ) {
+            INIT::$AUTOLOAD_PLUGINS = array_merge( INIT::$AUTOLOAD_PLUGINS, INIT::$MANDATORY_PLUGINS );
+        }
     }
 
     /**

@@ -28,11 +28,6 @@ class getSegmentsController extends ajaxController {
      */
     private $project ;
 
-    /**
-     * @var FeatureSet
-     */
-    private $feature_set ;
-
     private $segment_notes ;
 
 
@@ -74,10 +69,10 @@ class getSegmentsController extends ajaxController {
             return;
         }
 
-        $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-        $this->project = $this->job->getProject();
-        $this->feature_set = new FeatureSet();
-        $this->feature_set->loadForProject( $this->project ) ;
+        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->project    = $this->job->getProject();
+
+        $this->featureSet->loadForProject( $this->project ) ;
 
 		$lang_handler = Langs_Languages::getInstance();
 
@@ -163,7 +158,7 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['segments'] = array();
             }
 
-            $seg = $this->feature_set->filter('filter_get_segments_segment_data', $seg) ;
+            $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
 
             unset($seg['id_file']);
             unset($seg['source']);
@@ -216,7 +211,7 @@ class getSegmentsController extends ajaxController {
             $options['optional_fields'] = array('st.version_number');
         }
 
-        $options = $this->feature_set->filter('filter_get_segments_optional_fields', $options);
+        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
 
         return $options;
     }
@@ -230,8 +225,16 @@ class getSegmentsController extends ajaxController {
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
+            if( $this->featureSet->filter( 'prepareAllNotes', false ) ){
+                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
+                foreach ( $this->segment_notes as $k => $noteObj ){
+                    $this->segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
+                }
+                $this->segment_notes = $this->featureSet->filter( 'processExtractedJsonNotes', $this->segment_notes );
+            } else {
+                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+            }
 
-            $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
     }

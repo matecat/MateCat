@@ -407,6 +407,10 @@ button.ui-button-icon-only {
     width: 3.4em;
 }
 
+table .btn {
+    padding: 0px 20px;
+}
+
 button.ui-button-icons-only {
     width: 3.7em;
 }
@@ -1609,10 +1613,8 @@ h2.payoff {
     height: 35px !important;
     font-size: 1.1em;
     border: 0;
+    background: transparent;
 }
-
-/*.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}*/
-
 .cancel button:hover, .delete button:hover {
     background: #f26522;
     color: #fff;
@@ -2119,11 +2121,7 @@ header {
 .logo {
 }
 
-.popup-tm .popup-box {
-    width: 100%;
-    margin: 0;
-    /* padding-left: 10px; */
-}
+
 
 .supported-formats .popup {
     margin: auto;
@@ -2261,11 +2259,6 @@ header {
     color: #fff;
 }
 
-.popup-box {
-    float: left;
-    margin: 0 5px;
-}
-
 .close {
     background: url(../../img/x.png) center 1px no-repeat;
     width: 22px;
@@ -2276,7 +2269,7 @@ header {
     top: 0;
 }
 
-.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+.close:hover, .close:focus {
     background: url(../../img/x.png) center -30px no-repeat;
 }
 
@@ -2601,7 +2594,7 @@ header .open-more {
 .zip_internal_file /*:before*/
 {
     /*content: "\ea58";*/
-    margin-left: 15px;
+    /* margin-left: 15px;*/
     /*color: #555;*/
 }
 
@@ -2675,41 +2668,10 @@ div.continue-gdrive {
     display: none;
 }
 
-td.action .btn {
-    //height: 29px;
-    /*width: 116px !important;*/
-}
 
 .wrapper-dropdown-5 {
     padding: 4px 16px !important;
 }
-/*
-
-.filter-box input {
-    width: 170px;
-}
-*/
-
-.popup-languages.slide h1 {
-    height: 60px;
-}
-
-/*
-.btn.pull-left.addtmx {
-    width: 117px !important;
-}*/
-
-a.btn.addtmx {
-    height: 29px;
-}
-
-.popup-tm .btn-ok.right {
-    font-family: calibri;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 0px 18px;
-}
-
 .google-login-button {
     box-sizing: content-box;
 }

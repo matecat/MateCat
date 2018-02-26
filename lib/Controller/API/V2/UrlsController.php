@@ -19,9 +19,14 @@ class UrlsController extends KleinController {
     private $validator;
 
     public function urls() {
+
+        $this->featureSet->loadForProject( $this->validator->getProject() );
+
         $projectData = getProjectData( $this->validator->getProject()->id );
 
         $formatted = new ProjectUrls( $projectData );
+
+        $formatted = $this->featureSet->filter( 'projectUrls', $formatted );
 
         $this->response->json( $formatted->render() );
 

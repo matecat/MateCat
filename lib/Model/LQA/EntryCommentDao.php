@@ -23,7 +23,7 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
     public function createComment( $data ) {
         $struct = new EntryCommentStruct( $data );
         $struct->ensureValid();
-        $struct->create_date = date();
+        $struct->create_date = date('Y-m-d H:i:s');
        
 
         $sql = "INSERT INTO qa_entry_comments " .

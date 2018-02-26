@@ -32,7 +32,7 @@ class TeamProjectValidator extends Base {
     /**
      * @throws NotFoundError
      */
-    public function validate() {
+    public function _validate() {
 
         if ( empty( $this->project ) ) {
             throw new NotFoundError( "Not Found", 404 );

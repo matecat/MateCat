@@ -67,7 +67,7 @@
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
-                splitSegmentEnabled: true,
+                splitSegmentEnabled: ${splitSegmentEnabled},
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
@@ -195,91 +195,14 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
-        <header metal:use-macro="header.html/main_header">
-            <div class="wrapper">
-                <form id="fileDownload" action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="downloadFile" />
-                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                    <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="password" tal:attributes="value password" />
-                    <input type="hidden" name="download_type" value="all" />
-                </form>
-                <a href="#" class="filter"> <span class="arrow-top "></span></a>
+        <header metal:use-macro="header.html/main_header"/>
 
-                <a href="${basepath}" class="logo">
-                </a>
-                <div class="breadcrumbs">
-                    <div class="joblist">
-                        <a href="#" class="arrow-notification"></a>
-                        <ul>
-                            <li>
-                                <a href="">
-                                    <b>Job1</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Another job</b>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <b>Eaaasy job</b>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+        <div class="main-container">
+            <div data-mount="review-side-panel"></div>
+            <div id="outer"></div>
+            <div id="plugin-mount-point"></div>
+        </div>
 
-                    <a href="#" id="pname" tal:content="pname">Project</a>
-                    <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
-                </div>
-
-            </div>   <!-- .wrapper -->
-
-
-        </header>
-        <h1>
-
-        </h1>
-        <div data-mount="review-side-panel"></div>
-
-        <div id="outer">
-
-       	</div>
-
-<div class="modal popup-settings" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>
-            <a href="#" id="settings-save" class="btn-ok right">Save</a>
-            <a href="#" id="settings-restore" class="btn-cancel right">Restore</a>
-            Settings
-        </h1>
-
-        <div class="popup-box">
-			<ul class="submenu">
-				<li class="active" data-tab="settings-shortcuts">
-					<a tabindex="-1" href="#">Keyboard Shortcuts</a>
-				</li>
-				<li data-tab="settings-other">
-					<a tabindex="-1" href="#">(Other)</a>
-				</li>
-			</ul>
-
-			<div class="tab sub-editor" id="settings-shortcuts">
-				<div class="overflow">
-					<p>Click on a shortcut to change it, then perform the new keystrokes combination.</p>
-					<a href="#" id="default-shortcuts" class="btn-ok">Restore default</a>
-				</div>
-			</div>
- 			<div class="tab sub-editor" id="settings-other">
-				<div class="overflow">Other</div>
-			</div>
-		</div>
-    </div>
-</div>
         <div class="notifications-wrapper"></div>
 
         <footer>
@@ -349,13 +272,8 @@
 
         <div metal:use-macro="tm.html/tm_panel"></div>
 
+        <a id="segmentPointer" href="#" title="Go to the active segment"></a>
 
-        <ul id="contextMenu">
-            <li id="searchConcordance">
-                <span class="label">Concordance</span>
-                <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
-            </li>
-        </ul>
 
     <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
@@ -419,9 +337,6 @@
     <template id="tpl-taglock-customize" tal:condition="true:tagLockCustomizable">
         <a href="#" class="tagLockCustomize" title="Toggle Tag Lock"></a>
     </template>
-    <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
-    </template>
-<div class="offline_stuffs" ></div>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
 

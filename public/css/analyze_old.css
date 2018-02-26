@@ -661,7 +661,7 @@ a:hover{text-decoration:none}
 */
 
 .close{background:url(../img/x.png) center 1px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
-.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background:url(../img/x.png) center -30px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
+.close:hover, .close:focus {background:url(../img/x.png) center -30px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
 
 .billed-message{display:none;text-align:center;width:100%;margin:7px 0px 20px 0;padding:20px 0 20px 0;background:#ffffdd;border:1px solid #ccc;float:left;border-radius: 3px;-webkit-transition: all  200ms ease-in; -moz-transition: all  100ms ease-in;font-size:18px}
 .promo-text

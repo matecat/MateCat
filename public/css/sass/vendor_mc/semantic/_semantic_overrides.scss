@@ -364,3 +364,8 @@ a.ui.basic.blue.label:hover {
     overflow: initial !important;
     z-index: 20000000000000;
 }
+
+
+.ui.grid.border-box *{
+    box-sizing: border-box;
+}

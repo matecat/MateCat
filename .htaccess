@@ -35,9 +35,6 @@ RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&p
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 
-RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
-RewriteRule ^(configMissing)[/]?$ lib/View/configMissing.html [L]
-
 RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]

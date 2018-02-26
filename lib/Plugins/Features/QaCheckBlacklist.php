@@ -21,6 +21,8 @@ use AMQHandler ;
 
 class QaCheckBlacklist extends BaseFeature {
 
+    const FEATURE_CODE = 'qa_check_blacklist';
+
     const BLACKLIST_SCOPE = 'blacklist' ;
 
     public function postTMSegmentAnalyzed( $params ) {

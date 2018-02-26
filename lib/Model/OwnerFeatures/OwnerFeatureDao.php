@@ -4,6 +4,8 @@ use Teams\TeamStruct;
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
 
+    const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ";
+
     public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
        // TODO:
     }
@@ -55,21 +57,32 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $id_customer
+     *
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     */
+    public static function getByIdCustomer( $id_customer, $ttl = 3600 ) {
+        $conn = Database::obtain()->getConnection();
+        $thisDao = new self();
+        $stmt = $conn->prepare( self::query_by_user_email );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new OwnerFeatures_OwnerFeatureStruct(), [
+                'id_customer' => $id_customer
+        ] );
+    }
+
+    /**
+     * Destroy a cached object
+     *
      * @param $id_customer
      *
-     * @return OwnerFeatures_OwnerFeatureStruct[]
+     * @return bool|int
      */
-    public static function getByIdCustomer( $id_customer ) {
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
-            " INNER JOIN users ON users.uid = owner_features.uid " .
-            " WHERE users.email = :id_customer " .
-            " AND owner_features.enabled "
-        );
-        $stmt->execute( array( 'id_customer' => $id_customer) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
-        return $stmt->fetchAll();
+    public static function destroyCacheByIdCustomer( $id_customer ){
+        $thisDao = new self();
+        $stmt = $thisDao->_getStatementForCache( self::query_by_user_email );
+        return $thisDao->_destroyObjectCache( $stmt, [ 'id_customer' => $id_customer ] );
     }
 
     public static function getById( $id ) {

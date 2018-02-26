@@ -140,9 +140,7 @@ class userKeysController extends ajaxController {
                     break;
                 case 'newKey':
                     $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
-
-                    $featuresSet = new FeatureSet();
-                    $featuresSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->uid );
+                    $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->uid );
 
                     break;
                 case 'info':

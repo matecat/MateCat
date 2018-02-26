@@ -1,20 +1,18 @@
 <?php
 
 namespace API\V2  ;
+use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use Features\ReviewImproved;
 use LQA\EntryDao as EntryDao ;
 use Database;
 
-class SegmentTranslationIssueController extends KleinController {
+class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
-    private $chunk ;
-    private $project ;
     /**
      * @var Validators\SegmentTranslationIssue
      */
     private $validator ;
-    private $segment ;
     private $issue ;
 
     public function index() {
@@ -32,8 +30,6 @@ class SegmentTranslationIssueController extends KleinController {
 
     public function create() {
 
-        \Bootstrap::sessionStart();
-
         $data = array(
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
@@ -47,7 +43,7 @@ class SegmentTranslationIssueController extends KleinController {
             'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
             'comment'             => $this->request->comment,
-            'uid'                 => $_SESSION['uid']
+            'uid'                 => $this->getUser()->uid
         );
 
         $struct = new \LQA\EntryStruct( $data );
@@ -57,6 +53,10 @@ class SegmentTranslationIssueController extends KleinController {
             $this->request->password,
             $struct
         ) ;
+
+        if ( $this->request->diff ) {
+            $model->setDiff( $this->request->diff ) ;
+        }
 
         $struct = $model->save();
 
@@ -104,10 +104,7 @@ class SegmentTranslationIssueController extends KleinController {
 
     protected function afterConstruct() {
         $this->validator = new Validators\SegmentTranslationIssue( $this->request );
-    }
-
-    protected function validateRequest() {
-        $this->validator->validate();
+        $this->appendValidator( $this->validator );
     }
 
     private function getVersionNumber() {

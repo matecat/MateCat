@@ -217,4 +217,62 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    public function setApprovedByChunk( $chunk ) {
+        $sql = "UPDATE segment_translations
+            SET status = :status
+              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'status'        => Constants_TranslationStatus::STATUS_APPROVED,
+                'id_job'        => $chunk->id,
+                'first_segment' => $chunk->job_first_segment,
+                'last_segment'  => $chunk->job_last_segment
+        ] );
+
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+
+        return $stmt->rowCount();
+    }
+
+    public function setTranslatedByChunk( $chunk ) {
+
+        $sql = "UPDATE segment_translations
+            SET status = :status
+              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment AND status != :approved_status";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'status'          => Constants_TranslationStatus::STATUS_TRANSLATED,
+                'id_job'          => $chunk->id,
+                'first_segment'   => $chunk->job_first_segment,
+                'last_segment'    => $chunk->job_last_segment,
+                'approved_status' => Constants_TranslationStatus::STATUS_APPROVED,
+        ] );
+
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+
+        return $stmt->rowCount();
+    }
+
+    public static function getSegmentsWithIssues($job_id, $segments_ids ) {
+        $where_values = $segments_ids;
+
+        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1) . '?' .") AND id_job = ?";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $where_values[] = $job_id;
+        $stmt->execute($where_values);
+
+        return $stmt->fetchAll();
+    }
+
+
 }

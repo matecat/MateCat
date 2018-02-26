@@ -13,6 +13,7 @@
 
 namespace API\V2\Validators;
 
+use API\V2\KleinController;
 use Chunks_ChunkDao ;
 use Klein\Request ;
 
@@ -20,12 +21,14 @@ class ChunkPasswordValidator extends Base {
     /**
      * @var \Chunks_ChunkStruct
      */
-    private $chunk ;
+    protected $chunk ;
 
-    private $id_job;
-    private $password ;
+    protected $id_job;
+    protected $password ;
 
-    public function __construct( Request $request ) {
+    public function __construct( KleinController $controller ) {
+
+        parent::__construct( $controller->getRequest() );
 
         $filterArgs = array(
                 'id_job' => array(
@@ -36,23 +39,21 @@ class ChunkPasswordValidator extends Base {
                 ),
         );
 
-        $postInput = (object)filter_var_array( $request->params(
-                array(
-                        'id_job',
-                        'password',
-                )
-        ), $filterArgs );
+        $postInput = (object)filter_var_array( $controller->getParams(), $filterArgs );
 
         $this->id_job = $postInput->id_job;
         $this->password   = $postInput->password;
 
-        $request->id_job = $this->id_job;
-        $request->password   = $this->password;
+        $controller->id_job   = $this->id_job;
+        $controller->password = $this->password;
 
-        parent::__construct( $request );
     }
 
-    public function validate() {
+    /**
+     * @return mixed|void
+     * @throws \Exceptions\NotFoundError
+     */
+    protected function _validate() {
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
                 $this->id_job,
                 $this->password

@@ -28,7 +28,7 @@ class ProjectExistsInTeamValidator extends Base {
         parent::__construct( $controller->getRequest() );
     }
 
-    public function validate() {
+    public function _validate() {
 
         if( $this->request->id_team != $this->project->id_team ){
             throw new NotFoundException( "Project not found", 404 );
