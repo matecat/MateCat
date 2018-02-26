@@ -40,7 +40,13 @@ if ( ReviewExtendedLQA.enabled() ) {
              * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
              * @param editarea
              */
-            trackChanges: function (editarea) {},
+            trackChanges: function (editarea) {
+                var segmentId = UI.getSegmentId($(editarea));
+                var segmentFid = UI.getSegmentFileId($(editarea));
+                var currentSegment =  UI.getSegmentById(segmentId)
+                var originalTranslation = currentSegment.find('.original-translation').html();
+                SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
+            },
 
             submitIssues: function (sid, data, diff) {
                 return ReviewExtendedLQA.submitIssue(sid, data, diff);
@@ -100,6 +106,32 @@ if ( ReviewExtendedLQA.enabled() ) {
                     return true;
                 }
                 return false;
+            },
+
+            overrideButtonsForRevision: function () {
+                let div = $('<ul>' + UI.segmentButtons + '</ul>');
+                div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved disabled').attr("disabled", true);
+                let nextSegment = UI.currentSegment.next();
+                let goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+                div.find('.next-untranslated').parent().remove();
+                if (goToNextApprovedButton) {
+                    let htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+                        '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
+                        this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+                        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+                    div.html(htmlButton + div.html());
+                }
+                UI.segmentButtons = div.html();
+            },
+            
+            setDisabledOfButtonApproved: function (sid,isDisabled ) {
+                let div =$("#segment-"+sid+"-buttons").find(".approved");
+                if(!isDisabled){
+                    div.removeClass('disabled').attr("disabled", false);
+                }else{
+                    div.addClass('disabled').attr("disabled", false);
+                }
+
             }
 
         });

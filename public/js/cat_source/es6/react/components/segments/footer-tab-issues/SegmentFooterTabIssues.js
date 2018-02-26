@@ -10,10 +10,13 @@ class SegmentFooterTabIssues extends React.Component {
         this.state = {
             categorySelected: null,
             categoriesIssue: [],
-            segment: props.segment,
+            segment: this.props.segment,
+            translation: this.props.segment.translation,
+            oldTranslation: this.props.segment.translation,
+            isChangedTextarea: true,
+            firstSave: true, //because when initialize the component, we receive TRANSLATION_EDITED with same value and the button make green
             issues: []
         }
-
     }
 
     componentDidMount() {
@@ -21,20 +24,39 @@ class SegmentFooterTabIssues extends React.Component {
         $( this.selectIssueSeverity ).dropdown();
 
         SegmentStore.addListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened.bind( this ) );
+        SegmentStore.addListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind( this ) );
     }
-    componentDidUpdate(){
+
+    componentDidUpdate() {
         $( this.selectIssueSeverity ).dropdown();
-        if(this.state.categorySelected){
-            $(this.selectIssueCategoryWrapper).find('.ui.dropdown').removeClass('disabled');
-        }else{
-            $(this.selectIssueCategoryWrapper).find('.ui.dropdown').addClass('disabled');
+        if ( this.state.categorySelected ) {
+            $( this.selectIssueCategoryWrapper ).find( '.ui.dropdown' ).removeClass( 'disabled' );
+        } else {
+            $( this.selectIssueCategoryWrapper ).find( '.ui.dropdown' ).addClass( 'disabled' );
         }
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened );
+        SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
+
+    trackChanges( sid, editareaText ) {
+        let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
+        if ( this.state.segment.sid === sid && this.state.oldTranslation !== text || this.state.firstSave) {
+            UI.setDisabledOfButtonApproved(this.props.id_segment, true);
+            this.setState( {
+                translation: text,
+                isChangedTextarea: true
+            } );
+        } else {
+            UI.setDisabledOfButtonApproved(this.props.id_segment);
+            this.setState( {
+                isChangedTextarea: false
+            } );
+        }
+    }
 
     segmentOpened( sid, segment ) {
         let issues = [];
@@ -62,10 +84,11 @@ class SegmentFooterTabIssues extends React.Component {
 
     sendIssue( category, severity ) {
 
-        //rimossa temporaneamente la deferred
-
         let data = [];
-        let self = this;
+        let deferred = $.Deferred();
+        let self = this,
+            firstSave = true,
+            oldTranslation = this.state.oldTranslation;
 
         let issue = {
             'id_category': category.id,
@@ -77,18 +100,43 @@ class SegmentFooterTabIssues extends React.Component {
             'end_offset': 0
         };
 
-        data.push( issue );
-        SegmentActions.removeClassToSegment( self.props.id_segment, "modified" );
-        UI.currentSegment.data( 'modified', false );
-        SegmentActions.submitIssue( self.props.id_segment, data, [] )
-            .done( response => {
-                $( this.selectIssueSeverity ).dropdown('set selected',-1);
-            } )
-            .fail( response => {
-                console.log( response );
-            } );
-    }
 
+        if ( this.state.isChangedTextarea ) {
+            let segment = this.props.segment;
+            segment.translation = this.state.translation;
+            segment.status = 'approved';
+            API.SEGMENT.setTranslation( segment )
+                .done( function ( response ) {
+                    issue.version = response.translation.version;
+                    oldTranslation = response.translation.translation;
+                    firstSave = false;
+                    console.log( response );
+                    deferred.resolve();
+                } )
+                .fail( /*self.handleFail.bind(self)*/ );
+        } else {
+            deferred.resolve();
+        }
+
+        data.push( issue );
+
+        deferred.then( function () {
+            SegmentActions.removeClassToSegment( self.props.id_segment, "modified" );
+            UI.currentSegment.data( 'modified', false );
+            SegmentActions.submitIssue( self.props.id_segment, data, [] )
+                .done( response => {
+                    self.setState( {
+                        isChangedTextarea: false,
+                        oldTranslation: oldTranslation,
+                        firstSave: firstSave
+                    } );
+                    $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
+                    UI.setDisabledOfButtonApproved(self.props.id_segment);
+                } )
+                .fail( /* self.handleFail.bind(self)*/ );
+        } );
+
+    }
 
     issueCategories() {
         return JSON.parse( config.lqa_nested_categories ).categories;
@@ -99,15 +147,12 @@ class SegmentFooterTabIssues extends React.Component {
         this.setState( {
             categorySelected: currentCategory
         } );
-
     }
 
     severityOptionChange( e ) {
         let selectedSeverity = e.target.value;
         console.log( selectedSeverity );
-
         this.sendIssue( this.state.categorySelected, selectedSeverity )
-
     }
 
     findCategory( id ) {
@@ -137,10 +182,11 @@ class SegmentFooterTabIssues extends React.Component {
                 categorySeverities.push( severityOption );
             } );
         }
-        severitySelect = <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
-            <option value="-1">Select severity</option>
-            {categorySeverities}
-        </select>
+        severitySelect =
+            <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
+                <option value="-1">Select severity</option>
+                {categorySeverities}
+            </select>;
 
         this.state.issues.forEach( ( e, i ) => {
             issue = <SegmentFooterTabIssuesListItem key={i} issue={e} categories={this.state.categoriesIssue}/>;

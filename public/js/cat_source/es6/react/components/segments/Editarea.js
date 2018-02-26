@@ -94,7 +94,7 @@ class Editarea extends React.Component {
     }
 
     emitTrackChanges(){
-		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )){
+		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' ) || ReviewExtendedLQA.enabled()){
 			UI.trackChanges(this.editAreaRef);
 		}
 	}
