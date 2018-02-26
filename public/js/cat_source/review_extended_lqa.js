@@ -116,22 +116,27 @@ if ( ReviewExtendedLQA.enabled() ) {
                 div.find('.next-untranslated').parent().remove();
                 if (goToNextApprovedButton) {
                     let htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-                        '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
+                        '-nexttranslated" href="#" class="btn next-unapproved disabled" data-segmentid="segment-' +
                         this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
                         ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
                     div.html(htmlButton + div.html());
                 }
                 UI.segmentButtons = div.html();
             },
-            
+
             setDisabledOfButtonApproved: function (sid,isDisabled ) {
-                let div =$("#segment-"+sid+"-buttons").find(".approved");
+                let div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
                 if(!isDisabled){
                     div.removeClass('disabled').attr("disabled", false);
                 }else{
                     div.addClass('disabled').attr("disabled", false);
                 }
 
+            },
+
+            gotoNextSegment: function ( sid ) {
+                this.setDisabledOfButtonApproved(sid, true);
+                return false;
             }
 
         });
