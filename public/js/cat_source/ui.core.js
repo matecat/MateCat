@@ -45,7 +45,7 @@ UI = {
         3: "edit_3"
     },
 	toggleFileMenu: function() {
-        jobMenu = $('#jobMenu');
+        var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
 		} else {
@@ -360,7 +360,7 @@ UI = {
 
     },
     copyAllSources: function() {
-        if(typeof $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
+        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
             APP.confirmAndCheckbox({
                 title: 'Copy source to target',
                 name: 'confirmCopyAllSources',
@@ -415,7 +415,7 @@ UI = {
                         msg: d.errors[0].message
                     });*/
                 } else {
-                    $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
+                    Cookies.set('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
                     UI.unmountSegments();
                     UI.render({
@@ -429,13 +429,13 @@ UI = {
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
         if ( typeof dont_show != 'undefined' && dont_show) {
-            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+            Cookies.set('source_copied_to_target-' + config.job_id +"-" + config.password,
                     '0',
                     //expiration: 1 day
                     { expires: 30 });
         }
         else {
-            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+            Cookies.set('source_copied_to_target-' + config.job_id +"-" + config.password,
                     null,
                     //set expiration date before the current date to delete the cookie
                     {expires: new Date(1)});
@@ -443,7 +443,7 @@ UI = {
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
-        $.cookie('comingFrom' , page, { path: '/' });
+        Cookies.set('comingFrom' , page, { path: '/' });
     },
 
     clearMarks: function (str) {
@@ -605,11 +605,11 @@ UI = {
         $('.modal.survey').show();
 	},
 	surveyAlreadyDisplayed: function() {
-		if(typeof $.cookie('surveyedJobs') != 'undefined') {
-			var c = $.cookie('surveyedJobs');
+		if(typeof Cookies.get('surveyedJobs') != 'undefined') {
+			var c = Cookies.get('surveyedJobs');
 			surv = c.split('||')[0];
 			if(config.survey === surv) {
-				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
+				jobs = Cookies.get('surveyedJobs').split('||')[1].split(',');
 				var found = false;
 				$.each(jobs, function() {
 					if(this == config.id_job) {
@@ -1014,7 +1014,7 @@ UI = {
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
 
-                if ($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
+                if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 
 			}
@@ -2146,7 +2146,7 @@ UI = {
 		if($('body').hasClass('incomingMsg')) return false;
         $.each(messages, function() {
             var elem = this;
-            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) ) &&
+            if(typeof Cookies.get('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) ) &&
                 (typeof self.displayedMessages !== 'undefined' && self.displayedMessages.indexOf(this.token) < 0 )) {
                 var notification = {
                     title: 'Notice',
@@ -2157,7 +2157,7 @@ UI = {
                     allowHtml: true,
                     closeCallback: function () {
                         var expireDate = new Date(elem.expire);
-                        $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                        Cookies.set('msg-' + elem.token, '', {expires: expireDate});
                     }
                 };
                 APP.addNotification(notification);
@@ -2862,19 +2862,19 @@ UI = {
         this.currentSegment.find('.footer').removeClass('showMatches');
         this.body.toggleClass('hideMatches');
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-        $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
+        Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
     },
     setHideMatches: function () {
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
 
-        if(typeof $.cookie(cookieName + '-' + config.id_job) != 'undefined') {
-            if($.cookie(cookieName + '-' + config.id_job) == 'true') {
+        if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
+            if(Cookies.get(cookieName + '-' + config.id_job) == 'true') {
                 UI.body.addClass('hideMatches')
             } else {
                 UI.body.removeClass('hideMatches')
             }
         } else {
-            $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
+            Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
         }
 
     },
@@ -2882,9 +2882,9 @@ UI = {
         if(first && !config.tagLockCustomizable) return;
         var cookieName = 'tagLockDisabled';
 
-        if(typeof $.cookie(cookieName + '-' + config.id_job) != 'undefined') {
+        if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
             if(first) {
-                if($.cookie(cookieName + '-' + config.id_job) == 'true') {
+                if(Cookies.get(cookieName + '-' + config.id_job) == 'true') {
                     UI.body.addClass('tagmarkDisabled');
                     setTimeout(function() {
                         $('.editor .tagLockCustomize').addClass('unlock');
@@ -2894,11 +2894,11 @@ UI = {
                 }
             } else {
                 cookieVal = (UI.body.hasClass('tagmarkDisabled'))? 'true' : 'false';
-                $.cookie(cookieName + '-' + config.id_job, cookieVal,  { expires: 30 });
+                Cookies.set(cookieName + '-' + config.id_job, cookieVal,  { expires: 30 });
             }
 
         } else {
-            $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
+            Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
         }
 
     },
@@ -2906,12 +2906,14 @@ UI = {
         UI.body.removeClass('hideMatches');
     },
     setWaypoints: function() {
-		this.firstSegment.waypoint('remove');
-		this.lastSegment.waypoint('remove');
+        // if (this.setWayponts) {
+        //     this.firstSegment.waypoint('remove');
+        //     this.lastSegment.waypoint('remove');
+        // }
 		this.detectFirstLast();
-		this.lastSegment.waypoint(function(event, direction) {
+		this.lastSegment.waypoint(function(direction) {
 			if (direction === 'down') {
-				UI.lastSegment.waypoint('remove');
+				this.destroy();
 				if (UI.infiniteScroll) {
 					if (!UI.blockGetMoreSegments) {
 						UI.blockGetMoreSegments = true;
@@ -2924,12 +2926,13 @@ UI = {
 			}
 		}, UI.downOpts);
 
-		this.firstSegment.waypoint(function(event, direction) {
+		this.firstSegment.waypoint(function(direction) {
 			if (direction === 'up') {
-				UI.firstSegment.waypoint('remove');
+                this.destroy();
 				UI.getMoreSegments('before');
 			}
 		}, UI.upOpts);
+        this.setWayponts = true;
 	},
 	showContextMenu: function(str, ypos, xpos) {
 		if (($('#contextMenu').width() + xpos) > $(window).width())
@@ -2945,7 +2948,7 @@ UI = {
             xRes: window.screen.availWidth,
             yRes: window.screen.availHeight
         };
-        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
+        Cookies.set('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
 	browserScrollPositionRestoreCorrection: function() {
@@ -3301,7 +3304,7 @@ UI = {
         $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        // $.cookie('tmpanel-open', 1, { path: '/' });
+        // Cookies.set('tmpanel-open', 1, { path: '/' });
     },
     closeAllMenus: function (e, fromQA) {
         if ($('.searchbox').is(':visible')) {

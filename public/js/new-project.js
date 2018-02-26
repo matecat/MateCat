@@ -88,7 +88,7 @@ APP.displayCurrentTargetLang = function() {
         $('#target-lang').dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
     } else {
         var labels = '';
-        if ($('#target-lang div.item[data-value="'+ currentLangs +'"]').size() === 0) {
+        if ($('#target-lang div.item[data-value="'+ currentLangs +'"]').length === 0) {
             currentLangs.split(',').forEach(function (item) {
                 var elem = $('.popup-languages li input[value="'+ item +'"]');
                 labels += elem.parent().find('label').attr('for') + ',';
@@ -231,8 +231,7 @@ APP.getCreateProjectParams = function() {
 		project_name				: $('#project-name').val(),
 		source_language				: $('#source-lang').dropdown('get value'),
 		target_language				: $('#target-lang').dropdown('get value'),
-		// job_subject         		: $('#subject').val(),
-		job_subject         		: 'general',
+		job_subject         		: $('#project-subject').dropdown('get value'),
 		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 		mt_engine					: $('.mgmt-mt .activemt').data("id"),
 		private_keys_list			: UI.extractTMdataFromTable(),
@@ -410,6 +409,12 @@ $.extend(UI.UPLOAD_PAGE, {
             fullTextSearch: 'exact',
         });
 
+        $('#project-subject').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact'
+        });
+        $('#project-subject').dropdown('set selected', 'general');
+
 
         $('.tmx-select .tm-info-title .icon').popup({
             html: "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
@@ -434,7 +439,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
     selectTm: function (value, span) {
         var tmElem = $('.mgmt-table-tm #inactivetm tr.mine[data-key=' + value +'] .activate input');
-        if (tmElem.size() > 0) {
+        if (tmElem.length > 0) {
             $(tmElem).trigger('click');
         }
         setTimeout(function () {
@@ -444,7 +449,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
     disableTm: function (value, span) {
         var tmElem = $('.mgmt-table-tm #activetm tr.mine[data-key=' + value +'] .activate input');
-        if (tmElem.size() > 0) {
+        if (tmElem.length > 0) {
             $(tmElem).trigger('click');
         }
         setTimeout(function () {
@@ -468,12 +473,12 @@ $.extend(UI.UPLOAD_PAGE, {
 
     checkTmKeys: function (event, desc, key) {
         var activeTm = $('#activetm .mine');
-        if (activeTm.size() ===  0) {
+        if (activeTm.length ===  0) {
             $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
             $('#tmx-select').dropdown('remove selected', key);
         } else {
             var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
-            if (existingKey.size() > 0) {
+            if (existingKey.length > 0) {
                 if (existingKey.hasClass('active')){
                     return;
                 } else {
@@ -495,7 +500,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
     disableTmKeysFromSelect: function (event, key) {
         var existingKey = $('#tmx-select').find('div.item[data-value='+ key +']');
-        if (existingKey.size() > 0) {
+        if (existingKey.length > 0) {
             if (existingKey.hasClass('active')){
                 $('#tmx-select').dropdown('remove selected', key);
             }
@@ -503,7 +508,7 @@ $.extend(UI.UPLOAD_PAGE, {
     },
 
     deleteTMFromSelect: function (event, key) {
-	    if ($('#tmx-select').find('div.item[data-value='+ key +']').size() > 0) {
+	    if ($('#tmx-select').find('div.item[data-value='+ key +']').length > 0) {
             $('#tmx-select').find('div.item[data-value='+ key +']').remove();
             if ( $('#tmx-select').dropdown('get value') == key) {
                 $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM');
@@ -699,7 +704,7 @@ APP.handleCreationStatus = function( id_project, password ){
         } else {
             APP.postProjectCreation( data );
         }
-    }).error( function( data, statusText, xhr ){
+    }).fail( function( data, statusText, xhr ){
     	var _data = $.parseJSON( data.responseText );
         APP.postProjectCreation( _data );
     });

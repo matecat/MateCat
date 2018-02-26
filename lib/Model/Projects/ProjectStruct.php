@@ -143,6 +143,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @deprecated $id_customer could not correspond to the real team/assignee
      * @return Users_UserStruct
      */
     public function getOwner() {
@@ -154,7 +155,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      *
      * @return bool
      *
-     * @deprecated feature enabled for a created project should be decided based on project metadata
      */
     public function isFeatureEnabled( $feature_code ) {
         return in_array($feature_code, $this->getFeatures()->getCodes() );
