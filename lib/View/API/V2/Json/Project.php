@@ -86,7 +86,11 @@ class Project {
              * @var $jobJSON Job
              */
             $jobJSON = new $this->jRenderer();
-            $jobJSON->setUser( $this->user );
+
+            if( !empty( $this->user ) ){
+                $jobJSON->setUser( $this->user );
+            }
+
             if( $this->called_from_api ) {
                 $jobJSON->setCalledFromApi( true );
             }
