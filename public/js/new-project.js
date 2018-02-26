@@ -231,8 +231,7 @@ APP.getCreateProjectParams = function() {
 		project_name				: $('#project-name').val(),
 		source_language				: $('#source-lang').dropdown('get value'),
 		target_language				: $('#target-lang').dropdown('get value'),
-		// job_subject         		: $('#subject').val(),
-		job_subject         		: 'general',
+		job_subject         		: $('#project-subject').dropdown('get value'),
 		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 		mt_engine					: $('.mgmt-mt .activemt').data("id"),
 		private_keys_list			: UI.extractTMdataFromTable(),
@@ -409,6 +408,12 @@ $.extend(UI.UPLOAD_PAGE, {
             selectOnKeydown: false,
             fullTextSearch: 'exact',
         });
+
+        $('#project-subject').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact'
+        });
+        $('#project-subject').dropdown('set selected', 'general');
 
 
         $('.tmx-select .tm-info-title .icon').popup({

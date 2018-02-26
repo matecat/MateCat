@@ -3900,7 +3900,7 @@ float: left;
 .more:before,
 .more.minus:before,
 .more-options:before {
-    margin-right: 7px;
+    margin-right: 3px;
 }
 
 .more-options:before {
