@@ -14,6 +14,7 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Langs_Languages;
+use Langs_LanguageDomains;
 use ManageUtils;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
@@ -106,6 +107,12 @@ class Job {
 
         $lang_handler = Langs_Languages::getInstance();
 
+        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subjects        = $subject_handler->getEnabledDomains();
+
+        $subjects_keys = Utils::array_column( $subjects, "key" );
+        $subject_key   = array_search( $jStruct->subject, $subjects_keys );
+
         $warningsCount = $jStruct->getWarningsCount();
 
         return [
@@ -117,6 +124,7 @@ class Job {
                 'targetTxt'             => $lang_handler->getLocalizedName( $jStruct->target ),
                 'status'                => $jStruct->status_owner,
                 'subject'               => $jStruct->subject,
+                'subject_printable'     => $subjects[$subject_key]['display'],
                 'owner'                 => $jStruct->owner,
                 'open_threads_count'    => (int)$jStruct->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $jStruct->create_date ),
