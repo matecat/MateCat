@@ -891,6 +891,13 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     text-transform: uppercase;
 }
 
+.buttons .approved.disabled{
+    pointer-events: none;
+    color: #666 !important;
+    border-color: #666;
+    background: #efefef;
+}
+
 .approved {
     background: #7cc576;
 }

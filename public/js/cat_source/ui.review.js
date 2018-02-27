@@ -279,7 +279,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             if (goToNextNotApproved) {
                 UI.openNextTranslated();
             } else {
-                UI.gotoNextSegment();
+                UI.gotoNextSegment(sid);
             }
 
             var data = {

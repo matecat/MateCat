@@ -106,6 +106,37 @@ if ( ReviewExtendedLQA.enabled() ) {
                     return true;
                 }
                 return false;
+            },
+
+            overrideButtonsForRevision: function () {
+                let div = $('<ul>' + UI.segmentButtons + '</ul>');
+                div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved disabled').attr("disabled", true);
+                let nextSegment = UI.currentSegment.next();
+                let goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+                div.find('.next-untranslated').parent().remove();
+                if (goToNextApprovedButton) {
+                    let htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+                        '-nexttranslated" href="#" class="btn next-unapproved disabled" data-segmentid="segment-' +
+                        this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+                        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+                    div.html(htmlButton + div.html());
+                }
+                UI.segmentButtons = div.html();
+            },
+
+            setDisabledOfButtonApproved: function (sid,isDisabled ) {
+                let div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
+                if(!isDisabled){
+                    div.removeClass('disabled').attr("disabled", false);
+                }else{
+                    div.addClass('disabled').attr("disabled", false);
+                }
+
+            },
+
+            gotoNextSegment: function ( sid ) {
+                this.setDisabledOfButtonApproved(sid, true);
+                return false;
             }
 
         });
