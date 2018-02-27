@@ -59,8 +59,17 @@ if ( ReviewExtendedLQA.enabled() ) {
             getSegmentVersionsIssues: function (segmentId, fileId) {
                 API.SEGMENT.getSegmentVersionsIssues(segmentId)
                     .done(function (response) {
-                        SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, response.versions);
+                        UI.addIssuesToSegment(fileId, segmentId, response.versions)
                     });
+            },
+            /**
+             * To show the issues in the segment footer
+             * @param fileId
+             * @param segmentId
+             * @param versions
+             */
+            addIssuesToSegment: function ( fileId, segmentId, versions ) {
+                SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions);
             },
             /**
              * Overwrite the behavior of the click on the approved button
@@ -70,7 +79,10 @@ if ( ReviewExtendedLQA.enabled() ) {
             clickOnApprovedButton: function (e, button) {
                 originalClickOnApprovedButton.apply(this, [e , button]);
             },
-
+            /**
+             * To delete a segment issue
+             * @param context
+             */
             deleteTranslationIssue : function( context ) {
                 console.debug('delete issue', context);
 
@@ -87,11 +99,19 @@ if ( ReviewExtendedLQA.enabled() ) {
                     url: issue_path,
                     type: 'DELETE'
                 }).done( function( data ) {
-                    SegmentActions.confirmDeletedIssue(parsed.id_segment,issue_id);
-                    UI.getSegmentVersionsIssues(parsed.id_segment, fid);
+                    UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
                 });
             },
-
+            /**
+             * To remove Segment issue from the segment footer
+             * @param fid
+             * @param id_segment
+             * @param issue_id
+             */
+            deleteSegmentIssues: function ( fid, id_segment, issue_id ) {
+                SegmentActions.confirmDeletedIssue(id_segment, issue_id);
+                UI.getSegmentVersionsIssues(id_segment, fid);
+            },
             /**
              * To know if a segment has been modified but not yet approved
              * @param sid
@@ -106,22 +126,6 @@ if ( ReviewExtendedLQA.enabled() ) {
                     return true;
                 }
                 return false;
-            },
-
-            overrideButtonsForRevision: function () {
-                let div = $('<ul>' + UI.segmentButtons + '</ul>');
-                div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved disabled').attr("disabled", true);
-                let nextSegment = UI.currentSegment.next();
-                let goToNextApprovedButton = !nextSegment.hasClass('status-translated');
-                div.find('.next-untranslated').parent().remove();
-                if (goToNextApprovedButton) {
-                    let htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-                        '-nexttranslated" href="#" class="btn next-unapproved disabled" data-segmentid="segment-' +
-                        this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-                        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-                    div.html(htmlButton + div.html());
-                }
-                UI.segmentButtons = div.html();
             },
 
             setDisabledOfButtonApproved: function (sid,isDisabled ) {

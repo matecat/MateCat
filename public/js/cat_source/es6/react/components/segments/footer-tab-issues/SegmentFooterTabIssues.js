@@ -14,7 +14,6 @@ class SegmentFooterTabIssues extends React.Component {
             translation: this.props.segment.translation,
             oldTranslation: this.props.segment.translation,
             isChangedTextarea: true,
-            firstSave: true, //because when initialize the component, we receive TRANSLATION_EDITED with same value and the button make green
             issues: []
         }
     }
@@ -44,7 +43,7 @@ class SegmentFooterTabIssues extends React.Component {
 
     trackChanges( sid, editareaText ) {
         let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
-        if ( this.state.segment.sid === sid && this.state.oldTranslation !== text || this.state.firstSave) {
+        if ( this.state.segment.sid === sid && this.state.oldTranslation !== text) {
             UI.setDisabledOfButtonApproved(this.props.id_segment, true);
             this.setState( {
                 translation: text,
@@ -87,7 +86,6 @@ class SegmentFooterTabIssues extends React.Component {
         let data = [];
         let deferred = $.Deferred();
         let self = this,
-            firstSave = true,
             oldTranslation = this.state.oldTranslation;
 
         let issue = {
@@ -109,8 +107,6 @@ class SegmentFooterTabIssues extends React.Component {
                 .done( function ( response ) {
                     issue.version = response.translation.version;
                     oldTranslation = response.translation.translation;
-                    firstSave = false;
-                    console.log( response );
                     deferred.resolve();
                 } )
                 .fail( /*self.handleFail.bind(self)*/ );
@@ -128,7 +124,6 @@ class SegmentFooterTabIssues extends React.Component {
                     self.setState( {
                         isChangedTextarea: false,
                         oldTranslation: oldTranslation,
-                        firstSave: firstSave
                     } );
                     $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
                     UI.setDisabledOfButtonApproved(self.props.id_segment);
@@ -151,8 +146,9 @@ class SegmentFooterTabIssues extends React.Component {
 
     severityOptionChange( e ) {
         let selectedSeverity = e.target.value;
-        console.log( selectedSeverity );
-        this.sendIssue( this.state.categorySelected, selectedSeverity )
+        if(selectedSeverity != -1){
+            this.sendIssue( this.state.categorySelected, selectedSeverity )
+        }
     }
 
     findCategory( id ) {
