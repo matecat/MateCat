@@ -248,7 +248,8 @@ class newProjectController extends viewController {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->languages_array = json_encode( $this->lang_handler->getEnabledLanguages( 'en' ) );
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+        $this->template->subject_array = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 

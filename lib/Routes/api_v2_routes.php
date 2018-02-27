@@ -59,7 +59,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
 
 $klein->with('/api/v2/glossaries', function() {
 
-    route( '/import/', 'GET', '\API\V2\GlossariesController', 'import' );
+    route( '/import/', 'POST', '\API\V2\GlossariesController', 'import' );
     route( '/import/status/[:tm_key].?[:name]?', 'GET', '\API\V2\GlossariesController', 'uploadStatus' );
     route( '/export/[:tm_key].?[:downloadToken]?', 'GET', '\API\V2\GlossariesController', 'download' );
 

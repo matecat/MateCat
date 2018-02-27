@@ -468,6 +468,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
     private function __prepareQuotedJobCart( $jpid, $volAnalysis, $subject, $apiCallResult ) {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
         list( $jid, $jpsw, ) = explode( "-", $jpid );
+        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subjects        = $subject_handler->getEnabledDomains();
+
+        $subjects_keys = Utils::array_column( $subjects, "key" );
+        $subject_key   = array_search( $subject, $subjects_keys );
 
         // languages are in the form:
         //    "langpairs":{
@@ -510,20 +515,22 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         //          "revisor_vote": FLOAT                   <- the delta improvement. To be added to translator vote
         //      }
         //  }
-        $itemCart                      = new Shop_ItemHTSQuoteJob();
-        $itemCart[ 'id' ]              = $jpid;
-        $itemCart[ 'project_name' ]    = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
-        $itemCart[ 'name' ]            = "MATECAT_$jpid";
-        $itemCart[ 'source' ]          = $source;
-        $itemCart[ 'target' ]          = $target;
-        $itemCart[ 'words' ]           = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpsw ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
-        $itemCart[ 'subject' ]         = $subject;
-        $itemCart[ 'currency' ]        = $this->currency;
-        $itemCart[ 'timezone' ]        = $this->timezone;
-        $itemCart[ 'quote_result' ]    = $apiCallResult[ 'code' ];
-        $itemCart[ 'outsourced' ]      = 0;
-        $itemCart[ 'quote_available' ] = $apiCallResult[ 'quote_available' ];
-        $itemCart[ 'typeOfService' ]   = $this->typeOfService;
+
+        $itemCart                        = new Shop_ItemHTSQuoteJob();
+        $itemCart[ 'id' ]                = $jpid;
+        $itemCart[ 'project_name' ]      = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+        $itemCart[ 'name' ]              = "MATECAT_$jpid";
+        $itemCart[ 'source' ]            = $source;
+        $itemCart[ 'target' ]            = $target;
+        $itemCart[ 'words' ]             = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpsw ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
+        $itemCart[ 'subject' ]           = $subject;
+        $itemCart[ 'subject_printable' ] = $subjects[ $subject_key ][ 'display' ];
+        $itemCart[ 'currency' ]          = $this->currency;
+        $itemCart[ 'timezone' ]          = $this->timezone;
+        $itemCart[ 'quote_result' ]      = $apiCallResult[ 'code' ];
+        $itemCart[ 'outsourced' ]        = 0;
+        $itemCart[ 'quote_available' ]   = $apiCallResult[ 'quote_available' ];
+        $itemCart[ 'typeOfService' ]     = $this->typeOfService;
 
         // if the vendor has a quote available for this job, then get the info
         if( $itemCart[ 'quote_result' ] == 1 && $itemCart[ 'quote_available' ] == 1 ) {
