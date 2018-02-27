@@ -30,6 +30,10 @@ class OAuthSignInModel {
         );
     }
 
+    public function getUser() {
+        return $this->user ;
+    }
+
     public function signIn() {
         $userDao = new Users_UserDao() ;
         $existingUser = $userDao->getByEmail( $this->user->email ) ;
