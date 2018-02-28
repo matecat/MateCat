@@ -501,9 +501,9 @@ class ProjectContainer extends React.Component {
                     <div className="sixteen wide column">
                         <div className="project-header ui grid">
 
-                            <div className="eight wide column">
+                            <div className="nine wide column">
                                 <div className="ui stackable grid">
-                                    <div className="sixteen wide column">
+                                    <div className="sixteen wide column project-title">
                                         <div className="ui ribbon label">
                                             <div className="project-id" title="Project id">
                                                 {"(" + this.props.project.get('id') + ")"}
@@ -518,7 +518,7 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="eight wide right floated column pad-top-8">
+                            <div className="seven wide right floated column pad-top-8">
                                 <div className="ui mobile reversed stackable grid right aligned">
                                     <div className="sixteen wide right floated column">
 

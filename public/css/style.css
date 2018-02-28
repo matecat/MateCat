@@ -3902,11 +3902,18 @@ span.locked.tag-html-container-close {
     }
 
     .cattool #quality-report {
-        padding: 5px 10px !important;
+        padding: 5px 5px !important;
     }
 
     .header-menu li a, .header-menu li input {
         font-size: 14px;
+    }
+    .header-menu li:first-child {
+        margin-right: 5px;
+    }
+
+    .header-dropdown-menu {
+        margin-right: 5px;
     }
 }
 
