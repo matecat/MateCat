@@ -37,6 +37,8 @@ window.TeamsStore = require('./stores/TeamsStore');
 window.OutsourceStore = require('./stores/OutsourceStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
+window.ProjectContainer = require('./components/projects/ProjectContainer').default;
+window.JobMenu = require('./components/projects/JobMenu').default;
 
 window.Header = require("./components/Header").default;
 

@@ -1,7 +1,7 @@
 
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let ManageConstants = require('../../constants/ManageConstants');
-let Job = require('./JobContainer').default;
+let JobContainer = require('./JobContainer').default;
 
 class ProjectContainer extends React.Component {
 
@@ -278,7 +278,7 @@ class ProjectContainer extends React.Component {
                 let lastAction = self.getLastJobAction(job.get('id'));
                 let isChunkOutsourced =  self.thereIsChunkOutsourced(job.get('id'));
 
-                let item = <Job key={job.get('id') + "-" + i}
+                let item = <JobContainer key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
                                 project={self.props.project}
@@ -362,6 +362,10 @@ class ProjectContainer extends React.Component {
                 </div>
             </div>
         </div>;
+    }
+
+    moreProjectInfo() {
+        return "";
     }
 
     getDropDownUsers() {
@@ -509,6 +513,7 @@ class ProjectContainer extends React.Component {
                                             </div>
                                                 {state}
                                         </div>
+                                        {this.moreProjectInfo()}
                                     </div>
                                 </div>
                             </div>
@@ -518,6 +523,7 @@ class ProjectContainer extends React.Component {
                                     <div className="sixteen wide right floated column">
 
                                         <div className="project-activity-icon">
+
                                             {dropDownTeams}
                                             {dropDownUsers}
                                             <div className="project-menu ui icon top right pointing dropdown circular button" title="Project menu"
