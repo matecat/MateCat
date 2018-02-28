@@ -14,7 +14,9 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Langs_Languages;
+use LQA\ChunkReviewDao;
 use ManageUtils;
+use Routes;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
@@ -108,7 +110,9 @@ class Job {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-        return [
+        $project = $jStruct->getProject();
+
+        $result = [
                 'id'                    => (int)$jStruct->id,
                 'password'              => $jStruct->password,
                 'source'                => $jStruct->source,
@@ -131,8 +135,40 @@ class Job {
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
-                'total_raw_wc'          => (int) $jStruct->total_raw_wc
+                'total_raw_wc'          => (int)$jStruct->total_raw_wc,
+                'urls'                  => [
+                        'translate' => Routes::translate(
+                                $project->name,
+                                $jStruct->id,
+                                $jStruct->password,
+                                $jStruct->source,
+                                $jStruct->target
+                        )
+                ],
+                'quality_summary'       => [
+                        'equivalent_class' => $jStruct->getQualityInfo(),
+                        'quality_overall'  => $jStruct->getQualityOverall(),
+                        'errors_count'     => (int)$jStruct->getErrorsCount()
+                ]
         ];
+
+        if ( !$project->isFeatureEnabled( \Features::REVIEW_IMPROVED ) ) {
+
+            $reviewChunk = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                    $jStruct->id, $jStruct->password
+            );
+
+            $result[ 'urls' ][ 'revise' ] = Routes::revise(
+                    $project->name,
+                    $jStruct->id,
+                    ( !empty( $reviewChunk ) ? $reviewChunk->review_password : $jStruct->password ),
+                    $jStruct->source,
+                    $jStruct->target
+            );
+
+        }
+
+        return $result;
 
     }
 

@@ -332,6 +332,42 @@ $(function () {
                     }
                 }
             },
+            "/api/v2/jobs/{id_job}/{password}": {
+                "get": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Job Info",
+                    "description": "Get all information about a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job (Translate password)",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Job Information",
+                            "schema": {
+                                "$ref": "#/definitions/Chunk"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/api/v1/jobs/{id_job}/{password}/stats": {
                 "get": {
                     "tags": [
@@ -2301,12 +2337,12 @@ $(function () {
                     "chunks": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/Chunk"
+                            "$ref": "#/definitions/Url"
                         }
                     }
                 }
             },
-            "Chunk": {
+            "Url": {
                 "type": "object",
                 "properties": {
                     "password": {
@@ -2678,6 +2714,22 @@ $(function () {
                 }
             },
 
+            "Chunk": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "chunks": {
+                        "type": "array",
+                        "items" : {
+                            "type" : "object",
+                            "$ref" : "#/definitions/ExtendedJob"
+                        }
+                    }
+                }
+            },
+
             "ExtendedJob" : {
                 "type" : "object",
 
@@ -2693,16 +2745,22 @@ $(function () {
                     "owner": { "type" : "string", "format" : "email" },
                     "open_threads_count": { "type" : "integer" },
                     "create_timestamp": { "type" : "integer" },
+                    "created_at": { "type" : "string", "format" : "date-time" },
                     "create_date": { "type" : "string", "format" : "date-time" },
-                    // "formatted_create_date": "Oct 23, 08:37", // TODO: to be removed from SERVER
+                    "formatted_create_date": { "type" : "string" },
                     "quality_overall": { "type" : "string" },
                     "pee": { "type" : "integer" },
-                    "private_tm_key": { "type" : "string" },
+                    "private_tm_key": {
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string"
+                        }
+                    },
                     "warnings_count": { "type" : "integer" },
                     "warning_segments": {
                         "type" : "array",
                         "items" : {
-                            "type" : "object"
+                            "type" : "integer"
                         }
                     },
                     "outsource": {
@@ -2716,10 +2774,22 @@ $(function () {
                     },
 
                     "total_raw_wc": { "type" : "float" },
+                    "urls": {
+                        "type" : "object",
+                        "$ref" : "#/definitions/JobUrl"
+                    },
                     "stats" : {
                         "type" : "object",
                         "$ref" : "#/definitions/Stats"
                     }
+                }
+            },
+
+            "JobUrl" : {
+                "type" : "object",
+                "properties" : {
+                    "translate": { "type" : "string" },
+                    "revise": { "type" : "string" }
                 }
             },
 

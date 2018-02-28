@@ -153,7 +153,9 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Co
      * a subset of the attributes may be required to be bound to the query.
      *
      * @param $mask array|null a mask for the keys to return
+     *
      * @return array
+     * @throws ReflectionException
      */
     public function toArray( $mask = null ){
 
@@ -176,6 +178,7 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Co
      * Compatibility with ArrayObject
      *
      * @return array
+     * @throws ReflectionException
      */
     public function getArrayCopy(){
         return $this->toArray();
