@@ -1155,7 +1155,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-23 16:57:44
+-- Dump completed on 2018-02-28 15:06:22
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1224,7 +1224,7 @@ USE `matecat`;
 
 -- MySQL dump 10.13  Distrib 5.7.21, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: matecat_old
+-- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.30
 
@@ -1328,4 +1328,4 @@ INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-23 16:57:44
+-- Dump completed on 2018-02-28 15:06:22

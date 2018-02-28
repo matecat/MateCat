@@ -88,7 +88,7 @@ class SegmentTranslationIssue {
         return null;
     }
 
-    public function renderArray( $array ) {
+    public function render( $array ) {
         $out = array();
 
         foreach($array as $record) {

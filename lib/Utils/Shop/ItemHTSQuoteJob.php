@@ -31,6 +31,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'target'              => null,
             'words'               => 0,
             'subject'             => 'general',
+            'subject_printable'   => null,
             'currency'            => 'EUR',
             'timezone'            => '0',
             'quote_result'        => null,
