@@ -129,12 +129,26 @@ class engineController extends ajaxController {
 
                 break;
             case strtolower( Constants_Engines::MOSES ):
-            case strtolower( Constants_Engines::TAUYOU ):
 
                 /**
                  * Create a record of type Moses
                  */
                 $newEngineStruct = EnginesModel_MosesStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::TAUYOU ):
+
+                /**
+                 * Create a record of type Moses
+                 */
+                $newEngineStruct = EnginesModel_TauyouStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
                 $newEngineStruct->uid                                 = $this->uid;

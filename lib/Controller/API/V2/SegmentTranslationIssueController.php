@@ -23,7 +23,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
 
         $json = new JsonFormatter( );
-        $rendered = $json->renderArray( $result );
+        $rendered = $json->render( $result );
 
         $this->response->json( array('issues' => $rendered) );
     }

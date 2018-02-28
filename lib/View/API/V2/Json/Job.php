@@ -14,7 +14,10 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Langs_Languages;
+use Langs_LanguageDomains;
+use LQA\ChunkReviewDao;
 use ManageUtils;
+use Routes;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
@@ -106,9 +109,17 @@ class Job {
 
         $lang_handler = Langs_Languages::getInstance();
 
+        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subjects        = $subject_handler->getEnabledDomains();
+
+        $subjects_keys = Utils::array_column( $subjects, "key" );
+        $subject_key   = array_search( $jStruct->subject, $subjects_keys );
+
         $warningsCount = $jStruct->getWarningsCount();
 
-        return [
+        $project = $jStruct->getProject();
+
+        $result = [
                 'id'                    => (int)$jStruct->id,
                 'password'              => $jStruct->password,
                 'source'                => $jStruct->source,
@@ -117,6 +128,7 @@ class Job {
                 'targetTxt'             => $lang_handler->getLocalizedName( $jStruct->target ),
                 'status'                => $jStruct->status_owner,
                 'subject'               => $jStruct->subject,
+                'subject_printable'     => $subjects[$subject_key]['display'],
                 'owner'                 => $jStruct->owner,
                 'open_threads_count'    => (int)$jStruct->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $jStruct->create_date ),
@@ -131,8 +143,40 @@ class Job {
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
-                'total_raw_wc'          => (int) $jStruct->total_raw_wc
+                'total_raw_wc'          => (int)$jStruct->total_raw_wc,
+                'urls'                  => [
+                        'translate' => Routes::translate(
+                                $project->name,
+                                $jStruct->id,
+                                $jStruct->password,
+                                $jStruct->source,
+                                $jStruct->target
+                        )
+                ],
+                'quality_summary'       => [
+                        'equivalent_class' => $jStruct->getQualityInfo(),
+                        'quality_overall'  => $jStruct->getQualityOverall(),
+                        'errors_count'     => (int)$jStruct->getErrorsCount()
+                ]
         ];
+
+        if ( !$project->isFeatureEnabled( \Features::REVIEW_IMPROVED ) ) {
+
+            $reviewChunk = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                    $jStruct->id, $jStruct->password
+            );
+
+            $result[ 'urls' ][ 'revise' ] = Routes::revise(
+                    $project->name,
+                    $jStruct->id,
+                    ( !empty( $reviewChunk ) ? $reviewChunk->review_password : $jStruct->password ),
+                    $jStruct->source,
+                    $jStruct->target
+            );
+
+        }
+
+        return $result;
 
     }
 
