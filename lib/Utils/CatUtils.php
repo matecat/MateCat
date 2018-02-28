@@ -393,7 +393,7 @@ class CatUtils {
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars( $segment, ENT_NOQUOTES, 'UTF-8', false );
+        $segment = htmlspecialchars( $segment, ENT_XML1 | ENT_QUOTES, 'UTF-8', false );
         $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
     }
