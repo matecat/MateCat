@@ -33,12 +33,16 @@ class ProjectsController extends KleinController {
         } else {
             $formatted = new Project();
             $formatted->setUser( $this->user );
-            if( !empty( $this->api_key ) ) {
+            if ( !empty( $this->api_key ) ) {
                 $formatted->setCalledFromApi( true );
             }
         }
 
-        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
+        $this->featureSet->loadForProject( $this->project );
+        $projectOutputFields = $formatted->renderItem( $this->project );
+        $projectOutputFields = $this->featureSet->filter( 'filter_manage_single_project', $projectOutputFields );
+
+        $this->response->json( [ 'project' => $projectOutputFields ] );
 
     }
 
