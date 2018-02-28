@@ -19,7 +19,7 @@ class TranslationIssueComment extends KleinController {
         );
 
         $json = new JsonFormatter( );
-        $rendered = $json->renderArray( $comments );
+        $rendered = $json->render( $comments );
         $this->response->json( array('comments' => $rendered ));
     }
 
