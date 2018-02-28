@@ -233,6 +233,7 @@ class JobContainer extends React.Component {
                     <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
                     {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
+                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-eye2 icon"/> LQA</a>
                     <div className="divider"/>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
                     <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
@@ -249,6 +250,8 @@ class JobContainer extends React.Component {
             menuHtml = <div className="menu">
                         {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
+                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-eye2 icon"/> LQA</a>
+                    <div className="divider"/>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
                     <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
@@ -264,11 +267,13 @@ class JobContainer extends React.Component {
             menuHtml = <div className="menu">
                         {splitButton}
                         <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
+                        <a className="item" target="_blank" href={reviseUrl}><i className="icon-eye2 icon"/> LQA</a>
+                        <div className="divider"/>
                         <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
                         <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
                         <div className="divider"/>
-                        <a className="item" target="_blank" href={originalUrl}>i className="icon-download icon"/> Download Original</a>
+                        <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
                         <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
                         <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                         <div className="divider"/>

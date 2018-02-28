@@ -2682,6 +2682,7 @@ background-size: 25px!important;
 .wrapper-dropdown-5 .dropdown li:hover input
  {
     color: black;
+    background: #efefef !important;
 }
 
 /* Active state */
