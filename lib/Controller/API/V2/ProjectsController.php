@@ -32,6 +32,10 @@ class ProjectsController extends KleinController {
             $formatted = new ProjectAnonymous();
         } else {
             $formatted = new Project();
+            $formatted->setUser( $this->user );
+            if( !empty( $this->api_key ) ) {
+                $formatted->setCalledFromApi( true );
+            }
         }
 
         $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );

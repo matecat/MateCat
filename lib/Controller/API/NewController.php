@@ -161,6 +161,13 @@ class NewController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+        if ( !$this->validateAuthHeader() ) {
+            header( 'HTTP/1.0 401 Unauthorized' );
+            $this->api_output[ 'message' ] = 'Authentication failed';
+
+            return -1;
+        }
+
         if ( !isset( $__postInput[ 'tms_engine' ] ) || is_null( $__postInput[ 'tms_engine' ] ) ) {
             $__postInput[ 'tms_engine' ] = 1;
         }
@@ -319,12 +326,6 @@ class NewController extends ajaxController {
     }
 
     public function doAction() {
-        if ( !$this->validateAuthHeader() ) {
-            header( 'HTTP/1.0 401 Unauthorized' );
-            $this->api_output[ 'message' ] = 'Authentication failed';
-
-            return -1;
-        }
 
         try {
             $this->__validateTeam();
@@ -892,23 +893,43 @@ class NewController extends ajaxController {
                 }
 
             } //if a string is sent, transform it into a valid array
-            else {
-                if ( !empty( $tm_key ) ) {
-                    $this->private_tm_key[ $__key_idx ] =
-                            array(
-                                    'key'  => $tm_key[ 'key' ],
-                                    'name' => null,
-                                    'r'    => $tm_key[ 'r' ],
-                                    'w'    => $tm_key[ 'w' ]
+            elseif ( !empty( $tm_key ) ) {
 
-                            );
+                $uid = $this->current_user->uid;
+
+                $this_tm_key = [
+                        'key'  => $tm_key[ 'key' ],
+                        'name' => null,
+                        'r'    => $tm_key[ 'r' ],
+                        'w'    => $tm_key[ 'w' ]
+                ];
+
+                /**
+                 * Get the key description/name from the user keyring
+                 */
+                if ( $uid ) {
+                    $mkDao = new TmKeyManagement_MemoryKeyDao();
+
+                    /**
+                     * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
+                     */
+                    $keyRing = $mkDao->read(
+                            ( new TmKeyManagement_MemoryKeyStruct( [
+                                    'uid'    => $uid,
+                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                            ] )
+                        )
+                    );
+
+                    if ( count( $keyRing ) > 0 ) {
+                        $this_tm_key[ 'name' ] = $keyRing[ 0 ]->tm_key->name;
+                    }
                 }
+
+                $this->private_tm_key[ $__key_idx ] = $this_tm_key;
             }
 
-            $this->private_tm_key[ $__key_idx ] = array_filter(
-                    $this->private_tm_key[ $__key_idx ],
-                    array( "self", "sanitizeTmKeyArr" )
-            );
+            $this->private_tm_key[ $__key_idx ] = self::sanitizeTmKeyArr( $this->private_tm_key[ $__key_idx ] );
 
         }
 

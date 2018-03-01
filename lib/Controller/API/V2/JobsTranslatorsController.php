@@ -10,7 +10,7 @@
 namespace API\V2;
 
 
-use API\V2\Json\Job;
+use API\V2\Json\JobTranslator;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\LoginValidator;
 use InvalidArgumentException;
@@ -50,10 +50,16 @@ class JobsTranslatorsController extends KleinController {
                 ->setJobOwnerTimezone( $this->params[ 'timezone' ] )
                 ->setEmail( $this->params[ 'email' ] );
 
-        $TranslatorsModel->update();
-
-        $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
+        $tStruct = $TranslatorsModel->update();
+        $this->response->json(
+                [
+                        'job' => [
+                                'id'         => $this->jStruct->id,
+                                'password'   => $this->jStruct->password,
+                                'translator' => ( new JobTranslator() )->renderItem( $tStruct )
+                        ]
+                ]
+        );
 
     }
 
@@ -74,8 +80,22 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
-        $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
+        //do not show outsourced translators
+        $outsourceInfo = $this->jStruct->getOutsource();
+        $tStruct       = $this->jStruct->getTranslator();
+        $translator    = null;
+        if ( empty( $outsourceInfo ) ) {
+            $translator = ( !empty( $tStruct ) ? ( new JobTranslator() )->renderItem( $tStruct ) : null );
+        }
+        $this->response->json(
+                [
+                        'job' => [
+                                'id'         => $this->jStruct->id,
+                                'password'   => $this->jStruct->password,
+                                'translator' => $translator
+                        ]
+                ]
+        );
 
     }
 
