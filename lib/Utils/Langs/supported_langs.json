@@ -665,6 +665,16 @@
     ,
         {
             "localized":[{
+                "en":"Hmong"
+            }],
+            "isocode":"hmn",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"hmn-CN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Hungarian"
             }],
             "isocode":"hu",
@@ -793,6 +803,16 @@
             "enabled":true,
             "rtl":true,
             "rfc3066code":"kr-KAU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Karen"
+            }],
+            "isocode":"kar",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kar-MM"
         }
     ,
         {
@@ -1331,6 +1351,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"ro-RO"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Rundi"
+            }],
+            "isocode":"run",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"run-BI"
         }
     ,
         {

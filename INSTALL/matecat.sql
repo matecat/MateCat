@@ -976,10 +976,10 @@ DROP TABLE IF EXISTS `show_clients`;
 /*!50001 DROP VIEW IF EXISTS `show_clients`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `show_clients` AS SELECT
-                                         1 AS `host_short`,
-                                         1 AS `users`,
-                                         1 AS `COUNT(*)`*/;
+/*!50001 CREATE VIEW `show_clients` AS SELECT 
+ 1 AS `host_short`,
+ 1 AS `users`,
+ 1 AS `COUNT(*)`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1140,8 +1140,8 @@ USE `matecat`;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-  /*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
-  /*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
+/*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
+/*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1155,7 +1155,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-22 18:11:06
+-- Dump completed on 2018-02-28 15:06:22
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1224,7 +1224,7 @@ USE `matecat`;
 
 -- MySQL dump 10.13  Distrib 5.7.21, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: matecat_old
+-- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.30
 
@@ -1328,4 +1328,4 @@ INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-22 18:11:06
+-- Dump completed on 2018-02-28 15:06:22

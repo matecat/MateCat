@@ -2,6 +2,7 @@
 
 namespace Features ;
 use BasicFeatureStruct;
+use Exception;
 use INIT;
 use Klein\Klein;
 use Monolog\Logger;
@@ -32,6 +33,14 @@ abstract class BaseFeature implements IBaseFeature {
      */
     public static function getConflictingDependencies() {
         return static::$conflictingDependencies;
+    }
+
+    public static function getConfig() {
+        $config_file_path = self::getPluginBasePath() . '/../config.ini' ;
+        if ( ! file_exists( $config_file_path ) ) {
+            throw new Exception('Config file not found', 500 );
+        }
+        return parse_ini_file( $config_file_path ) ;
     }
 
     /**
