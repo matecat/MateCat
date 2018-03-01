@@ -4354,6 +4354,8 @@ section .toolbar .autofillTag {
 
 .editarea span.softReturn,
 .source span.softReturn,
+.sugg-target span.softReturn,
+.sugg-source span.softReturn, /*to be tested*/
 .track-changes span.softReturn
 {
     display: inline;
