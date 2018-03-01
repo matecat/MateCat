@@ -261,17 +261,53 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
-    public static function getSegmentsWithIssues($job_id, $segments_ids ) {
+    public static function getSegmentsWithIssues( $job_id, $segments_ids ) {
         $where_values = $segments_ids;
 
-        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1) . '?' .") AND id_job = ?";
+        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ") AND id_job = ?";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
         $where_values[] = $job_id;
-        $stmt->execute($where_values);
+        $stmt->execute( $where_values );
 
         return $stmt->fetchAll();
+    }
+
+    public static function setApprovedBySegmentsIds( $job, $segments_ids ) {
+        $update_values = [];
+        $conn          = Database::obtain()->getConnection();
+
+        $sql = "UPDATE segment_translations SET status = ? WHERE status = ? AND id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+
+        $stmt            = $conn->prepare( $sql );
+        $update_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+        $update_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $update_values[] = $job->id;
+        $update_values   = array_merge( $update_values, $segments_ids );
+
+
+        $stmt->execute( $update_values );
+
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount( $job->id, $job->password );
+
+        return $stmt->rowCount();
+    }
+
+    public static function getNotApprovables( $segments_ids ) {
+        $where_values = [];
+        $conn         = Database::obtain()->getConnection();
+
+        $sql            = "SELECT id_segment FROM segment_translations WHERE status != ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+        $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $where_values   = array_merge( $where_values, $segments_ids );
+        $stmt           = $conn->prepare( $sql );
+        $stmt->execute( $where_values );
+
+        return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
+            return $id_segment;
+        } );
     }
 
 
