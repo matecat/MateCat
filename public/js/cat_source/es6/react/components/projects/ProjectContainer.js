@@ -414,6 +414,19 @@ class ProjectContainer extends React.Component {
         return result;
     }
 
+    getDueDate() {
+        if ( this.props.project.get('due_date') ) {
+            return <div className="eight wide left aligned column pad-top-0 pad-bottom-0">
+                    <div className="project-due-date">
+                    {"Due Date: " + moment(this.props.project.get('due_date')).format('LLLL')}
+                    </div>
+            </div> ;
+        }
+        return <div className="eight wide left aligned column pad-top-0 pad-bottom-0">
+
+        </div>;
+    }
+
     componentDidUpdate() {
         let self = this;
         this.initDropdowns();
@@ -460,12 +473,13 @@ class ProjectContainer extends React.Component {
         //The list of jobs
         this.getJobsList(targetsLangs, jobsList, jobsLength);
 
+        let dueDateHtml = this.getDueDate();
 
         //Last Activity Log Action
         let lastAction;
         if (this.state.lastAction ) {
             let date = this.getLastActionDate();
-            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+            lastAction = <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
                 <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
                         <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
@@ -473,7 +487,7 @@ class ProjectContainer extends React.Component {
                 </div>
             </div>;
         } else {
-            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+            lastAction = <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
                 <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
                         <i> <span>Created on: {this.props.project.get('jobs').first().get('formatted_create_date')}</span></i>
@@ -549,6 +563,7 @@ class ProjectContainer extends React.Component {
                         </div>
 
                         <div className="project-footer ui grid">
+                            {dueDateHtml}
                             {lastAction}
                         </div>
 
