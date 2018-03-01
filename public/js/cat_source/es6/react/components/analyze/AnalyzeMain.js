@@ -1,6 +1,5 @@
 
 let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-let AnalyzeHeader = require('./AnalyzeHeader').default;
 let AnalyzeChunksResume = require('./AnalyzeChunksResume').default;
 let AnalyzeActions = require('../../actions/AnalyzeActions');
 let ProjectAnalyze = require('./ProjectAnalyze').default;

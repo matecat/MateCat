@@ -198,6 +198,14 @@ class AnalyzeHeader extends React.Component {
         UI.downloadAnalysisReport();
     }
 
+    /**
+     * To add informations from the plugins
+     * @returns {string}
+     */
+    moreProjectInfo() {
+        return "";
+    }
+
     componentDidUpdate() {
         let self = this;
         if (this.updatedSavingWords) {
@@ -248,6 +256,7 @@ class AnalyzeHeader extends React.Component {
                 <div className="ui ribbon label">
                     <div className="project-name" title="Project name"> {projectName} </div>
                 </div>
+                {this.moreProjectInfo()}
                 {analysisStateHtml}
             </div>
 
