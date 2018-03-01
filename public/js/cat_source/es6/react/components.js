@@ -38,6 +38,7 @@ window.OutsourceStore = require('./stores/OutsourceStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 window.ProjectContainer = require('./components/projects/ProjectContainer').default;
+window.JobContainer = require('./components/projects/JobContainer').default;
 window.JobMenu = require('./components/projects/JobMenu').default;
 
 window.Header = require("./components/Header").default;
@@ -61,6 +62,7 @@ window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
+window.AnalyzeHeader = require('./components/analyze/AnalyzeHeader').default;
 window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;

@@ -1,7 +1,6 @@
 
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let ManageConstants = require('../../constants/ManageConstants');
-let JobContainer = require('./JobContainer').default;
 
 class ProjectContainer extends React.Component {
 
@@ -364,6 +363,10 @@ class ProjectContainer extends React.Component {
         </div>;
     }
 
+    /**
+     * To add informations from the plugins
+     * @returns {string}
+     */
     moreProjectInfo() {
         return "";
     }
