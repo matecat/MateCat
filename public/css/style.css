@@ -2956,7 +2956,7 @@ body.rtl-target .editor .editarea span {
 
 .graysmall .graysmall-details {
     display: block;
-    width: 30%;
+    width: 100%; /*To be tested*/
     position: absolute;
     bottom: 0;
     right: 0;
