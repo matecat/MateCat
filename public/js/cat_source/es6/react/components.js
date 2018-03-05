@@ -57,12 +57,14 @@ window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
 window.OutsourceModal = require('./modals/OutsourceModal').default;
 window.SplitJobModal = require('./modals/SplitJob').default;
 window.DQFModal = require('./modals/DQFModal').default;
+window.ShortCutsModal = require('./modals/ShortCutsModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 window.AnalyzeHeader = require('./components/analyze/AnalyzeHeader').default;
+window.OpenJobBox = require('./components/outsource/OpenJobBox').default;
 window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
