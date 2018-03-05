@@ -891,6 +891,13 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     text-transform: uppercase;
 }
 
+.buttons .approved.disabled{
+    pointer-events: none;
+    color: #666 !important;
+    border-color: #666;
+    background: #efefef;
+}
+
 .approved {
     background: #7cc576;
 }
@@ -3895,11 +3902,18 @@ span.locked.tag-html-container-close {
     }
 
     .cattool #quality-report {
-        padding: 5px 10px !important;
+        padding: 5px 5px !important;
     }
 
     .header-menu li a, .header-menu li input {
         font-size: 14px;
+    }
+    .header-menu li:first-child {
+        margin-right: 5px;
+    }
+
+    .header-dropdown-menu {
+        margin-right: 5px;
     }
 }
 

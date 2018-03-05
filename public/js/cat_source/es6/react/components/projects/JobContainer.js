@@ -1,4 +1,4 @@
-
+import JobMenu from "./JobMenu";
 let OutsourceContainer = require('../outsource/OutsourceContainer').default;
 
 class JobContainer extends React.Component {
@@ -16,6 +16,11 @@ class JobContainer extends React.Component {
         this.changePassword = this.changePassword.bind(this);
         this.removeTranslator = this.removeTranslator.bind(this);
         this.downloadTranslation = this.downloadTranslation.bind(this);
+        this.openMergeModal = this.openMergeModal.bind(this);
+        this.openSplitModal = this.openSplitModal.bind(this);
+        this.archiveJob = this.archiveJob.bind(this);
+        this.activateJob = this.activateJob.bind(this);
+        this.cancelJob = this.cancelJob.bind(this);
     }
 
     /**
@@ -211,9 +216,6 @@ class JobContainer extends React.Component {
 
 
     getJobMenu() {
-        let reviseUrl = this.getReviseUrl();
-        let editLogUrl = this.getEditingLogUrl();
-        let qaReportUrl = this.getQAReport();
         let jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
         let exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
             '/' + this.props.project.get('project_slug') + '.zip';
@@ -223,59 +225,28 @@ class JobContainer extends React.Component {
 
         let downloadButton = this.getDownloadLabel();
         let splitButton;
-        if (!this.props.isChunkOutsourced) {
-             splitButton = (!this.props.isChunk) ?
-                <a className="item" target="_blank" onClick={this.openSplitModal.bind(this)}><i className="icon-expand icon"/> Split</a> :
-                <a className="item" target="_blank" onClick={this.openMergeModal.bind(this)}><i className="icon-compress icon"/> Merge</a>;
-        }
-        let menuHtml = <div className="menu">
 
-                    <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
-                    {splitButton}
-                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
-                    <div className="divider"/>
-                    <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                    <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
-                        {downloadButton}
-                    <div className="divider"/>
-                    <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
-                    <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
-                    <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
-                    <div className="divider"/>
-                    <a className="item" onClick={this.archiveJob.bind(this)}><i className="icon-drawer icon"/> Archive job</a>
-                    <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>;
-        if ( this.props.job.get('status') === 'archived' ) {
-            menuHtml = <div className="menu">
-                        {splitButton}
-                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
-                    <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                    <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
-                        {downloadButton}
-                    <div className="divider"/>
-                    <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
-                    <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
-                    <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
-                    <div className="divider"/>
-                    <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Unarchive job</a>
-                    <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>;
-        } else if ( this.props.job.get('status') === 'cancelled' ) {
-            menuHtml = <div className="menu">
-                        {splitButton}
-                        <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
-                        <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                        <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
-                        {downloadButton}
-                        <div className="divider"/>
-                        <a className="item" target="_blank" href={originalUrl}>i className="icon-download icon"/> Download Original</a>
-                        <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
-                        <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
-                        <div className="divider"/>
-                        <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume job</a>
-                    </div>;
-        }
-        return menuHtml;
+        return <JobMenu
+            jobId={this.props.job.get('id')}
+            review_password={this.props.job.get('review_password')}
+            project={this.props.project}
+            isChunk={this.props.isChunk}
+            status={this.props.job.get('status')}
+            isChunkOutsourced = {this.props.isChunkOutsourced}
+            reviseUrl = {this.getReviseUrl()}
+            editingLogUrl={this.getEditingLogUrl()}
+            qAReportUrl={this.getQAReport()}
+            jobTMXUrl={jobTMXUrl}
+            exportXliffUrl={exportXliffUrl}
+            originalUrl={originalUrl}
+            getDownloadLabel={this.getDownloadLabel()}
+            openSplitModalFn={this.openSplitModal}
+            openMergeModalFn={this.openMergeModal}
+            changePasswordFn={this.changePassword}
+            archiveJobFn={this.archiveJob}
+            activateJobFn={this.activateJob}
+            cancelJobFn={this.cancelJob}
+        />
     }
 
     getAnalysisUrl() {

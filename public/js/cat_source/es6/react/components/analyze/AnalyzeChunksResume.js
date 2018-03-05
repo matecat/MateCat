@@ -139,7 +139,8 @@ class AnalyzeChunksResume extends React.Component {
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
                                                 idJobLabel={ chunk.jid +'-'+ index }
-                                                outsourceJobId={self.state.outsourceJobId}/>
+                                                outsourceJobId={self.state.outsourceJobId}
+                            />
                         </div>;
                     });
 

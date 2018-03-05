@@ -543,17 +543,17 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
-    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="mt_engines.html/template-mmt" />
-    <div metal:use-macro="mt_engines.html/template-microsofthub" />
-    <div metal:use-macro="mt_engines.html/template-iptranslator" />
-    <div metal:use-macro="mt_engines.html/template-moses" />
-    <div metal:use-macro="mt_engines.html/template-tauyou" />
-    <div metal:use-macro="mt_engines.html/template-letsmt" />
-    <div metal:use-macro="mt_engines.html/template-apertium" />
-    <div metal:use-macro="mt_engines.html/template-altlang" />
-    <div metal:use-macro="mt_engines.html/template-smartmate" />
-    <div metal:use-macro="mt_engines.html/template-yandextranslate" />
-    <div metal:use-macro="mt_engines.html/template-googletranslate" />
+    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mmt" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-microsofthub" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-iptranslator" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-moses" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-tauyou" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-letsmt" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-apertium" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-altlang" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-smartmate" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-yandextranslate" />
+    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-googletranslate" />
 
 </div>
 
