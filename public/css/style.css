@@ -1591,14 +1591,15 @@ body .footer.showMatches .sub-editor.open {
     height: 17px;
     width: 140px;
     position: absolute;
-    bottom: -30px;
-    right: -1px;
-    border-radius: 0 0 0 4px;
-    border: 1px solid #58595b;
+    bottom: -26px;
+    right: 0px;
+    border-radius: 0 0 0 2px;
     color: #fff;
-    padding: 7px 4px 4px 4px;
+    padding: 4px 10px 4px 4px;
     font-size: 12px;
     background: #09beec;
+    box-shadow: 0 0 10px #868686;
+    z-index: -1;
 }
 
 .sub-editor.concordances .results {
@@ -4747,7 +4748,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr {
-    width: fit-content;
+    width: 130px;
     color: #333;
     background: #fff;
 }
