@@ -1,6 +1,4 @@
 <?php
-use Email\WelcomeEmail;
-use Teams\TeamDao;
 
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -55,87 +53,31 @@ class oauthResponseHandlerController extends viewController{
     }
 
     protected function _processSuccessfulOAuth() {
-        $this->_prepareUser();
+        $this->_initRemoteUser() ;
 
-        $userDao = new Users_UserDao() ;
-        $existingUser = $userDao->getByEmail( $this->user->email ) ;
+        $model = new OAuthSignInModel(
+                $this->remoteUser->givenName,
+                $this->remoteUser->familyName, $this->remoteUser->email
+        ) ;
 
-        if ( $existingUser ) {
-            $welcome_new_user = !$existingUser->everSignedIn();
-            $this->_updateExistingUser($existingUser) ;
+        $model->setProfilePicture( $this->remoteUser->picture );
+        $model->setAccessToken( $this->client->getAccessToken() );
 
-        } else {
-            $welcome_new_user = true ;
-            $this->_createNewUser();
-        }
-
-        if ( $welcome_new_user ) {
-            $this->_welcomeNewUser();
-        }
-
-        $this->_updateProfileImage();
-
-        $this->_authenticateUser();
-
-        $project = new \Users\RedeemableProject($this->user, $_SESSION)  ;
-        $project->tryToRedeem()  ;
+        $model->signIn() ;
     }
 
-    protected function _updateProfileImage() {
-        $dao = new \Users\MetadataDao();
-        $dao->set($this->user->uid, 'gplus_picture', $this->remoteUser->picture );
-    }
-
-	protected function _prepareUser() {
+    protected function _initRemoteUser() {
         $this->client = OauthClient::getInstance()->getClient();
         $this->client->setAccessType( "offline" );
 
         $plus = new Google_Service_Oauth2($this->client);
         $this->client->authenticate($this->code);
         $this->remoteUser = $plus->userinfo->get();
-
-        $this->user = new Users_UserStruct() ;
-        $this->user->email  = $this->remoteUser->email  ;
-        $this->user->first_name = $this->remoteUser->givenName;
-        $this->user->last_name = $this->remoteUser->familyName ;
-        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-            $this->client->getAccessToken()
-        );
     }
 
     protected function _respondWithError() {
         // TODO
     }
-
-    protected function _createNewUser() {
-        $this->user->create_date = Utils::mysqlTimestamp(time() ) ;
-        $this->user->uid = Users_UserDao::insertStruct($this->user);
-
-        $dao = new TeamDao();
-        $dao->getConnection()->begin();
-        $dao->createPersonalTeam($this->user);
-        $dao->getConnection()->commit();
-    }
-
-    protected function _updateExistingUser(Users_UserStruct $existing_user) {
-        $this->user->uid = $existing_user->uid ;
-        Users_UserDao::updateStruct( $this->user, array('fields' =>
-            array('oauth_access_token')
-        ) ) ;
-    }
-
-    protected function _authenticateUser() {
-        AuthCookie::setCredentials($this->user->email, $this->user->uid );
-        $_SESSION[ 'cid' ]  = $this->user->email ;
-        $_SESSION[ 'uid' ]  = $this->user->uid ;
-    }
-
-    protected function _welcomeNewUser() {
-        $email = new WelcomeEmail($this->user) ;
-        $email->send() ;
-        FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
-    }
-
 
     protected function collectFlashMessages()
     {

@@ -22,6 +22,31 @@ class LoginModal extends React.Component {
         this.errorFor = this.errorFor.bind(this);
     }
 
+    // TODO: find a way to abstract this into the plugin
+    otherServiceLogin() {
+        let url = config.pluggable.paypal.github_auth_url ;
+        let self = this;
+        this.checkRedeemProject();
+        let newWindow = window.open( url, 'name', 'height=900,width=900' );
+        if ( window.focus ) {
+            newWindow.focus();
+        }
+        let interval = setInterval(function () {
+            if ( newWindow.closed ) {
+                clearInterval( interval );
+                let loc;
+                if ( self.props.goToManage ) {
+                    window.location = '/manage/';
+                } else if ( loc = window.localStorage.getItem( 'wanted_url' ) ) {
+                    window.localStorage.removeItem( 'wanted_url' );
+                    window.location.href = loc;
+                } else {
+                    window.location.reload();
+                }
+            }
+        }, 600);
+    }
+
     googole_popup(  ) {
         let url = this.props.googleUrl;
         let self = this;
@@ -149,6 +174,8 @@ class LoginModal extends React.Component {
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
+                        <a className="btn-confirm-medium" onClick={this.otherServiceLogin.bind(this)}>Login with another service</a>
+
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
 
                         <div className="login-form-container">

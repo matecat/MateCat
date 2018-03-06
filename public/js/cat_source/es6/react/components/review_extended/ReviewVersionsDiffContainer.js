@@ -79,24 +79,25 @@ class ReviewVersionsDiffContainer extends React.Component {
 				<div className="re-header-track">
 					<h4>Revise Track changes</h4>
 					<ReviewVersionDiff
-						textSelectedFn={this.props.textSelectedFn}
-						removeSelection={this.props.removeSelection}
+						// textSelectedFn={this.props.textSelectedFn}
+						// removeSelection={this.props.removeSelection}
 						diffPatch={this.state.diffPatch}
 						segment={this.props.segment}
 						decodeTextFn={UI.decodeText}
-						selectable={this.props.selectable}
+						// selectable={this.props.selectable}
+						selectable={false}
 						customClass={'head'}
 					/>
 
-					{this.props.selectable? (
-						<div className="explain-selection">
-                            Highlight a
-							<span className="selected"> word </span>
-							or
-							<span className="selected"> phrase </span>
-                            to associate an issue to a specific portion of the text (optional).
-						</div>
-					): (null)}
+					{/*{this.props.selectable? (*/}
+						{/*<div className="explain-selection">*/}
+                            {/*Highlight a*/}
+							{/*<span className="selected"> word </span>*/}
+							{/*or*/}
+							{/*<span className="selected"> phrase </span>*/}
+                            {/*to associate an issue to a specific portion of the text (optional).*/}
+						{/*</div>*/}
+					{/*): (null)}*/}
 				</div>
 			</div>
     }

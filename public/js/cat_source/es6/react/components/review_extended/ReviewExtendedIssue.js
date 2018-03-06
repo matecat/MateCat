@@ -167,7 +167,7 @@ class ReviewExtendedIssue extends React.Component {
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
-						<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)} title="View track changes"><i className="icon-eye icon"/></button>
+						{/*<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)} title="View track changes"><i className="icon-eye icon"/></button>*/}
 						<button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
 						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
 					</div>

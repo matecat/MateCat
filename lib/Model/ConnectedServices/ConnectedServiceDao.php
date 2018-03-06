@@ -173,6 +173,21 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    public function findByRemoteIdAndCode( $remote_id, $service ) {
+        $stmt = $this->con->getConnection()->prepare(
+                " SELECT * FROM connected_services WHERE " .
+                " uid = :remote_id AND service = :service "
+        );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->execute( array(
+                'service'   => $service,
+                'remote_id' => $remote_id
+        ));
+
+        return $stmt->fetch();
+    }
+
     protected function _buildResult($array_result)
     {
         // TODO: Implement _buildResult() method.
