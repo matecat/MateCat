@@ -132,7 +132,7 @@ class OutsourceContainer extends React.Component {
                             <b>Subject</b>: {this.props.job.get('subject_printable')}
                         </div>
                     </div>
-                    <div className="sixteen wide column shadow-1">
+                    <div className="sixteen wide column">
                         <div className="ui grid"
                         ref={(container) => this.container = container}>
                                 {(this.props.showTranslatorBox ) ? (
