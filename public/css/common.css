@@ -4889,7 +4889,7 @@ a.btn.pull-left.addtmx {
     margin-left: 5px;
 }
 
-a.pull-right.btn-grey.canceladdtmx {
+a.pull-right, .btn-grey.canceladdtmx {
     margin-right: -6px;
 }
 
@@ -4903,7 +4903,7 @@ a#add-mt-provider-cancel {
     position: relative;
 }*/
 
-a.existingKey.pull-right.btn-ok.addtmxfile {
+a.existingKey, .pull-right.btn-ok, .addtmxfile {
     margin-right: 4px;
     width: 108px;
 }
