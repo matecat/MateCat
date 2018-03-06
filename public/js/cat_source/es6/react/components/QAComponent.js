@@ -102,7 +102,7 @@ class QAComponent extends React.Component {
             } else if($('#segment-' + segmentId + '-1').length) {
                 window.location.hash = segmentId + '-1';
             }
-            UI.scrollSegment($segment);
+            UI.scrollSegment($segment, segmentId);
         }
     }
 
@@ -283,7 +283,7 @@ class QAComponent extends React.Component {
         var buttonArrowsClass = 'qa-arrows-disabled';
         var counterLabel = 'Segment';
         var current_array = this.getCurrentArray();
-        if ( (this.state.lxq_selected || this.state.tag_issues_selected || this.state.total_issues_selected) && current_array.length > 1 ) {
+        if ( (this.state.lxq_selected || this.state.tag_issues_selected || this.state.total_issues_selected || this.state.translation_conflicts_selected) && current_array.length > 1 ) {
             buttonArrowsClass = 'qa-arrows-enabled';
             counterLabel = 'Segments';
         }
