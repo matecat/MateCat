@@ -274,40 +274,68 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function setApprovedBySegmentsIds( $job, $segments_ids ) {
+    public static function changeStatusBySegmentsIds( $job, $segments_ids, $status) {
         $update_values = [];
         $conn          = Database::obtain()->getConnection();
 
-        $sql = "UPDATE segment_translations SET status = ? WHERE status = ? AND id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+        $old_wStruct = new \WordCount_Struct();
+        $old_wStruct->setIdJob( $job->id );
+        $old_wStruct->setJobPassword( $job->password );
+        /*$old_wStruct->setNewWords( $job->new_words );
+        $old_wStruct->setDraftWords( $job->draft_words );
+        $old_wStruct->setTranslatedWords( $job->translated_words );
+        $old_wStruct->setApprovedWords( $job->approved_words );
+        $old_wStruct->setRejectedWords( $job->rejected_words );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus(  );
+        $old_wStruct->setNewStatus( $status );*/
+        //$counter = new \WordCount_Counter($old_wStruct);
+
+
+
+        $sql = "UPDATE segment_translations SET status = ? WHERE id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
 
         $stmt            = $conn->prepare( $sql );
-        $update_values[] = Constants_TranslationStatus::STATUS_APPROVED;
-        $update_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $update_values[] = $status;
         $update_values[] = $job->id;
         $update_values   = array_merge( $update_values, $segments_ids );
 
 
         $stmt->execute( $update_values );
 
+
         $counter = new \WordCount_Counter;
         $counter->initializeJobWordCount( $job->id, $job->password );
+        //$counter->updateCounts($old_wStruct);
 
         return $stmt->rowCount();
     }
 
-    public static function getNotApprovables( $segments_ids ) {
+    public static function getUnchangebleStatus( $segments_ids, $status ) {
+
+        //if translated all segments are changeble
+        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            return [];
+        }
+
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
 
-        $sql            = "SELECT id_segment FROM segment_translations WHERE status != ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
-        $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $where_values   = array_merge( $where_values, $segments_ids );
-        $stmt           = $conn->prepare( $sql );
-        $stmt->execute( $where_values );
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            $sql            = "SELECT id_segment FROM segment_translations WHERE status != ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
 
-        return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
-            return $id_segment;
-        } );
+            $where_values = array_merge( $where_values, $segments_ids );
+            $stmt         = $conn->prepare( $sql );
+            $stmt->execute( $where_values );
+
+            return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
+                return $id_segment;
+            } );
+        }
+
+
     }
 
 
