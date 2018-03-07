@@ -28,6 +28,13 @@ if ( ReviewExtendedLQA.enabled() ) {
                     UI.getSegmentVersionsIssues(sid, fid);
                 });
             },
+            submitComment : function(id_segment, id_issue, data) {
+                return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
+                    .done( function( data ) {
+                        var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment));
+                        UI.getSegmentVersionsIssues(id_segment, fid);
+                    });
+            },
         });
 
         $.extend(UI, {
@@ -126,6 +133,10 @@ if ( ReviewExtendedLQA.enabled() ) {
                     return true;
                 }
                 return false;
+            },
+
+            submitComment : function(id_segment, id_issue, data) {
+                return ReviewExtendedLQA.submitComment(id_segment, id_issue, data)
             },
 
             setDisabledOfButtonApproved: function (sid,isDisabled ) {

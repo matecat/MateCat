@@ -7,19 +7,12 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            categories: props.categories
+            categories: props.categories,
+            commentView: false,
+            sendDisabled : true,
+            comment_text: ''
         }
 
-    }
-
-    componentDidMount() {
-    }
-
-    componentWillUnmount() {
-    }
-
-
-    componentWillMount() {
     }
 
     allowHTML( string ) {
@@ -38,16 +31,112 @@ class SegmentFooterTabIssuesListItem extends React.Component {
         } )
     }
 
-    render() {
+    handleCommentChange(event) {
+        var text = event.target.value,
+            disabled = true;
 
-        return <div className="issue">
+        if ( text.length > 0 ) {
+            disabled = false;
+        }
+        this.setState({
+            comment_text : text,
+            sendDisabled : disabled,
+        });
+    }
+
+    addComment(e){
+        e.preventDefault();
+        let self = this;
+        // send action invokes ReviewImproved function
+        if ( !this.state.comment_text || this.state.comment_text.length === 0 ) {
+            return ;
+        }
+
+        var data = {
+            rebutted : true,
+            message : this.state.comment_text,
+            source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
+        };
+
+        this.setState({sendDisabled : true});
+
+        SegmentActions
+            .submitComment( this.props.issue.id_segment, this.props.issue.id, data )
+            .done(function (  ) {
+                self.setState({
+                    comment_text: ''
+                })
+            })
+            .fail( this.handleFail );
+    }
+
+    setCommentView(event){
+        event.preventDefault();
+        event.stopPropagation();
+        let self = this;
+        if(!this.state.commentView){
+            setTimeout(function (  ) {
+                $(self.el).find('.re-comment-input')[0].focus();
+            }, 100);
+        }
+        this.setState({
+            commentView : !this.state.commentView
+        });
+    }
+
+    generateHtmlCommentLines(){
+        let array = [];
+        let comments = this.props.issue.comments,
+            comment_date;
+        for(let n in comments){
+            let comment = comments[n]
+            comment_date = moment(comment.create_date).format('lll');
+
+            if(comment.source_page == 1){
+                array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+            }else if(comment.source_page == 2){
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+            }
+        }
+        if(array.length > 0 ){
+            array = array.reverse();
+        }
+        return array;
+    }
+
+    render() {
+        let formatted_date = moment(this.props.issue.created_at).format('lll');
+
+        let commentViewButtonClass = (this.state.commentView ? "re-active" :  '');
+        commentViewButtonClass = (this.props.issue.comments.length > 0) ? commentViewButtonClass + " re-message" : commentViewButtonClass;
+        let iconCommentClass = ( this.props.issue.comments.length > 0 ) ? "icon-uniE96B icon" : 'icon-uniE96E icon';
+        let htmlCommentLines = this.generateHtmlCommentLines();
+        let renderHtmlCommentLines = '';
+        if(htmlCommentLines.length> 0){
+            renderHtmlCommentLines = <div className="re-comment-list">
+                {htmlCommentLines}
+            </div>;
+        }
+        let commentSection = <div className="comments-view">
+            <div className="re-add-comment">
+                <form className="ui form" onSubmit={this.addComment.bind(this)}>
+                    <div className="field">
+                        <input className="re-comment-input" value={this.state.comment_text} type="text" name="first-name" placeholder="Add a comment + press Enter" onChange={this.handleCommentChange.bind(this)} />
+                    </div>
+                </form>
+            </div>
+            {renderHtmlCommentLines}
+        </div>;
+        return <div className="issue" ref={(node)=>this.el=node}>
             <p>
                 <b>{this.findCategory( this.props.issue.id_category ).label}:</b>
                 {this.props.issue.severity}
+                <button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
                 <i className="icon-cancel3" onClick={this.deleteIssue.bind(this)}>
 
                 </i>
             </p>
+            {this.state.commentView ? commentSection: null}
         </div>
     }
 }
