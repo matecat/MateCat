@@ -5058,7 +5058,6 @@ section .footer .tab.open {
 
 section.loaded .footer .tab.open {
     display: block;
-    min-height: 65px;
 }
 
 /*
