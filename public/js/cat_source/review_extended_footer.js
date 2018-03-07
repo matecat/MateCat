@@ -12,6 +12,7 @@ if ( ReviewExtendedFooter.enabled() ) {
     (function (ReviewExtendedFooter, $,undefined) {
 
         var originalClickOnApprovedButton = UI.clickOnApprovedButton;
+        var originalGotoNextSegment = UI.gotoNextSegment;
 
         $.extend(ReviewExtendedFooter, {
 
@@ -151,6 +152,7 @@ if ( ReviewExtendedFooter.enabled() ) {
 
             gotoNextSegment: function ( sid ) {
                 this.setDisabledOfButtonApproved(sid, true);
+                originalGotoNextSegment.apply(this);
                 return false;
             }
 
