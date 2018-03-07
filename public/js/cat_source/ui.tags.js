@@ -124,7 +124,7 @@ $.extend(UI, {
             var base64Array=[];
             tx = tx.replace( /&quot;/gi, '"' );
 
-            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
                 return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
             });
             tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
