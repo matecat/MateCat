@@ -1,19 +1,20 @@
 
-ReviewExtendedLQA = {
+ReviewExtendedFooter = {
     enabled : function() {
-        return Review.type === 'extended-lqa' ;
+        return Review.type === 'extended-footer' ;
     },
     type : config.reviewType
 };
 
-if ( ReviewExtendedLQA.enabled() ) {
+if ( ReviewExtendedFooter.enabled() ) {
 
 
-    (function (ReviewExtendedLQA, $,undefined) {
+    (function (ReviewExtendedFooter, $,undefined) {
 
         var originalClickOnApprovedButton = UI.clickOnApprovedButton;
+        var originalGotoNextSegment = UI.gotoNextSegment;
 
-        $.extend(ReviewExtendedLQA, {
+        $.extend(ReviewExtendedFooter, {
 
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
@@ -27,6 +28,13 @@ if ( ReviewExtendedLQA.enabled() ) {
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
                 });
+            },
+            submitComment : function(id_segment, id_issue, data) {
+                return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
+                    .done( function( data ) {
+                        var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment));
+                        UI.getSegmentVersionsIssues(id_segment, fid);
+                    });
             },
         });
 
@@ -49,7 +57,7 @@ if ( ReviewExtendedLQA.enabled() ) {
             },
 
             submitIssues: function (sid, data, diff) {
-                return ReviewExtendedLQA.submitIssue(sid, data, diff);
+                return ReviewExtendedFooter.submitIssue(sid, data, diff);
             },
             getSegmentVersionsIssuesHandler(event) {
                 let sid = event.segment.absId;
@@ -128,6 +136,10 @@ if ( ReviewExtendedLQA.enabled() ) {
                 return false;
             },
 
+            submitComment : function(id_segment, id_issue, data) {
+                return ReviewExtendedFooter.submitComment(id_segment, id_issue, data)
+            },
+
             setDisabledOfButtonApproved: function (sid,isDisabled ) {
                 let div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
                 if(!isDisabled){
@@ -140,6 +152,7 @@ if ( ReviewExtendedLQA.enabled() ) {
 
             gotoNextSegment: function ( sid ) {
                 this.setDisabledOfButtonApproved(sid, true);
+                originalGotoNextSegment.apply(this);
                 return false;
             }
 

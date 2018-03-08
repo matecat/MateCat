@@ -257,6 +257,8 @@ UI = {
     },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
+            segment.find('.editarea').attr('contenteditable', 'false');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -277,10 +279,6 @@ UI = {
             this.deActivateSegment(byButton, segment);
             this.removeGlossaryMarksFormSource();
 
-            segment.find('.editarea').attr('contenteditable', 'false');
-            setTimeout(function () {
-                SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
-            }, 0);
             $('span.locked.mismatch', segment).removeClass('mismatch');
 
 

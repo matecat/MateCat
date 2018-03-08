@@ -46,6 +46,16 @@
             // if ((!this.readonly)&&(!getNormally)) {
             //     $('#segment-' + segment.id + ' .alternatives .overflow').hide();
             // }
+            this.opening = true;
+
+            if (!(this.currentSegment.is(this.lastOpenedSegment))) {
+                var lastOpened = $(this.lastOpenedSegment).attr('id');
+                if (lastOpened != 'segment-' + this.currentSegmentId)
+                    this.closeSegment(this.lastOpenedSegment, 0, operation);
+            }
+
+            this.opening = false;
+
             SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor opened');
 
             if (!this.readonly) {
@@ -69,16 +79,6 @@
             if(!this.noGlossary) this.getGlossary(segment.el, true, 0);
 
             UI.setEditingSegment( segment.el );
-
-            this.opening = true;
-
-            if (!(this.currentSegment.is(this.lastOpenedSegment))) {
-                var lastOpened = $(this.lastOpenedSegment).attr('id');
-                if (lastOpened != 'segment-' + this.currentSegmentId)
-                    this.closeSegment(this.lastOpenedSegment, 0, operation);
-            }
-
-            this.opening = false;
 
             if (!this.readonly) {
                 /* Check if is right-to-left language, because there is a bug that make

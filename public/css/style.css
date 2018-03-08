@@ -556,7 +556,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 
 .sid .txt {
     padding: 0px 0;
-    background: #fff;
+    /*background: #fff;*/
     margin: 12px 8px 0 8px;
 }
 
@@ -1240,13 +1240,9 @@ article .approved:active {
 }
 
 article {
-    border-top: none;
-    margin: 20px auto 100px auto;
-    background: #ccc;
+    margin: 40px auto 100px auto;
     -moz-border-radius: 2px;
-    border-radius: 2px;
     -moz-box-shadow: 0 1px 3px #ccc;
-    -webkit-box-shadow: 0 1px 3px #ccc;
     position: relative;
     margin-left: 5%;
     width: 91.5%;
@@ -1315,23 +1311,23 @@ article {
 
 .text {
     width: 100%;
-    margin: 1px 0 0 0;
-    padding: 0px 0 0px 0;
     position: relative;
-    -webkit-transition: all 50ms ease-in;
-    background: #f1f2f2;
-    /*background: #f1f2f2 url(../img/freccia-light.png) 49% 10px no-repeat;*/
+    background: #ffffff;
     overflow: hidden;
     float: left;
-    transition: all 50ms ease-in;
-    -webkit-box-shadow: inset 0 1px 1px 1px #f7f8f9;
-    box-shadow: inset 0 1px 1px 1px #f7f8f9;
-    color: #4d4d4f;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+
 }
 
 .popup-tm .text, .popup-tm .text:hover, .header-menu .text, .header-menu .text:hover {
     background: transparent;
     box-shadow: none;
+}
+
+
+body.cattool {
+    background: #f2f4f7;
 }
 
 body.cattool.editing {
@@ -1361,8 +1357,8 @@ body.cattool .editor .text:hover {
 }
 
 body.cattool:not(.editing) article {
-    border: 1px solid #adadad;
-    border-top: none;
+/*    border: 1px solid #adadad;
+    border-top: none;*/
 }
 
 .editor .text {
@@ -1393,8 +1389,6 @@ body.cattool:not(.editing) article {
 .text {
     width: 100%;
     float: left;
-    -webkit-transition: all 100ms ease-in;
-    -moz-transition: all 100ms ease-in;
 }
 
 .graysmall {
@@ -2242,14 +2236,17 @@ body.filtering {
 }
 
 /*editor*/
-.editor{border:1px solid #58595b;width:100%;box-shadow: 0 1px 10px #666;-webkit-box-shadow: 0 1px 10px #666;position:relative;z-index:999;-moz-border-radius: 2px;border-radius: 2px;}
+.editor{
+    width: 100%;
+    -webkit-box-shadow: 0 1px 10px #666;
+    position: relative;
+    z-index: 999;
+    -moz-border-radius: 2px;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
 .editor, .editor .text{
-background:#fff;
-  /*-webkit-transition: background-color 1ms linear;*/
-  /*-moz-transition: background-color 1ms linear;*/
-  /*-o-transition: background-color 1ms linear;*/
-  /*-ms-transition: background-color 1ms linear;*/
-  /*transition: background-color 1ms linear;*/
+    background:#fff;
 }
 
 .loader {
@@ -2452,9 +2449,9 @@ section .text .warning {
     display: none;
 }
 
-.text {
+/*.text {
     overflow: hidden;
-}
+}*/
 
 /*textarea, .editarea {
     position: relative;
@@ -2473,7 +2470,6 @@ section.editor {
     z-index: 2;
     position: relative;
     height: 100%;
-    border: unset;
 }
 
 .source {
@@ -2518,10 +2514,8 @@ section.editor {
     border: 1px solid transparent;
     -moz-border-radius: 2px;
     border-radius: 2px;
-
     word-wrap: break-word;
     word-break: normal;
-
     hyphens: auto;
     -moz-hyphens: auto;
     transition: all 50ms ease-in;
@@ -2534,7 +2528,7 @@ section.readonly {
 
 section.ice-locked .text {
     cursor: no-drop !important;
-    background-color: #ececec !important;
+    background-color: #f2f4f7 !important;
 }
 
 body.editing section:not(.editor).ice-locked .text {
