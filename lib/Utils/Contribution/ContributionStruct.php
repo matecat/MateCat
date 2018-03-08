@@ -18,6 +18,7 @@ use \Jobs_JobStruct,
         \CatUtils,
         \Constants_TranslationStatus
     ;
+use TaskRunner\Commons\Params;
 
 /**
  * Class ContributionStruct
@@ -100,6 +101,11 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $propagationRequest =true;
 
     /**
+     * @var array
+     */
+    public $props = [];
+
+    /**
      * @var integer
      */
     public $id_mt;
@@ -130,7 +136,14 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
 
     public function getProp(){
         $jobStruct = $this->getJobStruct();
-        return CatUtils::getTMProps( $jobStruct[ 0 ] );
+        $props = $this->props;
+        if( !is_array( $props ) ) {
+            /**
+             * @var $props Params
+             */
+            $props = $props->toArray();
+        }
+        return array_merge( $props, CatUtils::getTMProps( $jobStruct[ 0 ] ) );
     }
 
     /**
@@ -152,7 +165,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
             $userDao = new \Users_UserDao( Database::obtain() );
             $userCredentials = new \Users_UserStruct();
             $userCredentials->uid = $contributionStruct->uid;
-            return $userDao->setCacheTTL( 60 * 60 )->read( $userCredentials );
+            return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
         } );
         
     }
