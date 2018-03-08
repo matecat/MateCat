@@ -127,8 +127,8 @@ class SegmentFooterTabIssuesListItem extends React.Component {
             </div>
             {renderHtmlCommentLines}
         </div>;
-        return <div className="issue-item">
-        <div className="issue" ref={(node)=>this.el=node}>
+        return <div className="issue-item" ref={(node)=>this.el=node}>
+        <div className="issue" >
             <div className="issue-head">
                 <p>
                     <b>{this.findCategory( this.props.issue.id_category ).label}:</b>

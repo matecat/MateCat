@@ -323,8 +323,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn         = Database::obtain()->getConnection();
 
         if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
-            $sql            = "SELECT id_segment FROM segment_translations WHERE status != ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+
+            $sql = "SELECT id_segment FROM segment_translations WHERE status NOT IN( "
+                    . str_repeat( '?,', count( $where_values ) -1 ) . '?'
+                    . " ) AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
 
             $where_values = array_merge( $where_values, $segments_ids );
             $stmt         = $conn->prepare( $sql );
