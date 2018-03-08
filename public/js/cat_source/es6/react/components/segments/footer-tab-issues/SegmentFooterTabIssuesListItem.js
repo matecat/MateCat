@@ -127,16 +127,24 @@ class SegmentFooterTabIssuesListItem extends React.Component {
             </div>
             {renderHtmlCommentLines}
         </div>;
-        return <div className="issue" ref={(node)=>this.el=node}>
-            <p>
-                <b>{this.findCategory( this.props.issue.id_category ).label}:</b>
-                {this.props.issue.severity}
-                <button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
-                <i className="icon-cancel3" onClick={this.deleteIssue.bind(this)}>
-
-                </i>
-            </p>
-            {this.state.commentView ? commentSection: null}
+        return <div className="issue-item">
+        <div className="issue" ref={(node)=>this.el=node}>
+            <div className="issue-head">
+                <p>
+                    <b>{this.findCategory( this.props.issue.id_category ).label}:</b>
+                    <span>{this.props.issue.severity}</span>
+                </p>
+            </div>
+            <div className="issue-activity-icon">
+                <button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments">
+                    <i className={iconCommentClass} />
+                </button>
+                <button>
+                    <i className="icon-trash-o icon" onClick={this.deleteIssue.bind(this)} />
+                </button>
+            </div>
+        </div>
+        {this.state.commentView ? commentSection: null}
         </div>
     }
 }
