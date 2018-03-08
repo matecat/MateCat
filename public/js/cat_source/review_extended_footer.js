@@ -1,19 +1,20 @@
 
-ReviewExtendedLQA = {
+ReviewExtendedFooter = {
     enabled : function() {
-        return Review.type === 'extended-lqa' ;
+        return Review.type === 'extended-footer' ;
     },
     type : config.reviewType
 };
 
-if ( ReviewExtendedLQA.enabled() ) {
+if ( ReviewExtendedFooter.enabled() ) {
 
 
-    (function (ReviewExtendedLQA, $,undefined) {
+    (function (ReviewExtendedFooter, $,undefined) {
 
         var originalClickOnApprovedButton = UI.clickOnApprovedButton;
+        var originalGotoNextSegment = UI.gotoNextSegment;
 
-        $.extend(ReviewExtendedLQA, {
+        $.extend(ReviewExtendedFooter, {
 
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
@@ -56,7 +57,7 @@ if ( ReviewExtendedLQA.enabled() ) {
             },
 
             submitIssues: function (sid, data, diff) {
-                return ReviewExtendedLQA.submitIssue(sid, data, diff);
+                return ReviewExtendedFooter.submitIssue(sid, data, diff);
             },
             getSegmentVersionsIssuesHandler(event) {
                 let sid = event.segment.absId;
@@ -136,7 +137,7 @@ if ( ReviewExtendedLQA.enabled() ) {
             },
 
             submitComment : function(id_segment, id_issue, data) {
-                return ReviewExtendedLQA.submitComment(id_segment, id_issue, data)
+                return ReviewExtendedFooter.submitComment(id_segment, id_issue, data)
             },
 
             setDisabledOfButtonApproved: function (sid,isDisabled ) {
@@ -151,6 +152,7 @@ if ( ReviewExtendedLQA.enabled() ) {
 
             gotoNextSegment: function ( sid ) {
                 this.setDisabledOfButtonApproved(sid, true);
+                originalGotoNextSegment.apply(this);
                 return false;
             }
 
