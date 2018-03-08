@@ -175,7 +175,7 @@ class CatUtils {
         preg_match_all( '/equiv-text\s*?=\s*?"(.*?)"|equiv-text\s*?=\s*?\'(.*?)\'/', $segment, $html, PREG_SET_ORDER );
         foreach( $html as $tag_attribute ){
             //replace subsequent elements excluding already encoded
-            $segment = preg_replace( '/equiv-text\s*?=["\'](?!base64:)(.*?)["\']/', 'equiv-text="base64:' . base64_encode( $tag_attribute[ 1 ] ) . "\"", $segment, 1 );
+            $segment = preg_replace( '/equiv-text\s*?=\'(?!base64:)(.*?)\'|equiv-text\s*?="(?!base64:)(.*?)"/', 'equiv-text="base64:' . base64_encode( $tag_attribute[ 1 ] ) . "\"", $segment, 1 );
         }
 
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
