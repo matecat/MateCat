@@ -1480,7 +1480,7 @@ body.noGlossary .tab-switcher-gl {
     -moz-transition: all 100ms ease-in;
     padding: 5px 20px;
     display: block;
-    color: #939598;
+    color: #666;
     font-size: 16px;
     float: left;
     text-decoration: none;
@@ -3219,11 +3219,11 @@ body.archived section .status-container a.status:hover {
 }
 
 section.status-translated .status {
-    background-color: #0798bc !important
+    background-color: #0abeec !important;
 }
 
 section.status-approved .status {
-    background-color: #639d5e !important;
+    background-color: #7cc576 !important;
 }
 
 /* section.status-draft .status{background-color:#dddedf !important;} */
@@ -3892,13 +3892,13 @@ span.locked.tag-html-container-close {
     }
 
     .sid {
-        left: -7%;
+        left: -6%;
         width: 7%;
     }
 
     section.editor .sid {
-        left: -5.5%;
-        width: 6%;
+        left: -5%;
+        width: 7%;
     }
 
 }
