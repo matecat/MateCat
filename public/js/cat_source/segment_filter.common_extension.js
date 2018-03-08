@@ -61,26 +61,26 @@ if ( SegmentFilter.enabled() )
             // change this if we are filtering, go to the next
             // segment, assuming the sample is what we want to revise.
             if ( SF.filtering() ) {
-                gotoNextSegment.apply(undefined, arguments);
+                gotoNextSegment.apply(this, arguments);
             }
             else {
-                original_openNextTranslated.apply(undefined, arguments);
+                original_openNextTranslated.apply(this, arguments);
             }
         },
         gotoPreviousSegment : function() {
             if ( SF.filtering() ) {
-                gotoPreviousSegment.apply(undefined, arguments);
+                gotoPreviousSegment.apply(this, arguments);
             } else {
-                original_gotoPreviousSegment.apply(undefined, arguments);
+                original_gotoPreviousSegment.apply(this, arguments);
             }
 
         },
 
         gotoNextSegment : function() {
             if ( SF.filtering() ) {
-                gotoNextSegment.apply(undefined, arguments);
+                gotoNextSegment.apply(this, arguments);
             } else {
-                original_gotoNextSegment.apply(undefined, arguments);
+                original_gotoNextSegment.apply(this, arguments);
             }
 
         },
