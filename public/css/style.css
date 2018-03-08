@@ -691,7 +691,7 @@ section {
     height: 100%;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    /*box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;*/
 }
 
 /*projectbar*/
@@ -1315,6 +1315,7 @@ article {
     float: left;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 
 }
 
@@ -1435,7 +1436,7 @@ body.cattool:not(.editing) article {
     background: #fff;
     text-align: left;
     width: 100%;
-    margin-top: 1px;
+    margin-top: -2px;
 }
 
 .submenu {
@@ -2750,11 +2751,12 @@ body.rtl-target .editor .editarea span {
 
 .wrap {
     float: left;
-    width: 99%;
+    width: 100%;
     height: 100%;
     padding-bottom: 0;
     padding-top: 5px;
     font-size: 16px;
+    /*background: #fff;*/
 
 }
 
@@ -3900,7 +3902,6 @@ span.locked.tag-html-container-close {
         left: -5%;
         width: 7%;
     }
-
 }
 
 @media screen and (max-width: 1100px) {
