@@ -156,7 +156,7 @@ class Job {
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 10 )->getProjectData( $project->id );
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id );
 
         $formatted = new ProjectUrls( $projectData );
 

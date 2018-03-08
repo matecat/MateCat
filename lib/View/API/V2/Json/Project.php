@@ -127,7 +127,7 @@ class Project {
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $data->id );
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $data->id );
 
         $formatted = new ProjectUrls( $projectData );
 
