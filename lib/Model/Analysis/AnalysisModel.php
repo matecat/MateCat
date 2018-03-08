@@ -326,9 +326,9 @@ class Analysis_AnalysisModel {
         }
 
         if ( $this->chunk == null ) {
-            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->project->id, $this->project->password );
+            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->project->id, $this->project->password );
         } else {
-            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->project->id, $this->project->password,
+            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->project->id, $this->project->password,
                     $this->chunk->id, $this->chunk->password );
         }
 
