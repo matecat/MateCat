@@ -13,7 +13,7 @@ class SegmentFooterTabIssues extends React.Component {
             segment: this.props.segment,
             translation: this.props.segment.translation,
             oldTranslation: this.props.segment.translation,
-            isChangedTextarea: true,
+            isChangedTextarea: false,
             issues: []
         }
     }
@@ -33,10 +33,6 @@ class SegmentFooterTabIssues extends React.Component {
         } else {
             $( this.selectIssueCategoryWrapper ).find( '.ui.dropdown' ).addClass( 'disabled' );
         }
-        let self = this;
-        setTimeout(function () {
-            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', self.state.issues.length);
-        });
     }
 
     componentWillUnmount() {
