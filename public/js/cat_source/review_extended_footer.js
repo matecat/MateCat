@@ -151,7 +151,9 @@ if ( ReviewExtendedFooter.enabled() ) {
             },
 
             gotoNextSegment: function ( sid ) {
-                this.setDisabledOfButtonApproved(sid, true);
+                if (config.isReview && sid) {
+                    this.setDisabledOfButtonApproved(sid, true);
+                }
                 originalGotoNextSegment.apply(this);
                 return false;
             }
