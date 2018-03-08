@@ -1402,6 +1402,10 @@ body.cattool:not(.editing) article {
 }
 */
 
+.tab.concordances {
+    text-align: center;
+}
+
 .tab.concordances .graysmall:not(.prime) {
     display: none;
 }
@@ -3790,7 +3794,9 @@ span.locked.tag-html-container-close {
         text-indent: -85px;
     }
 
-    .glossary .graysmall .b {
+    .glossary .graysmall .b,
+    .concordances .graysmall .b,
+    .alternatives .graysmall .b{
         /*padding-left:85px !important;*/
         width: 41% !important
     }

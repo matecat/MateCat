@@ -22,7 +22,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     deleteIssue(event) {
         event.preventDefault();
         event.stopPropagation();
-        SegmentActions.deleteIssue(this.props.issue)
+        SegmentActions.deleteIssue(this.props.issue);
     }
 
     findCategory( id ) {

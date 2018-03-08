@@ -353,6 +353,9 @@ AppDispatcher.register(function(action) {
             let segIssue = SegmentStore.addSegmentVersionIssue(action.fid, action.sid, action.issue, action.versionNumber);
             SegmentStore.emitChange(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, action.sid, segIssue.toJS());
             break;
+        case SegmentConstants.ADD_TAB_INDEX:
+            SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);
+            break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }

@@ -520,16 +520,6 @@ $.extend(UI, {
                 e.preventDefault();
                 e.stopPropagation();
             }
-		}).on('click', '.concordances .more', function(e) {
-			e.preventDefault();
-			tab = $(this).parents('.concordances');
-			container = $('.overflow', $(tab));
-			if($(tab).hasClass('extended')) {
-				UI.setExtendedConcordances(false);
-			} else {
-				UI.setExtendedConcordances(true);
-			}
-			$(this).parents('.matches').toggleClass('extended');
 		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {

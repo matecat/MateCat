@@ -13,7 +13,7 @@ class SegmentFooterTabIssues extends React.Component {
             segment: this.props.segment,
             translation: this.props.segment.translation,
             oldTranslation: this.props.segment.translation,
-            isChangedTextarea: true,
+            isChangedTextarea: false,
             issues: []
         }
     }
@@ -40,6 +40,12 @@ class SegmentFooterTabIssues extends React.Component {
         SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
+    componentWillMount() {
+        let categories = JSON.parse( config.lqa_nested_categories ).categories;
+        this.setState( {
+            categoriesIssue: categories
+        } )
+    }
 
     trackChanges( sid, editareaText ) {
         let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
@@ -68,13 +74,10 @@ class SegmentFooterTabIssues extends React.Component {
             segment: segment,
             issues: issues
         } );
-    }
-
-    componentWillMount() {
-        let categories = JSON.parse( config.lqa_nested_categories ).categories;
-        this.setState( {
-            categoriesIssue: categories
-        } )
+        let self = this;
+        setTimeout(function (  ) {
+            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
+        });
     }
 
     allowHTML( string ) {
