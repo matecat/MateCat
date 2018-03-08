@@ -561,7 +561,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 }
 
 .editing .sid .txt {
-    background: #ccc;
+    /*background: #f2f4f7;*/
 }
 
 p.split-shortcut {
@@ -691,6 +691,7 @@ section {
     height: 100%;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 /*projectbar*/
@@ -877,15 +878,14 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .translated,
 .approved,
 .guesstags {
-    border: 1px solid #848689;
+    border: 1px solid #797979;
     color: #fff !important;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 18px;
     border-radius: 2px;
-    border-radius: 2px;
     font-size: 18px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: #09beec;
     background: -moz-linear-gradient(top, #09beec, #119ec4);
     background: linear-gradient(top, #09beec, #119ec4);
     text-transform: uppercase;
@@ -1012,15 +1012,16 @@ article .translated:active,
 article .draft:active,
 article .btn:active,
 article .approved:active {
-    -moz-box-shadow: inset 0 0 1px 1px #888;
-    -webkit-box-shadow: inset 0 0 1px 1px #888;
-    box-shadow: inset 0 0 1px 1px #888;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 .translated:hover,
 .next-untranslated:hover,
 .guesstags:hover {
-    background: #12b4df;
+    background-color: #08b3de;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .draft:hover {
@@ -1035,7 +1036,7 @@ article .approved:active {
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     box-shadow: none;
-    border: 1px solid #000
+ /*   border: 1px solid #000*/
 }
 
 .next-untranslated,
@@ -1049,9 +1050,6 @@ article .approved:active {
     padding: 8px 2px 0px 2px;
     border-radius: 2px;
     font-size: 18px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-    background: -moz-linear-gradient(top, #09beec, #119ec4);
-    background: linear-gradient(top, #09beec, #119ec4);
     margin: -9px 25px -9px 25px;
     color: #fff !important;
 }
@@ -1331,15 +1329,11 @@ body.cattool {
 }
 
 body.cattool.editing {
-    background: #ccc;
+    background: #f2f4f7;
 }
 
 body.editing section:not(.editor) .text {
-    -webkit-box-shadow: inset 0 1px 1px 1px #CECECE;
-    box-shadow: inset 0 1px 1px 1px #CECECE;
-    background: #c1c2c2;
-    border: 1px solid #a3a3a3;
-    margin: -1px 0 0 0;
+    background: #dcdfe4;
 }
 
 section:not(.editor) .text:first-child {
@@ -1348,7 +1342,7 @@ section:not(.editor) .text:first-child {
 }
 
 body.cattool.editing section:not(.editor) .text:hover {
-    background: #bdbebc !important;
+    background: #d4d7dc !important;
     color: #000;
 }
 
@@ -1393,18 +1387,20 @@ body.cattool:not(.editing) article {
 
 .graysmall {
     width: 100%;
-    background: #fbfbfb;
+    background: #fff;
     float: left;
     position: relative;
-    border-bottom: 1px solid #ccc;
     color: #666;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
+    border-top: 1px solid #f2f4f7;
 }
 
-.graysmall:last-child {
-    border-bottom: none !important
+/*
+.graysmall:first-child {
+    border-top: 0;
 }
+*/
 
 .tab.concordances {
     text-align: center;
@@ -1439,7 +1435,6 @@ body.cattool:not(.editing) article {
     background: #fff;
     text-align: left;
     width: 100%;
-    border-bottom: 1px solid #666;
     margin-top: 1px;
 }
 
@@ -1472,7 +1467,7 @@ section.loaded .submenu {
     float: left;
     position: relative;
     width: auto !important;
-    background: #efefef url(../img/point.gif) 0 0 repeat-x;
+    background: #f2f4f7;
     z-index: 9999999999999;
 }
 
@@ -1483,16 +1478,14 @@ body.noGlossary .tab-switcher-gl {
 .submenu a {
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
-    padding: 4px 20px;
+    padding: 5px 20px;
     display: block;
     color: #939598;
     font-size: 16px;
     float: left;
-    font-weight: bold;
     text-decoration: none;
-    border-right: 1px solid #666;
-    border-top: 1px solid #666;
-    -webkit-box-shadow: inset 0 -1px 4px #ccc;
+    border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc;
 }
 
 .submenu .notification {
@@ -1540,12 +1533,10 @@ body.noGlossary .tab-switcher-gl {
 .submenu li.active a {
     background: #fff !important;
     color: #666;
-    text-shadow: none;
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
     margin: 0px 0 -1px 0;
     outline: none;
     padding-top: 5px !important;
+    border-bottom: 1px solid white;
 }
 
 .submenu li.modified a {
@@ -1560,7 +1551,8 @@ body.noGlossary .tab-switcher-gl {
     display: none;
     float: left;
     width: 100%;
-    background: #fff !important;
+    background: #ffffff !important;
+    border-top: 1px solid #f2f4f7;
 }
 
 .sub-editor.open {
@@ -2303,11 +2295,9 @@ body.filtering {
     font-size: 12px;
     float: left;
     text-align: left;
-    background: #efefef;
+    background: #f2f4f7;
     border-bottom: 1px solid #ccc;
     margin-bottom: 0px;
-    -webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;
-    box-shadow: inset 0 1px 1px 1px #f4f7f9;
 }
 
 .header .repetition {
@@ -2470,6 +2460,15 @@ section.editor {
     z-index: 2;
     position: relative;
     height: 100%;
+    box-shadow: 0 1px 20px rgba(0, 0, 0, 0.45) !important;
+    width: 102%;
+    margin-left: -1%;
+}
+
+section.editor .sid {
+    left: -5%;
+    width: 6%;
+    color: black;
 }
 
 .source {
@@ -2532,7 +2531,7 @@ section.ice-locked .text {
 }
 
 body.editing section:not(.editor).ice-locked .text {
-    background: #c1c2c2 !important
+    background: #d3d6da !important;
 }
 
 section.ice-unlocked .next-unapproved {
@@ -2571,18 +2570,17 @@ body.archived section {
 
 section.readonly .text,
 body.archived section .text {
-    background: rgba(250, 250, 250, 0.1);
-    color: #525252;
+    background: #f2f4f7;
+    color: #a4a6a9;
     cursor: not-allowed;
-    -webkit-box-shadow: inset 0 1px 1px -1px #ccc;
-    box-shadow: inset 0 1px 1px -1px #ccc;
-    /*color: #fff;*/
 }
 
 /*section.readonly .status-container,
 body.archived section .status-container {
     display: none;
 }*/
+
+
 
 .editarea div:last-child {
     margin-bottom: -22px !important;
@@ -2595,9 +2593,11 @@ body.archived section .status-container {
     word-break: normal;
     font-variant-ligatures: none;
     line-height: 27px;
-    box-shadow: inset 0 1px 3px #ddd;
-    border: 1px solid rgba(34, 36, 38, 0.15);
     outline: none;
+    color: #000;
+    border: 1px solid #dedede;
+    box-shadow: inset 0 1px 2px #ccc;
+    -webkit-box-shadow: inset 0 1px 2px #ccc;
 }
 .editor.editarea
 .highlighted1{
@@ -2962,13 +2962,13 @@ body.rtl-target .editor .editarea span {
     margin-top: 10px;
 }
 
-.graysmall {
+/*.graysmall {
     color: #333;
     background: #fbfbfb;
-}
+}*/
 
 .graysmall.notEditable {
-    background: #ccc;
+   /* background: #ccc;*/
 }
 
 .graysmall-details li {
@@ -2981,12 +2981,12 @@ body.rtl-target .editor .editarea span {
 }
 
 .graysmall:hover {
-    background: #e9e8e9;
+    background: #f2f4f7;
     cursor: default;
 }
 
 .graysmall.notEditable:hover {
-    background: #999;
+    /*background: #999;*/
 }
 
 .graysmall:hover li span {
@@ -3178,7 +3178,7 @@ section.readonly:hover .ice-locked-label {
     height: 98%;
     padding-bottom: 7px;
     background: #f5f5f5;
-    top: 3%;
+    top: 4%;
     margin: -6px 0 0 0 !important;
     border-bottom: 0;
 }
@@ -3757,6 +3757,7 @@ span.locked.tag-html-container-close {
 
     p.split-shortcut, .editing .sid .txt {
         font-size: 10px;
+        margin: 12px 8px 0 -8px;
     }
 
 }
@@ -3893,6 +3894,11 @@ span.locked.tag-html-container-close {
     .sid {
         left: -7%;
         width: 7%;
+    }
+
+    section.editor .sid {
+        left: -5.5%;
+        width: 6%;
     }
 
 }
@@ -5015,13 +5021,13 @@ body.cattool .mgmt-table-mt .activemt {
 
 .submenu li.footerSwitcher {
     float: left;
-    width: 23px !important;
-    height: 27px;
-    border: 1px solid #666666;
+    width: 24px !important;
+    height: 29px;
     border-left: 0 !important;
-    background: #3aa9dd url(../img/matches-down.png) 5px 9px no-repeat !important;
+    background: #3aa9dd url(../../img/matches-down.png) 5px 12px no-repeat !important;
     cursor: pointer;
     border-bottom: 0;
+    padding-top: 1px;
 }
 
 .submenu li.footerSwitcher:hover {
