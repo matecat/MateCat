@@ -33,6 +33,10 @@ class SegmentFooterTabIssues extends React.Component {
         } else {
             $( this.selectIssueCategoryWrapper ).find( '.ui.dropdown' ).addClass( 'disabled' );
         }
+        let self = this;
+        setTimeout(function () {
+            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', self.state.issues.length);
+        });
     }
 
     componentWillUnmount() {
@@ -40,6 +44,12 @@ class SegmentFooterTabIssues extends React.Component {
         SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
+    componentWillMount() {
+        let categories = JSON.parse( config.lqa_nested_categories ).categories;
+        this.setState( {
+            categoriesIssue: categories
+        } )
+    }
 
     trackChanges( sid, editareaText ) {
         let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
@@ -68,13 +78,10 @@ class SegmentFooterTabIssues extends React.Component {
             segment: segment,
             issues: issues
         } );
-    }
-
-    componentWillMount() {
-        let categories = JSON.parse( config.lqa_nested_categories ).categories;
-        this.setState( {
-            categoriesIssue: categories
-        } )
+        let self = this;
+        setTimeout(function (  ) {
+            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
+        });
     }
 
     allowHTML( string ) {
