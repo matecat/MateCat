@@ -3704,7 +3704,9 @@ span.locked.tag-html-container-close {
 
 .editarea .locked.order-error,
 .editarea .locked.order-error .locked,
-.source .locked.order-error {
+.source .locked.order-error,
+.editarea .locked a,
+.source .locked a{
     color: #e000ff !important;
 }
 
