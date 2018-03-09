@@ -335,7 +335,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $stmt->execute( $where_values );
 
             return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
-                return $id_segment;
+                return (int)$id_segment;
             } );
         }
 

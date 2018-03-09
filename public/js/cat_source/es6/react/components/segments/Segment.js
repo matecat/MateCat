@@ -204,7 +204,7 @@ class Segment extends React.Component {
         if (this.state.unlocked) {
             //TODO: move this to SegmentActions
             UI.removeFromStorage('unlocked-' + this.props.segment.sid);
-            UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
+            // UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
         } else {
             UI.addInStorage('unlocked-'+ this.props.segment.sid, true);
             UI.editAreaClick(this.section);
