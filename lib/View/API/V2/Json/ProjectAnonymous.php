@@ -26,9 +26,20 @@ class ProjectAnonymous extends Project {
     }
 
     /**
+     * @param bool $called_from_api
+     *
+     * @return $this
+     */
+    public function setCalledFromApi( $called_from_api ) {
+        return $this;
+    }
+
+    /**
      * @param $data Projects_ProjectStruct
      *
      * @return array
+     * @throws \Exception
+     * @throws \Exceptions\NotFoundError
      */
     public function renderItem( Projects_ProjectStruct $data ) {
 

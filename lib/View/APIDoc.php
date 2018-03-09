@@ -19,8 +19,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
     <link href="/public/css/legacy-misc.css" rel="stylesheet" type="text/css" />
     <link href="/public/css/build/common.css" rel="stylesheet" type="text/css" />
-    <script src="/public/js/lib/jquery.js"></script>
-      <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
   <link href='/public/api/dist/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='/public/api/dist/css/print.css' media='print' rel='stylesheet' type='text/css'/>
@@ -28,7 +27,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <script>
         /*<![CDATA[*/
         config = {} ;
-        config.swagger_host = '<?php echo INIT::$HTTPHOST ?>';
+        config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
         /*]]>*/
     </script>
 

@@ -117,15 +117,15 @@
      * @returns Deferred
      */
     var animateScroll = function( segment, speed ) {
-        var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
+        var scrollAnimation = $( scrollSelector ).stop();
         var pos ;
         var prev = segment.prev('section') ;
-
+        var searchHeight = ($('.searchbox:visible').length > 0) ? $('.searchbox:visible').height() : 0;
         // XXX: this condition is necessary **only** because in case of first segment of a file,
         // the previous element (<ul>) has display:none style. Such elements are ignored by the
         // the .offset() function.
         var commonOffset = $('.header-menu').height() +
-            $('.searchbox:visible').height() ;
+            searchHeight ;
 
         if ( prev.length ) {
             pos = prev.offset().top - commonOffset ;
@@ -135,7 +135,9 @@
 
         scrollAnimation.animate({
             scrollTop: pos
-        }, speed);
+        }, speed, function (  ) {
+            console.log("ANIMATE")
+        });
 
         return scrollAnimation.promise() ; 
     }

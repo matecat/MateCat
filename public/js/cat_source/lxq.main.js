@@ -230,7 +230,7 @@ LXQ.init  = function () {
                 //LXQ.reloadPowertip();
             }
         };
-        $(document).on('ready', function () {
+        $(document).ready(function () {
             initConstants();
 
             var delegate = '#outer';
@@ -686,7 +686,7 @@ LXQ.init  = function () {
             //$(area).html(text);
             return text;
         };
-        var toogleHighlighting = function () {
+        var toggleHighlighting = function () {
             var highlights = $('#outer').find('lxqwarning#lexiqahighlight');
             //console.dir(highlights);
             $.each(highlights, function(i, element) {
@@ -1263,7 +1263,7 @@ LXQ.init  = function () {
             cleanUpHighLighting: cleanUpHighLighting,
             colors: colors,
             toogleHighlightInSegment: toogleHighlightInSegment,
-            toogleHighlighting:toogleHighlighting,
+            toggleHighlighting:toggleHighlighting,
             shouldHighlighWarningsForSegment: shouldHighlighWarningsForSegment,
             getVisibleWarningsCountForSegment:getVisibleWarningsCountForSegment,
             getIgnoredWarningsCountForSegment:getIgnoredWarningsCountForSegment,

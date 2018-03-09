@@ -10,7 +10,7 @@ export default class GMTSelect extends React.Component {
         if (this.props.direction && this.props.direction === 'up') {
             direction = 'upward';
         }
-        var timezoneToShow = $.cookie( "matecat_timezone" );
+        var timezoneToShow = Cookies.get( "matecat_timezone" );
         $(this.gmtSelect).dropdown('set selected', timezoneToShow);
         $(this.gmtSelect).dropdown({
             direction: direction,

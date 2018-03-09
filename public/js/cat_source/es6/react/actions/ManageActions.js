@@ -196,7 +196,7 @@ let ManageActions = {
                     });
                 });
             }
-        ).error(function (response) {
+        ).fail(function (response) {
             console.log("Error change assignee", response);
             UI.showNotificationProjectsChanged();
             UI.reloadProjects();
@@ -288,7 +288,7 @@ let ManageActions = {
             //     });
             // }
 
-        }).error(function (response) {
+        }).fail(function (response) {
             console.log("Error change assignee", response);
             UI.showNotificationProjectsChanged();
             UI.reloadProjects();
