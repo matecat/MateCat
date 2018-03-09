@@ -16,6 +16,7 @@ div.segment-notes ul.graysmall li span.note-label {
     background: #f2f4f7;
     box-sizing: border-box;
     position: relative;
+    border: 5px solid white;
 }
 
 .segment-notes-container {

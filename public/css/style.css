@@ -1307,7 +1307,7 @@ article {
     height: 100%;
 }
 
-.text {
+section .body > .text {
     width: 100%;
     position: relative;
     background: #ffffff;
@@ -1316,8 +1316,12 @@ article {
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-
 }
+
+/*.text {
+    width: 100%;
+    float: left;
+}*/
 
 .popup-tm .text, .popup-tm .text:hover, .header-menu .text, .header-menu .text:hover {
     background: transparent;
@@ -1356,7 +1360,7 @@ body.cattool:not(.editing) article {
     border-top: none;*/
 }
 
-.editor .text {
+section.editor .body > .text {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -1379,11 +1383,6 @@ body.cattool:not(.editing) article {
 
 .sub-editor .set-glossary.disabled {
     background: none !important;
-}
-
-.text {
-    width: 100%;
-    float: left;
 }
 
 .graysmall {
@@ -1533,11 +1532,7 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu li.active a {
     background: #fff !important;
-    color: #666;
-    margin: 0px 0 -1px 0;
     outline: none;
-    padding-top: 5px !important;
-    border-bottom: 1px solid white;
 }
 
 .submenu li.modified a {
@@ -2440,15 +2435,6 @@ section .text .warning {
     display: none;
 }
 
-/*.text {
-    overflow: hidden;
-}*/
-
-/*textarea, .editarea {
-    position: relative;
-    z-index: 0;
-}*/
-
 section.status-new .editarea {
     text-indent: -20000px;
 }
@@ -3176,7 +3162,7 @@ section.readonly:hover .ice-locked-label {
     display: block;
     position: absolute;
     right: 0;
-    height: 98%;
+    height: 96%;
     padding-bottom: 7px;
     background: #ccced2;
     top: 4%;
@@ -5073,6 +5059,8 @@ section .footer .tab.open {
 
 section.loaded .footer .tab.open {
     display: block;
+    z-index: 0;
+    position: relative;
 }
 
 /*
