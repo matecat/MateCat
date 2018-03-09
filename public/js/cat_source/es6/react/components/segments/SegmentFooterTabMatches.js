@@ -156,7 +156,7 @@ class SegmentFooterTabMatches extends React.Component {
                         data-id={match.id}
                         data-original= {match.segment}
                         onDoubleClick = {self.suggestionDblClick.bind(self, match, index+1)}>
-                        <li className="sugg-source" > {trashIcon}
+                        <li className="sugg-source" >
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-source'}
                                 className="suggestion_source"
@@ -171,6 +171,7 @@ class SegmentFooterTabMatches extends React.Component {
                                 className="translation"
                                 dangerouslySetInnerHTML={ self.allowHTML(match.translationDecodedHtml) }>
                             </span>
+                            {trashIcon}
                         </li>
                         <ul className="graysmall-details">
                             <li className={'percent ' + match.percentClass}>
