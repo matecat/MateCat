@@ -1229,7 +1229,7 @@ class QA {
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ) {
-                $this->_addError( self::ERR_TAG_MISMATCH );
+                $this->_addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
 
                 return;
