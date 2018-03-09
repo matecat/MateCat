@@ -41,7 +41,9 @@ abstract class Engines_Results_AbstractResponse {
      * a subset of the attributes may be required to be bound to the query.
      *
      * @param $mask array|null a mask for the keys to return
+     *
      * @return array
+     * @throws ReflectionException
      */
     public function toArray( $mask = null ){
 

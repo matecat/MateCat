@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
 use RemoteFiles\RemoteFileServiceNameStruct;
 use Teams\TeamStruct;
 
@@ -312,6 +313,71 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         return $this->_fetchObject( $stmt, new RemoteFileServiceNameStruct(), [] );
+
+    }
+
+    /**
+     * @param      $pid
+     * @param string|null $project_password
+     * @param string|null $jid
+     * @param string|null $jpassword
+     *
+     * @return ShapelessConcreteStruct[]
+     */
+    public function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
+
+        $query = "
+            SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
+    
+                   SUM(s.raw_word_count) AS file_raw_word_count,
+                   SUM(st.eq_word_count) AS file_eq_word_count,
+                   SUM(st.standard_word_count) AS file_st_word_count,
+                   COUNT(s.id) AS total_segments,
+    
+                   p.fast_analysis_wc,
+                   p.tm_analysis_wc,
+                   p.standard_analysis_wc
+    
+                       FROM projects p
+                       INNER JOIN jobs j ON p.id=j.id_project
+                       INNER JOIN files f ON p.id=f.id_project
+                       INNER JOIN segments s ON s.id_file=f.id
+                       LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
+                       WHERE p.id= '$pid'
+                       AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                       %s
+                       %s
+                       %s
+                       GROUP BY f.id, j.id, j.password
+                       ORDER BY j.id,j.create_date, j.job_first_segment
+		";
+
+        $and_1 = $and_2 = $and_3 = null;
+        $values = [];
+
+        if ( !empty( $project_password ) ) {
+            $and_1 = " and p.password = ? ";
+            $values[] = $project_password;
+        }
+
+        if ( !empty( $jid ) ) {
+            $and_2 = " and j.id = ? ";
+            $values[] = $jid;
+        }
+
+        if ( !empty( $jpassword ) ) {
+            $and_3 = " and j.password = ? ";
+            $values[] = $jpassword;
+        }
+
+        $query = sprintf( $query, $and_1, $and_2, $and_3 );
+
+        $stmt = $this->_getStatementForCache( $query );
+
+        return $this->_fetchObject( $stmt,
+                new ShapelessConcreteStruct(),
+                $values
+        );
 
     }
 

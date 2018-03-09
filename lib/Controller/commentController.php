@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
+
 class commentController extends ajaxController {
 
     protected $id_segment;
@@ -158,9 +160,13 @@ class commentController extends ajaxController {
 
     private function projectData() {
         if ( $this->project_data == null ) {
-            // FIXME: this is not optimal, should make use of DAO and
-            // return just one record, not an array of records.
-            $this->project_data = getProjectData( $this->job[ 'id_project' ] );
+
+            // FIXME: this is not optimal, should return just one record, not an array of records.
+            /**
+             * @var $projectData ShapelessConcreteStruct[]
+             */
+            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->job[ 'id_project' ] );
+
         }
 
         return $this->project_data ;

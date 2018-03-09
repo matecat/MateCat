@@ -46,10 +46,11 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
+     * @return null
      * @throws EndQueueException
      * @throws ReQueueException
-     *
-     * @return null
+     * @throws \Exception
+     * @throws \Exceptions\ValidationError
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -69,7 +70,6 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param ContributionStruct $contributionStruct
      *
-     * @throws EndQueueException
      * @throws ReQueueException
      * @throws \Exception
      * @throws \Exceptions\ValidationError
@@ -78,8 +78,6 @@ class SetContributionWorker extends AbstractWorker {
 
         $jobStructList = $contributionStruct->getJobStruct();
         $jobStruct = array_pop( $jobStructList );
-//        $userInfoList = $contributionStruct->getUserInfo();
-//        $userInfo = array_pop( $userInfoList );
 
         $this->_loadEngine( $contributionStruct );
 
@@ -129,6 +127,12 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param array              $config
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws ReQueueException
+     */
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
 
         $config[ 'segment' ]        = $contributionStruct->segment;

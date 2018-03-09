@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\V2\Json\ProjectUrls;
 use API\V2\Validators\ProjectPasswordValidator ;
+use DataAccess\ShapelessConcreteStruct;
 
 class UrlsController extends KleinController {
 
@@ -22,13 +23,16 @@ class UrlsController extends KleinController {
 
         $this->featureSet->loadForProject( $this->validator->getProject() );
 
-        $projectData = getProjectData( $this->validator->getProject()->id );
+        /**
+         * @var $projectData ShapelessConcreteStruct[]
+         */
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->validator->getProject()->id );
 
         $formatted = new ProjectUrls( $projectData );
 
         $formatted = $this->featureSet->filter( 'projectUrls', $formatted );
 
-        $this->response->json( $formatted->render() );
+        $this->response->json( [ 'urls' => $formatted->render() ] );
 
     }
 
