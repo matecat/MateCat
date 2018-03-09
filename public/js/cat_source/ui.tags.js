@@ -122,14 +122,21 @@ $.extend(UI, {
     transformTagsWithHtmlAttribute: function (tx) {
         try {
             var base64Array=[];
+            var phIDs =[];
             tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?id="(.*?)"/gi, function (match, text) {
+                phIDs.push(text);
+                return match;
+            });
 
             tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
                 return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
             });
             tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
                 base64Array.push(text);
-                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'>" + Base64.decode(text) + "</span>";
+                var id = phIDs.shift();
+                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
             });
             tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
                 var base = base64Array.shift();

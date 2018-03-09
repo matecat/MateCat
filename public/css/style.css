@@ -1266,7 +1266,7 @@ article {
 
 #outer.loading {
     display: block;
-    background: url(../img/loading.gif) 48% bottom no-repeat;
+    background: url(../img/loading.gif) 48% center no-repeat;
     background-size: 30px 30px !important;
     float: left;
     position: relative;
