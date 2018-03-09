@@ -155,12 +155,12 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * Use when only the metadata are needed
      *
-     * @param Users_UserStruct $UserQuery
+     * @param Users_UserStruct|DataAccess_IDaoStruct $UserQuery
      *
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      * @throws Exception
      */
-    public function read( Users_UserStruct $UserQuery ) {
+    public function read( DataAccess_IDaoStruct $UserQuery ) {
 
         $UserQuery = $this->sanitize( $UserQuery );
 
