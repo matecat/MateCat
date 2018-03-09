@@ -95,7 +95,7 @@ class SegmentBody extends React.Component {
         }
         let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.copySource.keystrokes.mac : UI.shortcuts.copySource.keystrokes.standard;
         return (
-            <div className="text">
+            <div className="text segment-body-content">
                 <div className="wrap">
                     <div className="outersource">
                         <SegmentSource

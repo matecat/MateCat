@@ -99,7 +99,7 @@ class SegmentFooterTabConcordance extends React.Component {
                     return;
                 var prime = (index < UI.numDisplayContributionMatches) ? ' prime' : '';
 
-                var disabled = (this.id == '0') ? true : false;
+                // var disabled = (this.id == '0') ? true : false;
                 var cb = this.created_by;
                 var cl_suggestion = UI.getPercentuageClass( this.match );
 
@@ -116,9 +116,12 @@ class SegmentFooterTabConcordance extends React.Component {
                 var element = <ul key={index} className={["graysmall",
                     prime].join( ' ' )} data-item={index + 1} data-id={this.id}>
                     <li className={"sugg-source"}>
-                        {(disabled) ? (null) : (<a id={segment_id + "-tm-" + this.id + "-delete"} href="#" className="trash" title="delete this row"></a>)}
-                        <span id={segment_id + '-tm-' + this.id + '-source'} className={"suggestion_source"} dangerouslySetInnerHTML={self.allowHTML( leftTxt )}></span></li>
-                    <li className={"b sugg-target"}><span id={segment_id + "-tm-" + this.id + "-translation"} className={"translation"} dangerouslySetInnerHTML={self.allowHTML( rightTxt )}></span>
+                        <span id={segment_id + '-tm-' + this.id + '-source'} className={"suggestion_source"} dangerouslySetInnerHTML={self.allowHTML( leftTxt )}/>
+                    </li>
+                    <li className={"b sugg-target"}>
+                        <span id={segment_id + "-tm-" + this.id + "-translation"} className={"translation"} dangerouslySetInnerHTML={self.allowHTML( rightTxt )}/>
+                        {/*{(disabled) ? (null) : (<span id={segment_id + "-tm-" + this.id + "-delete"} className="trash" title="delete this row"></span>)}*/}
+
                     </li>
                     <ul className={"graysmall-details"}>
                         <li>{this.last_update_date}</li>
