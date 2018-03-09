@@ -675,8 +675,8 @@ $.extend(UI, {
 
     handleSourceCopyEvent: function ( e ) {
         var elem = $(e.target);
-        if ( elem.hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked');
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = cloneTag.text();
@@ -686,8 +686,8 @@ $.extend(UI, {
     },
     handleSourceDragEvent: function ( e ) {
         var elem = $(e.target);
-        if ( elem.hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked');
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = elem.parent('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());

@@ -3685,6 +3685,14 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
+    background-color: #f2f4f7;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.editarea .locked:hover,
+.source .locked:hover {
+    background-color: #dddff0;
 }
 
 .editarea .locked.mismatch,
@@ -3693,13 +3701,19 @@ span.locked.tag-html-container-close {
     color: red !important;
 }
 
-
+.source .locked a,
+.target .locked a,
+.ice-locked .targetarea .locked a,
+.footer .locked a,
+.splitArea .locked a {
+    color: #767676
+}
 
 .editarea .locked.order-error,
 .editarea .locked.order-error .locked,
 .source .locked.order-error,
-.targetarea .locked a,
-.source .locked a{
+.opened .targetarea .locked a,
+.opened .source .locked a {
     color: #e000ff !important;
 }
 
