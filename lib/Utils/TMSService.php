@@ -205,8 +205,8 @@ class TMSService {
     }
 
     /**
-     * Poll this function to know the status of a TMX upload
-     *
+     * @return array
+     * @throws Exception
      */
     public function tmxUploadStatus() {
 
@@ -381,6 +381,7 @@ class TMSService {
      * @param $userSurname
      *
      * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
      */
     public function requestTMXEmailDownload( $userMail, $userName, $userSurname ){
 
@@ -396,6 +397,10 @@ class TMSService {
 
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function downloadGlossary(){
         $fileName = "/tmp/GLOSS_" . $this->tm_key;
         $fHandle = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
@@ -406,15 +411,16 @@ class TMSService {
     /**
      * Export Job as Tmx File
      *
-     * @param      $jid
-     * @param      $jPassword
-     * @param      $sourceLang
-     * @param      $targetLang
+     * @param          $jid
+     * @param          $jPassword
+     * @param          $sourceLang
+     * @param          $targetLang
      *
      * @param int|null $uid
      *
      * @return SplTempFileObject $tmpFile
      *
+     * @throws Exception
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 

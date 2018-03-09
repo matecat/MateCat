@@ -807,6 +807,11 @@ class setTranslationController extends ajaxController {
     /**
      * @param $_Translation
      * @param $old_translation
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
      */
     private function evalSetContribution( $_Translation, $old_translation ) {
         if ( in_array( $this->status, array(

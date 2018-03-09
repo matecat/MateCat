@@ -134,6 +134,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @return array
      * @throws Exceptions_RecordNotFound
      * @throws \Exceptions\ValidationError
+     * @throws \API\V2\Exceptions\AuthenticationError
      */
     public function get( $_config ) {
 
@@ -476,6 +477,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param null|string  $source
      * @param null|string  $target
      * @param null|boolean $strict
+     *
+     * @return array
      */
     public function createExport( $key, $source = null, $target = null, $strict = null ) {
 
