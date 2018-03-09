@@ -3671,6 +3671,20 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
+    background-color: #dcdfe4;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.opened .editarea .locked,
+.opened .source .locked,
+.opened .target .locked,
+.opened .ice-locked .targetarea .locked,
+.opened .footer .locked,
+.opened .splitArea .locked {
+    font-size: 15px;
+    color: #767676;
+    font-style: italic;
     background-color: #f2f4f7;
     border-radius: 7px;
     padding: 3px;
