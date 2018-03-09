@@ -23,11 +23,6 @@ class TranslationChildProject extends AbstractChildProject {
     protected $originMap ;
 
     /**
-     * @var projectType
-     */
-    protected $projectType ;
-
-    /**
      * TranslationChildProject constructor.
      *
      * @param Chunks_ChunkStruct $chunk
@@ -38,12 +33,6 @@ class TranslationChildProject extends AbstractChildProject {
     public function __construct( Chunks_ChunkStruct $chunk ) {
         parent::__construct( $chunk, 'translate' );
         $this->originMap = new SegmentOrigin() ;
-
-        $this->projectType = $this->chunk->getProject()->getMetadataValue('project_type') ;
-
-        if ( !in_array($this->projectType, ['MT', 'HT'] ) ) {
-            throw new Exception('project_type is not valid ' . $this->projectType ) ;
-        }
     }
 
     protected function _submitData() {
@@ -177,10 +166,23 @@ class TranslationChildProject extends AbstractChildProject {
     }
 
     protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
-        $originName = is_null( $this->projectType ) ? 'MT' : $this->projectType ;
-        $object = $this->originMap->getByName( $originName ) ;
+        $originName = null ;
 
+        $this->chunk->getProject()->getFeatures()->run(
+                'filterDqfSegmentOriginName', $originName, $translation, $this->chunk
+        ) ;
+
+        if ( is_null( $originName ) ) {
+            $originName = $this->_computeDefaultOriginName( $translation ) ;
+        }
+
+        $object = $this->originMap->getByName( $originName ) ;
         return $object['id'] ;
+    }
+
+    //
+    protected function _computeDefaultOriginName( ExtendedTranslationStruct $translationStruct ) {
+        return 'HT' ;
     }
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
