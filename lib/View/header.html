@@ -13,7 +13,7 @@
     </p>
     <div class="wrapper">
         <div>
-            <div metal:use-macro="common.html/login_includes" />
+            <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/common.html/login_includes" />
         </div>
 
         <ul class="header-menu" tal:condition="php: !job_archived ">

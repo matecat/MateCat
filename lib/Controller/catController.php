@@ -197,6 +197,7 @@ class catController extends viewController {
             $this->job_archived = true;
             $this->job_owner    = $data[ 0 ][ 'job_owner' ];
         }
+
         $this->wStruct = CatUtils::getWStructFromJobArray( $data[0] );
         $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
@@ -328,6 +329,7 @@ class catController extends viewController {
             $this->template->owner_email         = INIT::$SUPPORT_MAIL;
 
             $team = $this->project->getTeam();
+
             if( !empty( $team ) ){
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
@@ -405,6 +407,7 @@ class catController extends viewController {
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
+
         $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
         $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 

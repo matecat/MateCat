@@ -11,6 +11,7 @@ var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
 var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 var SegmentTabRevise = require('./SegmentFooterTabRevise').default;
+var SegmentTabIssues = require('./footer-tab-issues/SegmentFooterTabIssues').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
@@ -76,6 +77,15 @@ class SegmentFooter extends React.Component {
                 visible : false,
                 open : false,
                 elements : []
+            },
+            issues : {
+                label : 'Issues',
+                code : 'issues',
+                tab_class : 'issues',
+                enabled : false,
+                visible : false,
+                open : false,
+                elements : []
             }
         };
         this.state = {
@@ -86,7 +96,7 @@ class SegmentFooter extends React.Component {
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
-        this.addGlossaryIndex = this.addGlossaryIndex.bind(this);
+        this.addTabIndex = this.addTabIndex.bind(this);
     }
 
     registerTab(tabName, visible, open) {
@@ -166,6 +176,17 @@ class SegmentFooter extends React.Component {
                     segment={this.props.segment}
                     decodeTextFn={this.props.decodeTextFn}/>;
                 break;
+            case 'issues':
+                return <SegmentTabIssues
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}
+                    translation={this.props.segment.translation}
+                    segment={this.props.segment}
+                    decodeTextFn={this.props.decodeTextFn}/>;
+                break;
             default:
                 return ''
         }
@@ -212,7 +233,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
-        SegmentStore.addListener(SegmentConstants.ADD_GLOSSARY_INDEX, this.addGlossaryIndex);
+        SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
     }
 
     componentWillUnmount() {
@@ -220,7 +241,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
-        SegmentStore.removeListener(SegmentConstants.ADD_GLOSSARY_INDEX, this.addGlossaryIndex);
+        SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
     }
 
     componentWillMount() {
@@ -231,11 +252,23 @@ class SegmentFooter extends React.Component {
         return { __html: string };
     }
 
-    addGlossaryIndex(sid, index) {
+    // addGlossaryIndex(sid, index) {
+    //     if (this.props.sid == sid) {
+    //         let tabs = $.extend(true, {}, this.state.tabs);
+    //         if (tabs.glossary) {
+    //             tabs.glossary.index = index;
+    //             this.setState({
+    //                 tabs: tabs
+    //             })
+    //         }
+    //     }
+    // }
+
+    addTabIndex(sid, tab, index) {
         if (this.props.sid == sid) {
             let tabs = $.extend(true, {}, this.state.tabs);
-            if (tabs.glossary) {
-                tabs.glossary.index = index;
+            if (tabs[tab]) {
+                tabs[tab].index = index;
                 this.setState({
                     tabs: tabs
                 })

@@ -4,17 +4,22 @@
 
     UI.scrollSelector = 'html,body';
 
-    var tryToRenderAgain = function( segment, highlight ) {
+    var tryToRenderAgain = function( idSegment, highlight, open ) {
         UI.unmountSegments();
-        
-        var id_segment = segment.selector.split('-')[1];
+        if (open) {
+            UI.render({
+                firstLoad: false,
+                segmentToOpen: idSegment,
+                highlight : highlight
+            });
+        } else {
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: idSegment,
+                highlight : highlight
+            });
+        }
 
-        UI.render({
-            firstLoad: false,
-            segmentToScroll: id_segment,
-            highlight : highlight 
-        });
-        
     }
 
     var someOpenSegmentOnPage = function() {
@@ -83,19 +88,21 @@
         return scrollPromise ; 
     }
 
-    var scrollSegment = function(inputSegment, highlight, quick) {
-        var segment = $(inputSegment);
+    var scrollSegment = function(inputSegment, idSegment, highlight, quick) {
+        var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
 
         quick = quick || false;
         highlight = highlight || false;
         
         if ( segment.length ) {
             return doDirectScroll( segment, highlight, quick ) ; 
-        } else if($(segment.selector + '-1').length) {
+        } else if( $(segment.selector + '-1').length ) {
             return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
         }
-        else {
-            return tryToRenderAgain( segment, highlight ) ;
+        else if ( idSegment ){
+            return tryToRenderAgain( idSegment, highlight, true ) ;
+        } else {
+            console.error("Segment not found in the UI");
         }
 
 

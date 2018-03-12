@@ -245,6 +245,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/segment_notes.*.js',
 
                     basePath + 'cat_source/ui.review.js',
+                    basePath + 'cat_source/review_extended_footer.js',
+                    basePath + 'cat_source/review_extended_footer.*.js',
                     basePath + 'cat_source/review_extended.js',
                     basePath + 'cat_source/review_extended.*.js',
                     basePath + 'cat_source/review_improved.js',
@@ -644,6 +646,10 @@ module.exports = function(grunt) {
         // 'strip',
         'sass',
         'replace:css'
+    ]);
+
+    grunt.registerTask('only-react', [
+        'browserify:components',
     ]);
 
     grunt.registerTask('test', [

@@ -257,6 +257,8 @@ UI = {
     },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
+            segment.find('.editarea').attr('contenteditable', 'false');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -277,10 +279,6 @@ UI = {
             this.deActivateSegment(byButton, segment);
             this.removeGlossaryMarksFormSource();
 
-            segment.find('.editarea').attr('contenteditable', 'false');
-            setTimeout(function () {
-                SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
-            }, 0);
             $('span.locked.mismatch', segment).removeClass('mismatch');
 
 
@@ -746,7 +744,7 @@ UI = {
 
 			// if getting segments before, UI points to the segment triggering the event
 			if ((where == 'before') && (numsegToAdd)) {
-				this.scrollSegment($('#segment-' + this.segMoving));
+				this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
 			}
 
 			if (this.body.hasClass('searchActive')) {
@@ -827,7 +825,7 @@ UI = {
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
 			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
-				this.scrollSegment(segToScrollElem, options.highlight );
+				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
                 $('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();

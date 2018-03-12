@@ -428,7 +428,7 @@ border-bottom: 3px solid #1B5D7B!important;
 {
     position: fixed;
     top: -1000px;
-    left: 210px;
+    left: 135px;
     width: 400px;
     background: #fff;
     border: 1px solid #333;
@@ -2372,6 +2372,7 @@ color: #999;}
     vertical-align: middle;
     border-top: 1px solid #ccc;
     box-shadow: inset 0 1px 0 0 #fff;
+    overflow: hidden;
 }
 
 .mgmt-tm td {
@@ -2682,6 +2683,7 @@ background-size: 25px!important;
 .wrapper-dropdown-5 .dropdown li:hover input
  {
     color: black;
+    background: #efefef !important;
 }
 
 /* Active state */
@@ -4888,7 +4890,7 @@ a.btn.pull-left.addtmx {
     margin-left: 5px;
 }
 
-a.pull-right.btn-grey.canceladdtmx {
+a.pull-right, .btn-grey.canceladdtmx {
     margin-right: -6px;
 }
 
@@ -4902,7 +4904,7 @@ a#add-mt-provider-cancel {
     position: relative;
 }*/
 
-a.existingKey.pull-right.btn-ok.addtmxfile {
+a.existingKey, .pull-right.btn-ok, .addtmxfile {
     margin-right: 4px;
     width: 108px;
 }

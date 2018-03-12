@@ -389,7 +389,6 @@ $.extend(UI, {
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
-
             var esc = 27 ;
 
             // ESC should close the current segment only if `article` is not
@@ -521,22 +520,12 @@ $.extend(UI, {
                 e.preventDefault();
                 e.stopPropagation();
             }
-		}).on('click', '.concordances .more', function(e) {
-			e.preventDefault();
-			tab = $(this).parents('.concordances');
-			container = $('.overflow', $(tab));
-			if($(tab).hasClass('extended')) {
-				UI.setExtendedConcordances(false);
-			} else {
-				UI.setExtendedConcordances(true);
-			}
-			$(this).parents('.matches').toggleClass('extended');
 		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
-			SegmentActions.highlightEditarea($(this).attr('data-goto'));
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
+			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});
 
 

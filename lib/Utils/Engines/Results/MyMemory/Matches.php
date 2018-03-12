@@ -21,6 +21,8 @@ class Engines_Results_MyMemory_Matches {
     public $prop;
     public $memory_key;
     public $ICE;
+    public $tm_properties;
+    public $source_note;
 
     public function __construct() {
 
@@ -31,7 +33,7 @@ class Engines_Results_MyMemory_Matches {
             throw new Exception( "No args defined for " . __CLASS__ . " constructor" );
         }
 
-        $match = array();
+        $match = [];
         if ( count( $args ) == 1 and is_array( $args[ 0 ] ) ) {
 
             $match = $args[ 0 ];
@@ -49,7 +51,7 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'match' ] = $match[ 'match' ] * 100;
             $match[ 'match' ] = $match[ 'match' ] . "%";
 
-            ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = array() );
+            ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
 
         }
 
@@ -65,7 +67,7 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'match' ]            = $args[ 2 ];
             $match[ 'created-by' ]       = $args[ 3 ];
             $match[ 'last-update-date' ] = $args[ 4 ];
-            $match[ 'prop' ]             = ( isset( $args[ 5 ] ) ? $args[ 5 ] : array() );
+            $match[ 'prop' ]             = ( isset( $args[ 5 ] ) ? $args[ 5 ] : [] );
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
@@ -86,13 +88,14 @@ class Engines_Results_MyMemory_Matches {
         $this->match            = array_key_exists( 'match', $match ) ? $match[ 'match' ] : 0;
         $this->memory_key       = array_key_exists( 'key', $match ) ? $match[ 'key' ] : '';
         $this->ICE              = array_key_exists( 'ICE', $match ) ? (bool)$match[ 'ICE' ] : false;
+        $this->tm_properties    = array_key_exists( 'tm_properties', $match ) ? json_decode( $match[ 'tm_properties' ], true ) : [];
 
-        $this->prop             = $match[ 'prop' ];
+        $this->prop = $match[ 'prop' ];
 
     }
 
     public function get_as_array() {
-        return ((array) $this);
+        return ( (array)$this );
     }
 
 }

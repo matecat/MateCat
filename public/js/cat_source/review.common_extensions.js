@@ -1,4 +1,4 @@
-if ( ReviewImproved.enabled() || ReviewExtended.enabled()) {
+if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
     /**
      * Split segment feature is not compatible with ReviewImproved.

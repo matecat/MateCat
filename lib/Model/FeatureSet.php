@@ -35,6 +35,11 @@ class FeatureSet {
         return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
 
+    /**
+     * @param $string
+     *
+     * @throws Exception
+     */
     public function loadFromString( $string ) {
         $feature_codes = FeatureSet::splitString( $string );
         $features = array();
@@ -53,6 +58,8 @@ class FeatureSet {
      * Features are attached to project via project_metadata.
      *
      * @param Projects_ProjectStruct $project
+     *
+     * @throws Exception
      */
     public function loadForProject( Projects_ProjectStruct $project ) {
         $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
@@ -60,6 +67,11 @@ class FeatureSet {
 
     /**
      * @param $metadata
+     *
+     * @throws AuthenticationError
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws ValidationError
      */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
         $project_dependencies = [];
@@ -74,6 +86,8 @@ class FeatureSet {
     /**
      *
      * @param $id_customer
+     *
+     * @throws Exception
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
@@ -94,9 +108,9 @@ class FeatureSet {
      * 3. filter the list based on the return of autoActivateOnProject()
      * 4. populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
      *
-     *
      * @param $id_customer
      *
+     * @throws Exception
      */
     public function loadAutoActivablesOnProject( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
@@ -115,17 +129,6 @@ class FeatureSet {
     }
 
     /**
-     * Loads the features starting from a given team.
-     *
-     * @param TeamStruct $team
-     */
-    public function loadFromTeam( TeamStruct $team ) {
-        $dao = new OwnerFeatures_OwnerFeatureDao() ;
-        $features = $dao->getByTeam( $team ) ;
-        $this->merge( $features );
-    }
-
-    /**
      * Returns the filtered subject variable passed to all enabled features.
      *
      * @param $method
@@ -137,6 +140,8 @@ class FeatureSet {
      * modified in cascade to the next function in the queue.
      * @throws Exceptions_RecordNotFound
      * @throws ValidationError
+     * @throws AuthenticationError
+     *
      * @internal param $id_customer
      */
     public function filter($method, $filterable) {
@@ -178,6 +183,19 @@ class FeatureSet {
         }
 
         return $filterable ;
+    }
+
+    /**
+     * Loads the features starting from a given team.
+     *
+     * @param TeamStruct $team
+     *
+     * @throws Exception
+     */
+    public function loadFromTeam( TeamStruct $team ) {
+        $dao = new OwnerFeatures_OwnerFeatureDao() ;
+        $features = $dao->getByTeam( $team ) ;
+        $this->merge( $features );
     }
 
     /**

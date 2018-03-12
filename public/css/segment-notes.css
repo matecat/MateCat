@@ -10,11 +10,24 @@ div.segment-notes ul.graysmall li span.note-label {
     float: left;
 }
 .segments-preview-footer {
-    float: left;
+    display: inline-block;
     padding: 20px 20px 10px;
+    width: 50%;
+    background: #f2f4f7;
+    box-sizing: border-box;
+    position: relative;
+    border: 5px solid white;
 }
+
+.segment-notes-container {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+    vertical-align: top;
+}
+
 .segments-preview-container {
-    width: 408px;
+    max-width: 408px;
     max-height: 300px;
     min-height: 200px;
     background-image: url(../../img/loading.gif);
@@ -24,8 +37,7 @@ div.segment-notes ul.graysmall li span.note-label {
     overflow-y: auto;
     cursor: pointer;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
-    margin-bottom: 10px;
-    position: relative;
+    margin: 0 auto;
 }
 
 .segments-preview-container:hover {
@@ -35,6 +47,7 @@ div.segment-notes ul.graysmall li span.note-label {
 
 .segments-preview-container img {
     width: 100%;
+    text-align: center;
 }
 
 .segments-notes-container div.note {
@@ -42,21 +55,32 @@ div.segment-notes ul.graysmall li span.note-label {
     padding: 20px;
     color: #666;
     list-style: none;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 16px;
     float: left;
     width: 100%;
 }
 
 .segments-notes-container div.note p{
     margin: 0;
+    line-height: 25px;
+}
+
+.segments-notes-container div.note p a {
+    text-decoration: underline;
+}
+
+.segments-notes-container div.note p a:hover {
+    text-decoration: none;
 }
 
 .note-label {
     font-weight: bold;
 }
 
-
+.tab-preview-screenshot {
+    text-align: center;
+    padding-top: 10px;
+}
 
 .tab-preview-screenshot button {
     font-size: 14px;

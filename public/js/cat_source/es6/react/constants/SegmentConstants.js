@@ -41,5 +41,5 @@ module.exports = keyMirror({
     OPEN_TAB: null,
     RENDER_PREVIEW: null,
     ISSUE_DELETED: null,
-    ADD_GLOSSARY_INDEX: null
+    ADD_TAB_INDEX: null
 });

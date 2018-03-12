@@ -165,7 +165,7 @@ if ( Review.enabled() )
  * Only bind events for specific review type
  */
 
-if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' )) {
+if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' || Review.type === 'extended-footer' )) {
 
     $('html').on('open', 'section', function() {
         if($(this).hasClass('opened')) {
@@ -279,7 +279,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             if (goToNextNotApproved) {
                 UI.openNextTranslated();
             } else {
-                UI.gotoNextSegment();
+                UI.gotoNextSegment(sid);
             }
 
             var data = {

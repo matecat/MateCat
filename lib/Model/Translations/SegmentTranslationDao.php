@@ -344,24 +344,28 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     public static function getUnchangebleStatus( $segments_ids, $status ) {
 
-        //if approved all segments are changeble
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        //if translated all segments are changeble
+        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
             return [];
         }
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
 
-        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $sql            = "SELECT id_segment FROM segment_translations WHERE status != ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+
+            $sql = "SELECT id_segment FROM segment_translations WHERE status NOT IN( "
+                    . str_repeat( '?,', count( $where_values ) -1 ) . '?'
+                    . " ) AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
 
             $where_values = array_merge( $where_values, $segments_ids );
             $stmt         = $conn->prepare( $sql );
             $stmt->execute( $where_values );
 
             return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
-                return $id_segment;
+                return (int)$id_segment;
             } );
         }
 

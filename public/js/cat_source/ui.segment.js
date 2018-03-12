@@ -373,7 +373,7 @@
             quick = quick || false;
 
             if ($('#segment-' + this.currentSegmentId).length) {
-                UI.scrollSegment(this.currentSegment, false, quick);
+                UI.scrollSegment(this.currentSegment, this.currentSegmentId, false, quick);
             } else {
                 this.render({
                     firstLoad: false,
