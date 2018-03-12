@@ -73,6 +73,11 @@ $.extend(UI, {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+		}).on('keydown.shortcuts', null, "alt+s", function(e) {
+            var props = {
+                shortcuts: UI.shortcuts
+            };
+            APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
 		});
 
 		if (UI.isMac) {
@@ -595,7 +600,8 @@ $.extend(UI, {
 
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
-                    !UI.body.hasClass('side-tools-opened') ) {
+                    !UI.body.hasClass('side-tools-opened') &&
+					!$("body").hasClass("side-popup" ) ) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }
