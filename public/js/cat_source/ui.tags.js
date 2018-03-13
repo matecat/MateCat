@@ -107,7 +107,7 @@ $.extend(UI, {
 
         tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
-        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
+        tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag
         tx = this.transformTagsWithHtmlAttribute(tx);
         return tx;
     },

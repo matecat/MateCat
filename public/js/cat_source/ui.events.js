@@ -276,7 +276,7 @@ $.extend(UI, {
 			 */
 
             if(!$('.editor .rangySelectionBoundary.focusOut').length) {
-                if(!UI.isSafari) saveSelection();
+                saveSelection();
             }
 
             $('.editor .rangySelectionBoundary').addClass('focusOut');
