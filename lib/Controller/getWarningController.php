@@ -151,23 +151,24 @@ class getWarningController extends ajaxController {
 
         $issues_detail = [];
         $items         = [];
-        $totals         = [ QA::ERROR => [], QA::WARNING => [], QA::INFO => [] ];
+        $totals        = [ QA::ERROR => [], QA::WARNING => [], QA::INFO => [] ];
         foreach ( $result as $position => $_item ) {
 
             $items[] = $_item[ 'id_segment' ];
 
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::ERROR ]  = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::ERROR ];
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::WARNING ] = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::WARNING ];
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::INFO ]    = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::INFO ];
+            $exceptionList                                          = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::WARNING ] = $exceptionList[ QA::WARNING ];
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::INFO ]    = $exceptionList[ QA::INFO ];
 
-            if ( count( QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::ERROR ] ) > 0 ) {
+            if ( count( $exceptionList[ QA::ERROR ] ) > 0 ) {
                 $totals[ QA::ERROR ][] = $_item[ 'id_segment' ];
             }
 
-            if ( count( QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::WARNING ] ) > 0 ) {
+            if ( count( $exceptionList[ QA::WARNING ] ) > 0 ) {
                 $totals[ QA::WARNING ][] = $_item[ 'id_segment' ];
             }
-            if ( count( QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] )[ QA::INFO ] ) > 0 ) {
+            if ( count( $exceptionList[ QA::INFO ] ) > 0 ) {
                 $totals[ QA::INFO ][] = $_item[ 'id_segment' ];
             }
 
