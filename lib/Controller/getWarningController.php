@@ -145,13 +145,38 @@ class getWarningController extends ajaxController {
             return;
         }
 
-        foreach ( $result as $position => &$item ) {
-            $item = $item[ 'id_segment' ];
+        $issues_detail = [];
+        $items         = [];
+        $totals        = [ QA::ERROR => [], QA::WARNING => [], QA::INFO => [] ];
+        foreach ( $result as $position => $_item ) {
+
+            $items[] = $_item[ 'id_segment' ];
+
+            $exceptionList                                          = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::WARNING ] = $exceptionList[ QA::WARNING ];
+            $issues_detail[ $_item[ 'id_segment' ] ][ QA::INFO ]    = $exceptionList[ QA::INFO ];
+
+            if ( count( $exceptionList[ QA::ERROR ] ) > 0 ) {
+                $totals[ QA::ERROR ][] = $_item[ 'id_segment' ];
+            }
+
+            if ( count( $exceptionList[ QA::WARNING ] ) > 0 ) {
+                $totals[ QA::WARNING ][] = $_item[ 'id_segment' ];
+            }
+            if ( count( $exceptionList[ QA::INFO ] ) > 0 ) {
+                $totals[ QA::INFO ][] = $_item[ 'id_segment' ];
+            }
+
         }
 
         $this->result[ 'messages' ] = Utils::getGlobalMessage()  ;
 
-        $this->result[ 'details' ][ 'tag_issues' ] = array_values( $result );
+        $this->result[ 'details' ][ 'tag_issues' ]  = array_values( $items );
+        $this->result[ 'details' ][ 'issues_info' ] = $issues_detail;
+        $this->result[ 'details' ][ 'totals' ] = $totals;
+
+
         $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
         $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );

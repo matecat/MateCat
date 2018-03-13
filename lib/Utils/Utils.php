@@ -144,12 +144,14 @@ class Utils {
     public static function getGlobalMessage() {
         if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
             $globalMessage              = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
-            return sprintf(
-                '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
-                $globalMessage[ 'message' ],
-                md5( $globalMessage[ 'message' ] ),
-                ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
-            );
+            if( ( new DateTime( $globalMessage[ 'expire' ] ) )->getTimestamp() > time() ){
+                return sprintf(
+                        '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
+                        $globalMessage[ 'message' ],
+                        md5( $globalMessage[ 'message' ] ),
+                        ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
+                );
+            }
         }
         return null;
     }

@@ -40,7 +40,7 @@ class JobMenu extends React.Component {
 
         let downloadButton = this.props.getDownloadLabel;
         let splitButton;
-        if (!this.props.isChunkOutsourced) {
+        if (!this.props.isChunkOutsourced && config.splitEnabled) {
             splitButton = (!this.props.isChunk) ?
                 <a className="item" target="_blank" onClick={this.props.openSplitModalFn}><i className="icon-expand icon"/> Split</a> :
                 <a className="item" target="_blank" onClick={this.props.openMergeModalFn}><i className="icon-compress icon"/> Merge</a>;
