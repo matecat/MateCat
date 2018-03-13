@@ -2521,10 +2521,6 @@ body.editing section:not(.editor).ice-locked .text {
     background: #d3d6da !important;
 }
 
-section.ice-unlocked .next-unapproved {
-    display: none;
-}
-
 
 /*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
     /*background-color: rgba(99, 157, 94, 0.1) !important;*/
