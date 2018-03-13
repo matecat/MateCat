@@ -1257,7 +1257,7 @@ article {
 
 #outer.loading {
     display: block;
-    background: url(../img/loading.gif) 48% bottom no-repeat;
+    background: url(../img/loading.gif) 48% center no-repeat;
     background-size: 30px 30px !important;
     float: left;
     position: relative;
@@ -2514,10 +2514,6 @@ body.editing section:not(.editor).ice-locked .text {
     background: #d3d6da !important;
 }
 
-section.ice-unlocked .next-unapproved {
-    display: none;
-}
-
 
 /*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
     /*background-color: rgba(99, 157, 94, 0.1) !important;*/
@@ -3656,6 +3652,28 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
+    background-color: #dcdfe4;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.opened .editarea .locked,
+.opened .source .locked,
+.opened .target .locked,
+.opened .ice-locked .targetarea .locked,
+.opened .footer .locked,
+.opened .splitArea .locked {
+    font-size: 15px;
+    color: #767676;
+    font-style: italic;
+    background-color: #f2f4f7;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.editarea .locked:hover,
+.source .locked:hover {
+    background-color: #dddff0;
 }
 
 .editarea .locked.mismatch,
@@ -3664,10 +3682,19 @@ span.locked.tag-html-container-close {
     color: red !important;
 }
 
-
+.source .locked a,
+.target .locked a,
+.ice-locked .targetarea .locked a,
+.footer .locked a,
+.splitArea .locked a {
+    color: #767676
+}
 
 .editarea .locked.order-error,
-.source .locked.order-error {
+.editarea .locked.order-error .locked,
+.source .locked.order-error,
+.opened .targetarea .locked a,
+.opened .source .locked a {
     color: #e000ff !important;
 }
 

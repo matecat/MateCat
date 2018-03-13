@@ -11,7 +11,6 @@ if ( ReviewExtendedFooter.enabled() ) {
 
     (function (ReviewExtendedFooter, $,undefined) {
 
-        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
         var originalGotoNextSegment = UI.gotoNextSegment;
 
         $.extend(ReviewExtendedFooter, {
@@ -78,14 +77,6 @@ if ( ReviewExtendedFooter.enabled() ) {
              */
             addIssuesToSegment: function ( fileId, segmentId, versions ) {
                 SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions);
-            },
-            /**
-             * Overwrite the behavior of the click on the approved button
-             * @param e
-             * @param button
-             */
-            clickOnApprovedButton: function (e, button) {
-                originalClickOnApprovedButton.apply(this, [e , button]);
             },
             /**
              * To delete a segment issue

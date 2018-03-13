@@ -122,14 +122,21 @@ $.extend(UI, {
     transformTagsWithHtmlAttribute: function (tx) {
         try {
             var base64Array=[];
+            var phIDs =[];
             tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?id="(.*?)"/gi, function (match, text) {
+                phIDs.push(text);
+                return match;
+            });
 
             tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
                 return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
             });
             tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
                 base64Array.push(text);
-                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'>" + Base64.decode(text) + "</span>";
+                var id = phIDs.shift();
+                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
             });
             tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
                 var base = base64Array.shift();
@@ -393,14 +400,18 @@ $.extend(UI, {
             if(typeof d.tag_mismatch.source != 'undefined') {
                 $.each(d.tag_mismatch.source, function(index) {
                     $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
-                        return $(this).text() === d.tag_mismatch.source[index];
+                        var clone = $(this).clone();
+                        clone.find('.inside-attribute').remove();
+                        return clone.text() === d.tag_mismatch.source[index];
                     }).last().addClass('temp');
                 });
             }
             if(typeof d.tag_mismatch.target != 'undefined') {
                 $.each(d.tag_mismatch.target, function(index) {
                     $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
-                        return $(this).text() === d.tag_mismatch.target[index];
+                        var clone = $(this).clone();
+                        clone.find('.inside-attribute').remove();
+                        return clone.text() === d.tag_mismatch.target[index];
                     }).last().addClass('temp');
                 });
             }
@@ -410,7 +421,9 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
-                return $(this).text() === d.tag_mismatch.order[0];
+                var clone = $(this).clone();
+                clone.find('.inside-attribute').remove();
+                return clone.text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
         }
 
@@ -662,8 +675,8 @@ $.extend(UI, {
 
     handleSourceCopyEvent: function ( e ) {
         var elem = $(e.target);
-        if ( elem.hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked');
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = cloneTag.text();
@@ -673,8 +686,8 @@ $.extend(UI, {
     },
     handleSourceDragEvent: function ( e ) {
         var elem = $(e.target);
-        if ( elem.hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked');
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = elem.parent('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());
