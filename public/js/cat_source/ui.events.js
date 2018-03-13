@@ -223,8 +223,8 @@ $.extend(UI, {
 			}
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
 			//add again undoCursorPlaceholder
-			UI.editarea.append(undoCursorPlaceholder )
-					   .append(brEnd);
+			UI.editarea.append(undoCursorPlaceholder );
+					   // .append(brEnd);
 
 			//lock tags and run again getWarnings
             UI.segmentQA(UI.currentSegment);
