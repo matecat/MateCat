@@ -253,7 +253,7 @@ if ( ProjectCompletion.enabled() ) {
                 onCancel: 'goToFirstError',
                 callback: 'markJobAsComplete',
                 okTxt: 'Mark as complete',
-                msg: 'Unresolved tag issues may prevent your translation from being marked as complete. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
+                msg: 'Unresolved tag issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
                 ' underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> '
             });
             return;
