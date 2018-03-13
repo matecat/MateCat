@@ -659,14 +659,7 @@ div.sid .implicit {
     display: block !important;
 }
 
-/*.comment{position:absolute;right:0;}*/
-/*
-.editor .status-container{display:none;}
-*/
-/* BAK
-.commentballoon{position:absolute;right:0;top:0;width:30px !important; margin-right:-57px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
-.commentballoon a{display:block;padding:16px 0 10px 0px !important;}
-*/
+
 .comments {
     position: absolute;
     right: 10px;
@@ -2562,13 +2555,6 @@ body.archived section .text {
     cursor: not-allowed;
 }
 
-/*section.readonly .status-container,
-body.archived section .status-container {
-    display: none;
-}*/
-
-
-
 .editarea div:last-child {
     margin-bottom: -22px !important;
 }
@@ -3200,7 +3186,6 @@ body.archived section .status-container a.status:hover {
 }
 
 .status-container {
-    /*width: 10px !important;*/
     float: right;
     margin: 0 0px 0 0 !important;
 }
