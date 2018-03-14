@@ -3677,7 +3677,10 @@ span.locked.tag-html-container-close {
 
 .editarea .locked.mismatch,
 .source .locked.mismatch,
-.locked.mismatch-old {
+.locked.mismatch-old,
+.editarea .locked.mismatch .locked,
+.source .locked.mismatch .locked,
+.locked.mismatch-old .locked {
     color: red !important;
 }
 
@@ -3788,7 +3791,7 @@ span.locked.tag-html-container-close {
     .concordances .graysmall .b,
     .alternatives .graysmall .b{
         /*padding-left:85px !important;*/
-        width: 46% !important
+        width: 41% !important
     }
 
     .graysmall-message {
