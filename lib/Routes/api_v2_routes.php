@@ -7,9 +7,9 @@
  */
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
-    route( '',                      'GET',  'API\V2\ProjectsController',    'get'     ); //this do not show some info like teams and translators
-    route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
-    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+    route( '', 'GET', 'API\V2\ProjectsController', 'get' ); //this do not show some info like teams and translators
+    route( '/urls', 'GET', 'API\V2\UrlsController', 'urls' );
+    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController', 'merge' );
     route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/check', 'POST', 'API\V2\JobSplitController', 'check' );
     route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/apply', 'POST', 'API\V2\JobSplitController', 'apply' );
     route( '/creation_status', 'GET', 'API\V2\ProjectCreationStatusController', 'get' );
@@ -17,6 +17,9 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '/due_date', 'PUT', 'API\V2\ProjectsController', 'updateDueDate' );
     route( '/due_date', 'POST', 'API\V2\ProjectsController', 'setDueDate' );
     route( '/due_date', 'DELETE', 'API\V2\ProjectsController', 'deleteDueDate' );
+    route( '/cancel', 'POST', 'API\V2\ProjectsController', 'cancel' );
+    route( '/archive', 'POST', 'API\V2\ProjectsController', 'archive' );
+    route( '/active', 'POST', 'API\V2\ProjectsController', 'active' );
 });
 
 route( '/api/v2/project-completion-status/[i:id_project]', 'GET', '\API\V2\ProjectCompletionStatus', 'status' );
