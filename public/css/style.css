@@ -3677,7 +3677,10 @@ span.locked.tag-html-container-close {
 
 .editarea .locked.mismatch,
 .source .locked.mismatch,
-.locked.mismatch-old {
+.locked.mismatch-old,
+.editarea .locked.mismatch .locked,
+.source .locked.mismatch .locked,
+.locked.mismatch-old .locked {
     color: red !important;
 }
 
