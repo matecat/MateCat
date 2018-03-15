@@ -1060,9 +1060,9 @@ class QA {
 //        Log::doLog( $this->source_seg );
 //        Log::doLog( $this->target_seg );
 
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
 //        Log::doLog( $malformedXmlSrcStruct );
@@ -1106,8 +1106,8 @@ class QA {
         }
 
         $totalResult = array(
-                'source' => array_merge( $clonedSrc, $clonedClosingSrc ),
-                'target' => array_merge( $clonedTrg, $clonedClosingTrg ),
+                'source' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedSrc, $clonedClosingSrc ) ),
+                'target' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedTrg, $clonedClosingTrg ) ),
         );
 
 //        Log::doLog($totalResult);
