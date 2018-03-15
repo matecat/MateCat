@@ -437,22 +437,9 @@ body.manage {
                                     }
                                 }
                             }
-
-                            .job-payable {
-                                padding: 0 5px 0 10px !important;
-                                float: left;
-                                text-decoration: underline;
-                                min-width: 105px;
-                                line-height: 30px;
-                                font-weight: 700;
-                                position: relative;
-                                top: 1px;
-                                &:hover {
-                                    text-decoration: none;
-                                }
-                            }
                             .outsource-job {
-                                //text-align: center;
+                                display: inline-block;
+                                min-width: 34%;
                                 .translated-outsourced {
                                     top: 1px;
                                     bottom: 6px;
@@ -481,7 +468,7 @@ body.manage {
                                     display: inline-block;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 125px;
+                                    width: 180px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -503,7 +490,7 @@ body.manage {
                                     }
                                 }
                                 &:hover .job-to-translator{
-                                    width: inherit;
+                                    /*width: inherit;*/
                                 }
 
                                 .job-delivery {
@@ -575,6 +562,19 @@ body.manage {
                                 }
                                 &:hover .item {
                                     display: inline-block;
+                                }
+                            }
+                            .job-payable {
+                                padding: 0 5px 0 10px !important;
+                                float: left;
+                                text-decoration: underline;
+                                min-width: 105px;
+                                line-height: 30px;
+                                font-weight: 700;
+                                position: relative;
+                                top: 1px;
+                                &:hover {
+                                    text-decoration: none;
                                 }
                             }
                             .open-translate {
@@ -842,6 +842,7 @@ footer nav ul a:hover {
         margin-right: auto !important;
         transition: 0.3s ease;
     }
+
 }
 
 @media only screen and (min-width: 1380px) {
@@ -861,6 +862,9 @@ footer nav ul a:hover {
         transition: 0.3s ease;
         .outsource-container {
             width: 105%;
+        }
+        .outsource-job {
+            min-width: 24% !important;
         }
     }
 
@@ -885,6 +889,9 @@ footer nav ul a:hover {
             text-overflow: ellipsis;
         }
     }
+    .outsource-job {
+        min-width: 24% !important;
+    }
 }
 
 @media only screen and (max-width: 767px) {
@@ -896,6 +903,9 @@ footer nav ul a:hover {
     }
     .project-list {
         padding-top: 50px;
+    }
+    .outsource-job {
+        min-width: 24% !important;
     }
 }
 
