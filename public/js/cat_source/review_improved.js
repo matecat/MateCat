@@ -157,7 +157,7 @@ if ( ReviewImproved.enabled() )
                     UI.focusSegment( el );
                 }
 
-                UI.scrollSegment( el );
+                UI.scrollSegment( el, data.sid );
             }, 500, data);
         },
 
