@@ -666,14 +666,6 @@ div.sid .implicit {
     display: block !important;
 }
 
-/*.comment{position:absolute;right:0;}*/
-/*
-.editor .status-container{display:none;}
-*/
-/* BAK
-.commentballoon{position:absolute;right:0;top:0;width:30px !important; margin-right:-57px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
-.commentballoon a{display:block;padding:16px 0 10px 0px !important;}
-*/
 .comments {
     position: absolute;
     right: 10px;
@@ -2684,9 +2676,9 @@ body.archived section .text {
     /*color: #fff;*/
 }
 
-section.readonly .status-container,
-body.archived section .status-container {
-    /*display: none;*/
+section.readonly .status-container a.status:hover,
+body.archived section .status-container a.status:hover {
+    cursor: default !important;
 }
 
 .editarea div:last-child {
@@ -3255,17 +3247,16 @@ section.readonly:hover .ice-locked-label {
 
 /*status*/
 .status-container .status {
-    width: 11px;
+    width: 8px;
     display: block;
     position: absolute;
-    height: 100%;
-    padding: 0;
-    background: #dddedf;
     right: 0;
-    border-left: 1px solid #ccc;
-    margin: 0px 0px 0px 0 !important;
-    z-index: 0;
-    border-bottom: 1px solid #ccc
+    height: 96%;
+    padding-bottom: 7px;
+    background: #ccced2;
+    top: 4%;
+    margin: -6px 0 0 0 !important;
+    border-bottom: 0;
 }
 
 section.readonly .status-container a.status:hover,
@@ -3299,7 +3290,6 @@ body.archived section .status-container a.status:hover {
 }
 
 .status-container {
-    width: 10px !important;
     float: right;
     margin: 0 0px 0 0 !important;
 }

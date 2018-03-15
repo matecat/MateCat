@@ -31,7 +31,7 @@ UI.SegmentFooter = function( element ) {
 
             var item = _
                 .chain(UI.SegmentFooter.registry)
-                .select(function(item) { return item.code == code })
+                .filter(function(item) { return item.code == code })
                 .first()
                 .value();
 

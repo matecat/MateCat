@@ -711,16 +711,6 @@ class JobContainer extends React.Component {
                             {tmIcon}
                         </div>
                         {warningIcons}
-                        <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
-                                ref={(dropdown) => this.dropdown = dropdown}>
-                            <i className="icon-more_vert icon"/>
-                            {jobMenu}
-                        </div>
-                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
-                            Open
-
-                        </a>
-                            {outsourceButton}
                         <div className="outsource-job">
                             <div className={"translated-outsourced " + outsourceClass}>
                                 {outsourceJobLabel}
@@ -735,6 +725,16 @@ class JobContainer extends React.Component {
 
                             </div>
                         </div>
+                        <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
+                                ref={(dropdown) => this.dropdown = dropdown}>
+                            <i className="icon-more_vert icon"/>
+                            {jobMenu}
+                        </div>
+                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
+                            Open
+
+                        </a>
+                            {outsourceButton}
 
 
                     { this.state.showDownloadProgress ? (
