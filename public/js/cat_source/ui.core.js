@@ -884,7 +884,7 @@ UI = {
 
 			// if getting segments before, UI points to the segment triggering the event
 			if ((where == 'before') && (numsegToAdd)) {
-				this.scrollSegment($('#segment-' + this.segMoving));
+				this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
 			}
 
 			if (this.body.hasClass('searchActive')) {
@@ -1053,7 +1053,7 @@ UI = {
 			}
 
 			if (options.segmentToScroll) {
-				this.scrollSegment($('#segment-' + options.segmentToScroll), options.highlight );
+				this.scrollSegment($('#segment-' + options.segmentToScroll), options.segmentToScroll, options.highlight );
 			}
 
 			if (options.segmentToOpen) {
@@ -1198,7 +1198,7 @@ UI = {
         quick = quick || false;
 
         if ($('#segment-' + this.currentSegmentId).length) {
-			UI.scrollSegment(this.currentSegment, false, quick);
+			UI.scrollSegment(this.currentSegment, this.currentSegmentId, false, quick);
 		} else {
             UI.unmountSegments();
 			this.render({
