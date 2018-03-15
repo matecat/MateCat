@@ -2304,12 +2304,11 @@ UI = {
     },
 
     setWaypoints: function() {
-        // if (this.setWayponts) {
-        //     this.firstSegment.waypoint('remove');
-        //     this.lastSegment.waypoint('remove');
-        // }
+        if (this.settedWaypoints) {
+            Waypoint.destroyAll();
+        }
 		this.detectFirstLast();
-		this.lastSegment.waypoint(function(direction) {
+		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
 			if (direction === 'down') {
 				this.destroy();
 				if (UI.infiniteScroll) {
@@ -2324,13 +2323,13 @@ UI = {
 			}
 		}, UI.downOpts);
 
-		this.firstSegment.waypoint(function(direction) {
+        this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
 			if (direction === 'up') {
                 this.destroy();
 				UI.getMoreSegments('before');
 			}
 		}, UI.upOpts);
-        this.setWayponts = true;
+        this.settedWaypoints = true;
 	},
 
     storeClientInfo: function () {

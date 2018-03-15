@@ -51,7 +51,7 @@ if ( ReviewExtended.enabled() ) {
                     context: $('#outer')
                 };
                 this.upOpts = {
-                    offset: '-40%',
+                    offset: '-100%',
                     context: $('#outer')
                 };
                 return promise;
