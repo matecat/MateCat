@@ -26,8 +26,6 @@ class ProjectsController extends KleinController {
 
     public function get() {
 
-        $this->project = $this->projectValidator->getProject();
-
         if ( empty( $this->user ) ) {
             $formatted = new ProjectAnonymous();
         } else {
@@ -51,8 +49,6 @@ class ProjectsController extends KleinController {
     }
 
     public function updateDueDate() {
-        $this->project = $this->projectValidator->getProject();
-
         if (
                 array_key_exists( "due_date", $this->params )
                 &&
@@ -76,8 +72,6 @@ class ProjectsController extends KleinController {
     }
 
     public function deleteDueDate() {
-        $this->project = $this->projectValidator->getProject();
-
         $project_dao = new \Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
 
@@ -89,9 +83,34 @@ class ProjectsController extends KleinController {
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
+    public function cancel() {
+        return $this->changeStatus(\Constants_JobStatus::STATUS_CANCELLED );
+    }
+
+    public function archive() {
+        return $this->changeStatus(\Constants_JobStatus::STATUS_ARCHIVED );
+    }
+
+    public function active() {
+        return $this->changeStatus(\Constants_JobStatus::STATUS_ACTIVE );
+    }
+
+    private function changeStatus($status){
+
+        updateJobsStatus( "prj", $this->project->id, $status );
+        $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
+
+    }
+
     protected function afterConstruct() {
-        $this->projectValidator = new ProjectPasswordValidator( $this );
-        $this->appendValidator( $this->projectValidator );
+
+        $projectValidator = ( new ProjectPasswordValidator( $this ) );
+
+        $projectValidator->onSuccess( function () use ( $projectValidator ) {
+            $this->project = $projectValidator->getProject();
+        } );
+
+        $this->appendValidator( $projectValidator );
     }
 
 }
