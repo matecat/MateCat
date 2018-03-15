@@ -132,6 +132,15 @@ class MainPanel extends React.Component {
         }
     }
 
+    setStatusClick(e) {
+        e.preventDefault();
+        if (this.props.isReview) {
+            UI.approveFilteredSegments(this.state.segmentsArray);
+        } else {
+            UI.translateFilteredSegments(this.state.segmentsArray);
+        }
+    }
+
     render() {
 
         var searchSettingsClass = classnames({
@@ -258,6 +267,7 @@ class MainPanel extends React.Component {
             </div>;
         }
 
+        let setStatusLabel = (this.props.isReview) ? "APPROVE ALL" : "TRANSLATE ALL";
         return <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
@@ -272,6 +282,17 @@ class MainPanel extends React.Component {
                 {controlsForSampling}
 
                 <div className="block right">
+
+                    <input onClick={this.setStatusClick.bind(this)} id="setStatus-filter"
+                           type="button"
+                           className={
+                               classnames({
+                                   btn: true,
+                                   disabled: !this.state.filtering,
+                                   translate: !this.props.isReview,
+                                   review: this.props.isReview
+                               })}
+                           value={setStatusLabel} />
 
                     <input id="clear-filter"
                            type="button"

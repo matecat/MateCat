@@ -214,6 +214,17 @@ class Segment extends React.Component {
         });
     }
 
+    checkSegmentClasses() {
+        let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
+        if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
+            let indexEditor = classes.indexOf("editor");
+            classes.splice(indexEditor, 1);
+            let indexOpened = classes.indexOf("opened");
+            classes.splice(indexOpened, 1);
+        }
+        return classes;
+    }
+
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -269,7 +280,7 @@ class Segment extends React.Component {
         let timeToEdit = "";
 
         let readonly = this.state.readonly;
-        let segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
+        let segment_classes = this.checkSegmentClasses();
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
         let originalId = this.props.segment.sid.split('-')[0];

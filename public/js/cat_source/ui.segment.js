@@ -633,23 +633,65 @@
             }
             return false ;
         },
-
-        // unlockIceSegment: function (elem) {
-        //     var section = elem.closest('section');
-        //     var icon = section.find('.ice-locked-icon .unlock-button');
-        //     icon.removeClass('locked').removeClass('icon-lock').addClass('unlocked').addClass('icon-unlocked3');
-        //     section.removeClass('ice-locked').removeClass('readonly').addClass('ice-unlocked');
-        //     section.find('.targetarea').removeClass('area').addClass('editarea').click();
-        //     UI.addInStorage('locked-'+ UI.getSegmentId(section), true);
-        // },
-        // lockIceSegment: function (elem) {
-        //     var section = elem.closest('section');
-        //     var icon = section.find('.ice-locked-icon .unlock-button');
-        //     icon.removeClass('unlocked').removeClass('icon-unlocked3').addClass('locked').addClass('icon-lock');
-        //     section.addClass('ice-locked').addClass('readonly').removeClass('ice-unlocked');
-        //     section.find('.targetarea').addClass('area').removeClass('editarea').attr('contenteditable', false);
-        //     UI.closeSegment(section, 1);
-        //     UI.removeFromStorage('locked-' + UI.getSegmentId(section));
-        // }
+        showApproveAllModalWarnirng: function (  ) {
+            var props = {
+                text: "It was not possible to approve all segments. There are some segments that have not been translated.",
+                successText: "Ok",
+                successCallback: function() {
+                    APP.ModalWindow.onCloseModal();
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+        },
+        showTranslateAllModalWarnirng: function (  ) {
+            var props = {
+                text: "It was not possible to translate all segments.",
+                successText: "Ok",
+                successCallback: function() {
+                    APP.ModalWindow.onCloseModal();
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+        },
+        approveFilteredSegments: function(segmentsArray) {
+            return API.SEGMENT.approveSegments(segmentsArray).done(function ( response ) {
+                if (response.data && response.unchangeble_segments.length === 0) {
+                    segmentsArray.forEach(function ( item ) {
+                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        SegmentActions.setStatus(item, fileId, "APPROVED");
+                    })
+                } else if (response.unchangeble_segments.length > 0) {
+                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                        return parseInt(item);
+                    });
+                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    array.forEach(function ( item ) {
+                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        SegmentActions.setStatus(item, fileId, "APPROVED");
+                    });
+                    UI.showApproveAllModalWarnirng();
+                }
+            });
+        },
+        translateFilteredSegments: function(segmentsArray) {
+            return API.SEGMENT.translateSegments(segmentsArray).done(function ( response ) {
+                if (response.data && response.unchangeble_segments.length === 0) {
+                    segmentsArray.forEach(function ( item ) {
+                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        SegmentActions.setStatus(item, fileId, "TRANSLATED");
+                    })
+                } else if (response.unchangeble_segments.length > 0) {
+                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                        return parseInt(item);
+                    });
+                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    array.forEach(function ( item ) {
+                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        SegmentActions.setStatus(item, fileId, "TRANSLATED");
+                    });
+                    UI.showTranslateAllModalWarnirng();
+                }
+            });
+        }
     });
 })(jQuery); 

@@ -151,6 +151,30 @@ API.SEGMENT = {
             type: "POST",
             url : "/?action=glossary"
         });
+    },
+    approveSegments: function ( segments ) {
+        var data = {
+            segments_id: segments,
+            status: 'approved'
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url : "/plugins/paypal/job/"+ config.id_job + "/"+ config.password + "/segments/status"
+        });
+    },
+    translateSegments: function ( segments ) {
+        var data = {
+            segments_id: segments,
+            status: 'translated'
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url : "/plugins/paypal/job/"+ config.id_job + "/"+ config.password + "/segments/status"
+        });
     }
 
 };

@@ -122,7 +122,8 @@ if (SegmentFilter.enabled())
 
                 var reactState = {
                     filteredCount : data.count,
-                    filtering : true
+                    filtering : true,
+                    segmentsArray: data.segment_ids
                 } ;
 
                 window.segment_filter_panel.setState( reactState );
@@ -238,10 +239,13 @@ if (SegmentFilter.enabled())
     $(document).ready( function() {
         // mount the hiddent react component by default so we can keep status
         window.segment_filter_panel = ReactDOM.render(
-          React.createElement(
-            SegmentFilter_MainPanel, {}),
-            $('#segment-filter-mountpoint')[0]
-          );
+            React.createElement(
+                SegmentFilter_MainPanel, {
+                    isReview: config.isReview,
+
+                }),
+                $('#segment-filter-mountpoint')[0]
+            );
     });
 
     $(document).on('header-tool:open', function(e, data) {
