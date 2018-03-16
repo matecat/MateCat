@@ -122,8 +122,8 @@ class TranslationChildProject extends AbstractChildProject {
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
-                            "segmentOriginId"   => $segmentOriginId ,
-                            "matchRate"         => $matchRate ,
+                            "segmentOriginId"   => $segmentOriginId,
+                            "matchRate"         => $matchRate,
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
@@ -176,7 +176,8 @@ class TranslationChildProject extends AbstractChildProject {
         ) ;
 
         $object = $this->originMap->getByName( $data['originName'] ) ;
-        return $object['id'] ;
+
+        return [ $object['id'], $data['matchRate'] ];
     }
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {

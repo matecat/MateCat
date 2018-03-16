@@ -131,7 +131,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                 $data['translation_before'] = $row['versioned_translation'];
             }
 
-            $this->__setSegmentOrigin( $data, $row );
+            $data = $this->__setSegmentOrigin( $data, $row );
 
             $result[ $row['id'] ] = new ExtendedTranslationStruct( $data ) ;
         }
@@ -144,7 +144,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
             $data[ 'segment_origin'] = 'TM' ;
             $data[ 'suggestion_match' ] = '100' ;
 
-            return ;
+            return $data ;
         }
 
         if ( ( strpos( $row['match_type'], '100%' ) === 0 ) || $row['match_type'] == 'ICE' ) {
@@ -159,7 +159,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
             $data['segment_origin'] = 'MT' ;
         }
 
-        if ( $row['translation'] !== $row['suggestion'] ) {
+        if ( !is_null( $row['suggestion'] ) && $row['translation'] !== $row['suggestion'] ) {
             // find match for the applied suggestion
            $suggestions = json_decode( $row['suggestions_array'], true );
            $selected    = $suggestions[ $row[ 'suggestion_position' ] ] ;
@@ -173,6 +173,8 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                $data[ 'suggestion_match'] = str_replace('%', '', $selected[ 'match' ]);
            }
         }
+
+        return $data ;
     }
 
     private function __getOriginalVersion( $row ) {
