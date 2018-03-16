@@ -69,6 +69,13 @@ class FeatureSet {
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+
+        if ( INIT::$DQF_ENABLED ) {
+            $features[] = new OwnerFeatures_OwnerFeatureStruct([
+                    'feature_code' => 'dqf'
+            ]) ;
+        }
+
         $this->features = static::merge( $this->features, $features );
     }
 
