@@ -251,9 +251,10 @@ if ( ProjectCompletion.enabled() ) {
             });
             return;
         }
+        else {
+            UI.markJobAsComplete();
+        }
         $(document).trigger('sidepanel:close');
-
-
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
