@@ -11,7 +11,6 @@ use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Utils\Functions;
 use INIT;
 use LoudArray;
-use Translations_TranslationVersionDao;
 
 class TranslationChildProject extends AbstractChildProject {
 
@@ -99,7 +98,7 @@ class TranslationChildProject extends AbstractChildProject {
                     );
 
             foreach ( $dqfChildProjects as $dqfChildProject ) {
-                $dao = new Translations_TranslationVersionDao();
+                $dao = new TranslationVersionDao();
                 $translations = $dao->getExtendedTranslationByFile(
                         $file,
                         $limitDate,
@@ -112,6 +111,9 @@ class TranslationChildProject extends AbstractChildProject {
                 foreach ( $translations as $translation ) {
                     // Using a struct and converting it to array immediately allows us to validate the
                     // input array.
+
+                    list( $segmentOriginId, $matchRate ) = $this->getSegmentOriginAndMatchRate( $translation ) ;
+
                     $segmentPairs[] = ( new SegmentPairStruct([
                             "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ]['dqf_segment_id'],
                             // TODO: the corect form of this key should be the following, to so to get back the
@@ -119,14 +121,12 @@ class TranslationChildProject extends AbstractChildProject {
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
-
                             "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
-
-                            "segmentOriginId"   => $this->mapSegmentOrigin( $translation ),
+                            "segmentOriginId"   => $segmentOriginId ,
+                            "matchRate"         => $matchRate ,
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
-                            // "matchRate"         => $translation->suggestion_match
                     ]) )->toArray() ;
                 }
 
@@ -165,24 +165,18 @@ class TranslationChildProject extends AbstractChildProject {
         return $time ;
     }
 
-    protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
-        $originName = null ;
+    protected function getSegmentOriginAndMatchRate( ExtendedTranslationStruct $translation ) {
+        $data = [
+                'originName' => $translation->segment_origin,
+                'matchRate'  => $translation->suggestion_match
+        ] ;
 
         $this->chunk->getProject()->getFeatures()->run(
-                'filterDqfSegmentOriginName', $originName, $translation, $this->chunk
+                'filterDqfSegmentOriginAndMatchRate', $data, $translation, $this->chunk
         ) ;
 
-        if ( is_null( $originName ) ) {
-            $originName = $this->_computeDefaultOriginName( $translation ) ;
-        }
-
-        $object = $this->originMap->getByName( $originName ) ;
+        $object = $this->originMap->getByName( $data['originName'] ) ;
         return $object['id'] ;
-    }
-
-    //
-    protected function _computeDefaultOriginName( ExtendedTranslationStruct $translationStruct ) {
-        return 'HT' ;
     }
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {
