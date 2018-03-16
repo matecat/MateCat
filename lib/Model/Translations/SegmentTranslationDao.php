@@ -303,7 +303,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $queryTotals );
 
-        $stmt->execute($where_values);
+        $stmt->execute( $where_values );
 
         $totals = $stmt->fetchAll();
 
@@ -319,16 +319,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $counter = new WordCount_Counter( $old_wStruct );
 
+        $newCounterValues = [];
+
         foreach ( $totals as $__pos => $old_value ) {
             $counter->setOldStatus( $old_value[ 'status' ] );
             $counter->setNewStatus( $status );
             $newCounterValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
         }
 
-        $differentialCountStruct = $counter->sumDifferentials( $newCounterValues );
-
-        updateWordCount( $differentialCountStruct );
-
+        $newTotals = $counter->updateDB( $newCounterValues );
 
         $sql = "UPDATE segment_translations SET status = ? WHERE id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
 
@@ -339,7 +338,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $stmt->execute( $update_values );
 
-        return $stmt->rowCount();
+
+        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
+
+        return $job_stats;
     }
 
     public static function getUnchangebleStatus( $segments_ids, $status ) {
