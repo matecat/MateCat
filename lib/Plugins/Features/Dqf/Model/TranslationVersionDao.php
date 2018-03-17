@@ -147,6 +147,12 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
             return $data ;
         }
 
+        if ( empty($row['suggestions_array']) ) {
+            $data[ 'segment_origin'] = 'HT' ;
+
+            return $data ;
+        }
+
         if ( ( strpos( $row['match_type'], '100%' ) === 0 ) || $row['match_type'] == 'ICE' ) {
             $data['segment_origin']   = 'TM';
             $data['suggestion_match'] = '100';
