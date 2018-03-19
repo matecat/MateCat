@@ -404,6 +404,114 @@ $(function () {
                     }
                 }
             },
+            "/api/v1/jobs/{id_job}/{password}/cancel": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Cancel API",
+                    "description": "API to cancel a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v1/jobs/{id_job}/{password}/archive": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Archive API",
+                    "description": "API to archive a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v1/jobs/{id_job}/{password}/active": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Active API",
+                    "description": "API to active a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/api/v2/projects/{id_project}/{password}/urls": {
                 "get": {
                     "tags": [
@@ -440,6 +548,7 @@ $(function () {
                     }
                 }
             },
+
             "/api/v2/projects/{id_project}/{password}/due_date": {
                 "post": {
                     "tags": [
@@ -561,6 +670,114 @@ $(function () {
                             "description": "Project",
                             "schema": {
                                 "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v1/projects/{id_project}/{password}/cancel": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Cancel API",
+                    "description": "API to cancel a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v1/projects/{id_project}/{password}/archive": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Archive API",
+                    "description": "API to archive a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v1/projects/{id_project}/{password}/active": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Active API",
+                    "description": "API to active a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
                             }
                         },
                         "default": {
@@ -2934,6 +3151,19 @@ $(function () {
                                 }
                             }
                         }
+                    }
+                }
+            },
+
+            "ChangeStatus" : {
+                "type": "object",
+                "properties": {
+                    "code" : { "type" : "integer", "required" : true },
+                    "data": { "type" : "string", "required" : true },
+                    "status": {
+                        "type" : "string",
+                        "enum" : ["active", "cancelled", "archived"],
+                        "required" : true
                     }
                 }
             },
