@@ -2549,7 +2549,10 @@ body.archived section .text {
     color: #a4a6a9;
     cursor: not-allowed;
 }
-
+section.readonly .status-container a.status:hover,
+body.archived section .status-container a.status:hover {
+    cursor: default !important;
+}
 .editarea div:last-child {
     margin-bottom: -22px !important;
 }
