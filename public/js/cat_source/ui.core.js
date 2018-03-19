@@ -136,7 +136,7 @@ UI = {
      */
     shouldSegmentAutoPropagate : function( $segment, newStatus ) {
         var segmentClassToFind = "status-" + newStatus.toLowerCase();
-        var statusChanged = !segment.hasClass(segmentClassToFind);
+        var statusChanged = !$segment.hasClass(segmentClassToFind);
         var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
         return statusChanged || segmentModified;
     },
