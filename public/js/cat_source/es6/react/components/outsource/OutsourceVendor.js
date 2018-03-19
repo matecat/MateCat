@@ -144,10 +144,13 @@ class OutsourceVendor extends React.Component {
         let changeRates = $.cookie( "matecat_changeRates");
         if( _.isUndefined(changeRates)) {
             API.OUTSOURCE.fetchChangeRates().done(function (response) {
-                self.setState({
-                    changeRates: $.parseJSON(response.data)
-                });
-                $.cookie( "matecat_changeRates",  response.data  , { expires: 1 });
+                var rates = $.parseJSON(response.data);
+                if (!_.isUndefined(rates)) {
+                    self.setState({
+                        changeRates: rates
+                    });
+                    $.cookie( "matecat_changeRates",  response.data  , { expires: 1 });
+                }
             });
         }
     }
