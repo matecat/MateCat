@@ -261,8 +261,6 @@ if ( ProjectCompletion.enabled() ) {
             UI.markJobAsComplete()
         }
         $(document).trigger('sidepanel:close');
-
-
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
