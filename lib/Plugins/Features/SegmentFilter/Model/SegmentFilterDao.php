@@ -82,6 +82,56 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             ));
         }
 
+        if ( $filter->sampleData() ) {
+            switch ($filter->sampleType()){
+                case 'repetitions':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::REPETITIONS,
+                    ));
+                    break;
+                case 'mt':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::MT,
+                    ));
+                    break;
+                case 'matches':
+                    $data = array_merge( $data, array(
+                            'match_type_100_public' => \Constants_SegmentTranslationsMatchType::_100_PUBLIC,
+                            'match_type_100' => \Constants_SegmentTranslationsMatchType::_100,
+                            'match_type_ice' => \Constants_SegmentTranslationsMatchType::ICE
+                    ));
+                    break;
+
+                case 'fuzzies_50_74':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::_50_74,
+                    ));
+                    break;
+                case 'fuzzies_75_84':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::_75_84,
+                    ));
+                    break;
+                case 'fuzzies_85_94':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::_85_94,
+                    ));
+                    break;
+                case 'fuzzies_95_99':
+                    $data = array_merge( $data, array(
+                            'match_type' => \Constants_SegmentTranslationsMatchType::_95_99,
+                    ));
+                    break;
+                case 'todo':
+                    $data = array_merge( $data, array(
+                            'status_new' => \Constants_TranslationStatus::STATUS_NEW,
+                            'status_draft' => \Constants_TranslationStatus::STATUS_DRAFT
+                    ));
+                    break;
+            }
+
+        }
+
         return $data;
     }
     /**
@@ -130,41 +180,72 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 
     public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
-        $limit = self::__getLimit($chunk, $filter);
+        if($filter->sampleSize() > 0){
+            $limit = self::__getLimit($chunk, $filter);
+        }
+        else {
+            $limit = (object)['limit' => 0, 'count' => 0, 'sample_size' => 0];
+        }
+
         $where = self::__getWhereFromFilter( $filter );
+        $data = self::__getData( $chunk, $filter );
 
         $sql = '';
 
         switch ( $filter->sampleType() ) {
             case 'segment_length_high_to_low':
-                $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForSegmentLength( $limit, $where, 'high_to_low' );
                 break;
             case 'segment_length_low_to_high':
-                $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForSegmentLength( $limit, $where, 'low_to_high' );
                 break;
             case 'edit_distance_high_to_low':
-                $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForEditDistance( $limit, $where, 'high_to_low' );
                 break;
             case 'edit_distance_low_to_high':
-                $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForEditDistance( $limit, $where, 'low_to_high' );
                 break;
             case 'regular_intervals':
-                $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForRegularIntervals( $limit, $where );
+                break;
+            case 'regular_intervals':
+                $sql = self::getSqlForRegularIntervals( $limit, $where );
+                break;
+            case 'unlocked':
+                $sql = self::getSqlForUnlocked( $where );
+                break;
+            case 'repetitions':
+                $sql = self::getSqlForRepetitions( $where );
+                break;
+            case 'mt':
+                $sql = self::getSqlForMT( $where );
+                break;
+            case 'matches':
+                $sql = self::getSqlForMatches( $where );
+                break;
+            case 'fuzzies_50_74':
+            case 'fuzzies_75_84':
+            case 'fuzzies_85_94':
+            case 'fuzzies_95_99':
+                $sql = self::getSqlForFuzzies( $where );
+                break;
+            case 'todo':
+                $sql = self::getSqlForTodo( $where );
                 break;
             default:
                 throw new \Exception('Sample type is not valid: '. $filter->sampleType());
                 break;
         }
 
-        $conn = \Database::obtain()->getConnection();
+        /*$conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($data);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll();*/
+
+
+        $thisDao = new self();
+        $stmt = $thisDao->_getStatementForCache( $sql );
+        return $thisDao->_fetchObject( $stmt, new \DataAccess\ShapelessConcreteStruct , $data);
     }
 
     /**
@@ -253,6 +334,123 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
           ) t1 ORDER BY t1.id ";
 
         return $sql ;
+    }
+
+    public static function getSqlForUnlocked($where){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.locked = 0
+           WHERE 1
+           $where->sql
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForRepetitions($where){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.match_type = :match_type
+           WHERE 1
+           $where->sql
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForMatches(){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND (st.match_type = :match_type_100_public 
+           OR st.match_type = :match_type_100 
+           OR st.match_type = :match_type_ice)
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForFuzzies($where){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.match_type = :match_type
+           WHERE 1
+           $where->sql
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForMT(){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.match_type = :match_type
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForToDo(){
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND (st.status = :status_new
+           OR st.status = :status_draft)
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
     }
 
     protected function _buildResult( $data ) { }
