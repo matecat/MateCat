@@ -4,6 +4,7 @@
  */
 let React = require('react');
 let SegmentStore = require('../../stores/SegmentStore');
+let SegmentActions = require('../../actions/SegmentActions');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
@@ -23,6 +24,7 @@ class Segment extends React.Component {
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
+        this.handleChangeBulk = this.handleChangeBulk.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
 
@@ -33,7 +35,8 @@ class Segment extends React.Component {
             status: this.props.segment.status,
             showTranslationIssues: false,
             unlocked: UI.isUnlockedSegment(this.props.segment),
-            readonly: readonly
+            readonly: readonly,
+            inBulk: false
         }
     }
 
@@ -271,6 +274,11 @@ class Segment extends React.Component {
         //     readonly: readonly
     }
 
+    handleChangeBulk(){
+        SegmentActions.toggleSegmentOnBulk(this.props.segment.sid, this.props.fid);
+    }
+
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -320,7 +328,13 @@ class Segment extends React.Component {
                 data-fid={this.props.fid}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
-
+                    <div className="txt">
+                        <input type="checkbox"
+                               ref={(node)=>this.bulk=node}
+                            checked={this.props.segment.inBulk}
+                            onChange={this.handleChangeBulk}
+                        />
+                    </div>
                     {(this.props.segment.ice_locked !== '1' ) ? (
                         config.splitSegmentEnabled ? (
                         <div className="actions">

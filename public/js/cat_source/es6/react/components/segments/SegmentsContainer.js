@@ -44,13 +44,15 @@ class SegmentsContainer extends React.Component {
     }
 
     renderSegments(segments, fid) {
-        if (fid !== this.props.fid) return;
+        console.log(fid);
+        if (parseInt(fid) !== parseInt(this.props.fid)) return;
         let splitGroup =  [];
         this.setState({
             segments: segments,
             splitGroup: splitGroup,
             timeToEdit: config.time_to_edit_enabled,
         });
+
     }
 
 
