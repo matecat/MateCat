@@ -41,5 +41,7 @@ module.exports = keyMirror({
     OPEN_TAB: null,
     RENDER_PREVIEW: null,
     ISSUE_DELETED: null,
-    ADD_TAB_INDEX: null
+    ADD_TAB_INDEX: null,
+    TOGGLE_SEGMENT_ON_BULK: null,
+    REMOVE_SEGMENTS_ON_BULK: null,
 });

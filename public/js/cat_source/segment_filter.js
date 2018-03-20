@@ -246,6 +246,14 @@ if (SegmentFilter.enabled())
                 }),
                 $('#segment-filter-mountpoint')[0]
             );
+
+        window.bulk_approve_bar = ReactDOM.render(
+            React.createElement(
+                SegmentBulkPanel_MainPanel, {
+                    isReview: config.isReview
+                }),
+            $('#bulk-approve-bar-mountpoint')[0]
+        );
     });
 
     $(document).on('header-tool:open', function(e, data) {
