@@ -250,6 +250,8 @@ if ( ProjectCompletion.enabled() ) {
                 ' underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> '
             });
             return;
+        } else {
+            UI.markJobAsComplete()
         }
         $(document).trigger('sidepanel:close');
 
