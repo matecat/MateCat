@@ -253,9 +253,6 @@ if ( ProjectCompletion.enabled() ) {
         } else {
             UI.markJobAsComplete()
         }
-        else {
-            UI.markJobAsComplete();
-        }
         $(document).trigger('sidepanel:close');
     });
 
