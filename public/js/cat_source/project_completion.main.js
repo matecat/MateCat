@@ -253,9 +253,10 @@ if ( ProjectCompletion.enabled() ) {
         } else {
             UI.markJobAsComplete()
         }
+        else {
+            UI.markJobAsComplete();
+        }
         $(document).trigger('sidepanel:close');
-
-
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
