@@ -376,7 +376,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForMatches(){
+    public static function getSqlForMatches( $where ){
 
         $sql = "
           SELECT st.id_segment AS id
@@ -390,6 +390,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND (st.match_type = :match_type_100_public 
            OR st.match_type = :match_type_100 
            OR st.match_type = :match_type_ice)
+           WHERE 1
+           $where->sql
            ORDER BY st.id_segment
         ";
 
@@ -416,7 +418,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForMT(){
+    public static function getSqlForMT( $where ){
 
         $sql = "
           SELECT st.id_segment AS id
@@ -428,13 +430,15 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.match_type = :match_type
+           WHERE 1
+           $where->sql
            ORDER BY st.id_segment
         ";
 
         return $sql;
     }
 
-    public static function getSqlForToDo(){
+    public static function getSqlForToDo($where){
 
         $sql = "
           SELECT st.id_segment AS id
@@ -447,6 +451,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
            OR st.status = :status_draft)
+           WHERE 1
+           $where->sql
            ORDER BY st.id_segment
         ";
 
