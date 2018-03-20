@@ -410,6 +410,7 @@ class QA {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
+            case self::ERR_TAG_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => self::ERR_TAG_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
@@ -576,6 +577,21 @@ class QA {
      */
     public function getWarningsJSON() {
         return json_encode( $this->checkErrorNone( self::WARNING, true ) );
+    }
+
+    /**
+     * Get an error list in JSON string format and returns an instance of a mock QA with filled errors
+     *
+     * @param $jsonString
+     *
+     * @return array
+     */
+    public static function JSONtoExceptionList( $jsonString ){
+        $that = new static( null, null );
+        array_walk( json_decode( $jsonString, true ), function( $errArray, $key ) use ( $that ){
+            $that->_addError( $errArray[ 'outcome' ] );
+        });
+        return $that->exceptionList;
     }
 
     /**
@@ -1044,9 +1060,9 @@ class QA {
 //        Log::doLog( $this->source_seg );
 //        Log::doLog( $this->target_seg );
 
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
 //        Log::doLog( $malformedXmlSrcStruct );
@@ -1090,8 +1106,8 @@ class QA {
         }
 
         $totalResult = array(
-                'source' => array_merge( $clonedSrc, $clonedClosingSrc ),
-                'target' => array_merge( $clonedTrg, $clonedClosingTrg ),
+                'source' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedSrc, $clonedClosingSrc ) ),
+                'target' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedTrg, $clonedClosingTrg ) ),
         );
 
 //        Log::doLog($totalResult);
@@ -1426,11 +1442,13 @@ class QA {
             $deepDiffTagG = $this->_checkTagCountMismatch( count( @$this->srcDomMap[ 'g' ] ), count( @$this->trgDomMap[ 'g' ] ) );
         }
 
-        //check for Tag ID MISMATCH
-        $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
-        if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
-            $this->_addError( self::ERR_TAG_ID );
+        if( $targetNumDiff == 0 ){
+            //check for Tag ID MISMATCH
+            $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
+            if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
+                $this->_addError( self::ERR_TAG_ID );
 //            Log::doLog($diffArray);
+            }
         }
 
     }

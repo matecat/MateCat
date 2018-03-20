@@ -659,14 +659,6 @@ div.sid .implicit {
     display: block !important;
 }
 
-/*.comment{position:absolute;right:0;}*/
-/*
-.editor .status-container{display:none;}
-*/
-/* BAK
-.commentballoon{position:absolute;right:0;top:0;width:30px !important; margin-right:-57px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
-.commentballoon a{display:block;padding:16px 0 10px 0px !important;}
-*/
 .comments {
     position: absolute;
     right: 10px;
@@ -2292,7 +2284,6 @@ body.filtering {
     float: left;
     text-align: left;
     background: #f2f4f7;
-    border-bottom: 1px solid #ccc;
     margin-bottom: 0px;
 }
 
@@ -2521,10 +2512,6 @@ body.editing section:not(.editor).ice-locked .text {
     background: #d3d6da !important;
 }
 
-section.ice-unlocked .next-unapproved {
-    display: none;
-}
-
 
 /*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
     /*background-color: rgba(99, 157, 94, 0.1) !important;*/
@@ -2561,13 +2548,6 @@ body.archived section .text {
     color: #a4a6a9;
     cursor: not-allowed;
 }
-
-/*section.readonly .status-container,
-body.archived section .status-container {
-    display: none;
-}*/
-
-
 
 .editarea div:last-child {
     margin-bottom: -22px !important;
@@ -3200,7 +3180,6 @@ body.archived section .status-container a.status:hover {
 }
 
 .status-container {
-    /*width: 10px !important;*/
     float: right;
     margin: 0 0px 0 0 !important;
 }
@@ -3697,7 +3676,10 @@ span.locked.tag-html-container-close {
 
 .editarea .locked.mismatch,
 .source .locked.mismatch,
-.locked.mismatch-old {
+.locked.mismatch-old,
+.editarea .locked.mismatch .locked,
+.source .locked.mismatch .locked,
+.locked.mismatch-old .locked {
     color: red !important;
 }
 
@@ -3808,7 +3790,7 @@ span.locked.tag-html-container-close {
     .concordances .graysmall .b,
     .alternatives .graysmall .b{
         /*padding-left:85px !important;*/
-        width: 46% !important
+        width: 41% !important
     }
 
     .graysmall-message {

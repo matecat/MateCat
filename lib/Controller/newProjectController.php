@@ -310,7 +310,7 @@ class newProjectController extends viewController {
 
         $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
 
-        $this->template->globalMessage = Utils::getGlobalMessage();
+        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
         if ( $this->isLoggedIn() ) {
             $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->logged_user );

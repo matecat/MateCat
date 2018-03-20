@@ -11,9 +11,8 @@ if ( ReviewExtendedFooter.enabled() ) {
 
     (function (ReviewExtendedFooter, $,undefined) {
 
-        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
         var originalGotoNextSegment = UI.gotoNextSegment;
-
+        var originalRender = UI.render;
         $.extend(ReviewExtendedFooter, {
 
             submitIssue: function (sid, data_array, diff) {
@@ -41,6 +40,21 @@ if ( ReviewExtendedFooter.enabled() ) {
         $.extend(UI, {
 
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
+
+            render: function ( options ) {
+                var promise = (new $.Deferred() ).resolve();
+                originalRender.call(this, options);
+                this.downOpts = {
+                    offset: '100%',
+                    context: $('#outer')
+                };
+                this.upOpts = {
+                    offset: '-40%',
+                    context: $('#outer')
+                };
+                return promise;
+            },
+
             registerReviseTab: function () {
                 SegmentActions.registerTab('issues', true, true);
             },
@@ -60,8 +74,8 @@ if ( ReviewExtendedFooter.enabled() ) {
                 return ReviewExtendedFooter.submitIssue(sid, data, diff);
             },
             getSegmentVersionsIssuesHandler(event) {
-                let sid = event.segment.absId;
-                let fid = UI.getSegmentFileId(event.segment.el);
+                var sid = event.segment.absId;
+                var fid = UI.getSegmentFileId(event.segment.el);
                 UI.getSegmentVersionsIssues(sid, fid);
             },
             getSegmentVersionsIssues: function (segmentId, fileId) {
@@ -78,14 +92,6 @@ if ( ReviewExtendedFooter.enabled() ) {
              */
             addIssuesToSegment: function ( fileId, segmentId, versions ) {
                 SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions);
-            },
-            /**
-             * Overwrite the behavior of the click on the approved button
-             * @param e
-             * @param button
-             */
-            clickOnApprovedButton: function (e, button) {
-                originalClickOnApprovedButton.apply(this, [e , button]);
             },
             /**
              * To delete a segment issue
@@ -141,7 +147,7 @@ if ( ReviewExtendedFooter.enabled() ) {
             },
 
             setDisabledOfButtonApproved: function (sid,isDisabled ) {
-                let div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
+                var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
                 if(!isDisabled){
                     div.removeClass('disabled').attr("disabled", false);
                 }else{

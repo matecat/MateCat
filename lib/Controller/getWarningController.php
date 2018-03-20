@@ -1,5 +1,9 @@
 <?php
 
+use API\V2\Json\QAGlobalWarning;
+use API\V2\Json\QALocalWarning;
+use API\V2\Json\SegmentTranslationMismatches;
+
 class getWarningController extends ajaxController {
 
     private $__postInput = null;
@@ -138,6 +142,7 @@ class getWarningController extends ajaxController {
 
         try {
             $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
+            $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
         } catch ( Exception $e ) {
             $this->result[ 'details' ]                = array();
             $this->result[ 'translation_mismatches' ] = array( 'total' => 0, 'mine' => 0, 'list_in_my_job' => array() );
@@ -145,29 +150,11 @@ class getWarningController extends ajaxController {
             return;
         }
 
-        foreach ( $result as $position => &$item ) {
-            $item = $item[ 'id_segment' ];
-        }
-
-        $this->result[ 'messages' ] = Utils::getGlobalMessage()  ;
-
-        $this->result[ 'details' ][ 'tag_issues' ] = array_values( $result );
-        $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
-
-        $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
-
-        foreach ( $tMismatch as $row ) {
-            if ( !empty( $row[ 'first_of_my_job' ] ) ) {
-                $result[ 'mine' ]++;
-                $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
-
-                //append to global list
-                $this->result[ 'details' ][ 'translation_mismatches' ][] = $row[ 'first_of_my_job' ];
-
-            }
-        }
-
-        $this->result[ 'translation_mismatches' ] = $result;
+        $this->result = array_merge(
+                $this->result,
+                ( new QAGlobalWarning( $result, $tMismatch ) )->render(),
+                Utils::getGlobalMessage()
+        );
 
         $this->invokeGlobalWarningsOnFeatures();
     }
@@ -178,21 +165,12 @@ class getWarningController extends ajaxController {
      */
     private function __segmentWarningsCall() {
 
-        $this->result[ 'details' ] = null;
-        $this->result[ 'token' ]   = $this->__postInput->token;
         $this->result[ 'total' ]   = 0;
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
 
-        if ( $QA->thereAreNotices() ) {
-            $this->result[ 'details' ]                 = array();
-            $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
-            $this->result[ 'details' ][ 'warnings' ]                = $QA->getNoticesJSON();
-            $this->result[ 'details' ][ 'tag_mismatch' ]            = $QA->getMalformedXmlStructs();
-            $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
-            $this->result[ 'total' ]                                = count( $QA->getNotices() );
-        }
+        $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
 
         $this->invokeLocalWarningsOnFeatures();
     }
@@ -222,5 +200,3 @@ class getWarningController extends ajaxController {
     }
 
 }
-
-?>

@@ -100,8 +100,11 @@ UI = {
      *
      * @returns {boolean}
      */
-    shouldSegmentAutoPropagate : function( segment ) {
-        return true ;
+    shouldSegmentAutoPropagate : function( $segment, newStatus ) {
+        var segmentClassToFind = "status-" + newStatus.toLowerCase();
+        var statusChanged = !$segment.hasClass(segmentClassToFind);
+        var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
+        return statusChanged || segmentModified;
     },
 
     /**
@@ -118,7 +121,7 @@ UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment )
+            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment, status )
         };
 
         if ( byStatus || opts.noPropagation ) {
@@ -153,9 +156,7 @@ UI = {
 
     autopropagateConfirmNeeded: function () {
         var segment = UI.currentSegment;
-        // TODO: this is relying on a comparison between strings to determine if the segment
-        // was modified. There should be a more consistent way to read this state, see UI.setSegmentModified .
-        if (UI.currentSegmentTranslation.trim() == UI.editarea.text().trim()) { //segment not modified
+        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
 
@@ -2304,12 +2305,11 @@ UI = {
     },
 
     setWaypoints: function() {
-        // if (this.setWayponts) {
-        //     this.firstSegment.waypoint('remove');
-        //     this.lastSegment.waypoint('remove');
-        // }
+        if (this.settedWaypoints) {
+            Waypoint.destroyAll();
+        }
 		this.detectFirstLast();
-		this.lastSegment.waypoint(function(direction) {
+		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
 			if (direction === 'down') {
 				this.destroy();
 				if (UI.infiniteScroll) {
@@ -2324,13 +2324,13 @@ UI = {
 			}
 		}, UI.downOpts);
 
-		this.firstSegment.waypoint(function(direction) {
+        this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
 			if (direction === 'up') {
                 this.destroy();
 				UI.getMoreSegments('before');
 			}
 		}, UI.upOpts);
-        this.setWayponts = true;
+        this.settedWaypoints = true;
 	},
 
     storeClientInfo: function () {

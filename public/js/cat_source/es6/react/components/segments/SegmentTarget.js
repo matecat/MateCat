@@ -89,7 +89,7 @@ class SegmentTarget extends React.Component {
 
     render() {
         var textAreaContainer = "";
-        let translation = this.state.translation;
+        let translation = this.state.translation.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
 
         if (this.props.isReviewImproved) {
             textAreaContainer = <div data-mount="segment_text_area_container">

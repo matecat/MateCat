@@ -107,8 +107,8 @@ $.extend(UI, {
 
         tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
-        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );
         tx = this.transformTagsWithHtmlAttribute(tx);
+        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
         return tx;
     },
 
@@ -396,37 +396,36 @@ $.extend(UI, {
     // TAG MISMATCH
 	markTagMismatch: function(d) {
 
-        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
-            if(typeof d.tag_mismatch.source != 'undefined') {
-                $.each(d.tag_mismatch.source, function(index) {
-                    $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
-                        var clone = $(this).clone();
-                        clone.find('.inside-attribute').remove();
-                        return clone.text() === d.tag_mismatch.source[index];
-                    }).last().addClass('temp');
-                });
-            }
-            if(typeof d.tag_mismatch.target != 'undefined') {
-                $.each(d.tag_mismatch.target, function(index) {
-                    $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
-                        var clone = $(this).clone();
-                        clone.find('.inside-attribute').remove();
-                        return clone.text() === d.tag_mismatch.target[index];
-                    }).last().addClass('temp');
-                });
-            }
-
-            $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-            $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-            $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
-        } else {
-            $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
-                var clone = $(this).clone();
-                clone.find('.inside-attribute').remove();
-                return clone.text() === d.tag_mismatch.order[0];
-            }).addClass('order-error');
+        if( !_.isUndefined(d.tag_mismatch.source) && d.tag_mismatch.source.length > 0 ) {
+            $.each(d.tag_mismatch.source, function(index) {
+                $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+                    var clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === d.tag_mismatch.source[index];
+                }).last().addClass('temp');
+            });
+        }
+        if( !_.isUndefined(d.tag_mismatch.target) && d.tag_mismatch.target.length > 0 ) {
+            $.each(d.tag_mismatch.target, function(index) {
+                $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+                    var clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === d.tag_mismatch.target[index];
+                }).last().addClass('temp');
+            });
         }
 
+        $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+        $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+        $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+
+        if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
+            $( '#segment-' + d.id_segment + ' .editarea .locked' ).filter( function () {
+                var clone = $( this ).clone();
+                clone.find( '.inside-attribute' ).remove();
+                return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
+            } ).addClass( 'order-error' );
+        }
 	},	
 
 	// TAG AUTOCOMPLETE
