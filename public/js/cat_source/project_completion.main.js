@@ -174,9 +174,9 @@ if ( ProjectCompletion.enabled() ) {
 
     var markJobAsComplete = function (  ) {
         if ( config.isReview ) {
-            clickMarkAsCompleteForReview();
+            UI.clickMarkAsCompleteForReview();
         } else {
-            clickMarkAsCompleteForTranslate();
+            UI.clickMarkAsCompleteForTranslate();
         }
     };
 
@@ -188,7 +188,9 @@ if ( ProjectCompletion.enabled() ) {
         handleClickOnReadOnly     : handleClickOnReadOnly,
         markJobAsComplete         : markJobAsComplete,
         isMarkedAsCompleteClickable: isClickableStatus,
-        translateAndReadonly      : translateAndReadonly
+        translateAndReadonly      : translateAndReadonly,
+        clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
+        clickMarkAsCompleteForReview : clickMarkAsCompleteForReview
     });
 
 
