@@ -249,6 +249,15 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
+    },
+
+    setToggleBulkOption: function (sid,fid) {
+        let index = this.getSegmentIndex(sid, fid);
+        let value = this._segments[fid].getIn([index,'inBulk']) ? false : true;
+        this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], value);
+    },
+    removeBulkOption: function (fid) {
+        this._segments[fid] = this._segments[fid].map(segment => segment.set('inBulk', false));
     }
 });
 
@@ -355,6 +364,14 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);
+            break;
+        case SegmentConstants.TOGGLE_SEGMENT_ON_BULK:
+            SegmentStore.setToggleBulkOption(action.sid, action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
+            SegmentStore.removeBulkOption(action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

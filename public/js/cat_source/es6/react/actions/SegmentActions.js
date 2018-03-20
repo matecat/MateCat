@@ -367,6 +367,21 @@ var SegmentActions = {
 
     submitComment: function (sid, idIssue, data) {
         return UI.submitComment(sid, idIssue, data);
+    },
+
+    toggleSegmentOnBulk: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
+            fid: fid,
+            sid: sid
+        });
+    },
+
+    removeSegmentsOnBulk: function(fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
+            fid: fid
+        });
     }
 
 
