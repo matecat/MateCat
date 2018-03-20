@@ -151,7 +151,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var isReadonlySegment = function( segment ) {
-        return translateAndReadonly() || original_isReadonlySegment( segment ) ;
+        return UI.translateAndReadonly() || original_isReadonlySegment( segment ) ;
     }
 
     var original_isReadonlySegment = UI.isReadonlySegment ;
@@ -212,7 +212,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var checkCompletionOnReady = function (  ) {
-        translateAndReadonly() && showTranslateWarningMessage();
+        UI.translateAndReadonly() && showTranslateWarningMessage();
         evalReviseNotice();
     };
 
