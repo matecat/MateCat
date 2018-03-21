@@ -219,10 +219,10 @@ $.extend(UI, {
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
 		if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+			/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
 		}
 		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+			/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
 		}
 		this.updateSearchItemsCount();
 		if (this.someSegmentToSave()) {
@@ -653,11 +653,11 @@ $.extend(UI, {
 	},
 	setFindFunction: function(func) {
 		var b = $('#exec-find');
-		if (func == 'next') {
+		/*if (func == 'next') {
 			b.attr('data-func', 'next').attr('value', 'Next');
 		} else {
 			b.attr('data-func', 'find').attr('value', 'Find');
-		}
+		}*/
 		b.removeAttr('disabled');
 	},
 	unmarkNumItemsInSegments: function() {

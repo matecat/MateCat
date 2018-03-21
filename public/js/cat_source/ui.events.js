@@ -580,40 +580,7 @@ $.extend(UI, {
 
 		// Search and replace
 
-		$("#exec-find").click(function(e) {
-			e.preventDefault();
-			if ($(this).attr('data-func') == 'find') {
-				UI.execFind();
-			} else {
-				if (!UI.goingToNext) {
-					UI.goingToNext = true;
-					UI.execNext();
-				}
-
-			}
-		});
-		$("#exec-cancel").click(function(e) {
-			e.preventDefault();
-			$("#filterSwitch").click();
-			UI.body.removeClass('searchActive');
-			UI.clearSearchMarkers();
-			UI.clearSearchFields();
-			UI.setFindFunction('find');
-			$('#exec-find').removeAttr('disabled');
-			$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
-			UI.enableTagMark();
-			if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-				UI.gotoOpenSegment();
-			} else {
-				UI.render({
-					firstLoad: false,
-					segmentToOpen: UI.currentSegmentId
-				});
-			}
-            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
-
-        });
-		$("#exec-replaceall").click(function(e) {
+		/*$("#exec-replaceall").click(function(e) {
 			e.preventDefault();
 			APP.confirm({
 				name: 'confirmReplaceAll',
@@ -651,20 +618,20 @@ $.extend(UI, {
                 if(UI.numSearchResultsSegments > 1) UI.gotoNextResultItem(true);
 			}
 
-        });
-		$("#enable-replace").on('change', function() {
+        });*/
+		/*$("#enable-replace").on('change', function() {
 			if ($('#enable-replace').is(':checked') && $('#search-target').val() != "") {
 				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			}
-		});
-		$("#search-source, #search-target").on('input', function() {
+		});*/
+		/*$("#search-source, #search-target").on('input', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 				$("#enable-replace").change();
 			}
-		});
+		});*/
         $('#replace-target').on('focus', function() {
             if(!$('#enable-replace').prop('checked')) {
                 $('label[for=enable-replace]').trigger('click');

@@ -1,0 +1,8 @@
+.searchbox {
+  .btn {
+    text-transform: uppercase;
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
