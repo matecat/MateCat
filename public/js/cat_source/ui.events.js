@@ -580,12 +580,6 @@ $.extend(UI, {
 
 		// Search and replace
 
-		$(".searchbox input, .searchbox select").bind('keydown', 'return', function(e) {
-			e.preventDefault();
-			if ($("#exec-find").attr('disabled') != 'disabled')
-				$("#exec-find").click();
-		});
-
 		$("#exec-find").click(function(e) {
 			e.preventDefault();
 			if ($(this).attr('data-func') == 'find') {

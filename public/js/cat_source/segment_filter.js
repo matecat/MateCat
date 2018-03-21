@@ -254,6 +254,15 @@ if (SegmentFilter.enabled())
                 }),
             $('#bulk-approve-bar-mountpoint')[0]
         );
+        window.search_compontent = ReactDOM.render(
+            React.createElement(
+                Search_MainPanel, {
+                    isReview: config.isReview,
+                    searchable_statuses: config.searchable_statuses
+                }),
+            $('#search-mountpoint')[0]
+        );
+
     });
 
     $(document).on('header-tool:open', function(e, data) {
