@@ -134,11 +134,7 @@ class MainPanel extends React.Component {
 
     setStatusClick(e) {
         e.preventDefault();
-        if (this.props.isReview) {
-            UI.approveFilteredSegments(this.state.segmentsArray);
-        } else {
-            UI.translateFilteredSegments(this.state.segmentsArray);
-        }
+        SegmentActions.setBulkSelectionSegments(this.state.segmentsArray);
     }
 
     render() {

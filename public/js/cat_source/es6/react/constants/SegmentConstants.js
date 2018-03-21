@@ -46,6 +46,7 @@ module.exports = keyMirror({
     REMOVE_SEGMENTS_ON_BULK: null,
     SET_UNLOCKED_SEGMENT: null,
     SET_BULK_SELECTION_INTERVAL : null,
+    SET_BULK_SELECTION_SEGMENTS: null,
     SET_MUTED_SEGMENTS:null,
     REMOVE_MUTED_SEGMENTS: null
 });

@@ -135,24 +135,32 @@ if (SegmentFilter.enabled())
                     reactState : window.segment_filter_panel.state
                 }) ;
 
-                UI.unmountSegments();
+                //UI.unmountSegments();
+                SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
-                var afterRenderCallback = function() { } ;
                 var segmentToOpen ;
 
                 if ( !wantedSegment ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
+                    var segment$ = UI.getSegmentById(segmentToOpen);
+                    if (segment$.length) {
+                        UI.openSegment(segment$)
+                    } else {
+                        UI.scrollSegment(segment$, segmentToOpen);
+                    }
                 } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
-                    afterRenderCallback = callbackForSegmentNotInSample( wantedSegment )  ;
+                    callbackForSegmentNotInSample( wantedSegment )  ;
                 } else {
                     segmentToOpen = wantedSegment ;
+                    var segment$ = UI.getSegmentById(segmentToOpen);
+                    if (segment$) {
+                        UI.openSegment(segment$)
+                    } else {
+                        UI.scrollSegment(segment$, segmentToOpen);
+                    }
                 }
 
-                return UI.render({
-                    firstLoad: false,
-                    segmentToOpen: segmentToOpen
-                }).done( afterRenderCallback ) ;
             })
         },
 

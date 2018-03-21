@@ -274,6 +274,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this.setBulkSelectionInterval(from + 1, to, fid);
         }
     },
+    setBulkSelectionSegments: function ( segmentsArray ) {
+        let self = this;
+        this.segmentsInBulk
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(function ( segment ) {
+                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
+                    return segment.set('inBulk', true);
+                }
+                return segment;
+            });
+        });
+    },
     setMutedSegments: function ( segmentsArray ) {
         let self = this;
         _.forEach(this._segments, function ( item, index ) {
@@ -417,6 +429,12 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.SET_BULK_SELECTION_INTERVAL:
             SegmentStore.setBulkSelectionInterval(action.from, action.to, action.fid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_BULK_SELECTION_SEGMENTS:
+            SegmentStore.setBulkSelectionSegments(action.segmentsArray);
+            _.forEach(SegmentStore._segments, function ( item, index ) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
             break;
         case SegmentConstants.SET_UNLOCKED_SEGMENT:
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);

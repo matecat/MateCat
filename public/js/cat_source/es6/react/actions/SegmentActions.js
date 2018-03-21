@@ -382,6 +382,7 @@ var SegmentActions = {
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
             fid: fid
         });
+        UI.setWaypoints();
     },
 
     setSegmentLocked( segment, fid, unlocked) {
@@ -411,11 +412,19 @@ var SegmentActions = {
             fid: fid
         });
     },
+    setBulkSelectionSegments(segmentsArray) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
+            segmentsArray: segmentsArray
+        });
+        UI.setWaypoints();
+    },
     setMutedSegments(segmentsArray) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_MUTED_SEGMENTS,
             segmentsArray: segmentsArray
         });
+        UI.setWaypoints();
     },
     removeAllMutedSegments() {
         AppDispatcher.dispatch({

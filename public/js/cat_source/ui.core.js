@@ -62,7 +62,7 @@ UI = {
 
 	},
 
-	activateSegment: function(segment) {
+    activateSegment: function(segment) {
         SegmentActions.createFooter(UI.getSegmentId(segment));
 		this.createButtons(segment);
 

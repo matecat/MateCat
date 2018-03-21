@@ -50,8 +50,16 @@ $.extend(UI, {
          */
         this.globalWarnings = [];
 
-        this.downOpts = {offset: '130%'};
-		this.upOpts = {offset: '-40%'};
+        // this.downOpts = {offset: '130%'};
+		// this.upOpts = {offset: '-40%'};
+        this.downOpts = {
+            offset: '100%',
+            context: $('#outer')
+        };
+        this.upOpts = {
+            offset: '-100%',
+            context: $('#outer')
+        };
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 
 
