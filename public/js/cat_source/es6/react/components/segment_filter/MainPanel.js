@@ -267,7 +267,6 @@ class MainPanel extends React.Component {
             </div>;
         }
 
-        let setStatusLabel = (this.props.isReview) ? "APPROVE ALL" : "TRANSLATE ALL";
         return <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
@@ -289,10 +288,9 @@ class MainPanel extends React.Component {
                                classnames({
                                    btn: true,
                                    disabled: !this.state.filtering,
-                                   translate: !this.props.isReview,
-                                   review: this.props.isReview
+                                   "select-all-filter": true,
                                })}
-                           value={setStatusLabel} />
+                           value="Select All" />
 
                     <input id="clear-filter"
                            type="button"

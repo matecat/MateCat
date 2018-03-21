@@ -1051,8 +1051,8 @@ UI = {
 			}
             console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
-            console.timeEnd("Time: RenderSegments"+fid);
-            console.timeEnd("Time: from start()");
+            // console.timeEnd("Time: RenderSegments"+fid);
+            // console.timeEnd("Time: from start()");
 
 		});
 

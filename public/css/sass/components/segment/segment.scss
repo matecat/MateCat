@@ -1,0 +1,22 @@
+.segment-selected-inBulk:not(.opened) {
+    .body > .text {
+        background-color: #8fb7c1 !important;
+    }
+    .segment-add-inBulk {
+        display: block;
+    }
+    &:hover .body > .text {
+        background-color: #8fb7c1 !important;
+    }
+}
+
+
+section {
+    .segment-add-inBulk {
+        display: none;
+    }
+
+    &:not(.readonly):hover .segment-add-inBulk {
+        display: block;
+    }
+}

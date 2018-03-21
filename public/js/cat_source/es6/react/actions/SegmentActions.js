@@ -382,6 +382,45 @@ var SegmentActions = {
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
             fid: fid
         });
+    },
+
+    setSegmentLocked( segment, fid, unlocked) {
+        if (!unlocked) {
+            //TODO: move this to SegmentActions
+            UI.removeFromStorage('unlocked-' + segment.sid);
+            if (segment.inBulk) {
+                this.toggleSegmentOnBulk(segment.sid, fid);
+            }
+        } else {
+            UI.addInStorage('unlocked-'+ segment.sid, true);
+            UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
+        }
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
+            fid: fid,
+            sid: segment.sid,
+            unlocked: unlocked
+        });
+    },
+
+    setBulkSelectionInterval(from, to, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_BULK_SELECTION_INTERVAL,
+            from: from,
+            to: to,
+            fid: fid
+        });
+    },
+    setMutedSegments(segmentsArray) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_MUTED_SEGMENTS,
+            segmentsArray: segmentsArray
+        });
+    },
+    removeAllMutedSegments() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS
+        });
     }
 
 

@@ -3,7 +3,7 @@ SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
     return ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled();
-}
+};
 
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
@@ -166,17 +166,7 @@ if (SegmentFilter.enabled())
             UI.body.addClass('filtering'); // filtering makes sense if we have serverData
 
             if ( this.getStoredState().serverData ) {
-                var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
-                    return  '#segment-' + i  ;
-                });
-                var selector = 'section:not( ' + ids + ')';
-
-                UI.body.addClass('sampling-enabled');
-                let elements = $( selector );
-                ids = $.map( elements, function(i) {
-                    return  UI.getSegmentId(i) ;
-                });
-                SegmentActions.addClassToSegment(ids, 'muted');
+                SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
                 UI.body.addClass('sampling-enabled');
 
                 setTimeout( function() {
@@ -197,7 +187,7 @@ if (SegmentFilter.enabled())
         closeFilter : function() {
             UI.body.removeClass('filtering');
             UI.body.removeClass('sampling-enabled');
-            SegmentActions.removeClassToSegment(-1, 'muted');
+            SegmentActions.removeAllMutedSegments();
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );

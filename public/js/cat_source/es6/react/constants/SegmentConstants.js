@@ -44,4 +44,8 @@ module.exports = keyMirror({
     ADD_TAB_INDEX: null,
     TOGGLE_SEGMENT_ON_BULK: null,
     REMOVE_SEGMENTS_ON_BULK: null,
+    SET_UNLOCKED_SEGMENT: null,
+    SET_BULK_SELECTION_INTERVAL : null,
+    SET_MUTED_SEGMENTS:null,
+    REMOVE_MUTED_SEGMENTS: null
 });

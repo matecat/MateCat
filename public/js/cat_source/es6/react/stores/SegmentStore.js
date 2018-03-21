@@ -55,7 +55,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         } else {
             this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
-        console.timeEnd("Time: updateAll segments"+fid);
+        // console.timeEnd("Time: updateAll segments"+fid);
     },
 
     normalizeSplittedSegments: function(segments) {
@@ -97,6 +97,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             } else {
                 segment.decoded_translation =  UI.decodeText(segment, segment.translation);
                 segment.decoded_source =  UI.decodeText(segment, segment.segment);
+                segment.unlocked = UI.isUnlockedSegment(segment);
                 newSegments.push(this);
             }
 
@@ -107,16 +108,17 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
         });
-
     },
-
     getSegmentIndex(sid, fid) {
         return this._segments[fid].findIndex(function (segment, index) {
             return parseInt(segment.get('sid')) === parseInt(sid);
         });
 
     },
-
+    // getSegmentIndexNoFid(sid) {
+    //     this._segments
+    //
+    // },
     splitSegment(oldSid, newSegments, fid, splitGroup) {
         var index = this._segments[fid].findIndex(function (segment, index) {
             return (segment.get('sid') == oldSid);
@@ -247,17 +249,54 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         return result;
     },
-    emitChange: function(event, args) {
-        this.emit.apply(this, arguments);
-    },
-
     setToggleBulkOption: function (sid,fid) {
         let index = this.getSegmentIndex(sid, fid);
         let value = this._segments[fid].getIn([index,'inBulk']) ? false : true;
         this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], value);
     },
-    removeBulkOption: function (fid) {
-        this._segments[fid] = this._segments[fid].map(segment => segment.set('inBulk', false));
+    removeBulkOption: function () {
+        let self = this;
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(segment => segment.set('inBulk', false));
+        });
+    },
+    setBulkSelectionInterval: function ( from, to, fid ) {
+        let index = this.getSegmentIndex(from, fid);
+        if (index > -1 &&
+            this._segments[fid].get(index).get("readonly") == "false" &&  //not readonly
+                (this._segments[fid].get(index).get("ice_locked") === "0" ||  //not ice_locked
+                    (this._segments[fid].get(index).get("ice_locked") === "1" && this._segments[fid].get(index).get("unlocked"))  //unlocked
+                )
+        ) {
+            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+        }
+        if (from < to) {
+            this.setBulkSelectionInterval(from + 1, to, fid);
+        }
+    },
+    setMutedSegments: function ( segmentsArray ) {
+        let self = this;
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(function ( segment ) {
+                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+                    return segment.set('muted', true);
+                }
+                return segment;
+            });
+        });
+    },
+    removeAllMutedSegments: function (  ) {
+        let self = this;
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(segment => segment.set('muted', false));
+        });
+    },
+    setUnlockedSegment: function (sid, fid, unlocked) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
+    },
+    emitChange: function(event, args) {
+        this.emit.apply(this, arguments);
     }
 });
 
@@ -370,8 +409,30 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
-            SegmentStore.removeBulkOption(action.fid);
+            SegmentStore.removeBulkOption();
+            _.forEach(SegmentStore._segments, function ( item, index ) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
+            break;
+        case SegmentConstants.SET_BULK_SELECTION_INTERVAL:
+            SegmentStore.setBulkSelectionInterval(action.from, action.to, action.fid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_UNLOCKED_SEGMENT:
+            SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.SET_MUTED_SEGMENTS:
+            SegmentStore.setMutedSegments(action.segmentsArray);
+            _.forEach(SegmentStore._segments, function ( item, index ) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
+            break;
+        case SegmentConstants.REMOVE_MUTED_SEGMENTS:
+            SegmentStore.removeAllMutedSegments();
+            _.forEach(SegmentStore._segments, function ( item, index ) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
