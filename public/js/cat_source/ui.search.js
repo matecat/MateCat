@@ -87,7 +87,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'find',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -160,7 +160,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'replaceAll',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,

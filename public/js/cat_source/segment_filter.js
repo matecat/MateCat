@@ -193,12 +193,14 @@ if (SegmentFilter.enabled())
         },
 
         closeFilter : function() {
-            UI.body.removeClass('filtering');
-            UI.body.removeClass('sampling-enabled');
-            SegmentActions.removeAllMutedSegments();
-            setTimeout( function() {
-                UI.scrollSegment( UI.currentSegment ) ;
-            }, 600 );
+            if ( UI.body.hasClass('filtering') ) {
+                UI.body.removeClass('filtering');
+                UI.body.removeClass('sampling-enabled');
+                SegmentActions.removeAllMutedSegments();
+                setTimeout( function() {
+                    UI.scrollSegment( UI.currentSegment ) ;
+                }, 600 );
+            }
         }
     });
 

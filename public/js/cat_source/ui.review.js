@@ -284,7 +284,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
 
             var data = {
                 action: 'setRevision',
-                job: config.job_id,
+                job: config.id_job,
                 jpassword: config.password,
                 segment: sid,
                 original: original,

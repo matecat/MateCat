@@ -377,10 +377,9 @@ var SegmentActions = {
         });
     },
 
-    removeSegmentsOnBulk: function(fid) {
+    removeSegmentsOnBulk: function() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
-            fid: fid
         });
         UI.setWaypoints();
     },

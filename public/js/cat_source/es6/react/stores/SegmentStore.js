@@ -42,7 +42,7 @@ EventEmitter.prototype.setMaxListeners(0);
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments : {},
-
+    segmentsInBulk : [],
     /**
      * Update all
      */
@@ -54,6 +54,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
             this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
+        }
+
+        if (this.segmentsInBulk.length > 0 ) {
+            this.setBulkSelectionSegments(this.segmentsInBulk);
         }
         // console.timeEnd("Time: updateAll segments"+fid);
     },
@@ -89,7 +93,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         decoded_translation:  UI.decodeText(segment, segment.translation),
                         version: segment.version,
                         warning: "0",
-                        tagged: false
+                        tagged: false,
+                        unlocked: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -251,16 +256,23 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setToggleBulkOption: function (sid,fid) {
         let index = this.getSegmentIndex(sid, fid);
-        let value = this._segments[fid].getIn([index,'inBulk']) ? false : true;
-        this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], value);
+        if (this._segments[fid].getIn([index,'inBulk'])) {
+            let indexArray = this.segmentsInBulk.indexOf(sid);
+            this.segmentsInBulk.splice(indexArray, 1);
+            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], false);
+        } else {
+            this.segmentsInBulk.push(sid);
+            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+        }
     },
     removeBulkOption: function () {
         let self = this;
         _.forEach(this._segments, function ( item, index ) {
             self._segments[index] = self._segments[index].map(segment => segment.set('inBulk', false));
         });
+        this.segmentsInBulk = [];
     },
-    setBulkSelectionInterval: function ( from, to, fid ) {
+    setBulkSelectionInterval: function ( from, to, fid) {
         let index = this.getSegmentIndex(from, fid);
         if (index > -1 &&
             this._segments[fid].get(index).get("readonly") == "false" &&  //not readonly
@@ -269,6 +281,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 )
         ) {
             this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+            if ( this.segmentsInBulk.indexOf(from.toString()) === -1) {
+                this.segmentsInBulk.push(from.toString());
+            }
         }
         if (from < to) {
             this.setBulkSelectionInterval(from + 1, to, fid);
@@ -276,18 +291,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setBulkSelectionSegments: function ( segmentsArray ) {
         let self = this;
-        // this.segmentsInBulk
+        this.segmentsInBulk = segmentsArray;
         _.forEach(this._segments, function ( item, index ) {
             self._segments[index] = self._segments[index].map(function ( segment ) {
-                if (segmentsArray.indexOf(segment.get('sid')) > -1 &&
-                    (
-                        ( segment.get('readonly') === "false" && segment.get('ice_locked') == "0" )  ||
-                        ( segment.get('ice_locked') == "1" && segment.get('unlocked') )
-                    )
-                ) {
-                    return segment.set('inBulk', true);
+                if ( segmentsArray.indexOf(segment.get('sid')) > -1 ) {
+                    if ( segment.get('ice_locked') == "1" && !segment.get('unlocked') ) {
+                        let index = segmentsArray.indexOf(segment.get('sid'));
+                        self.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
+                    } else {
+                        return segment.set('inBulk', true);
+                    }
                 }
-                return segment;
+                return segment.set('inBulk', false);
             });
         });
     },
@@ -423,10 +438,12 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.TOGGLE_SEGMENT_ON_BULK:
             SegmentStore.setToggleBulkOption(action.sid, action.fid);
+            SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
             SegmentStore.removeBulkOption();
+            SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, []);
             _.forEach(SegmentStore._segments, function ( item, index ) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
@@ -434,12 +451,14 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.SET_BULK_SELECTION_INTERVAL:
             SegmentStore.setBulkSelectionInterval(action.from, action.to, action.fid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_BULK_SELECTION_SEGMENTS:
             SegmentStore.setBulkSelectionSegments(action.segmentsArray);
             _.forEach(SegmentStore._segments, function ( item, index ) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
+            SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_UNLOCKED_SEGMENT:
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);

@@ -75,7 +75,7 @@ API.SEGMENT = {
             segment: source,
             automatic: true,
             translation: null,
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password
         };
         return $.ajax({
@@ -92,7 +92,7 @@ API.SEGMENT = {
             segment: source,
             automatic: false,
             translation: null,
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password
         };
         return $.ajax({
@@ -107,7 +107,7 @@ API.SEGMENT = {
             exec: 'delete',
             segment: source,
             translation: target,
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password
         };
         return $.ajax({
@@ -123,7 +123,7 @@ API.SEGMENT = {
             segment: source,
             translation: target,
             comment: comment,
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password
         };
         return $.ajax({
@@ -142,7 +142,7 @@ API.SEGMENT = {
             newtranslation: newTranslation,
             id_item: idItem,
             comment: comment,
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password
         };
 
