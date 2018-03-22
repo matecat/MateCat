@@ -20,7 +20,8 @@ class Search extends React.Component {
                 searchSource: null
             },
             currentTargetSearch: null,
-            currentSourceSearch: null
+            currentSourceSearch: null,
+            funcFindButton: true  // true=find / false=next
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -29,6 +30,7 @@ class Search extends React.Component {
 
         this.handleReplaceAllClick = this.handleReplaceAllClick.bind(this);
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
+        this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
     }
 
 
@@ -40,14 +42,7 @@ class Search extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        let currentTargetSearch,
-            currentSourceSearch;
-        if ($("#exec-find").attr('disabled') != 'disabled') {
-            currentSourceSearch = this.state.search.searchSource;
-            currentTargetSearch = this.state.search.searchTarget;
-            if((!this.state.currentTargetSearch && !this.state.currentSourceSearch) ||
-                this.state.currentTargetSearch !== this.state.search.searchTarget ||
-                this.state.currentSourceSearch !== this.state.search.searchSource){
+            if (this.state.funcFindButton) {
                 UI.execFind();
             } else {
                 if (!UI.goingToNext) {
@@ -55,10 +50,10 @@ class Search extends React.Component {
                     UI.execNext();
                 }
             }
-        }
         this.setState({
-            currentSourceSearch: currentSourceSearch,
-            currentTargetSearch: currentTargetSearch
+            currentSourceSearch: this.state.search.searchSource,
+            currentTargetSearch: this.state.search.searchTarget,
+            funcFindButton: false
         })
     }
 
@@ -68,8 +63,6 @@ class Search extends React.Component {
         UI.body.removeClass('searchActive');
         UI.clearSearchMarkers();
         UI.clearSearchFields();
-        UI.setFindFunction('find');
-        $('#exec-find').removeAttr('disabled');
         $('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
         UI.enableTagMark();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
@@ -84,8 +77,6 @@ class Search extends React.Component {
     }
 
     handleReplaceAllClick(event) {
-        console.log('handleReplaceAllClick');
-        console.log(this.enableReplace);
         event.preventDefault();
         APP.confirm({
             name: 'confirmReplaceAll',
@@ -98,9 +89,7 @@ class Search extends React.Component {
 
     handleReplaceClick(event) {
         event.preventDefault();
-        console.log('handleReplaceClick');
-        let replaceTarget = $('#replace-target').val();
-        if ($('#search-target').val() == replaceTarget) {
+        if(this.state.search.searchTarget === this.state.search.replaceTarget){
             APP.alert({msg: 'Attention: you are replacing the same text!'});
             return false;
         }
@@ -109,7 +98,7 @@ class Search extends React.Component {
 
             // todo: redo marksearchresults on the target
 
-            $("mark.currSearchItem").text(replaceTarget);
+            $("mark.currSearchItem").text(this.state.search.replaceTarget);
             let segment = $("mark.currSearchItem").parents('section');
             let status = UI.getStatus(segment);
 
@@ -127,14 +116,26 @@ class Search extends React.Component {
     }
 
     handleInputChange(event) {
+        //serch model
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
         let search = this.state.search;
         search[name] = value;
+
+
+        this.setState({
+            search: search,
+            funcFindButton: true
+        });
+    }
+
+    replaceTargetOnFocus() {
+        let search = this.state.search;
+        search.enableReplace = true;
         this.setState({
             search: search
-        });
+        })
     }
 
     render() {
@@ -143,14 +144,8 @@ class Search extends React.Component {
             return <option key={index} value={item.value}>{item.label}</option>;
         });
         let findIsDisabled = false;
-        let textFindButton = 'Next';
-        if(!this.state.search.searchTarget && !this.state.search.searchSource){
+        if (!this.state.search.searchTarget && !this.state.search.searchSource) {
             findIsDisabled = true;
-        }
-        if((!this.state.currentTargetSearch && !this.state.currentSourceSearch) ||
-            this.state.currentTargetSearch !== this.state.search.searchTarget ||
-            this.state.currentSourceSearch !== this.state.search.searchSource){
-            textFindButton = 'Find';
         }
         return <div className="searchbox">
             <form onSubmit={this.handleSubmit}>
@@ -164,7 +159,9 @@ class Search extends React.Component {
                     <div className="block">
                         <div className="field">
                             <label htmlFor="search-target">Find in target</label>
-                            <input id="search-target" className="search-input" type="text" name="searchTarget"
+                            <input id="search-target"
+                                   className={"search-input " + (!this.state.search.searchTarget && this.state.search.replaceTarget ? 'warn' : null)}
+                                   type="text" name="searchTarget"
                                    onChange={this.handleInputChange}
                                    defaultValue={this.state.search.searchTarget}/>
                         </div>
@@ -176,6 +173,7 @@ class Search extends React.Component {
                                        onChange={this.handleInputChange}/>
                                 <label htmlFor="enable-replace">Replace with</label>
                                 <input id="replace-target" className="search-input" type="text" name="replaceTarget"
+                                       onFocus={this.replaceTargetOnFocus}
                                        onChange={this.handleInputChange}
                                        defaultValue={this.state.search.replaceTarget}/>
                             </div>
@@ -194,7 +192,8 @@ class Search extends React.Component {
                         <div className="field">
                             <input id="exec-cancel" type="button" className="btn" onClick={this.handleCancelClick}
                                    defaultValue="Cancel"/>
-                            <input id="exec-find" type="submit" className="btn" data-func="find" defaultValue={textFindButton} disabled={findIsDisabled}/>
+                            <input id="exec-find" type="submit" className="btn" data-func="find"
+                                   defaultValue={(this.state.funcFindButton ? 'Find' : 'Next')} disabled={findIsDisabled}/>
                         </div>
                         {this.state.showReplaceOptionsInSearch ?
                             <div className="field">
@@ -204,7 +203,7 @@ class Search extends React.Component {
                                 </button>
 
                                 <button id="exec-replace" className="btn" onClick={this.handleReplaceClick}
-                                        disabled={!this.state.search.enableReplace  || !this.state.search.searchTarget}>
+                                        disabled={!this.state.search.enableReplace || !this.state.search.searchTarget}>
                                     Replace
                                 </button>
                             </div>

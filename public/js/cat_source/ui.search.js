@@ -652,13 +652,13 @@ $.extend(UI, {
 		return changes;
 	},
 	setFindFunction: function(func) {
-		var b = $('#exec-find');
+		/*var b = $('#exec-find');*/
 		/*if (func == 'next') {
 			b.attr('data-func', 'next').attr('value', 'Next');
 		} else {
 			b.attr('data-func', 'find').attr('value', 'Find');
 		}*/
-		b.removeAttr('disabled');
+		/*b.removeAttr('disabled');*/
 	},
 	unmarkNumItemsInSegments: function() {
 		$('section[data-searchItems]').removeAttr("data-searchItems");
