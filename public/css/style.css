@@ -1305,7 +1305,7 @@ article {
 .footer {
     float: left;
     width: 100%;
-    margin-top: -28px;
+    margin-top: -29px;
     height: 0;
     transition: width 2s;
     -moz-transition: width 2s; /* Firefox 4 */
@@ -1353,7 +1353,7 @@ body.cattool.editing {
 }
 
 body.editing section:not(.editor) .text {
-    background: #dcdfe4;
+    background: #e6e8ec;
 }
 
 section:not(.editor) .text:first-child {
@@ -1362,7 +1362,7 @@ section:not(.editor) .text:first-child {
 }
 
 body.cattool.editing section:not(.editor) .text:hover {
-    background: #d4d7dc !important;
+    background: #e2e6ec !important;
     color: #000;
 }
 
@@ -1563,7 +1563,6 @@ body.noGlossary .tab-switcher-gl {
     float: left;
     width: 100%;
     background: #ffffff !important;
-    border-top: 1px solid #f2f4f7;
 }
 
 .sub-editor.open {
@@ -2531,7 +2530,7 @@ section.ice-locked .text {
 }
 
 body.editing section:not(.editor).ice-locked .text {
-    background: #d3d6da !important;
+    background: #dde0e4 !important;
 }
 
 
@@ -3687,7 +3686,7 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    background-color: #dcdfe4;
+    background-color: #eef0f3;
     border-radius: 7px;
     padding: 3px;
 }
