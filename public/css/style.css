@@ -542,7 +542,6 @@ body.editing .grayed, body.virtualEditing .grayed {
 
 .sid {
     position: absolute;
-    width: 6%;
     left: -6%;
     text-align: center;
     display: block;
@@ -552,16 +551,39 @@ body.editing .grayed, body.virtualEditing .grayed {
     cursor: default;
     height: inherit;
     padding-bottom: 1px;
+    width: 6%;
 }
 
 .sid .txt {
-    padding: 0px 0;
-    /*background: #fff;*/
-    margin: 12px 8px 0 8px;
+    padding: 0px 3px;
+    margin: 2px 0px 0 0px;
 }
 
 .editing .sid .txt {
     /*background: #f2f4f7;*/
+}
+
+section .sid .txt input {
+    display: none;
+}
+
+section:hover .sid .txt input {
+    display: unset;
+}
+
+section.editor .sid .txt input {
+    display: unset;
+}
+
+section.readonly .txt input {
+    display: none !important;
+}
+
+section.segment-selected-inBulk .sid .txt input {
+    display: unset;
+}
+section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
+    display: unset;
 }
 
 p.split-shortcut {
@@ -1283,7 +1305,7 @@ article {
 .footer {
     float: left;
     width: 100%;
-    margin-top: -28px;
+    margin-top: -29px;
     height: 0;
     transition: width 2s;
     -moz-transition: width 2s; /* Firefox 4 */
@@ -1541,7 +1563,6 @@ body.noGlossary .tab-switcher-gl {
     float: left;
     width: 100%;
     background: #ffffff !important;
-    border-top: 1px solid #f2f4f7;
 }
 
 .sub-editor.open {
@@ -2295,7 +2316,7 @@ body.filtering {
     color: #FFF;
     font-size: 11px;
     background: #999;
-    padding: 1px 8px;
+    padding: 0px 8px;
     left: 46%;
     position: absolute;
     z-index: 12;
@@ -2446,7 +2467,6 @@ section.editor {
 
 section.editor .sid {
     left: -5%;
-    width: 6%;
     color: black;
 }
 
@@ -2510,7 +2530,7 @@ section.ice-locked .text {
 }
 
 body.editing section:not(.editor).ice-locked .text {
-    background: #d3d6da !important;
+    background: #dde0e4 !important;
 }
 
 
@@ -2519,13 +2539,25 @@ body.editing section:not(.editor).ice-locked .text {
 /*}*/
 
 .ice-locked-icon > button {
-    padding: 6px 3px 9px 11px;
-    font-size: 19px;
+    padding: 4px;
+    font-size: 15px;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 2px;
     cursor: pointer;
     color: #aaa;
+    position: relative;
+    margin-bottom: 5px;
+    top: 2px;
+}
+button.icon-lock.unlock-button.locked:before {
+    position: relative;
+    left: 3px;
+}
+
+button.unlock-button.unlocked.icon-unlocked3:before {
+    left: 2px;
+    position: relative;
 }
 
 section:hover  .ice-locked-icon > button{
@@ -3654,7 +3686,7 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    background-color: #dcdfe4;
+    background-color: #eef0f3;
     border-radius: 7px;
     padding: 3px;
 }
@@ -3753,7 +3785,6 @@ span.locked.tag-html-container-close {
 
     p.split-shortcut, .editing .sid .txt {
         font-size: 10px;
-        margin: 12px 8px 0 -8px;
     }
 
 }
@@ -3889,12 +3920,10 @@ span.locked.tag-html-container-close {
 
     .sid {
         left: -6%;
-        width: 7%;
     }
 
     section.editor .sid {
         left: -5%;
-        width: 7%;
     }
 }
 
