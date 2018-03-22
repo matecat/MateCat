@@ -80,6 +80,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     protected $_openThreads;
 
+    protected $is_review;
+
     /**
      * @return JobsTranslatorsStruct
      */
@@ -303,6 +305,15 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     public function isArchived() {
         return $this->status == Constants_JobStatus::STATUS_ARCHIVED ;
+    }
+
+    public function setIsReview($is_review){
+        $this->is_review = $is_review;
+        return $this;
+    }
+
+    public function getIsReview(){
+        return $this->is_review;
     }
 
 }

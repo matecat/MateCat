@@ -124,10 +124,16 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                     ] );
                     break;
                 case 'todo':
+
                     $data = array_merge( $data, [
                             'status_new'   => \Constants_TranslationStatus::STATUS_NEW,
                             'status_draft' => \Constants_TranslationStatus::STATUS_DRAFT
                     ] );
+                    if ( $chunk->getIsReview() ) {
+                        $data = array_merge( $data, [
+                                'status_translated'   => \Constants_TranslationStatus::STATUS_TRANSLATED,
+                        ] );
+                    }
                     break;
             }
 
@@ -182,17 +188,15 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
     }
 
     public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
-
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter );
         } else {
+            //initialize limit with 0 in all attributes because we use $limit attributes in methods called under below
             $limit = (object)[ 'limit' => 0, 'count' => 0, 'sample_size' => 0 ];
         }
 
         $where = self::__getWhereFromFilter( $filter );
         $data  = self::__getData( $chunk, $filter );
-
-        $sql = '';
 
         switch ( $filter->sampleType() ) {
             case 'segment_length_high_to_low':
@@ -217,10 +221,10 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 $sql = self::getSqlForUnlocked( $where );
                 break;
             case 'repetitions':
-                $sql = self::getSqlForRepetitions( $where );
+                $sql = self::getSqlForMatchType( $where );
                 break;
             case 'mt':
-                $sql = self::getSqlForMT( $where );
+                $sql = self::getSqlForMatchType( $where );
                 break;
             case 'matches':
                 $sql = self::getSqlForMatches( $where );
@@ -229,10 +233,10 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             case 'fuzzies_75_84':
             case 'fuzzies_85_94':
             case 'fuzzies_95_99':
-                $sql = self::getSqlForFuzzies( $where );
+                $sql = self::getSqlForMatchType( $where );
                 break;
             case 'todo':
-                $sql = self::getSqlForTodo( $where );
+                $sql = self::getSqlForTodo( $where, $data);
                 break;
             default:
                 throw new \Exception( 'Sample type is not valid: ' . $filter->sampleType() );
@@ -363,7 +367,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForRepetitions( $where ) {
+    public static function getSqlForMatchType( $where ) {
 
         $sql = "
           SELECT st.id_segment AS id
@@ -405,47 +409,10 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForFuzzies( $where ) {
-
-        $sql = "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND st.match_type = :match_type
-           WHERE 1
-           $where->sql
-           ORDER BY st.id_segment
-        ";
-
-        return $sql;
-    }
-
-    public static function getSqlForMT( $where ) {
-
-        $sql = "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND st.match_type = :match_type
-           WHERE 1
-           $where->sql
-           ORDER BY st.id_segment
-        ";
-
-        return $sql;
-    }
-
-    public static function getSqlForToDo( $where ) {
+    public static function getSqlForToDo( $where , $data) {
+        $sql_condition = "";
+        if(array_key_exists("status_translated", $data))
+            $sql_condition = " OR st.status = :status_translated ";
 
         $sql = "
           SELECT st.id_segment AS id
@@ -457,7 +424,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft)
+           OR st.status = :status_draft $sql_condition)
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
