@@ -1353,7 +1353,7 @@ body.cattool.editing {
 }
 
 body.editing section:not(.editor) .text {
-    background: #e6e8ec;
+    background: #dcdfe4;
 }
 
 section:not(.editor) .text:first-child {
@@ -1362,7 +1362,7 @@ section:not(.editor) .text:first-child {
 }
 
 body.cattool.editing section:not(.editor) .text:hover {
-    background: #e2e6ec !important;
+    background: #d4d7dc !important;
     color: #000;
 }
 
