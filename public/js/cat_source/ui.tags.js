@@ -423,7 +423,7 @@ $.extend(UI, {
             $( '#segment-' + d.id_segment + ' .editarea .locked' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
-                return clone.text() === d.tag_mismatch.order[0];
+                return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
         }
 	},	

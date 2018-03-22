@@ -274,25 +274,60 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function changeStatusBySegmentsIds( $job, $segments_ids, $status) {
+    public static function changeStatusBySegmentsIds( Jobs_JobStruct $job, $segments_ids, $status) {
         $update_values = [];
+        $where_values = [];
         $conn          = Database::obtain()->getConnection();
 
-        $old_wStruct = new \WordCount_Struct();
+        if ( $job->getProject()->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $sum_sql = "SUM(segments.raw_word_count)";
+        } else {
+            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+        }
+
+        $queryTotals = "
+           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
+
+           FROM segment_translations
+              INNER JOIN  segments
+              ON segments.id = segment_translations.id_segment
+           WHERE id_job = ?
+           AND status != ?
+           AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")
+           GROUP BY status
+    ";
+
+        $where_values[] = $job->id;
+        $where_values[] = $status;
+        $where_values   = array_merge( $where_values, $segments_ids );
+
+        $stmt = $conn->prepare( $queryTotals );
+
+        $stmt->execute( $where_values );
+
+        $totals = $stmt->fetchAll();
+
+        $old_wStruct = new WordCount_Struct();
         $old_wStruct->setIdJob( $job->id );
         $old_wStruct->setJobPassword( $job->password );
-        /*$old_wStruct->setNewWords( $job->new_words );
+        $old_wStruct->setNewWords( $job->new_words );
         $old_wStruct->setDraftWords( $job->draft_words );
         $old_wStruct->setTranslatedWords( $job->translated_words );
         $old_wStruct->setApprovedWords( $job->approved_words );
         $old_wStruct->setRejectedWords( $job->rejected_words );
 
-        //redundant, this is made into WordCount_Counter::updateDB
-        $old_wStruct->setOldStatus(  );
-        $old_wStruct->setNewStatus( $status );*/
-        //$counter = new \WordCount_Counter($old_wStruct);
 
+        $counter = new WordCount_Counter( $old_wStruct );
 
+        $newCounterValues = [];
+
+        foreach ( $totals as $__pos => $old_value ) {
+            $counter->setOldStatus( $old_value[ 'status' ] );
+            $counter->setNewStatus( $status );
+            $newCounterValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
+        }
+
+        $newTotals = $counter->updateDB( $newCounterValues );
 
         $sql = "UPDATE segment_translations SET status = ? WHERE id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
 
@@ -301,15 +336,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $update_values[] = $job->id;
         $update_values   = array_merge( $update_values, $segments_ids );
 
-
         $stmt->execute( $update_values );
 
 
-        $counter = new \WordCount_Counter;
-        $counter->initializeJobWordCount( $job->id, $job->password );
-        //$counter->updateCounts($old_wStruct);
+        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
 
-        return $stmt->rowCount();
+        return $job_stats;
     }
 
     public static function getUnchangebleStatus( $segments_ids, $status ) {

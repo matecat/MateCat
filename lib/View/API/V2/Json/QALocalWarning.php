@@ -49,11 +49,16 @@ class QALocalWarning {
                 $malformedStructs[ 'target' ][ $k ] = CatUtils::rawxliff2view( $rawTarget );
             }
 
+            $targetTagPositionError = $this->QA->getTargetTagPositionError();
+            foreach( $targetTagPositionError as $item => $value ){
+                $targetTagPositionError[ $item ] = CatUtils::rawxliff2view( $value );
+            }
+
             $out[ 'details' ]                              = [];
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
             $out[ 'details' ][ 'warnings' ]                = $this->QA->getNoticesJSON();
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
-            $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $this->QA->getTargetTagPositionError();
+            $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
             $out[ 'total' ]                                = count( $this->QA->getNotices() );
         }
 

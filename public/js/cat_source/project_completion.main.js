@@ -151,7 +151,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var isReadonlySegment = function( segment ) {
-        return translateAndReadonly() || original_isReadonlySegment( segment ) ;
+        return UI.translateAndReadonly() || original_isReadonlySegment( segment ) ;
     }
 
     var original_isReadonlySegment = UI.isReadonlySegment ;
@@ -174,9 +174,9 @@ if ( ProjectCompletion.enabled() ) {
 
     var markJobAsComplete = function (  ) {
         if ( config.isReview ) {
-            clickMarkAsCompleteForReview();
+            UI.clickMarkAsCompleteForReview();
         } else {
-            clickMarkAsCompleteForTranslate();
+            UI.clickMarkAsCompleteForTranslate();
         }
     };
 
@@ -188,7 +188,9 @@ if ( ProjectCompletion.enabled() ) {
         handleClickOnReadOnly     : handleClickOnReadOnly,
         markJobAsComplete         : markJobAsComplete,
         isMarkedAsCompleteClickable: isClickableStatus,
-        translateAndReadonly      : translateAndReadonly
+        translateAndReadonly      : translateAndReadonly,
+        clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
+        clickMarkAsCompleteForReview : clickMarkAsCompleteForReview
     });
 
 
@@ -212,7 +214,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var checkCompletionOnReady = function (  ) {
-        translateAndReadonly() && showTranslateWarningMessage();
+        UI.translateAndReadonly() && showTranslateWarningMessage();
         evalReviseNotice();
     };
 
@@ -261,8 +263,6 @@ if ( ProjectCompletion.enabled() ) {
             UI.markJobAsComplete()
         }
         $(document).trigger('sidepanel:close');
-
-
     });
 
     $(document).on('setTranslation:success', function(ev, data) {

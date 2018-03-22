@@ -45,6 +45,24 @@ class ChunkController extends KleinController {
 
     }
 
+    public function cancel() {
+        return $this->changeStatus( \Constants_JobStatus::STATUS_CANCELLED );
+    }
+
+    public function archive() {
+        return $this->changeStatus( \Constants_JobStatus::STATUS_ARCHIVED );
+    }
+
+    public function active() {
+        return $this->changeStatus( \Constants_JobStatus::STATUS_ACTIVE );
+    }
+
+    private function changeStatus( $status ) {
+
+        updateJobsStatus( "", $this->chunk->id, $status, $this->chunk->password );
+        $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
+    }
+
     protected function afterConstruct() {
         $Validator = new ChunkPasswordValidator( $this ) ;
         $Controller = $this;

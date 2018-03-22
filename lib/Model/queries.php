@@ -1928,18 +1928,18 @@ function changeProjectStatus( $pid, $status, $if_status_not = [] ) {
  * @param null $jPassword
  *
  * @deprecated
- * //TODO: Refactoring with prepared statements
  *
  */
 function updateJobsStatus( $res, $id, $status, $jPassword = null ) {
 
-    $db = Database::obtain();
+    $conn = Database::obtain()->getConnection();
 
     if ( $res == "prj" ) {
 
-        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id;
+        $query = "UPDATE jobs SET status_owner = :status WHERE id_project = :id_project";
+        $stmt = $conn->prepare( $query );
+        $stmt->execute( ['status' => $status, 'id_project' => $id] );
 
-        $db->query( $query );
 
         //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
         // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
@@ -1948,42 +1948,39 @@ function updateJobsStatus( $res, $id, $status, $jPassword = null ) {
 				SELECT max(id_segment) AS id_segment
 				FROM segment_translations
 				JOIN jobs ON id_job = id
-				WHERE id_project = " . (int)$id;
+				WHERE id_project = :id_project";
 
-        $_id_segment = $db->fetch_array( $select_max_id );
-        $_id_segment = array_pop( $_id_segment );
-        $id_segment  = $_id_segment[ 'id_segment' ];
-
-        $query_for_translations = "
-				UPDATE segment_translations
-				SET translation_date = NOW()
-				WHERE id_segment = $id_segment";
-
-        $db->query( $query_for_translations );
+        $stmt = $conn->prepare( $select_max_id );
+        $stmt->execute( ['id_project' => $id] );
 
     } else {
 
-        $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id=" . (int)$id . " and password = '" . $db->escape( $jPassword ) . "' ";
-        $db->query( $query );
+        $query = "update jobs set status_owner = :status where id = :id_job and password = :password ";
+        $stmt = $conn->prepare( $query );
+        $stmt->execute( ['status' => $status, 'id_job' => $id, 'password' => $jPassword] );
 
         $select_max_id = "
 			SELECT max(id_segment) as id_segment
 			FROM segment_translations
 			JOIN jobs ON id_job = id
-			WHERE id = $id
-			AND password = '" . $db->escape( $jPassword ) . "'";
+			WHERE id = :id_job
+			AND password = :password";
 
-        $_id_segment = $db->fetch_array( $select_max_id );
-        $_id_segment = array_pop( $_id_segment );
-        $id_segment  = $_id_segment[ 'id_segment' ];
+        $stmt = $conn->prepare( $select_max_id );
+        $stmt->execute( ['id_job' => $id, 'password' => $jPassword] );
 
-        $query_for_translations = "
+    }
+
+    $id_segment  = $stmt->fetchColumn();
+
+    $query_for_translations = "
 			UPDATE segment_translations
 			SET translation_date = NOW()
-			WHERE id_segment = $id_segment";
+			WHERE id_segment = :id_segment";
 
-        $db->query( $query_for_translations );
-    }
+    $stmt = $conn->prepare( $query_for_translations );
+    $stmt->execute( ['id_segment' => $id_segment] );
+
 }
 
 /**
