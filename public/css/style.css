@@ -2547,8 +2547,8 @@ body.editing section:not(.editor).ice-locked .text {
     cursor: pointer;
     color: #aaa;
     position: relative;
-    top: 5px;
-    text-align: center;
+    margin-bottom: 5px;
+    top: 2px;
 }
 button.icon-lock.unlock-button.locked:before {
     position: relative;
