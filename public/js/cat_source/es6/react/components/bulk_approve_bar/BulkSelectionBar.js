@@ -2,7 +2,7 @@ var React = require('react');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 
-class BulkApproveBar extends React.Component {
+class BulkSelectionBar extends React.Component {
 
     constructor(props) {
         super(props);
@@ -68,4 +68,4 @@ class BulkApproveBar extends React.Component {
     }
 }
 
-export default BulkApproveBar;
+export default BulkSelectionBar;
