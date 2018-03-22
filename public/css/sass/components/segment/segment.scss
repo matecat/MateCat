@@ -1,12 +1,12 @@
 .segment-selected-inBulk:not(.opened) {
     .body > .text {
-        background-color: #8fb7c1 !important;
+        background-color: #edf4fd !important;
     }
     .segment-add-inBulk {
         display: block;
     }
     &:hover .body > .text {
-        background-color: #8fb7c1 !important;
+        background-color: #edf4fd !important;
     }
 }
 
@@ -19,4 +19,16 @@ section {
     &:not(.readonly):hover .segment-add-inBulk {
         display: block;
     }
+}
+
+
+body.cattool.editing section:not(.editor).segment-selected-inBulk .text:hover {
+    background: #edf4fd !important;
+}
+section.editor.segment-selected-inBulk .text.segment-body-content {
+    background: #edf4fd;
+}
+
+section.editor.segment-selected-inBulk .text:hover.segment-body-content {
+    background: #edf4fd !important;
 }
