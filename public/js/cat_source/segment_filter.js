@@ -234,7 +234,7 @@ if (SegmentFilter.enabled())
         }
     });
 
-    $(document).ready( function() {
+    $(document).on("files:appended", function() {
         // mount the hiddent react component by default so we can keep status
         window.segment_filter_panel = ReactDOM.render(
             React.createElement(

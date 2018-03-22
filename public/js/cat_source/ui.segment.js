@@ -416,7 +416,7 @@
 
         isUnlockedSegment: function ( segment ) {
             let readonly = UI.isReadonlySegment(segment);
-            return (segment.ice_locked === "1" && !readonly) && UI.getFromStorage('unlocked-' + segment.sid)
+            return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid))
         },
         getStatusForAutoSave : function( segment ) {
             var status ;

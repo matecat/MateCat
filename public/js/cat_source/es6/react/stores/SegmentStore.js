@@ -276,10 +276,15 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setBulkSelectionSegments: function ( segmentsArray ) {
         let self = this;
-        this.segmentsInBulk
+        // this.segmentsInBulk
         _.forEach(this._segments, function ( item, index ) {
             self._segments[index] = self._segments[index].map(function ( segment ) {
-                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
+                if (segmentsArray.indexOf(segment.get('sid')) > -1 &&
+                    (
+                        ( segment.get('readonly') === "false" && segment.get('ice_locked') == "0" )  ||
+                        ( segment.get('ice_locked') == "1" && segment.get('unlocked') )
+                    )
+                ) {
                     return segment.set('inBulk', true);
                 }
                 return segment;
@@ -290,7 +295,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let self = this;
         _.forEach(this._segments, function ( item, index ) {
             self._segments[index] = self._segments[index].map(function ( segment ) {
-                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+                if ( segmentsArray.indexOf(segment.get('sid')) === -1 ) {
                     return segment.set('muted', true);
                 }
                 return segment;

@@ -2478,16 +2478,12 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        var initialRenderPromise ;
-        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
-            SegmentFilter.openFilter();
-            initialRenderPromise = ( new $.Deferred() ).resolve();
-        }
-        else {
-            initialRenderPromise = UI.render();
-        }
+        var initialRenderPromise = UI.render();;
 
         initialRenderPromise.done(function() {
+            if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
+                SegmentFilter.openFilter();
+            }
             UI.checkWarnings(true);
         });
 
