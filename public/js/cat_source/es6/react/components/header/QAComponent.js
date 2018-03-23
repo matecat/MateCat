@@ -252,8 +252,6 @@ class QAComponent extends React.Component {
     allowHTML(string) {
         return { __html: string };
     }
-
-    // shouldComponentUpdate(nextProps, nextState) { }
     componentDidMount() {
         CatToolStore.addListener(CatToolConstants.QA_SET_TAG_ISSUES, this.setTagIssues);
         CatToolStore.addListener(CatToolConstants.QA_SET_TRANSLATION_CONFLICTS, this.setTranslationConflitcts);

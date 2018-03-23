@@ -96,12 +96,6 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        restore : function( data ) {
-            // debugger  // TODO, find who calls this
-            window.segment_filter_panel.setState( this.getStoredState().reactState ) ;
-            $(document).trigger('segment-filter-submit');
-        },
-
         filterSubmit : function( data, wantedSegment) {
             if (!wantedSegment) {
                 wantedSegment = null;
@@ -121,14 +115,14 @@ if (SegmentFilter.enabled())
                     filtering : true,
                     segmentsArray: data.segment_ids
                 } ;
-
-                window.segment_filter_panel.setState( reactState );
+                CatToolActions.setSegmentFilter(data);
+                // window.segment_filter_panel.setState( reactState );
 
                 UI.clearStorage('SegmentFilter');
 
                 SegmentFilter.setStoredState({
                     serverData : data ,
-                    reactState : window.segment_filter_panel.state
+                    reactState : reactState
                 }) ;
 
                 //UI.unmountSegments();
@@ -182,8 +176,6 @@ if (SegmentFilter.enabled())
 
         clearFilter : function() {
             this.clearStoredData();
-            window.segment_filter_panel.resetState();
-
             this.closeFilter() ;
         },
 
@@ -229,28 +221,10 @@ if (SegmentFilter.enabled())
         }
     });
 
-    $(document).on("files:appended", function() {
-        // mount the hiddent react component by default so we can keep status
-        // window.segment_filter_panel = ReactDOM.render(
-        //     React.createElement(
-        //         SegmentFilter_MainPanel, {
-        //             isReview: config.isReview,
-        //
-        //         }),
-        //         $('#header-bars-wrapper')[0]
-        //     );
-
-        ReactDOM.render(
-            React.createElement(
-                SubHeaderContainer, {}),
-            $('#header-bars-wrapper')[0]
-        );
-
-    });
-
     $(document).on('click', "header .filter", function(e) {
         e.preventDefault();
         CatToolActions.toggleSegmentFilter();
+        SegmentFilter.openFilter();
     });
 
 

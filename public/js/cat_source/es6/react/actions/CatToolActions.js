@@ -64,6 +64,12 @@ let CatToolActions = {
             data: issues
         });
     },
+    setSegmentFilter: function ( segments ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_SEGMENT_FILTER,
+            data: segments
+        });
+    },
 };
 
 module.exports = CatToolActions;

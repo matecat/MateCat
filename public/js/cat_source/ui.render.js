@@ -79,6 +79,13 @@ $.extend(UI, {
 
 		}
 
+		ReactDOM.render(
+            React.createElement(
+                SubHeaderContainer, {}),
+            $('#header-bars-wrapper')[0]
+        );
+
+
 		return UI.getSegments(options);
 
 	},
