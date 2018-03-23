@@ -324,9 +324,9 @@ class Segment extends React.Component {
                     {(this.props.segment.ice_locked !== '1' ) ? (
                         config.splitSegmentEnabled ? (
                         <div className="actions">
-                            <a className="split" href="#" title="Click to split segment">
-                                <span className="icon-split"/>
-                            </a>
+                            <button className="split" href="#" title="Click to split segment">
+                                <i className="icon-split"/>
+                            </button>
                             <p className="split-shortcut">CTRL + S</p>
                         </div>
                         ) : (null)
