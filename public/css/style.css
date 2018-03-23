@@ -4964,26 +4964,20 @@ body.cattool .mgmt-table-mt .activemt {
 
 .splitArea {
     width: 45.5%;
-    z-index: 9999999;
     position: absolute;
-    min-height: 20px;
-    border: 2px solid #F00;
     padding: 3px 0px 5px 3px;
     margin: 0 0.7%;
     background: #efefef;
-    border-bottom: 1px solid #ccc;
     font-size: 18px;
-    min-height: 70px;
+    min-height: 55px;
     outline: 0;
     text-align: left;
     border-radius: 2px;
     line-height: 27px;
-    font-size: 18px;
     color: #000;
     border: 1px solid #727272;
     box-shadow: 0 1px 2px #ccc;
     -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal;
     word-break: normal !important;
     cursor: col-resize;
 }
