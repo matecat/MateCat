@@ -1,8 +1,15 @@
 .bulk-approve-bar {
     position: fixed;
-    margin-top: 28px;
+    margin-top: 80px;
     z-index: 2;
     left: 0;
     right: 0;
     background: #efefef;
+    span {
+        float: left;
+    }
+
+    button.btn {
+        float: left;
+    }
 }

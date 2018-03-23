@@ -134,7 +134,7 @@ class MainPanel extends React.Component {
 
     setStatusClick(e) {
         e.preventDefault();
-        SegmentActions.setBulkSelectionSegments(this.state.segmentsArray);
+        SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
     render() {

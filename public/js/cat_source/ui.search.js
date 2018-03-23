@@ -87,7 +87,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'find',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -160,7 +160,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'replaceAll',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -219,10 +219,10 @@ $.extend(UI, {
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
 		if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+			/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
 		}
 		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+			/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
 		}
 		this.updateSearchItemsCount();
 		if (this.someSegmentToSave()) {
@@ -652,13 +652,13 @@ $.extend(UI, {
 		return changes;
 	},
 	setFindFunction: function(func) {
-		var b = $('#exec-find');
-		if (func == 'next') {
+		/*var b = $('#exec-find');*/
+		/*if (func == 'next') {
 			b.attr('data-func', 'next').attr('value', 'Next');
 		} else {
 			b.attr('data-func', 'find').attr('value', 'Find');
-		}
-		b.removeAttr('disabled');
+		}*/
+		/*b.removeAttr('disabled');*/
 	},
 	unmarkNumItemsInSegments: function() {
 		$('section[data-searchItems]').removeAttr("data-searchItems");

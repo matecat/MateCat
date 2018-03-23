@@ -193,12 +193,14 @@ if (SegmentFilter.enabled())
         },
 
         closeFilter : function() {
-            UI.body.removeClass('filtering');
-            UI.body.removeClass('sampling-enabled');
-            SegmentActions.removeAllMutedSegments();
-            setTimeout( function() {
-                UI.scrollSegment( UI.currentSegment ) ;
-            }, 600 );
+            if ( UI.body.hasClass('filtering') ) {
+                UI.body.removeClass('filtering');
+                UI.body.removeClass('sampling-enabled');
+                SegmentActions.removeAllMutedSegments();
+                setTimeout( function() {
+                    UI.scrollSegment( UI.currentSegment ) ;
+                }, 600 );
+            }
         }
     });
 
@@ -252,6 +254,15 @@ if (SegmentFilter.enabled())
                 }),
             $('#bulk-approve-bar-mountpoint')[0]
         );
+        window.search_compontent = ReactDOM.render(
+            React.createElement(
+                Search_MainPanel, {
+                    isReview: config.isReview,
+                    searchable_statuses: config.searchable_statuses
+                }),
+            $('#search-mountpoint')[0]
+        );
+
     });
 
     $(document).on('header-tool:open', function(e, data) {

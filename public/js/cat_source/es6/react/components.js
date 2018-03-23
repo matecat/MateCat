@@ -21,7 +21,9 @@ window.Review_QualityReportButton = require('./components/review/QualityReportBu
 
 window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel').default ;
 
-window.SegmentBulkPanel_MainPanel = require('./components/bulk_approve_bar/BulkSelectionBar').default ;
+window.SegmentBulkPanel_MainPanel = require('./components/bulk_selection_bar/BulkSelectionBar').default ;
+
+window.Search_MainPanel = require('./components/header/search/Search').default ;
 
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
