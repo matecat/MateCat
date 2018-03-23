@@ -18,7 +18,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    position: fixed;
+    position: relative;
     z-index: 12;
     border-bottom: 1px solid #333;
     padding: 0;
@@ -26,6 +26,7 @@ header {
     -webkit-transition: margin-top 200ms ease-out;
     box-sizing: content-box;
     min-width: 1024px;
+    min-height: 49px;
 }
 
 body.login header {
@@ -1262,7 +1263,11 @@ article {
     float: left;
     box-sizing: content-box;
 }
-
+body #outer {
+    overflow-y: scroll;
+    position: relative;
+    display: inline-block;
+}
 #outer.loadingBefore {
     display: block;
     background: url(../img/loading.gif) 48% bottom no-repeat;
@@ -1820,10 +1825,6 @@ body .footer.showMatches .sub-editor.open {
     min-width: 890px
 }
 
-.searchbox {
-    padding: 0 !important;
-}
-
 .search-inputs input#enable-replace {
     float: left;
 }
@@ -1834,16 +1835,6 @@ body .footer.showMatches .sub-editor.open {
     margin-right: 10px;
 
 }
-
-.searchbox .search-inputs {
-    height: 64px;
-}
-
-.searchbox form {
-    width: 100%;
-    padding: 10px 4% 0 4% !important;
-}
-
 .search-inputs,
 .search-buttons,
 .search-options {
@@ -1939,10 +1930,6 @@ body.searchActive .search-display {
     border-color: red;
 }
 
-.searchbox input[type=button]:hover {
-    border-width: 2px;
-}
-
 .search .h-editor {
     padding: 2px 0 0 10px;
     text-shadow: #333 0px 1px 2px;
@@ -1968,27 +1955,6 @@ body.searchActive .search-display {
     right: 100px;
     top: 12px;
     background: url(../img/loading-black.gif) 0 0 no-repeat !important
-}
-
-body.cattool .searchbox .block.right {
-    margin-top: 0;
-    margin-right: 0 !important;
-}
-
-.searchbox .block.buttons {
-    margin-top: -6px !important;
-}
-
-.searchbox #exec-filter {
-    float: right;
-}
-
-.filtering .search {
-    display: block
-}
-
-body.filtering {
-    padding-top: 50px
 }
 
 .replace-box {
@@ -2055,7 +2021,7 @@ body.filtering {
     height: 35px;
 }
 
-.search .btn, .searchbox .btn {
+.search .btn {
     float: right;
     font-weight: bold;
     margin: 4px 10px 3px 0;
@@ -4054,12 +4020,6 @@ p.percent {
     border-top: 1px dotted #ccc;
 }
 
-/*
-body.filterOpen #outer {
-    margin-top: 80px !important;
-}
-*/
-
 .save-warning {
     display: none;
     width: 6px;
@@ -4090,11 +4050,11 @@ section.modified .save-warning {
     margin: -28px 0 0 30px !important;
 }
 
-body.searchActive:not(.filterOpen) #filterSwitch .numbererror {
+body.searchActive #filterSwitch .numbererror {
     display: block;
 }
 
-body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty {
+body.searchActive #filterSwitch .numbererror:empty {
     display: none;
 }
 
@@ -5173,193 +5133,6 @@ section:hover .segment-side-buttons {
     color: #999;
 }
 
-/********** QA Component **********/
-.qa-wrapper {
-    position: absolute;
-    width: 100%;
-    top: 47px;
-}
-
-.qa-container {
-    background-color: #efefef;
-    height: 50px;
-    box-shadow: 0 1px 3px #666;
-    border-radius: 0 0 2px 2px;
-    display: none;
-    color: #4d4d4d;
-}
-
-.qa-container-inside {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 8% 0 5%;
-    align-items: center;
-}
-
-.qa-issues-types {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: row;
-    justify-content: flex-start;
-}
-
-.qa-actions {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.qa-issues-container, .qa-lexiqa-container {
-    width: 150px;
-    height: 50px;
-    align-items: center;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: normal;
-    position: relative;
-    cursor: pointer;
-    box-sizing: border-box;
-}
-
-.qa-issues-container:hover, .qa-lexiqa-container:hover {
-    background-color: #d0d0d0;
-}
-
-.qa-issues-container.selected, .qa-lexiqa-container.selected {
-    box-shadow: inset 0px -3px 0px #4d4d4d;
-}
-
-.qa-counter {
-    width: 125px;
-    font-size: 16px;
-    color: #333;
-}
-
-.qa-arrows {
-    width: 80px;
-}
-
-.qa-move-up, .qa-move-down {
-    width: 25px;
-    float: left;
-    height: 22px;
-    cursor: pointer;
-    border-radius: 3px;
-    padding: 5px 2px 2px;
-    border: 1px solid #C6C6C6;
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    background-color: #f8f8f8;
-    background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
-}
-
-.icon-qa-issues,
-.icon-conflicts,
-.icon-qa-total-issues,
-.icon-qa-lexiqa {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    margin-top: 8px;
-}
-
-.icon-conflicts {
-    margin-right: -2px;
-    margin-left: 15px;
-}
-
-.icon-qa-total-issues:before {
-    content: "\e903";
-    font-size: 25px;
-}
-
-.icon-conflicts:before {
-    content: "\f071";
-    font-size: 25px;
-}
-
-.icon-qa-issues:before {
-    content: "\ea7f";
-    font-size: 25px;
-}
-
-.icon-qa-lexiqa:before {
-    content: "\f044";
-    font-size: 25px;
-    margin-top: 0px;
-    display: block;
-}
-
-.qa-total-issues-counter {
-    top: 10px;
-    left: 50px;
-}
-
-.qa-issues-counter {
-    top: 10px;
-    left: 25px;
-}
-
-.qa-conflicts-issues-counter {
-    top: 10px;
-    left: 15px;
-}
-
-.qa-lexiqa-counter {
-    top: 10px;
-    left: 35px;
-}
-
-.icon-qa-right-arrow:before {
-    content: "\ea3c";
-    font-size: 18px;
-}
-
-.icon-qa-left-arrow:before {
-    content: "\ea40";
-    font-size: 18px;
-}
-
-.qa-move-up, .qa-move-down {
-    color: #797979;
-}
-
-.qa-move-down {
-    margin-left: 15px;
-}
-
-.qa-move-up:hover,
-.qa-move-down:hover {
-    color: black;
-}
-
-.qa-move-up:active,
-.qa-move-down:active {
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-    background-color: #eee;
-    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
-}
-
-.qa-arrows.qa-arrows-disabled .qa-move-up,
-.qa-arrows.qa-arrows-disabled .qa-move-down,
-.qa-arrows.qa-arrows-disabled .qa-move-up:hover,
-.qa-arrows.qa-arrows-disabled .qa-move-down:hover {
-    cursor: default;
-    opacity: 0.5;
-    color: #797979;
-}
-
-/************************************************/
 
 .edit-log {
     /*top: 5px;*/

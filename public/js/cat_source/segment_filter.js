@@ -47,10 +47,6 @@ if (SegmentFilter.enabled())
             return this.getStoredState().serverData ;
         },
 
-        filterPanelOpen : function() {
-            return UI.body.hasClass('filtering');
-        },
-
         /**
          * This function return true if the user is in a filtered session with zoomed segments.
          *
@@ -171,8 +167,8 @@ if (SegmentFilter.enabled())
          *
          */
         openFilter : function() {
-            UI.body.addClass('filtering'); // filtering makes sense if we have serverData
 
+            CatToolActions.openSegmentFilter();
             if ( this.getStoredState().serverData ) {
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
                 UI.body.addClass('sampling-enabled');
@@ -182,7 +178,6 @@ if (SegmentFilter.enabled())
                 }, 600 );
             }
 
-            $(document).trigger('header-tool:open', { name: 'filter' });
         },
 
         clearFilter : function() {
@@ -193,14 +188,12 @@ if (SegmentFilter.enabled())
         },
 
         closeFilter : function() {
-            if ( UI.body.hasClass('filtering') ) {
-                UI.body.removeClass('filtering');
-                UI.body.removeClass('sampling-enabled');
-                SegmentActions.removeAllMutedSegments();
-                setTimeout( function() {
-                    UI.scrollSegment( UI.currentSegment ) ;
-                }, 600 );
-            }
+            CatToolActions.closeSubHeader();
+            UI.body.removeClass('sampling-enabled');
+            SegmentActions.removeAllMutedSegments();
+            setTimeout( function() {
+                UI.scrollSegment( UI.currentSegment ) ;
+            }, 600 );
         }
     });
 
@@ -238,48 +231,26 @@ if (SegmentFilter.enabled())
 
     $(document).on("files:appended", function() {
         // mount the hiddent react component by default so we can keep status
-        window.segment_filter_panel = ReactDOM.render(
-            React.createElement(
-                SegmentFilter_MainPanel, {
-                    isReview: config.isReview,
+        // window.segment_filter_panel = ReactDOM.render(
+        //     React.createElement(
+        //         SegmentFilter_MainPanel, {
+        //             isReview: config.isReview,
+        //
+        //         }),
+        //         $('#header-bars-wrapper')[0]
+        //     );
 
-                }),
-                $('#segment-filter-mountpoint')[0]
-            );
-
-        window.bulk_approve_bar = ReactDOM.render(
+        ReactDOM.render(
             React.createElement(
-                SegmentBulkPanel_MainPanel, {
-                    isReview: config.isReview
-                }),
-            $('#bulk-approve-bar-mountpoint')[0]
-        );
-        window.search_compontent = ReactDOM.render(
-            React.createElement(
-                Search_MainPanel, {
-                    isReview: config.isReview,
-                    searchable_statuses: config.searchable_statuses
-                }),
-            $('#search-mountpoint')[0]
+                SubHeaderContainer, {}),
+            $('#header-bars-wrapper')[0]
         );
 
-    });
-
-    $(document).on('header-tool:open', function(e, data) {
-        if ( data.name != 'filter' ) {
-            SF.closeFilter();
-        }
     });
 
     $(document).on('click', "header .filter", function(e) {
         e.preventDefault();
-
-        if ( UI.body.hasClass('filtering') ) {
-            SF.closeFilter();
-        } else {
-            UI.closeAllMenus(e);
-            SF.openFilter();
-        }
+        CatToolActions.toggleSegmentFilter();
     });
 
 

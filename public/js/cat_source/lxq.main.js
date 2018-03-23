@@ -31,7 +31,7 @@ var LXQ = {
                 if (!LXQ.initialized) {
                     LXQ.init();
                 } else {
-                    UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
+                    CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
                 }
                 UI.render();
             });
@@ -60,7 +60,7 @@ var LXQ = {
                 }
                 $('#lexiqabox').css('display', 'none');
                 UI.render();
-                UI.QAComponent.setLxqIssues([]);
+                CatToolActions.qaComponentsetLxqIssues([])
             });
         }
     },
@@ -1539,19 +1539,15 @@ LXQ.init  = function () {
         },
         updateWarningsUI: function () {
             LXQ.lexiqaData.segments.sort();
-            if ( !UI.QAComponent ) {
-                var mountPoint = $(".qa-wrapper")[0];
-                UI.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
-                }), mountPoint);
-            }
-            UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
+            CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segment)
+
         },
         removeSegmentWarning: function (idSegment) {
             if ((ind = LXQ.lexiqaData.segments.indexOf(idSegment))>=0) {
                 LXQ.lexiqaData.segments.splice(ind,1);
                 delete LXQ.lexiqaData.lexiqaWarnings[idSegment];
                 LXQ.lexiqaData.segments.sort();
-                UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
+                CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segment)
             }
         }
     });

@@ -42,14 +42,14 @@ class Search extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-            if (this.state.funcFindButton) {
-                UI.execFind();
-            } else {
-                if (!UI.goingToNext) {
-                    UI.goingToNext = true;
-                    UI.execNext();
-                }
+        if (this.state.funcFindButton) {
+            UI.execFind();
+        } else {
+            if (!UI.goingToNext) {
+                UI.goingToNext = true;
+                UI.execNext();
             }
+        }
         this.setState({
             currentSourceSearch: this.state.search.searchSource,
             currentTargetSearch: this.state.search.searchTarget,
@@ -147,7 +147,7 @@ class Search extends React.Component {
         if (!this.state.search.searchTarget && !this.state.search.searchSource) {
             findIsDisabled = true;
         }
-        return <div className="searchbox">
+        return ( this.props.active ? <div className="searchbox">
             <form onSubmit={this.handleSubmit}>
                 <div className="search-inputs">
                     <div className="block">
@@ -231,7 +231,7 @@ class Search extends React.Component {
                     className="results">...</span> results in <span
                     className="segments">...</span> segments</span> having<span className="query">...</span></p>
             </div>
-        </div>
+        </div> : (null) )
     }
 }
 

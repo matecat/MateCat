@@ -137,6 +137,8 @@ class MainPanel extends React.Component {
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
+    componentDidUpdate() {}
+
     render() {
 
         var searchSettingsClass = classnames({
@@ -263,7 +265,7 @@ class MainPanel extends React.Component {
             </div>;
         }
 
-        return <div className="advanced-filter-searchbox searchbox">
+        return ( this.props.active ? <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
                     <label htmlFor="search-projectname">segment status</label>
@@ -311,7 +313,7 @@ class MainPanel extends React.Component {
             {navigation}
             {filteringInfo}
 
-        </div>; 
+        </div> : (null) );
     }
 }
 

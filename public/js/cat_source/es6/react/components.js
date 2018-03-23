@@ -19,12 +19,7 @@ window.QualityReportVersions = require('./components/review_improved/QualityRepo
 
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
-window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel').default ;
-
-window.SegmentBulkPanel_MainPanel = require('./components/bulk_selection_bar/BulkSelectionBar').default ;
-
-window.Search_MainPanel = require('./components/header/search/Search').default ;
-
+window.SubHeaderContainer = require('./components/header/SubHeaderContainer').default ;
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
@@ -35,6 +30,7 @@ window.AnalyzeActions = require('./actions/AnalyzeActions');
 window.TeamsActions = require('./actions/TeamsActions');
 window.ModalsActions = require('./actions/ModalsActions');
 window.OutsourceActions = require('./actions/OutsourceActions');
+window.CatToolActions = require('./actions/CatToolActions');
 
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
@@ -46,8 +42,6 @@ window.JobContainer = require('./components/projects/JobContainer').default;
 window.JobMenu = require('./components/projects/JobMenu').default;
 
 window.Header = require("./components/Header").default;
-
-window.QAComponent = require('./components/QAComponent').default;
 
 window.ModalWindow = require('./modals/ModalWindowComponent').default;
 window.SuccessModal = require('./modals/SuccessModal').default;

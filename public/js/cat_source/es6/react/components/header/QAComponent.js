@@ -4,15 +4,9 @@
 
  */
 var React = require('react');
-
+var CatToolConstants = require('../../constants/CatToolConstants');
+var CatToolStore = require('../../stores/CatToolStore');
 class QAComponent extends React.Component {
-    get uniqEs6() {
-        return this._uniqEs6;
-    }
-
-    set uniqEs6(value) {
-        this._uniqEs6 = value;
-    }
 
     constructor(props) {
         super(props);
@@ -29,50 +23,43 @@ class QAComponent extends React.Component {
             current_counter: 1,
             selected_box: ''
         };
-        this.showTotal = false;
         this.getCurrentArray = this.getCurrentArray.bind(this);
-        QAComponent.togglePanel = QAComponent.togglePanel.bind(this);
+        this.createTotalIssues = this.createTotalIssues.bind(this);
+        this.updatePanel = this.updatePanel.bind(this);
+        this.setTagIssues = this.setTagIssues.bind(this);
+        this.setTranslationConflitcts = this.setTranslationConflitcts.bind(this);
+        this.setLxqIssues = this.setLxqIssues.bind(this);
     }
 
-    static togglePanel() {
-        var qa_cont = $('.qa-container');
-        qa_cont.toggleClass("qa-open");
-        qa_cont.toggle();
-
-        if ( !qa_cont.hasClass('qa-open') ) {
-            this.setState({
-                tag_issues_selected: false,
-                lxq_selected: false,
-                current_counter: 1,
-                selected_box: ''
-            });
-        } else {
-            var selectedBox = '';
-            var issue_selected = false, lxq_selected = false, total_issue_selected = false, translation_conflicts_selected = false;
-            if ( this.checkShowTotalIssues()) {
-                total_issue_selected = true;
-                selectedBox = 'total_issues';
-            } else if ( this.state.tag_issues.length > 0 ) {
-                issue_selected = true;
-                selectedBox = 'tag_issues';
-            } else if ( this.state.lxq_issues.length > 0 ) {
-                lxq_selected = true;
-                selectedBox = 'lxq';
-            } else if ( this.state.translation_conflicts.length > 0 ) {
-                translation_conflicts_selected = true;
-                selectedBox = 'conflicts';
-            }
-            this.setState({
-                total_issues_selected: total_issue_selected,
-                tag_issues_selected: issue_selected,
-                lxq_selected: lxq_selected,
-                translation_conflicts_selected: translation_conflicts_selected,
-                current_counter: 1,
-                selected_box: selectedBox
-            });
-            var current_array = this.getCurrentArray();
-            this.scrollToSegment(current_array[0]);
-        }
+    updatePanel() {
+        // var selectedBox = '';
+        // var issue_selected = false, lxq_selected = false, total_issue_selected = false, translation_conflicts_selected = false;
+        // if ( this.checkShowTotalIssues()) {
+        //     total_issue_selected = true;
+        //     selectedBox = 'total_issues';
+        // } else if ( this.state.tag_issues.length > 0 ) {
+        //     issue_selected = true;
+        //     selectedBox = 'tag_issues';
+        // } else if ( this.state.lxq_issues.length > 0 ) {
+        //     lxq_selected = true;
+        //     selectedBox = 'lxq';
+        // } else if ( this.state.translation_conflicts.length > 0 ) {
+        //     translation_conflicts_selected = true;
+        //     selectedBox = 'conflicts';
+        // }
+        // this.setState({
+        //     total_issues_selected: total_issue_selected,
+        //     tag_issues_selected: issue_selected,
+        //     lxq_selected: lxq_selected,
+        //     translation_conflicts_selected: translation_conflicts_selected,
+        //     current_counter: 1,
+        //     selected_box: selectedBox
+        // });
+        // if (this.props.active) {
+        //     var current_array = this.getCurrentArray();
+        //     this.scrollToSegment(current_array[0]);
+        // }
+        this.updateIcon();
     }
 
     getTotalIssues() {
@@ -83,7 +70,6 @@ class QAComponent extends React.Component {
                 total++;
             }
         });
-        this.showTotal = (total > 1);
         if (this.state.total_issues.length) {
             return this.state.total_issues.length;
         } else {
@@ -112,6 +98,7 @@ class QAComponent extends React.Component {
             tag_issues: issues,
             total_issues: total
         });
+        this.updatePanel();
     }
 
     setTranslationConflitcts(issues) {
@@ -120,6 +107,7 @@ class QAComponent extends React.Component {
             translation_conflicts: issues,
             total_issues: total
         });
+        this.updatePanel();
     }
 
     setLxqIssues(issues) {
@@ -128,13 +116,13 @@ class QAComponent extends React.Component {
             lxq_issues: issues,
             total_issues: total
         });
+        this.updatePanel();
     }
 
     createTotalIssues(tag_issues, lxq_issues, traslation_conflicts) {
-        return QAComponent._uniqueArray(tag_issues.concat(lxq_issues, traslation_conflicts)).sort();
+        return this._uniqueArray(tag_issues.concat(lxq_issues, traslation_conflicts)).sort();
     }
-
-    static _uniqueArray(arrArg) {
+    _uniqueArray(arrArg) {
         return arrArg.filter((elem, pos, arr) => {
             return arr.indexOf(elem) == pos;
         });
@@ -250,14 +238,6 @@ class QAComponent extends React.Component {
         }
     }
 
-    componentDidUpdate() {
-        this.updateIcon();
-        var totalIssues = this.getTotalIssues();
-        if ( totalIssues == 0 && $('.qa-container').hasClass('qa-open')) {
-            QAComponent.togglePanel();
-        }
-    }
-
     checkShowTotalIssues() {
         var total = 0;
         //Show the total only if more than 1 arrays exist
@@ -271,6 +251,19 @@ class QAComponent extends React.Component {
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    // shouldComponentUpdate(nextProps, nextState) { }
+    componentDidMount() {
+        CatToolStore.addListener(CatToolConstants.QA_SET_TAG_ISSUES, this.setTagIssues);
+        CatToolStore.addListener(CatToolConstants.QA_SET_TRANSLATION_CONFLICTS, this.setTranslationConflitcts);
+        CatToolStore.addListener(CatToolConstants.QA_LEXIQA_ISSUES, this.setLxqIssues);
+    }
+
+    componentWillUnmount() {
+        CatToolStore.removeListener(CatToolConstants.QA_SET_TAG_ISSUES, this.setTagIssues);
+        CatToolStore.removeListener(CatToolConstants.QA_SET_TRANSLATION_CONFLICTS, this.setTranslationConflitcts);
+        CatToolStore.removeListener(CatToolConstants.QA_LEXIQA_ISSUES, this.setLxqIssues);
     }
 
     render() {
@@ -346,7 +339,8 @@ class QAComponent extends React.Component {
             </div>;
 
         }
-        return  <div className="qa-container">
+        return (this.props.active ? <div className="qa-wrapper">
+            <div className="qa-container">
                     <div className="qa-container-inside">
                         <div className="qa-issues-types">
                             {total_issues_html}
@@ -368,6 +362,7 @@ class QAComponent extends React.Component {
                         </div>
                     </div>
                 </div>
+        </div> : null )
     }
 }
 
