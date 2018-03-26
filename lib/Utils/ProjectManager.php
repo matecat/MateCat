@@ -1079,14 +1079,8 @@ class ProjectManager {
             }
         }
 
-
-        /**
-         * Operations to be done once per file
-         */
-        foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
-            if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
-                $this->insertSegmentNotesForFile();
-            }
+        if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
+            $this->insertSegmentNotesForFile();
         }
 
         //Clean Translation array

@@ -73,6 +73,16 @@
     ,
         {
             "localized":[{
+                "en":"Assamese"
+            }],
+            "isocode":"asm",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"asm-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Asturian"
             }],
             "isocode":"ast",
@@ -544,6 +554,16 @@
     ,
         {
             "localized":[{
+                "en":"Garo"
+            }],
+            "isocode":"grt",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"grt-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Georgian"
             }],
             "isocode":"ka",
@@ -827,6 +847,16 @@
     ,
         {
             "localized":[{
+                "en":"Khasi"
+            }],
+            "isocode":"kha",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kha-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Khmer"
             }],
             "isocode":"km",
@@ -1017,6 +1047,16 @@
     ,
         {
             "localized":[{
+                "en":"Manipuri"
+            }],
+            "isocode":"mni",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mni-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Manx Gaelic"
             }],
             "isocode":"gv",
@@ -1073,6 +1113,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"men-MEN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Mizo"
+            }],
+            "isocode":"lus",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"lus-IN"
         }
     ,
         {
