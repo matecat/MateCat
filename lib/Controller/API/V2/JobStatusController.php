@@ -39,28 +39,24 @@ class JobStatusController extends KleinController {
     public function changeSegmentsStatus() {
 
         $segments_id = filter_var( $this->request->segments_id, FILTER_VALIDATE_INT, FILTER_FORCE_ARRAY );
-        if ( $this->request->status == 1 ) {
-            $status = \Constants_TranslationStatus::STATUS_TRANSLATED;
-        }
-        if ( $this->request->status == 2 ) {
-            $status = \Constants_TranslationStatus::STATUS_APPROVED;
-        }
+        $status      = strtoupper( $this->request->status );
+        if ( in_array( $status, [ \Constants_TranslationStatus::STATUS_TRANSLATED, \Constants_TranslationStatus::STATUS_APPROVED ] ) ) {
+            $unchangeble_segments = \Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
 
-        $unchangeble_segments = \Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
+            $segments_id = array_diff( $segments_id, $unchangeble_segments );
 
-        $segments_id = array_diff( $segments_id, $unchangeble_segments );
-
-        if ( !empty( $segments_id ) ) {
-            try{
-                $stats = \Translations_SegmentTranslationDao::changeStatusBySegmentsIds( $this->job, $segments_id, $status );
+            if ( !empty( $segments_id ) ) {
+                try{
+                    $stats = \Translations_SegmentTranslationDao::changeStatusBySegmentsIds( $this->job, $segments_id, $status );
+                }
+                catch(\Exception $e){
+                    $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id] );
+                    return;
+                }
             }
-            catch(\Exception $e){
-                $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id] );
-                return;
-            }
-        }
 
-        $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments, 'stats' => $stats] );
+            $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments, 'stats' => $stats ] );
+        }
     }
 
 }
