@@ -1268,6 +1268,7 @@ body #outer {
     position: relative;
     display: inline-block;
     height: 100%;
+    width: 100%;
 }
 
 body .main-container {

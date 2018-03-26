@@ -321,16 +321,7 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {(this.props.segment.ice_locked !== '1' ) ? (
-                        config.splitSegmentEnabled ? (
-                        <div className="actions">
-                            <a className="split" href="#" title="Click to split segment">
-                                <span className="icon-split"/>
-                            </a>
-                            <p className="split-shortcut">CTRL + S</p>
-                        </div>
-                        ) : (null)
-                    ) : (
+                    {this.props.segment.ice_locked === '1' ? (
                         !readonly ? (
                             this.props.segment.unlocked ? (
                                 <div className="ice-locked-icon"
@@ -344,7 +335,8 @@ class Segment extends React.Component {
                                 </div>
                             )
                         ) : (null)
-                    )}
+                    ): (null)}
+
                     <div className="txt segment-add-inBulk">
                         <input type="checkbox"
                                ref={(node)=>this.bulk=node}
@@ -352,6 +344,16 @@ class Segment extends React.Component {
                                onClick={this.handleChangeBulk}
                         />
                     </div>
+
+                    {(this.props.segment.ice_locked !== '1' && config.splitSegmentEnabled) ? (
+                                <div className="actions">
+                                    <a className="split" href="#" title="Click to split segment">
+                                        <span className="icon-split"/>
+                                    </a>
+                                    <p className="split-shortcut">CTRL + S</p>
+                                </div>
+                            ) : (null)}
+
                 </div>
                 {job_marker}
 
