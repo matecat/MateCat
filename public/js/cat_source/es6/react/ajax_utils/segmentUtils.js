@@ -161,7 +161,7 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs" + config.id_job + "/"+ config.password + "/segments/status"
+            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
         });
     },
     translateSegments: function ( segments ) {
@@ -173,7 +173,7 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs" + config.id_job + "/"+ config.password + "/segments/status"
+            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
         });
     }
 
