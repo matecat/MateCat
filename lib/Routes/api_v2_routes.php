@@ -57,9 +57,12 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', 'API\V2\TranslationIssueComment', 'create' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', 'API\V2\TranslationIssueComment', 'index' );
 
+    route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus'  );
+
     route( '/segments-filter', 'GET', 'Features\SegmentFilter\Controller\API\FilterController', 'index' );
 
     route( '/options', 'POST', 'API\V2\ChunkOptionsController', 'update' );
+
 
     route( '/cancel', 'POST', 'API\V2\ChunkController', 'cancel' );
     route( '/archive', 'POST', 'API\V2\ChunkController', 'archive' );

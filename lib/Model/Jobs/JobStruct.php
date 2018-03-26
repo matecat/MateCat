@@ -89,8 +89,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public function getTMProps(){
         $projectData = $this->getProject();
         $result = [
-                'project_id'   => $projectData[ 'pid' ],
-                'project_name' => $projectData[ 'pname' ],
+                'project_id'   => $projectData->id,
+                'project_name' => $projectData->name,
                 'job_id'       => $this->id,
         ];
         return $result;

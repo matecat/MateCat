@@ -107,7 +107,7 @@ if (SegmentFilter.enabled())
 
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
                               config.id_job, config.password, $.param( data ) );
-
+            SegmentActions.removeAllMutedSegments();
             return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
@@ -125,7 +125,6 @@ if (SegmentFilter.enabled())
                     reactState : reactState
                 }) ;
 
-                //UI.unmountSegments();
                 SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
                 var segmentToOpen ;
