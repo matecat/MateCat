@@ -96,9 +96,18 @@ class BulkSelectionBar extends React.Component {
 
     render() {
         return( this.state.count > 0 ? <div className="bulk-approve-bar">
-            <button className="btn" onClick={this.onClickBack}> back</button>
-            <span>in Bulk: {this.state.count}</span>
-            <button className="btn" onClick={this.onClickBulk}> {this.props.isReview ? 'Approve all' : 'Translate all'}</button>
+
+            <div className="bulk-back-info">
+                <div className="bulk-back">
+                    <button className="ui button back-bulk" onClick={this.onClickBack}> <i className="icon-arrow-left2 icon" /> back</button>
+                </div>
+                <div className="bulk-info">
+                    In bulk: <b>{this.state.count}</b>
+                </div>
+            </div>
+            <div className="bulk-activity-icons">
+                <button className="ui button approve-all-segments" onClick={this.onClickBulk}><i class="icon-checkmark5 icon" /> {this.props.isReview ? 'APPROVE ALL' : 'TRANSLATE ALL'}</button>
+            </div>
         </div> : null)
     }
 }
