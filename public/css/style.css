@@ -583,9 +583,26 @@ section.readonly .txt input {
 section.segment-selected-inBulk .sid .txt input {
     display: unset;
 }
+section.editor .sid .txt input {
+    display: unset;
+}
+
 section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
     display: unset;
 }
+
+section.editor .txt.segment-add-inBulk {
+    display: unset;
+}
+
+section.segment-selected-inBulk .body .text {
+    background: #edf4fd;
+}
+section.segment-selected-inBulk .body .text:hover {
+    background: #edf4fd !important;
+}
+
+
 
 p.split-shortcut {
     background: #dde0e4;
@@ -1379,14 +1396,14 @@ body.cattool.editing section:not(.editor) .text:hover {
     color: #000;
 }
 
-body.cattool .editor .text:hover {
+/*body.cattool .editor .text:hover {
     background: none !important;
-}
+}*/
 
-body.cattool:not(.editing) article {
-/*    border: 1px solid #adadad;
-    border-top: none;*/
-}
+/*body.cattool:not(.editing) article {
+    border: 1px solid #adadad;
+    border-top: none;
+}*/
 
 section.editor .body > .text {
     overflow: visible;
