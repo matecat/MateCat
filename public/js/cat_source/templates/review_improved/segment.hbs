@@ -9,14 +9,14 @@
          data-tagmode="crunched"
          data-tagprojection="{{dataAttrTagged}}">>
 
-    <a tabindex="-1" href="#{{segment.sid}}"></a>
+    <button tabindex="-1" href="#{{segment.sid}}"></button>
     <div class="sid" title="{{segment.sid}}">
         <div class="txt">{{{shortened_sid}}}</div>
         {{#unless ice_locked}}
             <div class="actions">
-                <a class="split" href="#" title="Click to split segment">
-                    <span class="icon-split"></span>
-                </a>
+                <button class="split" href="#" title="Click to split segment">
+                    <i class="icon-split" />
+                </button>
                 <p class="split-shortcut">CTRL + S</p>
             </div>
         {{/unless}}

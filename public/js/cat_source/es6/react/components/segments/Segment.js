@@ -337,22 +337,25 @@ class Segment extends React.Component {
                         ) : (null)
                     ): (null)}
 
-                    <div className="txt segment-add-inBulk">
-                        <input type="checkbox"
-                               ref={(node)=>this.bulk=node}
-                               checked={this.props.segment.inBulk}
-                               onClick={this.handleChangeBulk}
-                        />
-                    </div>
+                    {!config.isLQA ? (
+                        <div className="txt segment-add-inBulk">
+                            <input type="checkbox"
+                                   ref={(node)=>this.bulk=node}
+                                   checked={this.props.segment.inBulk}
+                                   onClick={this.handleChangeBulk}
+                            />
+                        </div>
+                    ) : (null)}
+
 
                     {(this.props.segment.ice_locked !== '1' && config.splitSegmentEnabled) ? (
-                                <div className="actions">
-                                    <a className="split" href="#" title="Click to split segment">
-                                        <span className="icon-split"/>
-                                    </a>
-                                    <p className="split-shortcut">CTRL + S</p>
-                                </div>
-                            ) : (null)}
+                        <div className="actions">
+                            <button className="split" href="#" title="Click to split segment">
+                                <i className="icon-split"/>
+                            </button>
+                            <p className="split-shortcut">CTRL + S</p>
+                        </div>
+                    ) : (null)}
 
                 </div>
                 {job_marker}

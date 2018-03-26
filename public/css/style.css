@@ -588,11 +588,10 @@ section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
 }
 
 p.split-shortcut {
-    background: #ccc;
-    padding: 8px 5px;
-    margin-right: 8px;
-    margin-top: 0px;
-    margin-left: 8px;
+    background: #dde0e4;
+    padding: 1px 0px;
+    width: 55px;
+    margin: 0 auto;
 }
 
 .splitStart .sid {
@@ -2524,6 +2523,7 @@ body.editing section:not(.editor).ice-locked .text {
     position: relative;
     margin-bottom: 5px;
     top: 2px;
+    outline: none;
 }
 button.icon-lock.unlock-button.locked:before {
     position: relative;
@@ -4395,18 +4395,30 @@ section .toolbar .autofillTag {
 }
 
 .split {
-    background: #9E9E9E;
-    color: #fff;
-    text-decoration: none;
-    padding: 7px 1px 3px 2px;
     border: 1px solid #5F5F5F;
-    border-radius: 4px;
-    width: 32px;
-    font-size: 20px;
-    margin: 0 auto;
-    display: block;
     cursor: pointer !important;
-    transform: rotate(-90deg);
+    font-size: 17px;
+    background-color: #9E9E9E;
+    border-radius: 2px;
+    color: #ffffff;
+    margin-bottom: 0px;
+    top: 2px;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    outline: none;
+}
+
+.split i {
+    padding: 0;
+    margin: 0;
+    width: 25px;
+    height: 25px;
+}
+
+.split .icon-split:before {
+    position: relative;
+    top: 3px;
 }
 
 .sid .actions.disabled .split {
@@ -4414,11 +4426,7 @@ section .toolbar .autofillTag {
 }
 
 .editor.split-action .actions .split {
-    display: block !important;
     background: #09beec;
-    -moz-box-shadow: inset 0 0 1px 1px #888;
-    -webkit-box-shadow: inset 0 0 1px 1px #888;
-    box-shadow: inset 0 0 1px 1px #888;
 }
 
 .splitBar .buttons a {
@@ -4925,26 +4933,20 @@ body.cattool .mgmt-table-mt .activemt {
 
 .splitArea {
     width: 45.5%;
-    z-index: 9999999;
     position: absolute;
-    min-height: 20px;
-    border: 2px solid #F00;
     padding: 3px 0px 5px 3px;
     margin: 0 0.7%;
     background: #efefef;
-    border-bottom: 1px solid #ccc;
     font-size: 18px;
     min-height: 70px;
     outline: 0;
     text-align: left;
     border-radius: 2px;
     line-height: 27px;
-    font-size: 18px;
     color: #000;
     border: 1px solid #727272;
     box-shadow: 0 1px 2px #ccc;
     -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal;
     word-break: normal !important;
     cursor: col-resize;
 }

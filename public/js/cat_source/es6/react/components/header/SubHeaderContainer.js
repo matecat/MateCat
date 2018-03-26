@@ -96,10 +96,6 @@ class SubHeaderContainer extends React.Component {
                 isReview={config.isReview}
                 searchable_statuses ={config.searchable_statuses}
             />
-            <SegmentSelectionPanel
-                active={this.state.selectionBar}
-                isReview={config.isReview}
-            />
             { this.props.filtersEnabled ? (
                 <SegmentFilter
                     active={this.state.segmentFilter}
@@ -108,6 +104,10 @@ class SubHeaderContainer extends React.Component {
             ) : (null) }
             <QaComponent
                 active={this.state.qaComponent}
+                isReview={config.isReview}
+            />
+            <SegmentSelectionPanel
+                active={this.state.selectionBar}
                 isReview={config.isReview}
             />
         </div>
