@@ -125,7 +125,6 @@ if (SegmentFilter.enabled())
                     reactState : reactState
                 }) ;
 
-                //UI.unmountSegments();
                 SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
                 var segmentToOpen ;
