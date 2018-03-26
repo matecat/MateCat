@@ -540,8 +540,7 @@ $.extend(UI, {
 			if (UI.currentSegment) {
                 UI.saveSegment(UI.currentSegment);
             }
-			UI.closeAllMenus(e, true);
-			QAComponent.togglePanel();
+			CatToolActions.toggleQaIssues();
 		});
 
 		$("#navSwitcher").on('click', function(e) {

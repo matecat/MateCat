@@ -1,8 +1,11 @@
+var CatToolConstants = require('../../../constants/CatToolConstants');
+var CatToolStore = require('../../../stores/CatToolStore');
 class MainPanel extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = this.defaultState();
+        this.setFilter = this.setFilter.bind(this);
     }
 
     defaultState() {
@@ -19,15 +22,9 @@ class MainPanel extends React.Component {
                 samplingType : 'edit_distance_high_to_low',
                 samplingSize : '5',
                 filtering : false,
-                filteredCount : 0
+                filteredCount : 0,
+                segmentsArray : []
             }
-        }
-    }
-
-    componentDidMount() {
-        let storedState = SegmentFilter.getStoredState() ;
-        if ( storedState.reactState ) {
-            this.doSubmitFilter( storedState.lastSegmentId );
         }
     }
 
@@ -43,8 +40,8 @@ class MainPanel extends React.Component {
 
     clearClick(e) {
         e.preventDefault();
-
         SegmentFilter.clearFilter();
+        this.resetState();
     }
 
     closeClick(e) {
@@ -135,6 +132,25 @@ class MainPanel extends React.Component {
     setStatusClick(e) {
         e.preventDefault();
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
+    }
+    setFilter(data) {
+        this.setState({
+            filteredCount : data.count,
+            filtering : true,
+            segmentsArray: data.segment_ids
+        });
+    }
+    componentDidMount() {
+        CatToolStore.addListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
+        let storedState = SegmentFilter.getStoredState() ;
+        if ( storedState.reactState ) {
+            this.doSubmitFilter( storedState.lastSegmentId );
+        }
+
+    }
+
+    componentWillUnmount() {
+        CatToolStore.removeListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
     }
 
     render() {
@@ -263,7 +279,7 @@ class MainPanel extends React.Component {
             </div>;
         }
 
-        return <div className="advanced-filter-searchbox searchbox">
+        return ( this.props.active ? <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
                     <label htmlFor="search-projectname">segment status</label>
@@ -311,7 +327,7 @@ class MainPanel extends React.Component {
             {navigation}
             {filteringInfo}
 
-        </div>; 
+        </div> : (null) );
     }
 }
 

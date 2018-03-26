@@ -193,8 +193,8 @@ class Bootstrap {
                 $output .= "{$error['message']}\n\t";
                 $output .= "Not Recoverable Error on line {$error['line']} in file " . $error[ 'file' ];
                 $output .= " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+                $output .= " - REQUEST URI: " . var_export( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+                $output .= " - REQUEST Message: " . var_export( $_REQUEST, true ) . "\n";
                 $output .= "\n\t";
                 $output .= "Aborting...\n";
                 $output .= "</pre>";
