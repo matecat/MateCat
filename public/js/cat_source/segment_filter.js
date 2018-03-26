@@ -44,6 +44,7 @@ if (SegmentFilter.enabled())
 
     $.extend(SF, {
         open: false,
+        filteringSegments: false,
         getLastFilterData : function() {
             return this.getStoredState().serverData ;
         },
@@ -54,7 +55,7 @@ if (SegmentFilter.enabled())
          * @returns {*}
          */
         filtering : function() {
-            return this.open;
+            return this.filteringSegments;
         },
 
         /**
@@ -101,7 +102,7 @@ if (SegmentFilter.enabled())
             if (!wantedSegment) {
                 wantedSegment = null;
             }
-            this.open = true;
+            this.filteringSegments = true;
             data = { filter: data } ;
 
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
@@ -162,9 +163,10 @@ if (SegmentFilter.enabled())
         openFilter : function() {
 
             CatToolActions.openSegmentFilter();
+            this.open = true;
             if ( this.getStoredState().serverData ) {
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
-                this.open = true;
+                this.filteringSegments = true;
                 setTimeout( function() {
                     tryToFocusLastSegment();
                 }, 600 );
@@ -175,6 +177,7 @@ if (SegmentFilter.enabled())
         clearFilter : function() {
             this.clearStoredData();
             this.closeFilter() ;
+            this.filteringSegments = false;
         },
 
         closeFilter : function() {
@@ -221,8 +224,13 @@ if (SegmentFilter.enabled())
 
     $(document).on('click', "header .filter", function(e) {
         e.preventDefault();
-        CatToolActions.toggleSegmentFilter();
-        SegmentFilter.openFilter();
+        if (!SegmentFilter.open) {
+            SegmentFilter.openFilter();
+        } else {
+            SegmentFilter.closeFilter();
+            SegmentFilter.open = false;
+        }
+        // SegmentFilter.openFilter();
     });
 
 
