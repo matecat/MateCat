@@ -854,6 +854,17 @@ class setTranslationController extends ajaxController {
         $contributionStruct = $this->featureSet->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
 
+        /** TODO Remove */
+        try {
+            $element            = new \TaskRunner\Commons\QueueElement();
+            $element->params    = $contributionStruct;
+            $element->__toString();
+            \Utils::raiseJsonExceptionError( true );
+        } catch ( Exception $e ){
+            Log::doLog( $contributionStruct );
+        }
+        /** TODO Remove */
+
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
