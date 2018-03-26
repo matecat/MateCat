@@ -95,6 +95,11 @@ class BulkSelectionBar extends React.Component {
     }
 
     render() {
+        let buttonClass = classnames({
+            "ui button approve-all-segments": true,
+            "translated-all-bulked": !this.props.isReview,
+            "approved-all-bulked": this.props.isReview
+        });
         return( this.state.count > 0 ? <div className="bulk-approve-bar">
 
             <div className="bulk-back-info">
@@ -106,7 +111,7 @@ class BulkSelectionBar extends React.Component {
                 </div>
             </div>
             <div className="bulk-activity-icons">
-                <button className="ui button approve-all-segments" onClick={this.onClickBulk}><i class="icon-checkmark5 icon" /> {this.props.isReview ? 'APPROVE ALL' : 'TRANSLATE ALL'}</button>
+                <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'APPROVE ALL' : 'TRANSLATE ALL'}</button>
             </div>
         </div> : null)
     }
