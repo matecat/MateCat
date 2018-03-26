@@ -114,17 +114,6 @@ class FeatureSet {
     }
 
     /**
-     * Loads the features starting from a given team.
-     *
-     * @param TeamStruct $team
-     */
-    public function loadFromTeam( TeamStruct $team ) {
-        $dao = new OwnerFeatures_OwnerFeatureDao() ;
-        $features = $dao->getByTeam( $team ) ;
-        $this->features = static::merge( $this->features, $features ) ;
-    }
-
-    /**
      * Returns the filtered subject variable passed to all enabled features.
      *
      * @param $method

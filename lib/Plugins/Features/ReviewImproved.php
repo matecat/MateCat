@@ -310,9 +310,10 @@ class ReviewImproved extends BaseFeature {
     /**
      * Sets the QA model fom the uploaded file which was previously validated
      * and added to the project structure.
+     *
+     * @param $projectStructure
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
-
         $model_json = $projectStructure['features']
             ['review_improved']['__meta']['qa_model'];
 
