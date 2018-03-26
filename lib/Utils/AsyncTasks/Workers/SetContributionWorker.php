@@ -76,8 +76,9 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _execContribution( ContributionStruct $contributionStruct ){
 
-        $jobStructList = $contributionStruct->getJobStruct();
-        $jobStruct = array_pop( $jobStructList );
+        $jobStruct = $contributionStruct->getJobStruct();
+//        $userInfoList = $contributionStruct->getUserInfo();
+//        $userInfo = array_pop( $userInfoList );
 
         $this->_loadEngine( $contributionStruct );
 
@@ -116,11 +117,18 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
+    /**
+     * !Important Refresh the engine ID for each queueElement received
+     * to avoid set contributions on the wrong engine ID
+     *
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws \Exception
+     * @throws \Exceptions\ValidationError
+     */
     protected function _loadEngine( ContributionStruct $contributionStruct ){
 
-        $jobStructList = $contributionStruct->getJobStruct();
-        $jobStruct = array_pop( $jobStructList );
-
+        $jobStruct = $contributionStruct->getJobStruct();
         if( empty( $this->_engine ) ){
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
@@ -132,6 +140,7 @@ class SetContributionWorker extends AbstractWorker {
      * @param ContributionStruct $contributionStruct
      *
      * @throws ReQueueException
+     * @throws \Exceptions\ValidationError
      */
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
 
