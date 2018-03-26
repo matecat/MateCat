@@ -2,7 +2,7 @@
 if ( SegmentFilter.enabled() )
 (function($, UI, SF, undefined) {
 
-    var original_renderSegments = UI.renderSegments ;
+    var original_renderFiles = UI.renderFiles ;
     var original_editAreaClick     = UI.editAreaClick ;
 
     var original_selectorForNextUntranslatedSegment = UI.selectorForNextUntranslatedSegment ; 
@@ -111,18 +111,19 @@ if ( SegmentFilter.enabled() )
             }
         },
 
-        renderSegments : function() {
-            original_renderSegments.apply( this, arguments );
+        renderFiles : function() {
+            original_renderFiles.apply( this, arguments );
 
             if (SF.filtering()) {
-                var segments = SegmentStore.getAllSegments();
-                var filterArray = SF.getLastFilterData()['segment_ids']
-                segments.forEach(function (segment,index) {
-                    if (filterArray.indexOf(segment.sid) === -1) {
-                        SegmentActions.addClassToSegment(segment.sid, 'muted');
-                        SegmentActions.removeClassToSegment(segment.sid, 'editor opened');
-                    }
-                })
+                // var segments = SegmentStore.getAllSegments();
+                var filterArray = SF.getLastFilterData()['segment_ids'];
+                SegmentActions.setMutedSegments(filterArray);
+                // segments.forEach(function (segment,index) {
+                //     if (filterArray.indexOf(segment.sid) === -1) {
+                //         SegmentActions.addClassToSegment(segment.sid, 'muted');
+                //         SegmentActions.removeClassToSegment(segment.sid, 'editor opened');
+                //     }
+                // })
             }
         }
     });

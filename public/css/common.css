@@ -15,7 +15,7 @@ body
 	position: relative;
 	text-align: center;
 	margin: 0;
-	padding: 75px 0 120px 0;
+	/*padding: 75px 0 120px 0;*/
 	font-family: calibri, Arial, Helvetica, sans-serif;
 	-webkit-transition: all 100ms ease-in;
 	-moz-transition: all 100ms ease-in;
@@ -1481,17 +1481,7 @@ float: none!important;
     display: block;
 }
 
-.manage .searchbox {
-    min-height: 20px;
-    height: 48px;
-}
-
-.searchbox, .mgmt-panel-tm, .mgmt-panel-gl {
-    font-size: 16px;
-}
-
-
-.mgmt-add-tm, .mgmt-add-gl, .searchbox, .mgmt-panel-gl, .addrow-tm, .addrow-gl, .dataTables_paginate {
+.mgmt-add-tm, .mgmt-add-gl, .addrow-tm, .addrow-gl, .dataTables_paginate {
     display:none;
 }
 
@@ -2506,31 +2496,8 @@ background: #F3F3F3!important;
 		width: 225px;
 		margin-right:12px;
 }
-.searchbox
-{
-	display: none;
-	position: fixed;
-	float: left;
-	width: 100%;
-	font-size:12px;
-	border-bottom: 1px solid #666;
-	background:#efefef url(../img/point.gif) 0 0 repeat-x;
-	margin-top: -27px;
-	padding:5px 4% 0px 4%;
-	-moz-box-shadow: 0 1px 3px #666;
-	-webkit-box-shadow: 0 1px 10px #666;
-	-moz-border-radius-bottom-right:2px;
-	-webkit-border-bottom-right-radius:2px;
-	-moz-border-radius-bottomleft:2px;
-	-webkit-border-bottom-left-radius:2px;
-	z-index: 9999;
-}
 
 .clear {clear:both;}
-
-header .searchbox {
-	margin-top:28px;
-}
 
 
 .offline span.msg span {
@@ -2711,22 +2678,6 @@ background-size: 25px!important;
     max-height: 400px;
 /*    width: 149px;
     margin-left: 15px;*/
-}
-
-body.filterOpen .searchbox
-{
-	display: block;
-    z-index: 2;
-	}
-
-	.searchbox label,
-    .mgmt-panel .mgmt-tm label,
-    .mgmt-panel .mgmt-mt label
-	{
-		display: inline;
-		width: auto !important;
-		margin-right: 5px;
-		text-transform: uppercase;
 }
 
 .mgmt-panel .mgmt-tm label,
@@ -2941,24 +2892,6 @@ border: 1px solid #999;
 .description .mgmt-input {
     width: 430px;;
 }
-
-
-.searchbox input[type=button],
-.searchbox input[type=submit]
-{
-	text-transform: uppercase;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
-.searchbox .block {
-	float: left;
-margin-right: 20px;
-text-align: left;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
 .mgmt-panel .block
 {
 	margin: 5px 0 10px 0;
@@ -3083,40 +3016,7 @@ color: green;
 
 .addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}
-.searchbox .block .field
-{
-	width: 100%;
-	text-align: right;
-	margin-bottom: 5px;
-}
-.searchbox .block.right
-{
-	float: right !important;
-	margin-right: 8% !important;
-	margin-top: -5px !important;
-}
-.searchbox .block.right .block
-{
-	margin-right: 0px;
-	margin-left: 20px;
-}
-.searchbox .block.right .block .btn
-{
-	margin-right: 0px;
-	margin-left: 10px;
-}
-.searchbox .block.vcentered
-{
-	padding-top: 7px !important;
-}
-.searchbox #exec-replace
-{
-	/*float: none;*/
-}
-.searchbox #exec-replaceall
-{
-	/* visibility: hidden; */
-}
+
 section mark
 {
 	background: transparent;

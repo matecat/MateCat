@@ -4,6 +4,7 @@
  */
 let React = require('react');
 let SegmentStore = require('../../stores/SegmentStore');
+let SegmentActions = require('../../actions/SegmentActions');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
@@ -23,6 +24,7 @@ class Segment extends React.Component {
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
+        this.handleChangeBulk = this.handleChangeBulk.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
 
@@ -33,7 +35,8 @@ class Segment extends React.Component {
             status: this.props.segment.status,
             showTranslationIssues: false,
             unlocked: UI.isUnlockedSegment(this.props.segment),
-            readonly: readonly
+            readonly: readonly,
+            inBulk: false
         }
     }
 
@@ -46,7 +49,7 @@ class Segment extends React.Component {
         }
 
         if ( this.props.segment.ice_locked === "1" && !readonly) {
-            if (this.state.unlocked) {
+            if (this.props.segment.unlocked) {
                 classes.push('ice-unlocked');
             } else {
                 classes.push('readonly');
@@ -79,6 +82,12 @@ class Segment extends React.Component {
         }
         if (this.props.isReviewImproved) {
             classes.push("reviewImproved");
+        }
+        if (this.props.segment.inBulk) {
+            classes.push("segment-selected-inBulk");
+        }
+        if ( this.props.segment.muted ) {
+            classes.push( 'muted' );
         }
         return classes;
     }
@@ -201,17 +210,32 @@ class Segment extends React.Component {
     lockUnlockSegment(event) {
         event.preventDefault();
         event.stopPropagation();
-        if (this.state.unlocked) {
-            //TODO: move this to SegmentActions
-            UI.removeFromStorage('unlocked-' + this.props.segment.sid);
-            // UI.closeSegment(UI.getSegmentById(this.props.segment.sid), 1);
-        } else {
-            UI.addInStorage('unlocked-'+ this.props.segment.sid, true);
-            UI.editAreaClick(this.section);
+        SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );
+    }
+
+    checkSegmentClasses() {
+        let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
+        if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
+            let indexEditor = classes.indexOf("editor");
+            classes.splice(indexEditor, 1);
+            let indexOpened = classes.indexOf("opened");
+            classes.splice(indexOpened, 1);
         }
-        this.setState({
-            unlocked: !this.state.unlocked
-        });
+        return classes;
+    }
+
+    handleChangeBulk(event){
+        if (event.shiftKey) {
+            this.props.setBulkSelection(this.props.segment.sid, this.props.fid);
+        } else {
+            SegmentActions.toggleSegmentOnBulk(this.props.segment.sid, this.props.fid);
+            this.props.setLastSelectedSegment(this.props.segment.sid, this.props.fid);
+        }
+    }
+
+
+    allowHTML(string) {
+        return { __html: string };
     }
 
     componentDidMount() {
@@ -247,21 +271,8 @@ class Segment extends React.Component {
             (nextState.autopropagated !== this.state.autopropagated) ||
             (nextState.status !== this.state.status) ||
             (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
-            (nextState.unlocked !== this.state.unlocked) ||
             (nextState.readonly !== this.state.readonly)
         );
-
-        // segment_classes : [],
-        //     modified: false,
-        //     autopropagated: this.props.segment.autopropagated_from != 0,
-        //     status: this.props.segment.status,
-        //     showTranslationIssues: false,
-        //     unlocked: (this.props.segment.ice_locked === "1" && !readonly) && UI.getFromStorage('locked-' + this.props.segment.sid),
-        //     readonly: readonly
-    }
-
-    allowHTML(string) {
-        return { __html: string };
     }
 
     render() {
@@ -269,7 +280,7 @@ class Segment extends React.Component {
         let timeToEdit = "";
 
         let readonly = this.state.readonly;
-        let segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
+        let segment_classes = this.checkSegmentClasses();
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
         let originalId = this.props.segment.sid.split('-')[0];
@@ -310,18 +321,9 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {(this.props.segment.ice_locked !== '1' ) ? (
-                        config.splitSegmentEnabled ? (
-                        <div className="actions">
-                            <a className="split" href="#" title="Click to split segment">
-                                <span className="icon-split"/>
-                            </a>
-                            <p className="split-shortcut">CTRL + S</p>
-                        </div>
-                        ) : (null)
-                    ) : (
+                    {this.props.segment.ice_locked === '1' ? (
                         !readonly ? (
-                            this.state.unlocked ? (
+                            this.props.segment.unlocked ? (
                                 <div className="ice-locked-icon"
                                      onClick={this.lockUnlockSegment.bind(this)}>
                                     <button className="unlock-button unlocked icon-unlocked3"/>
@@ -333,7 +335,28 @@ class Segment extends React.Component {
                                 </div>
                             )
                         ) : (null)
-                    )}
+                    ): (null)}
+
+                    {!config.isLQA ? (
+                        <div className="txt segment-add-inBulk">
+                            <input type="checkbox"
+                                   ref={(node)=>this.bulk=node}
+                                   checked={this.props.segment.inBulk}
+                                   onClick={this.handleChangeBulk}
+                            />
+                        </div>
+                    ) : (null)}
+
+
+                    {(this.props.segment.ice_locked !== '1' && config.splitSegmentEnabled) ? (
+                        <div className="actions">
+                            <button className="split" href="#" title="Click to split segment">
+                                <i className="icon-split"/>
+                            </button>
+                            <p className="split-shortcut">CTRL + S</p>
+                        </div>
+                    ) : (null)}
+
                 </div>
                 {job_marker}
 
@@ -347,12 +370,15 @@ class Segment extends React.Component {
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection}
-                        locked={!this.state.unlocked && this.props.segment.ice_locked === '1'}
+                        locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
                         {timeToEdit}
                     </div>
+                    {SegmentFilter && SegmentFilter.enabled() ? (
+                        <div className="edit-distance">Edit Distance: {this.props.segment.edit_distance}</div>
+                    ) : (null)}
                     <SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}

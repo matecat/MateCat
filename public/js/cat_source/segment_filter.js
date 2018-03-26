@@ -3,7 +3,7 @@ SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
     return ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled();
-}
+};
 
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
@@ -43,12 +43,10 @@ if (SegmentFilter.enabled())
     } ;
 
     $.extend(SF, {
+        open: false,
+        filteringSegments: false,
         getLastFilterData : function() {
             return this.getStoredState().serverData ;
-        },
-
-        filterPanelOpen : function() {
-            return UI.body.hasClass('filtering');
         },
 
         /**
@@ -57,7 +55,7 @@ if (SegmentFilter.enabled())
          * @returns {*}
          */
         filtering : function() {
-            return UI.body.hasClass('sampling-enabled');
+            return this.filteringSegments;
         },
 
         /**
@@ -100,18 +98,11 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        restore : function( data ) {
-            // debugger  // TODO, find who calls this
-            window.segment_filter_panel.setState( this.getStoredState().reactState ) ;
-            $(document).trigger('segment-filter-submit');
-        },
-
         filterSubmit : function( data, wantedSegment) {
             if (!wantedSegment) {
                 wantedSegment = null;
             }
-            $('body').addClass('sampling-enabled');
-
+            this.filteringSegments = true;
             data = { filter: data } ;
 
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
@@ -122,36 +113,44 @@ if (SegmentFilter.enabled())
 
                 var reactState = {
                     filteredCount : data.count,
-                    filtering : true
+                    filtering : true,
+                    segmentsArray: data.segment_ids
                 } ;
-
-                window.segment_filter_panel.setState( reactState );
+                CatToolActions.setSegmentFilter(data);
 
                 UI.clearStorage('SegmentFilter');
 
                 SegmentFilter.setStoredState({
                     serverData : data ,
-                    reactState : window.segment_filter_panel.state
+                    reactState : reactState
                 }) ;
 
-                UI.unmountSegments();
+                //UI.unmountSegments();
+                SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
-                var afterRenderCallback = function() { } ;
                 var segmentToOpen ;
 
                 if ( !wantedSegment ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
+                    var segment$ = UI.getSegmentById(segmentToOpen);
+                    if (segment$.length) {
+                        UI.openSegment(segment$)
+                    } else {
+                        UI.scrollSegment(segment$, segmentToOpen);
+                    }
                 } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
-                    afterRenderCallback = callbackForSegmentNotInSample( wantedSegment )  ;
+                    callbackForSegmentNotInSample( wantedSegment )  ;
                 } else {
                     segmentToOpen = wantedSegment ;
+                    var segment$ = UI.getSegmentById(segmentToOpen);
+                    if (segment$) {
+                        UI.openSegment(segment$)
+                    } else {
+                        UI.scrollSegment(segment$, segmentToOpen);
+                    }
                 }
 
-                return UI.render({
-                    firstLoad: false,
-                    segmentToOpen: segmentToOpen
-                }).done( afterRenderCallback ) ;
             })
         },
 
@@ -162,41 +161,29 @@ if (SegmentFilter.enabled())
          *
          */
         openFilter : function() {
-            UI.body.addClass('filtering'); // filtering makes sense if we have serverData
 
+            CatToolActions.openSegmentFilter();
+            this.open = true;
             if ( this.getStoredState().serverData ) {
-                var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
-                    return  '#segment-' + i  ;
-                });
-                var selector = 'section:not( ' + ids + ')';
-
-                UI.body.addClass('sampling-enabled');
-                let elements = $( selector );
-                ids = $.map( elements, function(i) {
-                    return  UI.getSegmentId(i) ;
-                });
-                SegmentActions.addClassToSegment(ids, 'muted');
-                UI.body.addClass('sampling-enabled');
-
+                SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
+                this.filteringSegments = true;
                 setTimeout( function() {
                     tryToFocusLastSegment();
                 }, 600 );
             }
 
-            $(document).trigger('header-tool:open', { name: 'filter' });
         },
 
         clearFilter : function() {
             this.clearStoredData();
-            window.segment_filter_panel.resetState();
-
             this.closeFilter() ;
+            this.filteringSegments = false;
         },
 
         closeFilter : function() {
-            UI.body.removeClass('filtering');
-            UI.body.removeClass('sampling-enabled');
-            SegmentActions.removeClassToSegment(-1, 'muted');
+            CatToolActions.closeSubHeader();
+            this.open = false;
+            SegmentActions.removeAllMutedSegments();
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );
@@ -235,30 +222,15 @@ if (SegmentFilter.enabled())
         }
     });
 
-    $(document).ready( function() {
-        // mount the hiddent react component by default so we can keep status
-        window.segment_filter_panel = ReactDOM.render(
-          React.createElement(
-            SegmentFilter_MainPanel, {}),
-            $('#segment-filter-mountpoint')[0]
-          );
-    });
-
-    $(document).on('header-tool:open', function(e, data) {
-        if ( data.name != 'filter' ) {
-            SF.closeFilter();
-        }
-    });
-
     $(document).on('click', "header .filter", function(e) {
         e.preventDefault();
-
-        if ( UI.body.hasClass('filtering') ) {
-            SF.closeFilter();
+        if (!SegmentFilter.open) {
+            SegmentFilter.openFilter();
         } else {
-            UI.closeAllMenus(e);
-            SF.openFilter();
+            SegmentFilter.closeFilter();
+            SegmentFilter.open = false;
         }
+        // SegmentFilter.openFilter();
     });
 
 

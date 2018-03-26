@@ -33,18 +33,14 @@ UI = {
                 currSegment.hide();
             }
             var menuHeight = jobMenu.height();
-//		var startTop = 47 - menuHeight;
-            var searchBoxIsOpen = UI.body.hasClass('filterOpen');
-            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() + 1 : 0;
             if (LXQ.enabled()) {
                 var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible');
                 var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 8 : 0;
-                jobMenu.css('top', (lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (lxqBoxHeight + 43 - menuHeight) + "px");
             }
             else {
-                jobMenu.css('top', (searchBoxHeight + 43 - menuHeight) + "px");
+                jobMenu.css('top', (43 - menuHeight) + "px");
             }
-//            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
                 jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
@@ -62,7 +58,7 @@ UI = {
 
 	},
 
-	activateSegment: function(segment) {
+    activateSegment: function(segment) {
         SegmentActions.createFooter(UI.getSegmentId(segment));
 		this.createButtons(segment);
 
@@ -259,7 +255,7 @@ UI = {
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor split-action');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -291,9 +287,6 @@ UI = {
             $('.sid .actions .split').removeClass('cancel');
             source = $(segment).find('.source');
             $(source).removeAttr('style');
-
-            // TODO: this line remove the class from all the segments???
-            $('section').removeClass('split-action');
 
             $('.split-shortcut').html('CTRL + S');
             $('.splitBar, .splitArea').remove();
@@ -406,13 +399,13 @@ UI = {
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
         if ( typeof dont_show != 'undefined' && dont_show) {
-            Cookies.set('source_copied_to_target-' + config.job_id +"-" + config.password,
+            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
                     '0',
                     //expiration: 1 day
                     { expires: 30 });
         }
         else {
-            Cookies.set('source_copied_to_target-' + config.job_id +"-" + config.password,
+            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
                     null,
                     //set expiration date before the current date to delete the cookie
                     {expires: new Date(1)});
@@ -651,10 +644,10 @@ UI = {
             localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
         }
     },
-    fixHeaderHeightChange: function() {
-        var headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0);
-        $('#outer').css('margin-top', headerHeight + 'px');
-    },
+    // fixHeaderHeightChange: function() {
+    //     var headerHeight = $('header .wrapper').height();
+    //     $('#outer').css('margin-top', headerHeight + 'px');
+    // },
 
     nextUnloadedResultSegment: function() {
 		var found = '';
@@ -1051,8 +1044,8 @@ UI = {
 			}
             console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
-            console.timeEnd("Time: RenderSegments"+fid);
-            console.timeEnd("Time: from start()");
+            // console.timeEnd("Time: RenderSegments"+fid);
+            // console.timeEnd("Time: from start()");
 
 		});
 
@@ -1593,7 +1586,7 @@ UI = {
 
                 //check for errors
                 if (UI.globalWarnings) {
-                    UI.renderQAPanel();
+                    UI.updateQAPanel();
                 }
 
                 // check for messages
@@ -1609,22 +1602,16 @@ UI = {
             }
         });
 	},
-    renderQAPanel: function () {
-	    if ( !this.QAComponent ) {
-            var mountPoint = $(".qa-wrapper")[0];
-            this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
-            }), mountPoint);
-        }
+    updateQAPanel: function () {
         if ( UI.globalWarnings.tag_issues ) {
-            this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
+            CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
         }
 
         var mismatches = [];
         if ( UI.globalWarnings.translation_mismatches ) {
             mismatches = UI.globalWarnings.translation_mismatches;
         }
-        this.QAComponent.setTranslationConflitcts( mismatches );
-
+        CatToolActions.qaComponentsetTranslationConflitcts(mismatches);
     },
 	displayMessage: function(messages) {
         var self = this;
@@ -2478,16 +2465,12 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        var initialRenderPromise ;
-        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
-            SegmentFilter.openFilter();
-            initialRenderPromise = ( new $.Deferred() ).resolve();
-        }
-        else {
-            initialRenderPromise = UI.render();
-        }
+        var initialRenderPromise = UI.render();;
 
         initialRenderPromise.done(function() {
+            if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
+                SegmentFilter.openFilter();
+            }
             UI.checkWarnings(true);
         });
 
@@ -2614,21 +2597,8 @@ UI = {
         // Cookies.set('tmpanel-open', 1, { path: '/' });
     },
     closeAllMenus: function (e, fromQA) {
-        if ($('.searchbox').is(':visible')) {
-            UI.closeSearch();
-        }
-        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
-
-        var qa_cont = $('.qa-container');
-        if ( qa_cont.hasClass('qa-open') && !fromQA) {
-            QAComponent.togglePanel();
-        }
-        if (SegmentFilter && SegmentFilter.closeFilter) {
-            SegmentFilter.closeFilter();
-        }
+        CatToolActions.closeSubHeader();
     }
-
-
 };
 
 $(document).ready(function() {
@@ -2637,6 +2607,6 @@ $(document).ready(function() {
 });
 
 $(window).resize(function() {
-    UI.fixHeaderHeightChange();
+    // UI.fixHeaderHeightChange();
     APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });

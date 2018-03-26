@@ -108,7 +108,7 @@ if(config.splitSegmentEnabled) {
                     action:              "setSegmentSplit",
                     segment:            totalSource,
                     id_segment:          sid,
-                    id_job:              config.job_id,
+                    id_job:              config.id_job,
                     password:            config.password
                 },
                 context: {

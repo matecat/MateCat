@@ -50,8 +50,16 @@ $.extend(UI, {
          */
         this.globalWarnings = [];
 
-        this.downOpts = {offset: '130%'};
-		this.upOpts = {offset: '-40%'};
+        // this.downOpts = {offset: '130%'};
+		// this.upOpts = {offset: '-40%'};
+        this.downOpts = {
+            offset: '100%',
+            context: $('#outer')
+        };
+        this.upOpts = {
+            offset: '-100%',
+            context: $('#outer')
+        };
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 
 
@@ -70,6 +78,15 @@ $.extend(UI, {
 			}, UI.checkUpdatesEvery);
 
 		}
+
+		ReactDOM.render(
+            React.createElement(
+                SubHeaderContainer, {
+                	filtersEnabled: SegmentFilter.enabled()
+				}),
+            $('#header-bars-wrapper')[0]
+        );
+
 
 		return UI.getSegments(options);
 

@@ -1,0 +1,43 @@
+.segment-selected-inBulk:not(.opened) {
+    .body > .text {
+        background-color: #edf4fd !important;
+    }
+    .segment-add-inBulk {
+        display: block;
+    }
+    &:hover .body > .text {
+        background-color: #edf4fd !important;
+    }
+}
+
+
+section {
+    &:not(.readonly):not(.muted):hover .segment-add-inBulk {
+        display: block;
+    }
+
+    .segment-add-inBulk,
+    &.muted .segment-add-inBulk,
+    .muted:hover .segment-add-inBulk,
+    .readonly:hover .segment-add-inBulk{
+        display: none;
+    }
+}
+
+
+body.cattool.editing {
+    section {
+        &:not(.editor).segment-selected-inBulk .text:hover {
+            background: #edf4fd !important;
+        }
+        .editor.segment-selected-inBulk {
+            .text.segment-body-content {
+                background: #edf4fd;
+            }
+            .text:hover.segment-body-content {
+                background: #edf4fd !important;
+            }
+        }
+
+    }
+}

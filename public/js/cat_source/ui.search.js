@@ -12,7 +12,7 @@ $.extend(UI, {
 	resetSearch: function() {
 		this.body.removeClass('searchActive');
 		this.clearSearchMarkers();
-		this.setFindFunction('find');
+		// this.setFindFunction('find');
 		$('#exec-find').removeAttr('disabled');
 		this.enableTagMark();
         this.markGlossaryItemsInSource(UI.cachedGlossaryData);
@@ -78,7 +78,7 @@ $.extend(UI, {
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
-		this.setFindFunction('next');
+		// this.setFindFunction('next');
 		this.body.addClass('searchActive');
 		//Save the current segment to not lose the translation
 		UI.saveSegment(UI.currentSegment);
@@ -87,7 +87,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'find',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -160,7 +160,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'replaceAll',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -218,12 +218,12 @@ $.extend(UI, {
 		query += ' (' + ((this.searchParams['match-case']) ? 'case sensitive' : 'case insensitive') + ')';
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
-		if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
-		}
-		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
-		}
+		// if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
+		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
+		// }
+		// if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
+		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
+		// }
 		this.updateSearchItemsCount();
 		if (this.someSegmentToSave()) {
 			this.addWarningToSearchDisplay();
@@ -651,15 +651,15 @@ $.extend(UI, {
 		}
 		return changes;
 	},
-	setFindFunction: function(func) {
-		var b = $('#exec-find');
-		if (func == 'next') {
-			b.attr('data-func', 'next').attr('value', 'Next');
-		} else {
-			b.attr('data-func', 'find').attr('value', 'Find');
-		}
-		b.removeAttr('disabled');
-	},
+	// setFindFunction: function(func) {
+	// 	/*var b = $('#exec-find');*/
+	// 	/*if (func == 'next') {
+	// 		b.attr('data-func', 'next').attr('value', 'Next');
+	// 	} else {
+	// 		b.attr('data-func', 'find').attr('value', 'Find');
+	// 	}*/
+	// 	/*b.removeAttr('disabled');*/
+	// },
 	unmarkNumItemsInSegments: function() {
 		$('section[data-searchItems]').removeAttr("data-searchItems");
 	},
@@ -669,35 +669,17 @@ $.extend(UI, {
 		});
 	},
 
-    searchIsOpen : function() {
-        // TODO: change the name of this, filter is not a good name.
-        // This panel opens search actually.
-        return $('body').hasClass('filterOpen') ;
-    },
     closeSearch : function() {
-        $('body').removeClass('filterOpen');
+		CatToolActions.closeSubHeader();
     },
     openSearch : function() {
-        $(document).trigger('header-tool:open', { name: 'search' });
-        $('body').addClass('filterOpen');
+        CatToolActions.openSearch();
         $('#search-source').focus();
     },
 	toggleSearch: function(e) {
 		if (!this.searchEnabled) return;
 		e.preventDefault();
-        // if (LXQ.enabled()) LXQ.hidePopUp();
-		if ( UI.searchIsOpen() )  {
-            UI.closeSearch();
-		} else {
-			UI.closeAllMenus(e);
-			UI.openSearch();
-		}
-        this.fixHeaderHeightChange();
+		CatToolActions.toggleSearch();
+        // this.fixHeaderHeightChange();
 	},
-});
-
-$(document).on('header-tool:open', function(e, data) {
-    if ( data.name != 'search' ) {
-        UI.closeSearch();
-    }
 });

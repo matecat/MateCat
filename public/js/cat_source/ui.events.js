@@ -540,8 +540,7 @@ $.extend(UI, {
 			if (UI.currentSegment) {
                 UI.saveSegment(UI.currentSegment);
             }
-			UI.closeAllMenus(e, true);
-			QAComponent.togglePanel();
+			CatToolActions.toggleQaIssues();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
@@ -577,124 +576,7 @@ $.extend(UI, {
 			}
 		});
 		
-
-		// Search and replace
-
-		$(".searchbox input, .searchbox select").bind('keydown', 'return', function(e) {
-			e.preventDefault();
-			if ($("#exec-find").attr('disabled') != 'disabled')
-				$("#exec-find").click();
-		});
-
-		$("#exec-find").click(function(e) {
-			e.preventDefault();
-			if ($(this).attr('data-func') == 'find') {
-				UI.execFind();
-			} else {
-				if (!UI.goingToNext) {
-					UI.goingToNext = true;
-					UI.execNext();
-				}
-
-			}
-		});
-		$("#exec-cancel").click(function(e) {
-			e.preventDefault();
-			$("#filterSwitch").click();
-			UI.body.removeClass('searchActive');
-			UI.clearSearchMarkers();
-			UI.clearSearchFields();
-			UI.setFindFunction('find');
-			$('#exec-find').removeAttr('disabled');
-			$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
-			UI.enableTagMark();
-			if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-				UI.gotoOpenSegment();
-			} else {
-				UI.render({
-					firstLoad: false,
-					segmentToOpen: UI.currentSegmentId
-				});
-			}
-            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
-
-        });
-		$("#exec-replaceall").click(function(e) {
-			e.preventDefault();
-			APP.confirm({
-				name: 'confirmReplaceAll',
-				cancelTxt: 'Cancel',
-				callback: 'execReplaceAll',
-				okTxt: 'Continue',
-				msg: "Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)"
-			});
-		});
-		$("#exec-replace").click(function(e) {
-			e.preventDefault();
-			var replaceTarget = $('#replace-target').val();
-			if ($('#search-target').val() == replaceTarget) {
-				APP.alert({msg: 'Attention: you are replacing the same text!'});
-				return false;
-			}
-
-			if (UI.searchMode !== 'onlyStatus') {
-
-				// todo: redo marksearchresults on the target
-
-				$("mark.currSearchItem").text(replaceTarget);
-				var segment = $("mark.currSearchItem").parents('section');
-                var status = UI.getStatus(segment);
-
-                UI.setTranslation({
-                    id_segment: $(segment).attr('id').split('-')[1],
-                    status: status,
-                    caller: 'replace'
-                });
-
-                UI.updateSearchDisplayCount(segment);
-				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
-
-                if(UI.numSearchResultsSegments > 1) UI.gotoNextResultItem(true);
-			}
-
-        });
-		$("#enable-replace").on('change', function() {
-			if ($('#enable-replace').is(':checked') && $('#search-target').val() != "") {
-				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
-			} else {
-				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
-			}
-		});
-		$("#search-source, #search-target").on('input', function() {
-			if (UI.checkSearchChanges()) {
-				UI.setFindFunction('find');
-				$("#enable-replace").change();
-			}
-		});
-        $('#replace-target').on('focus', function() {
-            if(!$('#enable-replace').prop('checked')) {
-                $('label[for=enable-replace]').trigger('click');
-                $('#replace-target').focus();
-            }
-        });
-        $('#replace-target').on('input', function() {
-            if($(this).val() != '') {
-                if(!$('#enable-replace').prop('checked')) $('label[for=enable-replace]').trigger('click');
-            }
-            UI.checkReplaceAvailability();
-        });
-		$("#search-target").on('input', function() {
-            UI.checkReplaceAvailability();
-		});
-		$("#select-status").on('change', function() {
-			if (UI.checkSearchChanges()) {
-				UI.setFindFunction('find');
-			}
-		});
-		$("#match-case, #exact-match").on('change', function() {
-			UI.setFindFunction('find');
-		});
-
+		//search
 
         if (!this.segmentToScrollAtRender)
             UI.gotoSegment(this.startSegmentId);
