@@ -242,7 +242,7 @@ class QAComponent extends React.Component {
         var total = 0;
         //Show the total only if more than 1 arrays exist
         $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (index, item) {
-            if (item.length) {
+            if (item && item.length) {
                 total++;
             }
         });

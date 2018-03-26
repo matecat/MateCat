@@ -81,7 +81,9 @@ $.extend(UI, {
 
 		ReactDOM.render(
             React.createElement(
-                SubHeaderContainer, {}),
+                SubHeaderContainer, {
+                	filtersEnabled: SegmentFilter.enabled()
+				}),
             $('#header-bars-wrapper')[0]
         );
 

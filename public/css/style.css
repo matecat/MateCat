@@ -1263,9 +1263,15 @@ article {
     box-sizing: content-box;
 }
 body #outer {
-    overflow-y: scroll;
+    overflow-y: auto;
     position: relative;
     display: inline-block;
+    height: 100%;
+}
+
+body .main-container {
+    width: 100%;
+    height: 95%;
 }
 #outer.loadingBefore {
     display: block;
@@ -1350,6 +1356,8 @@ section .body > .text {
 
 body.cattool {
     background: #f2f4f7;
+    overflow-y: hidden !important;
+    padding: unset;
 }
 
 body.cattool.editing {
