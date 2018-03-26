@@ -83,6 +83,20 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     protected $is_review;
 
     /**
+     *
+     * @return array
+     */
+    public function getTMProps(){
+        $projectData = $this->getProject();
+        $result = [
+                'project_id'   => $projectData[ 'pid' ],
+                'project_name' => $projectData[ 'pname' ],
+                'job_id'       => $this->id,
+        ];
+        return $result;
+    }
+
+    /**
      * @return JobsTranslatorsStruct
      */
     public function getTranslator() {

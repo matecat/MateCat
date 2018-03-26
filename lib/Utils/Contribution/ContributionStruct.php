@@ -116,7 +116,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
      * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
      * because we want control the cache eviction from other entrypoints.
      *
-     * @return Jobs_JobStruct[]
+     * @return Jobs_JobStruct
      *
      * @throws ValidationError
      */
@@ -126,14 +126,20 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
             throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );
         }
 
-        $JobDao = new \Jobs_JobDao( Database::obtain() );
-        $jobStruct = new \Jobs_JobStruct();
-        $jobStruct->id = $this->id_job;
-        $jobStruct->password = $this->job_password;
-        return $JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct );
+        return $this->cachable( '_contributionJob', $this, function () {
+            $JobDao = new \Jobs_JobDao( Database::obtain() );
+            $jobStruct = new \Jobs_JobStruct();
+            $jobStruct->id = $this->id_job;
+            $jobStruct->password = $this->job_password;
+            return @$JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];
+        } );
 
     }
 
+    /**
+     * @return array
+     * @throws ValidationError
+     */
     public function getProp(){
         $jobStruct = $this->getJobStruct();
         $props = $this->props;
@@ -143,7 +149,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
              */
             $props = $props->toArray();
         }
-        return array_merge( $props, CatUtils::getTMProps( $jobStruct[ 0 ] ) );
+        return array_merge( $jobStruct->getTMProps(), $props );
     }
 
     /**
@@ -172,6 +178,7 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
 
     /**
      * @return string
+     * @throws \ReflectionException
      */
     public function __toString() {
         return json_encode( $this->toArray() );
