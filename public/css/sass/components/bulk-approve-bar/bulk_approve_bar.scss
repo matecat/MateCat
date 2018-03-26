@@ -1,15 +1,72 @@
 .bulk-approve-bar {
     position: fixed;
-    margin-top: 80px;
+    margin-top: 28px;
     z-index: 2;
     left: 0;
     right: 0;
-    background: #efefef;
-    span {
-        float: left;
+    background: #edf4fd;
+    padding: 8px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.43);
+    .bulk-back-info, .bulk-activity-icons, .bulk-back, .bulk-info {
+        display: inline-block;
+        vertical-align: middle;
     }
-
-    button.btn {
-        float: left;
+    .bulk-back-info {
+        width: 50%;
+        text-align: left;
+        .bulk-back {
+            .back-bulk {
+                background: transparent;
+                padding: 0;
+                margin-left: 6px;
+                position: relative;
+                top: 2px;
+                i {
+                    position: relative;
+                    top: 1px;
+                }
+            }
+        }
+        .bulk-info {
+            padding-left: 53px;
+            font-size: 18px;
+            position: relative;
+            top: 2px;
+        }
+    }
+    .bulk-activity-icons {
+        width: 50%;
+        text-align: right;
+        .approve-all-segments {
+            line-height: 18px;
+            background: transparent;
+            font-weight: 100;
+            padding: 6px 10px;
+            border-radius: 2px;
+            transition: 0.3s ease;
+            width: auto;
+            vertical-align: bottom;
+            margin-right: 0;
+            &:hover {
+                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+            }
+            &.translated-all-bulked {
+                border: 1px solid #09beec;
+                color: #09beec;
+            }
+            &.approved-all-bulked {
+                border: 1px solid #7cc576;
+                color: #7cc576;
+            }
+            i {
+                top: 3px;
+                margin-right: 0 !important;
+                position: relative;
+                &:before {
+                    font-size: 19px;
+                    line-height: 1px;
+                }
+            }
+        }
     }
 }
