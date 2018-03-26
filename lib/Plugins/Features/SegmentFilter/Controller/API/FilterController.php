@@ -46,10 +46,15 @@ class FilterController extends KleinController {
 
         $this->model = new SegmentFilterModel( $this->chunk, $this->filter );
 
+
         // TODO: move this into a formatter
-        $ids_as_array = array_map(function( array $record ) {
-            return $record['id'];
-        }, $this->model->getSegmentIds());
+        $ids_as_array = [];
+        $segments_id = $this->model->getSegmentIds();
+        foreach($segments_id as $segment_id){
+            $ids_as_array[] = $segment_id['id'];
+        }
+
+
 
         $this->response->json( array(
             'segment_ids' => $ids_as_array,
