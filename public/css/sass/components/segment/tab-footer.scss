@@ -1,11 +1,31 @@
 .editor {
+    &.loaded {
+        .tab.issues {
+            display: block !important;
+        }
+    }
     .footer {
-
+        .submenu {
+            .tab-switcher-issues {
+                display: none;
+            }
+        }
         .tab {
 
         }
 
         .tab.issues {
+            box-shadow: 0 0 4px #ccc;
+            background: #f2f4f7 !important;
+            .title-for-issues {
+                color: black;
+                text-align: left;
+                background: #f2f4f7;
+                font-size: 18px;
+                padding-left: 28px;
+                padding-top: 10px;
+                font-weight: 700;
+            }
             .creation-issue-container {
                 padding: 1em;
             }

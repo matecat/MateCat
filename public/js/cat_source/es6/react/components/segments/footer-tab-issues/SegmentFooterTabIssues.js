@@ -195,6 +195,9 @@ class SegmentFooterTabIssues extends React.Component {
         return <div key={"container_" + this.props.code}
                     className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class}
                     id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+            <div className="title-for-issues">
+                Create Issues
+            </div>
             <div className="ui grid border-box">
                 <div className="height wide column">
                     <div className="creation-issue-container ui form">
