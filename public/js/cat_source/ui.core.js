@@ -255,7 +255,7 @@ UI = {
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor split-action');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -287,9 +287,6 @@ UI = {
             $('.sid .actions .split').removeClass('cancel');
             source = $(segment).find('.source');
             $(source).removeAttr('style');
-
-            // TODO: this line remove the class from all the segments???
-            $('section').removeClass('split-action');
 
             $('.split-shortcut').html('CTRL + S');
             $('.splitBar, .splitArea').remove();
