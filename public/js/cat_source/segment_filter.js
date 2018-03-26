@@ -43,6 +43,7 @@ if (SegmentFilter.enabled())
     } ;
 
     $.extend(SF, {
+        open: false,
         getLastFilterData : function() {
             return this.getStoredState().serverData ;
         },
@@ -53,7 +54,7 @@ if (SegmentFilter.enabled())
          * @returns {*}
          */
         filtering : function() {
-            return UI.body.hasClass('sampling-enabled');
+            return this.open;
         },
 
         /**
@@ -100,8 +101,7 @@ if (SegmentFilter.enabled())
             if (!wantedSegment) {
                 wantedSegment = null;
             }
-            $('body').addClass('sampling-enabled');
-
+            this.open = true;
             data = { filter: data } ;
 
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
@@ -116,7 +116,6 @@ if (SegmentFilter.enabled())
                     segmentsArray: data.segment_ids
                 } ;
                 CatToolActions.setSegmentFilter(data);
-                // window.segment_filter_panel.setState( reactState );
 
                 UI.clearStorage('SegmentFilter');
 
@@ -165,8 +164,7 @@ if (SegmentFilter.enabled())
             CatToolActions.openSegmentFilter();
             if ( this.getStoredState().serverData ) {
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
-                UI.body.addClass('sampling-enabled');
-
+                this.open = true;
                 setTimeout( function() {
                     tryToFocusLastSegment();
                 }, 600 );
@@ -181,7 +179,7 @@ if (SegmentFilter.enabled())
 
         closeFilter : function() {
             CatToolActions.closeSubHeader();
-            UI.body.removeClass('sampling-enabled');
+            this.open = false;
             SegmentActions.removeAllMutedSegments();
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;

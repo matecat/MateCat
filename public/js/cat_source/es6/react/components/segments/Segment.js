@@ -371,6 +371,9 @@ class Segment extends React.Component {
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
                         {timeToEdit}
                     </div>
+                    {SegmentFilter && SegmentFilter.enabled() ? (
+                        <div className="edit-distance">Edit Distance: {this.props.segment.edit_distance}</div>
+                    ) : (null)}
                     <SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
