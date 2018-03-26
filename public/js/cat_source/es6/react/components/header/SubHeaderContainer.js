@@ -100,10 +100,12 @@ class SubHeaderContainer extends React.Component {
                 active={this.state.selectionBar}
                 isReview={config.isReview}
             />
-            <SegmentFilter
-                active={this.state.segmentFilter}
-                isReview={config.isReview}
-            />
+            { this.props.filtersEnabled ? (
+                <SegmentFilter
+                    active={this.state.segmentFilter}
+                    isReview={config.isReview}
+                />
+            ) : (null) }
             <QaComponent
                 active={this.state.qaComponent}
                 isReview={config.isReview}

@@ -1539,7 +1539,7 @@ LXQ.init  = function () {
         },
         updateWarningsUI: function () {
             LXQ.lexiqaData.segments.sort();
-            CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segment)
+            CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
 
         },
         removeSegmentWarning: function (idSegment) {
@@ -1547,7 +1547,7 @@ LXQ.init  = function () {
                 LXQ.lexiqaData.segments.splice(ind,1);
                 delete LXQ.lexiqaData.lexiqaWarnings[idSegment];
                 LXQ.lexiqaData.segments.sort();
-                CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segment)
+                CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
             }
         }
     });

@@ -15,7 +15,7 @@ body
 	position: relative;
 	text-align: center;
 	margin: 0;
-	padding: 75px 0 120px 0;
+	/*padding: 75px 0 120px 0;*/
 	font-family: calibri, Arial, Helvetica, sans-serif;
 	-webkit-transition: all 100ms ease-in;
 	-moz-transition: all 100ms ease-in;
