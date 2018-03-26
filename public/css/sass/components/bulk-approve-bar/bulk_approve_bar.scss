@@ -5,8 +5,10 @@
     left: 0;
     right: 0;
     background: #edf4fd;
-    padding: 8px;
+    padding: 8px 10px;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.43);
+    min-width: 1008px;
+
     .bulk-back-info, .bulk-activity-icons, .bulk-back, .bulk-info {
         display: inline-block;
         vertical-align: middle;
