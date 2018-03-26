@@ -583,9 +583,26 @@ section.readonly .txt input {
 section.segment-selected-inBulk .sid .txt input {
     display: unset;
 }
+section.editor .sid .txt input {
+    display: unset;
+}
+
 section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
     display: unset;
 }
+
+section.editor .txt.segment-add-inBulk {
+    display: unset;
+}
+
+section.segment-selected-inBulk .body .text {
+    background: #edf4fd;
+}
+section.segment-selected-inBulk .body .text:hover {
+    background: #edf4fd !important;
+}
+
+
 
 p.split-shortcut {
     background: #dde0e4;
@@ -1379,14 +1396,14 @@ body.cattool.editing section:not(.editor) .text:hover {
     color: #000;
 }
 
-body.cattool .editor .text:hover {
+/*body.cattool .editor .text:hover {
     background: none !important;
-}
+}*/
 
-body.cattool:not(.editing) article {
-/*    border: 1px solid #adadad;
-    border-top: none;*/
-}
+/*body.cattool:not(.editing) article {
+    border: 1px solid #adadad;
+    border-top: none;
+}*/
 
 section.editor .body > .text {
     overflow: visible;
@@ -1496,7 +1513,12 @@ section.loaded .submenu {
     position: relative;
     width: auto !important;
     background: #f2f4f7;
-    z-index: 9999999999999;
+    z-index: 1;
+    border-bottom: 1px solid #cccccc;
+}
+
+.submenu li.active {
+    border-bottom: 1px solid white;
 }
 
 body.noGlossary .tab-switcher-gl {
@@ -3862,7 +3884,7 @@ span.locked.tag-html-container-close {
     }
 
     .review .wrapper {
-        width: 98%;
+        width: 100%;
     }
 
     .text .target {
@@ -5061,6 +5083,8 @@ section.loaded .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;
+    border-top: 1px solid #cccccc;
+    top: -1px;
 }
 
 /*
