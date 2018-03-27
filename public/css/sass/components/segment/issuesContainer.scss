@@ -7,11 +7,18 @@ section  {
     &.loaded {
         .issues-container {
             display: block !important;
+            float: left;
+            width: 100%;
+            margin-bottom: 31px;
+            border-bottom: 1px solid #ffffff;
+            position: relative;
+            z-index: 2;
+            top: 0px;
+            border-top: 1px solid #ccc;
         }
     }
     .issues-container {
-        box-shadow: 0 0 4px #ccc;
-        background: #f2f4f7 !important;
+        background: #ffffff !important;
         .title-for-issues {
             color: black;
             text-align: left;
@@ -20,6 +27,8 @@ section  {
             padding-left: 28px;
             padding-top: 10px;
             font-weight: 700;
+            position: relative;
+            top: 8px;
         }
         .creation-issue-container {
             padding: 1em;
