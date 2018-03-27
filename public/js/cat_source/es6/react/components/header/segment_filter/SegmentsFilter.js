@@ -1,6 +1,6 @@
 var CatToolConstants = require('../../../constants/CatToolConstants');
 var CatToolStore = require('../../../stores/CatToolStore');
-class MainPanel extends React.Component {
+class SegmentsFilter extends React.Component {
     constructor(props) {
         super(props);
 
@@ -331,4 +331,4 @@ class MainPanel extends React.Component {
     }
 }
 
-export default MainPanel ;
+export default SegmentsFilter ;
