@@ -15,10 +15,14 @@ section  {
             z-index: 2;
             top: 0px;
             border-top: 1px solid #ccc;
+
         }
     }
     .issues-container {
         background: #ffffff !important;
+        &.add-issue-segment .field {
+            border: 1px solid red;
+        }
         .title-for-issues {
             color: black;
             text-align: left;

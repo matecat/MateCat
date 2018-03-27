@@ -191,11 +191,21 @@ class SegmentFooterTabIssues extends React.Component {
             issue = <SegmentFooterTabIssuesListItem key={i} issue={e} categories={this.state.categoriesIssue}/>;
             issues.push( issue );
         } );
+        let containerClasses = classnames({
+            "issues-container" : true,
+            "add-issue-segment" : this.state.isChangedTextarea
+        });
+        return <div className={containerClasses}>
+            {this.state.issues.length > 0 ? (
+                <div className="title-for-issues">
+                    Create Issues ({this.state.issues.length})
+                </div>
+            ) : (
+                <div className="title-for-issues">
+                    Create Issues
+                </div>
+            )}
 
-        return <div className="issues-container">
-            <div className="title-for-issues">
-                Create Issues
-            </div>
             <div className="ui grid border-box">
                 <div className="height wide column">
                     <div className="creation-issue-container ui form">
