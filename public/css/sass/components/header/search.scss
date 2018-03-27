@@ -3,16 +3,11 @@
     float: left;
     width: 100%;
     font-size: 12px;
-    border-bottom: 1px solid #666;
-    background: #efefef url(../../img/point.gif) 0 0 repeat-x;
-    -moz-box-shadow: 0 1px 3px #666;
-    -webkit-box-shadow: 0 1px 10px #666;
-    -moz-border-radius-bottom-right: 2px;
-    -webkit-border-bottom-right-radius: 2px;
-    -moz-border-radius-bottomleft: 2px;
-    -webkit-border-bottom-left-radius: 2px;
+    background: #ffffff;
     z-index: 2;
     padding: 0 !important;
+    margin-top: 3px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
     .block.buttons {
         margin-top: -6px !important;
     }
@@ -41,10 +36,10 @@
         text-transform: uppercase;
         &:disabled {
             cursor: not-allowed;
-            background: #f5f4f4;
-            color: #6f6f6f;
+            background: #ffffff;
+            color: #b5b5b5;
+            border: 1px solid #b5b5b5;
         }
-
     }
     form {
         width: 100%;
