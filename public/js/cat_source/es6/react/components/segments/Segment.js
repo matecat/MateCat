@@ -10,12 +10,15 @@ let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
 let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
+let IssuesContainer = require('./footer-tab-issues/SegmentFooterTabIssues').default;
 let Immutable = require('immutable');
 
 class Segment extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.reviewExtendedFooter = 'extended-footer';
 
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
@@ -379,6 +382,14 @@ class Segment extends React.Component {
                     {SegmentFilter && SegmentFilter.enabled() ? (
                         <div className="edit-distance">Edit Distance: {this.props.segment.edit_distance}</div>
                     ) : (null)}
+
+                    {this.props.reviewType === this.reviewExtendedFooter ? (
+                        <IssuesContainer
+                            segment={this.props.segment}
+                            sid={this.props.segment.sid}
+                        />
+                    ) : (null)}
+
                     <SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}

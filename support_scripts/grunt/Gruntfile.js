@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
         cssBase + 'sass/review_improved.scss',
-        cssBase + 'sass/segment_filter.scss',
+        cssBase + 'sass/segmentsFilter.scss',
         cssBase + 'sass/cattool.scss',
         cssBase + 'sass/speech2text.scss',
         cssBase + 'sass/notifications.scss',

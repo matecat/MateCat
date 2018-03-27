@@ -50,13 +50,13 @@ class SegmentFooterTabIssues extends React.Component {
     trackChanges( sid, editareaText ) {
         let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
         if ( this.state.segment.sid === sid && this.state.oldTranslation !== text) {
-            UI.setDisabledOfButtonApproved(this.props.id_segment, true);
+            UI.setDisabledOfButtonApproved(this.props.sid, true);
             this.setState( {
                 translation: text,
                 isChangedTextarea: true
             } );
         } else {
-            UI.setDisabledOfButtonApproved(this.props.id_segment);
+            UI.setDisabledOfButtonApproved(this.props.sid);
             this.setState( {
                 isChangedTextarea: false
             } );
@@ -76,7 +76,7 @@ class SegmentFooterTabIssues extends React.Component {
         } );
         let self = this;
         setTimeout(function (  ) {
-            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
+            // SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
         });
     }
 
@@ -120,16 +120,16 @@ class SegmentFooterTabIssues extends React.Component {
         data.push( issue );
 
         deferred.then( function () {
-            SegmentActions.removeClassToSegment( self.props.id_segment, "modified" );
+            SegmentActions.removeClassToSegment( self.props.sid, "modified" );
             UI.currentSegment.data( 'modified', false );
-            SegmentActions.submitIssue( self.props.id_segment, data, [] )
+            SegmentActions.submitIssue( self.props.sid, data, [] )
                 .done( response => {
                     self.setState( {
                         isChangedTextarea: false,
                         oldTranslation: oldTranslation,
                     } );
                     $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
-                    UI.setDisabledOfButtonApproved(self.props.id_segment);
+                    UI.setDisabledOfButtonApproved(self.props.sid);
                 } )
                 .fail( /* self.handleFail.bind(self)*/ );
         } );
@@ -192,9 +192,7 @@ class SegmentFooterTabIssues extends React.Component {
             issues.push( issue );
         } );
 
-        return <div key={"container_" + this.props.code}
-                    className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class}
-                    id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+        return <div className="issues-container">
             <div className="title-for-issues">
                 Create Issues
             </div>
