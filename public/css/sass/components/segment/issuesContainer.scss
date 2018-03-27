@@ -16,9 +16,11 @@ section  {
             top: 0px;
             border-top: 1px solid #ccc;
             background: #ffffff !important;
+            padding-bottom: 20px;
             &.add-issue-segment .select-category .field.select_type .selection,
             &.add-issue-segment .select-severity .field.select_severity .selection {
-                border: 1px solid red;
+                border: 1px solid #96C8DA;
+                box-shadow: inset 0 0 2px 2px #96C8DA;
             }
             .title-for-issues {
                 color: black;
