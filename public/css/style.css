@@ -1869,7 +1869,7 @@ body .footer.showMatches .sub-editor.open {
 .search-buttons,
 .search-options {
     float: left;
-    width: 90.7%;
+    width: 100%;
     margin-bottom: 5px;
 }
 
@@ -5198,6 +5198,8 @@ section:hover .segment-side-buttons {
     display: inline-block;
     margin-right: 0;
     text-align: right;
+    z-index: 0;
+    position: relative;
 }
 
 .buttons li {
