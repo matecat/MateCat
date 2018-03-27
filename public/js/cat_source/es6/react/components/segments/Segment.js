@@ -383,7 +383,7 @@ class Segment extends React.Component {
                         <div className="edit-distance">Edit Distance: {this.props.segment.edit_distance}</div>
                     ) : (null)}
 
-                    {this.props.reviewType === this.reviewExtendedFooter ? (
+                    {config.isReview && this.props.reviewType === this.reviewExtendedFooter ? (
                         <IssuesContainer
                             segment={this.props.segment}
                             sid={this.props.segment.sid}

@@ -10,6 +10,10 @@ section  {
         }
     }
     .issues-container {
+
+        &.add-issue-segment .field {
+            border: 1px solid red;
+        }
         box-shadow: 0 0 4px #ccc;
         background: #f2f4f7 !important;
         .title-for-issues {
