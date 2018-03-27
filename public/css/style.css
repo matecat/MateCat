@@ -1333,7 +1333,7 @@ body .main-container {
 .footer {
     float: left;
     width: 100%;
-    margin-top: -29px;
+    margin-top: 0;
     height: 0;
     transition: width 2s;
     -moz-transition: width 2s; /* Firefox 4 */
@@ -1480,7 +1480,8 @@ section.editor .body > .text {
     background: #fff;
     text-align: left;
     width: 100%;
-    margin-top: -2px;
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
 }
 
 .submenu {
@@ -5057,8 +5058,6 @@ body.hideMatches .submenu li.footerSwitcher {
     -webkit-transform: scaleY(-1);
     transform: scaleY(-1);
     -ms-filter: "FlipV";
-    border-bottom: 1px solid #666666;
-    border-top: 1px solid #3aa9dd;
 }
 
 body.hideMatches .submenu {

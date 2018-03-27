@@ -198,11 +198,11 @@ class SegmentFooterTabIssues extends React.Component {
         return <div className={containerClasses}>
             {this.state.issues.length > 0 ? (
                 <div className="title-for-issues">
-                    Create Issues ({this.state.issues.length})
+                    Add issue ({this.state.issues.length})
                 </div>
             ) : (
                 <div className="title-for-issues">
-                    Create Issues
+                    Add issue
                 </div>
             )}
 
