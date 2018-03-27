@@ -143,7 +143,7 @@ class SegmentFooterTabIssues extends React.Component {
     categoryOptionChange( e ) {
         let currentCategory = this.issueCategories().find( category => {return category.id == e.target.value} );
         this.setState( {
-            categorySelected: currentCategory
+            categorySelected: currentCategory ? currentCategory : null
         } );
     }
 
@@ -195,6 +195,14 @@ class SegmentFooterTabIssues extends React.Component {
             "issues-container" : true,
             "add-issue-segment" : this.state.isChangedTextarea
         });
+        let categoryClass = classnames({
+            "field" : true,
+            "select_type": _.isNull(this.state.categorySelected) || this.state.categorySelected === -1
+        });
+        let severityClass = classnames({
+            "field" : true,
+            "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
+        });
         return <div className={containerClasses}>
             {this.state.issues.length > 0 ? (
                 <div className="title-for-issues">
@@ -212,7 +220,7 @@ class SegmentFooterTabIssues extends React.Component {
                         <div className="ui grid">
                             <div className="height wide column">
                                 <div className="select-category">
-                                    <div className="field">
+                                    <div className={categoryClass}>
                                         <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueCategory = input;}} onChange={( e ) => this.categoryOptionChange( e )}>
                                             <option value="-1">Select issue</option>
                                             {categoryOptions}
@@ -222,7 +230,7 @@ class SegmentFooterTabIssues extends React.Component {
                             </div>
                             <div className="height wide column">
                                 <div className="select-severity">
-                                    <div className="field" ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                                    <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
                                         {severitySelect}
                                     </div>
                                 </div>
