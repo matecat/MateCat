@@ -1480,8 +1480,6 @@ section.editor .body > .text {
     background: #fff;
     text-align: left;
     width: 100%;
-    margin-top: 20px;
-    border-top: 1px solid #ccc;
 }
 
 .submenu {
@@ -1536,6 +1534,7 @@ body.noGlossary .tab-switcher-gl {
     float: left;
     text-decoration: none;
     border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc;
 }
 
 .submenu .notification {
