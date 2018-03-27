@@ -128,6 +128,7 @@ class SegmentFooterTabIssues extends React.Component {
                         isChangedTextarea: false,
                         oldTranslation: oldTranslation,
                     } );
+                    $( self.selectIssueCategory ).dropdown( 'set selected', -1 );
                     $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
                     UI.setDisabledOfButtonApproved(self.props.sid);
                 } )
