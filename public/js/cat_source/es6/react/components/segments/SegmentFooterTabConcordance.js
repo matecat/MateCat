@@ -19,22 +19,36 @@ class SegmentFooterTabConcordance extends React.Component {
         }
     }
 
-    componentDidMount() {
-        console.log( "Mount SegmentFooterConcordance" + this.props.id_segment );
-
-    }
-
     componentWillUnmount() {
-        console.log( "Unmount SegmentFooterConcordance" + this.props.id_segment );
-
+        SegmentStore.removeListener( SegmentConstants.FIND_CONCORDANCE, this.findConcordance );
     }
 
-    componentWillMount() {
-
+    componentDidMount() {
+        SegmentStore.addListener( SegmentConstants.FIND_CONCORDANCE, this.findConcordance.bind( this ) );
     }
 
     allowHTML( string ) {
         return {__html: string};
+    }
+
+    findConcordance(sid, data) {
+        var self =  this;
+        if (this.props.id_segment == sid) {
+            if ( data.inTarget === 1) {
+                this.setState( {
+                    source: '',
+                    target: data.text,
+                    results: []
+                } );
+            } else {
+                this.setState( {
+                    source: data.text,
+                    target: '',
+                    results: []
+                } );
+            }
+            this.searchSubmit();
+        }
     }
 
     sourceChange( event ) {
@@ -151,7 +165,7 @@ class SegmentFooterTabConcordance extends React.Component {
 
 
     searchSubmit( event ) {
-        event.preventDefault();
+        (event) ? event.preventDefault() : '';
         if ( this.state.source.length > 0 ) {
             this.getConcordance( this.state.source, 0 );
 

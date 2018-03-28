@@ -299,6 +299,14 @@ var SegmentActions = {
         });
     },
 
+    findConcordance: function ( sid, data ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.FIND_CONCORDANCE,
+            sid: sid,
+            data: data
+        });
+    },
+
     /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({

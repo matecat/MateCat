@@ -49,5 +49,6 @@ module.exports = keyMirror({
     SET_BULK_SELECTION_INTERVAL : null,
     SET_BULK_SELECTION_SEGMENTS: null,
     SET_MUTED_SEGMENTS:null,
-    REMOVE_MUTED_SEGMENTS: null
+    REMOVE_MUTED_SEGMENTS: null,
+    FIND_CONCORDANCE: null
 });
