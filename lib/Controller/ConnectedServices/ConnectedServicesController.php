@@ -77,9 +77,6 @@ class ConnectedServicesController extends AbstractStatefulKleinController  {
     private function __validateOwnership() {
 
         // check for the user to be logged
-        $userDao = new \Users_UserDao() ;
-        $this->user = $userDao->getByUid( $_SESSION['uid'] );
-
         if ( !$this->user ) {
             throw new \Exceptions_RecordNotFound('user not found') ;
         }

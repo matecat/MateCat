@@ -66,7 +66,7 @@ class getProjectsController extends ajaxController {
 
         //SESSION ENABLED
         parent::__construct();
-        parent::checkLogin();
+        parent::readLoginInfo();
 
         $filterArgs = [
                 'page'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -126,7 +126,7 @@ class getProjectsController extends ajaxController {
             return;
         }
 
-        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
 
         try {
             $team = $this->filterTeam();
@@ -136,13 +136,13 @@ class getProjectsController extends ajaxController {
         }
 
         if( $team->type == Constants_Teams::PERSONAL ){
-            $assignee = $this->logged_user;
+            $assignee = $this->user;
             $team = null;
         } else {
             $assignee = $this->filterAssignee( $team );
         }
 
-        $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
+        $projects = ManageUtils::queryProjects( $this->user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
@@ -150,7 +150,7 @@ class getProjectsController extends ajaxController {
             $this->no_assignee
         );
 
-        $projnum = getProjectsNumber( $this->logged_user,
+        $projnum = getProjectsNumber( $this->user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
             $this->search_only_completed,
@@ -215,7 +215,7 @@ class getProjectsController extends ajaxController {
 
     private function filterTeam() {
         $dao = new MembershipDao() ;
-        $team = $dao->findTeamByIdAndUser($this->id_team, $this->logged_user ) ;
+        $team = $dao->findTeamByIdAndUser($this->id_team, $this->user ) ;
         if ( !$team ) {
             throw  new NotFoundError( 'Team not found in user memberships', 404 ) ;
         }

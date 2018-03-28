@@ -60,19 +60,6 @@ abstract class ajaxController extends controller {
         echo $toJson;
     }
 
-    public function checkLogin( $close = true ) {
-
-        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
-        parent::sessionStart();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
-
-        if ( $close ) {
-            parent::disableSessions();
-        }
-        
-    }
-
     public static function isRevision(){
         $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
         $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;

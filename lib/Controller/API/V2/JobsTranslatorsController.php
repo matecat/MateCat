@@ -45,7 +45,7 @@ class JobsTranslatorsController extends KleinController {
 
         $TranslatorsModel = new TranslatorsModel( $this->jStruct );
         $TranslatorsModel
-                ->setUserInvite( $this->getUser() )
+                ->setUserInvite( $this->user )
                 ->setDeliveryDate( $this->params[ 'delivery_date' ] )
                 ->setJobOwnerTimezone( $this->params[ 'timezone' ] )
                 ->setEmail( $this->params[ 'email' ] );

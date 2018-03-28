@@ -18,13 +18,11 @@ abstract class controller implements IController {
 
     /**
      * @var Users_UserStruct
-     * @deprecated Use getUser method instead
      */
-    protected $logged_user;
+    protected $user;
 
     protected $uid;
     protected $userIsLogged = false;
-    protected $userMail;
 
     /**
      * @var FeatureSet
@@ -53,7 +51,7 @@ abstract class controller implements IController {
      * @return Users_UserStruct
      */
     public function getUser() {
-        return $this->logged_user;
+        return $this->user;
     }
 
     /**
@@ -74,11 +72,8 @@ abstract class controller implements IController {
             }
 
             $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
+            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', function ( $c ) { return strtoupper( $c[ 1 ] ); }, $_REQUEST[ 'action' ] );
 
-            //PHP 5.2 compatibility, don't use a lambda function
-            $func                 = create_function( '$c', 'return strtoupper($c[1]);' );
-
-            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', $func, $_REQUEST[ 'action' ] );
             $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
 
             //set the log to the API Log
@@ -147,21 +142,25 @@ abstract class controller implements IController {
 
     public function setUserCredentials() {
 
-        $this->logged_user        = new Users_UserStruct();
-        $this->logged_user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->logged_user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->user        = new Users_UserStruct();
+        $this->user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
 
         try {
-            $userDao           = new Users_UserDao( Database::obtain() );
-            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[ 0 ]; // one hour cache
-            $this->logged_user = ( !empty( $loggedUser ) ? $loggedUser : $this->logged_user );
+
+            $userDao    = new Users_UserDao( Database::obtain() );
+            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
+            $this->userIsLogged = (
+                    !empty( $loggedUser->uid ) &&
+                    !empty( $loggedUser->email ) &&
+                    !empty( $loggedUser->first_name ) &&
+                    !empty( $loggedUser->last_name )
+            );
+            $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
+
         } catch ( Exception $e ) {
             Log::doLog( 'User not logged.' );
         }
-
-        $this->userIsLogged = ( !empty( $this->logged_user->email ) );
-        $this->uid          = $this->logged_user->getUid();
-        $this->userMail     = $this->logged_user->getEmail();
 
     }
 
@@ -177,6 +176,27 @@ abstract class controller implements IController {
                 $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
             }
         }
+    }
+
+    public function readLoginInfo( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        self::sessionStart();
+        $this->_setUserFromAuthCookie();
+        $this->setUserCredentials();
+
+        if ( $close ) {
+            self::disableSessions();
+        }
+
+    }
+
+    /**
+     * isLoggedIn
+     *
+     * @return bool
+     */
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
 }

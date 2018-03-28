@@ -63,10 +63,6 @@ EOF;
     }
 
     protected function afterConstruct() {
-        \Bootstrap::sessionStart();
-
-        $dao = new \Users_UserDao() ;
-        $this->user = $dao->getByUid( $_SESSION['uid'] );
 
         if ( !$this->user ) {
             throw  new \Exception('Logged user not found.') ;

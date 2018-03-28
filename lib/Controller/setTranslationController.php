@@ -264,7 +264,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->checkLogin();
+        $this->readLoginInfo();
         $this->initVersionHandler();
 
         //check tag mismatch
@@ -399,7 +399,7 @@ class setTranslationController extends ajaxController {
         $this->featureSet->run('postAddSegmentTranslation', array(
             'chunk'       =>  $this->chunk,
             'is_review'   =>  $this->isRevision(),
-            'logged_user' =>  $this->logged_user
+            'logged_user' =>  $this->user
         ));
 
         //propagate translations
@@ -572,7 +572,7 @@ class setTranslationController extends ajaxController {
                     'propagated_ids'   => $propagationTotal['propagated_ids'],
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
-                    'user'             => $this->getUser(),
+                    'user'             => $this->user,
                     'source_page_code' => $this->_getSourcePageCode()
             ] );
 
@@ -727,7 +727,7 @@ class setTranslationController extends ajaxController {
             $this->VersionsHandler = new \Features\TranslationVersions\SegmentTranslationVersionHandler(
                     $this->id_job,
                     $this->id_segment,
-                    $this->uid,
+                    $this->user->uid,
                     $this->jobData['id_project'],
                     $this->isRevision()
             );
@@ -841,7 +841,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->segment              = $this->segment[ 'segment' ];
         $contributionStruct->translation          = $_Translation[ 'translation' ];
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = $this->uid;
+        $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];

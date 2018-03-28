@@ -19,17 +19,15 @@ use Users_UserDao;
 class UserMetadataController extends AbstractStatefulKleinController {
 
     public function update() {
-        $dao  = new Users_UserDao();
-        $user = $dao->getByUid( $_SESSION[ 'uid' ] );
 
-        if ( !$user ) {
+        if ( !$this->user ) {
             throw new NotFoundError( 'user not found' );
         }
 
-        $model = new MetadataModel( $user, $this->request->param( 'metadata' ) );
+        $model = new MetadataModel( $this->user, $this->request->param( 'metadata' ) );
 
         $model->save();
-        $data = $user->getMetadataAsKeyValue();
+        $data = $this->user->getMetadataAsKeyValue();
 
         if ( empty ( $data ) ) {
             $data = null;

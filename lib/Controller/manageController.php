@@ -17,7 +17,7 @@ class manageController extends viewController {
 
 		$this->lang_handler = Langs_Languages::getInstance();
 
-        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
 	}
 
 	public function doAction() {
@@ -29,14 +29,14 @@ class manageController extends viewController {
 		$activity             = new ActivityLogStruct();
 		$activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;
 		$activity->ip         = Utils::getRealIpAddr();
-		$activity->uid        = $this->logged_user->uid;
+		$activity->uid        = $this->user->uid;
 		$activity->event_date = date( 'Y-m-d H:i:s' );
 		Activity::save( $activity );
 		
 	}
 
 	public function setTemplateVars() {
-		$this->template->logged_user = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
+		$this->template->logged_user = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
 		$this->template->build_number = INIT::$BUILD_NUMBER;
         $this->template->basepath = INIT::$BASEURL;
         $this->template->hostpath = INIT::$HTTPHOST;
