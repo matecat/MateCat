@@ -231,7 +231,7 @@ class SegmentFooterTabIssues extends React.Component {
             "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
         });
         return <div className={containerClasses}>
-            {this.state.issues.length > 0 ? (
+            {/*{this.state.issues.length > 0 ? (
                 <div className="title-for-issues">
                     Add issue ({this.state.issues.length})
                 </div>
@@ -239,37 +239,63 @@ class SegmentFooterTabIssues extends React.Component {
                 <div className="title-for-issues">
                     Add issue
                 </div>
-            )}
+            )}*/}
 
-            <div className="ui grid border-box">
-                <div className="height wide column">
-                    <div className="creation-issue-container ui form">
-                        <div className="ui grid">
-                            <div className="height wide column">
-                                <div className="select-category">
-                                    <div className={categoryClass}>
-                                        {this.getCategoryDropdown()}
-                                    </div>
+            <div className="border-box-issue">
+
+                <div className="creation-issue-container ui form">
+                    <div className="ui grid">
+                        <div className="height wide column">
+                            <div className="select-category">
+                                <div className={categoryClass}>
+                                    {this.getCategoryDropdown()}
                                 </div>
                             </div>
-                            <div className="height wide column">
-                                <div className="select-severity">
-                                    <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
-                                        {severitySelect}
-                                    </div>
+                        </div>
+                        <div className="height wide column">
+                            <div className="select-severity">
+                                <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                                    {severitySelect}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="height wide column">
+
+                <div className="border-box-issue">
                     <div className="issues-list">
                         {issues}
                     </div>
+            <div className="border-box-issue">
+                <div className="creation-issue-container ui form">
+                    <div className="ui grid">
+                        <div className="height wide column">
+                            <div className="select-category">
+                                <div className={categoryClass}>
+                                    <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueCategory = input;}} onChange={( e ) => this.categoryOptionChange( e )}>
+                                        <option value="-1">Select issue</option>
+                                        {categoryOptions}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="height wide column">
+                            <div className="select-severity">
+                                <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                                    {severitySelect}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
+            <div className="border-box-issue">
+                <div className="issues-list">
+                    {issues}
+                </div>
+            </div>
         </div>
+
     }
 }
 
