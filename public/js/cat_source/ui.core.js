@@ -1163,20 +1163,12 @@ UI = {
             numSeg += this.involved_id.length;
         });
         if(numAlt) {
-            var tab = UI.currentSegment.find('.tab-switcher-al');
-            tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
-            tab.show();
-            // tab.click();
-            // this.currentSegment.find('.footer').removeClass('showMatches');
-            $('.editor .submenu .active').removeClass('active');
-            tab.addClass('active');
-            $('.editor .sub-editor').removeClass('open');
-            $('.editor .sub-editor.alternatives').addClass('open');
-            this.body.removeClass('hideMatches');
-
+            SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'alternatives');
+            SegmentActions.setTabIndex(UI.getSegmentId(UI.currentSegment), 'alternatives', numAlt);
         }
     },
+    // TODO: refactoring React
     renderAlternatives: function(d) {
         var segment = UI.currentSegment;
         var segment_id = UI.currentSegmentId;
@@ -2245,26 +2237,6 @@ UI = {
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
         }
-    },
-    switchFooter: function() {
-        this.currentSegment.find('.footer').removeClass('showMatches');
-        this.body.toggleClass('hideMatches');
-        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-        Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
-    },
-    setHideMatches: function () {
-        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-
-        if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
-            if(Cookies.get(cookieName + '-' + config.id_job) == 'true') {
-                UI.body.addClass('hideMatches')
-            } else {
-                UI.body.removeClass('hideMatches')
-            }
-        } else {
-            Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
-        }
-
     },
     setTagLockCustomizeCookie: function (first) {
         if(first && !config.tagLockCustomizable) return;

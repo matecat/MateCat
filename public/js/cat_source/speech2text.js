@@ -149,7 +149,6 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.recognizing) {
                     Speech2Text.isStopingRecognition = true;
-                    Speech2Text.hideMatches();
                 }
             },
             onRecognitionStart: function () {
@@ -217,19 +216,7 @@ Speech2Text.init  = function () {
                 Speech2Text.isToKeepRecognizing = false;
             },
             showMatches: function () {
-                if ($('body').hasClass('hideMatches')) {
-                    $('body').removeClass('hideMatches');
-                    Speech2Text.wereMatchesPreviouslyOpened = false;
-                } else {
-                    Speech2Text.wereMatchesPreviouslyOpened = true;
-                }
-            },
-            hideMatches: function () {
-                if (!Speech2Text.wereMatchesPreviouslyOpened) {
-                    if (!$('body').hasClass('hideMatches')) {
-                        $('body').addClass('hideMatches');
-                    }
-                }
+                SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment, 'matches'));
             },
             animateSpeechActive: function () {
                 Speech2Text.microphone.removeClass('micSpeechReceiving');

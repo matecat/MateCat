@@ -451,9 +451,7 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-        }).on('click', '.footerSwitcher', function(e) {
-            UI.switchFooter();
-		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
+        }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
             if($(this).hasClass('selected')) {
@@ -499,22 +497,7 @@ $.extend(UI, {
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
-        }).on('click', 'section .footer .tab-switcher', function(e) {
-            e.preventDefault();
-			if(UI.body.hasClass('hideMatches')) UI.switchFooter();
-
-        }).on('showMatchesLocal', '.editor', function(e) {
-            UI.currentSegment.find('.footer').addClass('showMatches');
-        }).on('click', '.tab-switcher-tm', function(e) {
-			e.preventDefault();
-			$('.editor .submenu .active').removeClass('active');
-			$(this).addClass('active');
-			$('.editor .sub-editor').removeClass('open');
-			$('.editor .sub-editor.matches').addClass('open');
-		}).on('click', '.alternatives a', function(e) {
-			e.preventDefault();
-			$('.editor .tab-switcher-al').click();
-		}).on('keydown', function(e) {
+        }).on('keydown', function(e) {
             if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();

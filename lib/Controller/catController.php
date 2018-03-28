@@ -417,8 +417,6 @@ class catController extends viewController {
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
-
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
         //FIXME: temporarily disabled
         $this->template->editLogClass         = ""; //$this->getEditLogClass();

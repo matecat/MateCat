@@ -3,7 +3,7 @@
  */
 $.extend(UI, {
 	openConcordance: function() {
-		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'cc');
+		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'concordances');
 		$('.editor .cc-search .input').text('');
 		$('.editor .concordances .results').empty();
 		var searchField = (this.currentSearchInTarget) ? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
