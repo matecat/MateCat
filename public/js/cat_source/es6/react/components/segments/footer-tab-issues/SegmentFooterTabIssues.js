@@ -215,7 +215,7 @@ class SegmentFooterTabIssues extends React.Component {
                 </div>
             )}*/}
 
-            <div className="border-box">
+            <div className="border-box-issue">
                 <div className="creation-issue-container ui form">
                     <div className="ui grid">
                         <div className="height wide column">
@@ -238,7 +238,7 @@ class SegmentFooterTabIssues extends React.Component {
                     </div>
                 </div>
             </div>
-            <div className="border-box">
+            <div className="border-box-issue">
                 <div className="issues-list">
                     {issues}
                 </div>
