@@ -5,7 +5,7 @@
 var React = require('react');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
-var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
+// var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
 var SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
 var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
