@@ -65,7 +65,7 @@ class createProjectController extends ajaxController {
 
         ];
 
-        $this->checkLogin( false );
+        $this->readLoginInfo( false );
         $this->setupSystemWideFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
@@ -341,9 +341,9 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->uid;
-            $projectStructure[ 'id_customer' ]  = $this->userMail;
-            $projectStructure[ 'owner' ]        = $this->userMail;
+            $projectStructure[ 'uid' ]          = $this->user->uid;
+            $projectStructure[ 'id_customer' ]  = $this->user->email;
+            $projectStructure[ 'owner' ]        = $this->user->email;
             $projectManager->setTeam( $this->team ); // set the team object to avoid useless query
         }
 
@@ -371,7 +371,7 @@ class createProjectController extends ajaxController {
      */
     private function setupSystemWideFeatures() {
         if ( $this->userIsLogged ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email );
+            $this->featureSet->loadFromUserEmail( $this->user->email );
         }
     }
 
@@ -477,11 +477,11 @@ class createProjectController extends ajaxController {
      */
     private function __setTeam( $id_team = null ) {
         if ( is_null( $id_team ) ) {
-            $this->team = $this->logged_user->getPersonalTeam();
+            $this->team = $this->user->getPersonalTeam();
         } else {
             // check for the team to be allowed
             $dao  = new \Teams\MembershipDao();
-            $team = $dao->findTeamByIdAndUser( $id_team, $this->logged_user );
+            $team = $dao->findTeamByIdAndUser( $id_team, $this->user );
 
             if ( !$team ) {
                 throw new Exception( 'Team and user memberships do not match' );
@@ -503,7 +503,7 @@ class createProjectController extends ajaxController {
 
             $engineQuery      = new EnginesModel_EngineStruct();
             $engineQuery->id  = $this->mt_engine;
-            $engineQuery->uid = $this->uid;
+            $engineQuery->uid = $this->user->uid;
             $enginesDao       = new EnginesModel_EngineDAO();
             $engine           = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
 

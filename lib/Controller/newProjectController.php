@@ -62,18 +62,18 @@ class newProjectController extends viewController {
         $engineQuery       = new EnginesModel_EngineStruct();
         $engineQuery->type = 'MT';
 
-        $engineQuery->uid = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
+        $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
 
         $engineQuery->active = 1;
         $this->mt_engines    = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email );
+            $this->featureSet->loadFromUserEmail( $this->user->email );
 
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $dh       = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->logged_user->uid ] );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
 
                 $keyList = $_keyList->read( $dh );
                 foreach ( $keyList as $memKey ) {
@@ -277,9 +277,9 @@ class newProjectController extends viewController {
         $this->template->targetLangHistory          = $this->targetLangArray;
         $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
         $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->extended_user              = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->logged_user                = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->userMail                   = $this->logged_user->getEmail();
+        $this->template->extended_user              = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user                = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->userMail                   = $this->user->email;
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
@@ -313,7 +313,7 @@ class newProjectController extends viewController {
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
         if ( $this->isLoggedIn() ) {
-            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->logged_user );
+            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
         }
 
     }

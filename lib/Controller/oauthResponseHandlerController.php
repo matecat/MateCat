@@ -10,11 +10,6 @@ class oauthResponseHandlerController extends viewController{
     private $error ;
 
     /**
-     * @var Users_UserStruct
-     */
-    private $user ;
-
-    /**
      * @var Google_Service_Oauth2_Userinfoplus
      */
     private $remoteUser ;

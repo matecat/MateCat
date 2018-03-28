@@ -120,7 +120,7 @@ class analyzeOldController extends viewController {
         $activity->id_project = $this->pid;
         $activity->action     = ActivityLogStruct::ACCESS_ANALYZE_PAGE;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->logged_user->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
         
@@ -167,8 +167,8 @@ class analyzeOldController extends viewController {
         $this->template->num_segments               = $this->model->num_segments;
         $this->template->num_segments_analyzed      = $this->model->num_segments_analyzed;
 
-        $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+        $this->template->logged_user                = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->extended_user              = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = $this->featureSet->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
 

@@ -1,11 +1,12 @@
 <?php
 namespace API\V2  ;
+use API\App\AbstractStatefulKleinController;
 use API\V2\Json\TranslationIssueComment as JsonFormatter;
 use LQA\EntryCommentDao ;
 use LQA\EntryDao ;
 use Database ;
 
-class TranslationIssueComment extends KleinController {
+class TranslationIssueComment extends AbstractStatefulKleinController {
     /**
      * @var Validators\SegmentTranslationIssue
      */
@@ -24,14 +25,12 @@ class TranslationIssueComment extends KleinController {
     }
 
     public function create() {
-        \Bootstrap::sessionStart();
-        $uid = $_SESSION['uid'];
 
         $data = array(
             'comment' => $this->request->message,
             'id_qa_entry' => $this->validator->issue->id,
             'source_page' => $this->request->source_page,
-            'uid' => $uid
+            'uid' => $this->user->uid
         );
 
         $dao = new EntryCommentDao();

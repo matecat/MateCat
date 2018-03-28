@@ -172,28 +172,19 @@ class Utils {
     }
 
     public static function randomString( $maxlength = 15 ) {
-        //allowed alphabet
-        $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        //init counter lenght
-        $i = 0;
-        //init string
-        $salt = '';
+        $_pwd = base64_encode( md5( uniqid( '', true ) ) ); //we want more characters not only [0-9a-f]
+        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -8, 6 ); //exclude last 2 char2 because they can be == sign
 
-        //add random characters to $password until $length is reached
-        while ( $i < $maxlength ) {
-            //pick a random character from the possible ones
-            $char = substr( $possible, mt_rand( 0, $maxlength - 1 ), 1 );
-            //have we already used this character in $salt?
-            if ( !strstr( $salt, $char ) ) {
-                //no, so it's OK to add it onto the end of whatever we've already got...
-                $salt .= $char;
-                //... and increase the counter by one
-                $i++;
+        if ( $maxlength > 15 ) {
+            while ( strlen( $pwd ) < $maxlength ) {
+                $pwd .= self::randomString();
             }
+            $pwd = substr( $pwd, 0, $maxlength );
         }
 
-        return $salt;
+        return $pwd;
+
     }
 
 

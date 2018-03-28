@@ -26,7 +26,7 @@ class EnginesController extends KleinController {
 
         $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
         $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->uid = $this->getUser()->uid;
+        $engineStruct->uid = $this->user->uid;
         $engineStruct->active = true;
 
         $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
