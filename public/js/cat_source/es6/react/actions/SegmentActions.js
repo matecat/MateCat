@@ -238,6 +238,14 @@ var SegmentActions = {
             data: tab
         });
     },
+    closeTabs: function ( sid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_TABS,
+            sid: sid,
+            data: null
+        });
+    },
+
 
     renderPreview: function ( sid, data ) {
         AppDispatcher.dispatch({

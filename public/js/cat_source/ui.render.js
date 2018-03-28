@@ -87,8 +87,7 @@ $.extend(UI, {
             $('#header-bars-wrapper')[0]
         );
 
-
-		return UI.getSegments(options);
+        return UI.getSegments(options);
 
 	},
 });

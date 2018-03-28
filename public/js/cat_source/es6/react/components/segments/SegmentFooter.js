@@ -78,8 +78,11 @@ class SegmentFooter extends React.Component {
                 elements : []
             }
         };
+
+        let hideMatches = this.getHideMatchesCookie();
         this.state = {
             tabs: {},
+            hideMatches : hideMatches
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);
@@ -97,7 +100,7 @@ class SegmentFooter extends React.Component {
                 this.tabs[key].open = false;
             }
         }
-        this.tabs[tabName].open = open;
+        this.tabs[tabName].open = this.state.hideMatches ? false : open;
         this.tabs[tabName].enabled = true;
     }
 
@@ -170,42 +173,61 @@ class SegmentFooter extends React.Component {
                 return ''
         }
     }
+    closeAllTabs() {
+        let tabs = jQuery.extend(true, {}, this.state.tabs);
+        for ( var item in tabs ) {
+            tabs[item].open = false
+        }
+        this.setState({
+            tabs: tabs
+        });
+    }
 
     openTab(sid, tabCode) {
         // Todo: refactoring, no jquery
         if (this.props.sid === sid ) {
-            let e = {
-                target: $(this.footerRef).find('.tab-switcher-' + tabCode),
-                preventDefault: function () {}
-            };
-            this.changeTab(e);
+            this.changeTab(tabCode, true);
         }
     }
 
-    changeTab(e) {
+    setHideMatchesCookie(hideMatches) {
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        Cookies.set(cookieName + '-' + config.id_job, hideMatches, { expires: 30 });
+    }
 
-        // Todo: refactoring, no jquery
-        e.preventDefault();
-        let section = $(e.target).closest('section');
-        let tab_class = $(e.target).closest('li').data('tab-class');
-        let code = $(e.target).closest('li').data('code');
-        let li = $(e.target).closest('li');
-
-        $('.sub-editor', section).removeClass('open');
-        $('.' + tab_class, section).addClass('open');
-
-        $('.tab-switcher', section).removeClass('active');
-        li.addClass('active');
-
-        var item = _
-            .chain(this.tabs)
-            .filter(function(item) { return item.code == code })
-            .first()
-            .value();
-
-        if ( typeof item.on_activation  == 'function' ) {
-            item.on_activation( $(this.footerRef) ) ;
+    getHideMatchesCookie() {
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        if( !_.isUndefined(Cookies.get(cookieName + '-' + config.id_job)) && Cookies.get(cookieName + '-' + config.id_job) == "true") {
+            return true;
         }
+        return false;
+    }
+
+    changeTab(tabName, forceOpen) {
+        if (event) {
+            event.preventDefault();
+        }
+        forceOpen = forceOpen ? forceOpen : false;
+        let tabs = jQuery.extend(true, {}, this.state.tabs);
+        let tab = jQuery.extend(true, {}, tabs[tabName]);
+        //Close all tabs
+        for ( var item in tabs ) {
+            tabs[item].open = false
+        }
+        if (tab.open && !forceOpen) {
+            tab.open = false;
+            this.setHideMatchesCookie(true);
+        } else {
+            tab.open = true;
+            tab.visible = true;
+            this.setHideMatchesCookie(false);
+        }
+        tabs[tabName] = tab;
+
+        this.setState({
+            tabs: tabs,
+            hideMatches: !tab.open
+        });
     }
     componentDidMount() {
         console.log("Mount SegmentFooter" + this.props.sid);
@@ -213,6 +235,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
+        SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
     }
 
     componentWillUnmount() {
@@ -221,6 +244,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
     }
 
     componentWillMount() {
@@ -230,18 +254,6 @@ class SegmentFooter extends React.Component {
     allowHTML(string) {
         return { __html: string };
     }
-
-    // addGlossaryIndex(sid, index) {
-    //     if (this.props.sid == sid) {
-    //         let tabs = $.extend(true, {}, this.state.tabs);
-    //         if (tabs.glossary) {
-    //             tabs.glossary.index = index;
-    //             this.setState({
-    //                 tabs: tabs
-    //             })
-    //         }
-    //     }
-    // }
 
     addTabIndex(sid, tab, index) {
         if (this.props.sid == sid) {
@@ -262,8 +274,8 @@ class SegmentFooter extends React.Component {
         for ( var key in this.state.tabs ) {
             var tab = this.state.tabs[key];
             if ( tab.enabled) {
-                var hidden_class = tab.visible ? '' : 'hide';
-                var active_class = tab.open ? 'active' : '';
+                var hidden_class = (tab.visible) ? '' : 'hide';
+                var active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
                 var label = <li
                     key={ tab.code }
                     ref={(elem)=> this[tab.code] = elem}
@@ -271,8 +283,8 @@ class SegmentFooter extends React.Component {
                     id={"segment-" + this.props.sid + tab.code}
                     data-tab-class={ tab.tab_class }
                     data-code={ tab.code }
-                    onClick={ self.changeTab }>
-                    <a tabIndex="-1" href="#">{ tab.label }
+                    onClick={ self.changeTab.bind(this, key, false) }>
+                    <a tabIndex="-1" >{ tab.label }
                         <span className="number">{(tab.index) ? ' (' + tab.index + ')' : ''}</span>
                     </a>
                 </li>;
@@ -286,7 +298,6 @@ class SegmentFooter extends React.Component {
             <div className="footer toggle"
                  ref={(ref) => this.footerRef = ref}>
                 <ul className="submenu">
-                    <li className="footerSwitcher"/>
                     {labels}
                 </ul>
                 {containers}

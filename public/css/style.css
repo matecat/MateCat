@@ -1603,16 +1603,6 @@ body.noGlossary .tab-switcher-gl {
     display: block;
 }
 
-/*
-.sub-editor.matches
-{
-	display: block;
-}
-*/
-body.hideMatches .sub-editor {
-    display: none !important;
-}
-
 body .footer.showMatches .sub-editor.open {
     display: block !important;
 }
@@ -5033,39 +5023,6 @@ body.cattool .mgmt-table-mt .activemt {
 
 .bg_orange {
     background: #ee6633;
-}
-
-.submenu li.footerSwitcher {
-    float: left;
-    width: 24px !important;
-    height: 29px;
-    border-left: 0 !important;
-    background: #3aa9dd url(../../img/matches-down.png) 5px 12px no-repeat !important;
-    cursor: pointer;
-    border-bottom: 0;
-    padding-top: 1px;
-}
-
-.submenu li.footerSwitcher:hover {
-    opacity: 0.85;
-    /*border: 1px solid #000;*/
-}
-
-body.hideMatches .submenu li.footerSwitcher {
-    -moz-transform: scaleY(-1);
-    -o-transform: scaleY(-1);
-    -webkit-transform: scaleY(-1);
-    transform: scaleY(-1);
-    -ms-filter: "FlipV";
-}
-
-body.hideMatches .submenu {
-    margin-bottom: 0px;
-    border-bottom: none;
-}
-
-body.hideMatches .tab-switcher {
-    border-bottom: 1px solid rgba(158, 158, 158, 0.46);
 }
 
 /**
