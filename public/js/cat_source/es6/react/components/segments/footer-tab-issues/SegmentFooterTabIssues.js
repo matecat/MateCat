@@ -138,11 +138,11 @@ class SegmentFooterTabIssues extends React.Component {
     }
 
     issueCategories() {
-        return JSON.parse( config.lqa_nested_categories ).categories;
+        return JSON.parse( config.lqa_flat_categories ).categories;
     }
 
-    categoryOptionChange( e ) {
-        let currentCategory = this.issueCategories().find( category => {return category.id == e.target.value} );
+    categoryOptionChange( item ) {
+        let currentCategory = item;
         this.setState( {
             categorySelected: currentCategory ? currentCategory : null
         } );
@@ -161,20 +161,46 @@ class SegmentFooterTabIssues extends React.Component {
         } )
     }
 
+    getCategoryDropdown() {
+        let categoryOptions = [],
+            categoryOption,
+            self = this;
+        this.state.categoriesIssue.forEach( function ( category, i ) {
+            if (category.subcategories && category.subcategories.length > 0) {
+                let subCategories = category.subcategories.map(function ( item ) {
+                    return <div key={item.id} className="item" data-value={item.id} onClick={self.categoryOptionChange.bind(self, item)}>{item.label}</div>;
+                });
+                categoryOption = <div className="item" data-value={category.id} key={i}>
+                    <span className="text">{category.label}</span>
+                    <i className="dropdown icon"/>
+                    <div className="menu">
+                        {subCategories}
+                    </div>
+                </div>;
+            } else {
+                categoryOption = <div className="item" data-value={category.id} key={i} onClick={self.categoryOptionChange.bind(self, category)}>{category.label}</div>;
+            }
+            categoryOptions.push( categoryOption );
+        } );
+        return <div className="ui floating labeled icon dropdown button" ref={( input ) => { this.selectIssueCategory = input;}}>
+            <span className="text">Select issue</span>
+            <i className="dropdown icon"/>
+            <div className="right menu">
+                {categoryOptions}
+            </div>
+        </div>
+    }
+
     render() {
         let categoryOptions = [],
             categorySeverities = [],
-            categoryOption,
             severityOption,
             issues = [],
             severitySelect,
             issue,
             self = this;
 
-        this.state.categoriesIssue.forEach( function ( category, i ) {
-            categoryOption = <option value={category.id} key={i} selected={self.state.categorySelected && category.id === self.state.categorySelected.id}>{category.label}</option>;
-            categoryOptions.push( categoryOption );
-        } );
+
 
         if ( this.state.categorySelected ) {
             this.state.categorySelected.severities.forEach( ( severity, i ) => {
@@ -189,7 +215,7 @@ class SegmentFooterTabIssues extends React.Component {
             </select>;
 
         this.state.issues.forEach( ( e, i ) => {
-            issue = <SegmentFooterTabIssuesListItem key={i} issue={e} categories={this.state.categoriesIssue}/>;
+            issue = <SegmentFooterTabIssuesListItem key={i} issue={e}/>;
             issues.push( issue );
         } );
         let containerClasses = classnames({
@@ -222,10 +248,7 @@ class SegmentFooterTabIssues extends React.Component {
                             <div className="height wide column">
                                 <div className="select-category">
                                     <div className={categoryClass}>
-                                        <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueCategory = input;}} onChange={( e ) => this.categoryOptionChange( e )}>
-                                            <option value="-1">Select issue</option>
-                                            {categoryOptions}
-                                        </select>
+                                        {this.getCategoryDropdown()}
                                     </div>
                                 </div>
                             </div>

@@ -7,7 +7,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            categories: props.categories,
+            categories: JSON.parse( config.lqa_flat_categories ),
             commentView: false,
             sendDisabled : true,
             comment_text: ''
