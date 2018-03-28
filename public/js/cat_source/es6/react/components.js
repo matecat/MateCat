@@ -62,6 +62,7 @@ window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 window.AnalyzeHeader = require('./components/analyze/AnalyzeHeader').default;
+window.AnalyzeChunksResume = require('./components/analyze/AnalyzeChunksResume').default;
 window.OpenJobBox = require('./components/outsource/OpenJobBox').default;
 window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
