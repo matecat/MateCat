@@ -171,8 +171,8 @@ class SegmentFooterTabIssues extends React.Component {
                     return <div key={item.id} className="item" data-value={item.id} onClick={self.categoryOptionChange.bind(self, item)}>{item.label}</div>;
                 });
                 categoryOption = <div className="item" data-value={category.id} key={i}>
-                    <span className="text">{category.label}</span>
-                    <i className="dropdown icon"/>
+                    <div className="text">{category.label} <i className="icon-sort-down icon"/></div>
+
                     <div className="menu">
                         {subCategories}
                     </div>
@@ -182,9 +182,9 @@ class SegmentFooterTabIssues extends React.Component {
             }
             categoryOptions.push( categoryOption );
         } );
-        return <div className="ui floating labeled icon dropdown button" ref={( input ) => { this.selectIssueCategory = input;}}>
-            <span className="text">Select issue</span>
-            <i className="dropdown icon"/>
+        return <div className="ui fluid dropdown type" ref={( input ) => { this.selectIssueCategory = input;}}>
+            <div className="text ellipsis-messages">Select issue</div>
+            <i className="icon-sort-down icon"/>
             <div className="right menu">
                 {categoryOptions}
             </div>
