@@ -15,9 +15,10 @@ use \DataAccess_IDaoStruct;
 use \Jobs_JobStruct,
         \Database,
         \Exceptions\ValidationError,
-        \CatUtils,
         \Constants_TranslationStatus
     ;
+use Projects_MetadataDao;
+use Projects_MetadataStruct;
 use TaskRunner\Commons\Params;
 
 /**
@@ -174,6 +175,35 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
             return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
         } );
         
+    }
+
+    public function getProject(){
+
+        return $this->cachable( '_projectStruct', $this, function ( $contributionStruct ) {
+            $jobStruct = $this->getJobStruct();
+            return $jobStruct->getProject( 60 * 60 * 24 );
+        } );
+
+    }
+
+    /**
+     * Get all project Metadata not related to features
+     *
+     * @return Projects_MetadataStruct[]
+     * @throws ValidationError
+     */
+    public function getProjectMetaData(){
+        $jobStruct = $this->getJobStruct();
+        $projectMeta = array_filter( $jobStruct->getProjectMetadata(), function( $metadataStruct ){
+            return $metadataStruct->key != Projects_MetadataDao::FEATURES_KEY;
+        } );
+        return $projectMeta;
+    }
+
+    public function getSegmentNotes(){
+        return $this->cachable( '_segmentNote', $this, function () {
+            return \Segments_SegmentNoteDao::getBySegmentId( $this->id_segment );
+        } );
     }
 
     /**

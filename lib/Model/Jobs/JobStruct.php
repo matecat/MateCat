@@ -172,7 +172,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
         return $this->cachable( __function__, $this, function ( $job ) {
             $mDao = new Projects_MetadataDao();
-            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $job->id_project );
+            return $mDao->setCacheTTL( 60 * 60 * 24 * 30 )->allByProjectId( $job->id_project );
         } );
 
     }

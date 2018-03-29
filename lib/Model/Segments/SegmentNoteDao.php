@@ -43,17 +43,21 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_segment
+     * @param     $id_segment
+     * @param int $ttl
      *
-     * @return Segments_SegmentNoteStruct[]
+     * @return DataAccess_IDaoStruct[]|Segments_SegmentNoteStruct[]
      */
-    public static function getBySegmentId( $id_segment ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM segment_notes " .
-            " WHERE id_segment = ? " ); 
-        $stmt->execute( array( $id_segment ) ); 
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Segments_SegmentNoteStruct');
-        return $stmt->fetchAll(); 
+    public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
+
+        $thisDao = new self();
+        $conn = $thisDao->getConnection();
+        $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment = ? " );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+                new Segments_SegmentNoteStruct(),
+                [ $id_segment ]
+        );
+
     }
 
     public static function insertRecord( $values ) {
