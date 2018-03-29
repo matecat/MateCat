@@ -127,8 +127,9 @@ class SegmentFooterTabIssues extends React.Component {
                     self.setState( {
                         isChangedTextarea: false,
                         oldTranslation: oldTranslation,
+                        categorySelected: null
                     } );
-                    $( self.selectIssueCategory ).dropdown( 'set selected', -1 );
+                    $( self.selectIssueCategory ).dropdown( 'restore defaults' );
                     $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
                     UI.setDisabledOfButtonApproved(self.props.sid);
                 } )
@@ -231,16 +232,6 @@ class SegmentFooterTabIssues extends React.Component {
             "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
         });
         return <div className={containerClasses}>
-            {/*{this.state.issues.length > 0 ? (
-                <div className="title-for-issues">
-                    Add issue ({this.state.issues.length})
-                </div>
-            ) : (
-                <div className="title-for-issues">
-                    Add issue
-                </div>
-            )}*/}
-
             <div className="border-box-issue">
                 <div className="creation-issue-container ui form">
                     <div className="ui grid">
