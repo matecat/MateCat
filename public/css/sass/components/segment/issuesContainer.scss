@@ -210,6 +210,9 @@ section  {
                     @media only screen and (max-width: 1180px) {
                         .issue-item {
                             width: 95%;
+                            .sub_type_issue_name {
+                                max-width: 57% !important;
+                            }
                         }
                     }
                 }
