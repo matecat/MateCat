@@ -185,7 +185,7 @@ class SegmentFooterTabIssues extends React.Component {
         } );
         return <div className="ui fluid dropdown type" ref={( input ) => { this.selectIssueCategory = input;}}>
             <div className="text ellipsis-messages">Select issue</div>
-            <i className="icon-sort-down icon"/>
+            <i className="icon-sort-down"/>
             <div className="right menu">
                 {categoryOptions}
             </div>

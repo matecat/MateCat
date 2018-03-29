@@ -36,18 +36,18 @@ class SegmentFooterTabIssuesListItem extends React.Component {
         if ( category.id_parent ) {
             let parentCategory = this.findCategory( category.id_parent);
             return <div className="issue-head">
-                <p>
-                    <b>{parentCategory.label}:</b>
-                    <b>{category.label}:</b>
-                    <span>{this.props.issue.severity}</span>
-                </p>
+                <div>
+                    <div className="type_issue_name">{parentCategory.label}: </div>
+                    <div className="sub_type_issue_name">{category.label}:</div>
+                    <div className="severity_issue_name"> {this.props.issue.severity}</div>
+                </div>
             </div>
         } else {
             return <div className="issue-head">
-                <p>
-                    <b>{category.label}:</b>
-                    <span>{this.props.issue.severity}</span>
-                </p>
+                <div>
+                    <div className="sub_type_issue_name">{category.label}:</div>
+                    <div className="issue_severity_item">{this.props.issue.severity}</div>
+                </div>
             </div>
         }
     }

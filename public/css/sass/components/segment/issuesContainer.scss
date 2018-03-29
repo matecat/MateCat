@@ -82,6 +82,24 @@ section  {
                                 .issue-title {
                                     font-weight: 700;
                                 }
+                                .type_issue_name {
+                                    display: inline-block;
+                                    vertical-align: top;
+                                    font-weight: 700;
+                                }
+                                .sub_type_issue_name {
+                                    display: inline-block;
+                                    max-width: 65%;
+                                    min-width: 30px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+                                .severity_issue_name {
+                                    display: inline-block;
+                                    vertical-align: top;
+                                    font-weight: 700;
+                                }
                             }
                             .issue-activity-icon {
                                 width: 25%;
@@ -121,7 +139,7 @@ section  {
                                         margin-right: 0;
                                         color: grey;
                                         position: relative;
-                                        top: 2px;
+                                        top: 1px;
                                     }
                                     &.re-message {
                                         i {
@@ -189,22 +207,30 @@ section  {
                         padding: 3px 5px 5px;
                         text-align: right;
                     }
+                    @media only screen and (max-width: 1180px) {
+                        .issue-item {
+                            width: 95%;
+                        }
+                    }
                 }
             }
         }
     }
 }
-.field.select-type {
+/*.field.select-type {
     .ui.fluid.dropdown.type{
         padding-bottom: 5px;
-        i {
+        .icon_type_select {
             margin-left: 0;
             font-size: 12px;
             top: -1px;
         }
+        .right.menu {
+            width: 100%;
+        }
     }
-}
-.ellipsis-messages {
+}*/
+.text.ellipsis-messages {
     max-width: 95%;
     min-width: 30px;
     white-space: nowrap;
