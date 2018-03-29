@@ -37,7 +37,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
             let parentCategory = this.findCategory( category.id_parent);
             return <div className="issue-head">
                 <p>
-                    <b>{parentCategory.label}:</b>
+                    <b>{parentCategory.label} - </b>
                     <b>{category.label}:</b>
                     <span>{this.props.issue.severity}</span>
                 </p>
