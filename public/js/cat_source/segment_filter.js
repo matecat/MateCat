@@ -98,9 +98,12 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        filterSubmit : function( data, wantedSegment) {
+        filterSubmit : function( data, wantedSegment,extendendLocalStorageValues) {
             if (!wantedSegment) {
                 wantedSegment = null;
+            }
+            if(!extendendLocalStorageValues){
+                extendendLocalStorageValues = {};
             }
             this.filteringSegments = true;
             data = { filter: data } ;
@@ -111,11 +114,11 @@ if (SegmentFilter.enabled())
             return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
-                var reactState = {
+                let reactState = Object.assign({
                     filteredCount : data.count,
                     filtering : true,
                     segmentsArray: data.segment_ids
-                } ;
+                },extendendLocalStorageValues);
                 CatToolActions.setSegmentFilter(data);
 
                 UI.clearStorage('SegmentFilter');
