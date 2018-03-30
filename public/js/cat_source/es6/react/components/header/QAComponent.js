@@ -32,33 +32,6 @@ class QAComponent extends React.Component {
     }
 
     updatePanel() {
-        // var selectedBox = '';
-        // var issue_selected = false, lxq_selected = false, total_issue_selected = false, translation_conflicts_selected = false;
-        // if ( this.checkShowTotalIssues()) {
-        //     total_issue_selected = true;
-        //     selectedBox = 'total_issues';
-        // } else if ( this.state.tag_issues.length > 0 ) {
-        //     issue_selected = true;
-        //     selectedBox = 'tag_issues';
-        // } else if ( this.state.lxq_issues.length > 0 ) {
-        //     lxq_selected = true;
-        //     selectedBox = 'lxq';
-        // } else if ( this.state.translation_conflicts.length > 0 ) {
-        //     translation_conflicts_selected = true;
-        //     selectedBox = 'conflicts';
-        // }
-        // this.setState({
-        //     total_issues_selected: total_issue_selected,
-        //     tag_issues_selected: issue_selected,
-        //     lxq_selected: lxq_selected,
-        //     translation_conflicts_selected: translation_conflicts_selected,
-        //     current_counter: 1,
-        //     selected_box: selectedBox
-        // });
-        // if (this.props.active) {
-        //     var current_array = this.getCurrentArray();
-        //     this.scrollToSegment(current_array[0]);
-        // }
         this.updateIcon();
     }
 
@@ -337,7 +310,7 @@ class QAComponent extends React.Component {
             </div>;
 
         }
-        return (this.props.active ? <div className="qa-wrapper">
+        return ((this.props.active && this.state.total_issues > 0 ) ? <div className="qa-wrapper">
             <div className="qa-container">
                     <div className="qa-container-inside">
                         <div className="qa-issues-types">
