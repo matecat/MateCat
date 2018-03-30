@@ -6,3 +6,14 @@
 <p>
     Here's the link to the project: <a href="<?= $project_url ?>"><?= $project_url ?></a>.
 </p>
+
+<?php if(!empty($project['due_date'])) { ?>
+<p>
+    Due date: <?= $project['due_date']; ?>
+</p>
+<?php }  ?>
+
+<p>
+    Total words count: <?= $words_count ?>
+</p>
+
