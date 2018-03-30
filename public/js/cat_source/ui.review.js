@@ -173,20 +173,6 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
         }
     }).on('buttonsCreation', 'section', function() {
             UI.overrideButtonsForRevision();
-    }).on('click', '.editor .tab-switcher-review', function(e) {
-        e.preventDefault();
-
-        $('.editor .submenu .active').removeClass('active');
-        $(this).addClass('active');
-        $('.editor .sub-editor.open').removeClass('open');
-        if($(this).hasClass('untouched')) {
-            $(this).removeClass('untouched');
-            if(!UI.body.hasClass('hideMatches')) {
-                $('.editor .sub-editor.review').addClass('open');
-            }
-        } else {
-            $('.editor .sub-editor.review').addClass('open');
-        }
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
@@ -284,7 +270,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
 
             var data = {
                 action: 'setRevision',
-                job: config.job_id,
+                job: config.id_job,
                 jpassword: config.password,
                 segment: sid,
                 original: original,

@@ -36,9 +36,6 @@ $.extend(UI, {
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
-        this.fixHeaderHeightChange();
-        this.setHideMatches();
-
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);

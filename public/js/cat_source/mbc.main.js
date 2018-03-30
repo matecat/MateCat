@@ -846,6 +846,7 @@ if ( MBC.enabled() )
             if ( $( '.mbc-history-balloon-outer' ).hasClass('mbc-visible') ) {
                 UI.closeAllMenus(ev);
             } else {
+                UI.closeAllMenus(ev);
                 $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
             }
         } );

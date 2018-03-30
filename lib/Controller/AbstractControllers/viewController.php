@@ -65,15 +65,13 @@ abstract class viewController extends controller {
             die(); // do not complete klein response, set 404 header in render404 instead of 200
 	    }
 
-        //SESSION ENABLED
-        parent::sessionStart();
-
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
         $this->setBrowserSupport();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
+
+        //SESSION ENABLED
+        $this->readLoginInfo( false );
 
         $this->featureSet = new FeatureSet();
 
@@ -111,14 +109,6 @@ abstract class viewController extends controller {
         $this->login_required = $value ;
     }
 
-    /**
-     * isLoggedIn
-     *
-     * @return bool
-     */
-    public function isLoggedIn() {
-        return $this->userIsLogged;
-    }
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
@@ -183,12 +173,12 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        if( $this->logged_user instanceof Users_UserStruct ){
-            $this->template->logged_user   = $this->logged_user->shortName() ;
-            $this->template->extended_user = $this->logged_user->fullName() ;
+        if( $this->isLoggedIn() ){
+            $this->template->logged_user   = $this->user->shortName() ;
+            $this->template->extended_user = $this->user->fullName() ;
 
-            $this->template->isLoggedIn    = $this->isLoggedIn();
-            $this->template->userMail      = $this->logged_user->getEmail() ;
+            $this->template->isLoggedIn    = true;
+            $this->template->userMail      = $this->user->email;
             $this->collectFlashMessages();
         } else {
             Log::doLog( "Bad Configuration" );

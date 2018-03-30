@@ -13,10 +13,10 @@ div.segment-notes ul.graysmall li span.note-label {
     display: inline-block;
     padding: 20px 20px 10px;
     width: 50%;
-    background: #f2f4f7;
     box-sizing: border-box;
     position: relative;
     border: 5px solid white;
+    border-right: 1px solid #ccc;
 }
 
 .segment-notes-container {

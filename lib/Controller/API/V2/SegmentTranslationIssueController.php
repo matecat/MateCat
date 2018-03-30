@@ -43,7 +43,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
             'comment'             => $this->request->comment,
-            'uid'                 => $this->getUser()->uid
+            'uid'                 => $this->user->uid
         );
 
         $struct = new \LQA\EntryStruct( $data );

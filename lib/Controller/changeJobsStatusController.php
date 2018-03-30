@@ -11,7 +11,7 @@ class changeJobsStatusController extends ajaxController {
 
         //SESSION START
         parent::__construct();
-        parent::checkLogin();
+        parent::readLoginInfo();
 
         $filterArgs = array(
                 'res'           => [

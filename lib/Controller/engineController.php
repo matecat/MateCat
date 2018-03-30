@@ -26,7 +26,7 @@ class engineController extends ajaxController {
         parent::__construct();
 
         //Session Enabled
-        $this->checkLogin();
+        $this->readLoginInfo();
         //Session Disabled
 
         $filterArgs = [
@@ -121,7 +121,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_MicrosoftHubStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
@@ -136,7 +136,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_MosesStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
@@ -151,7 +151,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_TauyouStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
@@ -166,7 +166,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_IPTranslatorStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
@@ -180,7 +180,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_ApertiumStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
@@ -194,7 +194,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_AltlangStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
@@ -208,7 +208,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_LetsMTStruct::getStruct();
 
                 $newEngineStruct->name                            = $this->name;
-                $newEngineStruct->uid                             = $this->uid;
+                $newEngineStruct->uid                             = $this->user->uid;
                 $newEngineStruct->type                            = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
@@ -251,7 +251,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_SmartMATEStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
@@ -266,7 +266,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_YandexTranslateStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
@@ -280,7 +280,7 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
@@ -290,7 +290,7 @@ class engineController extends ajaxController {
 
                 $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
                         'providerName' => $this->provider,
-                        'logged_user'  => $this->logged_user,
+                        'logged_user'  => $this->user,
                         'engineData'   => $this->engineData
                 ] );
                 break;
@@ -303,7 +303,7 @@ class engineController extends ajaxController {
             return;
         }
 
-        $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->logged_user );
+        $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->user );
 
         $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
@@ -414,7 +414,7 @@ class engineController extends ajaxController {
         } else {
 
             try {
-                $this->featureSet->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->logged_user );
+                $this->featureSet->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->user );
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
 
@@ -441,7 +441,7 @@ class engineController extends ajaxController {
 
         $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
         $engineToBeDeleted->id  = $this->id;
-        $engineToBeDeleted->uid = $this->uid;
+        $engineToBeDeleted->uid = $this->user->uid;
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result    = $engineDAO->disable( $engineToBeDeleted );
@@ -475,7 +475,7 @@ class engineController extends ajaxController {
                 $tempEngineRecord = EnginesModel_LetsMTStruct::getStruct();
 
                 $tempEngineRecord->name                            = $this->name;
-                $tempEngineRecord->uid                             = $this->uid;
+                $tempEngineRecord->uid                             = $this->user->uid;
                 $tempEngineRecord->type                            = Constants_Engines::MT;
                 $tempEngineRecord->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
                 $tempEngineRecord->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ];

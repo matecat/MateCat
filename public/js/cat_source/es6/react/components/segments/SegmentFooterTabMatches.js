@@ -78,6 +78,9 @@ class SegmentFooterTabMatches extends React.Component {
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
             }
+            if ( !_.isUndefined(this.tm_properties) ) {
+                item.tm_properties = this.tm_properties;
+            }
             matchesProcessed.push(item);
         });
         return matchesProcessed;
@@ -121,6 +124,23 @@ class SegmentFooterTabMatches extends React.Component {
         });
     }
 
+    getMatchInfo(match) {
+        return <ul className="graysmall-details">
+            <li className={'percent ' + match.percentClass}>
+                {match.percentText}
+            </li>
+            <li>
+                {match.suggestion_info}
+            </li>
+            <li className="graydesc">
+                Source:
+                <span className="bold">
+                    {match.cb}
+                </span>
+            </li>
+        </ul>;
+    }
+
     componentDidMount() {
         console.log("Mount SegmentFooterMatches" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
@@ -133,9 +153,11 @@ class SegmentFooterTabMatches extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
-    componentWillMount() {
+    /**
+     * Do not delete, overwritten by plugin
+     */
+    componentDidUpdate() {}
 
-    }
     allowHTML(string) {
         return { __html: string };
     }
@@ -173,20 +195,7 @@ class SegmentFooterTabMatches extends React.Component {
                             </span>
                             {trashIcon}
                         </li>
-                        <ul className="graysmall-details">
-                            <li className={'percent ' + match.percentClass}>
-                                {match.percentText}
-                            </li>
-                            <li>
-                                {match.suggestion_info}
-                            </li>
-                            <li className="graydesc">
-                                Source:
-                                <span className="bold">
-                                {match.cb}
-                                </span>
-                            </li>
-                        </ul>
+                        {self.getMatchInfo(match)}
                     </ul>;
                 matches.push(item);
             });

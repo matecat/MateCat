@@ -957,45 +957,5 @@ class CatUtils {
         return $wStruct;
     }
 
-    public static function getTMProps( $job_data ){
-
-        //TODO this should use the Project DAO instead and use internal cache system to store the record
-        try {
-            $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-            $redisHandler->get(1); //ping established connection
-        } catch ( Exception $e ) {
-            $redisHandler = null;
-            Log::doLog( $e->getMessage() );
-            Log::doLog( "No Redis server(s) available." );
-        }
-
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $_existingResult = $redisHandler->get( "project_data_for_job_id:" . $job_data['id'] );
-            if ( !empty( $_existingResult ) ) {
-                return unserialize( $_existingResult );
-            }
-        }
-
-        $projectData = getProjectJobData( $job_data['id_project'] );
-
-        $result = array(
-                'project_id'   => $projectData[ 0 ][ 'pid' ],
-                'project_name' => $projectData[ 0 ][ 'pname' ],
-                'job_id'       => $job_data[ 'id' ],
-        );
-
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $redisHandler->setex(
-                    "project_data_for_job_id:" . $job_data['id'],
-                    60 * 60 * 24 * 15, /* 15 days of lifetime */
-                    serialize( $result )
-            );
-        }
-
-        return $result;
-
-    }
-
-
 }
 

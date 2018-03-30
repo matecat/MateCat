@@ -128,7 +128,18 @@ API.PROJECTS = {
             type: "POST",
             url : "/?action=getVolumeAnalysis"
         });
+    },
+    getCompletionStatus: function () {
+        var pid = config.id_project;
+        var jpassword = config.password ;
+        var data = {
+            pid: pid,
+            jpassword: jpassword
+        };
+        return $.ajax({
+            data: data,
+            type: "GET",
+            url : "/api/v2/projects/" + pid + "/" + jpassword + "/completion_status"
+        });
     }
-
-
 };

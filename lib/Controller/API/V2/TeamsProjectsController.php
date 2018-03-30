@@ -66,7 +66,7 @@ class TeamsProjectsController extends KleinController {
 
     public function getAll(){
 
-        $this->featureSet->loadFromUserEmail( $this->getUser()->email ) ;
+        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
 
         $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );
 

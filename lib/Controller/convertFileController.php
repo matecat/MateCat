@@ -57,7 +57,7 @@ class convertFileController extends ajaxController {
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
-        $this->checkLogin();
+        $this->readLoginInfo();
 
     }
 
@@ -72,8 +72,8 @@ class convertFileController extends ajaxController {
             return false;
         }
 
-        if ( $this->userIsLogged ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        if ( $this->isLoggedIn() ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email ) ;
         }
 
         $ext = FilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );

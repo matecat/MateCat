@@ -208,7 +208,7 @@ class getContributionController extends ajaxController {
             }
 
             //get job's TM keys
-            $this->checkLogin();
+            $this->readLoginInfo();
 
             try{
 
@@ -216,7 +216,7 @@ class getContributionController extends ajaxController {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 
-                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->user->uid, $this->userRole );
 
                 if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                     foreach ( $tm_keys as $tm_key ) {
@@ -351,9 +351,9 @@ class getContributionController extends ajaxController {
             } else {
 
                 $uid = null;
-                $this->checkLogin();
+                $this->readLoginInfo();
                 if($this->userIsLogged){
-                    $uid = $this->uid;
+                    $uid = $this->user->uid;
                 }
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                         $match,
@@ -409,9 +409,9 @@ class getContributionController extends ajaxController {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
                 } else {
                     $uid = null;
-                    $this->checkLogin();
+                    $this->readLoginInfo();
                     if($this->userIsLogged){
-                        $uid = $this->uid;
+                        $uid = $this->user->uid;
                     }
                     $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                             $m,

@@ -3,13 +3,8 @@
  */
 $.extend(UI, {
 	openConcordance: function() {
-		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'cc');
-		$('.editor .cc-search .input').text('');
-		$('.editor .concordances .results').empty();
-		var searchField = (this.currentSearchInTarget) ? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
-		$(searchField).text(this.currentSelectedText);
-
-		this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
+		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'concordances');
+        SegmentActions.findConcordance(UI.getSegmentId(UI.currentSegment), {text: this.currentSelectedText, inTarget: this.currentSearchInTarget});
 	},
 
 	preOpenConcordance: function() {
@@ -20,7 +15,6 @@ $.extend(UI, {
 			if (str.length) { // the trimmed string is not empty
 				this.currentSelectedText = str;
 				this.currentSearchInTarget = (isSource) ? 0 : 1;
-//                this.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
 				this.openConcordance();
 			}
 		}

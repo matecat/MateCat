@@ -50,13 +50,13 @@ class SegmentFooterTabIssues extends React.Component {
     trackChanges( sid, editareaText ) {
         let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
         if ( this.state.segment.sid === sid && this.state.oldTranslation !== text) {
-            UI.setDisabledOfButtonApproved(this.props.id_segment, true);
+            UI.setDisabledOfButtonApproved(this.props.sid, true);
             this.setState( {
                 translation: text,
                 isChangedTextarea: true
             } );
         } else {
-            UI.setDisabledOfButtonApproved(this.props.id_segment);
+            UI.setDisabledOfButtonApproved(this.props.sid);
             this.setState( {
                 isChangedTextarea: false
             } );
@@ -76,7 +76,7 @@ class SegmentFooterTabIssues extends React.Component {
         } );
         let self = this;
         setTimeout(function (  ) {
-            SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
+            // SegmentActions.setTabIndex(self.state.segment.sid, 'issues', issues.length);
         });
     }
 
@@ -120,16 +120,18 @@ class SegmentFooterTabIssues extends React.Component {
         data.push( issue );
 
         deferred.then( function () {
-            SegmentActions.removeClassToSegment( self.props.id_segment, "modified" );
+            SegmentActions.removeClassToSegment( self.props.sid, "modified" );
             UI.currentSegment.data( 'modified', false );
-            SegmentActions.submitIssue( self.props.id_segment, data, [] )
+            SegmentActions.submitIssue( self.props.sid, data, [] )
                 .done( response => {
                     self.setState( {
                         isChangedTextarea: false,
                         oldTranslation: oldTranslation,
+                        categorySelected: null
                     } );
+                    $( self.selectIssueCategory ).dropdown( 'restore defaults' );
                     $( self.selectIssueSeverity ).dropdown( 'set selected', -1 );
-                    UI.setDisabledOfButtonApproved(self.props.id_segment);
+                    UI.setDisabledOfButtonApproved(self.props.sid);
                 } )
                 .fail( /* self.handleFail.bind(self)*/ );
         } );
@@ -137,13 +139,13 @@ class SegmentFooterTabIssues extends React.Component {
     }
 
     issueCategories() {
-        return JSON.parse( config.lqa_nested_categories ).categories;
+        return JSON.parse( config.lqa_flat_categories ).categories;
     }
 
-    categoryOptionChange( e ) {
-        let currentCategory = this.issueCategories().find( category => {return category.id == e.target.value} );
+    categoryOptionChange( item ) {
+        let currentCategory = item;
         this.setState( {
-            categorySelected: currentCategory
+            categorySelected: currentCategory ? currentCategory : null
         } );
     }
 
@@ -160,20 +162,46 @@ class SegmentFooterTabIssues extends React.Component {
         } )
     }
 
+    getCategoryDropdown() {
+        let categoryOptions = [],
+            categoryOption,
+            self = this;
+        this.state.categoriesIssue.forEach( function ( category, i ) {
+            if (category.subcategories && category.subcategories.length > 0) {
+                let subCategories = category.subcategories.map(function ( item ) {
+                    return <div key={item.id} className="item" data-value={item.id} onClick={self.categoryOptionChange.bind(self, item)}>{item.label}</div>;
+                });
+                categoryOption = <div className="item" data-value={category.id} key={i}>
+                    <div className="text">{category.label} <i className="icon-sort-down icon"/></div>
+
+                    <div className="menu">
+                        {subCategories}
+                    </div>
+                </div>;
+            } else {
+                categoryOption = <div className="item" data-value={category.id} key={i} onClick={self.categoryOptionChange.bind(self, category)}>{category.label}</div>;
+            }
+            categoryOptions.push( categoryOption );
+        } );
+        return <div className="ui fluid dropdown type" ref={( input ) => { this.selectIssueCategory = input;}}>
+            <div className="text ellipsis-messages">Select issue</div>
+            <i className="icon-sort-down icon"/>
+            <div className="right menu">
+                {categoryOptions}
+            </div>
+        </div>
+    }
+
     render() {
         let categoryOptions = [],
             categorySeverities = [],
-            categoryOption,
             severityOption,
             issues = [],
             severitySelect,
             issue,
             self = this;
 
-        this.state.categoriesIssue.forEach( function ( category, i ) {
-            categoryOption = <option value={category.id} key={i} selected={self.state.categorySelected && category.id === self.state.categorySelected.id}>{category.label}</option>;
-            categoryOptions.push( categoryOption );
-        } );
+
 
         if ( this.state.categorySelected ) {
             this.state.categorySelected.severities.forEach( ( severity, i ) => {
@@ -188,45 +216,50 @@ class SegmentFooterTabIssues extends React.Component {
             </select>;
 
         this.state.issues.forEach( ( e, i ) => {
-            issue = <SegmentFooterTabIssuesListItem key={i} issue={e} categories={this.state.categoriesIssue}/>;
+            issue = <SegmentFooterTabIssuesListItem key={i} issue={e}/>;
             issues.push( issue );
         } );
-
-        return <div key={"container_" + this.props.code}
-                    className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class}
-                    id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
-            <div className="ui grid border-box">
-                <div className="height wide column">
-                    <div className="creation-issue-container ui form">
-                        <div className="ui grid">
-                            <div className="height wide column">
-                                <div className="select-category">
-                                    <div className="field">
-                                        <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueCategory = input;}} onChange={( e ) => this.categoryOptionChange( e )}>
-                                            <option value="-1">Select issue</option>
-                                            {categoryOptions}
-                                        </select>
-                                    </div>
+        let containerClasses = classnames({
+            "issues-container" : true,
+            "add-issue-segment" : this.state.isChangedTextarea
+        });
+        let categoryClass = classnames({
+            "field" : true,
+            "select_type": _.isNull(this.state.categorySelected) || this.state.categorySelected === -1
+        });
+        let severityClass = classnames({
+            "field" : true,
+            "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
+        });
+        return <div className={containerClasses}>
+            <div className="border-box-issue">
+                <div className="creation-issue-container ui form">
+                    <div className="ui grid">
+                        <div className="height wide column">
+                            <div className="select-category">
+                                <div className={categoryClass}>
+                                    {this.getCategoryDropdown()}
                                 </div>
                             </div>
-                            <div className="height wide column">
-                                <div className="select-severity">
-                                    <div className="field" ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
-                                        {severitySelect}
-                                    </div>
+                        </div>
+                        <div className="height wide column">
+                            <div className="select-severity">
+                                <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                                    {severitySelect}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="height wide column">
-                    <div className="issues-list">
-                        {issues}
-                    </div>
+
+            </div>
+            <div className="border-box-issue">
+                <div className="issues-list">
+                    {issues}
                 </div>
             </div>
-
         </div>
+
     }
 }
 

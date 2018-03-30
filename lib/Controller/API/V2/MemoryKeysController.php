@@ -24,7 +24,7 @@ class MemoryKeysController extends KleinController {
     public function listKeys(){
 
         $keyQuery = new TmKeyManagement_MemoryKeyStruct();
-        $keyQuery->uid = $this->getUser()->uid;
+        $keyQuery->uid = $this->user->uid;
 
         $memoryKeyDao = new TmKeyManagement_MemoryKeyDao();
         $keyList = $memoryKeyDao->read( $keyQuery );

@@ -1,0 +1,92 @@
+.searchbox {
+    position: relative;
+    float: left;
+    width: 100%;
+    font-size: 12px;
+    background: #ffffff;
+    z-index: 2;
+    padding: 0 !important;
+    margin-top: 3px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
+    .block.buttons {
+        margin-top: -6px !important;
+    }
+    .search-inputs {
+        height: 64px;
+    }
+    #exec-filter {
+        float: right;
+    }
+    .block.right {
+        margin-top: 0;
+        margin-right: 0 !important;
+    }
+    .btn {
+        float: right;
+        font-weight: bold;
+        margin: 4px 10px 3px 0;
+        padding: 2px 20px;
+        height: 28px;
+        background: #eeeeef;
+        cursor: pointer;
+        font-size: 14px;
+        width: 120px;
+        text-transform: uppercase;
+        &:disabled {
+            cursor: not-allowed;
+            background: #ffffff;
+            color: #d0d0d0;
+            color: #d0d0d0;
+            border: 1px solid #d0d0d0;
+            font-weight: 100;
+        }
+    }
+    form {
+        width: auto;
+        padding: 10px 4% 0 4% !important;
+    }
+    input[type=button]:hover {
+        border-width: 2px;
+    }
+    label {
+        display: inline;
+        width: auto !important;
+        margin-right: 5px;
+        text-transform: uppercase;
+    }
+    input[type=button],
+    input[type=submit] {
+        text-transform: uppercase;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .block {
+        float: left;
+        margin-right: 20px;
+        text-align: left;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .block .field {
+        width: 100%;
+        text-align: right;
+        margin-bottom: 5px;
+    }
+    .block.right {
+        float: right !important;
+        margin-top: -5px !important;
+    }
+    .block.right .block {
+        margin-right: 0px;
+        margin-left: 20px;
+    }
+    .block.right .block .btn {
+        margin-right: 0px;
+        margin-left: 10px;
+    }
+    .block.vcentered {
+        padding-top: 7px !important;
+    }
+}

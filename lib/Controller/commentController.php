@@ -46,7 +46,7 @@ class commentController extends ajaxController {
         $this->job = getJobData( $this->__postInput[ 'id_job' ],
             $this->__postInput['password'] );
 
-        $this->checkLogin() ;
+        $this->readLoginInfo() ;
         if ( $this->userIsLogged ) {
             $this->loadUser();
         }
@@ -234,7 +234,7 @@ class commentController extends ajaxController {
 
     private function loadUser() {
         $userStruct = new Users_UserStruct();
-        $userStruct->uid = $this->uid;
+        $userStruct->uid = $this->user->uid;
 
         $userDao = new Users_UserDao( Database::obtain() ) ;
         $result = $userDao->read( $userStruct );

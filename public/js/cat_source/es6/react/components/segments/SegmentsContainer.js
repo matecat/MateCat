@@ -18,7 +18,6 @@ class SegmentsContainer extends React.Component {
             timeToEdit: config.time_to_edit_enabled
         };
         this.renderSegments = this.renderSegments.bind(this);
-        // this.updateSegments = this.updateSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
         this.splitSegments = this.splitSegments.bind(this);
     }
@@ -31,41 +30,56 @@ class SegmentsContainer extends React.Component {
             });
         }
     }
-    // updateSegments(segments, fid) {
-    //     if (fid == this.props.fid) {
-    //         this.setState({
-    //             segments: segments,
-    //         });
-    //     }
-    // }
 
     updateAllSegments() {
         this.forceUpdate()
     }
 
     renderSegments(segments, fid) {
-        if (fid !== this.props.fid) return;
+        if (parseInt(fid) !== parseInt(this.props.fid)) return;
         let splitGroup =  [];
         this.setState({
             segments: segments,
             splitGroup: splitGroup,
             timeToEdit: config.time_to_edit_enabled,
         });
+
     }
 
+    setLastSelectedSegment(sid, fid) {
+        this.lastSelectedSegment = {
+            sid: sid,
+            fid: fid
+        };
+    }
+
+    setBulkSelection(sid, fid) {
+        if (_.isUndefined(this.lastSelectedSegment) ||
+            fid !== this.lastSelectedSegment.fid) {
+            this.lastSelectedSegment = {
+                sid: sid,
+                fid: fid
+            };
+        }
+        let from = Math.min(sid, this.lastSelectedSegment.sid);
+        let to = Math.max(sid, this.lastSelectedSegment.sid);
+        this.lastSelectedSegment = {
+            sid: sid,
+            fid: fid
+        };
+        SegmentActions.setBulkSelectionInterval(from, to, fid);
+    }
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-        // SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
-        console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
+        // console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-        // SegmentStore.removeListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
@@ -79,7 +93,7 @@ class SegmentsContainer extends React.Component {
     }
     componentDidUpdate() {
         restoreSelection();
-        console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
+        // console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
     }
 
     render() {
@@ -99,6 +113,8 @@ class SegmentsContainer extends React.Component {
                 tagModesEnabled={self.props.tagModesEnabled}
                 speech2textEnabledFn={self.props.speech2textEnabledFn}
                 reviewType={self.props.reviewType}
+                setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
+                setBulkSelection={self.setBulkSelection.bind(self)}
             />;
             items.push(item);
         });

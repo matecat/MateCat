@@ -56,7 +56,7 @@ if ( ReviewExtendedFooter.enabled() ) {
             },
 
             registerReviseTab: function () {
-                SegmentActions.registerTab('issues', true, true);
+                // SegmentActions.registerTab('issues', true, false);
             },
             /**
              * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.

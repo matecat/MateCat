@@ -7,7 +7,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            categories: props.categories,
+            categories: JSON.parse( config.lqa_flat_categories ),
             commentView: false,
             sendDisabled : true,
             comment_text: ''
@@ -29,6 +29,27 @@ class SegmentFooterTabIssuesListItem extends React.Component {
         return this.state.categories.find( category => {
             return id == category.id
         } )
+    }
+
+    getIssueHeader() {
+        let category = this.findCategory( this.props.issue.id_category);
+        if ( category.id_parent ) {
+            let parentCategory = this.findCategory( category.id_parent);
+            return <div className="issue-head">
+                <p>
+                    <b>{parentCategory.label} - </b>
+                    <b>{category.label}:</b>
+                    <span>{this.props.issue.severity}</span>
+                </p>
+            </div>
+        } else {
+            return <div className="issue-head">
+                <p>
+                    <b>{category.label}:</b>
+                    <span>{this.props.issue.severity}</span>
+                </p>
+            </div>
+        }
     }
 
     handleCommentChange(event) {
@@ -129,12 +150,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
         </div>;
         return <div className="issue-item" ref={(node)=>this.el=node}>
         <div className="issue" >
-            <div className="issue-head">
-                <p>
-                    <b>{this.findCategory( this.props.issue.id_category ).label}:</b>
-                    <span>{this.props.issue.severity}</span>
-                </p>
-            </div>
+            {this.getIssueHeader()}
             <div className="issue-activity-icon">
                 <button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments">
                     <i className={iconCommentClass} />

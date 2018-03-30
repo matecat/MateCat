@@ -18,7 +18,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    position: fixed;
+    position: relative;
     z-index: 12;
     border-bottom: 1px solid #333;
     padding: 0;
@@ -26,6 +26,7 @@ header {
     -webkit-transition: margin-top 200ms ease-out;
     box-sizing: content-box;
     min-width: 1024px;
+    min-height: 49px;
 }
 
 body.login header {
@@ -542,7 +543,6 @@ body.editing .grayed, body.virtualEditing .grayed {
 
 .sid {
     position: absolute;
-    width: 6%;
     left: -6%;
     text-align: center;
     display: block;
@@ -552,24 +552,63 @@ body.editing .grayed, body.virtualEditing .grayed {
     cursor: default;
     height: inherit;
     padding-bottom: 1px;
+    width: 6%;
 }
 
 .sid .txt {
-    padding: 0px 0;
-    /*background: #fff;*/
-    margin: 12px 8px 0 8px;
+    padding: 0px 3px;
+    margin: 2px 0px 0 0px;
 }
 
 .editing .sid .txt {
     /*background: #f2f4f7;*/
 }
 
+section .sid .txt input {
+    display: none;
+}
+
+section:hover .sid .txt input {
+    display: unset;
+}
+
+section.editor .sid .txt input {
+    display: unset;
+}
+
+section.readonly .txt input {
+    display: none !important;
+}
+
+section.segment-selected-inBulk .sid .txt input {
+    display: unset;
+}
+section.editor .sid .txt input {
+    display: unset;
+}
+
+section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
+    display: unset;
+}
+
+section.editor .txt.segment-add-inBulk {
+    display: unset;
+}
+
+section.segment-selected-inBulk .body .text {
+    background: #edf4fd;
+}
+section.segment-selected-inBulk .body .text:hover {
+    background: #edf4fd !important;
+}
+
+
+
 p.split-shortcut {
-    background: #ccc;
-    padding: 8px 5px;
-    margin-right: 8px;
-    margin-top: 0px;
-    margin-left: 8px;
+    background: #dde0e4;
+    padding: 1px 0px;
+    width: 55px;
+    margin: 0 auto;
 }
 
 .splitStart .sid {
@@ -658,6 +697,7 @@ div.sid .implicit {
 .split-action .actions {
     display: block !important;
 }
+
 
 .comments {
     position: absolute;
@@ -1239,7 +1279,18 @@ article {
     float: left;
     box-sizing: content-box;
 }
+body #outer {
+    overflow-y: auto;
+    position: relative;
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+}
 
+body .main-container {
+    width: 100%;
+    height: 95%;
+}
 #outer.loadingBefore {
     display: block;
     background: url(../img/loading.gif) 48% bottom no-repeat;
@@ -1282,7 +1333,7 @@ article {
 .footer {
     float: left;
     width: 100%;
-    margin-top: -28px;
+    margin-top: 0;
     height: 0;
     transition: width 2s;
     -moz-transition: width 2s; /* Firefox 4 */
@@ -1323,6 +1374,8 @@ section .body > .text {
 
 body.cattool {
     background: #f2f4f7;
+    overflow-y: hidden !important;
+    padding: unset;
 }
 
 body.cattool.editing {
@@ -1343,14 +1396,14 @@ body.cattool.editing section:not(.editor) .text:hover {
     color: #000;
 }
 
-body.cattool .editor .text:hover {
+/*body.cattool .editor .text:hover {
     background: none !important;
-}
+}*/
 
-body.cattool:not(.editing) article {
-/*    border: 1px solid #adadad;
-    border-top: none;*/
-}
+/*body.cattool:not(.editing) article {
+    border: 1px solid #adadad;
+    border-top: none;
+}*/
 
 section.editor .body > .text {
     overflow: visible;
@@ -1427,7 +1480,6 @@ section.editor .body > .text {
     background: #fff;
     text-align: left;
     width: 100%;
-    margin-top: -2px;
 }
 
 .submenu {
@@ -1460,7 +1512,13 @@ section.loaded .submenu {
     position: relative;
     width: auto !important;
     background: #f2f4f7;
-    z-index: 9999999999999;
+    z-index: 1;
+    border-bottom: 1px solid #cccccc;
+    cursor: pointer;
+}
+
+.submenu li.active {
+    border-bottom: 1px solid white;
 }
 
 body.noGlossary .tab-switcher-gl {
@@ -1540,21 +1598,10 @@ body.noGlossary .tab-switcher-gl {
     float: left;
     width: 100%;
     background: #ffffff !important;
-    border-top: 1px solid #f2f4f7;
 }
 
 .sub-editor.open {
     display: block;
-}
-
-/*
-.sub-editor.matches
-{
-	display: block;
-}
-*/
-body.hideMatches .sub-editor {
-    display: none !important;
 }
 
 body .footer.showMatches .sub-editor.open {
@@ -1798,10 +1845,6 @@ body .footer.showMatches .sub-editor.open {
     min-width: 890px
 }
 
-.searchbox {
-    padding: 0 !important;
-}
-
 .search-inputs input#enable-replace {
     float: left;
 }
@@ -1812,21 +1855,11 @@ body .footer.showMatches .sub-editor.open {
     margin-right: 10px;
 
 }
-
-.searchbox .search-inputs {
-    height: 64px;
-}
-
-.searchbox form {
-    width: 100%;
-    padding: 10px 4% 0 4% !important;
-}
-
 .search-inputs,
 .search-buttons,
 .search-options {
     float: left;
-    width: 90.7%;
+    width: 100%;
     margin-bottom: 5px;
 }
 
@@ -1917,10 +1950,6 @@ body.searchActive .search-display {
     border-color: red;
 }
 
-.searchbox input[type=button]:hover {
-    border-width: 2px;
-}
-
 .search .h-editor {
     padding: 2px 0 0 10px;
     text-shadow: #333 0px 1px 2px;
@@ -1946,27 +1975,6 @@ body.searchActive .search-display {
     right: 100px;
     top: 12px;
     background: url(../img/loading-black.gif) 0 0 no-repeat !important
-}
-
-body.cattool .searchbox .block.right {
-    margin-top: 0;
-    margin-right: 0 !important;
-}
-
-.searchbox .block.buttons {
-    margin-top: -6px !important;
-}
-
-.searchbox #exec-filter {
-    float: right;
-}
-
-.filtering .search {
-    display: block
-}
-
-body.filtering {
-    padding-top: 50px
 }
 
 .replace-box {
@@ -2033,7 +2041,7 @@ body.filtering {
     height: 35px;
 }
 
-.search .btn, .searchbox .btn {
+.search .btn {
     float: right;
     font-weight: bold;
     margin: 4px 10px 3px 0;
@@ -2294,7 +2302,7 @@ body.filtering {
     color: #FFF;
     font-size: 11px;
     background: #999;
-    padding: 1px 8px;
+    padding: 0px 8px;
     left: 46%;
     position: absolute;
     z-index: 12;
@@ -2445,7 +2453,6 @@ section.editor {
 
 section.editor .sid {
     left: -5%;
-    width: 6%;
     color: black;
 }
 
@@ -2509,7 +2516,7 @@ section.ice-locked .text {
 }
 
 body.editing section:not(.editor).ice-locked .text {
-    background: #d3d6da !important;
+    background: #dde0e4 !important;
 }
 
 
@@ -2518,13 +2525,26 @@ body.editing section:not(.editor).ice-locked .text {
 /*}*/
 
 .ice-locked-icon > button {
-    padding: 6px 3px 9px 11px;
-    font-size: 19px;
+    padding: 4px;
+    font-size: 15px;
     background-color: transparent;
     border: 1px solid transparent;
     border-radius: 2px;
     cursor: pointer;
     color: #aaa;
+    position: relative;
+    margin-bottom: 5px;
+    top: 2px;
+    outline: none;
+}
+button.icon-lock.unlock-button.locked:before {
+    position: relative;
+    left: 3px;
+}
+
+button.unlock-button.unlocked.icon-unlocked3:before {
+    left: 2px;
+    position: relative;
 }
 
 section:hover  .ice-locked-icon > button{
@@ -2548,7 +2568,10 @@ body.archived section .text {
     color: #a4a6a9;
     cursor: not-allowed;
 }
-
+section.readonly .status-container a.status:hover,
+body.archived section .status-container a.status:hover {
+    cursor: default !important;
+}
 .editarea div:last-child {
     margin-bottom: -22px !important;
 }
@@ -3650,7 +3673,7 @@ span.locked.tag-html-container-close {
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    background-color: #dcdfe4;
+    background-color: #eef0f3;
     border-radius: 7px;
     padding: 3px;
 }
@@ -3749,7 +3772,6 @@ span.locked.tag-html-container-close {
 
     p.split-shortcut, .editing .sid .txt {
         font-size: 10px;
-        margin: 12px 8px 0 -8px;
     }
 
 }
@@ -3852,7 +3874,7 @@ span.locked.tag-html-container-close {
     }
 
     .review .wrapper {
-        width: 98%;
+        width: 100%;
     }
 
     .text .target {
@@ -3885,12 +3907,10 @@ span.locked.tag-html-container-close {
 
     .sid {
         left: -6%;
-        width: 7%;
     }
 
     section.editor .sid {
         left: -5%;
-        width: 7%;
     }
 }
 
@@ -4021,12 +4041,6 @@ p.percent {
     border-top: 1px dotted #ccc;
 }
 
-/*
-body.filterOpen #outer {
-    margin-top: 80px !important;
-}
-*/
-
 .save-warning {
     display: none;
     width: 6px;
@@ -4057,11 +4071,11 @@ section.modified .save-warning {
     margin: -28px 0 0 30px !important;
 }
 
-body.searchActive:not(.filterOpen) #filterSwitch .numbererror {
+body.searchActive #filterSwitch .numbererror {
     display: block;
 }
 
-body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty {
+body.searchActive #filterSwitch .numbererror:empty {
     display: none;
 }
 
@@ -4393,18 +4407,30 @@ section .toolbar .autofillTag {
 }
 
 .split {
-    background: #9E9E9E;
-    color: #fff;
-    text-decoration: none;
-    padding: 7px 1px 3px 2px;
     border: 1px solid #5F5F5F;
-    border-radius: 4px;
-    width: 32px;
-    font-size: 20px;
-    margin: 0 auto;
-    display: block;
     cursor: pointer !important;
-    transform: rotate(-90deg);
+    font-size: 17px;
+    background-color: #9E9E9E;
+    border-radius: 2px;
+    color: #ffffff;
+    margin-bottom: 0px;
+    top: 2px;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    outline: none;
+}
+
+.split i {
+    padding: 0;
+    margin: 0;
+    width: 25px;
+    height: 25px;
+}
+
+.split .icon-split:before {
+    position: relative;
+    top: 3px;
 }
 
 .sid .actions.disabled .split {
@@ -4412,11 +4438,7 @@ section .toolbar .autofillTag {
 }
 
 .editor.split-action .actions .split {
-    display: block !important;
     background: #09beec;
-    -moz-box-shadow: inset 0 0 1px 1px #888;
-    -webkit-box-shadow: inset 0 0 1px 1px #888;
-    box-shadow: inset 0 0 1px 1px #888;
 }
 
 .splitBar .buttons a {
@@ -4923,26 +4945,20 @@ body.cattool .mgmt-table-mt .activemt {
 
 .splitArea {
     width: 45.5%;
-    z-index: 9999999;
     position: absolute;
-    min-height: 20px;
-    border: 2px solid #F00;
     padding: 3px 0px 5px 3px;
     margin: 0 0.7%;
     background: #efefef;
-    border-bottom: 1px solid #ccc;
     font-size: 18px;
     min-height: 70px;
     outline: 0;
     text-align: left;
     border-radius: 2px;
     line-height: 27px;
-    font-size: 18px;
     color: #000;
     border: 1px solid #727272;
     box-shadow: 0 1px 2px #ccc;
     -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal;
     word-break: normal !important;
     cursor: col-resize;
 }
@@ -5010,41 +5026,6 @@ body.cattool .mgmt-table-mt .activemt {
     background: #ee6633;
 }
 
-.submenu li.footerSwitcher {
-    float: left;
-    width: 24px !important;
-    height: 29px;
-    border-left: 0 !important;
-    background: #3aa9dd url(../../img/matches-down.png) 5px 12px no-repeat !important;
-    cursor: pointer;
-    border-bottom: 0;
-    padding-top: 1px;
-}
-
-.submenu li.footerSwitcher:hover {
-    opacity: 0.85;
-    /*border: 1px solid #000;*/
-}
-
-body.hideMatches .submenu li.footerSwitcher {
-    -moz-transform: scaleY(-1);
-    -o-transform: scaleY(-1);
-    -webkit-transform: scaleY(-1);
-    transform: scaleY(-1);
-    -ms-filter: "FlipV";
-    border-bottom: 1px solid #666666;
-    border-top: 1px solid #3aa9dd;
-}
-
-body.hideMatches .submenu {
-    margin-bottom: 0px;
-    border-bottom: none;
-}
-
-body.hideMatches .tab-switcher {
-    border-bottom: 1px solid rgba(158, 158, 158, 0.46);
-}
-
 /**
  * Ensure all tabbed content in the footer is only visible when
  * the segment completed loading.
@@ -5057,7 +5038,16 @@ section.loaded .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;
+    border-top: 1px solid #cccccc;
+    top: -1px;
 }
+
+
+/*This going to paypal*/
+/*section.editor .footer .tab.issues {
+    display: block !important;
+}*/
+/*Close - css going to paypal*/
 
 /*
  ******
@@ -5140,193 +5130,6 @@ section:hover .segment-side-buttons {
     color: #999;
 }
 
-/********** QA Component **********/
-.qa-wrapper {
-    position: absolute;
-    width: 100%;
-    top: 47px;
-}
-
-.qa-container {
-    background-color: #efefef;
-    height: 50px;
-    box-shadow: 0 1px 3px #666;
-    border-radius: 0 0 2px 2px;
-    display: none;
-    color: #4d4d4d;
-}
-
-.qa-container-inside {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 8% 0 5%;
-    align-items: center;
-}
-
-.qa-issues-types {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: row;
-    justify-content: flex-start;
-}
-
-.qa-actions {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.qa-issues-container, .qa-lexiqa-container {
-    width: 150px;
-    height: 50px;
-    align-items: center;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: normal;
-    position: relative;
-    cursor: pointer;
-    box-sizing: border-box;
-}
-
-.qa-issues-container:hover, .qa-lexiqa-container:hover {
-    background-color: #d0d0d0;
-}
-
-.qa-issues-container.selected, .qa-lexiqa-container.selected {
-    box-shadow: inset 0px -3px 0px #4d4d4d;
-}
-
-.qa-counter {
-    width: 125px;
-    font-size: 16px;
-    color: #333;
-}
-
-.qa-arrows {
-    width: 80px;
-}
-
-.qa-move-up, .qa-move-down {
-    width: 25px;
-    float: left;
-    height: 22px;
-    cursor: pointer;
-    border-radius: 3px;
-    padding: 5px 2px 2px;
-    border: 1px solid #C6C6C6;
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    background-color: #f8f8f8;
-    background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
-    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
-}
-
-.icon-qa-issues,
-.icon-conflicts,
-.icon-qa-total-issues,
-.icon-qa-lexiqa {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    margin-top: 8px;
-}
-
-.icon-conflicts {
-    margin-right: -2px;
-    margin-left: 15px;
-}
-
-.icon-qa-total-issues:before {
-    content: "\e903";
-    font-size: 25px;
-}
-
-.icon-conflicts:before {
-    content: "\f071";
-    font-size: 25px;
-}
-
-.icon-qa-issues:before {
-    content: "\ea7f";
-    font-size: 25px;
-}
-
-.icon-qa-lexiqa:before {
-    content: "\f044";
-    font-size: 25px;
-    margin-top: 0px;
-    display: block;
-}
-
-.qa-total-issues-counter {
-    top: 10px;
-    left: 50px;
-}
-
-.qa-issues-counter {
-    top: 10px;
-    left: 25px;
-}
-
-.qa-conflicts-issues-counter {
-    top: 10px;
-    left: 15px;
-}
-
-.qa-lexiqa-counter {
-    top: 10px;
-    left: 35px;
-}
-
-.icon-qa-right-arrow:before {
-    content: "\ea3c";
-    font-size: 18px;
-}
-
-.icon-qa-left-arrow:before {
-    content: "\ea40";
-    font-size: 18px;
-}
-
-.qa-move-up, .qa-move-down {
-    color: #797979;
-}
-
-.qa-move-down {
-    margin-left: 15px;
-}
-
-.qa-move-up:hover,
-.qa-move-down:hover {
-    color: black;
-}
-
-.qa-move-up:active,
-.qa-move-down:active {
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-    background-color: #eee;
-    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
-}
-
-.qa-arrows.qa-arrows-disabled .qa-move-up,
-.qa-arrows.qa-arrows-disabled .qa-move-down,
-.qa-arrows.qa-arrows-disabled .qa-move-up:hover,
-.qa-arrows.qa-arrows-disabled .qa-move-down:hover {
-    cursor: default;
-    opacity: 0.5;
-    color: #797979;
-}
-
-/************************************************/
 
 .edit-log {
     /*top: 5px;*/
@@ -5352,6 +5155,8 @@ section:hover .segment-side-buttons {
     display: inline-block;
     margin-right: 0;
     text-align: right;
+    z-index: 0;
+    position: relative;
 }
 
 .buttons li {

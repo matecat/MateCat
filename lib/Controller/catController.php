@@ -216,13 +216,13 @@ class catController extends viewController {
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->logged_user->email == $data[ 0 ][ 'job_owner' ] ) {
+        } elseif ( $this->user->email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->getUser(), $this->userRole ) ;
+        $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
         $this->template->user_keys = $userKeys->getKeys( $data[ 0 ] [ 'tm_keys' ] ) ;
 
         /**
@@ -251,7 +251,7 @@ class catController extends viewController {
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
-            $engineQuery->uid    = $this->logged_user->uid;
+            $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
@@ -295,7 +295,7 @@ class catController extends viewController {
         $activity->id_project = $this->pid;
         $activity->action     = $action;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->logged_user->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
@@ -350,7 +350,7 @@ class catController extends viewController {
                 }
                 $this->template->owner_email = $ownerMail;
 
-                if( $this->logged_user->email == $ownerMail || in_array( $this->logged_user->uid, $membersIdList ) ){
+                if( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ){
                     $this->template->jobOwnerIsMe        = true;
                 } else {
                     $this->template->jobOwnerIsMe        = false;
@@ -361,8 +361,8 @@ class catController extends viewController {
             $this->template->job_not_found       = $this->job_not_found;
             $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
             $this->template->job_cancelled       = $this->job_cancelled;
-            $this->template->logged_user         = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-            $this->template->extended_user       = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+            $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+            $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
 
             return;
 
@@ -375,7 +375,7 @@ class catController extends viewController {
         }
 
         $this->template->owner_email        = $this->job_owner;
-        $this->template->jobOwnerIsMe       = ( $this->logged_user->email == $this->job_owner );
+        $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
         $this->template->get_public_matches = ( !$this->job->only_private_tm );
         $this->template->job_not_found      = $this->job_not_found;
         $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
@@ -416,8 +416,6 @@ class catController extends viewController {
 
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-
-        $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
         //FIXME: temporarily disabled

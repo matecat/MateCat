@@ -33,14 +33,14 @@ class editlogDownloadController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->checkLogin();
+        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
         $activity->id_project = Projects_ProjectDao::findByJobId( $this->id_job, 60 * 60 )->id; //assume that all rows have the same project id
         $activity->action     = ActivityLogStruct::DOWNLOAD_EDIT_LOG;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
         
