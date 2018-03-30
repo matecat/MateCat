@@ -5,6 +5,7 @@ namespace API\V1;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use FeatureSet;
 
 class StatsController extends KleinController {
 
@@ -34,8 +35,8 @@ class StatsController extends KleinController {
 
         $response = array( 'stats' => $job_stats );
 
-        $featureSet = new \FeatureSet();
-        $featureSet->loadForProject( $job->getProject() )  ;
+        $featureSet = FeatureSet::loadForProject( $job->getProject() ) ;
+
         $response = $featureSet->filter('filterStatsControllerResponse', $response, array(
             'chunk' => $job ) );
 

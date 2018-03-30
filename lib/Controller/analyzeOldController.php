@@ -99,10 +99,12 @@ class analyzeOldController extends viewController {
             $this->page_type = 'project_analysis';
         }
 
-        $this->features = new FeatureSet();
 
         if ( $this->project ) {
-            $this->features->loadForProject( $this->project );
+            $this->features = FeatureSet::loadForProject( $this->project ) ;
+        }
+        else {
+            $this->features = new FeatureSet();
         }
 
     }

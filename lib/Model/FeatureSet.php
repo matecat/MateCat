@@ -1,10 +1,10 @@
 <?php
+
 use AbstractControllers\IController;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Features\Dqf;
 use Features\IBaseFeature;
-use Teams\TeamStruct;
 
 /**
  * Created by PhpStorm.
@@ -17,12 +17,22 @@ class FeatureSet {
     private $features = array();
 
     /**
-     * @param array $features
+     * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
+     * Otherwise it is populated with mandatory features.
+     *
+     * @param $features
+     *
+     * @throws Exception
      */
-    public function __construct( array $features = array() ) {
-        $this->features = $features;
-
-        $this->__loadFromMandatory();
+    public function __construct( $features = null ) {
+        if ( is_null( $features ) ) {
+            $this->features = self::__loadFromMandatory() ;
+        } else {
+            if ( !is_array( $features ) ) {
+                throw new Exception('features params should be an array');
+            }
+            $this->features = $features ;
+        }
     }
 
     public function getCodes() {
@@ -30,7 +40,10 @@ class FeatureSet {
     }
 
     public function loadFromString( $string ) {
-        $feature_codes = FeatureSet::splitString( $string );
+        $this->loadFromCodes( FeatureSet::splitString( $string ) ) ;
+    }
+
+    private function loadFromCodes( $feature_codes ) {
         $features = array();
 
         if ( !empty( $feature_codes ) ) {
@@ -45,9 +58,19 @@ class FeatureSet {
      * Features are attached to project via project_metadata.
      *
      * @param Projects_ProjectStruct $project
+     *
+     * @return FeatureSet
      */
-    public function loadForProject( Projects_ProjectStruct $project ) {
-        $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
+     public static function loadForProject( Projects_ProjectStruct $project ) {
+         $featureSet = new FeatureSet();
+         $featureSet->clear();
+         $featureSet->loadAutoActivableMandatoryFeatures();
+         $featureSet->loadFromString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
+         return $featureSet ;
+    }
+
+    public function clear() {
+         $this->features = [];
     }
 
     /**
@@ -69,14 +92,24 @@ class FeatureSet {
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-
-        if ( INIT::$DQF_ENABLED ) {
-            $features[] = new OwnerFeatures_OwnerFeatureStruct([
-                    'feature_code' => 'dqf'
-            ]) ;
-        }
-
         $this->features = static::merge( $this->features, $features );
+    }
+
+    /**
+     * Loads featurs that can be acivated automatically on project, reading from
+     * the list of MANDATORY_PLUGIN ( config.ini )
+     */
+    public function loadAutoActivableMandatoryFeatures() {
+        $features = self::__loadFromMandatory();
+
+        $returnable =  array_filter($features, function( BasicFeatureStruct $feature) {
+            $concreteClass = self::getObj( $feature ) ;
+            return $concreteClass->isAutoActivableOnProject();
+        }) ;
+
+        $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
+            return $feature->getFeatureStruct();
+        }, $returnable ) ) ;
     }
 
     /**
@@ -93,19 +126,19 @@ class FeatureSet {
      * 3. filter the list based on the return of autoActivateOnProject()
      * 4. populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
      *
-     *
      * @param $id_customer
      *
      * @return array
      */
-    public function loadAutoActivablesOnProject( $id_customer ) {
+    public function loadAutoActivableOwnerFeatures( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+
         $objs = array_map( function( $feature ) {
             return self::getObj( $feature );
         }, $features ) ;
 
         $returnable =  array_filter($objs, function( BaseFeature $obj ) {
-            return $obj->autoActivateOnProject();
+            return $obj->isAutoActivableOnProject();
         }) ;
 
         $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
@@ -165,6 +198,11 @@ class FeatureSet {
         return $filterable ;
     }
 
+    /**
+     * @param $feature
+     *
+     * @return null|IBaseFeature
+     */
     public static function getObj( $feature ) {
         /* @var $feature BasicFeatureStruct */
         $name = "Features\\" . $feature->toClassName() ;
@@ -230,9 +268,7 @@ class FeatureSet {
 
         if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
             $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
-            if ( !empty( $missing_dependencies ) ) {
-                throw new Exception('Missing dependencies for DQF: ' . implode(',', $missing_dependencies ) ) ;
-            }
+            $this->loadFromCodes( $missing_dependencies );
 
            usort( $this->features, function( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
                if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
@@ -273,22 +309,24 @@ class FeatureSet {
     }
 
     public static function splitString( $string ) {
-        return explode(',', $string);
+        return array_filter( explode(',', trim( $string ) ) ) ;
     }
 
     /**
-     * Loads plugins into the featureset from the list of mandatory plugins.
+     * Loads plugins into the FeatureSet from the list of mandatory plugins.
+     *
+     * @return BasicFeatureStruct[]|array
+     *
      */
-    private function __loadFromMandatory() {
+    private static function __loadFromMandatory() {
         $features = [] ;
 
         if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
-            foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
+            foreach( INIT::$MANDATORY_PLUGINS as $plugin ) {
                 $features[] = new BasicFeatureStruct(['feature_code' => $plugin ] );
             }
         }
-
-        $this->features = static::merge($this->features, $features);
+        return $features ;
     }
 
     /**

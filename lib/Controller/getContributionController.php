@@ -114,7 +114,7 @@ class getContributionController extends ajaxController {
         }
 
         $this->project = Projects_ProjectDao::findById( $this->jobData->id_project );
-        $this->feature_set->loadForProject( $this->project );
+        $this->feature_set = FeatureSet::loadForProject( $this->project ) ;
 
         /*
          * string manipulation strategy
