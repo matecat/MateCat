@@ -616,7 +616,7 @@ $(function () {
                             "type": "string"
                         },
                         {
-                            "name": "due_date",
+                            "name": "body",
                             "in": "body",
                             "description": "Date you want to set as due date. Date must be in the future",
                             "required": true,
@@ -629,7 +629,6 @@ $(function () {
 
                             }
                         }
-
                     ],
                     "responses": {
                         "200": {
@@ -1197,11 +1196,18 @@ $(function () {
                             "required" : true,
                         },
                         {
-                            "name" : "name",
-                            "type" : "string",
-                            "in" : "fromData",
-                            "required" : true
-                        }
+                            "name": "body",
+                            "in": "body",
+                            "description": "Parameters in JSON Body",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "properties":{
+                                    "name":  { "type": "string" },
+                                }
+
+                            }
+                        },
                     ],
                     "responses": {
                         "200": {
@@ -1395,27 +1401,20 @@ $(function () {
                             "in"       : "path",
                             "required" : true,
                         },
+                        {
+                            "name": "body",
+                            "in": "body",
+                            "description": "Parameters in JSON Body",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "properties":{
+                                    "id_assignee": { "type": "integer" },
+                                    "id_team":  { "type": "integer" },
+                                    "name":  { "type": "string" },
+                                }
 
-                        {
-                            "name" : "id_assignee",
-                            "type" : "integer",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Provide a user's `uid` property to change project assignee"
-                        },
-                        {
-                            "name" : "id_team",
-                            "type" : "integer",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Provide a given project's team to change project team"
-                        },
-                        {
-                            "name" : "name",
-                            "type" : "string",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Changes the project's name"
+                            }
                         },
                     ],
                     "responses": {
