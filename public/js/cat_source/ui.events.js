@@ -231,8 +231,7 @@ $.extend(UI, {
 
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
-			$(this).toggleClass('unlock');
-			if ($(this).hasClass('unlock')) {
+			if (UI.tagLockEnabled) {
 				UI.disableTagMark();
 			} else {
 				UI.enableTagMark();

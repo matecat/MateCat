@@ -4280,7 +4280,6 @@ del.diff {
 section .toolbar .tagModeToggle,
 section .toolbar .autofillTag {
     float: left;
-    display: none;
     font-size: 60%;
     text-decoration: none;
 }
@@ -4329,7 +4328,6 @@ section .toolbar span {
 }
 
 .tagLockCustomize:before {
-    content: "\e98f";
     font-size: 19px;
     display: block;
     margin-left: 5px;

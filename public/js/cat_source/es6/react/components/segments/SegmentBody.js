@@ -25,7 +25,7 @@ class SegmentBody extends React.Component {
             return false;
         }
 
-        if (!UI.taglockEnabled) {
+        if (!UI.tagLockEnabled) {
             return false;
         }
 

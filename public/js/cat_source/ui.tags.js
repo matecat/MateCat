@@ -41,15 +41,13 @@ $.extend(UI, {
 		return(mismatch);
 	},
     disableTagMark: function() {
-		this.taglockEnabled = false;
-		this.body.addClass('tagmarkDisabled');
-        SegmentActions.updateAllSegments();
+		this.tagLockEnabled = false;
+        SegmentActions.disableTagLock();
 
 	},
 	enableTagMark: function() {
-		this.taglockEnabled = true;
-		this.body.removeClass('tagmarkDisabled');
-        SegmentActions.updateAllSegments();
+		this.tagLockEnabled = true;
+        SegmentActions.enableTagLock();
 	},
     //TODO This method do the same of UI.transformTextForLockTags that receive the text not the segment
 	markSuggestionTags: function(segment) {
@@ -185,7 +183,7 @@ $.extend(UI, {
     },
 
     detectTagType: function (area) {
-        if (!this.taglockEnabled || config.tagLockCustomizable ) {
+        if (!this.tagLockEnabled || config.tagLockCustomizable ) {
             return false;
         }
         $('span.locked', area).each(function () {

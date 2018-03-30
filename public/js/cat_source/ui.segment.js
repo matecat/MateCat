@@ -234,7 +234,7 @@
                 decoded_text = text;
             }
             decoded_text = UI.decodePlaceholdersToText(decoded_text || '');
-            if ( !(config.tagLockCustomizable && $('body').hasClass('tagmarkDisabled')) ) {
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
                 decoded_text = UI.transformTextForLockTags(decoded_text);
             }
             return decoded_text;
