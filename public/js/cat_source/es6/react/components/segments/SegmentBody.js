@@ -51,8 +51,9 @@ class SegmentBody extends React.Component {
 
             var prevNumTags = $('span.locked', area).length;
 
-            if (LXQ.enabled())
+            if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
+            }
             if ($('span.locked', area).length != prevNumTags){
                 UI.closeTagAutocompletePanel();
             }

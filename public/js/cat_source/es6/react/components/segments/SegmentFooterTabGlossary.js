@@ -96,8 +96,10 @@ class SegmentFooterTabGlossary extends React.Component {
 
         // find current segment record
         let record = MateCat.db.segments.by('sid', this.props.id_segment );
-        record.glossary_matches = matches ;
-        MateCat.db.segments.update( record ) ;
+        if (record) {
+            record.glossary_matches = matches ;
+            MateCat.db.segments.update( record ) ;
+        }
     }
 
     deleteMatch(name, idMatch, event) {
