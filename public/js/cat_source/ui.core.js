@@ -2239,7 +2239,9 @@ UI = {
         }
     },
     setTagLockCustomizeCookie: function (first) {
-        if(first && !config.tagLockCustomizable) return;
+        if(first && !config.tagLockCustomizable) {
+            UI.tagLockEnabled = true;
+        };
         var cookieName = 'tagLockDisabled';
 
         if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
