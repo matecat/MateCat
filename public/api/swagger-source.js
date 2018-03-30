@@ -3166,6 +3166,27 @@ $(function () {
                     }
                 }
             },
+
+            "Segment": {
+                "type": "object",
+                "properties": {
+                    "id_segment": {"type": "integer"},
+                    "autopropagated_from": {"type": "string"},
+                    "status": {"type": "string"},
+                    "translation": {"type": "string"},
+                    "translation_date": {"type": "string"},
+                    "match_type": {"type": "string"},
+                    "context_hash": {"type": "string"},
+                    "locked": {"type": "integer"},
+                    "version_number": {"type": "integer"},
+                    "issues": {
+                        "type": "array",
+                        "items": {
+                            "$ref" : "#/definitions/Issue"
+                        }
+                    }
+                }
+            }
         }
     };
 
