@@ -153,9 +153,11 @@ class SegmentFooterTabMatches extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
-    componentWillMount() {
+    /**
+     * Do not delete, overwritten by plugin
+     */
+    componentDidUpdate() {}
 
-    }
     allowHTML(string) {
         return { __html: string };
     }
