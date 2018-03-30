@@ -201,23 +201,6 @@ class ProjectManager {
         $this->projectStructure['id_team'] = $team->id ;
     }
 
-    /**
-     * @param $id
-     *
-     * @throws Exceptions_RecordNotFound
-     */
-    public function setProjectIdAndLoadProject( $id ) {
-        $this->project = Projects_ProjectDao::findById($id, 60 * 60);
-        if ( $this->project == FALSE ) {
-            throw new Exceptions_RecordNotFound("Project was not found: id $id ");
-        }
-        $this->projectStructure['id_project'] = $this->project->id ;
-        $this->projectStructure['id_customer'] = $this->project->id_customer ;
-
-        $this->reloadFeatures();
-
-    }
-
     public function setProjectAndReLoadFeatures( Projects_ProjectStruct $pStruct ){
         $this->project = $pStruct;
         $this->projectStructure['id_project'] = $this->project->id ;
