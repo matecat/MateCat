@@ -172,7 +172,7 @@ class SegmentFooterTabIssues extends React.Component {
                     return <div key={item.id} className="item" data-value={item.id} onClick={self.categoryOptionChange.bind(self, item)}>{item.label}</div>;
                 });
                 categoryOption = <div className="item" data-value={category.id} key={i}>
-                    <div className="text">{category.label} <i className="icon-sort-down icon"/></div>
+                    <div className="text">{category.label} <i className="icon-chevron-right icon" /></div>
 
                     <div className="menu">
                         {subCategories}
@@ -183,10 +183,10 @@ class SegmentFooterTabIssues extends React.Component {
             }
             categoryOptions.push( categoryOption );
         } );
-        return <div className="ui fluid dropdown type" ref={( input ) => { this.selectIssueCategory = input;}}>
+        return <div className="ui fluid dropdown category" ref={( input ) => { this.selectIssueCategory = input;}}>
             <div className="text ellipsis-messages">Select issue</div>
             <i className="icon-sort-down"/>
-            <div className="right menu">
+            <div className="right menu sub-category">
                 {categoryOptions}
             </div>
         </div>
@@ -210,7 +210,7 @@ class SegmentFooterTabIssues extends React.Component {
             } );
         }
         severitySelect =
-            <select className="ui fluid dropdown" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
+            <select className="ui fluid dropdown severity" ref={( input ) => { this.selectIssueSeverity = input;}} onChange={( e ) => this.severityOptionChange( e )} disabled={!this.state.categorySelected}>
                 <option value="-1">Select severity</option>
                 {categorySeverities}
             </select>;
@@ -224,30 +224,22 @@ class SegmentFooterTabIssues extends React.Component {
             "add-issue-segment" : this.state.isChangedTextarea
         });
         let categoryClass = classnames({
-            "field" : true,
+            "field select-category" : true,
             "select_type": _.isNull(this.state.categorySelected) || this.state.categorySelected === -1
         });
         let severityClass = classnames({
-            "field" : true,
+            "field select-severity" : true,
             "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
         });
         return <div className={containerClasses}>
             <div className="border-box-issue">
                 <div className="creation-issue-container ui form">
                     <div className="ui grid">
-                        <div className="height wide column">
-                            <div className="select-category">
-                                <div className={categoryClass}>
-                                    {this.getCategoryDropdown()}
-                                </div>
-                            </div>
+                        <div className={categoryClass}>
+                            {this.getCategoryDropdown()}
                         </div>
-                        <div className="height wide column">
-                            <div className="select-severity">
-                                <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
-                                    {severitySelect}
-                                </div>
-                            </div>
+                        <div className={severityClass} ref={( input ) => { this.selectIssueCategoryWrapper = input;}}>
+                            {severitySelect}
                         </div>
                     </div>
                 </div>
