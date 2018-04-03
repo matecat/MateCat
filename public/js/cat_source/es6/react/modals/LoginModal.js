@@ -174,7 +174,7 @@ class LoginModal extends React.Component {
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
-                        <a className="btn-confirm-medium" onClick={this.otherServiceLogin.bind(this)}>Login with another service</a>
+                        {/*<a className="btn-confirm-medium" onClick={this.otherServiceLogin.bind(this)}>Login with another service</a>*/}
 
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
 

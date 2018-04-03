@@ -48,7 +48,7 @@
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().done(function(response) {
-                if (response.errors && response.errors.length) {
+                if (response.errors && (response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment()
                 } else {
