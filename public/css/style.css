@@ -560,6 +560,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
+    background: #f2f4f7;
 }
 
 .editing .sid .txt {
@@ -614,8 +615,8 @@ p.split-shortcut {
 }
 
 .splitStart .sid {
-    background: url(../img/split-bg.png) no-repeat;
-    background-position: 37px 3px;;
+    background: url(../../img/split-bg.png) no-repeat;
+    background-position: 49% 23px;
 }
 
 .splitInner .sid {
