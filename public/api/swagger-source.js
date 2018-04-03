@@ -139,7 +139,8 @@ $(function () {
                             "description": "Enable suggestions from the Public TM",
                             "required": false,
                             "type": "string",
-                            "default": 1,
+                            "default": "true",
+                            "enum": ["true", "false"]
                         },
                         {
                             "name": "pretranslate_100",
@@ -152,7 +153,7 @@ $(function () {
                         {
                             "name": "metadata",
                             "in": "formData",
-                            "description": "Metadata for the project must be sent in JSON format",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
                             "required": false,
                             "type": "string",
                         }
@@ -372,7 +373,8 @@ $(function () {
                             "description": "Enable suggestions from the Public TM",
                             "required": false,
                             "type": "string",
-                            "default": 1,
+                            "default": "true",
+                            "enum": ["true", "false"]
                         },
                         {
                             "name": "pretranslate_100",
@@ -385,7 +387,7 @@ $(function () {
                         {
                             "name": "metadata",
                             "in": "formData",
-                            "description": "Metadata for the project must be sent in JSON format",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
                             "required": false,
                             "type": "string",
                         }
