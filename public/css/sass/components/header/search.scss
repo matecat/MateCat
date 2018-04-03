@@ -129,3 +129,7 @@
         text-transform: capitalize;
     }
 }
+
+input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
+    width: 95px;
+}
