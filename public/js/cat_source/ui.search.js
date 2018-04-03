@@ -257,6 +257,7 @@ $.extend(UI, {
 		if (c > 0) {
 			$('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
 		} else {
+            $('#filterSwitch .numbererror').text('');
 		}
 	},
 	execNext: function() {
