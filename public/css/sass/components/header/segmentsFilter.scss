@@ -90,7 +90,7 @@
     }
 
     .advanced-filter-searchbox input[type=button], body.filtering .advanced-filter-searchbox input[type=submit] {
-        width: 80px !important;
+        width: fit-content !important;
         background: #dcdedf !important;
     }
 
@@ -156,7 +156,7 @@
     }
 
     #setStatus-filter {
-        width: 110px !important;
+        margin-right: 0;
     }
 
     section.muted .segment-side-buttons {

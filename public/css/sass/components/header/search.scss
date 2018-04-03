@@ -25,12 +25,12 @@
         float: right;
         font-weight: bold;
         margin: 4px 10px 3px 0;
-        padding: 2px 20px;
+        padding: 2px 10px;
         height: 28px;
         background: #eeeeef;
         cursor: pointer;
         font-size: 14px;
-        width: 120px;
+        width: fit-content;
         text-transform: uppercase;
         &:disabled {
             cursor: not-allowed;
@@ -46,7 +46,7 @@
         padding: 10px 4% 0 4% !important;
     }
     input[type=button]:hover {
-        border-width: 2px;
+        border-width: 1px;
     }
     .search-input {
         width: 200px;
@@ -99,7 +99,7 @@
     }
     .block {
         float: left;
-        margin-right: 20px;
+        margin-right: 10px;
         text-align: left;
         -webkit-box-sizing: border-box;
         -moz-box-sizing: border-box;
