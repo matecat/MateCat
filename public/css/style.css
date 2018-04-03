@@ -70,10 +70,12 @@ header .wrapper {
     outline: none;
     word-wrap: break-word;
     word-break: normal;
+    line-height: 25px;
 }
 
 .text .source.item {
     padding-bottom: 10px;
+    padding-top: 11px !important;
 }
 
 .text a {
@@ -2579,10 +2581,10 @@ body.archived section .status-container a.status:hover {
 .editor .editarea {
     width: 100%;
     font-size: 18px;
-    margin: -5px 0 5px -11px;
+    margin: 2px 0 5px -11px;
     word-break: normal;
     font-variant-ligatures: none;
-    line-height: 27px;
+    line-height: 25px;
     outline: none;
     color: #000;
     border: 1px solid #dedede;
