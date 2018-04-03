@@ -107,9 +107,7 @@ class FeatureSet {
             return $concreteClass->isAutoActivableOnProject();
         }) ;
 
-        $this->features = static::merge( $this->features, array_map( function( BaseFeature $feature ) {
-            return $feature->getFeatureStruct();
-        }, $returnable ) ) ;
+        $this->features = static::merge( $this->features, $returnable ) ;
     }
 
     /**
