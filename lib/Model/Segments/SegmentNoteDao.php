@@ -2,6 +2,11 @@
 
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $notes
+     *
+     * @throws Exception
+     */
     public static function bulkInsertFromProjectStructure( $notes ) {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES " ;
 
@@ -31,13 +36,28 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
         }
 
         $chunked = array_chunk( $insert_values, $chunk_size ) ;
+        Log::doLog( "Notes: Total Rows to insert: " . count( $chunked ) );
+
         $conn = Database::obtain()->getConnection();
 
-        foreach( $chunked as $chunk ) {
-            $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ?, ? ) " ) ;
-            $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
-            $flattened_values = array_reduce( $chunk, 'array_merge', array() );
-            $stmt->execute( $flattened_values ) ;
+        try {
+
+            foreach( $chunked as $i => $chunk ) {
+                $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ?, ? ) " ) ;
+                $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
+                $flattened_values = array_reduce( $chunk, 'array_merge', array() );
+                $stmt->execute( $flattened_values ) ;
+                Log::doLog( "Notes: Executed Query " . ( $i + 1 ) );
+            }
+
+        } catch ( Exception $e ){
+            Log::doLog( "Notes import - DB Error: " . $e->getMessage() . " - \n" );
+            /** @noinspection PhpUndefinedVariableInspection */
+            Log::doLog( "Notes import - Statement: " . $stmt->queryString . "\n" );
+            Log::doLog( "Notes Chunk Dump: " . var_export( $chunk , true ) . "\n" );
+            /** @noinspection PhpUndefinedVariableInspection */
+            Log::doLog( "Notes Flattened Values Dump: " . var_export( $flattened_values , true ) . "\n" );
+            throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0 , $e );
         }
 
     }
@@ -71,8 +91,8 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $start start segment
-     * @param $stop stop segment
+     * @param $start int start segment
+     * @param $stop int stop segment
      * @return array array aggregated by id_segment
      */
 
