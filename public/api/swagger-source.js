@@ -858,7 +858,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/projects/{id_project}/{password}/active": {
+            "/api/v2/projects/{id_project}/{password}/active": {
                 "post": {
                     "tags": [
                         "Project"
