@@ -164,9 +164,10 @@ class ProjectManager {
         }
 
         $this->features = new FeatureSet( $features );
+        $this->features->loadAutoActivableMandatoryFeatures();
 
-        if ( !empty( $this->projectStructure[ 'id_customer' ] ) ) {
-            $this->features->loadAutoActivablesOnProject( $this->projectStructure[ 'id_customer' ] );
+        if ( !empty( $this->projectStructure['id_customer'] ) ) {
+           $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(

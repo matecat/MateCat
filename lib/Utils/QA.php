@@ -588,7 +588,8 @@ class QA {
      */
     public static function JSONtoExceptionList( $jsonString ){
         $that = new static( null, null );
-        array_walk( json_decode( $jsonString, true ), function( $errArray, $key ) use ( $that ){
+        $jsonValue = json_decode( $jsonString, true );
+        array_walk( $jsonValue, function( $errArray, $key ) use ( $that ){
             $that->_addError( $errArray[ 'outcome' ] );
         });
         return $that->exceptionList;

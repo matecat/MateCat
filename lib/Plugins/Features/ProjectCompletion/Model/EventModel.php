@@ -42,8 +42,7 @@ class EventModel {
                 $this->chunk, $this->eventStruct
         );
 
-        $featureSet = new FeatureSet() ;
-        $featureSet->loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
+        $featureSet = FeatureSet::loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
         $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
     }
 

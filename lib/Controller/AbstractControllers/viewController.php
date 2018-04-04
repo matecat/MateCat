@@ -173,16 +173,12 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        if( $this->isLoggedIn() ){
-            $this->template->logged_user   = $this->user->shortName() ;
-            $this->template->extended_user = $this->user->fullName() ;
+        $this->template->logged_user   = $this->user->shortName() ;
+        $this->template->extended_user = $this->user->fullName() ;
 
-            $this->template->isLoggedIn    = true;
-            $this->template->userMail      = $this->user->email;
-            $this->collectFlashMessages();
-        } else {
-            Log::doLog( "Bad Configuration" );
-        }
+        $this->template->isLoggedIn    = $this->userIsLogged;
+        $this->template->userMail      = $this->user->email;
+        $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
 

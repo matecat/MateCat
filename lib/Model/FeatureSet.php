@@ -1,11 +1,11 @@
 <?php
+
 use AbstractControllers\IController;
 use API\V2\Exceptions\AuthenticationError;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Features\Dqf;
 use Features\IBaseFeature;
-use Teams\TeamStruct;
 
 /**
  * Created by PhpStorm.
@@ -18,7 +18,12 @@ class FeatureSet {
     private $features = array();
 
     /**
-     * @param array $features
+     * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
+     * Otherwise it is populated with mandatory features.
+     *
+     * @param $features
+     *
+     * @throws Exception
      */
     public function __construct( array $features = array() ) {
         $this->features = $features;
@@ -95,6 +100,20 @@ class FeatureSet {
     }
 
     /**
+     * Loads featurs that can be acivated automatically on project, reading from
+     * the list of MANDATORY_PLUGIN ( config.ini )
+     */
+    public function loadAutoActivableMandatoryFeatures() {
+
+        $returnable =  array_filter($this->features, function( BasicFeatureStruct $feature) {
+            $concreteClass = $feature->toNewObject();
+            return $concreteClass->isAutoActivableOnProject();
+        }) ;
+
+        $this->merge( $returnable );
+    }
+
+    /**
      * Loads features that can be activated automatically on proejct, i.e. those that
      * don't require a parameter to be passed from the UI.
      *
@@ -112,15 +131,16 @@ class FeatureSet {
      *
      * @throws Exception
      */
-    public function loadAutoActivablesOnProject( $id_customer ) {
+    public function loadAutoActivableOwnerFeatures( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+
         $objs = array_map( function( $feature ) {
             /* @var $feature BasicFeatureStruct */
             return $feature->toNewObject();
         }, $features ) ;
 
         $returnable =  array_filter($objs, function( BaseFeature $obj ) {
-            return $obj->autoActivateOnProject();
+            return $obj->isAutoActivableOnProject();
         }) ;
 
         $this->merge( array_map( function( BaseFeature $feature ) {
@@ -185,18 +205,6 @@ class FeatureSet {
         return $filterable ;
     }
 
-    /**
-     * Loads the features starting from a given team.
-     *
-     * @param TeamStruct $team
-     *
-     * @throws Exception
-     */
-    public function loadFromTeam( TeamStruct $team ) {
-        $dao = new OwnerFeatures_OwnerFeatureDao() ;
-        $features = $dao->getByTeam( $team ) ;
-        $this->merge( $features );
-    }
 
     /**
      * @param $method
@@ -310,11 +318,14 @@ class FeatureSet {
     }
 
     public static function splitString( $string ) {
-        return explode(',', $string);
+        return array_filter( explode(',', trim( $string ) ) ) ;
     }
 
     /**
-     * Loads plugins into the featureset from the list of mandatory plugins.
+     * Loads plugins into the FeatureSet from the list of mandatory plugins.
+     *
+     * @return BasicFeatureStruct[]|array
+     *
      */
     private function __loadFromMandatory() {
         $features = [] ;
