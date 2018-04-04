@@ -2239,26 +2239,28 @@ UI = {
         }
     },
     setTagLockCustomizeCookie: function (first) {
-        if(first && !config.tagLockCustomizable) return;
+        if(first && !config.tagLockCustomizable) {
+            UI.tagLockEnabled = true;
+            return true;
+        };
         var cookieName = 'tagLockDisabled';
 
         if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
             if(first) {
                 if(Cookies.get(cookieName + '-' + config.id_job) == 'true') {
-                    $('body').addClass('tagmarkDisabled');
+                    this.tagLockEnabled = false;
                     setTimeout(function() {
                         $('.editor .tagLockCustomize').addClass('unlock');
                     }, 100);
                 } else {
-                    $('body').removeClass('tagmarkDisabled')
+                    this.tagLockEnabled = true;
                 }
             } else {
-                cookieVal = ($('body').hasClass('tagmarkDisabled'))? 'true' : 'false';
-                Cookies.set(cookieName + '-' + config.id_job, cookieVal,  { expires: 30 });
+                Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled,  { expires: 30 });
             }
 
         } else {
-            Cookies.set(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
+            Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30 });
         }
 
     },

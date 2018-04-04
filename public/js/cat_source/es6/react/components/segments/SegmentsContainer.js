@@ -32,7 +32,7 @@ class SegmentsContainer extends React.Component {
     }
 
     updateAllSegments() {
-        this.forceUpdate()
+        this.forceUpdate();
     }
 
     renderSegments(segments, fid) {
@@ -85,7 +85,8 @@ class SegmentsContainer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return (!nextState.segments.equals(this.state.segments) ||
-        nextState.splitGroup !== this.state.splitGroup)
+        nextState.splitGroup !== this.state.splitGroup ||
+        nextState.tagLockEnabled !== this.state.tagLockEnabled)
     }
 
     componentWillUpdate() {
@@ -110,6 +111,7 @@ class SegmentsContainer extends React.Component {
                 isReviewImproved={isReviewImproved}
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}
+                tagLockEnabled={self.state.tagLockEnabled}
                 tagModesEnabled={self.props.tagModesEnabled}
                 speech2textEnabledFn={self.props.speech2textEnabledFn}
                 reviewType={self.props.reviewType}

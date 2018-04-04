@@ -11,7 +11,7 @@ APP.createTMKey = function () {
     APP.pendingCreateTMkey = true;
 
     //call API
-    APP.doRequest( {
+    return APP.doRequest( {
         data: {
             action: 'createRandUser'
         },

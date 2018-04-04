@@ -70,10 +70,12 @@ header .wrapper {
     outline: none;
     word-wrap: break-word;
     word-break: normal;
+    line-height: 25px;
 }
 
 .text .source.item {
     padding-bottom: 10px;
+    padding-top: 11px !important;
 }
 
 .text a {
@@ -561,7 +563,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 }
 
 .editing .sid .txt {
-    /*background: #f2f4f7;*/
+    background: #f2f4f7;
 }
 
 section .sid .txt input {
@@ -622,12 +624,12 @@ p.split-shortcut {
 }
 
 .splitEnd .sid {
-    background: url(../img/split-bg.png) no-repeat;
-    background-position: 37px bottom;
+    background: url(../../img/split-bg.png) no-repeat;
+    background-position: 49% bottom;
 }
 
 .editor.splitStart .sid {
-    background-position: 36px 3px;
+    background-position: 50% 43px;
 }
 
 .editor.splitInner .sid {
@@ -2242,9 +2244,9 @@ body.searchActive .search-display {
     height: 20px;
     background: url(../img/loading.gif) 0 0 no-repeat !important;
     position: absolute;
-    left: -47px;
-    bottom: -30px;
+    bottom: 11px;
     display: none;
+    left: 50%;
     background-size: 20px 20px !important;
 }
 
@@ -2267,7 +2269,7 @@ body.searchActive .search-display {
 
 }
 
-.loader_on {
+section.editor .loader_on {
     display: block !important
 }
 
@@ -2579,10 +2581,10 @@ body.archived section .status-container a.status:hover {
 .editor .editarea {
     width: 100%;
     font-size: 18px;
-    margin: -5px 0 5px -11px;
+    margin: 2px 0 5px -11px;
     word-break: normal;
     font-variant-ligatures: none;
-    line-height: 27px;
+    line-height: 25px;
     outline: none;
     color: #000;
     border: 1px solid #dedede;
@@ -4280,7 +4282,6 @@ del.diff {
 section .toolbar .tagModeToggle,
 section .toolbar .autofillTag {
     float: left;
-    display: none;
     font-size: 60%;
     text-decoration: none;
 }
@@ -4329,7 +4330,6 @@ section .toolbar span {
 }
 
 .tagLockCustomize:before {
-    content: "\e98f";
     font-size: 19px;
     display: block;
     margin-left: 5px;
@@ -4337,9 +4337,9 @@ section .toolbar span {
 
 section .toolbar .autofillTag {
     float: left;
-    display: none;
     font-size: 60%;
     text-decoration: none;
+    display: none;
 }
 
 .editToolbar {

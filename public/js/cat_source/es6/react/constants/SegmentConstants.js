@@ -50,5 +50,7 @@ module.exports = keyMirror({
     SET_BULK_SELECTION_SEGMENTS: null,
     SET_MUTED_SEGMENTS:null,
     REMOVE_MUTED_SEGMENTS: null,
-    FIND_CONCORDANCE: null
+    FIND_CONCORDANCE: null,
+    DISABLE_TAG_LOCK: null,
+    ENABLE_TAG_LOCK: null
 });

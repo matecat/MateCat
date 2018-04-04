@@ -21,6 +21,7 @@ class SegmentTarget extends React.Component {
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
+        this.toggleTagLock = this.toggleTagLock.bind(this);
     }
 
     replaceTranslation(sid, translation) {
@@ -30,6 +31,13 @@ class SegmentTarget extends React.Component {
             });
         }
     }
+
+    toggleTagLock(sid, source) {
+        this.setState({
+            translation: this.props.segment.decoded_translation
+        });
+    }
+
     setOriginalTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
             this.setState({
@@ -67,12 +75,16 @@ class SegmentTarget extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         this.afterRenderActions();
 
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 
@@ -101,8 +113,13 @@ class SegmentTarget extends React.Component {
         } else {
             var s2tMicro = "";
             var tagModeButton = "";
+            var tagCopyButton = "";
+            var tagLockCustomizable;
+            if ( (this.props.segment.segment.match( /\&lt;.*?\&gt;/gi ) && config.tagLockCustomizable ) ) {
+                var tagLockCustomizable = (UI.tagLockEnabled  ? <a href="#" className="tagLockCustomize icon-lock" title="Toggle Tag Lock"/> :
+                    <a href="#" className="tagLockCustomize icon-unlocked3" title="Toggle Tag Lock"/>);
+            }
 
-            var tagLockCustomizable = ( this.props.segment.segment.match( /\&lt;.*?\&gt;/gi ) ? $('#tpl-taglock-customize').html() : null );
 
             //Speeche2Text
             var s2t_enabled = this.props.speech2textEnabledFn();
@@ -126,7 +143,7 @@ class SegmentTarget extends React.Component {
 
             //Tag Mode Buttons
 
-            if (this.props.tagModesEnabled && !this.props.enableTagProjection && !config.tagLockCustomizable) {
+            if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
                 var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
                     <a href="#" className={"tagModeToggle " + buttonClass} alt="Display full/short tags" title="Display full/short tags">
@@ -134,14 +151,13 @@ class SegmentTarget extends React.Component {
                         <span className="icon-tag-expand"/>
                         <span className="icon-chevron-right"/>
                     </a>;
+                tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
+
             }
 
             //Text Area
             textAreaContainer = <div className="textarea-container">
 
-                                    <span className="loader"/>
-
-                                    {/*<div className="editarea-container" id={"editarea-container-"+ this.props.segment.sid}/>*/}
 
                                     <EditArea
                                         segment={this.props.segment}
@@ -153,12 +169,10 @@ class SegmentTarget extends React.Component {
                                     {s2tMicro}
                                     <div className="original-translation" style={{display: 'none'}} dangerouslySetInnerHTML={ this.allowHTML(this.state.originalTranslation) }/>
                                     <div className="toolbar">
-                                        <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}/>
+                                        {tagLockCustomizable}
                                         {tagModeButton}
-                                        <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
-
+                                        {tagCopyButton}
                                         <ul className="editToolbar">
-
                                             <li className="uppercase" title="Uppercase"/>
                                             <li className="lowercase" title="Lowercase"/>
                                             <li className="capitalize" title="Capitalized"/>

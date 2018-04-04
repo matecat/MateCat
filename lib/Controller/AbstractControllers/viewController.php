@@ -249,12 +249,13 @@ abstract class viewController extends controller {
                 $this->template                   = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
             }
 
-            $this->template->basepath             = INIT::$BASEURL;
-            $this->template->hostpath             = INIT::$HTTPHOST;
-            $this->template->build_number         = INIT::$BUILD_NUMBER;
-            $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
-            $this->template->supportedBrowser     = $this->supportedBrowser ;
-            $this->template->platform             = $this->platform ;
+            $this->template->basepath            = INIT::$BASEURL;
+            $this->template->hostpath            = INIT::$HTTPHOST;
+            $this->template->build_number        = INIT::$BUILD_NUMBER;
+            $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS;
+            $this->template->supportedBrowser    = $this->supportedBrowser;
+            $this->template->platform            = $this->platform;
+            $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
 
             $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;

@@ -160,6 +160,16 @@ var SegmentActions = {
         });
     },
 
+    disableTagLock: function (  ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.DISABLE_TAG_LOCK
+        });
+    },
+    enableTagLock: function (  ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ENABLE_TAG_LOCK
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

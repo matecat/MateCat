@@ -8,7 +8,7 @@ class SegmentsFilter extends React.Component {
             {value: 'unlocked', label: 'Unlocked'},
             {value: 'repetitions', label: 'Repetitions'},
             {value: 'mt', label: 'MT'},
-            {value: 'matches', label: 'Matches'},
+            {value: 'matches', label: '100% Matches'},
             {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
             {value: 'fuzzies_75_84', label: 'fuzzies_75_84'},
             {value: 'fuzzies_85_94', label: 'fuzzies_85_94'},
@@ -244,10 +244,10 @@ class SegmentsFilter extends React.Component {
         if (this.state.filtering) {
             if (this.state.filteredCount > 0) {
                 filteringInfo =
-                    <div className="block filter-segments-count">Showing {this.state.filteredCount} segments</div>;
+                    <div className="block filter-segments-count">{this.state.filteredCount} segments</div>;
             }
             else {
-                filteringInfo = <div className="block filter-segments-count">No segments matched by this filter</div>;
+                filteringInfo = <div className="block filter-segments-count">0 segments</div>;
             }
 
         }
@@ -351,7 +351,7 @@ class SegmentsFilter extends React.Component {
                 </div>
 
                 <div className="block">
-                    <label htmlFor="search-projectname">More filters</label>
+                    <label htmlFor="search-projectname">Filters</label>
                     <select
                         onChange={this.moreFilterSelectChanged.bind(this)}
                         value={this.state.samplingType} className="search-select">

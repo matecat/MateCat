@@ -311,14 +311,14 @@ $.extend( UI, {
         // if (e.ctrlKey || e.shiftKey){
         //     return;
         // }
-        if( (e.which == 60) && (UI.taglockEnabled) ) { // opening tag sign
+        if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
             if($('.tag-autocomplete').length) {
                 e.preventDefault();
                 return false;
             }
             UI.openTagAutocompletePanel();
         }
-        if( (e.which == 62) && (UI.taglockEnabled) ) { // closing tag sign
+        if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
             if($('.tag-autocomplete').length) {
                 e.preventDefault();
                 return false;

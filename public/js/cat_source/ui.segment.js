@@ -48,7 +48,7 @@
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().done(function(response) {
-                if (response.errors && response.errors.length) {
+                if (response.errors && (response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment()
                 } else {
@@ -145,7 +145,7 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment)  && currentSegment.hasClass('enableTP');
             if (this.enableTagProjection && tagProjectionEnabled) {
-                SegmentActions.removeClassToSegment(UI.getSegmentId(currentSegment), 'enableTP');
+                SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
                 currentSegment.data('tagprojection', 'tagged');
                 this.copySourcefromDataAttribute(segment);
                 UI.createButtons();
@@ -234,7 +234,7 @@
                 decoded_text = text;
             }
             decoded_text = UI.decodePlaceholdersToText(decoded_text || '');
-            if ( !(config.tagLockCustomizable && $('body').hasClass('tagmarkDisabled')) ) {
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
                 decoded_text = UI.transformTextForLockTags(decoded_text);
             }
             return decoded_text;

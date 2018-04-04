@@ -169,7 +169,9 @@ UI = {
         if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
         if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
-        APP.createTMKey();
+        APP.createTMKey().done(function (  ) {
+            UI.checkTMKeysUpdateChecks();
+        });
         var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         if (extension && extension === "g") {
             textToDisplay = '<span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
@@ -180,6 +182,7 @@ UI = {
         $('.warning-message .translation-memory-option-panel').off('click').on('click', function() {
             APP.openOptionsPanel("tm");
         } );
+
     },
 
     checkFailedConversionsNumber: function () {

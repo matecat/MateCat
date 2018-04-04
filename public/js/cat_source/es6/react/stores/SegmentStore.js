@@ -202,7 +202,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
         return source;
     },
-
+    decodeSegmentsText: function (  ) {
+        let self = this;
+        _.forEach(this._segments, function ( item, index ) {
+            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
+            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
+        });
+    },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
@@ -327,6 +333,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
+
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     }
@@ -387,6 +394,7 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
+            // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
@@ -415,7 +423,7 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
-            SegmentStore.setSegmentAsTagged(action.id, action.fid)
+            SegmentStore.setSegmentAsTagged(action.id, action.fid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
@@ -475,6 +483,15 @@ AppDispatcher.register(function(action) {
             _.forEach(SegmentStore._segments, function ( item, index ) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
+            break;
+        case SegmentConstants.DISABLE_TAG_LOCK:
+        case SegmentConstants.ENABLE_TAG_LOCK:
+            SegmentStore.decodeSegmentsText();
+            _.forEach(SegmentStore._segments, function ( item, index ) {
+                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
+            });
+            // Todo remove this
+            SegmentStore.emitChange(action.actionType);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

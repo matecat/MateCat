@@ -63,8 +63,8 @@ $.extend(UI, {
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 
 
-		this.taglockEnabled = config.taglockEnabled;
-		this.debug = false;
+        this.setTagLockCustomizeCookie(true);
+        this.debug = false;
 		UI.detectStartSegment();
 		options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
 

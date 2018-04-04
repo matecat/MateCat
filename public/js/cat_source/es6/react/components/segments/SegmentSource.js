@@ -20,6 +20,7 @@ class SegmentSource extends React.Component {
         this.replaceSource = this.replaceSource.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
+        this.toggleTagLock = this.toggleTagLock.bind(this);
     }
 
     replaceSource(sid, source) {
@@ -28,6 +29,12 @@ class SegmentSource extends React.Component {
                 source: source
             });
         }
+    }
+
+    toggleTagLock(sid, source) {
+        this.setState({
+            source: this.props.segment.decoded_source
+        });
     }
 
     decodeTextSource(segment, source) {
@@ -72,11 +79,15 @@ class SegmentSource extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
+        SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         this.afterRenderActions();
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
+        SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.removeListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
     }
     componentWillMount() {
         this.beforeRenderActions();

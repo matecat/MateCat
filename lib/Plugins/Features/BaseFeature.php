@@ -36,7 +36,7 @@ abstract class BaseFeature implements IBaseFeature {
     }
 
     public static function getConfig() {
-        $config_file_path = self::getPluginBasePath() . '/../config.ini' ;
+        $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
         if ( ! file_exists( $config_file_path ) ) {
             throw new Exception('Config file not found', 500 );
         }
