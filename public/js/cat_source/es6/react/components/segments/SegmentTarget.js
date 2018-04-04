@@ -158,7 +158,7 @@ class SegmentTarget extends React.Component {
             //Text Area
             textAreaContainer = <div className="textarea-container">
 
-                                    <span className="loader"/>
+
                                     <EditArea
                                         segment={this.props.segment}
                                         translation={translation}
