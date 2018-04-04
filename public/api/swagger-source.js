@@ -513,7 +513,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/cancel": {
+            "/api/v2/jobs/{id_job}/{password}/cancel": {
                 "post": {
                     "tags": [
                         "Job"
@@ -549,7 +549,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/archive": {
+            "/api/v2/jobs/{id_job}/{password}/archive": {
                 "post": {
                     "tags": [
                         "Job"
@@ -585,7 +585,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/active": {
+            "/api/v2/jobs/{id_job}/{password}/active": {
                 "post": {
                     "tags": [
                         "Job"
@@ -786,7 +786,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/projects/{id_project}/{password}/cancel": {
+            "/api/v2/projects/{id_project}/{password}/cancel": {
                 "post": {
                     "tags": [
                         "Project"
@@ -822,7 +822,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/projects/{id_project}/{password}/archive": {
+            "/api/v2/projects/{id_project}/{password}/archive": {
                 "post": {
                     "tags": [
                         "Project"
