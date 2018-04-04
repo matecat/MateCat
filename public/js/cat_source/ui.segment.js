@@ -145,7 +145,7 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment)  && currentSegment.hasClass('enableTP');
             if (this.enableTagProjection && tagProjectionEnabled) {
-                SegmentActions.removeClassToSegment(UI.getSegmentId(currentSegment), 'enableTP');
+                SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
                 currentSegment.data('tagprojection', 'tagged');
                 this.copySourcefromDataAttribute(segment);
                 UI.createButtons();

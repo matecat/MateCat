@@ -170,7 +170,6 @@ var SegmentActions = {
             actionType: SegmentConstants.ENABLE_TAG_LOCK
         });
     },
-
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

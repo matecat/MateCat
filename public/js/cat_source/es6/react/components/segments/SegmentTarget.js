@@ -113,6 +113,7 @@ class SegmentTarget extends React.Component {
         } else {
             var s2tMicro = "";
             var tagModeButton = "";
+            var tagCopyButton = "";
             var tagLockCustomizable;
             if ( (this.props.segment.segment.match( /\&lt;.*?\&gt;/gi ) && config.tagLockCustomizable ) ) {
                 var tagLockCustomizable = (UI.tagLockEnabled  ? <a href="#" className="tagLockCustomize icon-lock" title="Toggle Tag Lock"/> :
@@ -150,15 +151,14 @@ class SegmentTarget extends React.Component {
                         <span className="icon-tag-expand"/>
                         <span className="icon-chevron-right"/>
                     </a>;
+                tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
+
             }
 
             //Text Area
             textAreaContainer = <div className="textarea-container">
 
                                     <span className="loader"/>
-
-                                    {/*<div className="editarea-container" id={"editarea-container-"+ this.props.segment.sid}/>*/}
-
                                     <EditArea
                                         segment={this.props.segment}
                                         translation={translation}
@@ -171,10 +171,8 @@ class SegmentTarget extends React.Component {
                                     <div className="toolbar">
                                         {tagLockCustomizable}
                                         {tagModeButton}
-                                        <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
-
+                                        {tagCopyButton}
                                         <ul className="editToolbar">
-
                                             <li className="uppercase" title="Uppercase"/>
                                             <li className="lowercase" title="Lowercase"/>
                                             <li className="capitalize" title="Capitalized"/>
