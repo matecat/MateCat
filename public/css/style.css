@@ -616,12 +616,12 @@ p.split-shortcut {
 
 .splitStart .sid {
     background: url(../../img/split-bg.png) no-repeat;
-    background-position: 49% 23px;
+    background-position: 48.5% 23px;
 }
 
 .splitInner .sid {
     background: url(../img/split-bg.png) no-repeat;
-    background-position: 37px -40px;
+    background-position: 48.5% 23px;
 }
 
 .splitEnd .sid {
@@ -634,11 +634,11 @@ p.split-shortcut {
 }
 
 .editor.splitInner .sid {
-    background-position: 36px -40px;
+    background-position: 50.5% -40px;
 }
 
 .editor.splitEnd .sid {
-    background-position: 36px bottom;
+    background-position: 50.5% bottom;
 }
 
 .start-job-marker,
@@ -3170,6 +3170,10 @@ section.readonly:hover .ice-locked-label {
     top: 4%;
     margin: -6px 0 0 0 !important;
     border-bottom: 0;
+}
+.editor .status-container .status {
+    top: 6px !important;
+    height: 98.5% !important;
 }
 
 section.readonly .status-container a.status:hover,
