@@ -166,7 +166,7 @@ class Dqf extends BaseFeature {
                 throw new ValidationError('input validation failed: ' . implode(', ', $validationErrors ) ) ;
             }
 
-            $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
+            $features[ Features::DQF ] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
     }

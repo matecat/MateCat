@@ -19,6 +19,8 @@ class newProjectController extends viewController {
 
     private $keyList = [];
 
+    protected  $subject_handler ;
+
     public function __construct() {
 
         parent::__construct();
