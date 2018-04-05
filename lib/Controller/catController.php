@@ -99,7 +99,7 @@ class catController extends viewController {
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->featureSet->loadForProject( $this->project ) ;
+        $this->featureSet = FeatureSet::loadForProject( $this->project ) ;
 
     }
 

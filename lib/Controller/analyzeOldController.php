@@ -95,7 +95,7 @@ class analyzeOldController extends viewController {
         }
 
         if ( $this->project ) {
-            $this->featureSet->loadForProject( $this->project );
+            $this->featureSet = FeatureSet::loadForProject( $this->project );
         }
 
     }

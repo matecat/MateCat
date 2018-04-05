@@ -21,7 +21,7 @@ class UrlsController extends KleinController {
 
     public function urls() {
 
-        $this->featureSet->loadForProject( $this->validator->getProject() );
+        $this->featureSet = FeatureSet::loadForProject( $this->validator->getProject() );
 
         /**
          * @var $projectData ShapelessConcreteStruct[]

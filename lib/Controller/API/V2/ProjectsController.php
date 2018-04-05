@@ -36,7 +36,7 @@ class ProjectsController extends KleinController {
             }
         }
 
-        $this->featureSet->loadForProject( $this->project );
+        $this->featureSet = FeatureSet::loadForProject( $this->project );
         $projectOutputFields = $formatted->renderItem( $this->project );
         $projectOutputFields = $this->featureSet->filter( 'filter_manage_single_project', $projectOutputFields );
 

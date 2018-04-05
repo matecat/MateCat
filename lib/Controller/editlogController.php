@@ -43,7 +43,7 @@ class editlogController extends viewController {
 
         $this->project    = Projects_ProjectDao::findByJobId( $this->jid );
 
-        $this->featureSet->loadForProject( $this->project ) ;
+        $this->featureSet = FeatureSet::loadForProject( $this->project ) ;
 
     }
 
