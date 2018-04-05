@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: fregini
- * Date: 10/11/2017
- * Time: 12:25
+ * Date: 30/03/2018
+ * Time: 12:07
  */
 
 namespace Features;
@@ -11,6 +11,7 @@ namespace Features;
 
 interface IBaseFeature {
 
+    public function isAutoActivableOnProject() ;
     /**
      * These are the dependencies we need to make to be enabled when a dependecy is
      * activated for a given project. These will fill the project metadata table.

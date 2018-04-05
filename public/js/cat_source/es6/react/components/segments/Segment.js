@@ -39,7 +39,9 @@ class Segment extends React.Component {
             showTranslationIssues: false,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
-            inBulk: false
+            inBulk: false,
+            tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
+            && !UI.checkXliffTagsInText(this.props.segment.translation)
         }
     }
 
@@ -76,8 +78,7 @@ class Segment extends React.Component {
         else if ( splitGroup.length ) {
             classes.push('splitInner');
         }
-        if (this.props.enableTagProjection && (this.state.status.toLowerCase() === 'draft' || this.state.status.toLowerCase() === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation)){
+        if (this.state.tagProjectionEnabled && !this.props.segment.tagged){
             classes.push('enableTP');
             this.dataAttrTagged = "nottagged";
         } else {
@@ -182,7 +183,6 @@ class Segment extends React.Component {
             });
         }
     }
-
     isSplitted() {
         return (!_.isUndefined(this.props.segment.split_group));
     }
@@ -372,7 +372,7 @@ class Segment extends React.Component {
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
-                        enableTagProjection={this.props.enableTagProjection}
+                        enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
                     />
                     <div className="timetoedit"

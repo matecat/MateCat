@@ -17,13 +17,16 @@ div.segment-notes ul.graysmall li span.note-label {
     position: relative;
     border: 5px solid white;
     border-right: 1px solid #ccc;
+    float: left;
 }
 
 .segment-notes-container {
     display: inline-block;
-    width: 50%;
+    max-width: 80%;
     box-sizing: border-box;
     vertical-align: top;
+    text-align: left;
+    float:left;
 }
 
 .segments-preview-container {

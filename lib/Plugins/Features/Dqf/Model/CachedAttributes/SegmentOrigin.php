@@ -13,5 +13,4 @@ class SegmentOrigin extends AbstractCachedAttribute {
 
     protected $resource_name = 'segmentOrigin' ;
 
-
 }
