@@ -4460,8 +4460,8 @@ body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .endTag {
-    /*visibility: hidden;*/
-    text-indent: -10000px;
+    visibility: hidden;
+    text-indent: -9995px;
     display: inline-block;
     overflow: hidden;
     position: relative;

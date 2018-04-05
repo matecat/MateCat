@@ -310,7 +310,7 @@ class QAComponent extends React.Component {
             </div>;
 
         }
-        return ((this.props.active && this.state.total_issues > 0 ) ? <div className="qa-wrapper">
+        return ((this.props.active && this.state.total_issues.length > 0 ) ? <div className="qa-wrapper">
             <div className="qa-container">
                     <div className="qa-container-inside">
                         <div className="qa-issues-types">
