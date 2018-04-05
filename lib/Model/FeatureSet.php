@@ -36,14 +36,27 @@ class FeatureSet {
         }
     }
 
+    /**
+     * @return array
+     */
     public function getCodes() {
         return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
 
+    /**
+     * @param $string
+     *
+     * @throws Exception
+     */
     public function loadFromString( $string ) {
         $this->loadFromCodes( FeatureSet::splitString( $string ) ) ;
     }
 
+    /**
+     * @param $feature_codes
+     *
+     * @throws Exception
+     */
     private function loadFromCodes( $feature_codes ) {
         $features = array();
 
@@ -61,7 +74,8 @@ class FeatureSet {
      *
      * @param Projects_ProjectStruct $project
      *
-     * @return FeatureSet
+     * @return void
+     * @throws Exception
      */
      public function loadForProject( Projects_ProjectStruct $project ) {
          $this->clear();
@@ -75,13 +89,17 @@ class FeatureSet {
 
     /**
      * @param $metadata
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws ValidationError
      */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
         $project_dependencies = [];
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
         $features = [] ;
         foreach( $project_dependencies as $dependency ) {
-            $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
+            $features [ $dependency ] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
         }
 
         $this->merge( $features );
@@ -90,6 +108,8 @@ class FeatureSet {
     /**
      *
      * @param $id_customer
+     *
+     * @throws Exception
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
@@ -248,17 +268,22 @@ class FeatureSet {
     public function sortFeatures() {
         $codes = $this->getCodes() ;
 
-        if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
-            $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+        foreach( $this->features as $feature ){
+            /**
+             * @var $feature BasicFeatureStruct
+             */
+            $baseFeature = $feature->toNewObject();
+            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes ) ;
             $this->loadFromCodes( $missing_dependencies );
 
-            usort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
-                if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
+            uasort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) use ( $baseFeature ) {
+                if ( in_array( $left->feature_code, $baseFeature::getDependencies() ) ) {
                     return 0;
                 } else {
                     return 1;
                 }
             } );
+
         }
 
         return $this;

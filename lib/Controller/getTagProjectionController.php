@@ -119,6 +119,9 @@ class getTagProjectionController extends ajaxController {
 
     public function getTagProjection() {
 
+        /**
+         * @var $engine Engines_MyMemory
+         */
         $engine = Engine::getInstance( 1 );
 
         $config                  = array();

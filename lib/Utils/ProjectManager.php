@@ -153,7 +153,7 @@ class ProjectManager {
 
         $features = [];
 
-        if ( !empty( $this->projectStructure[ 'project_features' ] ) ) {
+        if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
             foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
                 /**
                  * @var $feature RecursiveArrayObject
@@ -266,10 +266,14 @@ class ProjectManager {
         }
 
         $dao = new Projects_MetadataDao();
-        $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $this->features->getCodes() )
-        );
+
+        $featureCodes = $this->features->getCodes();
+        if( !empty( $featureCodes ) ){
+            $dao->set( $this->projectStructure[ 'id_project' ],
+                    Projects_MetadataDao::FEATURES_KEY,
+                    implode( ',', $featureCodes )
+            );
+        }
 
         foreach ( $options as $key => $value ) {
             $dao->set(

@@ -90,6 +90,9 @@ class NewController extends ajaxController {
     private $tag_projection     = false;
     private $project_completion = false;
 
+    /**
+     * @var BasicFeatureStruct[]
+     */
     private $projectFeatures = [];
 
     private $metadata = [];
@@ -314,7 +317,7 @@ class NewController extends ajaxController {
         }
 
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput
+                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput, $this->userIsLogged
         );
 
     }
