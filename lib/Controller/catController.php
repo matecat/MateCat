@@ -95,7 +95,7 @@ class catController extends viewController {
         /*
          * avoid Exception
          *
-         * Argument 1 passed to FeatureSet::loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
+         * Argument 1 passed to loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
