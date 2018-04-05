@@ -61,7 +61,7 @@
             ownerIsMe: true,
             blueimp_dataType: 'json',
             defaults : {
-                tag_projection : true,
+                tag_projection : ${tag_projection_default},
                 speech2text : false,
                 lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
             },

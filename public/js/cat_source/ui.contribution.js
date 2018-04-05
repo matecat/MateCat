@@ -217,7 +217,7 @@ $.extend(UI, {
                 if (UI.checkCurrentSegmentTPEnabled(segment)) {
                     var currentContribution = this.getCurrentSegmentContribution(segment);
                     if (parseInt(currentContribution.match) !== 100) {
-                        translation = htmlEncode($('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').text());
+                        translation = currentContribution.translation;
                         translation = UI.removeAllTags(translation);
                     } else {
                         UI.disableTPOnSegment(segment);
