@@ -102,7 +102,62 @@ $(function () {
                             "required": false,
                             "type": "string",
                             "default": "anonymous"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "If you want to set a due date for your project, send this param with a timestamp",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "id_team",
+                            "in": "formData",
+                            "description": "The team you want to assign this project",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "lexiqa",
+                            "in": "formData",
+                            "description": "Enable lexiQA QA check. Requires purchase of a license from lexiQA.",
+                            "required": false,
+                            "type": "string",
+                            "default": 0,
+                        },
+                        {
+                            "name": "speech2text",
+                            "in": "formData",
+                            "description": "Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "get_public_matches",
+                            "in": "formData",
+                            "description": "Enable suggestions from the Public TM",
+                            "required": false,
+                            "type": "string",
+                            "default": "true",
+                            "enum": ["true", "false"]
+                        },
+                        {
+                            "name": "pretranslate_100",
+                            "in": "formData",
+                            "description": "Pre-translate 100% matches from TM",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "metadata",
+                            "in": "formData",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
+                            "required": false,
+                            "type": "string",
                         }
+
                     ],
                     "responses": {
                         "200": {
@@ -281,6 +336,60 @@ $(function () {
                             "required": false,
                             "type": "string",
                             "default": "anonymous"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "If you want to set a due date for your project, send this param with a timestamp",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "id_team",
+                            "in": "formData",
+                            "description": "The team you want to assign this project",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "lexiqa",
+                            "in": "formData",
+                            "description": "Enable lexiQA QA check. Requires purchase of a license from lexiQA.",
+                            "required": false,
+                            "type": "string",
+                            "default": 0,
+                        },
+                        {
+                            "name": "speech2text",
+                            "in": "formData",
+                            "description": "Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "get_public_matches",
+                            "in": "formData",
+                            "description": "Enable suggestions from the Public TM",
+                            "required": false,
+                            "type": "string",
+                            "default": "true",
+                            "enum": ["true", "false"]
+                        },
+                        {
+                            "name": "pretranslate_100",
+                            "in": "formData",
+                            "description": "Pre-translate 100% matches from TM",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "metadata",
+                            "in": "formData",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
+                            "required": false,
+                            "type": "string",
                         }
                     ],
                     "responses": {
@@ -404,7 +513,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/cancel": {
+            "/api/v2/jobs/{id_job}/{password}/cancel": {
                 "post": {
                     "tags": [
                         "Job"
@@ -440,7 +549,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/archive": {
+            "/api/v2/jobs/{id_job}/{password}/archive": {
                 "post": {
                     "tags": [
                         "Job"
@@ -476,7 +585,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/jobs/{id_job}/{password}/active": {
+            "/api/v2/jobs/{id_job}/{password}/active": {
                 "post": {
                     "tags": [
                         "Job"
@@ -677,7 +786,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/projects/{id_project}/{password}/cancel": {
+            "/api/v2/projects/{id_project}/{password}/cancel": {
                 "post": {
                     "tags": [
                         "Project"
@@ -713,7 +822,7 @@ $(function () {
                     }
                 }
             },
-            "/api/v1/projects/{id_project}/{password}/archive": {
+            "/api/v2/projects/{id_project}/{password}/archive": {
                 "post": {
                     "tags": [
                         "Project"
