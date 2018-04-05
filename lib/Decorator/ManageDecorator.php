@@ -23,6 +23,8 @@ class ManageDecorator {
     }
 
     public function decorate() {
+
+        $this->template->logged_user             = ( $this->controller->isLoggedIn() !== false ) ? $this->controller->getUser()->shortName() : "";
         $this->template->build_number  = INIT::$BUILD_NUMBER;
         $this->template->basepath      = INIT::$BASEURL;
         $this->template->hostpath      = INIT::$HTTPHOST;

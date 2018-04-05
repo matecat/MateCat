@@ -25,36 +25,33 @@ class FeatureSet {
      *
      * @throws Exception
      */
-    public function __construct( array $features = array() ) {
-        $this->features = $features;
-
-        $this->__loadFromMandatory();
+    public function __construct( $features = null ) {
+        if ( is_null( $features ) ) {
+            $this->__loadFromMandatory();
+        } else {
+            if ( !is_array( $features ) ) {
+                throw new Exception('features params should be an array');
+            }
+            $this->features = $features ;
+        }
     }
 
-    /**
-     * TODO Check if $this->feature is every time an object like [ 'review_improved' => OwnerFeatures_OwnerFeatureStruct ],
-     * TODO  in this case array_keys is enough instead of array_values( array_map() )
-     * @return array
-     */
     public function getCodes() {
         return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
 
-    /**
-     * @param $string
-     *
-     * @throws Exception
-     */
     public function loadFromString( $string ) {
-        $feature_codes = FeatureSet::splitString( $string );
+        $this->loadFromCodes( FeatureSet::splitString( $string ) ) ;
+    }
+
+    private function loadFromCodes( $feature_codes ) {
         $features = array();
 
         if ( !empty( $feature_codes ) ) {
             foreach( $feature_codes as $code ) {
-                if ( !empty($code)) {
-                    $features [] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
-                }
+                $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
             }
+
             $this->merge( $features ) ;
         }
     }
@@ -64,19 +61,20 @@ class FeatureSet {
      *
      * @param Projects_ProjectStruct $project
      *
-     * @throws Exception
+     * @return FeatureSet
      */
-    public function loadForProject( Projects_ProjectStruct $project ) {
-        $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
+     public function loadForProject( Projects_ProjectStruct $project ) {
+         $this->clear();
+         $this->loadAutoActivableMandatoryFeatures();
+         $this->loadFromString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
+    }
+
+    public function clear() {
+         $this->features = [];
     }
 
     /**
      * @param $metadata
-     *
-     * @throws AuthenticationError
-     * @throws Exception
-     * @throws Exceptions_RecordNotFound
-     * @throws ValidationError
      */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
         $project_dependencies = [];
@@ -85,14 +83,13 @@ class FeatureSet {
         foreach( $project_dependencies as $dependency ) {
             $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
         }
+
         $this->merge( $features );
     }
 
     /**
      *
      * @param $id_customer
-     *
-     * @throws Exception
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
@@ -160,8 +157,6 @@ class FeatureSet {
      * modified in cascade to the next function in the queue.
      * @throws Exceptions_RecordNotFound
      * @throws ValidationError
-     * @throws AuthenticationError
-     *
      * @internal param $id_customer
      */
     public function filter($method, $filterable) {
@@ -212,7 +207,7 @@ class FeatureSet {
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
 
-        foreach ( $this->features as $feature ) {
+        foreach ( $this->sortFeatures()->features as $feature ) {
             $this->runOnFeature($method, $feature, $args);
         }
     }
@@ -233,7 +228,7 @@ class FeatureSet {
     public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
 
         /** @var BasicFeatureStruct $feature */
-        foreach ( $this->features as $feature ) {
+        foreach( $this->sortFeatures()->features as $feature ) {
 
             $cls = Features::getFeatureClassDecorator( $feature, $name );
             if( !empty( $cls ) ){
@@ -251,16 +246,11 @@ class FeatureSet {
      * TODO: conver into something abstract.
      */
     public function sortFeatures() {
+        $codes = $this->getCodes() ;
 
-        $codes = $this->getCodes();
-
-        if ( in_array( Dqf::FEATURE_CODE, $codes ) ) {
-
-            $missing_dependencies = array_diff( Dqf::$dependencies, $codes );
-
-            if ( !empty( $missing_dependencies ) ) {
-                throw new Exception( 'Missing dependencies for DQF: ' . implode( ',', $missing_dependencies ) );
-            }
+        if ( in_array( Dqf::FEATURE_CODE, $codes  )  ) {
+            $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
+            $this->loadFromCodes( $missing_dependencies );
 
             usort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
                 if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
