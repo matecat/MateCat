@@ -37,7 +37,7 @@ class manageController extends viewController {
     }
 
     public function setTemplateVars() {
-        $this->template->logged_user             = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+
         $this->template->outsource_service_login = $this->_outsource_login_API;
 
         $this->decorator = new ManageDecorator( $this, $this->template );

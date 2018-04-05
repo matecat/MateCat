@@ -57,6 +57,11 @@
         <script type="text/javascript" tal:attributes="src js_source"></script>
     </tal:block>
 
+    <tal:block  tal:repeat="css_url css_resources">
+        <link rel="stylesheet" tal:attributes="href css_url"></link>
+    </tal:block>
+
+
     <div id="modal" style="z-index: 999999999"></div>
 </div>
 
