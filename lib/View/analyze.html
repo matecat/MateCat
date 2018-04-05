@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/analyze-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
+    <tal:block  tal:repeat="css_url css_resources">
+        <link rel="stylesheet" tal:attributes="href css_url"></link>
+    </tal:block>
+
     <script type="text/javascript">
         /*<![CDATA[*/
         var config = {
@@ -24,13 +28,11 @@
             password: '${project_password}',
             outsource_service_login : '${outsource_service_login}',
             jobs: ${json_jobs},
-            splitEnabled: true,
-            <!--TODO: remove this  -->
-            enable_outsource : false,
-            splitEnabled: false
+            splitEnabled: ${split_enabled},
         };
         /*]]>*/
     </script>
+
 
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
@@ -38,9 +40,7 @@
     <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
-    <!--TODO: remove this  -->
-    <script type="text/javascript" src="${basepath}plugins/paypal/static/build/paypal-analyze-build.js?build=${build_number}"></script>
-    <link rel="stylesheet" href="${basepath}plugins/paypal/static/build/paypal-manage-build.css?build=${build_number}"/>
+
     <!--  -->
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
 

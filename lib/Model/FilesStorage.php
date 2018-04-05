@@ -702,7 +702,7 @@ class FilesStorage {
     }
 
     private function link($source, $destination) {
-        return EnvWrap::link($source, $destination);
+        return link($source, $destination);
     }
 
     /**

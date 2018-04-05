@@ -2244,9 +2244,9 @@ body.searchActive .search-display {
     height: 20px;
     background: url(../img/loading.gif) 0 0 no-repeat !important;
     position: absolute;
-    left: -47px;
-    bottom: -30px;
+    bottom: 11px;
     display: none;
+    left: 50%;
     background-size: 20px 20px !important;
 }
 
@@ -2269,7 +2269,7 @@ body.searchActive .search-display {
 
 }
 
-.loader_on {
+section.editor .loader_on {
     display: block !important
 }
 
@@ -4337,9 +4337,9 @@ section .toolbar span {
 
 section .toolbar .autofillTag {
     float: left;
-    display: none;
     font-size: 60%;
     text-decoration: none;
+    display: none;
 }
 
 .editToolbar {

@@ -1382,20 +1382,23 @@
             var removeListeners = function () {
                 $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click');
             };
-            $('.confirm-tm-key-delete').off('click');
-            $('.confirm-tm-key-delete').on('click', function (e) {
-                e.preventDefault();
-                UI.deleteTM(button);
-                UI.hideAllBoxOnTables();
-                removeListeners();
-            });
-            $('.cancel-tm-key-delete').off('click');
-            $('.cancel-tm-key-delete').on('click', function (e) {
-                e.preventDefault();
-                UI.hideAllBoxOnTables();
-                $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-                removeListeners();
-            });
+            setTimeout(function (  ) {
+                $('.confirm-tm-key-delete').off('click');
+                $('.confirm-tm-key-delete').on('click', function (e) {
+                    e.preventDefault();
+                    UI.deleteTM(button);
+                    UI.hideAllBoxOnTables();
+                    removeListeners();
+                });
+                $('.cancel-tm-key-delete').off('click');
+                $('.cancel-tm-key-delete').on('click', function (e) {
+                    e.preventDefault();
+                    UI.hideAllBoxOnTables();
+                    $("tr.tm-key-deleting").removeClass('tm-key-deleting');
+                    removeListeners();
+                });
+            }, 200);
+
         },
         deleteTM: function (button) {
             tr = $(button).parents('tr').first();

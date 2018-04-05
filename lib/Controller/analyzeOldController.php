@@ -169,12 +169,9 @@ class analyzeOldController extends viewController {
 
         $this->template->logged_user                = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->extended_user              = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = $this->featureSet->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
 
         $this->template->outsource_service_login    = $this->_outsource_login_API ;
-
-        $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = Langs_LanguageDomains::getInstance();
         $this->subject = $langDomains::getDisplayDomain($this->model->subject);  // subject is null !!??!?!?!
@@ -204,6 +201,15 @@ class analyzeOldController extends viewController {
         }
 
         $this->template->daemon_misconfiguration = var_export( $misconfiguration, true );
+
+        $this->decorator = new AnalyzeDecorator( $this, $this->template );
+        $this->decorator->decorate();
+
+        $this->featureSet->appendDecorators(
+                'AnalyzeDecorator',
+                $this,
+                $this->template
+        );
 
     }
 
