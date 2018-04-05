@@ -15,7 +15,7 @@ use Features\IBaseFeature;
  */
 class FeatureSet {
 
-    private $features = array();
+    private $features = [] ;
 
     /**
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
@@ -29,10 +29,14 @@ class FeatureSet {
         if ( is_null( $features ) ) {
             $this->__loadFromMandatory();
         } else {
-            if ( !is_array( $features ) ) {
-                throw new Exception('features params should be an array');
+            foreach( $features as $feature ) {
+                if ( !property_exists('feature_code', $feature ) ) {
+                    $this->features[ $feature->feature_code ] = $feature ;
+                }
+                else {
+                    throw new Exception('`feature_code` property not found on ' . var_export( $feature, true )  );
+                }
             }
-            $this->features = $features ;
         }
     }
 
@@ -49,7 +53,7 @@ class FeatureSet {
 
         if ( !empty( $feature_codes ) ) {
             foreach( $feature_codes as $code ) {
-                $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+                $features [ $code ] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
             }
 
             $this->merge( $features ) ;
@@ -81,7 +85,7 @@ class FeatureSet {
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
         $features = [] ;
         foreach( $project_dependencies as $dependency ) {
-            $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
+            $features [ $dependency ] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
         }
 
         $this->merge( $features );
@@ -252,8 +256,8 @@ class FeatureSet {
             $missing_dependencies = array_diff( Dqf::$dependencies, $codes ) ;
             $this->loadFromCodes( $missing_dependencies );
 
-            usort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
-                if ( in_array( $left->feature_code, DQF::$dependencies ) ) {
+            uasort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) {
+                if ( in_array( $left->feature_code, Dqf::$dependencies ) ) {
                     return 0;
                 } else {
                     return 1;
@@ -322,7 +326,7 @@ class FeatureSet {
 
         if ( !empty( INIT::$AUTOLOAD_PLUGINS ) )  {
             foreach( INIT::$AUTOLOAD_PLUGINS as $plugin ) {
-                $features[] = new BasicFeatureStruct( [ 'feature_code' => $plugin ] );
+                $features[ $plugin ] = new BasicFeatureStruct( [ 'feature_code' => $plugin ] );
             }
         }
 

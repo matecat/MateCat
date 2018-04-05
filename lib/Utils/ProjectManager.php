@@ -153,7 +153,7 @@ class ProjectManager {
 
         $features = [];
 
-        if ( !empty( $this->projectStructure[ 'project_features' ] ) ) {
+        if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
             foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
                 /**
                  * @var $feature RecursiveArrayObject
