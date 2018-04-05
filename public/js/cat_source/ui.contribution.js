@@ -211,12 +211,13 @@ $.extend(UI, {
                 UI.setChosenSuggestion(1, segment);
 
                 translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-                /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
+                /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
                  */
                 if (UI.checkCurrentSegmentTPEnabled(segment)) {
                     var currentContribution = this.getCurrentSegmentContribution(segment);
                     if (parseInt(currentContribution.match) !== 100) {
+                        translation = htmlEncode($('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').text());
                         translation = UI.removeAllTags(translation);
                     } else {
                         UI.disableTPOnSegment(segment);

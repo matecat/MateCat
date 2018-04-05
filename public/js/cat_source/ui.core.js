@@ -2241,6 +2241,7 @@ UI = {
     setTagLockCustomizeCookie: function (first) {
         if(first && !config.tagLockCustomizable) {
             UI.tagLockEnabled = true;
+            return true;
         };
         var cookieName = 'tagLockDisabled';
 
