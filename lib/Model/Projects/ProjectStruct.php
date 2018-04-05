@@ -166,7 +166,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      */
     public function getFeatures() {
         return $this->cachable(__METHOD__, $this, function( Projects_ProjectStruct $project ) {
-            return FeatureSet::loadForProject( $project ) ;
+            $featureSet = new FeatureSet() ;
+            $featureSet->loadForProject( $project ) ;
+            return $featureSet ;
         });
     }
 

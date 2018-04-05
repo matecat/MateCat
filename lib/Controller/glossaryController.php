@@ -65,7 +65,7 @@ class glossaryController extends ajaxController {
 
         //get Job Info, we need only a row of jobs ( split )
         $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
-        $this->featureSet = FeatureSet::loadForProject( $this->jobData->getProject() );
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /**
          * For future reminder

@@ -230,7 +230,8 @@ class ProjectManager {
     }
 
     private function reloadFeatures() {
-        $this->features = FeatureSet::loadForProject( $this->project );
+        $this->features = new FeatureSet();
+        $this->features->loadForProject( $this->project );
     }
 
     public function getProjectStructure() {

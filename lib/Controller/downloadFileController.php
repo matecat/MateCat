@@ -88,7 +88,7 @@ class downloadFileController extends downloadController {
         $this->job      = $this->getJob();
         $this->project  = $this->job->getProject();
 
-        $this->featureSet = FeatureSet::loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project ) ;
 
         //get storage object
         $fs        = new FilesStorage();

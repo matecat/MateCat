@@ -63,12 +63,10 @@ class FeatureSet {
      *
      * @return FeatureSet
      */
-     public static function loadForProject( Projects_ProjectStruct $project ) {
-         $featureSet = new FeatureSet();
-         $featureSet->clear();
-         $featureSet->loadAutoActivableMandatoryFeatures();
-         $featureSet->loadFromString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
-         return $featureSet ;
+     public function loadForProject( Projects_ProjectStruct $project ) {
+         $this->clear();
+         $this->loadAutoActivableMandatoryFeatures();
+         $this->loadFromString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
     }
 
     public function clear() {

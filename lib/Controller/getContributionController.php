@@ -104,7 +104,7 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
-        $this->featureSet = FeatureSet::loadForProject( $this->jobData->getProject() );
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /*
          * string manipulation strategy
