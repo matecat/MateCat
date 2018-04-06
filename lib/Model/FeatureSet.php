@@ -7,7 +7,7 @@ use Features\BaseFeature;
 
 /**
  * Created by PhpStorm.
- * User: fregini
+ * User: fregini/ostico
  * Date: 3/11/16
  * Time: 11:00 AM
  */
@@ -82,7 +82,7 @@ class FeatureSet {
      public function loadForProject( Projects_ProjectStruct $project ) {
          $this->clear();
          $this->loadAutoActivableMandatoryFeatures();
-         $this->loadFromString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
+         $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
     }
 
     public function clear() {
@@ -119,15 +119,17 @@ class FeatureSet {
     }
 
     /**
-     * Loads featurs that can be acivated automatically on project, reading from
+     * Loads features that can be activated automatically on project creation phase, reading from
      * the list of MANDATORY_PLUGIN ( config.ini )
+     *
+     * @throws Exception
      */
     public function loadAutoActivableMandatoryFeatures() {
 
-        $returnable =  array_filter($this->features, function( BasicFeatureStruct $feature) {
+        $returnable = array_filter( $this->features, function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
             return $concreteClass->isAutoActivableOnProject();
-        }) ;
+        } );
 
         $this->merge( $returnable );
     }
@@ -179,7 +181,7 @@ class FeatureSet {
      * modified in cascade to the next function in the queue.
      * @throws Exceptions_RecordNotFound
      * @throws ValidationError
-     * @internal param $id_customer
+     * @throws AuthenticationError
      */
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
@@ -225,6 +227,8 @@ class FeatureSet {
 
     /**
      * @param $method
+     *
+     * @throws Exception
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
@@ -242,10 +246,11 @@ class FeatureSet {
      * Also, gives a last chance to plugins to define a custom decorator class to be
      * added to any call.
      *
-     * @param string $name name of the decorator to activate
+     * @param string      $name       name of the decorator to activate
      * @param IController $controller the controller to work on
-     * @param PHPTAL $template the PHPTAL view to add properties to
+     * @param PHPTAL      $template   the PHPTAL view to add properties to
      *
+     * @throws Exception
      */
     public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
 
@@ -264,8 +269,12 @@ class FeatureSet {
     }
 
     /**
-     * This function ensures that whenever DQF is present, dependent features always come before.
-     * TODO: conver into something abstract.
+     * This function ensures that whenever a plugin load is requested
+     * it's own dependencies are also loaded
+     *
+     * These dependencies are ordered so the plugin is every time at the last position
+     *
+     * @throws Exception
      */
     public function sortFeatures() {
         $codes = $this->getCodes() ;
@@ -341,8 +350,9 @@ class FeatureSet {
     /**
      * Loads plugins into the FeatureSet from the list of mandatory plugins.
      *
-     * @return BasicFeatureStruct[]|array
+     * @return void
      *
+     * @throws Exception
      */
     private function __loadFromMandatory() {
         $features = [] ;
