@@ -64,7 +64,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @internal param $pid
      */
     public function changePassword( Projects_ProjectStruct $project, $newPass ){
-        return $this->updateField( $project, 'password', $newPass );
+        $res = $this->updateField( $project, 'password', $newPass );
+        $this->destroyCacheById( $project->id );
+        return $res;
     }
 
     public function deleteFailedProject( $idProject ){

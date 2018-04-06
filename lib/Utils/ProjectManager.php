@@ -1423,6 +1423,8 @@ class ProjectManager {
 
         }
 
+        ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
