@@ -94,6 +94,9 @@ class newProjectController extends viewController {
      * Even if a user is included in more teams, we'd prefer to have the team bound
      * to the given session.
      *
+     * @param     $arr
+     * @param     $col
+     * @param int $dir
      */
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
         $sort_col = [];

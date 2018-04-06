@@ -81,7 +81,7 @@ class FeatureSet {
      */
      public function loadForProject( Projects_ProjectStruct $project ) {
          $this->clear();
-         $this->loadAutoActivableMandatoryFeatures();
+         $this->loadAutoActivableAutoloadFeatures();
          $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
     }
 
@@ -120,13 +120,13 @@ class FeatureSet {
 
     /**
      * Loads features that can be activated automatically on project creation phase, reading from
-     * the list of MANDATORY_PLUGIN ( config.ini )
+     * the list of AUTOLOAD_PLUGINS ( config.ini )
      *
      * @throws Exception
      */
-    public function loadAutoActivableMandatoryFeatures() {
+    public function loadAutoActivableAutoloadFeatures() {
 
-        $returnable = array_filter( $this->features, function ( BasicFeatureStruct $feature ) {
+        $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
             return $concreteClass->isAutoActivableOnProject();
         } );
@@ -355,6 +355,11 @@ class FeatureSet {
      * @throws Exception
      */
     private function __loadFromMandatory() {
+        $features = $this->__getAutoloadPlugins();
+        $this->merge( $features ) ;
+    }
+
+    private function __getAutoloadPlugins(){
         $features = [] ;
 
         if ( !empty( INIT::$AUTOLOAD_PLUGINS ) )  {
@@ -363,7 +368,7 @@ class FeatureSet {
             }
         }
 
-        $this->merge( $features ) ;
+        return $features;
     }
 
     /**
