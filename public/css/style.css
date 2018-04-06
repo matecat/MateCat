@@ -545,7 +545,7 @@ body.editing .grayed, body.virtualEditing .grayed {
 
 .sid {
     position: absolute;
-    left: -6%;
+    left: -5.5%;
     text-align: center;
     display: block;
     font-size: 12px;
@@ -554,12 +554,13 @@ body.editing .grayed, body.virtualEditing .grayed {
     cursor: default;
     height: inherit;
     padding-bottom: 1px;
-    width: 6%;
+    width: 4%;
 }
 
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
+    background: #f2f4f7;
 }
 
 .editing .sid .txt {
@@ -594,7 +595,7 @@ section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
 }
 
 section.editor .txt.segment-add-inBulk {
-    display: unset;
+    display: block;
 }
 
 section.segment-selected-inBulk .body .text {
@@ -614,13 +615,13 @@ p.split-shortcut {
 }
 
 .splitStart .sid {
-    background: url(../img/split-bg.png) no-repeat;
-    background-position: 37px 3px;;
+    background: url(../../img/split-bg.png) no-repeat;
+    background-position: 48.5% 23px;
 }
 
 .splitInner .sid {
     background: url(../img/split-bg.png) no-repeat;
-    background-position: 37px -40px;
+    background-position: 48.5% 23px;
 }
 
 .splitEnd .sid {
@@ -633,11 +634,11 @@ p.split-shortcut {
 }
 
 .editor.splitInner .sid {
-    background-position: 36px -40px;
+    background-position: 50.5% -40px;
 }
 
 .editor.splitEnd .sid {
-    background-position: 36px bottom;
+    background-position: 50.5% bottom;
 }
 
 .start-job-marker,
@@ -725,7 +726,7 @@ section {
     height: 100%;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-    /*box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;*/
+    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 /*projectbar*/
@@ -1081,10 +1082,10 @@ article .approved:active {
     border: 1px solid #848689;
     font-weight: bold;
     text-decoration: none;
-    padding: 8px 2px 0px 2px;
+    padding: 5px 2px 3px 2px;
     border-radius: 2px;
     font-size: 18px;
-    margin: -9px 25px -9px 25px;
+    margin: -6px 25px -7px 25px;
     color: #fff !important;
 }
 
@@ -1360,7 +1361,6 @@ section .body > .text {
     float: left;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 /*.text {
@@ -1411,7 +1411,7 @@ section.editor .body > .text {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
-    padding: 5px 0 9px 0;
+    padding: 5px 0 19px 0;
     color: #000
 }
 
@@ -2228,11 +2228,9 @@ body.searchActive .search-display {
 /*editor*/
 .editor{
     width: 100%;
-    -webkit-box-shadow: 0 1px 10px #666;
     position: relative;
     z-index: 999;
     -moz-border-radius: 2px;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .editor, .editor .text{
@@ -2448,13 +2446,12 @@ section.editor {
     z-index: 2;
     position: relative;
     height: 100%;
-    box-shadow: 0 1px 20px rgba(0, 0, 0, 0.45) !important;
     width: 102%;
     margin-left: -1%;
 }
 
 section.editor .sid {
-    left: -5%;
+    left: -4.5%;
     color: black;
 }
 
@@ -3173,6 +3170,10 @@ section.readonly:hover .ice-locked-label {
     top: 4%;
     margin: -6px 0 0 0 !important;
     border-bottom: 0;
+}
+.editor .status-container .status {
+    top: 6px !important;
+    height: 98.5% !important;
 }
 
 section.readonly .status-container a.status:hover,
@@ -3907,13 +3908,13 @@ span.locked.tag-html-container-close {
         margin-left: 6%;
     }
 
-    .sid {
-        left: -6%;
-    }
+    /*.sid {
+        left: -5.5%;
+    }*/
 
-    section.editor .sid {
+    /*section.editor .sid {
         left: -5%;
-    }
+    }*/
 }
 
 @media screen and (max-width: 1100px) {
@@ -5070,40 +5071,9 @@ section.loaded .footer .tab.open {
 }
 
 section:hover .segment-side-buttons {
-    /* styles based on .sid line 460 style.css */
     color: #6d6e71
 }
 
-/*.mc-resizable-textarea {
-    -webkit-box-shadow: inset 0 1px 2px #ccc;
-    box-shadow: inset 0 1px 2px #ccc;
-    border: 1px solid #999;
-    font-size: 16px;
-    margin: 0;
-    overflow: hidden;
-    padding: 4px;
-    position: static; !* avoid position relative set for any textarea element in style.css line 169 *!
-    resize: none;
-    word-break: normal;
-}
-
-.mc-button {
-    cursor: pointer;
-    color: #fff;
-    -moz-box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
-    -moz-border-radius: 2px;
-    border: 1px solid #666;
-    border-radius: 2px;
-    text-decoration: none;
-    opacity: 0.9;
-    text-align: center;
-    padding: 5px 10px;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-left: 10px;
-}*/
 
 .blue-button {
     background: #09beec;
