@@ -135,6 +135,20 @@ class FeatureSet {
     }
 
     /**
+     * When some HTML page need to load static
+     * resources for customization from mandatory plugins
+     * even when a plugin is not auto activable for the projects
+     * ( Ex: analyze page )
+     *
+     * @see FeatureSet::loadForProject()
+     *
+     * @throws Exception
+     */
+    public function forceAutoLoadFeatures(){
+        $this->__loadFromMandatory();
+    }
+
+    /**
      * Loads features that can be activated automatically on proejct, i.e. those that
      * don't require a parameter to be passed from the UI.
      *

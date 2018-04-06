@@ -148,6 +148,16 @@ class analyzeController extends viewController {
         $this->decorator = new AnalyzeDecorator( $this, $this->template );
         $this->decorator->decorate();
 
+
+        /**
+         * This loading is forced for HTML customization purpose only
+         * when a plugin in beginDoAction needs to customize the behaviour
+         *
+         * @see FeatureSet::forceAutoLoadFeatures()
+         *
+         */
+        $this->featureSet->forceAutoLoadFeatures();
+
         $this->featureSet->appendDecorators(
                 'AnalyzeDecorator',
                 $this,
