@@ -89,13 +89,13 @@
         height: 48px;
     }
     .searchbox form {
-        width: 91%;
-        padding: 11px 5% 0 4% !important;
+        width: auto;
+        padding: 11px 10px 0px 15px !important;
     }
 
-    .searchbox .block {
+  /*  .searchbox .block {
         margin-top: 5px;
-    }
+    }*/
 
     .advanced-filter-searchbox {
         z-index: 1 !important;
@@ -129,10 +129,6 @@
         display: none;
     }
 
-    #data-sample-checkbox {
-        margin: 0 5px !important;
-    }
-
     #review-side-panel {
         top: 48px;
     }
@@ -160,5 +156,5 @@
     .sf-segment-navigation-arrows {
         float: right;
         margin-right: 20px;
-        margin-top: -3px;
+        margin-top: 3px;
     }
