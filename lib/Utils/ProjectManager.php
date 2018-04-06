@@ -1425,6 +1425,9 @@ class ProjectManager {
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
+        $projectStruct = $jobInfo->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
@@ -1516,6 +1519,9 @@ class ProjectManager {
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
+
+        $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
 
     }
 
