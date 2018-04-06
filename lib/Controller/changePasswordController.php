@@ -68,7 +68,6 @@ class changePasswordController extends ajaxController {
             $jStruct = Jobs_JobDao::getByIdAndPassword( $this->res_id, $actual_pwd );
             $jDao = new Jobs_JobDao();
             $jDao->changePassword( $jStruct, $new_password );
-            $jDao->destroyCache( $jStruct );
 
             $jStruct->getProject()
                     ->getFeatures()

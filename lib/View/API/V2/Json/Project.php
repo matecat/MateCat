@@ -77,7 +77,7 @@ class Project {
      */
     public function renderItem( Projects_ProjectStruct $data ) {
 
-        $jobs = $data->getJobs(); //cached
+        $jobs = $data->getJobs(60 * 10 ); //cached
 
         $jobJSONs    = [];
         $jobStatuses = [];
