@@ -368,9 +368,9 @@ class SegmentsFilter extends React.Component {
                            className={
                                classnames({
                                    btn: true,
-                                   disabled: !this.state.filtering,
-                                   "select-all-filter": true,
+                                   "select-all-filter": true
                                })}
+                           disabled={!this.state.filtering}
                            value="Select All"/>
 
                     <input id="clear-filter"
@@ -382,12 +382,14 @@ class SegmentsFilter extends React.Component {
                     <input id="clear-filter"
                            type="button"
                            onClick={this.clearClick.bind(this)}
-                           className={classnames({btn: true, disabled: !this.state.filtering})}
+                           className={classnames({btn: true})}
+                           disabled={!this.state.filtering}
                            value="CLEAR"/>
 
                     <input onClick={this.submitClick.bind(this)} id="exec-filter"
                            type="submit"
-                           className={classnames({btn: true, disabled: !submitEnabled})}
+                           className={classnames({btn: true})}
+                           disabled={!submitEnabled}
                            value="FILTER"/>
                 </div>
 
