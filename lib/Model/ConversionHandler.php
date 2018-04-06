@@ -27,6 +27,8 @@ class ConversionHandler {
     protected $uploadedFiles;
     public $uploadError = false;
 
+    protected $_userIsLogged;
+
     /**
      * @var FeatureSet
      */
@@ -55,7 +57,7 @@ class ConversionHandler {
             return -1;
         }
 
-        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged );
 
         //XLIFF Conversion management
         $fileMustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $file_path, $forceXliff );
@@ -204,6 +206,7 @@ class ConversionHandler {
     }
 
     public function extractZipFile() {
+
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
         $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
@@ -284,8 +287,6 @@ class ConversionHandler {
 
             return null;
         }
-
-        return array();
 
     }
 
@@ -453,6 +454,16 @@ class ConversionHandler {
      */
     public function setFeatures( FeatureSet $features ) {
         $this->features = $features;
+        return $this;
+    }
+
+    /**
+     * @param mixed $_userIsLogged
+     *
+     * @return $this
+     */
+    public function setUserIsLogged( $_userIsLogged ) {
+        $this->_userIsLogged = $_userIsLogged;
         return $this;
     }
 

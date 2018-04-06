@@ -423,6 +423,7 @@ class NewController extends ajaxController {
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
+            $conversionHandler->setUserIsLogged( $this->userIsLogged );
 
             $status = [];
 
