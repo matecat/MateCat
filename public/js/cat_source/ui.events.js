@@ -4,93 +4,69 @@
 $.extend(UI, {
 	bindShortcuts: function() {
 		$("body").removeClass('shortcutsDisabled');
-		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
-			e.preventDefault();
-			if ( config.isReview ) {
-				$('body.review .editor .approved').click();
-			} else {
-				if ( $('.editor .translated').length > 0 ) {
-					$('.editor .translated').click();
-				} else if ( $('.editor .guesstags').length > 0 ) {
-					$('.editor .guesstags').click();
-				}
-			}
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
-			e.preventDefault();
-			if ($('.editor .translated').length > 0) {
-				$('.editor .translated').click();
-			} else {
-				$('.editor .guesstags').click();
-			}
-            $('body.review .editor .approved').click();
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
-			e.preventDefault();
-			$('.editor .next-untranslated').click();
-			$('.editor .next-unapproved').click();
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
-			e.preventDefault();
-			$('.editor .next-untranslated').click();
-			$('.editor .next-unapproved').click();
-		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
-			e.preventDefault();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoNextSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.mac, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoNextSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.standard, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoPreviousSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.mac, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoPreviousSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.undoInSegment(UI.currentSegment);
-			UI.closeTagAutocompletePanel();
-		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.undoInSegment(UI.currentSegment);
-			UI.closeTagAutocompletePanel();
-		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.redoInSegment(UI.currentSegment);
-		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.redoInSegment(UI.currentSegment);
-		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		}).on('keydown.shortcuts', null, "alt+s", function(e) {
-            var props = {
-                shortcuts: UI.shortcuts
-            };
-            APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
+
+		$("body").on('keydown.shortcuts', null, "alt+s", function(e) {
+            UI.openShortcutsModal();
 		});
 
+
+        this.shortCutskey = "standard";
 		if (UI.isMac) {
-			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.mac, function(e) {
-				e.preventDefault();
-				UI.copySource();
-			});
-		} else {
-			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
-				e.preventDefault();
-				UI.copySource();
-			});
-		}
+            this.shortCutskey = "mac";
+        }
+        $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.copySource();
+        }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
+            UI.openLanguageResourcesPanel();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.redoInSegment(UI.currentSegment);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.undoInSegment(UI.currentSegment);
+            UI.closeTagAutocompletePanel();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.pointToOpenSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoPreviousSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoNextSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
+            $('.editor .next-unapproved').click();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            if ( config.isReview ) {
+                $('body.review .editor .approved').click();
+            } else {
+                if ( $('.editor .translated').length > 0 ) {
+                    $('.editor .translated').click();
+                } else if ( $('.editor .guesstags').length > 0 ) {
+                    $('.editor .guesstags').click();
+                }
+            }
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.toggleTagsMode();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
+        });
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -142,45 +118,9 @@ $.extend(UI, {
             }
         });
 
-		$("body").on('keydown', null, 'ctrl+1', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
-			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
-			}
-		}).on('keydown', null, 'ctrl+2', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
-			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
-			}
-		}).on('keydown', null, 'ctrl+3', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-			} else if(active.hasClass('.tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
-			}
-		});
-
-		$("body").bind('keydown', 'Meta+shift+l', function() {
-            UI.openLanguageResourcesPanel();
-        }).bind('keydown', 'Meta+shift+s', function(e) {
-            UI.body.toggleClass('tagmode-default-extended');
-        }).on('click', '.tagModeToggle', function(e) {
+		$("body").on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
-            UI.toggleTagsMode(this);
+            UI.toggleTagsMode();
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 		} );
 
@@ -259,7 +199,6 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-
 			UI.chooseTagAutocompleteOption($(this));
 
 		});
@@ -574,7 +513,14 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-    }
+    },
+
+    openShortcutsModal: function (  ) {
+        var props = {
+            shortcuts: UI.shortcuts
+        };
+        APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
+    },
 
 });
 

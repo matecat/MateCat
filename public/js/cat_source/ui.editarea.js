@@ -3,7 +3,7 @@ $.extend( UI, {
         /**
          * Start EditArea Events Shortcuts
          */
-        $("#outer").on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
+        $("#outer").on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.cattol.events.searchInConcordance.keystrokes.mac, function(e) {
             e.preventDefault();
             UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', 'shift+return', function(e) {

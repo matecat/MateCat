@@ -48,8 +48,8 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
         bindShortcuts: function() {
             originalBindShortcuts();
-            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, handleKeyPressOnMainButton );
-            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.translate.keystrokes.standard, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.translate.keystrokes.mac, handleKeyPressOnMainButton );
         },
 
         showRevisionStatuses : function() {
