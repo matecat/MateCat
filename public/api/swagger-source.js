@@ -102,7 +102,62 @@ $(function () {
                             "required": false,
                             "type": "string",
                             "default": "anonymous"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "If you want to set a due date for your project, send this param with a timestamp",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "id_team",
+                            "in": "formData",
+                            "description": "The team you want to assign this project",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "lexiqa",
+                            "in": "formData",
+                            "description": "Enable lexiQA QA check. Requires purchase of a license from lexiQA.",
+                            "required": false,
+                            "type": "string",
+                            "default": 0,
+                        },
+                        {
+                            "name": "speech2text",
+                            "in": "formData",
+                            "description": "Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "get_public_matches",
+                            "in": "formData",
+                            "description": "Enable suggestions from the Public TM",
+                            "required": false,
+                            "type": "string",
+                            "default": "true",
+                            "enum": ["true", "false"]
+                        },
+                        {
+                            "name": "pretranslate_100",
+                            "in": "formData",
+                            "description": "Pre-translate 100% matches from TM",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "metadata",
+                            "in": "formData",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
+                            "required": false,
+                            "type": "string",
                         }
+
                     ],
                     "responses": {
                         "200": {
@@ -281,6 +336,60 @@ $(function () {
                             "required": false,
                             "type": "string",
                             "default": "anonymous"
+                        },
+                        {
+                            "name": "due_date",
+                            "in": "formData",
+                            "description": "If you want to set a due date for your project, send this param with a timestamp",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "id_team",
+                            "in": "formData",
+                            "description": "The team you want to assign this project",
+                            "required": false,
+                            "type": "string",
+                        },
+                        {
+                            "name": "lexiqa",
+                            "in": "formData",
+                            "description": "Enable lexiQA QA check. Requires purchase of a license from lexiQA.",
+                            "required": false,
+                            "type": "string",
+                            "default": 0,
+                        },
+                        {
+                            "name": "speech2text",
+                            "in": "formData",
+                            "description": "Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "get_public_matches",
+                            "in": "formData",
+                            "description": "Enable suggestions from the Public TM",
+                            "required": false,
+                            "type": "string",
+                            "default": "true",
+                            "enum": ["true", "false"]
+                        },
+                        {
+                            "name": "pretranslate_100",
+                            "in": "formData",
+                            "description": "Pre-translate 100% matches from TM",
+                            "required": false,
+                            "type": "integer",
+                            "default": 0,
+                        },
+                        {
+                            "name": "metadata",
+                            "in": "formData",
+                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
+                            "required": false,
+                            "type": "string",
                         }
                     ],
                     "responses": {
@@ -404,6 +513,114 @@ $(function () {
                     }
                 }
             },
+            "/api/v2/jobs/{id_job}/{password}/cancel": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Cancel API",
+                    "description": "API to cancel a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/jobs/{id_job}/{password}/archive": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Archive API",
+                    "description": "API to archive a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/jobs/{id_job}/{password}/active": {
+                "post": {
+                    "tags": [
+                        "Job"
+                    ],
+                    "summary": "Active API",
+                    "description": "API to active a Job",
+                    "parameters": [
+                        {
+                            "name": "id_job",
+                            "in": "path",
+                            "description": "The id of the job",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the job",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
             "/api/v2/projects/{id_project}/{password}/urls": {
                 "get": {
                     "tags": [
@@ -440,6 +657,7 @@ $(function () {
                     }
                 }
             },
+
             "/api/v2/projects/{id_project}/{password}/due_date": {
                 "post": {
                     "tags": [
@@ -507,7 +725,7 @@ $(function () {
                             "type": "string"
                         },
                         {
-                            "name": "due_date",
+                            "name": "body",
                             "in": "body",
                             "description": "Date you want to set as due date. Date must be in the future",
                             "required": true,
@@ -520,7 +738,6 @@ $(function () {
 
                             }
                         }
-
                     ],
                     "responses": {
                         "200": {
@@ -561,6 +778,114 @@ $(function () {
                             "description": "Project",
                             "schema": {
                                 "$ref": "#/definitions/Project"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/projects/{id_project}/{password}/cancel": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Cancel API",
+                    "description": "API to cancel a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/projects/{id_project}/{password}/archive": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Archive API",
+                    "description": "API to archive a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
+                            }
+                        },
+                        "default": {
+                            "description": "Unexpected error"
+                        }
+                    }
+                }
+            },
+            "/api/v2/projects/{id_project}/{password}/active": {
+                "post": {
+                    "tags": [
+                        "Project"
+                    ],
+                    "summary": "Active API",
+                    "description": "API to active a Project",
+                    "parameters": [
+                        {
+                            "name": "id_project",
+                            "in": "path",
+                            "description": "The id of the project",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "password",
+                            "in": "path",
+                            "description": "The password of the project",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "ChangeStatus",
+                            "schema": {
+                                "$ref": "#/definitions/ChangeStatus"
                             }
                         },
                         "default": {
@@ -980,11 +1305,18 @@ $(function () {
                             "required" : true,
                         },
                         {
-                            "name" : "name",
-                            "type" : "string",
-                            "in" : "fromData",
-                            "required" : true
-                        }
+                            "name": "body",
+                            "in": "body",
+                            "description": "Parameters in JSON Body",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "properties":{
+                                    "name":  { "type": "string" },
+                                }
+
+                            }
+                        },
                     ],
                     "responses": {
                         "200": {
@@ -1178,27 +1510,20 @@ $(function () {
                             "in"       : "path",
                             "required" : true,
                         },
+                        {
+                            "name": "body",
+                            "in": "body",
+                            "description": "Parameters in JSON Body",
+                            "required": true,
+                            "schema": {
+                                "type": "object",
+                                "properties":{
+                                    "id_assignee": { "type": "integer" },
+                                    "id_team":  { "type": "integer" },
+                                    "name":  { "type": "string" },
+                                }
 
-                        {
-                            "name" : "id_assignee",
-                            "type" : "integer",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Provide a user's `uid` property to change project assignee"
-                        },
-                        {
-                            "name" : "id_team",
-                            "type" : "integer",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Provide a given project's team to change project team"
-                        },
-                        {
-                            "name" : "name",
-                            "type" : "string",
-                            "in" : "formData",
-                            "required" : false,
-                            "description" : "Changes the project's name"
+                            }
                         },
                     ],
                     "responses": {
@@ -2937,6 +3262,40 @@ $(function () {
                     }
                 }
             },
+
+            "ChangeStatus" : {
+                "type": "object",
+                "properties": {
+                    "code" : { "type" : "integer", "required" : true },
+                    "data": { "type" : "string", "required" : true },
+                    "status": {
+                        "type" : "string",
+                        "enum" : ["active", "cancelled", "archived"],
+                        "required" : true
+                    }
+                }
+            },
+
+            "Segment": {
+                "type": "object",
+                "properties": {
+                    "id_segment": {"type": "integer"},
+                    "autopropagated_from": {"type": "string"},
+                    "status": {"type": "string"},
+                    "translation": {"type": "string"},
+                    "translation_date": {"type": "string"},
+                    "match_type": {"type": "string"},
+                    "context_hash": {"type": "string"},
+                    "locked": {"type": "integer"},
+                    "version_number": {"type": "integer"},
+                    "issues": {
+                        "type": "array",
+                        "items": {
+                            "$ref" : "#/definitions/Issue"
+                        }
+                    }
+                }
+            }
         }
     };
 

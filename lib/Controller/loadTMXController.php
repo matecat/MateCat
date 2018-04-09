@@ -37,7 +37,7 @@ class loadTMXController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        parent::checkLogin();
+        parent::readLoginInfo();
 
         $filterArgs = array(
                 'name'   => array(
@@ -110,7 +110,7 @@ class loadTMXController extends ajaxController {
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->addTmxInMyMemory();
 
-                    ( new \FeatureSet() )->run( 'postPushTMX', $fileInfo, $this->logged_user, $this->TMService->getTMKey() );
+                    $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );
 
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key
@@ -127,7 +127,7 @@ class loadTMXController extends ajaxController {
                         $key                     = new TmKeyManagement_TmKeyStruct();
                         $key->key                = $this->tm_key;
 
-                        $searchMemoryKey->uid    = $this->uid;
+                        $searchMemoryKey->uid    = $this->user->uid;
                         $searchMemoryKey->tm_key = $key;
                         $userMemoryKey           = $mkDao->read( $searchMemoryKey );
 

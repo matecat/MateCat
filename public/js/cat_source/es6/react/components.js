@@ -11,23 +11,15 @@ window.MC.SegmentMainButtons = require('./components/SegmentMainButtons').defaul
 
 window.classnames = require('classnames');
 
-window.TranslationIssuesSideButton = require('./components/TranslationIssuesSideButton').default ;
-
-window.ReviewSidePanel = require('./components/ReviewSidePanel').default ;
-window.TranslationIssuesOverviewPanel = require('./components/TranslationIssuesOverviewPanel').default ;
-window.ReviewTranslationVersion = require('./components/ReviewTranslationVersion').default ;
-window.ReviewIssuesContainer = require('./components/ReviewIssuesContainer').default ;
-window.ReviewTranslationIssue = require('./components/ReviewTranslationIssue').default ;
-window.ReviewTranslationIssueCommentsContainer = require('./components/ReviewTranslationIssueCommentsContainer').default ;
-window.ReviewIssueSelectionPanel = require('./components/ReviewIssueSelectionPanel').default ;
-window.ReviewIssueCategorySelector = require('./components/ReviewIssueCategorySelector').default ;
+window.ReviewSidePanel = require('./components/review/ReviewSidePanel').default ;
+window.ReviewTranslationIssueCommentsContainer = require('./components/review_improved/ReviewTranslationIssueCommentsContainer').default ;
+window.ReviewIssueCategorySelector = require('./components/review_improved/ReviewIssueCategorySelector').default ;
 window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
 
 
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
-window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel').default ;
-
+window.SubHeaderContainer = require('./components/header/SubHeaderContainer').default ;
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
@@ -38,16 +30,18 @@ window.AnalyzeActions = require('./actions/AnalyzeActions');
 window.TeamsActions = require('./actions/TeamsActions');
 window.ModalsActions = require('./actions/ModalsActions');
 window.OutsourceActions = require('./actions/OutsourceActions');
+window.CatToolActions = require('./actions/CatToolActions');
 
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
 window.OutsourceStore = require('./stores/OutsourceStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
+window.ProjectContainer = require('./components/projects/ProjectContainer').default;
+window.JobContainer = require('./components/projects/JobContainer').default;
+window.JobMenu = require('./components/projects/JobMenu').default;
 
 window.Header = require("./components/Header").default;
-
-window.QAComponent = require('./components/QAComponent').default;
 
 window.ModalWindow = require('./modals/ModalWindowComponent').default;
 window.SuccessModal = require('./modals/SuccessModal').default;
@@ -66,7 +60,12 @@ window.ShortCutsModal = require('./modals/ShortCutsModal').default;
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 
-
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
-
+window.AnalyzeHeader = require('./components/analyze/AnalyzeHeader').default;
+window.AnalyzeChunksResume = require('./components/analyze/AnalyzeChunksResume').default;
+window.OpenJobBox = require('./components/outsource/OpenJobBox').default;
+window.SegmentActions = require('./actions/SegmentActions');
+window.SegmentStore = require('./stores/SegmentStore');
+window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
+window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 

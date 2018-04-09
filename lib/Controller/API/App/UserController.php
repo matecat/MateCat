@@ -6,6 +6,7 @@ use API\App\Json\ConnectedService;
 use API\V2\Json\Team;
 use API\V2\Json\User;
 
+use API\V2\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
 use Exceptions\NotFoundError;
 use TeamModel;
@@ -64,21 +65,11 @@ class UserController extends AbstractStatefulKleinController {
     }
 
     protected function afterConstruct() {
-        \Bootstrap::sessionClose();
-        $this->__findUser();
-        $this->__findConnectedServices();
-    }
-
-    private function __findUser() {
-        $dao = new Users_UserDao();
-
-        if ( isset( $_SESSION[ 'uid' ] ) ) {
-            $this->user = $dao->getByUid( $_SESSION[ 'uid' ] );
-        }
-
-        if ( !$this->user ) {
-            throw new NotFoundError( 'user not found' );
-        }
+        $loginValidator = new LoginValidator( $this );
+        $loginValidator->onSuccess( function () {
+            $this->__findConnectedServices();
+        } );
+        $this->appendValidator( $loginValidator );
     }
 
     private function __findConnectedServices() {

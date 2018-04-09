@@ -18,7 +18,7 @@ class ExtendedTranslationStruct extends DataAccess_AbstractDaoSilentStruct {
     public $translation_after ;
 
     public $time ;
-    public $suggestion_match ;
 
     public $segment_origin ;
+    public $suggestion_match ;
 }

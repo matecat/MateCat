@@ -2,18 +2,24 @@
 
     var segment ;
 
-    var scrollSelector = 'html,body'; 
+    UI.scrollSelector = "#outer";
 
-    var tryToRenderAgain = function( segment, highlight ) {
+    var tryToRenderAgain = function( idSegment, highlight, open ) {
         UI.unmountSegments();
-        
-        var id_segment = segment.selector.split('-')[1];
+        if (open) {
+            UI.render({
+                firstLoad: false,
+                segmentToOpen: idSegment,
+                highlight : highlight
+            });
+        } else {
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: idSegment,
+                highlight : highlight
+            });
+        }
 
-        UI.render({
-            segmentToScroll: id_segment,
-            highlight : highlight 
-        });
-        
     }
 
     var someOpenSegmentOnPage = function() {
@@ -68,33 +74,35 @@
     var doDirectScroll = function( segment, highlight, quick ) {
         var pointSpeed = (quick)? 0 : 500;
 
-        var scrollPromise = animateScroll( segment, pointSpeed ) ;
+        var scrollPromise = UI.animateScroll( segment, pointSpeed ) ;
         scrollPromise.done( function() {
             UI.goingToNext = false;
         });
         
         if ( highlight ) { 
             scrollPromise.done( function() {
-                UI.highlightEditarea( segment ) ;
+                SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
             }); 
         }
         
         return scrollPromise ; 
     }
 
-    var scrollSegment = function(inputSegment, highlight, quick) {
-        var segment = $(inputSegment);
+    var scrollSegment = function(inputSegment, idSegment, highlight, quick) {
+        var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
 
         quick = quick || false;
         highlight = highlight || false;
         
         if ( segment.length ) {
             return doDirectScroll( segment, highlight, quick ) ; 
-        } else if($(segment.selector + '-1').length) {
+        } else if( $(segment.selector + '-1').length ) {
             return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
         }
-        else {
-            return tryToRenderAgain( segment, highlight ) ;
+        else if ( idSegment ){
+            return tryToRenderAgain( idSegment, highlight, true ) ;
+        } else {
+            console.error("Segment not found in the UI");
         }
 
 
@@ -117,33 +125,40 @@
      * @returns Deferred
      */
     var animateScroll = function( segment, speed ) {
-        var scrollAnimation = $( scrollSelector ).stop();
-        var pos ;
+        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+        var pos = 0;
         var prev = segment.prev('section') ;
-        var searchHeight = ($('.searchbox:visible').length > 0) ? $('.searchbox:visible').height() : 0;
-        // XXX: this condition is necessary **only** because in case of first segment of a file,
-        // the previous element (<ul>) has display:none style. Such elements are ignored by the
-        // the .offset() function.
-        var commonOffset = $('.header-menu').height() +
-            searchHeight ;
+        var segmentOpen = $('section.editor');
+        var article = segment.closest('article');
 
         if ( prev.length ) {
-            pos = prev.offset().top - commonOffset ;
+            pos = prev.offset().top ; // to show also the segment beforeq
         } else {
-            pos = segment.offset().top - commonOffset ;
+            pos = segment.offset().top ;
         }
+        pos = pos - segment.offsetParent('#outer').offset().top;
+
+        if (article.prevAll('article').length > 0) {
+            _.forEach(article.prevAll('article'), function ( item ) {
+                pos = pos + $(item).outerHeight() + 140;
+            });
+        }
+        if ( segmentOpen.length && UI.getSegmentId(segment) !== UI.getSegmentId(segmentOpen)) {
+            pos = pos - segmentOpen.find('.footer').height();
+        }
+
 
         scrollAnimation.animate({
             scrollTop: pos
-        }, speed, function (  ) {
-            console.log("ANIMATE")
-        });
+        }, speed);
 
-        return scrollAnimation.promise() ; 
-    }
+
+        return scrollAnimation.promise() ;
+    };
 
     $.extend(UI, {
         scrollSegment : scrollSegment,
+        animateScroll: animateScroll
     });
 
 })(window, $, UI, undefined);

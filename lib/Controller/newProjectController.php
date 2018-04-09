@@ -1,7 +1,7 @@
 <?php
 
 
-use ConnectedServices\GDrive ;
+use ConnectedServices\GDrive;
 
 use LexiQA\LexiQADecorator;
 
@@ -11,37 +11,32 @@ class newProjectController extends viewController {
     private $mt_engines;
     private $lang_handler;
 
-    private $sourceLangArray = array();
-    private $targetLangArray = array();
-    private $subjectArray = array();
+    private $sourceLangArray = [];
+    private $targetLangArray = [];
+    private $subjectArray    = [];
 
-    private $project_name='';
+    private $project_name = '';
 
-    private $keyList = array();
+    private $keyList = [];
 
-    /**
-     * @var FeatureSet
-     */
-    private $featureSet ;
+    protected  $subject_handler ;
 
     public function __construct() {
 
-        parent::__construct( false );
+        parent::__construct();
         parent::makeTemplate( "upload.html" );
 
-        $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING )
-        );
+        $filterArgs = [
+                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+        ];
 
-        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
-        $this->project_name      = $__postInput[ "project_name" ];
+        $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
+        $this->project_name = $__postInput[ "project_name" ];
 
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
-
-        $this->featureSet = new FeatureSet() ;
 
     }
 
@@ -50,42 +45,42 @@ class newProjectController extends viewController {
         $this->setOrGetGuid();
 
         try {
-            $this->evalSourceLangHistory() ;
+            $this->evalSourceLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
             Log::doLog( $e->getMessage() );
-            $this->template->noSourceLangHistory = true ;
+            $this->template->noSourceLangHistory = true;
         }
 
         try {
-            $this->evalTragetLangHistory() ;
+            $this->evalTragetLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
             Log::doLog( $e->getMessage() );
-            $this->template->noTargetLangHistory = true ;
+            $this->template->noTargetLangHistory = true;
         }
 
         $this->initUploadDir();
 
-        $engine = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'MT';
+        $engine            = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineQuery       = new EnginesModel_EngineStruct();
+        $engineQuery->type = 'MT';
 
-        $engineQuery->uid    = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
+        $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
 
         $engineQuery->active = 1;
-        $this->mt_engines = $engine->read( $engineQuery );
+        $this->mt_engines    = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+            $this->featureSet->loadFromUserEmail( $this->user->email );
 
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->logged_user->uid ) );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
 
                 $keyList = $_keyList->read( $dh );
                 foreach ( $keyList as $memKey ) {
                     //all keys are available in this condition ( we are creating a project
-                    $this->keyList[ ] = $memKey->tm_key;
+                    $this->keyList[] = $memKey->tm_key;
                 }
 
             } catch ( Exception $e ) {
@@ -99,9 +94,12 @@ class newProjectController extends viewController {
      * Even if a user is included in more teams, we'd prefer to have the team bound
      * to the given session.
      *
+     * @param     $arr
+     * @param     $col
+     * @param int $dir
      */
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
-        $sort_col = array();
+        $sort_col = [];
         foreach ( $arr as $key => $row ) {
             $sort_col[ $key ] = $row[ $col ];
         }
@@ -113,12 +111,12 @@ class newProjectController extends viewController {
         if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
             $ckSourceLang = filter_input( INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG );
 
-            if( $ckSourceLang != Constants::EMPTY_VAL ) {
-                $sourceLangHistory   = $ckSourceLang;
-                $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
+            if ( $ckSourceLang != Constants::EMPTY_VAL ) {
+                $sourceLangHistory = $ckSourceLang;
+                $sourceLangAr      = explode( '||', urldecode( $sourceLangHistory ) );
 
-                if(count( $sourceLangAr ) > 0) {
-                    return $sourceLangAr[0];
+                if ( count( $sourceLangAr ) > 0 ) {
+                    return $sourceLangAr[ 0 ];
                 }
             }
         }
@@ -140,17 +138,17 @@ class newProjectController extends viewController {
                     $this->noSourceLangHistory = false;
                     $this->sourceLangHistory   = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
                     $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
-                    $tmpSourceAr               = array();
-                    $tmpSourceArAs             = array();
+                    $tmpSourceAr               = [];
+                    $tmpSourceArAs             = [];
                     foreach ( $this->sourceLangAr as $key => $lang ) {
                         if ( $lang != '' ) {
                             $tmpSourceAr[ $lang ] = $this->lang_handler->getLocalizedName( $lang );
 
-                            $ar               = array();
-                            $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
-                            $ar[ 'code' ]     = $lang;
-                            $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
-                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
+                            $ar                = [];
+                            $ar[ 'name' ]      = $this->lang_handler->getLocalizedName( $lang );
+                            $ar[ 'code' ]      = $lang;
+                            $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
+                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
@@ -170,9 +168,8 @@ class newProjectController extends viewController {
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
             $this->guid = Utils::create_guid();
             setcookie( "upload_session", $this->guid, time() + 86400, '/' );
-        }
-        else {
-            $this->guid = $_COOKIE['upload_session'] ;
+        } else {
+            $this->guid = $_COOKIE[ 'upload_session' ];
         }
 
     }
@@ -188,6 +185,7 @@ class newProjectController extends viewController {
                 }
             }
         }
+
         return false;
     }
 
@@ -209,12 +207,12 @@ class newProjectController extends viewController {
     }
 
     private function getExtensionsUnsupported() {
-        $ext_ret = array();
+        $ext_ret = [];
         foreach ( INIT::$UNSUPPORTED_FILE_TYPES as $kk => $vv ) {
             if ( !isset( $vv[ 1 ] ) or empty( $vv[ 1 ] ) ) {
                 continue;
             }
-            $ext_ret[ ] = array( "format" => "$kk", "message" => "$vv[1]" );
+            $ext_ret[] = [ "format" => "$kk", "message" => "$vv[1]" ];
         }
         $json = json_encode( $ext_ret );
 
@@ -231,16 +229,16 @@ class newProjectController extends viewController {
     }
 
     private function getCategories( $output = "array" ) {
-        $ret = array();
+        $ret = [];
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
-            $val         = array();
-            foreach ($value as $ext => $info) {
-                $val[] = array(
+            $val = [];
+            foreach ( $value as $ext => $info ) {
+                $val[] = [
                         'ext'   => $ext,
-                        'class' => $info[2]
-                );
+                        'class' => $info[ 2 ]
+                ];
             }
-            $val = array_chunk($val, 12 );
+            $val = array_chunk( $val, 12 );
 
             $ret[ $key ] = $val;
         }
@@ -258,18 +256,18 @@ class newProjectController extends viewController {
         $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
         $this->template->subject_array = $this->subjectArray;
 
-        $this->template->project_name=$this->project_name;
+        $this->template->project_name = $this->project_name;
 
-        $this->template->page = 'home';
+        $this->template->page             = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
-        $this->template->subjects = $this->subjectArray;
+        $this->template->subjects         = $this->subjectArray;
 
         $this->template->mt_engines         = $this->mt_engines;
-        $this->template->conversion_enabled = !empty(INIT::$FILTERS_ADDRESS);
+        $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );
 
         $this->template->isUploadTMXAllowed = false;
-        if ( !empty(INIT::$FILTERS_ADDRESS) ) {
+        if ( !empty( INIT::$FILTERS_ADDRESS ) ) {
             $this->template->allowed_file_types = $this->getExtensions( "" );
             $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
         } else {
@@ -284,20 +282,20 @@ class newProjectController extends viewController {
         $this->template->targetLangHistory          = $this->targetLangArray;
         $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
         $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->userMail                   = $this->logged_user->getEmail();
+        $this->template->extended_user              = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user                = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->userMail                   = $this->user->email;
 
-        $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
+        $this->template->build_number   = INIT::$BUILD_NUMBER;
+        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->template->maxNumberFiles = INIT::$MAX_NUM_FILES;
 
         //this can be overridden by plugins to enable/disable the default flag on MyMemory lookup
         $this->template->get_public_matches = true;
 
-        $this->template->user_keys = $this->keyList;
-        $this->template->user_keys_obj = json_encode( array_map( function( $tmKeyStruct ){
+        $this->template->user_keys     = $this->keyList;
+        $this->template->user_keys_obj = json_encode( array_map( function ( $tmKeyStruct ) {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
@@ -307,17 +305,21 @@ class newProjectController extends viewController {
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         $this->template->currentSourceLang = $this->getCurrentSourceLang();
 
-        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
-        $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
+        $this->template->additional_input_params_base_path = \INIT::$TEMPLATE_ROOT;
 
-        $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
+        //Enable tag projection at instance level
+        $this->template->tag_projection_enabled = true;
+        $this->template->tag_projection_default = true;
 
-        $this->template->globalMessage = Utils::getGlobalMessage() ;
+        $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
+
+        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
         if ( $this->isLoggedIn() ) {
-            $this->template->teams = ( new \Teams\MembershipDao())->findUserTeams($this->logged_user) ;
+            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
         }
 
     }
@@ -326,12 +328,12 @@ class newProjectController extends viewController {
         if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
             $ckTargetLang = filter_input( INPUT_COOKIE, Constants::COOKIE_TARGET_LANG );
 
-            if( $ckTargetLang != Constants::EMPTY_VAL ) {
-                $targetLangHistory   = $ckTargetLang;
-                $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
+            if ( $ckTargetLang != Constants::EMPTY_VAL ) {
+                $targetLangHistory = $ckTargetLang;
+                $targetLangAr      = explode( '||', urldecode( $targetLangHistory ) );
 
-                if(count( $targetLangAr ) > 0) {
-                    return $targetLangAr[0];
+                if ( count( $targetLangAr ) > 0 ) {
+                    return $targetLangAr[ 0 ];
                 }
             }
         }
@@ -352,8 +354,8 @@ class newProjectController extends viewController {
                     $this->targetLangHistory   = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
                     $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
 
-                    $tmpTargetAr   = array();
-                    $tmpTargetArAs = array();
+                    $tmpTargetAr   = [];
+                    $tmpTargetArAs = [];
 
                     foreach ( $this->targetLangAr as $key => $lang ) {
                         if ( $lang != '' ) {
@@ -367,9 +369,9 @@ class newProjectController extends viewController {
 
                             $tmpTargetAr[ $lang ] = $cl;
 
-                            $ar                = array();
+                            $ar                = [];
                             $ar[ 'name' ]      = $cl;
-                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL(  $lang  ) ? 'rtl' : 'ltr' );
+                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
                             $ar[ 'code' ]      = $lang;
                             $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
                             array_push( $tmpTargetArAs, $ar );

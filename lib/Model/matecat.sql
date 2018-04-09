@@ -808,7 +808,7 @@ CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_segment` bigint(20) NOT NULL,
   `internal_id` varchar(100) NOT NULL,
-  `note` text NOT NULL,
+  `note` text,
   `json` text,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
@@ -833,6 +833,27 @@ CREATE TABLE `segment_revisions` (
   `err_style` varchar(512) NOT NULL,
   PRIMARY KEY (`id_job`,`id_segment`),
   KEY `segm_key` (`id_segment`,`id_job`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `segment_translation_events`
+--
+
+DROP TABLE IF EXISTS `segment_translation_events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `segment_translation_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_job` bigint(20) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `source_page` tinyint(4) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`,`id_job`),
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `id_segment` (`id_segment`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1155,7 +1176,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-28 15:05:11
+-- Dump completed on 2018-04-06 19:40:04
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1317,6 +1338,8 @@ INSERT INTO `phinxlog` VALUES (20171004154445,'2017-12-18 13:33:09','2017-12-18 
 INSERT INTO `phinxlog` VALUES (20171106115121,'2017-12-18 13:33:10','2017-12-18 13:33:12');
 INSERT INTO `phinxlog` VALUES (20171129152525,'2017-11-30 12:39:09','2017-11-30 12:39:13');
 INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 16:48:14');
+INSERT INTO `phinxlog` VALUES (20180207155126,'2018-03-30 17:15:01','2018-03-30 17:15:03');
+INSERT INTO `phinxlog` VALUES (20180330145502,'2018-03-30 17:15:03','2018-03-30 17:15:16');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1328,4 +1351,4 @@ INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-28 15:05:11
+-- Dump completed on 2018-04-06 19:40:04

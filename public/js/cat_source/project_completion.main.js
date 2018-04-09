@@ -80,7 +80,7 @@ if ( ProjectCompletion.enabled() ) {
         button.removeClass('isMarkableAsComplete isMarkedComplete');
         button.addClass('notMarkedComplete');
 
-        if ( isClickableStatus( stats ) ) {
+        if ( UI.isMarkedAsCompleteClickable( stats ) ) {
             button.addClass('isMarkableAsComplete');
             button.removeAttr('disabled');
         } else {
@@ -142,7 +142,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var messageForClickOnReadonly = function( section ) {
-        if ( translateAndReadonly() ) {
+        if ( UI.translateAndReadonly()) {
             return 'This job is currently under review. Segments are in read-only mode.';
         }
         else {
@@ -151,7 +151,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var isReadonlySegment = function( segment ) {
-        return translateAndReadonly() || original_isReadonlySegment( segment ) ;
+        return UI.translateAndReadonly() || original_isReadonlySegment( segment ) ;
     }
 
     var original_isReadonlySegment = UI.isReadonlySegment ;
@@ -170,14 +170,27 @@ if ( ProjectCompletion.enabled() ) {
         else {
             original_handleClickOnReadOnly.apply( undefined, arguments );
         }
-    }
+    };
+
+    var markJobAsComplete = function (  ) {
+        if ( config.isReview ) {
+            UI.clickMarkAsCompleteForReview();
+        } else {
+            UI.clickMarkAsCompleteForTranslate();
+        }
+    };
 
     $.extend( UI, {
         // This is necessary because of the way APP.popup works
         markAsCompleteSubmit      : markAsCompleteSubmit,
         isReadonlySegment         : isReadonlySegment,
         messageForClickOnReadonly : messageForClickOnReadonly,
-        handleClickOnReadOnly     : handleClickOnReadOnly
+        handleClickOnReadOnly     : handleClickOnReadOnly,
+        markJobAsComplete         : markJobAsComplete,
+        isMarkedAsCompleteClickable: isClickableStatus,
+        translateAndReadonly      : translateAndReadonly,
+        clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
+        clickMarkAsCompleteForReview : clickMarkAsCompleteForReview
     });
 
 
@@ -200,6 +213,11 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var checkCompletionOnReady = function (  ) {
+        UI.translateAndReadonly() && showTranslateWarningMessage();
+        evalReviseNotice();
+    };
+
     $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
         e.preventDefault();
 
@@ -214,7 +232,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     var evalReviseNotice = function() {
-        if ( config.isReview && config.job_completion_current_phase == 'translate' ) {
+        if ( config.isReview && config.job_completion_current_phase == 'translate' && config.job_marked_complete == 0 ) {
             warningNotification = APP.addNotification({
                 type: 'warning',
                 title: 'Warning',
@@ -230,13 +248,21 @@ if ( ProjectCompletion.enabled() ) {
         if ( !button.hasClass('isMarkableAsComplete') ) {
             return;
         }
-        $(document).trigger('sidepanel:close');
-        if ( config.isReview ) {
-            clickMarkAsCompleteForReview();
+        if (UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length > 0) {
+            APP.confirm({
+                name: 'markJobAsComplete', // <-- this is the name of the function that gets invoked?
+                cancelTxt: 'Fix errors',
+                onCancel: 'goToFirstError',
+                callback: 'markJobAsComplete',
+                okTxt: 'Mark as complete',
+                msg: 'Unresolved tag issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
+                ' underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> '
+            });
+            return;
         } else {
-            clickMarkAsCompleteForTranslate();
+            UI.markJobAsComplete()
         }
-
+        $(document).trigger('sidepanel:close');
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
@@ -244,8 +270,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).ready(function() {
-        translateAndReadonly() && showTranslateWarningMessage();
-        evalReviseNotice();
+        checkCompletionOnReady()
     });
 
 

@@ -1373,10 +1373,6 @@ LEXIQA POPUP
     cursor: pointer;
 }
 
-.filterOpen #lexiqa-popup  {
- 	display: block;
- }
-
 /*********************************
  Highlight toggle switch
  ********************************/

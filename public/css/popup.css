@@ -25,16 +25,15 @@
     z-index:999999999;
 }
 
-.modal .popup p {
+.modal .popup p.text-container-top {
     font-size: 18px;
     margin-top: 20px;
-    padding: 0 15px;
+    padding: 0 30px;
     text-align: left;
-
 }
 
-.modal .popup {
-
+p.button-aligned-right {
+    text-align: right !important;
 }
 
 .popup h1 {
@@ -118,7 +117,6 @@
     {
     width: 45px;
     border-right: 1px solid #003366;
-    background: transparent url(../img/g.png) 0 5px no-repeat;
     border-radius: 0 0 0 6px;
     }
 
@@ -1926,15 +1924,18 @@ span.title-source {
 }
 
 
-.popup.popup-confirm.confirm_checkbox {
+.popup.popup-confirm.confirm_checkbox,
+.popup.popup-alert {
     text-align: right;
 }
 
-.popup.popup-confirm.confirm_checkbox p{
+.popup.popup-confirm.confirm_checkbox p.text-container-top,
+.popup.popup-alert p.text-container-top {
     text-align: left;
     padding: 20px;
 }
 
-.popup.popup-confirm.confirm_checkbox .btn-ok{
+.popup.popup-confirm.confirm_checkbox .btn-ok,
+.popup.popup-alert .btn-ok {
     margin-right: 20px;
 }

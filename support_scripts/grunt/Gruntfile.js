@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
         cssBase + 'sass/review_improved.scss',
-        cssBase + 'sass/segment_filter.scss',
+        cssBase + 'sass/segmentsFilter.scss',
         cssBase + 'sass/cattool.scss',
         cssBase + 'sass/speech2text.scss',
         cssBase + 'sass/notifications.scss',
@@ -153,28 +153,25 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'qa-report-improved.js'
             },
-            manage: {
+            test: {
                 options: {
-                    transform: [
-                        [ 'babelify', { presets: [ es2015Preset ] } ]
+                    external: [
+                        'react/addons',
+                        'react/lib/ReactContext',
+                        'react/lib/ExecutionEnvironment'
                     ],
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
                 },
                 src: [
-                    buildPath + 'manage.js'
+                    basePath + '__tests__/*.js',
                 ],
-                dest: buildPath + 'manage.min.js'
+                dest: buildPath + '/tests/test-react.js'
             },
-            app: {
-                options: {
-                    transform: [
-                        [ 'babelify', { presets: [ es2015Preset ] } ]
-                    ],
-                },
-                src: [
-                    buildPath + 'app.js'
-                ],
-                dest: buildPath + 'app.min.js'
-            }
         },
 
         //
@@ -211,9 +208,9 @@ module.exports = function(grunt) {
                     basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
+                    basePath + 'cat_source/ui.editarea.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
                     basePath + 'cat_source/ui.classes.js',
-                    basePath + 'cat_source/ui.classes.segment_footer.js',
                     basePath + 'cat_source/ui.init.js',
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
@@ -227,9 +224,12 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/qa_check_blacklist.js',
 
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
+                    basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
+
+                    basePath + 'cat_source/es6/react/ajax_utils/segmentUtils.js',
 
                     basePath + 'cat_source/ui.customization.js',
-                    basePath + 'cat_source/ui.review.js',
+                    // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
@@ -243,8 +243,15 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
+
+                    basePath + 'cat_source/ui.review.js',
+                    basePath + 'cat_source/review_extended_footer.js',
+                    basePath + 'cat_source/review_extended_footer.*.js',
+                    basePath + 'cat_source/review_extended.js',
+                    basePath + 'cat_source/review_extended.*.js',
                     basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
+                    basePath + 'cat_source/review.*.js',
 
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
@@ -253,7 +260,7 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/speech2text.js',
                     basePath + 'tm.js',
-                    basePath + 'advancedOptionsTab.js'
+                    basePath + 'advancedOptionsTab.js',
                 ],
                 dest: buildPath + 'app.js'
             },
@@ -271,11 +278,13 @@ module.exports = function(grunt) {
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
+                    basePath + 'lib/base64.min.js',
                     basePath + 'lib/moment.min.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
+                    basePath + 'lib/imagesloaded.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
@@ -481,6 +490,16 @@ module.exports = function(grunt) {
                 ],
                 dest: cssBase + 'build/analyze-build.css'
             },
+            distIcons: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase ]
+                },
+                src: [
+                    cssBase + 'sass/commons/icons_main.scss'
+                ],
+                dest: cssBase + 'build/icons.css'
+            },
             distSemantic: {
                 options : {
                     sourceMap : false,
@@ -627,5 +646,13 @@ module.exports = function(grunt) {
         // 'strip',
         'sass',
         'replace:css'
+    ]);
+
+    grunt.registerTask('only-react', [
+        'browserify:components',
+    ]);
+
+    grunt.registerTask('test', [
+        'browserify:test'
     ]);
 };

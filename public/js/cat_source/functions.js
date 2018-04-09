@@ -1,94 +1,4 @@
-/*
-	Component: functions
- */
 
-function htmlEncode(value) {
-	if (value) {
-		return jQuery('<div />').text(value).html();
-	} else {
-		return '';
-	}
-}
-
-function htmlDecode(value) {
-	if (value) {
-		return $('<div />').html(value).text();
-	} else {
-		return '';
-	}
-}
-
-function utf8_to_b64(str) { // currently unused
-	return window.btoa(unescape(encodeURIComponent(str)));
-}
-
-function b64_to_utf8(str) { // currently unused
-	return decodeURIComponent(escape(window.atob(str)));
-}
-
-function escapeRegExp(str) {
-	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-}
-
-// START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
-function handlepaste(elem, e) {
-	var savedcontent = elem.innerHTML;
-
-	if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-		if (/text\/html/.test(e.clipboardData.types)) {
-			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
-			elem.innerHTML = txt;
-		}
-		else if (/text\/plain/.test(e.clipboardData.types)) {
-			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
-			elem.innerHTML = txt;
-		}
-		else {
-			elem.innerHTML = "";
-		}
-		waitforpastedata(elem, savedcontent);
-		if (e.preventDefault) {
-			e.stopPropagation();
-			e.preventDefault();
-		}
-		return false;
-	}
-	else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
-		elem.innerHTML = "";
-		waitforpastedata(elem, savedcontent);
-		return true;
-	}
-}
-
-function waitforpastedata(elem, savedcontent) {
-
-	if (elem.childNodes && elem.childNodes.length > 0) {
-		processpaste(elem, savedcontent);
-	}
-	else {
-		var that = {
-			e: elem,
-			s: savedcontent
-		};
-		that.callself = function() {
-			waitforpastedata(that.e, that.s);
-		};
-		setTimeout(that.callself, 20);
-	}
-}
-
-function processpaste(elem, savedcontent) {
-	var pasteddata = elem.innerHTML;
-
-	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
-	elem.innerHTML = savedcontent;
-
-	// Do whatever with gathered data;
-	$('#placeHolder').before(pasteddata);
-	focusOnPlaceholder();
-	$('#placeHolder').remove();
-}
-// END Get clipboard data at paste event
 
 function focusOnPlaceholder() {
 	var placeholder = document.getElementById('placeHolder');
@@ -121,18 +31,22 @@ function truncate_filename(n, len) {
 }
 
 function insertNodeAtCursor(node) {
-	var range, html;
-	if (window.getSelection && window.getSelection().getRangeAt) {
-		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
-			range = window.getSelection().getRangeAt(0);
-			range.insertNode(node);
-			setCursorAfterNode(range, node);
-		} 
-	} else if (document.selection && document.selection.createRange) {
-		range = document.selection.createRange();
-		html = (node.nodeType == 3) ? node.data : node.outerHTML;
-		range.pasteHTML(html);
-	}
+    try {
+        var range, html;
+        if (window.getSelection && window.getSelection().getRangeAt) {
+            if ((window.getSelection().type == 'Caret') || (UI.isFirefox)) {
+                range = window.getSelection().getRangeAt(0);
+                range.insertNode(node);
+                setCursorAfterNode(range, node);
+            }
+        } else if (document.selection && document.selection.createRange) {
+            range = document.selection.createRange();
+            html = (node.nodeType == 3) ? node.data : node.outerHTML;
+            range.pasteHTML(html);
+        }
+    } catch (e) {
+        console.error("Fail to insert node at cursor", e);
+    }
 }
 
 function setCursorAfterNode(range, node) {
@@ -385,7 +299,7 @@ function runDownload() {
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.tag_issues.length ) {
+    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length ) {
         APP.confirm({
             name: 'confirmDownload', // <-- this is the name of the funciton that gets invoked?
             cancelTxt: 'Fix errors',
@@ -485,7 +399,7 @@ function insertHtmlAfterSelection(html) {
 // register a different activation function.
 // The function is defined in review_improved module.
 SegmentActivator.registry.push(function( sid ) {
-    var el = $("#segment-" + sid + "-target").find(".editarea");
+    var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
     $(el).click();
 });
 
@@ -640,7 +554,25 @@ function goodbye(e) {
 }
 
 function cleanupHTMLCharsForDiff( string ) {
-	return string.replace(/&nbsp;/g, '');
+	return replacePlaceholder(string.replace(/&nbsp;/g, ''));
+}
+
+function replacePlaceholder(string) {
+   return  string
+       .replace( config.lfPlaceholderRegex, "softReturnMonad")
+        .replace( config.crPlaceholderRegex, "crPlaceholder" )
+        .replace( config.crlfPlaceholderRegex, "brMarker" )
+        .replace( config.tabPlaceholderRegex, "tabMarkerMonad" )
+        .replace( config.nbspPlaceholderRegex, "nbspPlMark" )
+}
+
+function restorePlaceholders(string) {
+    return string
+        .replace(/softReturnMonad/g , config.lfPlaceholder)
+        .replace(/crPlaceholder/g,  config.crPlaceholder)
+        .replace(/brMarker/g,  config.crlfPlaceholder )
+        .replace(/tabMarkerMonad/g, config.tabPlaceholder)
+        .replace(/nbspPlMark/g, config.nbspPlaceholder)
 }
 
 function trackChangesHTML(source, target) {
@@ -657,20 +589,55 @@ function trackChangesHTML(source, target) {
         if(this[0] == -1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="deleted"/>' );
-            $( newElem ).text( this[1] );
+            $( newElem ).text( htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else if(this[0] == 1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="added"/>' );
-            $( newElem ).text( this[1] );
+            $( newElem ).text( htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else {
             diffTxt += this[1];
         }
     });
-    return diffTxt ;
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt) ;
+}
+
+function getDiffPatch(source, target) {
+    var diff   = UI.dmp.diff_main(
+        cleanupHTMLCharsForDiff( source ),
+        cleanupHTMLCharsForDiff( target )
+    );
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
+    return diff;
+}
+
+function trackChangesHTMLFromDiffArray(diff) {
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt);
 }
 
 

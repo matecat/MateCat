@@ -6,32 +6,23 @@
  * Time: 10:17
  */
 
-$klein->respond('/utils/pee', function() {
+$klein->respond( '/utils/pee', function () {
 
-    #Block all not whitelisted IPs
-    $ipWhiteList = [
-            "/^10\.30\.1\..*/",
-            "/^10\.3\.14\..*/",
-            "/^10\.3\.15\..*/",
-            "/^149\.7\.212\..*/",
-            "/^2\.229\.60\.78/",
-            "/^127\.0\.0\..*/",
-            "/^93\.43\.95\.132/",
-    ];
+    $reflect  = new ReflectionClass( 'peeViewController' );
+    $instance = $reflect->newInstanceArgs( func_get_args() );
 
-    if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
-        $method = new ReflectionMethod( 'badConfigurationController', 'render404' );
-        $method->setAccessible( true );
-        $method->invoke( new badConfigurationController() );
+    try {
+        $instance->doAction();
+        $instance->finalize();
+    } catch ( Exception $e ) {
+        $controllerInstance = new CustomPage();
+        $controllerInstance->setTemplate( "404.html" );
+        $controllerInstance->setCode( 404 );
+        $controllerInstance->doAction();
         die(); // do not complete klein response, set 404 header in render404 instead of 200
     }
 
-    $reflect  = new ReflectionClass('peeViewController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->doAction();
-    $instance->finalize();
-
-});
+} );
 
 route( '/api/app/user',                                                             'GET',  'API\App\UserController', 'show' );
 route( '/api/app/user/password',                                                    'POST', 'API\App\UserController', 'updatePassword' );

@@ -61,7 +61,7 @@
             ownerIsMe: true,
             blueimp_dataType: 'json',
             defaults : {
-                tag_projection : true,
+                tag_projection : ${tag_projection_default},
                 speech2text : false,
                 lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
             },
@@ -945,51 +945,6 @@
 <div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
 
 <div id="uploadCallback"></div>
-
-
-<script type="text/javascript">
-
-    // script per il funzionamento del dropdown menu del profilo utente
-
-    function DropDown( el ) {
-        this.dd = el;
-        this.initEvents();
-    }
-    DropDown.prototype = {
-        initEvents: function () {
-            var obj = this;
-
-            obj.dd.on( 'click', function ( event ) {
-                $( this ).toggleClass( 'active' );
-                event.stopPropagation();
-            } );
-        }
-    }
-
-    $( ".open-more" ).click( function () {
-        $(".hide-payoff").hide();
-        $( ".learnmore" ).slideToggle( "700", function () {
-            // Animation complete.
-        } );
-    } );
-    $( ".learnmore .open-more" ).click( function () {
-        $(".hide-payoff").show();
-       
-    } );
-
-    $( function () {
-
-        var dd = new DropDown( $( '#dd' ) );
-
-        $( document ).click( function () {
-            // all dropdowns
-            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
-        } );
-
-    } );
-
-</script>
-
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 

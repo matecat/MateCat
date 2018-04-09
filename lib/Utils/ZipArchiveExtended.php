@@ -10,6 +10,7 @@ class ZipArchiveExtended extends ZipArchive {
 
     const REFERENCE_FOLDER = '__reference'  ;
     const META_FOLDER = '__meta' ;
+    const PREVIEWS_FOLDER = '__previews' ;
 
     const MAX_VISITED_DEPTH = 5;
     const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
@@ -128,7 +129,8 @@ class ZipArchiveExtended extends ZipArchive {
 
             if( $pathBySlash[ 0 ] == '__MACOSX' ) continue;
             if( $pathBySlash[ 0 ] == self::REFERENCE_FOLDER ) continue ;
-            if( $pathBySlash[ 0 ] == '__meta' ) continue;
+            if( $pathBySlash[ 0 ] == self::META_FOLDER ) continue;
+            if( $pathBySlash[ 0 ] == self::PREVIEWS_FOLDER ) continue;
 
             if( end($pathBySlash) == '.DS_Store' ) continue;
 
@@ -310,5 +312,7 @@ class ZipArchiveExtended extends ZipArchive {
 
         return implode( self::INTERNAL_SEPARATOR, $path );
     }
+
+
 
 }

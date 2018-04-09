@@ -27,7 +27,12 @@ class SegmentTranslationIssue extends Base {
      */
     protected $chunk_review ;
 
-    public function validate() {
+    /**
+     * @return mixed|void
+     * @throws ValidationError
+     * @throws \Exception
+     */
+    public function _validate() {
         // if method is delete we expect the password to be revise password.
 
         if ( $this->request->method('delete') ) {
@@ -47,7 +52,7 @@ class SegmentTranslationIssue extends Base {
 
         $this->translation = $this->parent_validator->translation ;
 
-        $this->segment =$this->parent_validator->segment ;
+        $this->segment = $this->parent_validator->segment ;
 
         if ( $this->request->id_issue ) {
             $this->ensureIssueIsInScope();

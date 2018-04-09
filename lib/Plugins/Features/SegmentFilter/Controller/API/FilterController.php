@@ -3,14 +3,16 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
+use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Exceptions\ValidationError;
+use Chunks_ChunkStruct;
 use Features\SegmentFilter\Model\SegmentFilterModel;
 
 use Features\SegmentFilter\Model\FilterDefinition ;
 
 
-class FilterController extends \API\V2\KleinController {
+class FilterController extends KleinController {
 
     /**
      * @var ChunkPasswordValidator
@@ -20,7 +22,7 @@ class FilterController extends \API\V2\KleinController {
     private $model ;
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     private $chunk ;
 
@@ -28,16 +30,31 @@ class FilterController extends \API\V2\KleinController {
      * @var FilterDefinition
      */
     private $filter ;
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return $this
+     */
+    public function setChunk( $chunk ) {
+        $this->chunk = $chunk;
+
+        return $this;
+    }
 
     public function index() {
        // TODO: validate the input filter
 
         $this->model = new SegmentFilterModel( $this->chunk, $this->filter );
 
+
         // TODO: move this into a formatter
-        $ids_as_array = array_map(function( array $record ) {
-            return $record['id'];
-        }, $this->model->getSegmentIds());
+        $ids_as_array = [];
+        $segments_id = $this->model->getSegmentIds();
+        foreach($segments_id as $segment_id){
+            $ids_as_array[] = $segment_id['id'];
+        }
+
+
 
         $this->response->json( array(
             'segment_ids' => $ids_as_array,
@@ -46,23 +63,17 @@ class FilterController extends \API\V2\KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new ChunkPasswordValidator( $this->request );
-    }
-
-    /**
-     * @throws ValidationError
-     */
-    protected function validateRequest() {
-        $this->validator->validate();
-
-        $this->chunk = $this->validator->getChunk();
-        $get = $this->request->paramsGet();
-        $this->filter = new FilterDefinition( $get['filter'] );
-
-        if (! $this->filter->isValid() ) {
-            throw new ValidationError('Filter is invalid');
-        }
-
+        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Controller = $this;
+        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
+            $Controller->setChunk( $Validator->getChunk() );
+            $get = $Controller->getRequest()->paramsGet();
+            $this->filter = new FilterDefinition( $get['filter'] );
+            if (! $this->filter->isValid() ) {
+                throw new ValidationError('Filter is invalid');
+            }
+        } );
+        $this->appendValidator( $Validator );
     }
 
 }

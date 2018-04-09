@@ -153,7 +153,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $fileStream = new KleinResponseFileStream( $this->response );
         $fileName   = $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip";
-        $fileStream->streamFileFromPointer( $ZipFilePointer, $fileName );
+        $fileStream->streamFileDownloadFromPointer( $ZipFilePointer, $fileName );
     }
 
     protected function logDownloadError( Exception $e ) {
@@ -171,12 +171,15 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     }
 
+    /**
+     * @unused
+     */
     protected function recordDownloadActivity() {
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
         $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
     }

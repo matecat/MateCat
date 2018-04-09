@@ -46,7 +46,7 @@ class catController extends viewController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    public $project ;
 
     private $translation_engines;
 
@@ -63,21 +63,18 @@ class catController extends viewController {
     private $review_password = "";
 
     /**
-     * @var FeatureSet
-     */
-    private $projectFeatures ;
-
-    /**
      * @var WordCount_Struct
      */
     private $wStruct ;
 
+    protected $templateName = "index.html";
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
-        parent::__construct( false );
+        parent::__construct();
 
-        parent::makeTemplate( "index.html" );
+        parent::makeTemplate( $this->templateName );
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -98,12 +95,11 @@ class catController extends viewController {
         /*
          * avoid Exception
          *
-         * Argument 1 passed to FeatureSet::loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
+         * Argument 1 passed to loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->projectFeatures = new FeatureSet();
-        $this->projectFeatures->loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project ) ;
 
     }
 
@@ -122,7 +118,7 @@ class catController extends viewController {
      */
     private function findJobByIdAndPassword() {
         if ( self::isRevision() ) {
-            $this->password = $this->projectFeatures->filter(
+            $this->password = $this->featureSet->filter(
                 'filter_review_password_to_job_password',
                 $this->password,
                 $this->jid
@@ -134,13 +130,14 @@ class catController extends viewController {
     }
 
     public function doAction() {
-        $this->projectFeatures->run('catControllerDoActionStart', $this);
-        $this->checkLoginRequiredAndRedirect() ;
+
+        $this->featureSet->run('beginDoAction', $this);
 
         try {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
             // function and not-found handled via exception.
             $this->findJobByIdAndPassword();
+            $this->featureSet->run('handleProjectType', $this);
         } catch( NotFoundError $e ){
             $this->job_not_found = true;
             return;
@@ -149,7 +146,7 @@ class catController extends viewController {
         $data = getSegmentsInfo( $this->jid, $this->password );
 
         //retrieve job owner. It will be useful also if the job is archived or cancelled
-        $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : "support@matecat.com";
+        $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : INIT::$MAILER_RETURN_PATH;
 
         if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
@@ -200,6 +197,7 @@ class catController extends viewController {
             $this->job_archived = true;
             $this->job_owner    = $data[ 0 ][ 'job_owner' ];
         }
+
         $this->wStruct = CatUtils::getWStructFromJobArray( $data[0] );
         $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
@@ -218,13 +216,13 @@ class catController extends viewController {
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->logged_user->email == $data[ 0 ][ 'job_owner' ] ) {
+        } elseif ( $this->user->email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->getUser(), $this->userRole ) ;
+        $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
         $this->template->user_keys = $userKeys->getKeys( $data[ 0 ] [ 'tm_keys' ] ) ;
 
         /**
@@ -253,7 +251,7 @@ class catController extends viewController {
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
-            $engineQuery->uid    = $this->logged_user->uid;
+            $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
@@ -297,7 +295,7 @@ class catController extends viewController {
         $activity->id_project = $this->pid;
         $activity->action     = $action;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->logged_user->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
@@ -331,6 +329,7 @@ class catController extends viewController {
             $this->template->owner_email         = INIT::$SUPPORT_MAIL;
 
             $team = $this->project->getTeam();
+
             if( !empty( $team ) ){
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
@@ -351,7 +350,7 @@ class catController extends viewController {
                 }
                 $this->template->owner_email = $ownerMail;
 
-                if( $this->logged_user->email == $ownerMail || in_array( $this->logged_user->uid, $membersIdList ) ){
+                if( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ){
                     $this->template->jobOwnerIsMe        = true;
                 } else {
                     $this->template->jobOwnerIsMe        = false;
@@ -362,8 +361,8 @@ class catController extends viewController {
             $this->template->job_not_found       = $this->job_not_found;
             $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
             $this->template->job_cancelled       = $this->job_cancelled;
-            $this->template->logged_user         = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-            $this->template->extended_user       = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+            $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+            $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
 
             return;
 
@@ -376,8 +375,8 @@ class catController extends viewController {
         }
 
         $this->template->owner_email        = $this->job_owner;
-        $this->template->jobOwnerIsMe       = ( $this->logged_user->email == $this->job_owner );
-        $this->template->get_public_matches = ( !$this->job->only_private_tm );
+        $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
+        $this->template->get_public_matches = ( !$this->chunk->only_private_tm );
         $this->template->job_not_found      = $this->job_not_found;
         $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled      = $this->job_cancelled;
@@ -408,6 +407,7 @@ class catController extends viewController {
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
+
         $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
         $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 
@@ -416,8 +416,6 @@ class catController extends viewController {
 
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-
-        $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
         //FIXME: temporarily disabled
@@ -461,10 +459,13 @@ class catController extends viewController {
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
+        //Maybe some plugin want disable the Split from the config
+        $this->template->splitSegmentEnabled = var_export(true, true);
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
-        $this->projectFeatures->appendDecorators(
+        $this->featureSet->appendDecorators(
             'CatDecorator',
             $this,
             $this->template

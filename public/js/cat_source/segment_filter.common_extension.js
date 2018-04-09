@@ -2,7 +2,7 @@
 if ( SegmentFilter.enabled() )
 (function($, UI, SF, undefined) {
 
-    var original_getSegmentsMarkup = UI.getSegmentMarkup ;
+    var original_renderFiles = UI.renderFiles ;
     var original_editAreaClick     = UI.editAreaClick ;
 
     var original_selectorForNextUntranslatedSegment = UI.selectorForNextUntranslatedSegment ; 
@@ -61,26 +61,26 @@ if ( SegmentFilter.enabled() )
             // change this if we are filtering, go to the next
             // segment, assuming the sample is what we want to revise.
             if ( SF.filtering() ) {
-                gotoNextSegment.apply(undefined, arguments);
+                gotoNextSegment.apply(this, arguments);
             }
             else {
-                original_openNextTranslated.apply(undefined, arguments);
+                original_openNextTranslated.apply(this, arguments);
             }
         },
         gotoPreviousSegment : function() {
             if ( SF.filtering() ) {
-                gotoPreviousSegment.apply(undefined, arguments);
+                gotoPreviousSegment.apply(this, arguments);
             } else {
-                original_gotoPreviousSegment.apply(undefined, arguments);
+                original_gotoPreviousSegment.apply(this, arguments);
             }
 
         },
 
         gotoNextSegment : function() {
             if ( SF.filtering() ) {
-                gotoNextSegment.apply(undefined, arguments);
+                gotoNextSegment.apply(this, arguments);
             } else {
-                original_gotoNextSegment.apply(undefined, arguments);
+                original_gotoNextSegment.apply(this, arguments);
             }
 
         },
@@ -104,25 +104,27 @@ if ( SegmentFilter.enabled() )
             return  $(el).closest('section').hasClass('muted');
         },
 
-        editAreaClick : function(e, operation, action) {
+        editAreaClick : function(target, operation) {
             var e = arguments[0];
-            if ( ! UI.isMuted(e.target) ) {
-                original_editAreaClick.apply( $(e.target).closest('.editarea'), arguments );
+            if ( ! UI.isMuted(target) ) {
+                original_editAreaClick.apply( this,[target, operation]);
             }
         },
 
-        getSegmentMarkup : function() {
-            var markup = original_getSegmentsMarkup.apply( undefined, arguments );
-            var segment = arguments[0];
+        renderFiles : function() {
+            original_renderFiles.apply( this, arguments );
 
             if (SF.filtering()) {
-                if ( SF.getLastFilterData()['segment_ids'].indexOf( segment.sid ) === -1 ) {
-                    markup = $(markup).addClass('muted');
-                    markup = $('<div/>').append(markup).html();
-                }
+                // var segments = SegmentStore.getAllSegments();
+                var filterArray = SF.getLastFilterData()['segment_ids'];
+                SegmentActions.setMutedSegments(filterArray);
+                // segments.forEach(function (segment,index) {
+                //     if (filterArray.indexOf(segment.sid) === -1) {
+                //         SegmentActions.addClassToSegment(segment.sid, 'muted');
+                //         SegmentActions.removeClassToSegment(segment.sid, 'editor opened');
+                //     }
+                // })
             }
-
-            return markup ;
         }
     });
 })(jQuery, UI, SegmentFilter);

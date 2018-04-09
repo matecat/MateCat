@@ -12,6 +12,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
 
+    protected static $_sql_get_jobs_by_project = "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;";
+
     /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
@@ -103,11 +105,18 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    public function destroyCacheByProjectId( $project_id ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
+
+        return $this->_destroyObjectCache( $stmt, [ $project_id ] );
+    }
+
     public static function getByProjectId( $id_project, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;" );
+        $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_project ] );
 
@@ -258,7 +267,12 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $jStruct->password = $new_password;
 
+        $this->destroyCache( $jStruct );
+        $this->destroyCacheByProjectId( $jStruct->id_project );
+
         return $jStruct;
+
+
 
     }
 

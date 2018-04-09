@@ -170,6 +170,10 @@
     }
     .item-key-name {
         color: initial;
+        max-width: 145px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .text .multiple-tm {
         display: block;

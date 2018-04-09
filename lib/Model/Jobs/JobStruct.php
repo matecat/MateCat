@@ -80,6 +80,22 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     protected $_openThreads;
 
+    protected $is_review;
+
+    /**
+     *
+     * @return array
+     */
+    public function getTMProps(){
+        $projectData = $this->getProject();
+        $result = [
+                'project_id'   => $projectData->id,
+                'project_name' => $projectData->name,
+                'job_id'       => $this->id,
+        ];
+        return $result;
+    }
+
     /**
      * @return JobsTranslatorsStruct
      */
@@ -156,7 +172,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
         return $this->cachable( __function__, $this, function ( $job ) {
             $mDao = new Projects_MetadataDao();
-            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $job->id_project );
+            return $mDao->setCacheTTL( 60 * 60 * 24 * 30 )->allByProjectId( $job->id_project );
         } );
 
     }
@@ -295,6 +311,23 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function offsetUnset( $offset ) {
         $this->__set( $offset, null );
+    }
+
+    public function isCanceled() {
+        return $this->status == Constants_JobStatus::STATUS_CANCELLED ;
+    }
+
+    public function isArchived() {
+        return $this->status == Constants_JobStatus::STATUS_ARCHIVED ;
+    }
+
+    public function setIsReview($is_review){
+        $this->is_review = $is_review;
+        return $this;
+    }
+
+    public function getIsReview(){
+        return $this->is_review;
     }
 
 }

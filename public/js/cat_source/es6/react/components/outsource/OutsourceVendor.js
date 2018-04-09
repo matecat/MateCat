@@ -144,10 +144,13 @@ class OutsourceVendor extends React.Component {
         let changeRates = Cookies.get( "matecat_changeRates");
         if( _.isUndefined(changeRates)) {
             API.OUTSOURCE.fetchChangeRates().done(function (response) {
-                self.setState({
-                    changeRates: $.parseJSON(response.data)
-                });
-                Cookies.set( "matecat_changeRates",  response.data  , { expires: 1 });
+                var rates = $.parseJSON(response.data);
+                if (!_.isUndefined(rates)) {
+                    self.setState({
+                        changeRates: rates
+                    });
+                    Cookies.set( "matecat_changeRates",  response.data  , { expires: 1 });
+                }
             });
         }
     }
@@ -443,7 +446,7 @@ class OutsourceVendor extends React.Component {
 
                                                 {(showDateMessage) ? (
                                                     <div className="errors-date too-far-date" >We will deliver before the selected date
-                                                        <div className="tip" data-tooltip="This date already provide us with all the time we need to deliver quality work at the lowest price"
+                                                        <div className="tip" data-tooltip="This date already provides us with all the time we need to deliver quality work at the lowest price"
                                                              data-position="bottom center" data-variation="wide"><i className="icon-info icon" /></div>
                                                     </div>
                                                 ):('')}

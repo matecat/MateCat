@@ -20,6 +20,12 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
 
+    /**
+     * @see SetContributionWorker::_loadEngine
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws EndQueueException
+     */
     protected function _loadEngine( ContributionStruct $contributionStruct ){
 
         try {

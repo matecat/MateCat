@@ -26,7 +26,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
 
     /**
      * @param Chunks_ChunkStruct $chunk
-     * @param                    $versionNumbero
+     * @param                    $versionNumber
      * @return ArchivedQualityReportStruct
      */
     public function getByChunkAndVersionNumber( Chunks_ChunkStruct $chunk, $versionNumber ) {

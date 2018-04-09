@@ -11,22 +11,30 @@ namespace API\V2;
 
 use API\V2\Json\SegmentComment;
 use API\V2\Validators\ChunkPasswordValidator;
-
+use Chunks_ChunkStruct;
 use Comments_CommentDao ;
 
 class CommentsController extends KleinController {
 
     /**
-     *
-     * Gets the full list of comments for the current job
-     *
-     * @var ChunkPasswordValidator
+     * @var Chunks_ChunkStruct
      */
-    private $validator ;
+    protected $chunk;
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return $this
+     */
+    public function setChunk( $chunk ) {
+        $this->chunk = $chunk;
+
+        return $this;
+    }
 
     public function index() {
-        $chunk = $this->validator->getChunk() ;
-        $comments = Comments_CommentDao::getCommentsForChunk( $chunk, array(
+
+        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, array(
             'from_id' => $this->request->param( 'from_id' )
         ));
 
@@ -34,12 +42,13 @@ class CommentsController extends KleinController {
         $this->response->json( array('comments' => $formatted->render() ) ) ;
     }
 
-    protected function validateRequest() {
-        $this->validator->validate();
-    }
-
     protected function afterConstruct() {
-        $this->validator = new Validators\ChunkPasswordValidator( $this->request );
+        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Controller = $this;
+        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
+            $Controller->setChunk( $Validator->getChunk() );
+        } );
+        $this->appendValidator( $Validator );
     }
 
 }

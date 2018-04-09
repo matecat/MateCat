@@ -2,13 +2,15 @@
 
 namespace API\V2;
 
+use AbstractControllers\IController;
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use FeatureSet;
 use Users_UserDao;
 
-abstract class KleinController {
+abstract class KleinController implements IController {
 
     /**
      * @var \Klein\Request
@@ -48,6 +50,29 @@ abstract class KleinController {
     public $params;
 
     /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet() {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featuresSet ) {
+        $this->featureSet = $featuresSet;
+
+        return $this;
+    }
+
+    /**
      * @return mixed
      */
     public function getParams() {
@@ -64,17 +89,22 @@ abstract class KleinController {
         $paramsGet = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
-
+        $this->featureSet = new FeatureSet();
         $this->afterConstruct();
 
+    }
+
+    public function performValidations(){
+        $this->validateAuth();
+        $this->identifyUser();
+        $this->validateRequest();
     }
 
     public function respond( $method ) {
         $start = microtime(true) ;
 
-        $this->validateAuth();
-        $this->identifyUser();
-        $this->validateRequest();
+        $this->performValidations();
+
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
@@ -162,10 +192,12 @@ abstract class KleinController {
         foreach( $this->validators as $validator ){
             $validator->validate();
         }
+        $this->validators = [];
     }
 
     protected function appendValidator( Base $validator ){
         $this->validators[] = $validator;
+        return $this;
     }
 
     /**
@@ -197,8 +229,7 @@ abstract class KleinController {
         $this->downloadToken = null;
     }
 
-    protected function afterConstruct() {
-    }
+    protected function afterConstruct() {}
 
     protected function _logWithTime( $time ) {
         $previous_filename = \Log::$fileName ;

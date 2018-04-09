@@ -29,7 +29,7 @@ class userKeysController extends ajaxController {
         parent::__construct();
 
         //Session Enabled
-        $this->checkLogin();
+        $this->readLoginInfo();
         //Session Disabled
 
         //define input filters
@@ -128,7 +128,7 @@ class userKeysController extends ajaxController {
             $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
 
             $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
-            $memoryKeyToUpdate->uid    = $this->uid;
+            $memoryKeyToUpdate->uid    = $this->user->uid;
             $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 
             switch ( $this->exec ) {
@@ -140,9 +140,7 @@ class userKeysController extends ajaxController {
                     break;
                 case 'newKey':
                     $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
-
-                    $featuresSet = new FeatureSet();
-                    $featuresSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->uid );
+                    $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
 
                     break;
                 case 'info':
@@ -239,7 +237,7 @@ class userKeysController extends ajaxController {
                  * @var Users_UserStruct[] $alreadyRegisteredRecipient
                  */
                 $email = new TmKeyManagement_ShareKeyEmail(
-                        $this->logged_user,
+                        $this->user,
                         [
                                 $alreadyRegisteredRecipient[ 0 ]->email,
                                 $alreadyRegisteredRecipient[ 0 ]->fullName()
@@ -250,7 +248,7 @@ class userKeysController extends ajaxController {
 
             } else {
 
-                $email = new TmKeyManagement_ShareKeyEmail( $this->logged_user, [ $email, "" ], $memoryKeyToUpdate );
+                $email = new TmKeyManagement_ShareKeyEmail( $this->user, [ $email, "" ], $memoryKeyToUpdate );
                 $email->send();
 
             }

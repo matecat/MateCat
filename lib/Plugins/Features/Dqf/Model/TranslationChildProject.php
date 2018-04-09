@@ -11,7 +11,6 @@ use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Utils\Functions;
 use INIT;
 use LoudArray;
-use Translations_TranslationVersionDao;
 
 class TranslationChildProject extends AbstractChildProject {
 
@@ -21,11 +20,6 @@ class TranslationChildProject extends AbstractChildProject {
      * @var SegmentOrigin
      */
     protected $originMap ;
-
-    /**
-     * @var projectType
-     */
-    protected $projectType ;
 
     /**
      * TranslationChildProject constructor.
@@ -38,12 +32,6 @@ class TranslationChildProject extends AbstractChildProject {
     public function __construct( Chunks_ChunkStruct $chunk ) {
         parent::__construct( $chunk, 'translate' );
         $this->originMap = new SegmentOrigin() ;
-
-        $this->projectType = $this->chunk->getProject()->getMetadataValue('project_type') ;
-
-        if ( !in_array($this->projectType, ['MT', 'HT'] ) ) {
-            throw new Exception('project_type is not valid ' . $this->projectType ) ;
-        }
     }
 
     protected function _submitData() {
@@ -110,7 +98,7 @@ class TranslationChildProject extends AbstractChildProject {
                     );
 
             foreach ( $dqfChildProjects as $dqfChildProject ) {
-                $dao = new Translations_TranslationVersionDao();
+                $dao = new TranslationVersionDao();
                 $translations = $dao->getExtendedTranslationByFile(
                         $file,
                         $limitDate,
@@ -123,6 +111,9 @@ class TranslationChildProject extends AbstractChildProject {
                 foreach ( $translations as $translation ) {
                     // Using a struct and converting it to array immediately allows us to validate the
                     // input array.
+
+                    list( $segmentOriginId, $matchRate ) = $this->getSegmentOriginAndMatchRate( $translation ) ;
+
                     $segmentPairs[] = ( new SegmentPairStruct([
                             "sourceSegmentId"   => $segmentIdsMap[ $translation->id_segment ]['dqf_segment_id'],
                             // TODO: the corect form of this key should be the following, to so to get back the
@@ -130,14 +121,12 @@ class TranslationChildProject extends AbstractChildProject {
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
                             "targetSegment"     => $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
-
                             "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
-
-                            "segmentOriginId"   => $this->mapSegmentOrigin( $translation ),
+                            "segmentOriginId"   => $segmentOriginId,
+                            "matchRate"         => $matchRate,
                             "mtEngineId"        => 22, // MyMemory
                             // "mtEngineId"        => Functions::mapMtEngine( $this->chunk->id_mt_engine ),
                             "mtEngineOtherName" => '',
-                            // "matchRate"         => $translation->suggestion_match
                     ]) )->toArray() ;
                 }
 
@@ -176,11 +165,19 @@ class TranslationChildProject extends AbstractChildProject {
         return $time ;
     }
 
-    protected function mapSegmentOrigin( ExtendedTranslationStruct $translation ) {
-        $originName = is_null( $this->projectType ) ? 'MT' : $this->projectType ;
-        $object = $this->originMap->getByName( $originName ) ;
+    protected function getSegmentOriginAndMatchRate( ExtendedTranslationStruct $translation ) {
+        $data = [
+                'originName' => $translation->segment_origin,
+                'matchRate'  => $translation->suggestion_match
+        ] ;
 
-        return $object['id'] ;
+        $this->chunk->getProject()->getFeatures()->run(
+                'filterDqfSegmentOriginAndMatchRate', $data, $translation, $this->chunk
+        ) ;
+
+        $object = $this->originMap->getByName( $data['originName'] ) ;
+
+        return [ $object['id'], $data['matchRate'] ];
     }
 
     protected function translationIdToDqf( ExtendedTranslationStruct $translation, DqfProjectMapStruct $dqfChildProject ) {

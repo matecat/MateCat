@@ -109,7 +109,6 @@ class INIT {
      * DQF configuration
      *
      */
-    public static $DQF_ENABLED = true;
     public static $DQF_BASE_URL;
     public static $DQF_ID_PREFIX = '' ;
     public static $DQF_API_KEY;
@@ -399,7 +398,13 @@ class INIT {
 
     public static $PLUGIN_LOAD_PATHS = array();
 
+    /**
+     * @deprecated use AUTOLOAD_PLUGINS
+     * @var array
+     */
     public static $MANDATORY_PLUGINS = array();
+
+    public static $AUTOLOAD_PLUGINS = [] ;
 
     /**
      * Definitions for the asynchronous task runner

@@ -589,7 +589,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat -34px 136px;
+    background: url(../img/matecat_watch-left-border.png) no-repeat -34px 136px;
     background-size: 23%;
     /*width: 385px;*/
     padding: 25px 96px;
@@ -1042,7 +1042,7 @@ div#matecat-modal p {
 
     .matecat-modal-top {
         background-color: #ffffff;
-      
+
     }
     .matecat-modal-middle,
     .matecat-modal-bottom,
@@ -1107,7 +1107,8 @@ div#matecat-modal p {
 
                     .content.user {
                         font-weight: bold;
-                        & invited {
+                        min-width:: 360px;
+                        &.invited {
                             font-weight: 100;
                         }
                     }
@@ -1225,12 +1226,6 @@ div#matecat-modal p {
     height: 16px;
     &:hover {
         color: #333333;
-    }
-}
-
-.action {
-    .tmx-import-slider {
-        width: 150px !important;
     }
 }
 

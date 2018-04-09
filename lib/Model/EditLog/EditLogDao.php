@@ -76,6 +76,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $query = "SELECT
             s.id,
             s.segment AS source,
+            s.internal_id,
             st.translation AS translation,
             st.time_to_edit,
             st.suggestion,
@@ -86,6 +87,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             st.mt_qe,
             st.match_type,
             st.locked,
+            ste.uid,
             j.id_translator,
             j.source AS job_source,
             j.target AS job_target,
@@ -100,13 +102,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 JOIN(
                   %s
                 ) AS TEMP ON TEMP.__sid = s.id
+
+                LEFT JOIN segment_translation_events ste on st.id_segment = ste.id_segment
+                  AND st.version_number = ste.version_number
+
                 WHERE
-                id_job = %d AND
+                st.id_job = %d AND
                 j.password = '%s' AND
                 translation IS NOT NULL AND
                 st.status not in( '%s', '%s' )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                ORDER BY id_segment ASC";
+                ORDER BY st.id_segment ASC";
 
         $querySegments = sprintf(
                 $querySegments,
@@ -134,6 +140,15 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
+
+        $userDao = new Users_UserDao() ;
+        $userDao->setCacheTTL( 60 * 60 * 24 * 30 ) ;
+
+        foreach( $result as $key => $value ) {
+            if ( !is_null( $result[ $key ] [ 'uid' ] ) ) {
+                $result[ $key ] [ 'email' ] = $userDao->getByUid( $result [ $key ] [ 'uid' ] )->email  ;
+            }
+        }
 
         return $this->_buildResult( $result );
     }

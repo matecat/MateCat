@@ -9,7 +9,7 @@ class changePasswordController extends ajaxController {
 
     public function __construct() {
 
-        parent::checkLogin( false ); //need to write to the sessions
+        parent::readLoginInfo( false ); //need to write to the sessions
 		parent::__construct();
 
         $filterArgs = array(
@@ -68,7 +68,6 @@ class changePasswordController extends ajaxController {
             $jStruct = Jobs_JobDao::getByIdAndPassword( $this->res_id, $actual_pwd );
             $jDao = new Jobs_JobDao();
             $jDao->changePassword( $jStruct, $new_password );
-            $jDao->destroyCache( $jStruct );
 
             $jStruct->getProject()
                     ->getFeatures()

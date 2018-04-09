@@ -32,8 +32,8 @@ Styles from other css files should be ported over time.
   border-radius: 3px;
   padding: 2px;
   border: 1px solid #C6C6C6;
-  @include box-shadow(0 1px 1px rgba(0,0,0,.1));
-  @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
+  /*@include box-shadow(0 1px 1px rgba(0,0,0,.1));
+  @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);*/
 
   &:hover {
     color: #000000;
@@ -75,11 +75,17 @@ section:hover .segment-side-buttons {
 }
 
 //ICE MATCH
-.ice-locked .footer,
-.ice-locked .buttons,
-.ice-locked .copy,
-.ice-locked .loader {
-  display: none !important;
+.ice-locked,
+.readonly {
+  .footer,
+  .buttons,
+  .copy,
+  .loader,
+  .warnings,
+  .toolbar {
+    display: none !important;
+  }
 }
+
 
 

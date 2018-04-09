@@ -97,7 +97,7 @@ class reviseSummaryController extends viewController {
         $activity->id_project = $this->data[ 'id_project' ];
         $activity->action     = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->logged_user->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
@@ -124,8 +124,8 @@ class reviseSummaryController extends viewController {
 
 
         $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->logged_user   = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
+        $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
 
         //set the labels
         $error_info = array(

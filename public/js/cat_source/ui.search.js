@@ -12,7 +12,7 @@ $.extend(UI, {
 	resetSearch: function() {
 		this.body.removeClass('searchActive');
 		this.clearSearchMarkers();
-		this.setFindFunction('find');
+		// this.setFindFunction('find');
 		$('#exec-find').removeAttr('disabled');
 		this.enableTagMark();
         this.markGlossaryItemsInSource(UI.cachedGlossaryData);
@@ -78,7 +78,7 @@ $.extend(UI, {
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
-		this.setFindFunction('next');
+		// this.setFindFunction('next');
 		this.body.addClass('searchActive');
 		//Save the current segment to not lose the translation
 		UI.saveSegment(UI.currentSegment);
@@ -87,7 +87,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'find',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -160,7 +160,7 @@ $.extend(UI, {
 			data: {
 				action: 'getSearch',
 				function: 'replaceAll',
-				job: config.job_id,
+				job: config.id_job,
 				token: dd.getTime(),
 				password: config.password,
 				source: source,
@@ -176,18 +176,13 @@ $.extend(UI, {
 					return false;
 				}
 				UI.unmountSegments();
-				UI.render();
+                UI.render({
+                    firstLoad: false
+                });
 			}
 		});
 	},
-	checkSearchStrings: function() {
-		s = this.searchParams.source;
-		if (s.match(/[<\>]/gi)) { // there is a tag in source
-			this.disableTagMark();
-		} else {
-			this.enableTagMark();
-		}
-	},
+
 	updateSearchDisplay: function() {
 		var res,resNumString,numbers;
 
@@ -223,12 +218,12 @@ $.extend(UI, {
 		query += ' (' + ((this.searchParams['match-case']) ? 'case sensitive' : 'case insensitive') + ')';
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
-		if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
-		}
-		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
-		}
+		// if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
+		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
+		// }
+		// if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
+		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
+		// }
 		this.updateSearchItemsCount();
 		if (this.someSegmentToSave()) {
 			this.addWarningToSearchDisplay();
@@ -262,6 +257,7 @@ $.extend(UI, {
 		if (c > 0) {
 			$('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
 		} else {
+            $('#filterSwitch .numbererror').text('');
 		}
 	},
 	execNext: function() {
@@ -286,8 +282,9 @@ $.extend(UI, {
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
             seg = options.segmentToScroll;
-            var el = $("#segment-"+seg);
-            $(el).addClass('currSearchSegment');
+            if ( seg ) {
+                SegmentActions.addClassToSegment(seg, 'currSearchSegment');
+            }
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
@@ -443,7 +440,7 @@ $.extend(UI, {
 		$('mark.searchMarker').each(function() {
 			$(this).replaceWith($(this).html());
 		});
-		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
+		$('section.currSearchSegment').removeClass('currSearchSegment');
 	},
 	rebuildSearchSegmentMarkers: function(el) {
 		var querySearchString = this.searchParams.target,
@@ -484,8 +481,8 @@ $.extend(UI, {
 			} else {
 				if (el.nextAll(status).length) {
 					nextToGo = el.nextAll(status).first();
-					$(el).removeClass('currSearchSegment');
-					nextToGo.addClass('currSearchSegment');
+                    SegmentActions.removeClassToSegment(UI.getSegmentId(el), 'currSearchSegment');
+                    SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
 					// We fit this case if the next batch of segments is to load
@@ -534,7 +531,7 @@ $.extend(UI, {
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
 					this.gotoSearchResultAfter({
@@ -566,7 +563,7 @@ $.extend(UI, {
 			} else {
 				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
 					var nextToGo = $('#' + el).nextAll(status).first();
-					nextToGo.addClass('currSearchSegment');
+                    SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
 					// load new segments
@@ -579,6 +576,7 @@ $.extend(UI, {
 						var seg2scroll = this.nextUnloadedResultSegment();
 						UI.unmountSegments();
 						this.render({
+							firstLoad: false,
 							applySearch: true,
 							segmentToScroll: seg2scroll
 						});
@@ -590,15 +588,16 @@ $.extend(UI, {
 			var seg = $('section' + wh).has("mark.searchMarker");
 			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			var found = false;
-
+			var self = this;
 			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
 					} else {
 						found = true;
-						$("html,body").animate({
-							scrollTop: $(this).offset().top - 200
-						}, 500);
+                        self.scrollSegment($(this));
+						// $("html,body").animate({
+						// 	scrollTop: $(this).offset().top - 200
+						// }, 500);
 						setTimeout(function() {
 							UI.goingToNext = false;
 						}, 500);
@@ -622,6 +621,7 @@ $.extend(UI, {
 					seg2scroll = this.nextUnloadedResultSegment();
 					UI.unmountSegments();
 					this.render({
+						firstLoad: false,
 						applySearch: true,
 						segmentToScroll: seg2scroll
 					});
@@ -652,15 +652,15 @@ $.extend(UI, {
 		}
 		return changes;
 	},
-	setFindFunction: function(func) {
-		var b = $('#exec-find');
-		if (func == 'next') {
-			b.attr('data-func', 'next').attr('value', 'Next');
-		} else {
-			b.attr('data-func', 'find').attr('value', 'Find');
-		}
-		b.removeAttr('disabled');
-	},
+	// setFindFunction: function(func) {
+	// 	/*var b = $('#exec-find');*/
+	// 	/*if (func == 'next') {
+	// 		b.attr('data-func', 'next').attr('value', 'Next');
+	// 	} else {
+	// 		b.attr('data-func', 'find').attr('value', 'Find');
+	// 	}*/
+	// 	/*b.removeAttr('disabled');*/
+	// },
 	unmarkNumItemsInSegments: function() {
 		$('section[data-searchItems]').removeAttr("data-searchItems");
 	},
@@ -670,35 +670,17 @@ $.extend(UI, {
 		});
 	},
 
-    searchIsOpen : function() {
-        // TODO: change the name of this, filter is not a good name.
-        // This panel opens search actually.
-        return $('body').hasClass('filterOpen') ;
-    },
     closeSearch : function() {
-        $('body').removeClass('filterOpen');
+		CatToolActions.closeSubHeader();
     },
     openSearch : function() {
-        $(document).trigger('header-tool:open', { name: 'search' });
-        $('body').addClass('filterOpen');
+        CatToolActions.openSearch();
         $('#search-source').focus();
     },
 	toggleSearch: function(e) {
 		if (!this.searchEnabled) return;
 		e.preventDefault();
-        // if (LXQ.enabled()) LXQ.hidePopUp();
-		if ( UI.searchIsOpen() )  {
-            UI.closeSearch();
-		} else {
-			UI.closeAllMenus(e);
-			UI.openSearch();
-		}
-        this.fixHeaderHeightChange();
+		CatToolActions.toggleSearch();
+        // this.fixHeaderHeightChange();
 	},
-});
-
-$(document).on('header-tool:open', function(e, data) {
-    if ( data.name != 'search' ) {
-        UI.closeSearch();
-    }
 });

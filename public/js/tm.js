@@ -1349,8 +1349,8 @@
             var tr = button.closest('tr');
             var id = tr.data("id");
             $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? ' +
-                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete">       <span class="text">Confirm</span>   </a>' +
-                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>').show();
+                '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete">       <span class="text">Confirm</span>   </a>').show();
             $('.continueDeletingMT, .cancelDeletingMT').off('click');
             $('.continueDeletingMT').on('click', function(e){
                 e.preventDefault();
@@ -1382,20 +1382,23 @@
             var removeListeners = function () {
                 $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click');
             };
-            $('.confirm-tm-key-delete').off('click');
-            $('.confirm-tm-key-delete').on('click', function (e) {
-                e.preventDefault();
-                UI.deleteTM(button);
-                UI.hideAllBoxOnTables();
-                removeListeners();
-            });
-            $('.cancel-tm-key-delete').off('click');
-            $('.cancel-tm-key-delete').on('click', function (e) {
-                e.preventDefault();
-                UI.hideAllBoxOnTables();
-                $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-                removeListeners();
-            });
+            setTimeout(function (  ) {
+                $('.confirm-tm-key-delete').off('click');
+                $('.confirm-tm-key-delete').on('click', function (e) {
+                    e.preventDefault();
+                    UI.deleteTM(button);
+                    UI.hideAllBoxOnTables();
+                    removeListeners();
+                });
+                $('.cancel-tm-key-delete').off('click');
+                $('.cancel-tm-key-delete').on('click', function (e) {
+                    e.preventDefault();
+                    UI.hideAllBoxOnTables();
+                    $("tr.tm-key-deleting").removeClass('tm-key-deleting');
+                    removeListeners();
+                });
+            }, 200);
+
         },
         deleteTM: function (button) {
             tr = $(button).parents('tr').first();

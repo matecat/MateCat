@@ -30,6 +30,7 @@ use Log;
 use LQA\ChunkReviewDao;
 use Monolog\Logger;
 use PHPTALWithAppend;
+use Projects_ProjectStruct;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
@@ -44,7 +45,9 @@ class Dqf extends BaseFeature {
     protected $autoActivateOnProject = false ;
 
     public static $dependencies = [
-            Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS
+            Features::PROJECT_COMPLETION,
+            Features::REVIEW_IMPROVED,
+            Features::TRANSLATION_VERSIONS
     ] ;
 
     /**
@@ -92,17 +95,6 @@ class Dqf extends BaseFeature {
             }
         }
         return $metadata ;
-    }
-
-    /**
-     * These are the dependencies we need to make to be enabled when we detedct DQF is to be
-     * activated for a given project. These will fill the project metadata table.
-     *
-     *
-     * @return array
-     */
-    public function getProjectDependencies() {
-        return self::$dependencies ;
     }
 
     /**
@@ -155,6 +147,17 @@ class Dqf extends BaseFeature {
         $revisionChildModel->setCompleted();
     }
 
+    public function filterCreationStatus($result, Projects_ProjectStruct $project) {
+        $master_project_created = $project->getMetadataValue('dqf_master_project_creation_completed_at');
+
+        if ( $master_project_created ) {
+            return $result ;
+        }
+        else {
+            return null ;
+        }
+    }
+
     public function filterCreateProjectFeatures( $features, $postInput ) {
         if ( isset( $postInput[ 'dqf' ] ) && !!$postInput[ 'dqf' ] ) {
             $validationErrors = ProjectMetadata::getValiationErrors( $postInput ) ;
@@ -163,7 +166,7 @@ class Dqf extends BaseFeature {
                 throw new ValidationError('input validation failed: ' . implode(', ', $validationErrors ) ) ;
             }
 
-            $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
+            $features[ Features::DQF ] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
     }
@@ -215,7 +218,7 @@ class Dqf extends BaseFeature {
      */
     public function filterProjectDependencies( $dependencies, $metadata ) {
         if ( isset( $metadata[ self::FEATURE_CODE ] ) && $metadata[ self::FEATURE_CODE ] ) {
-            $dependencies = array_merge( $dependencies, $this->getProjectDependencies() );
+            $dependencies = array_merge( $dependencies, static::getDependencies() );
         }
         return $dependencies ;
     }

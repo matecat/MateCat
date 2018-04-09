@@ -64,11 +64,6 @@ class setTranslationController extends ajaxController {
      */
     private $VersionsHandler ;
 
-    /**
-     * @var FeatureSet
-     */
-    protected $feature_set;
-
     public function __construct() {
 
         parent::__construct();
@@ -200,10 +195,11 @@ class setTranslationController extends ajaxController {
              * Here we instantiate new objects in order to migrate towards
              * a more object oriented approach.
              */
-            $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
-            $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
-            $this->feature_set = new FeatureSet() ;
-            $this->feature_set->loadForProject( $this->project ) ;
+            $this->project    = Projects_ProjectDao::findByJobId( $this->id_job );
+            $this->chunk      = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
+
+            $this->featureSet->loadForProject( $this->project ) ;
+
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
@@ -268,7 +264,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->checkLogin();
+        $this->readLoginInfo();
         $this->initVersionHandler();
 
         //check tag mismatch
@@ -379,7 +375,7 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
 
-        $this->feature_set->run('preAddSegmentTranslation', array(
+        $this->featureSet->run('preAddSegmentTranslation', array(
             'new_translation' => $_Translation,
             'old_translation' => $old_translation
         ));
@@ -400,17 +396,17 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
-        $this->feature_set->run('postAddSegmentTranslation', array(
-            'chunk' => $this->chunk,
-            'is_review' => $this->isRevision(),
-            'logged_user' => $this->logged_user
+        $this->featureSet->run('postAddSegmentTranslation', array(
+            'chunk'       =>  $this->chunk,
+            'is_review'   =>  $this->isRevision(),
+            'logged_user' =>  $this->user
         ));
 
         //propagate translations
-        $TPropagation = array();
-        $propagationTotal = array(
-            'propagated_ids' => array()
-        );
+        $TPropagation     = [];
+        $propagationTotal = [
+                'propagated_ids' => []
+        ];
 
         if ( $this->propagate && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
@@ -569,19 +565,23 @@ class setTranslationController extends ajaxController {
         }
 
         try {
-            $this->feature_set->run('setTranslationCommitted', array(
-                    'translation'     => $_Translation,
-                    'old_translation' => $old_translation,
-                    'propagated_ids'  => $propagationTotal['propagated_ids'],
-                    'chunk'           => $this->chunk,
-                    'segment'         => $this->segment
-            ));
+
+            $this->featureSet->run('setTranslationCommitted', [
+                    'translation'      => $_Translation,
+                    'old_translation'  => $old_translation,
+                    'propagated_ids'   => $propagationTotal['propagated_ids'],
+                    'chunk'            => $this->chunk,
+                    'segment'          => $this->segment,
+                    'user'             => $this->user,
+                    'source_page_code' => $this->_getSourcePageCode()
+            ] );
+
         } catch ( Exception $e ){
             Log::doLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
 
         try {
-            $this->result = $this->feature_set->filter('filterSetTranslationResult', $this->result, array(
+            $this->result = $this->featureSet->filter('filterSetTranslationResult', $this->result, array(
                     'translation'     => $_Translation,
                     'old_translation' => $old_translation,
                     'propagated_ids'  => $propagationTotal['propagated_ids'],
@@ -627,6 +627,13 @@ class setTranslationController extends ajaxController {
                 'status'         => $saved_translation['status']
         );
         return $translation ;
+    }
+
+    private function _getSourcePageCode() {
+        $code = $this->isRevision() ? Constants::SOURCE_PAGE_REVISION :
+                Constants::SOURCE_PAGE_TRANSLATE ;
+
+        return $this->featureSet->filter('filterSourcePageCode', $code ) ;
     }
 
     private function recountJobTotals( $old_status ) {
@@ -720,7 +727,7 @@ class setTranslationController extends ajaxController {
             $this->VersionsHandler = new \Features\TranslationVersions\SegmentTranslationVersionHandler(
                     $this->id_job,
                     $this->id_segment,
-                    $this->uid,
+                    $this->user->uid,
                     $this->jobData['id_project'],
                     $this->isRevision()
             );
@@ -800,6 +807,11 @@ class setTranslationController extends ajaxController {
     /**
      * @param $_Translation
      * @param $old_translation
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
      */
     private function evalSetContribution( $_Translation, $old_translation ) {
         if ( in_array( $this->status, array(
@@ -810,7 +822,7 @@ class setTranslationController extends ajaxController {
         }
 
         $skip_set_contribution = false ;
-        $skip_set_contribution = $this->feature_set->filter('filter_skip_set_contribution',
+        $skip_set_contribution = $this->featureSet->filter('filter_skip_set_contribution',
                 $skip_set_contribution, $_Translation, $old_translation
         );
 
@@ -829,7 +841,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->segment              = $this->segment[ 'segment' ];
         $contributionStruct->translation          = $_Translation[ 'translation' ];
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = $this->uid;
+        $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
         $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
@@ -839,14 +851,25 @@ class setTranslationController extends ajaxController {
         $contributionStruct->context_after        = $this->context_after;
         $contributionStruct->context_before       = $this->context_before;
 
-        $contributionStruct = $this->feature_set->filter(
+        $contributionStruct = $this->featureSet->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
+
+        /** TODO Remove */
+        try {
+            $element            = new \TaskRunner\Commons\QueueElement();
+            $element->params    = $contributionStruct;
+            $element->__toString();
+            \Utils::raiseJsonExceptionError( true );
+        } catch ( Exception $e ){
+            Log::doLog( $contributionStruct );
+        }
+        /** TODO Remove */
 
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
-        $contributionStruct = $this->feature_set->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project ) ;
+        $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project ) ;
         Set::contributionMT( $contributionStruct );
 
     }

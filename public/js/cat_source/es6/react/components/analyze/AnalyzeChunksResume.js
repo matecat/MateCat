@@ -84,6 +84,11 @@ class AnalyzeChunksResume extends React.Component {
         this.payableValues[idJob] = payable;
     }
 
+    getOpenButton(chunk, index) {
+        return <div className="open-translate ui primary button open"
+                    onClick={this.openOutsourceModal.bind(this, index)}>Translate</div>;
+    }
+
     getResumeJobs() {
         var self = this;
 
@@ -126,8 +131,7 @@ class AnalyzeChunksResume extends React.Component {
                                 </div>
                             </div>
                             <div className="activity-icons">
-                                <div className="open-translate ui primary button open"
-                                     onClick={self.openOutsourceModal.bind(self, chunk.jid + '-' + index)}>Translate</div>
+                                {self.getOpenButton(chunk, chunk.jid + '-' + index)}
                             </div>
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
@@ -139,7 +143,8 @@ class AnalyzeChunksResume extends React.Component {
                                                 onClickOutside={self.closeOutsourceModal.bind(self)}
                                                 openOutsource={openOutsource}
                                                 idJobLabel={ chunk.jid +'-'+ index }
-                                                outsourceJobId={self.state.outsourceJobId}/>
+                                                outsourceJobId={self.state.outsourceJobId}
+                            />
                         </div>;
                     });
 
@@ -210,12 +215,11 @@ class AnalyzeChunksResume extends React.Component {
                                     </div>
                                 </div>
                                 <div className="activity-icons">
-                                    {!config.jobAnalysis ? (
+                                    {(!config.jobAnalysis && config.splitEnabled) ? (
                                         <div className={"split ui blue basic button " + buttonsClass + ' '}
                                              onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     ) : (null)}
-                                    <div className="open-translate ui primary button open"
-                                         onClick={self.openOutsourceModal.bind(self, self.props.jobsInfo[indexJob].jid)}>Translate</div>
+                                    {self.getOpenButton(chunkJob, self.props.jobsInfo[indexJob].jid)}
                                 </div>
                             </div>
                             <OutsourceContainer project={self.props.project}
@@ -306,7 +310,10 @@ class AnalyzeChunksResume extends React.Component {
         return ( !nextProps.jobsAnalysis.equals(this.props.jobsAnalysis) ||
             nextProps.status !== this.props.status ||
             nextState.openDetails !== this.state.openDetails ||
-            nextState.outsourceJobId !== this.state.outsourceJobId)
+            nextState.outsourceJobId !== this.state.outsourceJobId ||
+            !nextProps.project.equals(this.props.project)
+        )
+
     }
 
     render() {

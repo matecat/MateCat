@@ -89,9 +89,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
           data.start_node = $.inArray( $(selection.anchorNode).parent()[0], container.contents() );
         }
         var nodes = container.contents();//array of nodes
-        if (data.start_node ===0)
-          data.start_offset =  selection.anchorOffset;
-        else {
+        if (data.start_node ===0) {
+            data.start_offset = selection.anchorOffset;
+        } else {
           data.start_offset = 0;
           for (var i=0;i<data.start_node;i++) {
             data.start_offset += nodes[i].textContent.length;
@@ -133,7 +133,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         if ( textSelectedInsideSelectionArea(selection, container ) )  {
             var selection = getSelectionData( selection, container ) ;
-            RI.openPanel( { sid: segment.id,  selection : selection });
+            SegmentActions.openIssuesPanel({ sid: segment.id,  selection : selection })
         }
     });
     function renderButtons(segment) {

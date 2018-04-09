@@ -19,6 +19,8 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
     public $email ;
     public $name;
 
+    public $remote_id ;
+
     public $oauth_access_token ;
 
     public $created_at ;

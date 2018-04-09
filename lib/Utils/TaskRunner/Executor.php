@@ -301,7 +301,6 @@ class Executor implements SplObserver {
      *
      * @return array[ \StompFrame, QueueElement ]
      * @throws FrameException
-     * @throws WorkerClassException
      */
     protected function _readAMQFrame() {
 
@@ -337,6 +336,7 @@ class Executor implements SplObserver {
         } catch ( Exception $e ) {
 //            self::_TimeStampMsg( $e->getMessage() );
 //            self::_TimeStampMsg( $e->getTraceAsString() );
+            $this->_logMsg( $e->getMessage() );
             throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
             /* jump the ack */
         }
@@ -362,12 +362,14 @@ class Executor implements SplObserver {
         die();
 
     }
-    
+
     /**
      * Check on redis Set for this process ID
+     *
      * @param $pid
      *
      * @return int
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _myProcessExists( $pid ) {
 

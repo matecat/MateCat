@@ -217,4 +217,162 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    public function setApprovedByChunk( $chunk ) {
+        $sql = "UPDATE segment_translations
+            SET status = :status
+              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'status'        => Constants_TranslationStatus::STATUS_APPROVED,
+                'id_job'        => $chunk->id,
+                'first_segment' => $chunk->job_first_segment,
+                'last_segment'  => $chunk->job_last_segment
+        ] );
+
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+
+        return $stmt->rowCount();
+    }
+
+    public function setTranslatedByChunk( $chunk ) {
+
+        $sql = "UPDATE segment_translations
+            SET status = :status
+              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment AND status != :approved_status";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'status'          => Constants_TranslationStatus::STATUS_TRANSLATED,
+                'id_job'          => $chunk->id,
+                'first_segment'   => $chunk->job_first_segment,
+                'last_segment'    => $chunk->job_last_segment,
+                'approved_status' => Constants_TranslationStatus::STATUS_APPROVED,
+        ] );
+
+        $counter = new \WordCount_Counter;
+        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+
+        return $stmt->rowCount();
+    }
+
+    public static function getSegmentsWithIssues( $job_id, $segments_ids ) {
+        $where_values = $segments_ids;
+
+        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ") AND id_job = ?";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $where_values[] = $job_id;
+        $stmt->execute( $where_values );
+
+        return $stmt->fetchAll();
+    }
+
+    public static function changeStatusBySegmentsIds( Jobs_JobStruct $job, $segments_ids, $status) {
+        $update_values = [];
+        $where_values = [];
+        $conn          = Database::obtain()->getConnection();
+
+        if ( $job->getProject()->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $sum_sql = "SUM(segments.raw_word_count)";
+        } else {
+            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+        }
+
+        $queryTotals = "
+           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
+
+           FROM segment_translations
+              INNER JOIN  segments
+              ON segments.id = segment_translations.id_segment
+           WHERE id_job = ?
+           AND status != ?
+           AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")
+           GROUP BY status
+    ";
+
+        $where_values[] = $job->id;
+        $where_values[] = $status;
+        $where_values   = array_merge( $where_values, $segments_ids );
+
+        $stmt = $conn->prepare( $queryTotals );
+
+        $stmt->execute( $where_values );
+
+        $totals = $stmt->fetchAll();
+
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $job->id );
+        $old_wStruct->setJobPassword( $job->password );
+        $old_wStruct->setNewWords( $job->new_words );
+        $old_wStruct->setDraftWords( $job->draft_words );
+        $old_wStruct->setTranslatedWords( $job->translated_words );
+        $old_wStruct->setApprovedWords( $job->approved_words );
+        $old_wStruct->setRejectedWords( $job->rejected_words );
+
+
+        $counter = new WordCount_Counter( $old_wStruct );
+
+        $newCounterValues = [];
+
+        foreach ( $totals as $__pos => $old_value ) {
+            $counter->setOldStatus( $old_value[ 'status' ] );
+            $counter->setNewStatus( $status );
+            $newCounterValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
+        }
+
+        $newTotals = $counter->updateDB( $newCounterValues );
+
+        $sql = "UPDATE segment_translations SET status = ? WHERE id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+
+        $stmt            = $conn->prepare( $sql );
+        $update_values[] = $status;
+        $update_values[] = $job->id;
+        $update_values   = array_merge( $update_values, $segments_ids );
+
+        $stmt->execute( $update_values );
+
+
+        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
+
+        return $job_stats;
+    }
+
+    public static function getUnchangebleStatus( $segments_ids, $status ) {
+
+        //if translated all segments are changeble
+        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            return [];
+        }
+
+        $where_values = [];
+        $conn         = Database::obtain()->getConnection();
+
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+
+            $sql = "SELECT id_segment FROM segment_translations WHERE status NOT IN( "
+                    . str_repeat( '?,', count( $where_values ) -1 ) . '?'
+                    . " ) AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
+
+            $where_values = array_merge( $where_values, $segments_ids );
+            $stmt         = $conn->prepare( $sql );
+            $stmt->execute( $where_values );
+
+            return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
+                return (int)$id_segment;
+            } );
+        }
+
+
+    }
+
+
 }
