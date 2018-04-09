@@ -175,6 +175,26 @@ API.SEGMENT = {
             type: "post",
             url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
         });
+    },
+
+    getConcordance: function (query, type) {
+        let data = {
+            action: 'getContribution',
+            is_concordance: 1,
+            from_target: type,
+            id_segment: UI.currentSegmentId,
+            text: view2rawxliff(query),
+            id_job: config.job_id,
+            num_results: UI.numMatchesResults,
+            id_translator: config.id_translator,
+            password: config.password
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url : "/?action=getContribution"
+        });
     }
 
 };

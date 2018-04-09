@@ -12,7 +12,6 @@ $.extend(UI, {
 		this.initStart = new Date();
 		this.version = "x.x.x";
 		this.numContributionMatchesResults = 3;
-		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.editarea = '';
 		this.byButton = false;
