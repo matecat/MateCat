@@ -3269,9 +3269,9 @@ p.tm-warning-message {
 
 .fixed-msg {
     position: fixed;
-    top: 16px;
-    width: 1007px;
-    z-index: 10000;
+    top: -35px;
+    width: 966px;
+    z-index: 1;
 }
 
 .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {
@@ -4840,4 +4840,16 @@ a.pull-right.btn-orange-small.cancelDeletingMT.cancel-tm-key-delete {
     width: 33px;
     height: 33px;
     margin-left: 20px;
+}
+
+.pull-right.btn-ok.share-button {
+    width: 116px;
+}
+
+a.pull-right.btn-confirm-small.confirmDelete.confirm-tm-key-delete {
+    margin-right: 3px;
+}
+
+a.pull-left.btn-ok.uploadtm {
+    margin-right: 5px;
 }
