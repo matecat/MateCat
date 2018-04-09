@@ -1952,6 +1952,7 @@ function updateJobsStatus( $res, $id, $status, $jPassword = null ) {
 
         $stmt = $conn->prepare( $select_max_id );
         $stmt->execute( ['id_project' => $id] );
+        $project_id = $id;
 
     } else {
 
@@ -1969,7 +1970,13 @@ function updateJobsStatus( $res, $id, $status, $jPassword = null ) {
         $stmt = $conn->prepare( $select_max_id );
         $stmt->execute( ['id_job' => $id, 'password' => $jPassword] );
 
+        $job = Jobs_JobDao::getById($id)[0];
+
+        $project_id = $job->id_project;
     }
+
+    ( new Jobs_JobDao )->destroyCacheByProjectId($project_id);
+
 
     $id_segment  = $stmt->fetchColumn();
 

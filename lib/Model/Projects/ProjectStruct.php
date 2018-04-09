@@ -144,10 +144,11 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @deprecated $id_customer could not correspond to the real team/assignee
+     * WARNING $id_customer could not correspond to the real team/assignee
+     *
      * @return Users_UserStruct
      */
-    public function getOwner() {
+    public function getOriginalOwner() {
         return ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $this->id_customer ) ;
     }
 

@@ -45,7 +45,7 @@ class ProjectModel {
             $user = ( new Users_UserDao() )->getByUid( $intermeiateUid );
         }
         else {
-            $user = $this->getMateCatProject()->getOwner();
+            $user = $this->getMateCatProject()->getOriginalOwner();
         }
         return new UserModel( $user ) ;
     }
@@ -69,7 +69,7 @@ class ProjectModel {
     }
 
     public function getOwnerUser() {
-       return new UserModel( $this->getMateCatProject()->getOwner() ) ;
+       return new UserModel( $this->getMateCatProject()->getOriginalOwner() ) ;
     }
 
     public function isMaster() {

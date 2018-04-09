@@ -127,7 +127,7 @@ class ProjectCreation {
                     'dqf_project_uuid' => $this->remoteMasterProject->dqfUUID,
                     'create_date'      => Utils::mysqlTimestamp( time() ),
                     'project_type'     => 'master',
-                    'uid'              => $this->project->getOwner()->uid
+                    'uid'              => $this->project->getOriginalOwner()->uid
             ]);
 
             DqfProjectMapDao::insertStructWithAutoIncrements( $struct ) ;
@@ -174,7 +174,7 @@ class ProjectCreation {
     }
 
     protected function _initSession() {
-        $this->user = ( new UserModel( $this->project->getOwner() ) );
+        $this->user = ( new UserModel( $this->project->getOriginalOwner() ) );
         $this->ownerSession = $this->user->getSession()->login() ;
     }
 

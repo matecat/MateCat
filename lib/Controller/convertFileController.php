@@ -87,6 +87,7 @@ class convertFileController extends ajaxController {
         $conversionHandler->setIntDir( $this->intDir );
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
+        $conversionHandler->setUserIsLogged( $this->userIsLogged );
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {

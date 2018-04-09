@@ -221,6 +221,12 @@ section  {
                     }
                 }
             }
+            &.add-issue-segment {
+                .category, .category-selected .severity {
+                    border: 1px solid #7cc576 !important;
+                    box-shadow: inset 0 0 3px #7cc576;
+                }
+            }
         }
     }
 }

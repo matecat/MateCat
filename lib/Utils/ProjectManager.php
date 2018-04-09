@@ -74,6 +74,21 @@ class ProjectManager {
      */
     protected $user;
 
+    /**
+     * @var Database|IDatabase
+     */
+    protected $dbHandler;
+
+    /**
+     * ProjectManager constructor.
+     *
+     * @param ArrayObject|null $projectStructure
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     */
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
@@ -151,21 +166,7 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
-        $features = [];
-
-        if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
-            foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
-                /**
-                 * @var $feature RecursiveArrayObject
-                 */
-                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
-            }
-            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
-        }
-
-        $this->features = new FeatureSet( $features );
-        $this->features->loadAutoActivableMandatoryFeatures();
-
+        $this->features = new FeatureSet( $this->_getRequestedFeatures() );
         if ( !empty( $this->projectStructure['id_customer'] ) ) {
            $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure['id_customer'] );
         }
@@ -176,6 +177,23 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getRequestedFeatures(){
+        $features = [];
+        if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
+            foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
+                /**
+                 * @var $feature RecursiveArrayObject
+                 */
+                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
+            }
+            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+        }
+        return $features;
     }
 
     /**
@@ -1405,6 +1423,11 @@ class ProjectManager {
 
         }
 
+        ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+
+        $projectStruct = $jobInfo->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
@@ -1496,6 +1519,9 @@ class ProjectManager {
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
+
+        $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
 
     }
 
