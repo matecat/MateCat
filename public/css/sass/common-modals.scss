@@ -1107,7 +1107,7 @@ div#matecat-modal p {
 
                     .content.user {
                         font-weight: bold;
-                        min-width:: 360px;
+                        min-width: 360px;
                         &.invited {
                             font-weight: 100;
                         }
@@ -1189,7 +1189,7 @@ div#matecat-modal p {
 }
 
 
-.create-team-modal, .modify-team-modal {
+.create-team-modal, .modify-team-modal, .shortcuts-modal {
     .create-team {
         font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
         padding: 11px 22px;
@@ -1393,5 +1393,148 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     .boxed {
         padding-right: 20px;
         padding-bottom: 15px;
+    }
+}
+
+
+.shortcuts-modal {
+    .matecat-modal-top {
+        padding: 10px 25px;
+    }
+    .matecat-modal-middle {
+        padding: 10px 15px;
+        max-height: 430px;
+        overflow: auto;
+        .shortcut-list {
+            &:not(:first-of-type) {
+                padding-top: 10px;
+            }
+            h2 {
+                padding-left: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #dee7e8;
+            }
+            .shortcut-item-list {
+                .shortcut-item {
+                padding: 7px 0 7px 10px;
+                margin: 3px 0;
+                &:first-child {
+                    margin-top: 10px;
+                }
+                &:hover {
+                    background: #f1f1f1;
+                }
+                .shortcut-title, .shortcut-keys {
+                    display: inline-block;
+                    width: 50%;
+                }
+                .shortcut-keys {
+                    .shortcuts {
+                        text-align: right;
+                        color: #03bdee;
+                    }
+                    .mac, .standard {
+                        .keys {
+                            content: "";
+                            font-family: "Courier New";
+                            display: inline-block;
+                            margin-left: 5px;
+                            margin-right: 5px;
+                            background: #909798;
+                            padding: 0 5px;
+                            line-height: 20px;
+                            font-size: 12px;
+                            color: white;
+                            border-radius: 2px;
+                            &:first-child {
+                                margin-left: 0px !important;
+                            }
+                            &.ctrl:after {
+                                content: "Ctrl";
+                            }
+                            &.shift:after {
+                                content: "Shift";
+                            }
+                            &.return:after {
+                                Content: "Enter";
+                            }
+                            &.meta:after {
+                                content: "Cmd";
+                            }
+                            &.alt:after {
+                                content: "Alt";
+                            }
+                            &.\31 :after {
+                                content: "1";
+                            }
+                            &.\32 :after {
+                                content: "2";
+                            }
+                            &.\33 :after {
+                                content: "3";
+                            }
+                            &.i:after {
+                                content: "I";
+                            }
+                            &.l:after {
+                                content: "L";
+                            }
+                            &.n:after {
+                                content: "N";
+                            }
+                            &.p:after {
+                                content: "P";
+                            }
+                            &.z:after {
+                                content: "Z";
+                            }
+                            &.f:after {
+                                content: "F";
+                            }
+                            &.k:after {
+                                content: "K";
+                            }
+                            &.y:after {
+                                content: "Y";
+                            }
+                            &.s:after {
+                                content: "S";
+                            }
+                            &.up:after {
+                                content: "Arrow up";
+                            }
+                            &.right:after {
+                                content: "Arrow right";
+                            }
+                            &.left:after {
+                                content: "Arrow left";
+                            }
+                            &.down:after {
+                                content: "Arrow down";
+                            }
+                            &.pagedown:after {
+                                content: "Page Down";
+                            }
+                            &.pageup:after {
+                                content: "Page Up";
+                            }
+                            &.previous:after {
+                                content: "<";
+                            }
+                            &.next:after {
+                                content: ">";
+                            }
+                            &.home:after {
+                                content: "Home";
+                            }
+                        }
+                    }
+                }
+            }
+            }
+        }
+    }
+    .matecat-modal-bottom {
+        padding: 10px 25px;
     }
 }

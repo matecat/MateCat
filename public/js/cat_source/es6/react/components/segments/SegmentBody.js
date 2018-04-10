@@ -94,7 +94,7 @@ class SegmentBody extends React.Component {
         } else {
             status_change_title = 'Change segment status' ;
         }
-        let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.copySource.keystrokes.mac : UI.shortcuts.copySource.keystrokes.standard;
+        let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.cattol.events.copySource.keystrokes.mac : UI.shortcuts.cattol.events.copySource.keystrokes.standard;
         return (
             <div className="text segment-body-content">
                 <div className="wrap">

@@ -199,10 +199,7 @@ $.extend(UI, {
         })
     },
 
-    toggleTagsMode: function (elem) {
-        if (elem) {
-            $(elem).toggleClass('active');
-        }
+    toggleTagsMode: function () {
         if (UI.body.hasClass('tagmode-default-extended')) {
             this.setCrunchedTagMode();
         } else {
@@ -219,12 +216,14 @@ $.extend(UI, {
     },
     setExtendedTagMode: function () {
         this.body.addClass('tagmode-default-extended');
+        $(".tagModeToggle").addClass('active');
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = true;
         this.saveCustomization();
     },
     setCrunchedTagMode: function () {
         this.body.removeClass('tagmode-default-extended');
+        $(".tagModeToggle").removeClass('active');
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = false;
         this.saveCustomization();
