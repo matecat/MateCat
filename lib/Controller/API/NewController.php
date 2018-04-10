@@ -181,7 +181,7 @@ class NewController extends ajaxController {
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
         ];
 
-        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs );
+        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -758,6 +758,13 @@ class NewController extends ajaxController {
 
             Log::doLog( $key );
             $this->current_user = $key->getUser();
+
+            $this->userIsLogged = (
+                    !empty( $this->current_user->uid ) &&
+                    !empty( $this->current_user->email ) &&
+                    !empty( $this->current_user->first_name ) &&
+                    !empty( $this->current_user->last_name )
+            );
 
         }
 
