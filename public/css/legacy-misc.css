@@ -131,10 +131,6 @@ section {
     -moz-box-shadow: none !important;
     box-shadow: none !important;
 }
-h3.method-title{
-    display:none;
-    visibility:hidden;
-}
 .swagger-ui .wrapper {
     padding: 20px !important;
 }

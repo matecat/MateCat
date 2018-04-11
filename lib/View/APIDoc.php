@@ -169,7 +169,6 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
     <div class="coldx">
 
         <div class="block block-api block-swagger">
-            <a name="api-swagger"><h3 class="method-title">List of commands</h3></a>
             <div id="swagger-ui-container" class="swagger-ui-wrap">
                 <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
             </div>
