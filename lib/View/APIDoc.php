@@ -103,7 +103,6 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 
             } );
 
-            hideSwaggerElements();
             generateSwaggerMenu();
 
             // smooth scrolling for normal links
