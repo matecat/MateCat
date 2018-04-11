@@ -21,13 +21,17 @@ $(function () {
             "application/json"
         ],
         "paths": {
-            "/api/new": {
+            "/api/v1/new": {
                 "post": {
                     "tags": [
                         "Project"
                     ],
-                    "summary": "Create new Project on Matecat",
-                    "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. MateCat PRO accepts 70 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
+                    "summary": "Create new Project on Matecat in detached mode",
+                    "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/" +
+                    "new has a maximum file size limit of 200 MB per file and a max number of files of 600. " +
+                    "This API will process the project creation in background. Client can poll the v1 project creation status API " +
+                    "to be notified when the project is actually created.",
+
                     "parameters": [
                         {
                             "name": "files",
@@ -157,7 +161,6 @@ $(function () {
                             "required": false,
                             "type": "string",
                         }
-
                     ],
                     "responses": {
                         "200": {
@@ -243,160 +246,6 @@ $(function () {
                             "description": "An array of price estimates by product",
                             "schema": {
                                 "$ref": "#/definitions/ChangePasswordResponse"
-                            }
-                        },
-                        "default": {
-                            "description": "Unexpected error"
-                        }
-                    }
-                }
-            },
-            "/api/v1/new": {
-                "post": {
-                    "tags": [
-                        "Project"
-                    ],
-                    "summary": "Create new Project on Matecat in detatched mode",
-                    "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/" +
-                        "new has a maximum file size limit of 200 MB per file and a max number of files of 600. " +
-                        "This is the same as /new API but it will process the project creation in background. Client can poll the v1 project creation status API " +
-                        "to be notified when the project is actually created.",
-
-                    "parameters": [
-                        {
-                            "name": "files",
-                            "in": "formData",
-                            "description": "The file(s) to be uploaded. You may also upload your own translation memories (TMX).",
-                            "required": true,
-                            "type": "file"
-                        },
-                        {
-                            "name": "project_name",
-                            "in": "formData",
-                            "description": "The name of the project you want create.",
-                            "required": true,
-                            "type": "string"
-                        },
-                        {
-                            "name": "source_lang",
-                            "in": "formData",
-                            "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.",
-                            "required": true,
-                            "type": "string"
-                        },
-                        {
-                            "name": "target_lang",
-                            "in": "formData",
-                            "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)",
-                            "required": true,
-                            "type": "integer"
-                        },
-                        {
-                            "name": "tms_engine",
-                            "in": "formData",
-                            "description": "Identifier for Memory Server 0 means disabled, 1 means MyMemory)",
-                            "required": false,
-                            "type": "integer",
-                            "default": 1
-                        },
-                        {
-                            "name": "mt_engine",
-                            "in": "formData",
-                            "description": "Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).",
-                            "required": false,
-                            "type": "integer",
-                            "default": 1
-                        },
-                        {
-                            "name": "private_tm_key",
-                            "in": "formData",
-                            "description": "Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create a new key. - Multiple keys must be comma separated. Up to 5 keys allowed. (xxx345cvf,new,s342f234fc) - Only available if tms_engine is set to 1 or if is not used",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "name": "subject",
-                            "in": "formData",
-                            "description": "The subject of the project you want to create.",
-                            "required": false,
-                            "type": "string",
-                            "default": "general"
-                        },
-                        {
-                            "name": "segmentation_rule",
-                            "in": "formData",
-                            "description": "The segmentation rule you want to use to parse your file.",
-                            "required": false,
-                            "type": "string"
-                        },
-                        {
-                            "name": "owner_email",
-                            "in": "formData",
-                            "description": "The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.",
-                            "required": false,
-                            "type": "string",
-                            "default": "anonymous"
-                        },
-                        {
-                            "name": "due_date",
-                            "in": "formData",
-                            "description": "If you want to set a due date for your project, send this param with a timestamp",
-                            "required": false,
-                            "type": "string",
-                        },
-                        {
-                            "name": "id_team",
-                            "in": "formData",
-                            "description": "The team you want to assign this project",
-                            "required": false,
-                            "type": "string",
-                        },
-                        {
-                            "name": "lexiqa",
-                            "in": "formData",
-                            "description": "Enable lexiQA QA check. Requires purchase of a license from lexiQA.",
-                            "required": false,
-                            "type": "string",
-                            "default": 0,
-                        },
-                        {
-                            "name": "speech2text",
-                            "in": "formData",
-                            "description": "Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.",
-                            "required": false,
-                            "type": "integer",
-                            "default": 0,
-                        },
-                        {
-                            "name": "get_public_matches",
-                            "in": "formData",
-                            "description": "Enable suggestions from the Public TM",
-                            "required": false,
-                            "type": "string",
-                            "default": "true",
-                            "enum": ["true", "false"]
-                        },
-                        {
-                            "name": "pretranslate_100",
-                            "in": "formData",
-                            "description": "Pre-translate 100% matches from TM",
-                            "required": false,
-                            "type": "integer",
-                            "default": 0,
-                        },
-                        {
-                            "name": "metadata",
-                            "in": "formData",
-                            "description": 'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
-                            "required": false,
-                            "type": "string",
-                        }
-                    ],
-                    "responses": {
-                        "200": {
-                            "description": "The metadata for the created project.",
-                            "schema": {
-                                "$ref": "#/definitions/NewProject"
                             }
                         },
                         "default": {
