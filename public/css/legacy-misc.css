@@ -124,14 +124,21 @@ th.headerSortDown, th.tablesorter-headerDesc {
     background: #fafafa;
 }
 
-/* Bruteforce Override style.css */
+/* Bruteforce Override style.css and legacy.min.css */
 section {
     float: none !important;
     -webkit-box-shadow: none !important;
     -moz-box-shadow: none !important;
     box-shadow: none !important;
 }
- 
+h3.method-title{
+    display:none;
+    visibility:hidden;
+}
+.swagger-ui .wrapper {
+    padding: 20px !important;
+}
+/* Bruteforce Override style.css and legacy.min.css */
 
 .api a {
     color: #39699a;
