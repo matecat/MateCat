@@ -138,6 +138,9 @@ h3.method-title{
 .swagger-ui .wrapper {
     padding: 20px !important;
 }
+.scheme-container {
+    padding: 12px 0 !important;
+}
 /* Bruteforce Override style.css and legacy.min.css */
 
 .api a {
