@@ -1357,7 +1357,6 @@ section .body > .text {
     width: 100%;
     position: relative;
     background: #ffffff;
-    overflow: hidden;
     float: left;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
@@ -2027,7 +2026,7 @@ body.searchActive .search-display {
     margin: -30px 0 0 250px;
 }
 
-#search, .statusmenu, #col-menu, .c-toggle, .comment-area {
+#search,  #col-menu, .c-toggle, .comment-area {
     display: none;
 }
 
@@ -3265,7 +3264,6 @@ section.modified.editor .status {
 
 .statusmenu {
     position: absolute;
-    display: none;
     text-align: left;
     top: 0;
     margin: 50px -3px 0 -200px;

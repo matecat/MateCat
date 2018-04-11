@@ -12,7 +12,11 @@ class SegmentBody extends React.Component {
         super(props);
         this.beforeRenderOrUpdate = this.beforeRenderOrUpdate.bind(this);
         this.afterRenderOrUpdate = this.afterRenderOrUpdate.bind(this);
-
+        this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this);
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.state = {
+            showStatusMenu: false
+        };
     }
 
     statusHandleTitleAttr(status) {
@@ -33,6 +37,31 @@ class SegmentBody extends React.Component {
             return false;
         }
         return true;
+    }
+
+    openStatusSegmentMenu(e) {
+        e.preventDefault();
+        this.setState({
+            showStatusMenu: !this.state.showStatusMenu
+        });
+    }
+
+    changeStatus(status) {
+        UI.changeStatus(this.segmentBody, status, 1);
+        this.setState({
+            showStatusMenu: false
+        });
+    }
+
+    /**
+     * Alert if clicked on outside of element
+     */
+    handleClickOutside(event) {
+        if (this.statusMenuRef && !this.statusMenuRef.contains(event.target)) {
+            this.setState({
+                showStatusMenu: false
+            });
+        }
     }
 
     beforeRenderOrUpdate(area) {
@@ -79,13 +108,13 @@ class SegmentBody extends React.Component {
 
     componentDidMount() {
         console.log("Mount SegmentBody" + this.props.segment.sid);
+        document.addEventListener('mousedown', this.handleClickOutside);
     }
 
     componentWillUnmount() {
         console.log("Unmount SegmentBody" + this.props.segment.sid);
+        document.removeEventListener('mousedown', this.handleClickOutside);
     }
-
-    componentWillMount() {}
 
     render() {
         var status_change_title;
@@ -96,7 +125,7 @@ class SegmentBody extends React.Component {
         }
         let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.cattol.events.copySource.keystrokes.mac : UI.shortcuts.cattol.events.copySource.keystrokes.standard;
         return (
-            <div className="text segment-body-content">
+            <div className="text segment-body-content" ref={(body)=>this.segmentBody=body}>
                 <div className="wrap">
                     <span className="loader"/>
                     <div className="outersource">
@@ -127,8 +156,61 @@ class SegmentBody extends React.Component {
                 </div>
                 <div className="status-container">
                     <a href="#" title={status_change_title}
-                       className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}/>
+                       className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}
+                       onClick={this.openStatusSegmentMenu}
+                    />
                 </div>
+
+                {this.state.showStatusMenu ? (
+                    <ul className="statusmenu" ref={(menu)=>this.statusMenuRef=menu}>
+                        <li className="arrow"><span className="arrow-mcolor"/></li>
+
+                        <li>
+                            <a className="draftStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set draft as status"
+                               onClick={this.changeStatus.bind(this, 'draft')}>
+                            DRAFT
+                            </a>
+                        </li>
+                        <li>
+                            <a className="translatedStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set translated as status"
+                               onClick={this.changeStatus.bind(this, 'translated')}>
+                                TRANSLATED
+                            </a>
+                        </li>
+
+                        {!this.props.isReviewImproved && config.reviewType !== 'improved' ? (
+                            <li><a className="approvedStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set approved as status"
+                                   onClick={this.changeStatus.bind(this, 'approved')}>APPROVED</a></li>
+                        ) : (null) }
+                            {!this.props.isReviewImproved && config.reviewType !== 'improved' ? (
+                            <li>
+                                <a className="rejectedStatusMenu" data-sid={"segment-"+ this.props.segment.sid} title="set rejected as status"
+                                   onClick={this.changeStatus.bind(this, 'rejected')}>
+                                    REJECTED
+                                </a>
+                            </li>
+                        ) : (null) }
+
+                        {this.props.isReviewImproved || config.reviewType == 'improved' ? (
+                            <li>
+                                <a className="fx" data-sid={"segment-"+ this.props.segment.sid} title="set fixed as status"
+                                   onClick={this.changeStatus.bind(this, 'fixed')}>
+                                    FIXED
+                                </a>
+                            </li>
+                        ) : (null) }
+                        {this.props.isReviewImproved || config.reviewType == 'improved' ? (
+                            <li>
+                                <a className="rb" data-sid={"segment-"+ this.props.segment.sid} title="set rebutted as status"
+                                   onClick={this.changeStatus.bind(this, 'rebutted')}>
+                                    REBUTTED
+                                </a>
+                            </li>
+                        ) : (null) }
+
+                    </ul>
+                ) : (null)}
+
             </div>
         )
     }

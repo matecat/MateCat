@@ -4,7 +4,6 @@
 UI = null;
 
 UI = {
-    showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
         1: "edit_1",
@@ -553,24 +552,6 @@ UI = {
                                                                                 'extxif';
         return c;
     },
-    showRevisionStatuses : function() {
-        return true;
-    },
-	createStatusMenu: function(statusMenu, section) {
-        $("ul.statusmenu").empty().hide();
-
-        var segment = new UI.Segment( section );
-
-        var data = {
-            id_segment : segment.id,
-            show_revision_statuses : UI.showRevisionStatuses(),
-            show_post_revision_statuses : UI.showPostRevisionStatuses
-        };
-
-        var menu = MateCat.Templates['segment_status_menu'](data);
-
-		statusMenu.html(menu).show();
-	},
 	deActivateSegment: function(byButton, segment) {
 		UI.removeButtons(byButton, segment);
 
@@ -981,9 +962,6 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).empty();
-	},
-	removeStatusMenu: function(statusMenu) {
-		statusMenu.empty().hide();
 	},
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them

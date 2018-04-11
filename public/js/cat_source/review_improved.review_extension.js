@@ -194,7 +194,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             originalBindShortcuts();
 
             $('body').on('keydown.shortcuts', null, UI.shortcuts.cattol.events.reject.keystrokes.standard, rejectKeyDownEvent ) ;
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.cattol.reject.keystrokes.mac, rejectKeyDownEvent ) ;
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.cattol.events.reject.keystrokes.mac, rejectKeyDownEvent ) ;
         },
 
         renderAfterConfirm: function (nextId) {
