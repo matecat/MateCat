@@ -2845,6 +2845,7 @@ body.rtl-target .editor .editarea span {
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
     box-sizing: border-box;
+    line-height: 26px;
 }
 
 .suggestion-item li.sugg-source {
