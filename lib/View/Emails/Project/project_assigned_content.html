@@ -9,7 +9,7 @@
 
 <?php if(!empty($project['due_date'])): ?>
 <p>
-    Due date: <?= date( 'F j, Y, g:i a', strtotime( $project['due_date'] ) ); ?>
+    Due date: <?= date( 'F j, Y, g:i a A', strtotime( $project['due_date'] ) ); ?>
 </p>
 <?php endif;  ?>
 
