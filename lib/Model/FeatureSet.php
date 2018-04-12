@@ -28,7 +28,7 @@ class FeatureSet {
             $this->__loadFromMandatory();
         } else {
             foreach( $features as $feature ) {
-                if ( !property_exists('feature_code', $feature ) ) {
+                if ( property_exists( $feature, 'feature_code' ) ) {
                     $this->features[ $feature->feature_code ] = $feature ;
                 }
                 else {
