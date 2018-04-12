@@ -139,7 +139,7 @@ class SegmentFooterTabConcordance extends React.Component {
                     </li>
                     <ul className={"graysmall-details"}>
                         <li>{this.last_update_date}</li>
-                        <li className={"graydesc"}>Source: <span className={"bold"}>{cb}</span></li>
+                        <li className={"graydesc"}>Source: <span className={"bold"}> {cb}</span></li>
                     </ul>
                 </ul>;
                 array.push( element );
