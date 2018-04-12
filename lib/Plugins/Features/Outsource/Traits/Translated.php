@@ -8,6 +8,7 @@
 
 namespace Features\Outsource\Traits;
 
+use Email\AbstractEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
@@ -17,7 +18,18 @@ use \INIT;
 
 trait Translated {
 
-    public static function requestQuote( $project_id ) {
+    protected $successEmailObject;
+    protected $failureEmailObject;
+
+    public function setSuccessMailSender( AbstractEmail $emailObject ) {
+        $this->successEmailObject = $emailObject;
+    }
+
+    public function setFailureMailSender( AbstractEmail $emailObject ) {
+        $this->failureEmailObject = $emailObject;
+    }
+
+    public function requestQuote( $project_id ) {
 
         $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id, 3600 );
         /** @var $jobs \Jobs_JobStruct[] */
@@ -52,26 +64,34 @@ trait Translated {
                     throw new Exception( $quote_response->message );
                 }
             } catch ( Exception $e ) {
-                //send error email
-            }
+                $this->failureEmailObject->setErrorMessage( $e->getMessage() );
+                $this->failureEmailObject->send();
 
+                return;
+            }
 
             $confirmation_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
                             'f'   => 'confirm',
                             'cid' => $config[ 'translated_username' ],
                             'p'   => $config[ 'translated_password' ],
                             'pid' => $quote_response->pid,
+                            'c'   => 1,
+                            'of'  => "json"
                     ], PHP_QUERY_RFC3986 );
 
             try {
-                $confirmation_response = json_decode( self::request( $confirmation_url ) );
+                $response              = self::request( $confirmation_url );
+                $confirmation_response = json_decode( $response );
                 Utils::raiseJsonExceptionError();
                 if ( $confirmation_response->code != 1 ) {
                     throw new Exception( $confirmation_response->message );
                 }
-                //send success email
+                $this->successEmailObject->send();
             } catch ( Exception $e ) {
-                //send error email
+                $this->failureEmailObject->setErrorMessage( $e->getMessage() );
+                $this->failureEmailObject->send();
+
+                return;
             }
 
             $confirmationStruct = new TranslatedConfirmationStruct( [
@@ -84,22 +104,12 @@ trait Translated {
             $cDao               = new ConfirmationDao;
             $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
 
-            sleep( 1 );
-
         }
-
 
     }
 
-
     public static function get_class_name() {
-        $class_name = get_class();
-
-        if ( $pos = strrpos( $class_name, '\\' ) ) {
-            return substr( $class_name, $pos + 1 );
-        }
-
-        return $class_name;
+        return ( new \ReflectionClass( get_called_class() ) )->getShortName();
     }
 
     public static function request( $url ) {
