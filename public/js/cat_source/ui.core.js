@@ -2052,7 +2052,7 @@ UI = {
      */
     getContribution : function(segment, next) {
         UI.blockButtons = false ;
-        $( segment ).addClass('loaded');
+        SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
         this.segmentQA(segment);
         var deferred = new jQuery.Deferred() ;
         return deferred.resolve();
