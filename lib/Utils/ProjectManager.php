@@ -453,7 +453,11 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+            $forceXliff = $this->features->filter(
+                    'forceXLIFFConversion',
+                    INIT::$FORCE_XLIFF_CONVERSION,
+                    ( isset( $this->projectStructure[ 'session' ][ 'uid' ] ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+            );
 
             /*
                Conversion Enforce
