@@ -277,14 +277,14 @@ class Analysis_PayableRates {
      */
     public static function getPayableRates( $source, $target ) {
 
-        $ret = self::$DEFAULT_PAYABLE_RATES;
+        $ret = static::$DEFAULT_PAYABLE_RATES;
 
         //search source -> target pair
-        if ( isset( self::$langPair2MTpayableRates[ $source ][ $target ] ) ) {
-            $ret = self::$langPair2MTpayableRates[ $source ][ $target ];
+        if ( isset( static::$langPair2MTpayableRates[ $source ][ $target ] ) ) {
+            $ret = static::$langPair2MTpayableRates[ $source ][ $target ];
 
-        } elseif ( isset( self::$langPair2MTpayableRates[ $target ][ $source ] ) ) { //search target -> source pair
-            $ret = self::$langPair2MTpayableRates[ $target ][ $source ];
+        } elseif ( isset( static::$langPair2MTpayableRates[ $target ][ $source ] ) ) { //search target -> source pair
+            $ret = static::$langPair2MTpayableRates[ $target ][ $source ];
         }
 
         return $ret;
