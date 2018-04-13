@@ -23,7 +23,7 @@ class Analysis_PayableRates {
             'MT'          => 85
     ];
 
-    private static $langPair2MTpayableRates = [
+    protected static $langPair2MTpayableRates = [
             "en" => [
                     "it" => [
                             'NO_MATCH'    => 100,

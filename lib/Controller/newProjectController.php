@@ -311,6 +311,7 @@ class newProjectController extends viewController {
         $this->template->additional_input_params_base_path = \INIT::$TEMPLATE_ROOT;
 
         //Enable tag projection at instance level
+        $this->template->show_tag_projection = true;
         $this->template->tag_projection_enabled = true;
         $this->template->tag_projection_default = true;
 
