@@ -173,8 +173,11 @@ class CatDecorator {
     }
 
     private function assignOptions() {
-        $chunk_options_model = new ChunkOptionsModel( $this->job ) ; 
-        
+        $chunk_options_model = new ChunkOptionsModel( $this->job ) ;
+
+        //show Tag Projection
+        $this->template->show_tag_projection = true;
+
         $this->template->tag_projection_enabled = $chunk_options_model->isEnabled('tag_projection')   ; 
         $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ;
 
