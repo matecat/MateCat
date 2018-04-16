@@ -13,7 +13,7 @@ use Exception;
 use Features\Dqf\Service\ChildProjectRevisionBatchService;
 use Features\Dqf\Service\Struct\Request\RevisionRequestStruct;
 use Features\ReviewImproved\Model\QualityReportModel;
-use LoudArray;
+use DataAccess\LoudArray;
 
 
 /**

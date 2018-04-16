@@ -221,7 +221,7 @@ class Search extends React.Component {
                         <input id="exact-match" type="checkbox" name="exactMatch"
                                onChange={this.handleInputChange}
                                defaultValue={this.state.search.exactMatch}/>
-                        <label htmlFor="exact-match">Segment exact match</label>
+                        <label htmlFor="exact-match">Whole word</label>
                     </div>
                 </div>
             </form>
