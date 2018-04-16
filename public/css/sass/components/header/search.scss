@@ -1,12 +1,12 @@
 .searchbox {
-    position: relative;
+    position: fixed;
     float: left;
     width: 100%;
     font-size: 12px;
     background: #ffffff;
-    z-index: 2;
+    z-index: 1;
     padding: 0 !important;
-    margin-top: 3px;
+    margin-top: 31px;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
     .block.buttons {
         margin-top: -6px !important;
