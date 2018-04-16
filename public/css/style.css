@@ -3262,6 +3262,7 @@ section.modified .status {
 
 section.modified.editor .status {
     background-size: 200% !important;
+    height: 115%;
 }
 
 .statusmenu {
