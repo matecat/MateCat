@@ -72,6 +72,12 @@ class Routes {
         return "$host/api/app/user/confirm/$confirmation_token";
     }
 
+    public static function qualityReport( $id_job, $password, $options = [] ) {
+        $host = self::httpHost( $options );
+
+        return "$host/api/v2/jobs/{$id_job}/{$password}/quality-report";
+    }
+
     /**
      * @param       $id_job
      * @param       $password

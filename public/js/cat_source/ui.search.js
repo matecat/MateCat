@@ -346,7 +346,14 @@ $.extend(UI, {
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-            var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
+            var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase );
+
+
+            if (p['exact-match']) {
+                reg = new RegExp('\\b(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
+                reg1 = new RegExp('\\b(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')\\b', "g" + ignoreCase );
+            }
+
 
 			// Finding double spaces
             if (txt == "  ") {
@@ -378,7 +385,7 @@ $.extend(UI, {
 						}
 					});
 				}
-				UI.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
+				UI.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase );
 				$('section.justAdded').removeClass('justAdded');
 			}
 		}
@@ -425,11 +432,13 @@ $.extend(UI, {
 		});
 	},
 	filterExactMatch: function(items, txt) {
+	    var searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	    var searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 		return (this.searchParams['exact-match']) ? items.filter(function() {
 			if (UI.searchParams['match-case']) {
-				return $(this).text() == txt;
+				return $(this).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
 			} else {
-				return $(this).text().toUpperCase() == txt.toUpperCase();
+				return $(this).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
 			}
 		}) : items;
 	},

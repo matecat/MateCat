@@ -2,230 +2,228 @@
  * React Component .
 
  */
-var React = require( 'react' );
-var SegmentConstants = require( '../../constants/SegmentConstants' );
-var SegmentStore = require( '../../stores/SegmentStore' );
+let React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
 
 class SegmentFooterTabConcordance extends React.Component {
 
-    constructor( props ) {
-        super( props );
+    constructor(props) {
+        super(props);
+        let extended = false;
+        if (Cookies.get('segment_footer_extendend_concordance')) {
+            extended = Cookies.get('segment_footer_extendend_concordance') === 'true';
+        }
+
         this.state = {
             noResults: false,
+            numDisplayContributionMatches: 3,
             results: [],
+            loading: false,
             source: '',
             target: '',
-            extended: false
+            extended: extended
         }
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener( SegmentConstants.FIND_CONCORDANCE, this.findConcordance );
+        SegmentStore.removeListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance);
     }
 
     componentDidMount() {
-        SegmentStore.addListener( SegmentConstants.FIND_CONCORDANCE, this.findConcordance.bind( this ) );
+        SegmentStore.addListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance.bind(this));
     }
 
-    allowHTML( string ) {
+    allowHTML(string) {
         return {__html: string};
     }
 
     findConcordance(sid, data) {
-        var self =  this;
         if (this.props.id_segment == sid) {
-            if ( data.inTarget === 1) {
-                this.setState( {
+            if (data.inTarget === 1) {
+                this.setState({
                     source: '',
                     target: data.text,
                     results: []
-                } );
+                });
             } else {
-                this.setState( {
+                this.setState({
                     source: data.text,
                     target: '',
                     results: []
-                } );
+                });
             }
             this.searchSubmit();
         }
     }
 
-    sourceChange( event ) {
-        this.setState( {
+    sourceChange(event) {
+        this.setState({
             source: event.target.value,
             target: '',
             results: []
-        } );
+        });
 
     }
 
-    targetChange( event ) {
-        this.setState( {
+    targetChange(event) {
+        this.setState({
             source: '',
             target: event.target.value,
             results: []
-        } );
+        });
 
     }
 
-    getConcordance( query, type ) {
+    getConcordance(query, type) {
         //type 0 = source, 1 = target
-        $( '.cc-search', UI.currentSegment ).addClass( 'loading' );
-        $( '.sub-editor.concordances .overflow .results', this.currentSegment ).empty();
-        let txt = view2rawxliff( query );
         let self = this;
-        APP.doRequest( {
-            data: {
-                action: 'getContribution',
-                is_concordance: 1,
-                from_target: type,
-                id_segment: UI.currentSegmentId,
-                text: txt,
-                id_job: config.job_id,
-                num_results: UI.numMatchesResults,
-                id_translator: config.id_translator,
-                password: config.password
-            },
-            error: function () {
-                UI.failedConnection( this, 'getConcordance' );
-            },
-            success: function ( d ) {
-                self.renderConcordances( d, type );
-            }
-        } );
+        API.SEGMENT.getConcordance(query, type)
+            .done(function (d) {
+                self.renderConcordances(d, type);
+            }).fail(function () {
+            UI.failedConnection(this, 'getConcordance');
+        });
+        this.setState({
+            loading: true,
+            results: []
+        });
     }
 
-    allowHTML( string ) {
+    allowHTML(string) {
         return {__html: string};
     }
 
-    renderConcordances( d, in_target ) {
+    renderConcordances(d, in_target) {
         let self = this;
-        var segment = UI.currentSegment;
-        var segment_id = UI.currentSegmentId;
-        $( '.sub-editor.concordances .overflow .results', segment ).empty();
-        $( '.sub-editor.concordances .overflow .message', segment ).remove();
+        let segment = UI.currentSegment;
+        let segment_id = UI.currentSegmentId;
         let array = [];
-        if ( d.data.matches.length ) {
-            $.each( d.data.matches, function ( index ) {
-                if ( (this.segment === '') || (this.translation === '') )
+
+        if (d.data.matches.length) {
+            _.each(d.data.matches, function (item, index) {
+                if ((item.segment === '') || (item.translation === ''))
                     return;
-                var prime = (index < UI.numDisplayContributionMatches) ? ' prime' : '';
+                let prime = (index < self.state.numDisplayContributionMatches) ? ' prime' : '';
 
-                // var disabled = (this.id == '0') ? true : false;
-                var cb = this.created_by;
-                var cl_suggestion = UI.getPercentuageClass( this.match );
+                let cb = item.created_by;
 
-                var leftTxt = (in_target) ? this.translation : this.segment;
-                leftTxt = UI.decodePlaceholdersToText( leftTxt );
-                leftTxt = leftTxt.replace( /\#\{/gi, "<mark>" );
-                leftTxt = leftTxt.replace( /\}\#/gi, "</mark>" );
+                let leftTxt = (in_target) ? item.translation : item.segment;
+                leftTxt = UI.decodePlaceholdersToText(leftTxt);
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
 
-                var rightTxt = (in_target) ? this.segment : this.translation;
-                rightTxt = UI.decodePlaceholdersToText( rightTxt );
-                rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
-                rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+                let rightTxt = (in_target) ? item.segment : item.translation;
+                rightTxt = UI.decodePlaceholdersToText(rightTxt);
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
 
-                var element = <ul key={index} className={["graysmall",
-                    prime].join( ' ' )} data-item={index + 1} data-id={this.id}>
+                let element = <ul key={index} className={["graysmall",
+                    prime].join(' ')} data-item={index + 1} data-id={item.id}>
                     <li className={"sugg-source"}>
-                        <span id={segment_id + '-tm-' + this.id + '-source'} className={"suggestion_source"} dangerouslySetInnerHTML={self.allowHTML( leftTxt )}/>
+                        <span id={segment_id + '-tm-' + item.id + '-source'} className={"suggestion_source"}
+                              dangerouslySetInnerHTML={self.allowHTML(leftTxt)}/>
                     </li>
                     <li className={"b sugg-target"}>
-                        <span id={segment_id + "-tm-" + this.id + "-translation"} className={"translation"} dangerouslySetInnerHTML={self.allowHTML( rightTxt )}/>
-                        {/*{(disabled) ? (null) : (<span id={segment_id + "-tm-" + this.id + "-delete"} className="trash" title="delete this row"></span>)}*/}
-
+                        <span id={segment_id + "-tm-" + item.id + "-translation"} className={"translation"}
+                              dangerouslySetInnerHTML={self.allowHTML(rightTxt)}/>
                     </li>
                     <ul className={"graysmall-details"}>
-                        <li>{this.last_update_date}</li>
-                        <li className={"graydesc"}>Source: <span className={"bold"}> {cb}</span></li>
+                        <li>{item.last_update_date}</li>
+                        <li className={"graydesc"}>Source: <span className={"bold"}>{cb}</span></li>
                     </ul>
                 </ul>;
-                array.push( element );
-            } );
+                array.push(element);
+            });
 
-            this.setState( {
+            this.setState({
                 results: array,
-                extended: false,
-                noResults: false
-            } )
+                noResults: false,
+                loading: false
+            })
 
 
         } else {
-            this.setState( {
+            this.setState({
                 noResults: true,
-                extended: false,
-                results: []
-            } )
+                results: [],
+                loading: false
+            })
         }
-
-        $( '.cc-search', this.currentSegment ).removeClass( 'loading' );
     }
 
 
-    searchSubmit( event ) {
+    searchSubmit(event) {
         (event) ? event.preventDefault() : '';
-        if ( this.state.source.length > 0 ) {
-            this.getConcordance( this.state.source, 0 );
+        if (this.state.source.length > 0) {
+            this.getConcordance(this.state.source, 0);
 
-        } else if ( this.state.target.length > 0 ) {
-            this.getConcordance( this.state.target, 1 );
+        } else if (this.state.target.length > 0) {
+            this.getConcordance(this.state.target, 1);
         }
     }
 
     toggleExtendend() {
-        if ( this.state.extended ) {
-            $( '.sub-editor.concordances' ).removeClass( 'extended' );
-            $( '.sub-editor.concordances .overflow' ).removeAttr( 'style' );
-            UI.custom.extended_concordance = false;
-            UI.saveCustomization();
+        if (this.state.extended) {
+            Cookies.set('segment_footer_extendend_concordance', false, {expires: 3650});
         } else {
-            $( '.sub-editor.concordances .overflow' ).css( 'height', $( '.sub-editor.concordances' ).height() + 'px' );
-            $( '.sub-editor.concordances' ).addClass( 'extended' );
-            UI.custom.extended_concordance = true;
-            UI.saveCustomization();
+            Cookies.set('segment_footer_extendend_concordance', true, {expires: 3650});
         }
-        this.setState( {
+        this.setState({
             extended: !this.state.extended
-        } );
+        });
     }
 
 
     render() {
         let html = '',
             results = '',
-            extended = '';
-        extended = <a className={"more"} onClick={this.toggleExtendend.bind( this )}>{this.state.extended ? 'Fewer' : 'More'}</a>;
+            loadingClass = '',
+            extended = '',
+            haveResults = '',
+            isExtendedClass = this.state.extended ? 'extended' : '';
+        extended = <a className={"more"}
+                      onClick={this.toggleExtendend.bind(this)}>{this.state.extended ? 'Fewer' : 'More'}</a>;
 
-        if ( config.tms_enabled ) {
-            html = <div className="cc-search">
-                <form onSubmit={this.searchSubmit.bind( this )}>
-                    <input type="text" className="input search-source" onChange={this.sourceChange.bind( this )}
-                           value={this.state.source}/>
-                    <input type="text" className="input search-target" onChange={this.targetChange.bind( this )}
-                           value={this.state.target}/>
+        if (this.state.results.length > 0) {
+            haveResults = 'have-results'
+        }
+        if (this.state.loading) {
+            loadingClass = 'loading';
+        }
+        if (config.tms_enabled) {
+            html = <div className={"cc-search " + loadingClass}>
+                <form onSubmit={this.searchSubmit.bind(this)}>
+                    <div className="input-group">
+                        <input type="text" className="input search-source" onChange={this.sourceChange.bind(this)}
+                               value={this.state.source}/>
+                    </div>
+                    <div className="input-group">
+                        <input type="text" className="input search-target" onChange={this.targetChange.bind(this)}
+                               value={this.state.target}/>
+                    </div>
                     <input type="submit" value="" style={{display: "none"}}/>
                 </form>
             </div>;
         } else {
-            html = <ul className={"graysmall message"}>
+            html = <ul className={"graysmall message prime"}>
                 <li>Concordance is not available when the TM feature is disabled</li>
             </ul>;
         }
 
-        if ( this.state.results.length > 0 && !this.state.noResults ) {
+        if (this.state.results.length > 0 && !this.state.noResults) {
             results = this.state.results;
         }
-        if ( this.state.noResults ) {
-            results = <ul className={"graysmall message"}>
+        if (this.state.noResults) {
+            results = <ul className={"graysmall message prime"}>
                 <li>Can't find any matches. Check the language combination.</li>
             </ul>
         }
 
         return (
 
-            <div key={"container_" + this.props.code} className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class }
+            <div key={"container_" + this.props.code}
+                 className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class + " " + isExtendedClass + " " + haveResults}
                  id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
                 <div className="overflow">
                     {html}

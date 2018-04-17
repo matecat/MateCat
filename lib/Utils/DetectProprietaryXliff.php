@@ -257,17 +257,4 @@ class DetectProprietaryXliff {
 
     }
 
-    /**
-     * Alias od self::isConversionToEnforce
-     *
-     * @param $fullPath
-     *
-     * @param $enforceOnXliff
-     *
-     * @return bool|int
-     */
-    public static function isAConvertedFile( $fullPath, $enforceOnXliff ){
-        return self::fileMustBeConverted( $fullPath, $enforceOnXliff );
-    }
-
 }

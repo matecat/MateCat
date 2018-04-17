@@ -52,9 +52,6 @@ if ( ReviewImproved.enabled() && !config.isReview)
             $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes.mac, handleKeyPressOnMainButton );
         },
 
-        showRevisionStatuses : function() {
-            return false;
-        },
         cleanupLegacyButtons : function( segment ) {
             var segObj ;
 

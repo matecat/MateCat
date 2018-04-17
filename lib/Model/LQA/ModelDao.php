@@ -39,7 +39,7 @@ class ModelDao extends DataAccess_AbstractDao {
             " VALUES ( :label, :pass_type, :pass_options ) ";
 
         $struct = new ModelStruct( array(
-            'label' => $data['label'] ,
+            'label' => @$data['label'] ,
             'pass_type' => $data['passfail']['type'],
             'pass_options' => json_encode( $data['passfail']['options'] )
         ) );

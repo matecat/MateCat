@@ -276,22 +276,6 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
-		}).on('click', 'a.status', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-		}).on('click', 'section:not(.readonly, .ice-locked) a.status', function() {
-			var section = $(this).closest("section");
-			var statusMenu = $("ul.statusmenu", section);
-
-			UI.createStatusMenu(statusMenu, section );
-
-			statusMenu.show();
-
-			$('html').bind("click.outOfStatusMenu", function() {
-				$("ul.statusmenu").hide();
-				$('html').unbind('click.outOfStatusMenu');
-				UI.removeStatusMenu(statusMenu);
-			});
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
@@ -419,23 +403,6 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.startSegmentTagProjection();
 			return false;
-		}).on('click', 'a.translatedStatusMenu, a.approvedStatusMenu, a.rejectedStatusMenu, a.draftStatusMenu, a.fx, a.rb', function() {
-			var segment = $(this).parents("section");
-			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
-			$("ul.statusmenu", segment).toggle();
-			return false;
-		}).on('click', 'a.translatedStatusMenu', function() {
-			UI.changeStatus(this, 'translated', 1);
-		}).on('click', 'a.approvedStatusMenu', function() {
-			UI.changeStatus(this, 'approved', 1);
-		}).on('click', 'a.rejectedStatusMenu', function() {
-			UI.changeStatus(this, 'rejected', 1);
-		}).on('click', 'a.draftStatusMenu', function() {
-			UI.changeStatus(this, 'draft', 1);
-        }).on('click', 'a.fx', function() {
-			UI.changeStatus(this, 'fixed', 1);
-        }).on('click', 'a.rb', function() {
-			UI.changeStatus(this, 'rebutted', 1);
 		}).on('click', '.editor .outersource .copy', function(e) {
 			e.preventDefault();
 			UI.copySource();

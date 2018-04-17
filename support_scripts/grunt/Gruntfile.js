@@ -256,7 +256,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
 
-                    basePath + 'cat_source/handlebars-helpers.js',
+                    // basePath + 'cat_source/handlebars-helpers.js',
 
                     basePath + 'cat_source/speech2text.js',
                     basePath + 'tm.js',
