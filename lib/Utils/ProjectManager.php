@@ -464,10 +464,10 @@ class ProjectManager {
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAConvertedFile = $this->isAConvertedFile( $fileName, $forceXliff );
+            $mustBeConverted = $this->fileMustBeConverted( $fileName, $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAConvertedFile ) {
+            if ( !$mustBeConverted ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -491,7 +491,8 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
@@ -2431,18 +2432,18 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function isAConvertedFile( $fileName, $forceXliff ) {
+    private function fileMustBeConverted( $fileName, $forceXliff ) {
 
         $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
 
-        $isAConvertedFile = DetectProprietaryXliff::isAConvertedFile( $fullPath, $forceXliff );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $fullPath, $forceXliff );
 
         /**
          * Application misconfiguration.
          * upload should not be happened, but if we are here, raise an error.
          * @see upload.class.php
          * */
-        if ( -1 === $isAConvertedFile ) {
+        if ( -1 === $mustBeConverted ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -8,
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
@@ -2452,7 +2453,7 @@ class ProjectManager {
             }
         }
 
-        return $isAConvertedFile;
+        return $mustBeConverted;
 
     }
 
