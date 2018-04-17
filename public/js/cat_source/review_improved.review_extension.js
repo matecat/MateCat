@@ -22,7 +22,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         setShortcuts: function () {
             originalSetShortcuts.apply(this);
 
-            UI.shortcuts.reject = {
+            UI.shortcuts.cattol.events.reject = {
                 "label" : "Reject translation",
                     "equivalent": "click on Rejected",
                     "keystrokes" : {
@@ -193,8 +193,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             originalBindShortcuts();
 
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, rejectKeyDownEvent ) ;
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, rejectKeyDownEvent ) ;
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.cattol.events.reject.keystrokes.standard, rejectKeyDownEvent ) ;
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.cattol.events.reject.keystrokes.mac, rejectKeyDownEvent ) ;
         },
 
         renderAfterConfirm: function (nextId) {

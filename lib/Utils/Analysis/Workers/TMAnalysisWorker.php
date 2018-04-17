@@ -706,6 +706,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws \Predis\Connection\ConnectionException
+     * @throws EndQueueException
      */
     protected function _tryToCloseProject( $_project_id ) {
 
@@ -736,6 +737,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 throw new ReQueueException();
             }
 
+            //TODO use a simplest query to get job id and password
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
@@ -751,9 +753,17 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
 
             $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
+            $wordCountStructs = [];
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new \WordCount_Counter();
-                $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+            }
+
+            try {
+                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id );
+            } catch(\Exception $e) {
+                //ignore Exception the analysis is finished anyway
+                $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
             }
 
         }

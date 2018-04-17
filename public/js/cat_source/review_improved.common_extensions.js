@@ -4,10 +4,6 @@ if ( ReviewImproved.enabled() ) {
     var prev_getStatusForAutoSave = UI.getStatusForAutoSave ;
 
     $.extend(UI, {
-        get showPostRevisionStatuses() {
-            return true;
-        },
-
         /**
          * getStatusForAutoSave
          *
