@@ -6,7 +6,7 @@ class Search extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
+        this.defaultState = {
             isReview: props.isReview,
             searchable_statuses: props.searchable_statuses,
             showReplaceOptionsInSearch: !ReviewImproved.enabled(),
@@ -22,7 +22,8 @@ class Search extends React.Component {
             currentTargetSearch: null,
             currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
-        };
+        }
+        this.state = this.defaultState;
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancelClick = this.handleCancelClick.bind(this);
@@ -74,6 +75,7 @@ class Search extends React.Component {
             });
         }
         UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
+        this.setState(this.defaultState);
     }
 
     handleReplaceAllClick(event) {
