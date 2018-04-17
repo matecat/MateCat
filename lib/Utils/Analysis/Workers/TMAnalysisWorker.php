@@ -272,7 +272,7 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             //custom condition for 100% matches
-            $this->featureSet->filter( 'check100MatchLocked', $tm_data, $queueElementParams );
+            $tm_data = $this->featureSet->filter( 'check100MatchLocked', $tm_data, $queueElementParams );
 
         }
 
