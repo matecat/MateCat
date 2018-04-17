@@ -2,15 +2,15 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
-// var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
-var SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
-var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
-var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
-var SegmentTabMessages = require('./SegmentFooterTabMessages').default;
-var SegmentTabRevise = require('./SegmentFooterTabRevise').default;
+let React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+// let SegmentTabMatches = require('./SegmentFooterTabMatches').default;
+let SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
+let SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
+let SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
+let SegmentTabMessages = require('./SegmentFooterTabMessages').default;
+let SegmentTabRevise = require('./SegmentFooterTabRevise').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
@@ -96,7 +96,7 @@ class SegmentFooter extends React.Component {
         this.tabs[tabName].visible = visible;
         // Ensure there is only one tab open.
         if (open === true) {
-            for (var key in this.tabs) {
+            for (let key in this.tabs) {
                 this.tabs[key].open = false;
             }
         }
@@ -113,7 +113,7 @@ class SegmentFooter extends React.Component {
     }
 
     getTabContainer(tab, active_class) {
-        var open_class = (active_class == 'active') ? 'open' : '';
+        let open_class = (active_class == 'active') ? 'open' : '';
         switch(tab.code) {
             case 'tm':
                 return <SegmentTabMatches
@@ -175,7 +175,7 @@ class SegmentFooter extends React.Component {
     }
     closeAllTabs() {
         let tabs = jQuery.extend(true, {}, this.state.tabs);
-        for ( var item in tabs ) {
+        for ( let item in tabs ) {
             tabs[item].open = false
         }
         this.setState({
@@ -191,12 +191,12 @@ class SegmentFooter extends React.Component {
     }
 
     setHideMatchesCookie(hideMatches) {
-        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        let cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
         Cookies.set(cookieName + '-' + config.id_job, hideMatches, { expires: 30 });
     }
 
     getHideMatchesCookie() {
-        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        let cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
         if( !_.isUndefined(Cookies.get(cookieName + '-' + config.id_job)) && Cookies.get(cookieName + '-' + config.id_job) == "true") {
             return true;
         }
@@ -211,7 +211,7 @@ class SegmentFooter extends React.Component {
         let tabs = jQuery.extend(true, {}, this.state.tabs);
         let tab = jQuery.extend(true, {}, tabs[tabName]);
         //Close all tabs
-        for ( var item in tabs ) {
+        for ( let item in tabs ) {
             tabs[item].open = false
         }
         if (tab.open && !forceOpen) {
@@ -268,15 +268,15 @@ class SegmentFooter extends React.Component {
     }
 
     render() {
-        var labels = [];
-        var containers = [];
-        var self = this;
-        for ( var key in this.state.tabs ) {
-            var tab = this.state.tabs[key];
+        let labels = [];
+        let containers = [];
+        let self = this;
+        for ( let key in this.state.tabs ) {
+            let tab = this.state.tabs[key];
             if ( tab.enabled) {
-                var hidden_class = (tab.visible) ? '' : 'hide';
-                var active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
-                var label = <li
+                let hidden_class = (tab.visible) ? '' : 'hide';
+                let active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
+                let label = <li
                     key={ tab.code }
                     ref={(elem)=> this[tab.code] = elem}
                     className={ hidden_class + " " + active_class + " tab-switcher tab-switcher-" + tab.code }

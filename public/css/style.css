@@ -1679,8 +1679,6 @@ body .footer.showMatches .sub-editor.open {
     cursor: pointer;
 }
 
-.sub-editor .cc-search .search-target,
-.sub-editor .cc-search .search-source,
 .sub-editor .gl-search .search-source,
 .sub-editor .gl-search .search-target,
 .sub-editor .gl-search .gl-comment {
