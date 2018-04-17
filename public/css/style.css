@@ -18,7 +18,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    position: fixed;
+    position: relative;
     z-index: 12;
     border-bottom: 1px solid #333;
     padding: 0;
@@ -1288,7 +1288,6 @@ body #outer {
     display: inline-block;
     height: 100%;
     width: 100%;
-    padding-top: 50px;
 }
 
 body .main-container {
@@ -3166,17 +3165,17 @@ section.readonly:hover .ice-locked-label {
     display: block;
     position: absolute;
     right: 0;
-    height: 96%;
-    padding-bottom: 7px;
+    height: 100%;
     background: #ccced2;
     top: 4%;
-    margin: -6px 0 0 0 !important;
+    margin: -4px 0 0 0 !important;
     border-bottom: 0;
 }
 .editor .status-container .status {
-    top: 6px !important;
-    height: 115%!important;
+    top: 4px !important;
+    height: 100% !important;
     z-index: 1;
+    padding-bottom: 0;
 }
 
 section.readonly .status-container a.status:hover,
