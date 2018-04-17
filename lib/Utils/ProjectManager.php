@@ -453,7 +453,11 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+            $forceXliff = $this->features->filter(
+                    'forceXLIFFConversion',
+                    INIT::$FORCE_XLIFF_CONVERSION,
+                    ( isset( $this->projectStructure[ 'session' ][ 'uid' ] ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+            );
 
             /*
                Conversion Enforce
@@ -1027,7 +1031,8 @@ class ProjectManager {
             $shortTargetLang = substr( $target, 0, 2 );
 
             //get payable rates
-            $payableRates = json_encode( Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang ) );
+            $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
+            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
 
             $password = $this->generatePassword();
 

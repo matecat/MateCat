@@ -9,66 +9,33 @@
 
 namespace DataAccess;
 
+use ArrayAccess;
+use DataAccess_AbstractDaoObjectStruct;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct implements ArrayAccess {
 
-class ShapelessConcreteStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
+    use ArrayAccessTrait;
+
+    protected function tryValidator() {}
 
     public function __set( $name, $value ) {
         $this->$name = $value;
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function __get( $name ) {
+        if ( !property_exists( $this, $name ) ) {
+            return null;
+        }
+        return $this->$name;
+    }
+
     public function getArrayCopy() {
         return (array)$this;
-    }
-
-    /**
-     * ArrayAccess interface implementation
-     *
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
-    }
-
-    /**
-     * ArrayAccess interface implementation
-     *
-     * @param mixed $offset
-     *
-     * @return null
-     */
-    public function offsetGet( $offset ) {
-        if ( $this->offsetExists( $offset ) ) {
-            return $this->$offset;
-        }
-        return null;
-    }
-
-    /**
-     * ArrayAccess interface implementation
-     *
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        if ( $this->offsetExists( $offset ) ) {
-            $this->$offset = $value;
-        }
-    }
-
-    /**
-     * ArrayAccess interface implementation
-     *
-     * @param mixed $offset
-     */
-    public function offsetUnset( $offset ) {
-        if ( $this->offsetExists( $offset ) ) {
-            $this->$offset = null;
-        }
     }
 
 }

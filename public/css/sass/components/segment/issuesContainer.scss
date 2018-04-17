@@ -124,8 +124,11 @@ section  {
                                     overflow: hidden;
                                     text-overflow: ellipsis;
                                     font-weight: 100;
+                                    margin-left: 4px;
                                 }
-                                .severity_issue_name {}
+                                .severity_issue_name {
+                                    margin-left: 4px;
+                                }
                             }
                             .issue-activity-icon {
                                 width: 25%;

@@ -27,14 +27,18 @@ class FeatureSet {
         if ( is_null( $features ) ) {
             $this->__loadFromMandatory();
         } else {
-            foreach( $features as $feature ) {
-                if ( !property_exists('feature_code', $feature ) ) {
-                    $this->features[ $feature->feature_code ] = $feature ;
-                }
-                else {
-                    throw new Exception('`feature_code` property not found on ' . var_export( $feature, true )  );
+
+            $_features = [];
+            foreach ( $features as $feature ) {
+                if ( property_exists( $feature, 'feature_code' ) ) {
+                    $_features[ $feature->feature_code ] = $feature;
+                } else {
+                    throw new Exception( '`feature_code` property not found on ' . var_export( $feature, true ) );
                 }
             }
+
+            $this->merge( $_features );
+
         }
     }
 
@@ -247,7 +251,7 @@ class FeatureSet {
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
 
-        foreach ( $this->sortFeatures()->features as $feature ) {
+        foreach ( $this->features as $feature ) {
             $this->runOnFeature($method, $feature, $args);
         }
     }
@@ -269,7 +273,7 @@ class FeatureSet {
     public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
 
         /** @var BasicFeatureStruct $feature */
-        foreach( $this->sortFeatures()->features as $feature ) {
+        foreach( $this->features as $feature ) {
 
             $cls = Features::getFeatureClassDecorator( $feature, $name );
             if( !empty( $cls ) ){
@@ -291,16 +295,13 @@ class FeatureSet {
      * @throws Exception
      */
     public function sortFeatures() {
-        $codes = $this->getCodes() ;
 
         foreach( $this->features as $feature ){
+
             /**
              * @var $feature BasicFeatureStruct
              */
             $baseFeature = $feature->toNewObject();
-            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes ) ;
-            $this->loadFromCodes( $missing_dependencies );
-
             uasort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) use ( $baseFeature ) {
                 if ( in_array( $left->feature_code, $baseFeature::getDependencies() ) ) {
                     return 0;
@@ -315,6 +316,30 @@ class FeatureSet {
     }
 
     /**
+     * Foe each feature Load it's defined dependencies
+     * @throws Exception
+     */
+    private function _loadFeatureDependencies(){
+
+        $codes = $this->getCodes() ;
+        foreach( $this->features as $feature ){
+            /**
+             * @var $feature BasicFeatureStruct
+             */
+            $baseFeature = $feature->toNewObject();
+            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes ) ;
+
+            if ( !empty( $missing_dependencies ) ) {
+                foreach( $missing_dependencies as $code ) {
+                    $this->features [ $code ] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+                }
+            }
+
+        }
+
+    }
+
+    /**
      * Updates the features array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
@@ -323,7 +348,8 @@ class FeatureSet {
      * @throws Exception
      */
     private function merge( $new_features ) {
-        // first round, load dependencies
+
+        $this->_loadFeatureDependencies();
 
         $all_features = [] ;
         $conflictingDeps = [] ;
@@ -354,6 +380,8 @@ class FeatureSet {
                 $this->features[ $feature->feature_code ] = $feature;
             }
         }
+
+        $this->sortFeatures();
 
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\ArrayAccessTrait;
 use Exceptions\NotFoundError;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
@@ -9,7 +10,9 @@ use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
 
 class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
-    
+
+    use ArrayAccessTrait;
+
     public $id;
     public $password;
     public $id_project;
@@ -276,41 +279,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $this->translated_words +
         $this->approved_words +
         $this->rejected_words;
-    }
-
-    /**
-     * This method is executed when using isset() or empty() on objects implementing ArrayAccess.
-     *
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @returns mixed
-     */
-    public function offsetGet( $offset ) {
-        return $this->__get( $offset );
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        $this->__set( $offset, $value );
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function offsetUnset( $offset ) {
-        $this->__set( $offset, null );
     }
 
     public function isCanceled() {

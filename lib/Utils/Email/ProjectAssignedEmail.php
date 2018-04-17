@@ -41,14 +41,14 @@ class ProjectAssignedEmail extends AbstractEmail {
             $jobStats->setTranslatedWords( $jStruct->translated_words );
             $jobStats->setApprovedWords( $jStruct->approved_words );
             $stats         = \CatUtils::getFastStatsForJob( $jobStats, false );
-            $words_count[] = $stats[ 'TOTAL_FORMATTED' ];
+            $words_count[] = $stats[ 'TOTAL' ];
         }
 
         return [
                 'user'        => $this->assignee->toArray(),
                 'sender'      => $this->user->toArray(),
                 'project'     => $this->project->toArray(),
-                'words_count' => array_sum( $words_count ),
+                'words_count' => number_format( array_sum( $words_count ), 0, ".", "," ),
                 'project_url' => \Routes::analyze( [
                         'project_name' => $this->project->name,
                         'id_project'   => $this->project->id,

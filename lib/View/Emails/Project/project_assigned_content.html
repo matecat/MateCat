@@ -7,11 +7,11 @@
     Here's the link to the project: <a href="<?= $project_url ?>"><?= $project_url ?></a>.
 </p>
 
-<?php if(!empty($project['due_date'])) { ?>
+<?php if(!empty($project['due_date'])): ?>
 <p>
-    Due date: <?= $project['due_date']; ?>
+    Due date: <?= date( 'F j, Y, g:i a A', strtotime( $project['due_date'] ) ); ?>
 </p>
-<?php }  ?>
+<?php endif;  ?>
 
 <p>
     Total words count: <?= $words_count ?>

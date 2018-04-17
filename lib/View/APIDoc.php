@@ -9,44 +9,32 @@ foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
 
 $nr_supoported_files = $count;
 
-$max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
+$max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>API - Matecat</title>
-    <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
-    <link href="/public/css/legacy-misc.css" rel="stylesheet" type="text/css" />
-    <link href="/public/css/build/common.css" rel="stylesheet" type="text/css" />
-    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
-  <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
-  <link href='/public/api/dist/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
-  <link href='/public/api/dist/css/print.css' media='print' rel='stylesheet' type='text/css'/>
+    <link href="/public/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/public/css/legacy-misc.css" rel="stylesheet" type="text/css"/>
+    <link href="/public/css/build/common.css" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" type="text/css" href="/public/api/dist/lib/swagger-ui.css">
+    <link rel="icon" href="/public/img/favicon.ico"/>
 
     <script>
         /*<![CDATA[*/
-        config = {} ;
+        config = {};
         config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
         /*]]>*/
     </script>
 
-  <script src='/public/api/dist/lib/object-assign-pollyfill.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/jquery.slideto.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/jquery.wiggle.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/handlebars-4.0.5.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/lodash.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/backbone-min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/swagger-ui.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/jsoneditor.min.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/marked.js' type='text/javascript'></script>
-  <script src='/public/api/dist/lib/swagger-oauth.js' type='text/javascript'></script>
+    <script src='/public/api/dist/lib/jquery-3.3.1.min.js' type='text/javascript'></script>
+    <script src="/public/api/dist/lib/swagger-ui-bundle.js"></script>
+    <script src="/public/api/dist/lib/swagger-ui-standalone-preset.js"></script>
 
-  <script src='/public/api/swagger-source.js' type='text/javascript'></script>
+    <script src='/public/api/swagger-source.js' type='text/javascript'></script>
     <?php
 
     $reflect  = new ReflectionClass( 'CustomPage' );
@@ -58,9 +46,103 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     echo implode( "\n", $appendJS );
 
     ?>
-</head>
-<body class="api swagger-section pippo">
+    <script type="application/javascript">
+        /*<![CDATA[*/
 
+        // add active class to menu
+        function setActivesMenuLink( element ) {
+            if ( !$( element ).hasClass( 'active' ) ) {
+                location.hash = element.hash;
+                $( ".menu a" ).removeClass( 'active' );
+                $( element ).addClass( 'active' );
+            }
+        }
+
+        function hideSwaggerElements() {
+            var swaggerElements = $( ".is-open" );
+            swaggerElements.each( function () {
+                //close tags
+                $( this ).children( 'h4' ).click();
+            } );
+        }
+
+        function generateSwaggerMenu() {
+
+            var tags = $( '.opblock-tag' );
+            var elements = $();
+            tags.each( function () {
+                var name = $( this ).prop( 'id' ).replace( 'operations-tag-', '' );
+                elements = elements.add( '<li><a id="' + name + '" href="#' + name + '">' + name.replace( '_', ' ' ) + '</a></li>' );
+            } );
+
+            $( '#menuElements' ).prepend( elements );
+
+        }
+
+        $( document ).ready( function () {
+
+            // Build a system
+            window.swaggerUi = SwaggerUIBundle( {
+                url: spec,
+                spec: spec,
+                dom_id: '#swagger-ui-container',
+                supportedSubmitMethods: ['get',
+                    'post',
+                    'put',
+                    'delete'],
+                docExpansion: 'none',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                //layout: "StandaloneLayout"
+
+            } );
+
+            generateSwaggerMenu();
+
+            // smooth scrolling for normal links
+            $( '#menuElements li a' ).click( function () {
+
+                //menu href
+                var anchorName = this.hash.slice( 1 );
+
+                //exists an element with anchor in the page?
+                var domAnchorList = $( '[name="' + anchorName + '"]' );
+
+                //exist a swagger tag element?
+                var swaggerTagList = $( "#operations-tag-" + anchorName );
+
+                hideSwaggerElements();
+
+                var target = null;
+                if ( domAnchorList.length ) {
+                    target = domAnchorList;
+                } else if ( swaggerTagList.length ) {
+                    target = swaggerTagList;
+                    //open Swagger Menu
+                    $( target[0] ).trigger( 'click' );
+                }
+
+                setActivesMenuLink( this );
+                $( 'html,body' ).animate( {
+                    scrollTop: target.offset().top
+                }, 500 );
+
+                return false;
+
+            } );
+
+        } );
+
+        /*]]>*/
+    </script>
+</head>
+<body class="api swagger-section">
 
 
 <header>
@@ -72,51 +154,41 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <div class="colsx">
         <a href="#top"><span class="logosmall"></span></a>
         <h1>API</h1>
-        <ul class="menu">
-              
-            
-                <li data-id="Project"><a class="anchor_api">Project</a></li>
+        <ul id="menuElements" class="menu">
 
-              
-                <li data-id="Comments"><a class="anchor_api">Comments</a></li>
-                <li data-id="Quality_Report"><a class="anchor_api">Quality Report</a></li>
-                <li data-id="Teams"><a class="anchor_api">Teams</a></li>
-                <li data-id="Translation_Issues"><a class="anchor_api">Translation Issues</a></li>
-                <li data-id="Translation_Versions"><a class="anchor_api">Translation Versions</a></li>
-                <li data-id="Job"><a class="anchor_api">Job</a></li>
-                <li data-id="Options"><a class="anchor_api">Options</a></li>
-                <li data-id="Glossary"><a class="anchor_api">Glossary</a></li>
-              
-            
+            <!-- Swagger anchors -->
+
             <li><a href="#file-format">Supported file format</a></li>
             <li><a href="#languages">Supported languages</a></li>
             <li><a href="#subjects">Supported subjects</a></li>
             <li><a href="#seg-rules">Supported segmentation rules</a></li>
         </ul>
     </div>
-            <a name="top" class="top"></a>
+    <a name="top" class="top"></a>
     <div class="coldx">
+
         <div class="block block-api block-swagger">
-             <a name="api-swagger"><h3 class="method-title">List of commands</h3></a>      
             <div id="swagger-ui-container" class="swagger-ui-wrap">
                 <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
             </div>
-              <a class="gototop" href="#top">Go to top</a>
+            <a class="gototop" href="#top">Go to top</a>
         </div>
+
         <div class="block block-api">
-            <a name="file-format"><h3 class="method-title">Supported file formats</h3></a>
-
-
+            <h3 name="file-format" class="method-title">Supported file formats</h3>
             <table class="tablestats fileformat" width="100%" border="0" cellspacing="0" cellpadding="0">
 
                 <thead>
-                <tr><th width="40%">Office</th>
+                <tr>
+                    <th width="40%">Office</th>
                     <th width="15%">Web</th>
                     <th width="15%">Interchange Formats</th>
                     <th width="15%">Desktop Publishing</th>
                     <th width="15%">Localization</th>
-                </tr></thead>
-                <tbody><tr>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
                     <td>
                         <ul class="office">
                             <li><span class="extdoc">doc</span></li>
@@ -195,15 +267,13 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                         </ul>
                     </td>
                 </tr>
-                </tbody></table>
-
-
+                </tbody>
+            </table>
             <a class="gototop" href="#top">Go to top</a>
         </div>
 
         <div class="block block-api">
-            <a name="languages"><h3 class="method-title">Supported languages</h3></a>
-
+            <h3 name="languages" class="method-title">Supported languages</h3>
             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <thead>
                 <th>
@@ -214,8 +284,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 <tr>
                     <td>
                         <ul class="lang-list">
-                            <?php foreach( Langs_Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
-                            <li><?=$lang['name'] . " (" . $lang['code']  . ")"?></li>
+                            <?php foreach ( Langs_Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
+                                <li><?= $lang[ 'name' ] . " (" . $lang[ 'code' ] . ")" ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </td>
@@ -226,9 +296,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         </div>
 
         <div class="block block-api">
-            <a name="subjects"><h3 class="method-title">Supported subjects</h3></a>
-
-
+            <h3 name="subjects" class="method-title">Supported subjects</h3>
             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <thead>
                 <tr>
@@ -237,19 +305,19 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach( Langs_LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
-                <tr><td><?=$domains['display']?></td><td><?=$domains['key']?></td></tr>
+                <?php foreach ( Langs_LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
+                    <tr>
+                        <td><?= $domains[ 'display' ] ?></td>
+                        <td><?= $domains[ 'key' ] ?></td>
+                    </tr>
                 <?php endforeach; ?>
                 </tbody>
             </table>
             <a class="gototop" href="#top">Go to top</a>
         </div>
 
-
         <div class="block block-api">
-            <a name="seg-rules"><h3 class="method-title">Supported segmentation rules</h3></a>
-
-
+            <h3 name="seg-rules" class="method-title">Supported segmentation rules</h3>
             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <thead>
                 <tr>
@@ -258,89 +326,57 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 </tr>
                 </thead>
                 <tbody>
-                <tr><td>General </td><td><code>empty</code></td></tr>
-                <tr><td>Patent</td><td>patent</td></tr>
-
+                <tr>
+                    <td>General</td>
+                    <td><code>empty</code></td>
+                </tr>
+                <tr>
+                    <td>Patent</td>
+                    <td>patent</td>
+                </tr>
                 </tbody>
             </table>
             <a class="last gototop" href="#top">Go to top</a>
         </div>
 
-        <div class="block block-api">
-        </div>
-        
+        <div class="block block-api"></div>
+
     </div>
 </div>
-<script type="text/javascript">
-// add active class to menu
 
-  $(".menu a").click(function() {
-        if ($(this).hasClass('active')) {
-          console.log('active');
-          
-        }
-        else {
-          $(".menu a").removeClass('active');
-           $(this).addClass('active');
-           console.log('inactive');
-        }
-       
-    });
-// anchor menu when scrolling
 
-    $(window).scroll(function() {
-        var scroll = $(window).scrollTop();
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0">
+    <defs>
+        <symbol viewBox="0 0 20 20" id="unlocked">
+            <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path>
+        </symbol>
 
-        if (scroll >= 30) {
-            $(".colsx").addClass("menuscroll");
-        }
-        else {
-            $(".colsx").removeClass("menuscroll");
-        }
+        <symbol viewBox="0 0 20 20" id="locked">
+            <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"/>
+        </symbol>
 
-    });
-  
+        <symbol viewBox="0 0 20 20" id="close">
+            <path d="M14.348 14.849c-.469.469-1.229.469-1.697 0L10 11.819l-2.651 3.029c-.469.469-1.229.469-1.697 0-.469-.469-.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-.469-.469-.469-1.228 0-1.697.469-.469 1.228-.469 1.697 0L10 8.183l2.651-3.031c.469-.469 1.228-.469 1.697 0 .469.469.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c.469.469.469 1.229 0 1.698z"/>
+        </symbol>
 
-// smooth scrolling
+        <symbol viewBox="0 0 20 20" id="large-arrow">
+            <path d="M13.25 10L6.109 2.58c-.268-.27-.268-.707 0-.979.268-.27.701-.27.969 0l7.83 7.908c.268.271.268.709 0 .979l-7.83 7.908c-.268.271-.701.27-.969 0-.268-.269-.268-.707 0-.979L13.25 10z"/>
+        </symbol>
 
-    $(function() {
-        $('a[href*=#]:not([href=#])').click(function() {
-            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-                var target = $(this.hash);
-                target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-                if (target.length) {
-                    $('html,body').animate({
-                        scrollTop: target.offset().top
-                    }, 1000);
-                    return false;
-                }
-            }
-        });
-    });
+        <symbol viewBox="0 0 20 20" id="large-arrow-down">
+            <path d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"/>
+        </symbol>
 
-// scroll to id + add active on menu
+        <symbol viewBox="0 0 24 24" id="jump-to">
+            <path d="M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z"/>
+        </symbol>
 
- $(".anchor_api").click(function() {
-                    var name = $(this).closest("li").attr("data-id");
-                      $('html, body').animate({
-                          scrollTop: $("#resource_"+name).offset().top
-                      }, 500,function() {
-                        
-                    });  
-                       if ($(this).hasClass("selected") && $("#resource_"+name).hasClass('active')) {
-                            console.log("selected");
-                        }
-                        else {
-                          if (!$("#resource_"+name).hasClass('active')) {
-                            console.log("selected");
-                            $(this).addClass('selected');
-                          $("#resource_"+name+ " #endpointListTogger_"+name).click();
-                            console.log("selected");
-                        }
-                          
-                        }
-                  });
-</script>
+        <symbol viewBox="0 0 24 24" id="expand">
+            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+        </symbol>
+
+    </defs>
+</svg>
 
 </body>
 </html>

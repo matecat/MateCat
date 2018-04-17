@@ -296,7 +296,7 @@ class SegmentFooterTabGlossary extends React.Component {
                             <ul className="graysmall-details">
                                 <li>{match.last_update_date}</li>
                                 <li className="graydesc">Source:
-                                    <span className="bold">{cb}</span>
+                                    <span className="bold"> {cb}</span>
                                 </li>
                             </ul>
                         </li>
