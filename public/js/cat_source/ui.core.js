@@ -1447,6 +1447,9 @@ UI = {
 	},
 	goToFirstError: function() {
         $("#point2seg").trigger('mousedown');
+        setTimeout(function (  ) {
+            $('.qa-issues-container ').first().click()
+        }, 300);
 	},
 
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
