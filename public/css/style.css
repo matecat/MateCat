@@ -1284,6 +1284,7 @@ article {
 }
 body #outer {
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     display: inline-block;
     height: 100%;
