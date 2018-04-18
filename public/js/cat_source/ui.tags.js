@@ -680,7 +680,7 @@ $.extend(UI, {
             e.preventDefault();
         }
     },
-    handleSourceDragEvent: function ( e ) {
+    handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = elem.parent('span.locked:not(.inside-attribute)');

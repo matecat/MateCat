@@ -154,9 +154,12 @@ function removeSelectedText() {
 				oSelection.deleteFromDocument();
 		} else if (oSelection.type == 'Range') {
 			var ss = $(oSelection.baseNode).parent()[0];
+			var ssParentTag = $(oSelection.baseNode).closest('.locked.selfClosingTag')[0];
 			if ($(ss).hasClass('selected')) {
 				$(ss).remove();
-			} else {
+			} else if (ssParentTag) {
+                $(ssParentTag).remove();
+            } else {
 				oSelection.deleteFromDocument();
 				oSelection.collapseToStart();
 			}
