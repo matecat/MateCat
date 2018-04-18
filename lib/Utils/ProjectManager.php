@@ -2000,24 +2000,26 @@ class ProjectManager {
 
                 $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
                         [
-                                'approved'      => $translation_row [ 4 ],
-                                'locked'        => 0,
-                                'match_type'    => 'ICE',
-                                'eq_word_count' => 0,
-                                'status'        => $status
+                                'approved'         => $translation_row [ 4 ],
+                                'locked'           => 0,
+                                'match_type'       => 'ICE',
+                                'eq_word_count'    => 0,
+                                'status'           => $status,
+                                'suggestion_match' => null
                         ]
                 );
 
                 //WARNING do not change the order of the keys
                 $sql_values = [
-                        'id_segment'    => $translation_row [ 0 ],
-                        'id_job'        => $jid,
-                        'segment_hash'  => $translation_row [ 3 ],
-                        'status'        => $iceLockArray[ 'status' ],
-                        'translation'   => $translation_row [ 2 ],
-                        'locked'        => $iceLockArray[ 'locked' ],
-                        'match_type'    => $iceLockArray[ 'match_type' ],
-                        'eq_word_count' => $iceLockArray[ 'eq_word_count' ],
+                        'id_segment'       => $translation_row [ 0 ],
+                        'id_job'           => $jid,
+                        'segment_hash'     => $translation_row [ 3 ],
+                        'status'           => $iceLockArray[ 'status' ],
+                        'translation'      => $translation_row [ 2 ],
+                        'locked'           => $iceLockArray[ 'locked' ],
+                        'match_type'       => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'    => $iceLockArray[ 'eq_word_count' ],
+                        'suggestion_match' => $iceLockArray[ 'suggestion_match' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2040,11 +2042,12 @@ class ProjectManager {
                         tm_analysis_status, /* DONE */
                         locked, 
                         match_type, 
-                        eq_word_count 
+                        eq_word_count,
+                        suggestion_match
                 )
                 VALUES ";
 
-            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ? )";
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ? )";
 
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
