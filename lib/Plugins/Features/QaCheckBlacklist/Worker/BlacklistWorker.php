@@ -51,7 +51,7 @@ class BlacklistWorker extends AbstractWorker {
         $params = $this->queueElement->params ;
 
         $dao = new \Projects_MetadataDao() ;
-        $has_blacklist = $dao->get( $params['id_project'],  'has_blacklist' ) ;
+        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $params['id_project'],  'has_blacklist' ) ;
 
         if ( ! $has_blacklist ) {
             return ;
