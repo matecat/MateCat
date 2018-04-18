@@ -8,8 +8,6 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Features\SegmentFilter\Model\SegmentFilterDao;
-
 class SegmentFilterModel {
 
     /**
@@ -29,6 +27,7 @@ class SegmentFilterModel {
 
     /**
      * @return null|\Translations_SegmentTranslationStruct[]
+     * @throws \Exception
      */
     public function getSegmentIds() {
         $result = null;
