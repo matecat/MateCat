@@ -680,7 +680,7 @@ $.extend(UI, {
             e.preventDefault();
         }
     },
-    handleSourceDragEvent: function ( e ) {
+    handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = elem.parent('span.locked:not(.inside-attribute)');
@@ -694,6 +694,14 @@ $.extend(UI, {
             e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
             e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
         }
+    },
+    /**
+     * When you click on a tag, it is selected and the selected class is added (ui.events->382).
+     * Clicking on the edititarea to remove the tags with the selected class that otherwise are
+     * removed the first time you press the delete key (ui.editarea-> 51 )
+     */
+    removeSelectedClassToTags: function (  ) {
+        UI.editarea.find('.locked.selected').removeClass('selected');
     }
 
 });

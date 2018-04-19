@@ -388,13 +388,11 @@ $.extend(UI, {
             } else {
                 setCursorPosition(this);
                 selectText(this);
+                UI.removeSelectedClassToTags();
                 $(this).toggleClass('selected');
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
-		}).on('dragstart', '.editor .editarea .locked', function() {
-            // To stop the drag in tags elements
-            return false;
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			UI.clickOnTranslatedButton(e, this);
 		}).on('click', 'a.guesstags', function(e) {

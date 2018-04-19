@@ -74,7 +74,7 @@ class SegmentSource extends React.Component {
     }
 
     onDragEvent(e) {
-        UI.handleSourceDragEvent(e);
+        UI.handleDragEvent(e);
     }
 
     componentDidMount() {
