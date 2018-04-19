@@ -388,6 +388,7 @@ $.extend(UI, {
             } else {
                 setCursorPosition(this);
                 selectText(this);
+                UI.removeSelectedClassToTags();
                 $(this).toggleClass('selected');
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }

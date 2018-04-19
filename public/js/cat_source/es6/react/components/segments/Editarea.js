@@ -90,6 +90,7 @@ class Editarea extends React.Component {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
             UI.editAreaClick(event.currentTarget);
+            UI.removeSelectedClassToTags()
         }
     }
 
@@ -131,6 +132,7 @@ class Editarea extends React.Component {
         if ( this.draggingFromEditArea ) {
             removeSelectedText();
         }
+        UI.saveInUndoStack('paste');
         this.emitTrackChanges();
         console.log("Drop Event");
         this.draggingFromEditArea = false;

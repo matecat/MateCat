@@ -12,23 +12,6 @@ input, textarea {
     font-size: 16px;
 }
 
-/*header*/
-header {
-    background: #4D4D4D;
-    top: 0;
-    left: 0;
-    width: 100%;
-    position: relative;
-    z-index: 12;
-    border-bottom: 1px solid #333;
-    padding: 0;
-    transition: margin-top 200ms ease-out;
-    -webkit-transition: margin-top 200ms ease-out;
-    box-sizing: content-box;
-    min-width: 1024px;
-    min-height: 49px;
-}
-
 body.login header {
     margin-top: 0 !important;
     height: 47px;
