@@ -134,7 +134,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-                $suggestion_match,
+                ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
                 $queueElement->params->match_type,
                 $equivalentWordMapping,
                 /* is Public TM */
@@ -295,6 +295,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param bool   $isICE
      *
      * @return string
+     * @throws Exception
      */
     protected function _getNewMatchType( $tm_match_type, $fast_match_type, &$equivalentWordMapping, $publicTM = false, $isICE = false ) {
 
@@ -303,6 +304,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $tm_match_fuzzy_band = "";
         $tm_rate_paid = 0;
+
+        $tm_match_type = $this->featureSet->filter( 'customizeTMMatches', $tm_match_type );
 
         if ( stripos( $tm_match_type, "MT" ) !== false ) {
 
@@ -527,6 +530,8 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
         }
+
+        $matches = $this->featureSet->filter( 'modifyMatches', $matches );
 
         return $matches;
 
