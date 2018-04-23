@@ -463,13 +463,14 @@ UI = {
             var filterinRepetitions = data.reactState.samplingType === "repetitions";
             if (filterinRepetitions) {
                 nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
-                    '-nextgrouprepetition" href="#" class="btn next-repetition-group" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Translate and go to next repetition group">NEXT GROUP</a>' +
+                    '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
                     '</li>' +
                     '<li><a id="segment-' + this.currentSegmentId +
-                    '-nextrepetition" href="#" class="btn next-repetition" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Translate and go to next repetition">NEXT REP</a>' +
+                    '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
                     '</li>';
+
             }
         }
 
