@@ -184,6 +184,9 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
     }).on('click', 'a.next-review-repetition', function(e) {
         e.preventDefault();
         SegmentFilter.goToNextRepetition(this, 'approved');
+    }).on('click', 'a.next-review-repetition-group', function(e) {
+        e.preventDefault();
+        SegmentFilter.goToNextRepetitionGroup(this, 'approved');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
@@ -292,10 +295,11 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
             var nextSegment = UI.currentSegment.next();
             var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+            var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
             div.find('.next-untranslated').parent().remove();
             div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition');
-            div.find('.next-repetition-gruop').removeClass('next-repetition-group').addClass('next-review-repetition-group');
-            if (goToNextApprovedButton) {
+            div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group');
+            if (goToNextApprovedButton && !filtering) {
                 var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
                     '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
                     this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +

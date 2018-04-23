@@ -439,7 +439,7 @@ UI = {
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
-        var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering());
+        var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";

@@ -399,6 +399,9 @@ $.extend(UI, {
         }).on('click', 'a.next-repetition', function(e) {
             e.preventDefault();
             SegmentFilter.goToNextRepetition(this, 'translated');
+		}).on('click', 'a.next-repetition-group', function(e) {
+            e.preventDefault();
+            SegmentFilter.goToNextRepetitionGroup(this, 'translated');
 		}).on('click', 'a.guesstags', function(e) {
 			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
 			// in the current segment
