@@ -297,8 +297,8 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
             var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
             div.find('.next-untranslated').parent().remove();
-            div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition');
-            div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group');
+            div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
+            div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
             if (goToNextApprovedButton && !filtering) {
                 var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
                     '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
