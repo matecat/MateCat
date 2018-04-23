@@ -294,6 +294,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
             div.find('.next-untranslated').parent().remove();
             div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition');
+            div.find('.next-repetition-gruop').removeClass('next-repetition-group').addClass('next-review-repetition-group');
             if (goToNextApprovedButton) {
                 var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
                     '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
