@@ -181,6 +181,9 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
         // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
         // because of the event is triggered even on download button
         UI.clickOnApprovedButton(e, this)
+    }).on('click', 'a.next-review-repetition', function(e) {
+        e.preventDefault();
+        SegmentFilter.goToNextRepetition(this, 'approved');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
@@ -290,6 +293,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             var nextSegment = UI.currentSegment.next();
             var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
             div.find('.next-untranslated').parent().remove();
+            div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition');
             if (goToNextApprovedButton) {
                 var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
                     '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +

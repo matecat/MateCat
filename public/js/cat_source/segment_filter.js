@@ -189,7 +189,35 @@ if (SegmentFilter.enabled())
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );
+        },
+        goToNextRepetition: function ( button, status ) {
+            var hash = UI.currentSegment.data('hash');
+            var segmentFilterData = SegmentFilter.getStoredState();
+            var groupArray = segmentFilterData.serverData.grouping[hash];
+            var index = groupArray.indexOf(UI.currentSegmentId);
+            var nextItem;
+            if(index >= 0 && index < groupArray.length - 1) {
+                nextItem = groupArray[index + 1]
+            } else {
+                nextItem = groupArray[0];
+            }
+            UI.changeStatus(button, status, 0);
+            skipChange = true;
+
+            if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+                UI.reloadToSegment( nextItem );
+                return ;
+            }
+
+            UI.setStatusButtons(UI.currentSegment.find('a.translated'));
+
+            if ( UI.segmentIsLoaded(nextItem) ) {
+                UI.gotoSegment(nextItem)
+            } else {
+                UI.render({ segmentToOpen: nextItem });
+            }
         }
+
     });
 
     $(document).on('segmentsAdded', function(e) {
