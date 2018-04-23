@@ -341,10 +341,10 @@ class ProjectContainer extends React.Component {
             </div>
 
             <div className="menu">
-                {/*<div className="header"*/}
-                     {/*onClick={this.openAddMember.bind(this)}>*/}
-                    {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
-                {/*</div>*/}
+                <div className="header"
+                     onClick={this.openAddMember.bind(this)}>
+                    <a href="#">Add New Member <i className="icon-plus3 icon right"/></a>
+                </div>
                 <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
