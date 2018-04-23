@@ -23,8 +23,10 @@ body.incomingMsg header {
 
 header .wrapper {
     height: 20px;
-    padding: 0px 0 0 0;
+    padding: 0px 0 0px 0;
     width: 100%;
+    background: #4D4D4D;
+    height: 48px;
 }
 
 .header-menu {;
