@@ -29,7 +29,7 @@ class SegmentFilterModel {
      * @return null|\Translations_SegmentTranslationStruct[]
      * @throws \Exception
      */
-    public function getSegmentIds() {
+    public function getSegmentList() {
         $result = null;
 
         if ( $this->filter->isSampled() ) {

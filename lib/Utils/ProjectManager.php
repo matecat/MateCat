@@ -2082,7 +2082,7 @@ class ProjectManager {
 
     protected function _strip_external( $segment ) {
 
-        if ( $this->features->filter( 'skipTagLessFeature', false ) ) {
+        if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
         }
 
@@ -2103,6 +2103,10 @@ class ProjectManager {
         // of all tags openings/closures. In the second step the function checks
         // all the tags opened or closed between the first and last letter, and
         // ensures that closures and openings of those tags are not stripped out.
+
+        //TODO IMPROVEMENT:
+        // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
+        // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
 
         $segmentLength = strlen( $segment );
 

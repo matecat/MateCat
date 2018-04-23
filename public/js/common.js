@@ -23,9 +23,11 @@ APP = {
             }
         } ).on( 'click', '.modal[data-type=confirm] .btn-ok:not(.disabled), .modal[data-type=confirm_checkbox] .btn-ok:not(.disabled)', function ( e ) {
             e.preventDefault();
-            var dataType = $('.modal' ).attr('data-type');
+            var dataType = $(this).closest('.modal' ).attr('data-type');
 
-            if ( $( '.modal[data-type='+dataType+']' ).hasClass( 'closeOnSuccess' ) ) APP.closePopup();
+            if ( $( '.modal[data-type='+dataType+']' ).hasClass( 'closeOnSuccess' ) ) {
+                APP.closePopup();
+            }
             if ( $( this ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( this ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( this ).attr( 'data-context' ) || '';

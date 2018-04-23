@@ -387,7 +387,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
     public static function getSqlForRepetition( $where ) {
 
         $sql = "
-            SELECT id_segment AS id FROM segment_translations JOIN(
+            SELECT id_segment AS id, segment_hash FROM segment_translations JOIN(
                 SELECT 
                     GROUP_CONCAT( st.id_segment ) AS id,
                     st.segment_hash as hash
