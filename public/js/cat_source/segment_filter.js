@@ -170,26 +170,84 @@ if (SegmentFilter.enabled())
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
                 this.filteringSegments = true;
                 setTimeout( function() {
+                    UI.createButtons();
                     tryToFocusLastSegment();
-                }, 600 );
+                }, 200 );
             }
 
         },
 
         clearFilter : function() {
             this.clearStoredData();
-            this.closeFilter() ;
             this.filteringSegments = false;
+            this.closeFilter() ;
         },
 
         closeFilter : function() {
             CatToolActions.closeSubHeader();
             this.open = false;
             SegmentActions.removeAllMutedSegments();
+            UI.createButtons();
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );
+        },
+        goToNextRepetition: function ( button, status ) {
+            var hash = UI.currentSegment.data('hash');
+            var segmentFilterData = SegmentFilter.getStoredState();
+            var groupArray = segmentFilterData.serverData.grouping[hash];
+            var index = groupArray.indexOf(UI.currentSegmentId);
+            var nextItem;
+            if(index >= 0 && index < groupArray.length - 1) {
+                nextItem = groupArray[index + 1]
+            } else {
+                nextItem = groupArray[0];
+            }
+            UI.changeStatus(button, status, 0);
+            skipChange = true;
+
+            if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+                UI.reloadToSegment( nextItem );
+                return ;
+            }
+
+            UI.setStatusButtons(UI.currentSegment.find('a.translated'));
+
+            if ( UI.segmentIsLoaded(nextItem) ) {
+                UI.gotoSegment(nextItem)
+            } else {
+                UI.render({ segmentToOpen: nextItem });
+            }
+        },
+        goToNextRepetitionGroup: function ( button, status ) {
+            var hash = UI.currentSegment.data('hash');
+            var segmentFilterData = SegmentFilter.getStoredState();
+            var groupsArray = Object.keys(segmentFilterData.serverData.grouping);
+            var index = groupsArray.indexOf(hash);
+            var nextGroupHash;
+            if(index >= 0 && index < groupsArray.length - 1) {
+                nextGroupHash = groupsArray[index + 1]
+            } else {
+                nextGroupHash = groupsArray[0];
+            }
+            var nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0];
+            UI.changeStatus(button, status, 0);
+            skipChange = true;
+
+            if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+                UI.reloadToSegment( nextItem );
+                return ;
+            }
+
+            UI.setStatusButtons(UI.currentSegment.find('a.translated'));
+
+            if ( UI.segmentIsLoaded(nextItem) ) {
+                UI.gotoSegment(nextItem)
+            } else {
+                UI.render({ segmentToOpen: nextItem });
+            }
         }
+
     });
 
     $(document).on('segmentsAdded', function(e) {
