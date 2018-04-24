@@ -241,11 +241,11 @@ section {
 
 }
 
-#review-side-panel {
+#review-side-panel.review-improved-panel {
     background-color: #ffffff;
     height: 100%;
     position: fixed;
-    top: 0;
+    top: 50px;
     right: 0;
     width: 25%;
     z-index: 1;

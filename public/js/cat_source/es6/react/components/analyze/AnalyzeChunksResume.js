@@ -131,7 +131,7 @@ class AnalyzeChunksResume extends React.Component {
                                 </div>
                             </div>
                             <div className="activity-icons">
-                                {self.getOpenButton(chunk, chunk.jid + '-' + index)}
+                                {self.getOpenButton(chunkJob.toJS(), chunk.jid + '-' + index)}
                             </div>
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
@@ -219,7 +219,7 @@ class AnalyzeChunksResume extends React.Component {
                                         <div className={"split ui blue basic button " + buttonsClass + ' '}
                                              onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
                                     ) : (null)}
-                                    {self.getOpenButton(chunkJob, self.props.jobsInfo[indexJob].jid)}
+                                    {self.getOpenButton(chunkJob.toJS(), self.props.jobsInfo[indexJob].jid)}
                                 </div>
                             </div>
                             <OutsourceContainer project={self.props.project}

@@ -30,9 +30,9 @@ class createProjectController extends ajaxController {
     private $team;
 
     /**
-     * @var FeatureSet
+     * @var BasicFeatureStruct[]
      */
-    private $projectFeatures;
+    private $projectFeatures = [];
 
     public function __construct() {
 
@@ -66,13 +66,13 @@ class createProjectController extends ajaxController {
         ];
 
         $this->readLoginInfo( false );
-        $this->setupSystemWideFeatures();
+        $this->setupUserFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->setProjectFeatures( $__postInput );
+        $this->setProjectFeaturesFromPostValues( $__postInput );
 
         //first we check the presence of a list from tm management panel
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
@@ -172,7 +172,7 @@ class createProjectController extends ajaxController {
      * @throws \Exceptions\ValidationError
      */
 
-    private function setProjectFeatures( $__postInput ) {
+    private function setProjectFeaturesFromPostValues( $__postInput ) {
         // change project features
 
         if ( !empty( $__postInput[ 'project_completion' ] ) ) {
@@ -182,7 +182,7 @@ class createProjectController extends ajaxController {
         }
 
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $__postInput
+                'filterCreateProjectFeatures', $this->projectFeatures, $__postInput, $this->userIsLogged
         );
     }
 
@@ -369,7 +369,7 @@ class createProjectController extends ajaxController {
     /**
      * Loads current features from current logged user.
      */
-    private function setupSystemWideFeatures() {
+    private function setupUserFeatures() {
         if ( $this->userIsLogged ) {
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }

@@ -4,6 +4,7 @@ namespace Projects;
 
 use API\V2\Exceptions\AuthorizationError;
 use Constants_Teams;
+use Exceptions\ValidationError;
 use Features\QaCheckBlacklist\BlacklistFromZip;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -64,6 +65,12 @@ class ProjectModel {
         $this->user = $user ;
     }
 
+    /**
+     * @return Projects_ProjectStruct
+     * @throws AuthorizationError
+     * @throws ValidationError
+     * @throws \ReflectionException
+     */
     public function update() {
         $this->changedFields = array();
 
@@ -73,12 +80,13 @@ class ProjectModel {
             $this->checkName();
         }
 
-        if ( isset( $this->willChange[ 'id_assignee' ] ) ) {
-            $this->checkIdAssignee();
-        }
-
-        if( array_key_exists( 'id_assignee', $this->willChange ) ){
-            $this->checkAssigneeChangeInPersonalTeam();
+        if (
+                isset( $this->willChange[ 'id_assignee' ] ) &&
+                isset( $this->willChange[ 'id_team' ] )
+        ) {
+            $this->checkIdAssignee( $this->willChange[ 'id_team' ] );
+        } elseif( isset( $this->willChange[ 'id_assignee' ] ) ){
+            $this->checkIdAssignee( $this->project_struct->id_team );
         }
 
         if ( isset( $this->willChange[ 'id_team' ] ) ) {
@@ -122,39 +130,57 @@ class ProjectModel {
         }
     }
 
+    /**
+     * @throws ValidationError
+     */
     private function checkName() {
         if ( empty( $this->willChange[ 'name' ] ) ) {
-            throw new \Exceptions\ValidationError( 'Project name cannot be empty' );
+            throw new ValidationError( 'Project name cannot be empty' );
         }
     }
 
-    private function checkAssigneeChangeInPersonalTeam(){
+    /**
+     * @param $id_team
+     *
+     * @throws ValidationError
+     */
+    private function checkAssigneeChangeInPersonalTeam( $id_team ){
 
         $teamDao = new TeamDao();
-        $team = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->project_struct->id_team );
+        $team = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $id_team );
         if( $team->type == Constants_Teams::PERSONAL ){
-            throw new \Exceptions\ValidationError( 'Can\'t change the Assignee of a personal project.' );
+            throw new ValidationError( 'Can\'t change the Assignee of a personal project.' );
         }
 
     }
 
-    private function checkIdAssignee() {
+    /**
+     * @param $id_team
+     *
+     * @throws ValidationError
+     */
+    private function checkIdAssignee(  $id_team ) {
 
         $membershipDao = new MembershipDao();
-        $members       = $membershipDao->setCacheTTL( 60 )->getMemberListByTeamId( $this->project_struct->id_team );
+        $members       = $membershipDao->setCacheTTL( 60 )->getMemberListByTeamId( $id_team );
         $id_assignee   = $this->willChange[ 'id_assignee' ];
         $found         = array_filter( $members, function ( MembershipStruct $member ) use ( $id_assignee ) {
             return ( $id_assignee == $member->uid );
         } );
 
         if ( empty( $found ) ) {
-            throw new \Exceptions\ValidationError( 'Assignee must be team member' );
+            throw new ValidationError( 'Assignee must be team member' );
         }
 
-        $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+        $this->checkAssigneeChangeInPersonalTeam( $id_team );
+
+        $this->cacheTeamsToClean[] = $id_team;
 
     }
 
+    /**
+     * @throws AuthorizationError
+     */
     private function checkIdTeam(){
 
         $memberShip = new MembershipDao();
@@ -182,7 +208,7 @@ class ProjectModel {
             $this->cacheTeamsToClean[] = $this->project_struct->id_team;
         }
 
-        // if the project has an assignee abd the destination team is not personal,
+        // if the project has an assignee and the destination team is not personal,
         // we have to check if the assignee_id exists in the other team. If not, reset the assignee
         elseif( $this->project_struct->id_assignee ){
 

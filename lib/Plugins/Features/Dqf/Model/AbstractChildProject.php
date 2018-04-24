@@ -129,7 +129,7 @@ abstract class AbstractChildProject {
     abstract protected function _submitData() ;
 
     protected function _findRemoteFileId( Files_FileStruct $file ) {
-        $projectOwner = new UserModel ( $this->chunk->getProject()->getOwner()  ) ;
+        $projectOwner = new UserModel ( $this->chunk->getProject()->getOriginalOwner()  ) ;
         $service = new FileIdMapping( $projectOwner->getSession()->login(), $file ) ;
 
         return $service->getRemoteId() ;

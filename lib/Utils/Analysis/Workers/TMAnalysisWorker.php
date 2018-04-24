@@ -122,14 +122,9 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ){
 
-        $tm_match_type = $this->_matches[ 0 ][ 'match' ];
-        if ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ) {
-            $tm_match_type = "MT";
-        }
-
         $suggestion = \CatUtils::view2rawxliff( $this->_matches[ 0 ][ 'raw_translation' ] );
 
-        //preg_replace all x tags <x not closed > inside suggestions with correctly closed
+        // OLD Patch for wrong tag in memories: preg_replace all x tags <x not closed > inside suggestions with correctly closed
         $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
@@ -139,7 +134,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-                $tm_match_type,
+                ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
                 $queueElement->params->match_type,
                 $equivalentWordMapping,
                 /* is Public TM */
@@ -150,9 +145,13 @@ class TMAnalysisWorker extends AbstractWorker {
         $eq_words       = $equivalentWordMapping[ $new_match_type ] * $queueElement->params->raw_word_count / 100;
         $standard_words = $eq_words;
 
-        //if the first match is MT perform QA realignment
+        /**
+         * if the first match is MT perform QA realignment because some MT engines breaks tags
+         * also perform a tag ID check and mismatch validation
+         */
         if ( $new_match_type == 'MT' ) {
 
+            //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
             $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion );
@@ -169,7 +168,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
         } else {
 
-            //try to perform only the tagCheck
+            /**
+             * Otherwise try to perform only the tagCheck
+             */
             $check = new \PostProcess( $queueElement->params->segment, $suggestion );
             $check->performTagCheckOnly();
 
@@ -233,7 +234,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.");
 
         }
-        
+
 
         //set redis cache
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
@@ -271,6 +272,9 @@ class TMAnalysisWorker extends AbstractWorker {
                 $tm_data[ 'locked' ] = false;
             }
 
+            //custom condition for 100% matches
+            $tm_data = $this->featureSet->filter( 'check100MatchLocked', $tm_data, $queueElementParams );
+
         }
 
         return $tm_data;
@@ -280,6 +284,10 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Calculate the new score match by the Equivalent word mapping ( the value is inside the queue element )
      *
+     * RATIO : i change the value only if the new match is strictly better
+     * ( in terms of percent payed per word )  then the actual one
+     *
+     *
      * @param string $tm_match_type
      * @param string $fast_match_type
      * @param array  $equivalentWordMapping
@@ -287,48 +295,51 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param bool   $isICE
      *
      * @return string
+     * @throws Exception
      */
     protected function _getNewMatchType( $tm_match_type, $fast_match_type, &$equivalentWordMapping, $publicTM = false, $isICE = false ) {
-
-        // RATIO : i change the value only if the new match is strictly better
-        // ( in terms of percent payed per word )
-        // then the actual one
-        $tm_match_cat = "";
-        $tm_rate_paid = 0;
 
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
 
+        $tm_match_fuzzy_band = "";
+        $tm_rate_paid = 0;
 
-        if ( $tm_match_type == "MT" ) {
-            $tm_match_cat = "MT";
-            $tm_rate_paid = $equivalentWordMapping[ $tm_match_type ];
-        }
+        $tm_match_type = $this->featureSet->filter( 'customizeTMMatches', $tm_match_type );
 
+        if ( stripos( $tm_match_type, "MT" ) !== false ) {
 
-        if ( empty( $tm_match_cat ) ) {
+            $tm_match_fuzzy_band = "MT";
+            $tm_rate_paid = $equivalentWordMapping[ "MT" ];
+
+        } else {
+
             $ind = intval( $tm_match_type );
 
             if ( $ind == "100" ) {
 
                 if( $isICE ){
-                    $tm_match_cat  = "ICE";
+                    $tm_match_fuzzy_band  = "ICE";
                     $tm_rate_paid = 0;
                     $equivalentWordMapping[ "ICE" ] = 0;
                 } else {
-                    $tm_match_cat = ($publicTM) ? "100%_PUBLIC" : "100%";
-                    $tm_rate_paid = $equivalentWordMapping[ $tm_match_cat ];
+                    $tm_match_fuzzy_band = ($publicTM) ? "100%_PUBLIC" : "100%";
+                    $tm_rate_paid = $equivalentWordMapping[ $tm_match_fuzzy_band ];
                 }
 
             }
 
+            /**
+             * MyMemory never returns matches below 50%, it send them as NO_MATCH
+             * So this block of code results unused
+             */
             if ( $ind < 50 ) {
-                $tm_match_cat = "NO_MATCH";
+                $tm_match_fuzzy_band = "NO_MATCH";
                 $tm_rate_paid = $equivalentWordMapping[ "NO_MATCH" ];
             }
 
             if ( $ind >= 50 and $ind < 75 ) {
-                $tm_match_cat = "50%-74%";
+                $tm_match_fuzzy_band = "50%-74%";
                 $tm_rate_paid = $equivalentWordMapping[ "50%-74%" ];
             }
 
@@ -340,26 +351,30 @@ class TMAnalysisWorker extends AbstractWorker {
              */
             if( !isset( $equivalentWordMapping[ "75%-99%" ]) ) {
                 if( $ind >= 75 && $ind <=84 ){
-                    $tm_match_cat = "75%-84%";
+                    $tm_match_fuzzy_band = "75%-84%";
                     $tm_rate_paid = $equivalentWordMapping[ "75%-84%" ];
                 }
                 elseif( $ind >= 85 && $ind <=94 ){
-                    $tm_match_cat = "85%-94%";
+                    $tm_match_fuzzy_band = "85%-94%";
                     $tm_rate_paid = $equivalentWordMapping[ "85%-94%" ];
                 }
                 elseif( $ind >= 95 && $ind <=99 ){
-                    $tm_match_cat = "95%-99%";
+                    $tm_match_fuzzy_band = "95%-99%";
                     $tm_rate_paid = $equivalentWordMapping[ "95%-99%" ];
                 }
             }
             elseif ( $ind >= 75 and $ind <= 99 ) {
-                $tm_match_cat = "75%-99%";
+                $tm_match_fuzzy_band = "75%-99%";
                 $tm_rate_paid = $equivalentWordMapping[ "75%-99%" ];
             }
         }
-        //this is because 50%-74% is never returned because it's rate equals NO_MATCH
+
+        /**
+         * Apply the TM discount rate and/or force the value obtained from TM for
+         * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
+         */
         if ( $tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
-            return $tm_match_cat;
+            return $tm_match_fuzzy_band;
         }
 
         return $fast_match_type;
@@ -515,6 +530,8 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
         }
+
+        $matches = $this->featureSet->filter( 'modifyMatches', $matches );
 
         return $matches;
 
@@ -706,6 +723,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws \Predis\Connection\ConnectionException
+     * @throws EndQueueException
      */
     protected function _tryToCloseProject( $_project_id ) {
 
@@ -736,6 +754,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 throw new ReQueueException();
             }
 
+            //TODO use a simplest query to get job id and password
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
@@ -751,9 +770,17 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
 
             $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
+            $wordCountStructs = [];
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new \WordCount_Counter();
-                $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+            }
+
+            try {
+                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id );
+            } catch(\Exception $e) {
+                //ignore Exception the analysis is finished anyway
+                $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
             }
 
         }

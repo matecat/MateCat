@@ -86,9 +86,9 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         if ( $filter->sampleData() ) {
             switch ( $filter->sampleType() ) {
                 case 'repetitions':
-                    $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::REPETITIONS,
-                    ] );
+//                    $data = array_merge( $data, [
+//                            'match_type' => \Constants_SegmentTranslationsMatchType::REPETITIONS,
+//                    ] );
                     break;
                 case 'mt':
                     $data = array_merge( $data, [
@@ -214,14 +214,11 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             case 'regular_intervals':
                 $sql = self::getSqlForRegularIntervals( $limit, $where );
                 break;
-            case 'regular_intervals':
-                $sql = self::getSqlForRegularIntervals( $limit, $where );
-                break;
             case 'unlocked':
                 $sql = self::getSqlForUnlocked( $where );
                 break;
             case 'repetitions':
-                $sql = self::getSqlForMatchType( $where );
+                $sql = self::getSqlForRepetition( $where );
                 break;
             case 'mt':
                 $sql = self::getSqlForMatchType( $where );
@@ -382,6 +379,29 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+    public static function getSqlForRepetition( $where ) {
+
+        $sql = "
+            SELECT id_segment AS id, segment_hash FROM segment_translations JOIN(
+                SELECT 
+                    GROUP_CONCAT( st.id_segment ) AS id,
+                    st.segment_hash as hash
+                FROM segment_translations st
+                JOIN jobs 
+                        ON jobs.id = st.id_job 
+                        AND jobs.id = :id_job
+                        AND jobs.password = :password
+                        AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
+                        $where->sql
+                GROUP BY segment_hash, CONCAT( id_job, '-', password )
+                HAVING COUNT( segment_hash ) > 1
+            ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
+            ORDER BY id_segment
         ";
 
         return $sql;

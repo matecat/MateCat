@@ -4,27 +4,23 @@
     width: 100%;
     font-size: 12px;
     background: #ffffff;
-    z-index: 2;
-    padding: 0 !important;
-    margin-top: 3px;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
     .block.buttons {
         margin-top: -6px !important;
     }
     .search-inputs {
-        height: 64px;
+        height: 74px;
     }
     #exec-filter {
         float: right;
     }
     .block.right {
-        margin-top: 0;
         margin-right: 0 !important;
     }
     .btn {
         float: right;
         font-weight: bold;
-        margin: 4px 10px 3px 0;
+        margin: 4px 0px 3px 10px;
         padding: 2px 10px;
         height: 28px;
         background: #eeeeef;
@@ -41,10 +37,7 @@
             font-weight: 100;
         }
     }
-    form {
-        width: auto;
-        padding: 10px 4% 0 4% !important;
-    }
+
     input[type=button]:hover {
         border-width: 1px;
     }

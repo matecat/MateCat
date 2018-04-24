@@ -49,17 +49,14 @@ if(config.splitSegmentEnabled) {
         var segment = $(this).parents('section');
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
-
-      }).on('click', '.splitBar .buttons .done', function(e) {
+    }).on('click', '.splitBar .buttons .done', function(e) {
         var segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
     });
 
-    $("html").bind('keydown', 'ctrl+s', function(e) {
-        e.preventDefault();
-        UI.currentSegment.find('.sid .actions .split').click();
-    }).bind('keydown', 'ctrl+w', function(e) {
+    // Move it (UI.shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey])
+    $("html").on('keydown.shortcuts', null, "ctrl+s", function(e) {
         e.preventDefault();
         UI.currentSegment.find('.sid .actions .split').click();
     });

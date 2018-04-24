@@ -30,6 +30,7 @@ use Log;
 use LQA\ChunkReviewDao;
 use Monolog\Logger;
 use PHPTALWithAppend;
+use Projects_ProjectStruct;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
@@ -146,6 +147,17 @@ class Dqf extends BaseFeature {
         $revisionChildModel->setCompleted();
     }
 
+    public function filterCreationStatus($result, Projects_ProjectStruct $project) {
+        $master_project_created = $project->getMetadataValue('dqf_master_project_creation_completed_at');
+
+        if ( $master_project_created ) {
+            return $result ;
+        }
+        else {
+            return null ;
+        }
+    }
+
     public function filterCreateProjectFeatures( $features, $postInput ) {
         if ( isset( $postInput[ 'dqf' ] ) && !!$postInput[ 'dqf' ] ) {
             $validationErrors = ProjectMetadata::getValiationErrors( $postInput ) ;
@@ -154,7 +166,7 @@ class Dqf extends BaseFeature {
                 throw new ValidationError('input validation failed: ' . implode(', ', $validationErrors ) ) ;
             }
 
-            $features[] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
+            $features[ Features::DQF ] = new BasicFeatureStruct([ 'feature_code' => Features::DQF ]);
         }
         return $features ;
     }

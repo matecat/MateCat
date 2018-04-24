@@ -101,3 +101,22 @@
         box-shadow: none;
     }
 }
+
+.ui.next-repetition-group, .ui.next-repetition {
+    border: 1px solid #797979;
+    position: relative;
+    top: -6px;
+    padding: 9px 12px 8px !important;
+}
+
+.ui.next-review-repetition-group, .ui.next-review-repetition {
+    border: 1px solid #797979;
+    position: relative;
+    top: -6px;
+    padding: 9px 12px 8px !important;
+    background: #7cc576 !important;
+}
+
+.ui.next-repetition-group, .ui.next-review-repetition-group {
+    margin-right: 4px;
+}

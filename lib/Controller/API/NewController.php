@@ -90,6 +90,9 @@ class NewController extends ajaxController {
     private $tag_projection     = false;
     private $project_completion = false;
 
+    /**
+     * @var BasicFeatureStruct[]
+     */
     private $projectFeatures = [];
 
     private $metadata = [];
@@ -178,7 +181,7 @@ class NewController extends ajaxController {
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
         ];
 
-        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs );
+        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -314,7 +317,7 @@ class NewController extends ajaxController {
         }
 
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput
+                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput, $this->userIsLogged
         );
 
     }
@@ -420,6 +423,7 @@ class NewController extends ajaxController {
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
+            $conversionHandler->setUserIsLogged( $this->userIsLogged );
 
             $status = [];
 
@@ -754,6 +758,13 @@ class NewController extends ajaxController {
 
             Log::doLog( $key );
             $this->current_user = $key->getUser();
+
+            $this->userIsLogged = (
+                    !empty( $this->current_user->uid ) &&
+                    !empty( $this->current_user->email ) &&
+                    !empty( $this->current_user->first_name ) &&
+                    !empty( $this->current_user->last_name )
+            );
 
         }
 

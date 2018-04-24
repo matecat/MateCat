@@ -425,24 +425,26 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function import( $file, $key, $name = false ) {
 
-        $postFields = array(
-                'tmx'  => "@" . realpath( $file ),
-                'name' => $name
-        );
+        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {
 
-        $postFields[ 'key' ] = trim( $key );
-
-
-        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
              */
-            $options[CURLOPT_SAFE_UPLOAD] = false;
+            $options[ CURLOPT_SAFE_UPLOAD ] = true;
             $this->_setAdditionalCurlParams($options);
+            $file = new \CURLFile( realpath( $file ) );
+
+        } else{
+            $file = "@" . realpath( $file );
         }
 
-        
+        $postFields = array(
+                'tmx'  => $file,
+                'name' => $name,
+                'key'  => trim( $key )
+        );
+
         $this->call( "tmx_import_relative_url", $postFields, true );
 
         return $this->result;

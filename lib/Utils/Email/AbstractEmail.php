@@ -39,6 +39,10 @@ abstract class AbstractEmail
         $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template ;
     }
 
+    protected function _setTemplateByPath( $path ) {
+        $this->_template_path = $path ;
+    }
+
     /**
      * TODO: implement some kind of hook to improve testability
      *
@@ -103,6 +107,15 @@ abstract class AbstractEmail
 
         return $mailConf ;
 
+    }
+
+    protected function sendTo($address, $name){
+        $recipient = [ $address, $name ];
+
+        $this->doSend( $recipient, $this->title,
+                $this->_buildHTMLMessage(),
+                $this->_buildTxtMessage( $this->_buildMessageContent() )
+        );
     }
 
     protected function doSend($address, $subject, $htmlBody, $altBody) {

@@ -4,88 +4,69 @@
 $.extend(UI, {
 	bindShortcuts: function() {
 		$("body").removeClass('shortcutsDisabled');
-		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
-			e.preventDefault();
-			if ( config.isReview ) {
-				$('body.review .editor .approved').click();
-			} else {
-				if ( $('.editor .translated').length > 0 ) {
-					$('.editor .translated').click();
-				} else if ( $('.editor .guesstags').length > 0 ) {
-					$('.editor .guesstags').click();
-				}
-			}
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
-			e.preventDefault();
-			if ($('.editor .translated').length > 0) {
-				$('.editor .translated').click();
-			} else {
-				$('.editor .guesstags').click();
-			}
-            $('body.review .editor .approved').click();
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
-			e.preventDefault();
-			$('.editor .next-untranslated').click();
-			$('.editor .next-unapproved').click();
-		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
-			e.preventDefault();
-			$('.editor .next-untranslated').click();
-			$('.editor .next-unapproved').click();
-		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
-			e.preventDefault();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoNextSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.mac, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoNextSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.standard, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoPreviousSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.mac, function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.gotoPreviousSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.undoInSegment(UI.currentSegment);
-			UI.closeTagAutocompletePanel();
-		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.undoInSegment(UI.currentSegment);
-			UI.closeTagAutocompletePanel();
-		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.redoInSegment(UI.currentSegment);
-		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
-			e.preventDefault();
-			UI.redoInSegment(UI.currentSegment);
-		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+
+		$("body").on('keydown.shortcuts', null, "alt+s", function(e) {
+            UI.openShortcutsModal();
 		});
 
+
+        this.shortCutskey = "standard";
 		if (UI.isMac) {
-			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.mac, function(e) {
-				e.preventDefault();
-				UI.copySource();
-			});
-		} else {
-			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
-				e.preventDefault();
-				UI.copySource();
-			});
-		}
+            this.shortCutskey = "mac";
+        }
+        $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.copySource();
+        }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
+            UI.openLanguageResourcesPanel();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.redoInSegment(UI.currentSegment);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.undoInSegment(UI.currentSegment);
+            UI.closeTagAutocompletePanel();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.pointToOpenSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoPreviousSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoNextSegment();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
+            $('.editor .next-unapproved').click();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            if ( config.isReview ) {
+                $('body.review .editor .approved').click();
+            } else {
+                if ( $('.editor .translated').length > 0 ) {
+                    $('.editor .translated').click();
+                } else if ( $('.editor .guesstags').length > 0 ) {
+                    $('.editor .guesstags').click();
+                }
+            }
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            UI.toggleTagsMode();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
+        });
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -137,45 +118,9 @@ $.extend(UI, {
             }
         });
 
-		$("body").on('keydown', null, 'ctrl+1', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
-			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
-			}
-		}).on('keydown', null, 'ctrl+2', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
-			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
-			}
-		}).on('keydown', null, 'ctrl+3', function(e) {
-			e.preventDefault();
-			var tab;
-			var active = $('.editor .submenu li.active');
-			if(active.hasClass('tab-switcher-tm')) {
-				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-			} else if(active.hasClass('.tab-switcher-al')) {
-				tab = 'alternatives';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
-			}
-		});
-
-		$("body").bind('keydown', 'Meta+shift+l', function() {
-            UI.openLanguageResourcesPanel();
-        }).bind('keydown', 'Meta+shift+s', function(e) {
-            UI.body.toggleClass('tagmode-default-extended');
-        }).on('click', '.tagModeToggle', function(e) {
+		$("body").on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
-            UI.toggleTagsMode(this);
+            UI.toggleTagsMode();
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 		} );
 
@@ -254,7 +199,6 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-
 			UI.chooseTagAutocompleteOption($(this));
 
 		});
@@ -332,22 +276,6 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
-		}).on('click', 'a.status', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-		}).on('click', 'section:not(.readonly, .ice-locked) a.status', function() {
-			var section = $(this).closest("section");
-			var statusMenu = $("ul.statusmenu", section);
-
-			UI.createStatusMenu(statusMenu, section );
-
-			statusMenu.show();
-
-			$('html').bind("click.outOfStatusMenu", function() {
-				$("ul.statusmenu").hide();
-				$('html').unbind('click.outOfStatusMenu');
-				UI.removeStatusMenu(statusMenu);
-			});
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
@@ -395,7 +323,8 @@ $.extend(UI, {
 
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
-                    !UI.body.hasClass('side-tools-opened') ) {
+                    !UI.body.hasClass('side-tools-opened') &&
+					!$("body").hasClass("side-popup" ) ) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }
@@ -459,38 +388,26 @@ $.extend(UI, {
             } else {
                 setCursorPosition(this);
                 selectText(this);
+                UI.removeSelectedClassToTags();
                 $(this).toggleClass('selected');
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
-		}).on('dragstart', '.editor .editarea .locked', function() {
-            // To stop the drag in tags elements
-            return false;
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
-			UI.clickOnTranslatedButton(e, this);
+            e.preventDefault();
+            UI.clickOnTranslatedButton(this);
+        }).on('click', 'a.next-repetition', function(e) {
+            e.preventDefault();
+            SegmentFilter.goToNextRepetition(this, 'translated');
+		}).on('click', 'a.next-repetition-group', function(e) {
+            e.preventDefault();
+            SegmentFilter.goToNextRepetitionGroup(this, 'translated');
 		}).on('click', 'a.guesstags', function(e) {
 			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
 			// in the current segment
 			e.preventDefault();
 			UI.startSegmentTagProjection();
 			return false;
-		}).on('click', 'a.translatedStatusMenu, a.approvedStatusMenu, a.rejectedStatusMenu, a.draftStatusMenu, a.fx, a.rb', function() {
-			var segment = $(this).parents("section");
-			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
-			$("ul.statusmenu", segment).toggle();
-			return false;
-		}).on('click', 'a.translatedStatusMenu', function() {
-			UI.changeStatus(this, 'translated', 1);
-		}).on('click', 'a.approvedStatusMenu', function() {
-			UI.changeStatus(this, 'approved', 1);
-		}).on('click', 'a.rejectedStatusMenu', function() {
-			UI.changeStatus(this, 'rejected', 1);
-		}).on('click', 'a.draftStatusMenu', function() {
-			UI.changeStatus(this, 'draft', 1);
-        }).on('click', 'a.fx', function() {
-			UI.changeStatus(this, 'fixed', 1);
-        }).on('click', 'a.rb', function() {
-			UI.changeStatus(this, 'rebutted', 1);
 		}).on('click', '.editor .outersource .copy', function(e) {
 			e.preventDefault();
 			UI.copySource();
@@ -568,7 +485,14 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-    }
+    },
+
+    openShortcutsModal: function (  ) {
+        var props = {
+            shortcuts: UI.shortcuts
+        };
+        APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
+    },
 
 });
 

@@ -4,7 +4,6 @@
 UI = null;
 
 UI = {
-    showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
         1: "edit_1",
@@ -440,6 +439,7 @@ UI = {
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
+        var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";
@@ -448,7 +448,7 @@ UI = {
                 '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
         } else {
-            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+            nextUntranslated = (sameButton || filtering)? '' : '<li><a id="segment-' + this.currentSegmentId +
                 '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
                 this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
@@ -456,6 +456,22 @@ UI = {
                 '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        if (filtering) {
+            var data = SegmentFilter.getStoredState();
+            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            if (filterinRepetitions) {
+                nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
+                    '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
+                    '</li>' +
+                    '<li><a id="segment-' + this.currentSegmentId +
+                    '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
+                    '</li>';
+
+            }
         }
 
         UI.segmentButtons = nextUntranslated + currentButton;
@@ -553,24 +569,6 @@ UI = {
                                                                                 'extxif';
         return c;
     },
-    showRevisionStatuses : function() {
-        return true;
-    },
-	createStatusMenu: function(statusMenu, section) {
-        $("ul.statusmenu").empty().hide();
-
-        var segment = new UI.Segment( section );
-
-        var data = {
-            id_segment : segment.id,
-            show_revision_statuses : UI.showRevisionStatuses(),
-            show_post_revision_statuses : UI.showPostRevisionStatuses
-        };
-
-        var menu = MateCat.Templates['segment_status_menu'](data);
-
-		statusMenu.html(menu).show();
-	},
 	deActivateSegment: function(byButton, segment) {
 		UI.removeButtons(byButton, segment);
 
@@ -981,9 +979,6 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).empty();
-	},
-	removeStatusMenu: function(statusMenu) {
-		statusMenu.empty().hide();
 	},
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
@@ -1434,7 +1429,6 @@ UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		this.buttonClickStop = new Date();
 		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
@@ -1447,6 +1441,9 @@ UI = {
 	},
 	goToFirstError: function() {
         $("#point2seg").trigger('mousedown');
+        setTimeout(function (  ) {
+            $('.qa-issues-container ').first().click()
+        }, 300);
 	},
 
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
@@ -2052,7 +2049,7 @@ UI = {
      */
     getContribution : function(segment, next) {
         UI.blockButtons = false ;
-        $( segment ).addClass('loaded');
+        SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
         this.segmentQA(segment);
         var deferred = new jQuery.Deferred() ;
         return deferred.resolve();
@@ -2464,9 +2461,8 @@ UI = {
      * @param e
      * @param button
      */
-    clickOnTranslatedButton: function (e, button) {
+    clickOnTranslatedButton: function (button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
-        e.preventDefault();
         //??
         $('.test-invisible').remove();
 
@@ -2522,9 +2518,6 @@ UI = {
             // See function closeSegment (line 271) ??
             $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
         }
-
-        UI.changeStatusStop = new Date();
-        UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     },
 
     handleClickOnReadOnly : function(section) {

@@ -124,8 +124,11 @@ section  {
                                     overflow: hidden;
                                     text-overflow: ellipsis;
                                     font-weight: 100;
+                                    margin-left: 4px;
                                 }
-                                .severity_issue_name {}
+                                .severity_issue_name {
+                                    margin-left: 4px;
+                                }
                             }
                             .issue-activity-icon {
                                 width: 25%;
@@ -219,6 +222,12 @@ section  {
                             }
                         }
                     }
+                }
+            }
+            &.add-issue-segment {
+                .category, .category-selected .severity {
+                    border: 1px solid #7cc576 !important;
+                    box-shadow: inset 0 0 3px #7cc576;
                 }
             }
         }

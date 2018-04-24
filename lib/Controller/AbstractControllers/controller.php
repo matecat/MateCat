@@ -156,11 +156,11 @@ abstract class controller implements IController {
                     !empty( $loggedUser->first_name ) &&
                     !empty( $loggedUser->last_name )
             );
-            $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 
         } catch ( Exception $e ) {
             Log::doLog( 'User not logged.' );
         }
+        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 
     }
 

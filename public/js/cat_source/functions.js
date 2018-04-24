@@ -147,23 +147,26 @@ function setCursorPosition(el, pos) {
 }
 
 function removeSelectedText() {
-	if (window.getSelection || document.getSelection) {
-		var oSelection = (window.getSelection ? window : document).getSelection();
-		if (oSelection.type == 'Caret') {
-			if (oSelection.extentOffset != oSelection.baseOffset)
-				oSelection.deleteFromDocument();
-		} else if (oSelection.type == 'Range') {
-			var ss = $(oSelection.baseNode).parent()[0];
-			if ($(ss).hasClass('selected')) {
-				$(ss).remove();
-			} else {
-				oSelection.deleteFromDocument();
-				oSelection.collapseToStart();
-			}
-		}
-	} else {
-		document.selection.clear();
-	}
+    if (window.getSelection || document.getSelection) {
+        var oSelection = (window.getSelection ? window : document).getSelection();
+        if (oSelection.type == 'Caret' && (oSelection.extentOffset != oSelection.baseOffset)) {
+            oSelection.deleteFromDocument();
+        } else if (oSelection.type == 'Range') {
+            var ss = $(oSelection.baseNode).parent()[0];
+            var ssParentTag = $(oSelection.baseNode).closest('.locked.selfClosingTag')[0];
+            if ($(ss).hasClass('selected')) {
+                $(ss).remove();
+            } else if (ssParentTag) {
+                $(ssParentTag).remove();
+            } else {
+                oSelection.deleteFromDocument();
+                oSelection.collapseToStart();
+            }
+
+        }
+    } else {
+        document.selection.clear();
+    }
 }
 function stripHTML(dirtyString) {
     var container = document.createElement('div');
@@ -850,9 +853,9 @@ function isTranslated(section) {
     );
 }
 
-function template( name, data ) {
-    return $( MateCat.Templates[ name ]( data ) );
-}
+// function template( name, data ) {
+//     return $( MateCat.Templates[ name ]( data ) );
+// }
 
 function eventFromReact(e) {
     return e.target.hasAttribute('data-reactid');

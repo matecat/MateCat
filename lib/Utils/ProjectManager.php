@@ -74,6 +74,21 @@ class ProjectManager {
      */
     protected $user;
 
+    /**
+     * @var Database|IDatabase
+     */
+    protected $dbHandler;
+
+    /**
+     * ProjectManager constructor.
+     *
+     * @param ArrayObject|null $projectStructure
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     */
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
@@ -151,22 +166,9 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
-        $features = [];
-
-        if ( !empty( $this->projectStructure[ 'project_features' ] ) ) {
-            foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
-                /**
-                 * @var $feature RecursiveArrayObject
-                 */
-                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
-            }
-            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
-        }
-
-        $this->features = new FeatureSet( $features );
-
-        if ( !empty( $this->projectStructure[ 'id_customer' ] ) ) {
-            $this->features->loadAutoActivablesOnProject( $this->projectStructure[ 'id_customer' ] );
+        $this->features = new FeatureSet( $this->_getRequestedFeatures() );
+        if ( !empty( $this->projectStructure['id_customer'] ) ) {
+           $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
@@ -175,6 +177,23 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+    }
+
+    /**
+     * @return array
+     */
+    protected function _getRequestedFeatures(){
+        $features = [];
+        if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
+            foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
+                /**
+                 * @var $feature RecursiveArrayObject
+                 */
+                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
+            }
+            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+        }
+        return $features;
     }
 
     /**
@@ -265,10 +284,14 @@ class ProjectManager {
         }
 
         $dao = new Projects_MetadataDao();
-        $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $this->features->getCodes() )
-        );
+
+        $featureCodes = $this->features->getCodes();
+        if( !empty( $featureCodes ) ){
+            $dao->set( $this->projectStructure[ 'id_project' ],
+                    Projects_MetadataDao::FEATURES_KEY,
+                    implode( ',', $featureCodes )
+            );
+        }
 
         foreach ( $options as $key => $value ) {
             $dao->set(
@@ -430,17 +453,21 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION );
+            $forceXliff = $this->features->filter(
+                    'forceXLIFFConversion',
+                    INIT::$FORCE_XLIFF_CONVERSION,
+                    ( isset( $this->projectStructure[ 'session' ][ 'uid' ] ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+            );
 
             /*
                Conversion Enforce
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAConvertedFile = $this->isAConvertedFile( $fileName, $forceXliff );
+            $mustBeConverted = $this->fileMustBeConverted( $fileName, $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAConvertedFile ) {
+            if ( !$mustBeConverted ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -464,7 +491,8 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
@@ -1004,7 +1032,8 @@ class ProjectManager {
             $shortTargetLang = substr( $target, 0, 2 );
 
             //get payable rates
-            $payableRates = json_encode( Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang ) );
+            $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
+            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
 
             $password = $this->generatePassword();
 
@@ -1402,6 +1431,9 @@ class ProjectManager {
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
+        $projectStruct = $jobInfo->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
     }
@@ -1493,6 +1525,11 @@ class ProjectManager {
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $this->dbHandler->getConnection()->commit();
+
+        ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+
+        $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
 
     }
 
@@ -1963,24 +2000,26 @@ class ProjectManager {
 
                 $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
                         [
-                                'approved'      => $translation_row [ 4 ],
-                                'locked'        => 0,
-                                'match_type'    => 'ICE',
-                                'eq_word_count' => 0,
-                                'status'        => $status
+                                'approved'         => $translation_row [ 4 ],
+                                'locked'           => 0,
+                                'match_type'       => 'ICE',
+                                'eq_word_count'    => 0,
+                                'status'           => $status,
+                                'suggestion_match' => null
                         ]
                 );
 
                 //WARNING do not change the order of the keys
                 $sql_values = [
-                        'id_segment'    => $translation_row [ 0 ],
-                        'id_job'        => $jid,
-                        'segment_hash'  => $translation_row [ 3 ],
-                        'status'        => $iceLockArray[ 'status' ],
-                        'translation'   => $translation_row [ 2 ],
-                        'locked'        => $iceLockArray[ 'locked' ],
-                        'match_type'    => $iceLockArray[ 'match_type' ],
-                        'eq_word_count' => $iceLockArray[ 'eq_word_count' ],
+                        'id_segment'       => $translation_row [ 0 ],
+                        'id_job'           => $jid,
+                        'segment_hash'     => $translation_row [ 3 ],
+                        'status'           => $iceLockArray[ 'status' ],
+                        'translation'      => $translation_row [ 2 ],
+                        'locked'           => $iceLockArray[ 'locked' ],
+                        'match_type'       => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'    => $iceLockArray[ 'eq_word_count' ],
+                        'suggestion_match' => $iceLockArray[ 'suggestion_match' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2003,11 +2042,12 @@ class ProjectManager {
                         tm_analysis_status, /* DONE */
                         locked, 
                         match_type, 
-                        eq_word_count 
+                        eq_word_count,
+                        suggestion_match
                 )
                 VALUES ";
 
-            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ? )";
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ? )";
 
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
@@ -2042,7 +2082,7 @@ class ProjectManager {
 
     protected function _strip_external( $segment ) {
 
-        if ( $this->features->filter( 'skipTagLessFeature', false ) ) {
+        if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
         }
 
@@ -2063,6 +2103,10 @@ class ProjectManager {
         // of all tags openings/closures. In the second step the function checks
         // all the tags opened or closed between the first and last letter, and
         // ensures that closures and openings of those tags are not stripped out.
+
+        //TODO IMPROVEMENT:
+        // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
+        // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
 
         $segmentLength = strlen( $segment );
 
@@ -2395,18 +2439,18 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function isAConvertedFile( $fileName, $forceXliff ) {
+    private function fileMustBeConverted( $fileName, $forceXliff ) {
 
         $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
 
-        $isAConvertedFile = DetectProprietaryXliff::isAConvertedFile( $fullPath, $forceXliff );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $fullPath, $forceXliff );
 
         /**
          * Application misconfiguration.
          * upload should not be happened, but if we are here, raise an error.
          * @see upload.class.php
          * */
-        if ( -1 === $isAConvertedFile ) {
+        if ( -1 === $mustBeConverted ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -8,
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
@@ -2416,7 +2460,7 @@ class ProjectManager {
             }
         }
 
-        return $isAConvertedFile;
+        return $mustBeConverted;
 
     }
 

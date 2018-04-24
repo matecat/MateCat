@@ -12,7 +12,6 @@ $.extend(UI, {
 		this.initStart = new Date();
 		this.version = "x.x.x";
 		this.numContributionMatchesResults = 3;
-		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.editarea = '';
 		this.byButton = false;
@@ -109,7 +108,11 @@ $.extend(UI, {
 	 */
 	registerFooterTabs: function () {
         SegmentActions.registerTab('concordances', true, false);
-        SegmentActions.registerTab('matches', true, true);
+
+        if ( config.translation_matches_enabled ) {
+            SegmentActions.registerTab('matches', true, true);
+        }
+
         SegmentActions.registerTab('glossary', true, false);
         SegmentActions.registerTab('alternatives', false, false);
         // SegmentActions.registerTab('messages', false, false);

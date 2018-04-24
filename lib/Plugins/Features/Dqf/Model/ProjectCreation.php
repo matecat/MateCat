@@ -89,6 +89,11 @@ class ProjectCreation {
         $this->_submitProjectFiles();
         $this->_submitReviewSettings();
         $this->_submitSourceSegments();
+        $this->_saveCompletion();
+    }
+
+    protected function _saveCompletion() {
+        $this->project->setMetadata('dqf_master_project_creation_completed_at', time() );
     }
 
     protected function _createProject() {
@@ -122,7 +127,7 @@ class ProjectCreation {
                     'dqf_project_uuid' => $this->remoteMasterProject->dqfUUID,
                     'create_date'      => Utils::mysqlTimestamp( time() ),
                     'project_type'     => 'master',
-                    'uid'              => $this->project->getOwner()->uid
+                    'uid'              => $this->project->getOriginalOwner()->uid
             ]);
 
             DqfProjectMapDao::insertStructWithAutoIncrements( $struct ) ;
@@ -169,7 +174,7 @@ class ProjectCreation {
     }
 
     protected function _initSession() {
-        $this->user = ( new UserModel( $this->project->getOwner() ) );
+        $this->user = ( new UserModel( $this->project->getOriginalOwner() ) );
         $this->ownerSession = $this->user->getSession()->login() ;
     }
 
@@ -188,6 +193,8 @@ class ProjectCreation {
             }
             $this->_saveSegmentsList( $result->segmentList ) ;
         }
+
+        $this->project->setMetadata('dqf_source_segments_submitted', 1) ;
     }
 
     protected function _saveSegmentsList( $segmentList ) {

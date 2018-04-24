@@ -397,9 +397,6 @@ class Segment extends React.Component {
                     />
                 </div>
 
-
-                <ul className="statusmenu"/>
-
                 {/*//!-- TODO: place this element here only if it's not a split --*/}
                 <div className="segment-side-buttons">
                     <div data-mount="translation-issues-button" className="translation-issues-button" data-sid={this.props.segment.sid}>

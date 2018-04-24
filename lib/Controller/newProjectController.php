@@ -19,6 +19,8 @@ class newProjectController extends viewController {
 
     private $keyList = [];
 
+    protected  $subject_handler ;
+
     public function __construct() {
 
         parent::__construct();
@@ -92,6 +94,9 @@ class newProjectController extends viewController {
      * Even if a user is included in more teams, we'd prefer to have the team bound
      * to the given session.
      *
+     * @param     $arr
+     * @param     $col
+     * @param int $dir
      */
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
         $sort_col = [];
@@ -306,7 +311,9 @@ class newProjectController extends viewController {
         $this->template->additional_input_params_base_path = \INIT::$TEMPLATE_ROOT;
 
         //Enable tag projection at instance level
+        $this->template->show_tag_projection = true;
         $this->template->tag_projection_enabled = true;
+        $this->template->tag_projection_default = true;
 
         $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
 

@@ -106,7 +106,7 @@
             this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
 
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), translation);
+                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), UI.transformPlaceholdersAndTags(translation));
 
                 // $(this.editarea).html(decoded_translation);
             }
@@ -157,12 +157,12 @@
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
             var source = currentSegment.find('.source').data('original');
-            source = UI.transformTextForLockTags(source);
-            source = source.replace(/\n/g , config.lfPlaceholder)
-                    .replace(/\r/g, config.crPlaceholder )
-                    .replace(/\r\n/g, config.crlfPlaceholder )
-                    .replace(/\t/g, config.tabPlaceholder )
-                    .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
+            source = UI.transformPlaceholdersAndTags(source);
+            // source = source.replace(/\n/g , config.lfPlaceholder)
+            //         .replace(/\r/g, config.crPlaceholder )
+            //         .replace(/\r\n/g, config.crlfPlaceholder )
+            //         .replace(/\t/g, config.tabPlaceholder )
+            //         .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
             SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
             UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
         },
@@ -238,6 +238,13 @@
                 decoded_text = UI.transformTextForLockTags(decoded_text);
             }
             return decoded_text;
+        },
+        transformPlaceholdersAndTags: function(text) {
+            text = UI.decodePlaceholdersToText(text || '');
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
+                text = UI.transformTextForLockTags(text);
+            }
+            return text;
         },
         getPercentuageClass: function(match) {
             var percentageClass = "";

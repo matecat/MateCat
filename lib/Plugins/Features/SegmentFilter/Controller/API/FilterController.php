@@ -48,18 +48,23 @@ class FilterController extends KleinController {
 
 
         // TODO: move this into a formatter
-        $ids_as_array = [];
-        $segments_id = $this->model->getSegmentIds();
-        foreach($segments_id as $segment_id){
-            $ids_as_array[] = $segment_id['id'];
+        $ids_as_array   = [];
+        $ids_grouping   = [];
+        $reorderedGroup = [];
+        $segments_id    = $this->model->getSegmentList();
+        foreach ( $segments_id as $segment_id ) {
+            $ids_as_array[] = $segment_id[ 'id' ];
+            if ( isset( $segment_id[ 'segment_hash' ] ) ) {
+                $ids_grouping[ $segment_id[ 'segment_hash' ] ][] = $segment_id[ 'id' ];
+            }
         }
 
+        $this->response->json( [
+                'segment_ids' => $ids_as_array,
+                'count'       => count( $ids_as_array ),
+                'grouping'    => $ids_grouping
+        ] );
 
-
-        $this->response->json( array(
-            'segment_ids' => $ids_as_array,
-            'count' => count($ids_as_array)
-        ));
     }
 
     protected function afterConstruct() {

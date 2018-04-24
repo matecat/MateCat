@@ -39,8 +39,6 @@ class Mmt extends BaseFeature {
 
     const FEATURE_CODE = 'mmt';
 
-    protected $autoActivateOnProject = false;
-
     public static function loadRoutes(  Klein $klein  ){
         route( '/me', 'GET', '\Features\Mmt\Controller\RedirectMeController', 'redirect' );
     }

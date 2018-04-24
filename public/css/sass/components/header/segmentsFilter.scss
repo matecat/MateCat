@@ -1,4 +1,4 @@
-    section.muted .text {
+    section.muted {
         zoom: 0.8;
         width: 94%;
         margin: 0 3% !important;
@@ -88,20 +88,14 @@
         display: block;
         height: 48px;
     }
-
-    .advanced-filter-searchbox input[type=button], body.filtering .advanced-filter-searchbox input[type=submit] {
-        width: fit-content !important;
-        background: #dcdedf !important;
-    }
-
     .searchbox form {
-        width: 91%;
-        padding: 11px 5% 0 4% !important;
+        width: auto;
+        padding: 11px 10px 0px 15px !important;
     }
 
-    .searchbox .block {
+  /*  .searchbox .block {
         margin-top: 5px;
-    }
+    }*/
 
     .advanced-filter-searchbox {
         z-index: 1 !important;
@@ -133,10 +127,6 @@
 
     .mbc-history-balloon-outer {
         display: none;
-    }
-
-    #data-sample-checkbox {
-        margin: 0 5px !important;
     }
 
     #review-side-panel {

@@ -229,7 +229,7 @@ class SegmentFooterTabIssues extends React.Component {
         });
         let severityClass = classnames({
             "field select-severity" : true,
-            "select_severity": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
+            "category-selected": !_.isNull(this.state.categorySelected) && this.state.categorySelected !== -1
         });
         return <div className={containerClasses}>
             <div className="border-box-issue">

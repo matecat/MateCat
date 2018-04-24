@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\LoudArray;
 use DataAccess\ShapelessConcreteStruct;
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
@@ -85,8 +86,9 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param     $id_job
+     * @param     $password
+     * @param int $ttl
      *
      * @return Jobs_JobStruct
      */

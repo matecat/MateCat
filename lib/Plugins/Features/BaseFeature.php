@@ -22,6 +22,10 @@ abstract class BaseFeature implements IBaseFeature {
 
     private $logger_name ;
 
+    /**
+     * @var bool This property defines if the feature is automatically active when projects are created,
+     *           or if it requires an explicit activation from the user when the project is created.
+     */
     protected $autoActivateOnProject = true ;
 
     protected static $dependencies = [];
@@ -60,7 +64,7 @@ abstract class BaseFeature implements IBaseFeature {
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
     }
 
-    public function autoActivateOnProject() {
+    public function isAutoActivableOnProject() {
         return $this->autoActivateOnProject ;
     }
 

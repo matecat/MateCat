@@ -40,7 +40,7 @@ class FilterDefinition {
     }
 
     public function sampleSize() {
-        return $this->filter_data['sample']['size'];
+        return @$this->filter_data['sample']['size'];
     }
 
     public function getSegmentStatus() {

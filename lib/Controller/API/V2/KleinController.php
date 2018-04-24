@@ -235,13 +235,13 @@ abstract class KleinController implements IController {
         $previous_filename = \Log::$fileName ;
         \Log::$fileName = 'API.log' ;
 
-        $log_string = " " . $this->request->pathname() . " " . round( $time, 4 ) ;
+        $log_string = " " . $this->request->method() . " " . $this->request->pathname() . " " . round( $time, 4 ) ;
 
         if ( $this->api_key ) {
             $log_string .= " key:" . $this->api_key ;
         }
 
-        \Log::doLog( $log_string  );
+        \Log::doLog( $log_string . " " . json_encode( $this->params ) );
         \Log::$fileName = $previous_filename ;
     }
 

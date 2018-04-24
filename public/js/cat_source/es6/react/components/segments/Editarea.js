@@ -90,6 +90,7 @@ class Editarea extends React.Component {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
             UI.editAreaClick(event.currentTarget);
+            UI.removeSelectedClassToTags()
         }
     }
 
@@ -119,6 +120,26 @@ class Editarea extends React.Component {
     onPasteEvent(e) {
         UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
 		this.emitTrackChanges();
+    }
+    onDragEvent(e) {
+        this.draggingFromEditArea = true;
+        UI.handleDragEvent(e);
+    }
+    onDragEnd() {
+        this.draggingFromEditArea = false;
+    }
+    onDropEvent(e) {
+        if ( this.draggingFromEditArea ) {
+            removeSelectedText();
+        }
+        UI.saveInUndoStack('paste');
+        this.emitTrackChanges();
+        console.log("Drop Event");
+        this.draggingFromEditArea = false;
+        let self = this;
+        setTimeout(function (  ) {
+            $(self.editAreaRef).find('br:not([class])').remove();
+        });
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -163,6 +184,9 @@ class Editarea extends React.Component {
                     data-sid={this.props.segment.sid}
                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
                     onMouseUp={this.onMouseUpEvent}
+                    onDragStart={this.onDragEvent.bind(this)}
+                    onDrop={this.onDropEvent.bind(this)}
+                    onDragEnd={this.onDragEnd.bind(this)}
                     onMouseDown={this.onMouseDownEvent}
                     onContextMenu={this.onMouseUpEvent}
                     onBlur={this.onBlurEvent}
