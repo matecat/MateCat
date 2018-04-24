@@ -177,13 +177,11 @@ class getWarningController extends ajaxController {
 
 
     private function invokeGlobalWarningsOnFeatures() {
-        $data = array( );
 
-        $data = $this->featureSet->filter( 'filterGlobalWarnings', $data, array(
-                'chunk'       => $this->chunk
+        $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, array(
+                'chunk'       => $this->chunk,
         ) );
 
-        $this->result['data'] = $data ;
     }
 
     private function invokeLocalWarningsOnFeatures() {
