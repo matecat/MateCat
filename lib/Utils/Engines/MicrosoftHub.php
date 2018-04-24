@@ -67,31 +67,56 @@ TAG;
 
     }
 
+
+    public function get($_config){
+        $auth_curl_options = [
+                CURLOPT_POST       => true,
+                CURLOPT_POSTFIELDS => "",
+                CURLOPT_HTTPHEADER => [
+                        'Ocp-Apim-Subscription-Key: '. $this->client_id,
+                        'Accept: application/jwt',
+                        'Content-Type: application/json',
+                ]
+        ];
+
+        try {
+
+            //Check for time to live and refresh cache and token info
+            if( $this->token_endlife <= time() ){
+                $this->_authenticate($auth_curl_options);
+            }
+
+        } catch( Exception $e ){
+            return $this->result;
+        }
+
+
+        $parameters = array();
+        if ( $this->client_secret != '' && $this->client_secret != null ) {
+            $parameters[ 'Ocp-Apim-Subscription-Key' ] = $this->client_id;
+
+        }
+
+        $parameters['appId'] = 'Bearer '.$this->token;
+        $parameters['to'] = $this->_fixLangCode( $_config['target'] );
+        $parameters['from'] = $this->_fixLangCode( $_config['source'] );
+        $parameters['text'] = $this->_preserveSpecialStrings($_config['segment']);
+
+
+        $this->call( "translate_relative_url", $parameters, false );
+
+        return $this->result;
+    }
+
     protected function _decode( $rawValue ) {
 
         $all_args =  func_get_args();
 
-        $xmlObj = simplexml_load_string( $rawValue,'SimpleXMLElement', LIBXML_NOENT );
-        foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
-            if( $key === 'body' ){ //WHY IN THIS STUPID LANGUAGE EVERY STRING EQUALS TO ZERO???......
-                $error = (array)$val;
-                $decoded = array(
-                    'error' => array( "message" => $error['h1'] . ": " . $error['p'][2], 'code' => -1 )
-                );
-                break;
-            } else {
-                $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) )
-                                )
-                        )
-                );
-            }
-
+        if(isset($rawValue['error']) && !empty($rawValue['error'])){
+            return $rawValue;
         }
 
-        return $this->_composeResponseAsMatch( $all_args, $decoded );
+        return $this->_composeResponseAsMatch( $all_args );
 
     }
 

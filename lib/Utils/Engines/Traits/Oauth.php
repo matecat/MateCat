@@ -22,7 +22,7 @@ trait Oauth {
      * @return mixed
      * @throws Exception
      */
-    protected function _authenticate(){
+    protected function _authenticate($_curl_opt = array()){
 
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
@@ -34,18 +34,21 @@ trait Oauth {
                 CURLOPT_TIMEOUT    => 120
         );
 
+        $curl_opt = array_replace($curl_opt, $_curl_opt) + $_curl_opt; // trick to preserve keys (override and merge)
+
         $rawValue = $this->_call( $url, $curl_opt );
 
-        if ( is_string( $rawValue ) ){
+        if ( $this->isJson( $rawValue ) ){
             $objResponse = json_decode( $rawValue, true );
-        } else {
+        }
+        else {
             $objResponse = $rawValue;
         }
 
         if ( isset( $objResponse['error'] ) ) {
 
             //format as a normal Translate Response and send to decoder to output the data
-            $rawValue = $this->_formatAuthenticateError( $objResponse );
+            //$rawValue = $this->_formatAuthenticateError( $objResponse );
             $this->result = $this->_decode( $rawValue, $this->_auth_parameters );
 
             //no more valid token
@@ -53,9 +56,14 @@ trait Oauth {
             $this->_setTokenEndLife( -86400 );
 
         } else {
-
-            $this->token = $objResponse['access_token'];
-            $this->_setTokenEndLife( @$objResponse['expires_in'] );
+            if(is_array($objResponse)){
+                $this->token = $objResponse['access_token'];
+                $this->_setTokenEndLife( @$objResponse['expires_in'] );
+            }
+            else{
+                $this->token = $objResponse;
+                $this->_setTokenEndLife( 60 * 10 ); // microsoft token expire in 10 minutes
+            }
 
         }
 
@@ -79,6 +87,15 @@ trait Oauth {
             throw new Exception( $objResponse['error_description'] );
         }
 
+    }
+
+    private function isJson( $string ) {
+        if(is_array($string)){
+            return false;
+        }
+        json_decode( $string );
+
+        return ( json_last_error() == JSON_ERROR_NONE );
     }
 
     public function get( $_config ) {
