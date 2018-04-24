@@ -154,7 +154,8 @@ class Editarea extends React.Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
-            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation)
+            nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
+            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) )
     }
     componentDidUpdate() {
         let self = this;
@@ -167,7 +168,7 @@ class Editarea extends React.Component {
         let readonly = false;
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
-            readonly = ((this.props.readonly) || this.props.locked);
+            readonly = ((this.props.readonly) || this.props.locked || this.props.segment.muted);
         }
         let classes = this.state.editAreaClasses.slice();
         if (this.props.locked || this.props.readonly) {
