@@ -70,10 +70,10 @@ class QaCheckGlossary extends BaseFeature {
     }
 
 
-    public function filterGlobalWarnings($result, $params) {
+    public function filterGlobalWarnings( $result, $params ) {
 
         /** @var  $chunk \Chunks_ChunkStruct */
-        $chunk  = $params[ 'chunk' ];
+        $chunk = $params[ 'chunk' ];
 
         $warnings = WarningDao::findByChunkAndScope( $chunk, self::GLOSSARY_SCOPE );
 
@@ -83,7 +83,7 @@ class QaCheckGlossary extends BaseFeature {
 
         if ( count( $warnings ) > 0 ) {
             foreach ( $warnings as $element ) {
-                $segments_ids[] = $element->id_segment;
+                $segments_ids[]  = $element->id_segment;
                 $data_elements[] = [
                         'id_segment' => $element->id_segment,
                         'severity'   => $element->severity,
@@ -93,9 +93,12 @@ class QaCheckGlossary extends BaseFeature {
 
         }
 
-        $result[ 'data' ][ self::GLOSSARY_SCOPE ] = [ 'matches' => $data_elements ];
-        $result['details'][ self::GLOSSARY_SCOPE."_issues"] = $segments_ids;
-        $result['details']['totals']['ERROR'] = array_unique(array_merge($result['details']['totals']['ERROR'], $segments_ids));
+        $result[ 'data' ][ self::GLOSSARY_SCOPE ]                = [ 'matches' => $data_elements ];
+        $result[ 'details' ][ self::GLOSSARY_SCOPE . "_issues" ] = $segments_ids;
+        if ( isset( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) && is_array( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) ) {
+            $result[ 'details' ][ 'totals' ][ 'ERROR' ] = array_unique( array_merge( $result[ 'details' ][ 'totals' ][ 'ERROR' ], $segments_ids ) );
+        }
+
         return $result;
 
     }
