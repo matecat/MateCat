@@ -16,25 +16,27 @@ use Exception;
 
 trait Oauth {
 
+    protected function getAuthParameters(){
+        return array(
+                CURLOPT_POST       => true,
+                CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
+                CURLOPT_TIMEOUT    => 120
+        );
+    }
+
     /**
      * Check for time to live and refresh cache and token info
      *
      * @return mixed
      * @throws Exception
      */
-    protected function _authenticate($_curl_opt = array()){
+    protected function _authenticate(){
 
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
 
         $url = $this->oauth_url;
-        $curl_opt = array(
-                CURLOPT_POST       => true,
-                CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
-                CURLOPT_TIMEOUT    => 120
-        );
-
-        $curl_opt = array_replace($curl_opt, $_curl_opt) + $_curl_opt; // trick to preserve keys (override and merge)
+        $curl_opt = $this->getAuthParameters();
 
         $rawValue = $this->_call( $url, $curl_opt );
 
@@ -106,12 +108,6 @@ trait Oauth {
             return $this->_formatRecursionError();
         }
 
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-
-        $parameters = $this->_fillCallParameters( $_config );
-
         try {
 
             //Check for time to live and refresh cache and token info
@@ -123,13 +119,8 @@ trait Oauth {
             return $this->result;
         }
 
-        $this->_setAdditionalCurlParams( array(
-                        CURLOPT_HTTPHEADER     => array(
-                                "Authorization: Bearer " . $this->token, "Content-Type: text/plain"
-                        ),
-                        CURLOPT_SSL_VERIFYPEER => false,
-                )
-        );
+        $parameters = $this->_fillCallParameters( $_config );
+
 
         $this->call( "translate_relative_url", $parameters );
 

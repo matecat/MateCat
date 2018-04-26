@@ -41,7 +41,6 @@ TAG;
 
     protected $_auth_parameters = array(
             'client_id'     => "",
-            'client_secret' => "",
 
             /**
              * Hardcoded params, from documentation
@@ -68,49 +67,44 @@ TAG;
     }
 
 
-    public function get($_config){
-        $auth_curl_options = [
+    protected function getAuthParameters(){
+        return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => "",
                 CURLOPT_HTTPHEADER => [
-                        'Ocp-Apim-Subscription-Key: '. $this->client_id,
+                        'Ocp-Apim-Subscription-Key: '. $this->client_id, //key1
                         'Accept: application/jwt',
                         'Content-Type: application/json',
                 ]
         ];
-
-        try {
-
-            //Check for time to live and refresh cache and token info
-            if ( $this->token_endlife <= time() ) {
-                $this->_authenticate( $auth_curl_options );
-            }
-
-        } catch ( Exception $e ) {
-            return $this->result;
-        }
-
-
-        $parameters = $this->_fillCallParameters( $_config );
-        if ( $this->client_secret != '' && $this->client_secret != null ) {
-            $parameters[ 'Ocp-Apim-Subscription-Key' ] = $this->client_id;
-
-        }
-
-        $this->call( "translate_relative_url", $parameters, false );
-
-        return $this->result;
     }
 
     protected function _decode( $rawValue ) {
 
-        $all_args =  func_get_args();
+        $all_args = func_get_args();
 
-        if(isset($rawValue['error']) && !empty($rawValue['error'])){
-            return $rawValue;
+        if ( isset( $rawValue[ 'error' ] ) && !empty( $rawValue[ 'error' ] ) ) {
+            $xmlObj = simplexml_load_string( $rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT );
+
+            $decoded = [
+                    'error' => [ "message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1 ]
+            ];
+
+            return $decoded;
         }
 
-        return $this->_composeResponseAsMatch( $all_args );
+        $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT );
+        foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
+            $decoded = [
+                    'data' => [
+                            "translations" => [
+                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) ]
+                            ]
+                    ]
+            ];
+        }
+
+        return $this->_composeResponseAsMatch( $all_args, $decoded );
 
     }
 
