@@ -120,6 +120,7 @@ body.searchActive #filterSwitch {
 .numbererror,
 .qa-total-issues-counter,
 .qa-issues-counter,
+.qa-glossary-counter,
 .qa-conflicts-issues-counter,
 .qa-lexiqa-counter {
     position: absolute;

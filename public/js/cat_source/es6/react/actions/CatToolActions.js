@@ -52,6 +52,12 @@ let CatToolActions = {
             data: issues
         });
     },
+    qaComponentSetGlossaryIssues: function ( issues ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.QA_SET_GLOSSARY_ISSUES,
+            data: issues
+        });
+    },
     qaComponentsetTranslationConflitcts: function ( issues ) {
         AppDispatcher.dispatch({
             actionType: CattolConstants.QA_SET_TRANSLATION_CONFLICTS,
