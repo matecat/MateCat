@@ -85,10 +85,17 @@ TAG;
 
         if ( isset( $rawValue[ 'error' ] ) && !empty( $rawValue[ 'error' ] ) ) {
             $xmlObj = simplexml_load_string( $rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT );
+            if ( empty( $xmlObj ) ) {
+                $jsonObj = json_decode( $rawValue[ 'error' ][ 'response' ] );
+                $decoded = [
+                        'error' => [ "message" => $jsonObj->message, 'code' => -1 ]
+                ];
+            } else {
+                $decoded = [
+                        'error' => [ "message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1 ]
+                ];
+            }
 
-            $decoded = [
-                    'error' => [ "message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1 ]
-            ];
 
             return $decoded;
         }
