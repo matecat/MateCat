@@ -2695,7 +2695,7 @@ body.archived section .status-container a.status:hover {
     box-shadow: inset 0 1px 2px #ccc;
     -webkit-box-shadow: inset 0 1px 2px #ccc;
     word-break: normal;
-    font-variant-ligatures: none;
+    /*font-variant-ligatures: none;*/
 }
 
 .editor.highlighted1 .editarea {
