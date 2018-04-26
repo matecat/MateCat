@@ -82,26 +82,20 @@ TAG;
         try {
 
             //Check for time to live and refresh cache and token info
-            if( $this->token_endlife <= time() ){
-                $this->_authenticate($auth_curl_options);
+            if ( $this->token_endlife <= time() ) {
+                $this->_authenticate( $auth_curl_options );
             }
 
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
             return $this->result;
         }
 
 
-        $parameters = array();
+        $parameters = $this->_fillCallParameters( $_config );
         if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'Ocp-Apim-Subscription-Key' ] = $this->client_id;
 
         }
-
-        $parameters['appId'] = 'Bearer '.$this->token;
-        $parameters['to'] = $this->_fixLangCode( $_config['target'] );
-        $parameters['from'] = $this->_fixLangCode( $_config['source'] );
-        $parameters['text'] = $this->_preserveSpecialStrings($_config['segment']);
-
 
         $this->call( "translate_relative_url", $parameters, false );
 
@@ -182,11 +176,14 @@ TAG;
     }
 
     protected function _fillCallParameters( $_config ) {
-        $parameters = array();
-        $parameters['text']       = $_config[ 'segment' ];
-        $parameters['from']       = $_config[ 'source' ];
-        $parameters['to']         = $_config[ 'target' ];
-        $parameters['category']   = $this->engineRecord->extra_parameters[ 'category' ];
+        $parameters = [];
+
+        $parameters[ 'appId' ]    = 'Bearer ' . $this->token;
+        $parameters[ 'to' ]       = $this->_fixLangCode( $_config[ 'target' ] );
+        $parameters[ 'from' ]     = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'text' ]     = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $parameters[ 'category' ] = $this->engineRecord->extra_parameters[ 'category' ];
+
         return $parameters;
 
     }

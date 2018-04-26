@@ -124,6 +124,7 @@ class engineController extends ajaxController {
                 $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
+                $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData[ 'category' ];
                 break;
             case strtolower( Constants_Engines::MOSES ):
 
