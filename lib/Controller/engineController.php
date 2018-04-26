@@ -124,9 +124,7 @@ class engineController extends ajaxController {
                 $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData[ 'category' ];
-
                 break;
             case strtolower( Constants_Engines::MOSES ):
 
@@ -329,7 +327,7 @@ class engineController extends ajaxController {
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
-            $config[ 'target' ]  = "fr-FR";
+            $config[ 'target' ]  = "it-IT";
 
             $mt_result = $newTestCreatedMT->get( $config );
 
