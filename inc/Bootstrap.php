@@ -38,8 +38,6 @@ class Bootstrap {
         require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
-        require_once( 'vendor/onelogin/php-saml/_toolkit_loader.php');
-
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
 
         // Overridable defaults
