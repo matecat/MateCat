@@ -106,17 +106,39 @@ class SegmentsFilter extends React.Component {
     }
 
     filterSelectChanged(e) {
-        this.setState({
-            selectedStatus: e.target.value
-        });
+        let value = e.target.value;
+        if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
+            config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
+            this.setState({
+                selectedStatus: e.target.value,
+                samplingType: ""
+            });
+        } else  {
+            this.setState({
+                selectedStatus: e.target.value
+            });
+        }
+
     }
 
     moreFilterSelectChanged(e) {
-        this.setState({
-            samplingType: e.target.value,
-            samplingEnabled: false,
-            samplingSize: null
-        });
+        let value = e.target.value;
+        if ( (!config.isReview && this.state.selectedStatus === "TRANSLATED" && value === "todo") ||
+            config.isReview && this.state.selectedStatus === "APPROVED" && value === "todo" ) {
+            this.setState({
+                samplingType: e.target.value,
+                selectedStatus: "",
+                samplingEnabled: false,
+                samplingSize: null
+            });
+        } else  {
+            this.setState({
+                samplingType: e.target.value,
+                samplingEnabled: false,
+                samplingSize: null
+            });
+        }
+
     }
 
     submitEnabled() {
