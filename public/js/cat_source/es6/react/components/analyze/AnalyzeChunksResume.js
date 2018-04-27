@@ -269,7 +269,9 @@ class AnalyzeChunksResume extends React.Component {
         }
     }
 
-    openAnalysisReport() {
+    openAnalysisReport(e) {
+        e.preventDefault();
+        e.stopPropagation();
         this.props.openAnalysisReport();
         this.setState({
             openDetails: !this.state.openDetails

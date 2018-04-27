@@ -439,6 +439,7 @@ UI = {
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
+        var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";
@@ -447,7 +448,7 @@ UI = {
                 '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
         } else {
-            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+            nextUntranslated = (sameButton || filtering)? '' : '<li><a id="segment-' + this.currentSegmentId +
                 '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
                 this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
@@ -455,6 +456,22 @@ UI = {
                 '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        if (filtering) {
+            var data = SegmentFilter.getStoredState();
+            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            if (filterinRepetitions) {
+                nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
+                    '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
+                    '</li>' +
+                    '<li><a id="segment-' + this.currentSegmentId +
+                    '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
+                    '</li>';
+
+            }
         }
 
         UI.segmentButtons = nextUntranslated + currentButton;
@@ -1412,7 +1429,6 @@ UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		this.buttonClickStop = new Date();
 		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
@@ -1576,15 +1592,16 @@ UI = {
         });
 	},
     updateQAPanel: function () {
-        if ( UI.globalWarnings.tag_issues ) {
+        if ( UI.globalWarnings.tag_issues && UI.globalWarnings.tag_issues.length > 0 ) {
             CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
         }
 
-        var mismatches = [];
-        if ( UI.globalWarnings.translation_mismatches ) {
-            mismatches = UI.globalWarnings.translation_mismatches;
+        if ( UI.globalWarnings.glossary_issues && UI.globalWarnings.glossary_issues.length > 0 ) {
+            CatToolActions.qaComponentSetGlossaryIssues(UI.globalWarnings.glossary_issues)
         }
-        CatToolActions.qaComponentsetTranslationConflitcts(mismatches);
+        if ( UI.globalWarnings.translation_mismatches && UI.globalWarnings.translation_mismatches.length > 0 ) {
+            CatToolActions.qaComponentsetTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+        }
     },
 	displayMessage: function(messages) {
         var self = this;
@@ -2445,9 +2462,8 @@ UI = {
      * @param e
      * @param button
      */
-    clickOnTranslatedButton: function (e, button) {
+    clickOnTranslatedButton: function (button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
-        e.preventDefault();
         //??
         $('.test-invisible').remove();
 
@@ -2503,9 +2519,6 @@ UI = {
             // See function closeSegment (line 271) ??
             $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
         }
-
-        UI.changeStatusStop = new Date();
-        UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     },
 
     handleClickOnReadOnly : function(section) {

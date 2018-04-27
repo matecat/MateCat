@@ -12,6 +12,7 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.11.1",
     "babelify": "^7.2.0",
+    "browserify": "^16.2.0",
     "classnames": "^2.2.3",
     "envify": "^3.4.0",
     "flux": "^2.1.1",

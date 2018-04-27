@@ -3,9 +3,9 @@
  * React Component for the editarea.
 
  */
-var React = require('react');
-var CatToolConstants = require('../../constants/CatToolConstants');
-var CatToolStore = require('../../stores/CatToolStore');
+let React = require('react');
+let CatToolConstants = require('../../constants/CatToolConstants');
+let CatToolStore = require('../../stores/CatToolStore');
 class QAComponent extends React.Component {
 
     constructor(props) {
@@ -16,6 +16,8 @@ class QAComponent extends React.Component {
             total_issues_selected: false,
             tag_issues: [],
             tag_issues_selected: false,
+            glossary_issues: [],
+            glossary_issues_selected: false,
             translation_conflicts: [],
             translation_conflicts_selected: false,
             lxq_issues: [],
@@ -27,6 +29,7 @@ class QAComponent extends React.Component {
         this.createTotalIssues = this.createTotalIssues.bind(this);
         this.updatePanel = this.updatePanel.bind(this);
         this.setTagIssues = this.setTagIssues.bind(this);
+        this.setGlossaryIssues = this.setGlossaryIssues.bind(this);
         this.setTranslationConflitcts = this.setTranslationConflitcts.bind(this);
         this.setLxqIssues = this.setLxqIssues.bind(this);
     }
@@ -36,9 +39,9 @@ class QAComponent extends React.Component {
     }
 
     getTotalIssues() {
-        var total = 0;
+        let total = 0;
         //Show the total only if more than 1 arrays exist
-        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (item) {
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts, this.state.glossary_issues], function (item) {
             if (item.length) {
                 total++;
             }
@@ -46,7 +49,7 @@ class QAComponent extends React.Component {
         if (this.state.total_issues.length) {
             return this.state.total_issues.length;
         } else {
-            return this.state.lxq_issues.length + this.state.tag_issues.length + this.state.translation_conflicts;
+            return this.state.lxq_issues.length + this.state.tag_issues.length + this.state.translation_conflicts + this.state.glossary_issues;
         }
     }
 
@@ -66,7 +69,7 @@ class QAComponent extends React.Component {
     }
 
     setTagIssues(issues) {
-        var total = this.createTotalIssues(issues, this.state.lxq_issues, this.state.translation_conflicts);
+        let total = this.createTotalIssues(issues, this.state.glossary_issues, this.state.lxq_issues, this.state.translation_conflicts);
         this.setState({
             tag_issues: issues,
             total_issues: total
@@ -75,7 +78,7 @@ class QAComponent extends React.Component {
     }
 
     setTranslationConflitcts(issues) {
-        var total = this.createTotalIssues(this.state.tag_issues, this.state.lxq_issues, issues);
+        let total = this.createTotalIssues(this.state.tag_issues, this.state.glossary_issues, this.state.lxq_issues, issues);
         this.setState({
             translation_conflicts: issues,
             total_issues: total
@@ -84,9 +87,17 @@ class QAComponent extends React.Component {
     }
 
     setLxqIssues(issues) {
-        var total = this.createTotalIssues(this.state.tag_issues, issues, this.state.translation_conflicts);
+        let total = this.createTotalIssues(this.state.tag_issues, this.state.glossary_issues, issues, this.state.translation_conflicts);
         this.setState({
             lxq_issues: issues,
+            total_issues: total
+        });
+        this.updatePanel();
+    }
+    setGlossaryIssues(issues) {
+        let total = this.createTotalIssues(this.state.tag_issues, issues, this.state.lxq_issues, this.state.translation_conflicts);
+        this.setState({
+            glossary_issues: issues,
             total_issues: total
         });
         this.updatePanel();
@@ -107,6 +118,7 @@ class QAComponent extends React.Component {
                 this.setState({
                     total_issues_selected: false,
                     tag_issues_selected: true,
+                    glossary_issues_selected: false,
                     lxq_selected: false,
                     translation_conflicts_selected: false,
                     current_counter: 1,
@@ -118,6 +130,19 @@ class QAComponent extends React.Component {
                 this.setState({
                     total_issues_selected: true,
                     tag_issues_selected: false,
+                    glossary_issues_selected: false,
+                    lxq_selected: false,
+                    translation_conflicts_selected: false,
+                    current_counter: 1,
+                    selected_box: type,
+                });
+                this.scrollToSegment(this.state.total_issues[this.state.current_counter - 1]);
+                break;
+            case 'glossary_issues':
+                this.setState({
+                    total_issues_selected: false,
+                    tag_issues_selected: false,
+                    glossary_issues_selected: true,
                     lxq_selected: false,
                     translation_conflicts_selected: false,
                     current_counter: 1,
@@ -130,6 +155,7 @@ class QAComponent extends React.Component {
                     total_issues_selected: false,
                     lxq_selected: true,
                     tag_issues_selected: false,
+                    glossary_issues_selected: false,
                     translation_conflicts_selected: false,
                     current_counter: 1,
                     selected_box: type
@@ -141,6 +167,7 @@ class QAComponent extends React.Component {
                     total_issues_selected: false,
                     lxq_selected: false,
                     tag_issues_selected: false,
+                    glossary_issues_selected: false,
                     translation_conflicts_selected: true,
                     current_counter: 1,
                     selected_box: type
@@ -157,6 +184,8 @@ class QAComponent extends React.Component {
                 return this.state.total_issues;
             case 'tag_issues':
                 return this.state.tag_issues;
+            case 'glossary_issues':
+                return this.state.glossary_issues;
             case 'lxq':
                 return this.state.lxq_issues;
             case 'conflicts':
@@ -168,10 +197,10 @@ class QAComponent extends React.Component {
 
     moveUp() {
         if ( this.state.selected_box === '' ) return;
-        var current_array = this.getCurrentArray();
+        let current_array = this.getCurrentArray();
 
-        var counter = this.state.current_counter;
-        var newCounter;
+        let counter = this.state.current_counter;
+        let newCounter;
         if ( counter  === 1) {
             newCounter = current_array.length;
         }  else {
@@ -186,10 +215,10 @@ class QAComponent extends React.Component {
 
     moveDown() {
         if ( this.state.selected_box === '' ) return;
-        var current_array = this.getCurrentArray();
+        let current_array = this.getCurrentArray();
 
-        var counter = this.state.current_counter;
-        var newCounter;
+        let counter = this.state.current_counter;
+        let newCounter;
         if ( counter  >= current_array.length) {
             newCounter = 1;
 
@@ -203,7 +232,7 @@ class QAComponent extends React.Component {
     }
 
     updateIcon() {
-        var totalIssues = this.getTotalIssues();
+        let totalIssues = this.getTotalIssues();
         if ( totalIssues > 0 ) {
             $('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(totalIssues);
         } else {
@@ -212,9 +241,9 @@ class QAComponent extends React.Component {
     }
 
     checkShowTotalIssues() {
-        var total = 0;
+        let total = 0;
         //Show the total only if more than 1 arrays exist
-        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (index, item) {
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.glossary_issues, this.state.translation_conflicts], function (index, item) {
             if (item && item.length) {
                 total++;
             }
@@ -227,27 +256,30 @@ class QAComponent extends React.Component {
     }
     componentDidMount() {
         CatToolStore.addListener(CatToolConstants.QA_SET_TAG_ISSUES, this.setTagIssues);
+        CatToolStore.addListener(CatToolConstants.QA_SET_GLOSSARY_ISSUES, this.setGlossaryIssues);
         CatToolStore.addListener(CatToolConstants.QA_SET_TRANSLATION_CONFLICTS, this.setTranslationConflitcts);
         CatToolStore.addListener(CatToolConstants.QA_LEXIQA_ISSUES, this.setLxqIssues);
     }
 
     componentWillUnmount() {
         CatToolStore.removeListener(CatToolConstants.QA_SET_TAG_ISSUES, this.setTagIssues);
+        CatToolStore.removeListener(CatToolConstants.QA_SET_GLOSSARY_ISSUES, this.setGlossaryIssues);
         CatToolStore.removeListener(CatToolConstants.QA_SET_TRANSLATION_CONFLICTS, this.setTranslationConflitcts);
         CatToolStore.removeListener(CatToolConstants.QA_LEXIQA_ISSUES, this.setLxqIssues);
     }
 
     render() {
-        var tag_issues_html = '';
-        var translation_conflicts_html = '';
-        var total_issues_html = '';
-        var counter;
-        var lxq_container = '';
-        var lxq_options = '';
-        var buttonArrowsClass = 'qa-arrows-disabled';
-        var counterLabel = 'Segment';
-        var current_array = this.getCurrentArray();
-        if ( (this.state.lxq_selected || this.state.tag_issues_selected || this.state.total_issues_selected || this.state.translation_conflicts_selected) && current_array.length > 1 ) {
+        let tag_issues_html = '';
+        let glossary_issues_html = '';
+        let translation_conflicts_html = '';
+        let total_issues_html = '';
+        let counter;
+        let lxq_container = '';
+        let lxq_options = '';
+        let buttonArrowsClass = 'qa-arrows-disabled';
+        let counterLabel = 'Segment';
+        let current_array = this.getCurrentArray();
+        if ( (this.state.lxq_selected || this.state.tag_issues_selected || this.state.glossary_issues_selected || this.state.total_issues_selected || this.state.translation_conflicts_selected) && current_array.length > 1 ) {
             buttonArrowsClass = 'qa-arrows-enabled';
             counterLabel = 'Segments';
         }
@@ -287,6 +319,18 @@ class QAComponent extends React.Component {
                 Tag issues
             </div>;
         }
+        if ( this.state.glossary_issues.length > 0 ) {
+            let selected = '';
+            if ( this.state.glossary_issues_selected ) {
+                counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.glossary_issues.length + ' ' + counterLabel}</div>;
+                selected = 'selected';
+            }
+            glossary_issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'glossary_issues')}>
+                <span className="icon-qa-glossary"/>
+                <span className="qa-glossary-counter">{this.state.glossary_issues.length}</span>
+                Glossary issues
+            </div>;
+        }
         if ( this.state.lxq_issues.length > 0 ) {
             let selected = '';
             if ( this.state.lxq_selected ) {
@@ -317,6 +361,7 @@ class QAComponent extends React.Component {
                             {total_issues_html}
                             {tag_issues_html}
                             {translation_conflicts_html}
+                            {glossary_issues_html}
                             {lxq_container}
                         </div>
                         {lxq_options}

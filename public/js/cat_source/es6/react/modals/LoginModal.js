@@ -24,7 +24,7 @@ class LoginModal extends React.Component {
 
     // TODO: find a way to abstract this into the plugin
     otherServiceLogin() {
-        let url = config.pluggable.paypal.github_auth_url ;
+        let url = config.pluggable.other_service_auth_url ;
         let self = this;
         this.checkRedeemProject();
         let newWindow = window.open( url, 'name', 'height=900,width=900' );
@@ -141,14 +141,51 @@ class LoginModal extends React.Component {
         $('#modal').trigger('openforgotpassword');
     }
 
-    render() {
-        let generalErrorHtml = '';
-        let buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
-        if (this.state.generalError.length) {
-            generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
+    googleLoginButton() {
+        if ( ! ( config.pluggable && config.pluggable.auth_disable_google ) ) {
+            return <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/> ;
         }
+    }
 
-        let loaderClass = (this.state.requestRunning) ? 'show' : '';
+    otherServiceLoginButton() {
+        if ( config.pluggable && config.pluggable.other_service_auth_url ) {
+            return <a className="btn-confirm-medium" onClick={this.otherServiceLogin.bind(this)}>{config.pluggable.other_service_button_label}</a> ;
+        }
+    }
+
+    loginFormContainerCode() {
+        if ( ! ( config.pluggable && config.pluggable.auth_disable_email ) ) {
+
+            let generalErrorHtml = '';
+            let buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
+            if (this.state.generalError.length) {
+                generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
+            }
+
+            let loaderClass = (this.state.requestRunning) ? 'show' : '';
+            return <div className="login-form-container">
+                <div className="form-divider">
+                    <div className="divider-line"></div>
+                    <span>OR</span>
+                    <div className="divider-line"></div>
+                </div>
+                <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
+                           placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
+                <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
+                           placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
+                <a className={"login-button btn-confirm-medium sing-in " + buttonSignInClass }
+                   onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
+                   onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
+                {generalErrorHtml}
+                <br/>
+                <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>
+            </div> ;
+        }
+    }
+
+    render() {
 
         let htmlMessage = <div className="login-container-right">
             <h2>Sign up now to:</h2>
@@ -174,29 +211,13 @@ class LoginModal extends React.Component {
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
-                        {/*<a className="btn-confirm-medium" onClick={this.otherServiceLogin.bind(this)}>Login with another service</a>*/}
 
-                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
+                        {this.otherServiceLoginButton()}
 
-                        <div className="login-form-container">
-                            <div className="form-divider">
-                                <div className="divider-line"></div>
-                                <span>OR</span>
-                                <div className="divider-line"></div>
-                            </div>
-                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
-                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                                       placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
-                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                            <a className={"login-button btn-confirm-medium sing-in " + buttonSignInClass }
-                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
-                            {generalErrorHtml}
-                            <br/>
-                            <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>
-                        </div>
+                        {this.googleLoginButton()}
+
+                        {this.loginFormContainerCode()}
+
                     </div>
                 </div>;
     }

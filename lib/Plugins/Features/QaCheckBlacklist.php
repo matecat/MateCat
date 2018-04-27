@@ -84,28 +84,29 @@ class QaCheckBlacklist extends BaseFeature {
 
     }
 
-    public function filterGlobalWarnings($data, $params) {
+    public function filterGlobalWarnings( $result, $params ) {
         /**
          * @var $chunk \Chunks_ChunkStruct
          */
-        $chunk =$params['chunk'] ;
+        $chunk = $params[ 'chunk' ];
 
         $warnings = WarningDao::findByChunkAndScope( $chunk, self::BLACKLIST_SCOPE );
 
-        $data_elements = array() ;
+        $data_elements = [];
 
-        if ( count($warnings) > 0 ) {
-            $data_elements = array_map(function(WarningStruct $element) {
-                return array(
+        if ( count( $warnings ) > 0 ) {
+            $data_elements = array_map( function ( WarningStruct $element ) {
+                return [
                         'id_segment' => $element->id_segment,
-                        'severity' => $element->severity,
-                        'data' => json_decode( $element->data, TRUE )
-                );
-            }, $warnings);
+                        'severity'   => $element->severity,
+                        'data'       => json_decode( $element->data, true )
+                ];
+            }, $warnings );
         }
 
-        $data[self::BLACKLIST_SCOPE] = array('matches' => $data_elements ) ;
-        return $data ;
+        $result[ 'data' ][ self::BLACKLIST_SCOPE ] = [ 'matches' => $data_elements ];
+
+        return $result;
 
     }
 
