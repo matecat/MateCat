@@ -90,6 +90,7 @@
 }
 
 .icon-qa-issues,
+.icon-qa-glossary,
 .icon-conflicts,
 .icon-qa-total-issues,
 .icon-qa-lexiqa {
@@ -106,6 +107,11 @@
 
 .icon-qa-total-issues:before {
   content: "\e903";
+  font-size: 25px;
+}
+
+.icon-qa-glossary:before {
+  content: "\ea4f";
   font-size: 25px;
 }
 
@@ -134,6 +140,11 @@
 .qa-issues-counter {
   top: 10px;
   left: 25px;
+}
+
+.qa-glossary-counter {
+  top: 10px;
+  left: 10px;
 }
 
 .qa-conflicts-issues-counter {

@@ -124,18 +124,6 @@ class Project {
                 'due_date'             => Utils::api_timestamp( $data->due_date )
         ];
 
-        /**
-         * @var $projectData ShapelessConcreteStruct[]
-         */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $data->id );
-
-        $formatted = new ProjectUrls( $projectData );
-
-        /** @var $formatted ProjectUrls */
-        $formatted = $data->getFeatures()->filter( 'projectUrls', $formatted );
-
-        $projectOutputFields[ 'urls' ] = $formatted->render();
-
         return $projectOutputFields;
 
     }

@@ -70,27 +70,36 @@ class QaCheckGlossary extends BaseFeature {
     }
 
 
-    public function filterGlobalWarnings($data, $params) {
+    public function filterGlobalWarnings( $result, $params ) {
 
         /** @var  $chunk \Chunks_ChunkStruct */
-        $chunk = $params['chunk'];
+        $chunk = $params[ 'chunk' ];
 
         $warnings = WarningDao::findByChunkAndScope( $chunk, self::GLOSSARY_SCOPE );
 
-        $data_elements = array() ;
+        $data_elements = [];
 
-        if ( count($warnings) > 0 ) {
-            $data_elements = array_map(function(WarningStruct $element) {
-                return array(
+        $segments_ids = [];
+
+        if ( count( $warnings ) > 0 ) {
+            foreach ( $warnings as $element ) {
+                $segments_ids[]  = $element->id_segment;
+                $data_elements[] = [
                         'id_segment' => $element->id_segment,
-                        'severity' => $element->severity,
-                        'data' => json_decode( $element->data, TRUE )
-                );
-            }, $warnings);
+                        'severity'   => $element->severity,
+                        'data'       => json_decode( $element->data, true )
+                ];
+            }
+
         }
 
-        $data[self::GLOSSARY_SCOPE] = array('matches' => $data_elements ) ;
-        return $data ;
+        $result[ 'data' ][ self::GLOSSARY_SCOPE ]                = [ 'matches' => $data_elements ];
+        $result[ 'details' ][ self::GLOSSARY_SCOPE . "_issues" ] = $segments_ids;
+        if ( isset( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) && is_array( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) ) {
+            $result[ 'details' ][ 'totals' ][ 'ERROR' ] = array_unique( array_merge( $result[ 'details' ][ 'totals' ][ 'ERROR' ], $segments_ids ) );
+        }
+
+        return $result;
 
     }
 }
