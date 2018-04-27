@@ -38,6 +38,8 @@ class Bootstrap {
         require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
+        require_once( 'vendor/onelogin/php-saml/_toolkit_loader.php');
+
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
 
         // Overridable defaults
@@ -47,6 +49,7 @@ class Bootstrap {
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
+
 
         //get the environment configuration
         self::initConfig();
