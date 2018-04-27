@@ -392,6 +392,39 @@ var spec = {
                 }
             }
         },
+        "/translation/{id_job}/{password}": {
+            "get": {
+                "tags": [
+                    "Job"
+                ],
+                "summary": "Download Translation",
+                "description": "Download the Job translation",
+                "parameters": [
+                    {
+                        "name": "id_job",
+                        "in": "path",
+                        "description": "The id of the job",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "path",
+                        "description": "The password of the job",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job translation"
+                    },
+                    "default": {
+                        "description": "Unexpected error"
+                    }
+                }
+            }
+        },
         "/api/v1/jobs/{id_job}/{password}/stats": {
             "get": {
                 "tags": [
@@ -2016,6 +2049,39 @@ var spec = {
                         "schema": {
                             "$ref": "#/definitions/Options"
                         }
+                    },
+                    "default": {
+                        "description": "Unexpected error"
+                    }
+                }
+            }
+        },
+        "/TMX/id_job/password": {
+            "post": {
+                "tags": [
+                    "Job"
+                ],
+                "summary": "Download Job TMX",
+                "description": "Download the Job TMX ",
+                "parameters": [
+                    {
+                        "name": "id_job",
+                        "in": "path",
+                        "description": "The id of the job",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "path",
+                        "description": "The password of the job (Translate password)",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job TMX",
                     },
                     "default": {
                         "description": "Unexpected error"
