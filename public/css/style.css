@@ -2866,6 +2866,7 @@ body.rtl-target .editor .editarea span {
 
 .suggestion-item.graysmall .b {
     float: right;
+    padding-right: 30px;
 }
 
 .message li {
@@ -3946,6 +3947,10 @@ body.rtl-target .footer .sugg-target {
     direction: rtl !important;
     text-align: right !important;
 }
+body.rtl-target section.ice-locked .target {
+    text-align: right;
+}
+
 
 body.archived ul.buttons,
 body.archived ul.header-menu,
