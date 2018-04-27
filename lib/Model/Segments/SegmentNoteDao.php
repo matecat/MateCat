@@ -131,7 +131,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT id_segment, json FROM segment_notes WHERE id_segment BETWEEN :start AND :stop AND note = '' " );
+        $stmt = $conn->prepare( "SELECT id_segment, json FROM segment_notes WHERE id_segment BETWEEN :start AND :stop AND note IS NULL " );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject(
                 $stmt, new Segments_SegmentNoteStruct(),
