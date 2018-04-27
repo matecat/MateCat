@@ -12,6 +12,7 @@
         "google/apiclient": "1.1.7",
         "defuse/php-encryption": "2.0.*",
         "phpmailer/phpmailer": "~5.2",
-        "symfony/filesystem": "^2.8.9"
+        "symfony/filesystem": "^2.8.9",
+        "onelogin/php-saml": "^2.13"
     }
 }
