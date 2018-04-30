@@ -178,8 +178,6 @@ a.mbc-new-message-link:hover {
 
 .mbc-comment-input {
   border-radius: 2px;
-  float: left;
-  max-width: 186px;
   outline-width: 0;
   width: 100%;
 }
@@ -623,14 +621,12 @@ article.mbc-commenting-opened {
  ******
  */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
-  float: right;
-  margin-right: -245px;
   position: absolute;
-  right: 0;
   text-align: left;
-  width: 210px;
   z-index: 10001;
   display: block;
+  width: 20%;
+  left: 102%;
 }
 
 .side-tools-opened article.mbc-commenting-opened .mbc-comment-balloon-outer {
