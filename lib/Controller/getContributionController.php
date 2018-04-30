@@ -363,7 +363,7 @@ class getContributionController extends ajaxController {
                 );
             }
 
-            $match = $this->_iceMatchRewrite( $match );
+            $match = $this->_matchRewrite( $match );
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
                 $match[ 'sentence_confidence' ] = round( $match[ 'sentence_confidence' ], 0 ) . "%";
@@ -383,8 +383,9 @@ class getContributionController extends ajaxController {
         $this->result[ 'data' ][ 'matches' ] = $matches;
     }
 
-    protected function _iceMatchRewrite( $match ){
+    protected function _matchRewrite( $match ){
 
+        //Rewrite ICE matches as 101%
         if( $match[ 'match' ] == '100%' ){
             list( $lang, ) = explode( '-', $this->jobData[ 'target' ] );
             if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ){
@@ -393,7 +394,8 @@ class getContributionController extends ajaxController {
             //else do not rewrite the match value
         }
 
-        $match = $this->featureSet->filter( 'iceMatchRewriteForContribution', $match );
+        //Allow the plugins to customize matches
+        $match = $this->featureSet->filter( 'matchRewriteForContribution', $match );
 
         return $match;
 

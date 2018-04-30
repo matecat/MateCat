@@ -442,6 +442,16 @@
     ,
         {
             "localized":[{
+                "en":"English Australia"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-AU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Esperanto"
             }],
             "isocode":"eo",
