@@ -59,13 +59,14 @@ class Engines_Results_MyMemory_Matches {
             throw new Exception( "Invalid arg 1 " . __CLASS__ . " constructor" );
         }
 
-        if ( count( $args ) == 5 and !is_array( $args[ 0 ] ) ) {
+        if ( count( $args ) >= 5 and !is_array( $args[ 0 ] ) ) {
             $match[ 'segment' ]          = CatUtils::rawxliff2view( $args[ 0 ] );
             $match[ 'raw_segment' ]      = $args[ 0 ];
             $match[ 'translation' ]      = CatUtils::rawxliff2view( $args[ 1 ] );
             $match[ 'raw_translation' ]  = $args[ 1 ];
             $match[ 'match' ]            = $args[ 2 ];
             $match[ 'created-by' ]       = $args[ 3 ];
+            $match[ 'create-date' ]      = $args[ 4 ];
             $match[ 'last-update-date' ] = $args[ 4 ];
             $match[ 'prop' ]             = ( isset( $args[ 5 ] ) ? $args[ 5 ] : [] );
         }
