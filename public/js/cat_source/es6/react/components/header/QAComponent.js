@@ -50,9 +50,7 @@ class QAComponent extends React.Component {
 
     scrollToSegment(segmentId) {
         let $segment = $('#segment-' + segmentId);
-        if ($segment.hasClass('ice-locked')) {
-            UI.unlockIceSegment($segment)
-        }
+
         if ( segmentId) {
             if ( $segment.length ) {
                 window.location.hash = segmentId;
@@ -60,6 +58,9 @@ class QAComponent extends React.Component {
                 window.location.hash = segmentId + '-1';
             }
             UI.scrollSegment($segment, segmentId);
+            if ($segment.hasClass('ice-locked')) {
+                UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
+            }
         }
     }
 
