@@ -9,7 +9,6 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive;
 use Jobs\SplitQueue;
 use Teams\TeamStruct;
@@ -1597,6 +1596,8 @@ class ProjectManager {
                     $show_in_cattool = 0;
                 } else {
 
+                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ] );
+
                     $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
 
                     // If the XLIFF is already segmented (has <seg-source>)
@@ -1690,7 +1691,8 @@ class ProjectManager {
                             $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                    } else {
+                    }
+                    else {
 
                         $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
@@ -1754,6 +1756,7 @@ class ProjectManager {
                         $this->files_word_count += $wordCount;
 
                     }
+
                 }
 
                 //increment the counter for not empty segments
@@ -1974,6 +1977,57 @@ class ProjectManager {
             }
 
         }
+
+    }
+
+    /**
+     * @param array $xliff_trans_unit
+     *
+     * @param       $xliff_file_attributes
+     *
+     * @throws Exception
+     */
+    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes ){
+
+        //Source and target language are mandatory, moreover do not set matches on public area
+        if (
+                empty( $xliff_file_attributes[ 'source-language' ] ) ||
+                empty( $xliff_file_attributes[ 'target-language' ] ) ||
+                count( $this->projectStructure[ 'private_tm_key' ] ) == 0
+        ) {
+            return;
+        }
+
+        // set the contribution for every key in the job belonging to the user
+        $engine = Engine::getInstance( 1 );
+        $config = $engine->getConfigStruct();
+
+        if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {
+
+            foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $tm_info ) {
+                $config[ 'id_user' ][] = $tm_info['key'];
+            }
+
+        }
+
+        $config[ 'source' ]         = $xliff_file_attributes[ 'source-language' ];
+        $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
+        $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
+        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
+        $config[ 'context_after' ]  = null;
+        $config[ 'context_before' ] = null;
+
+        if( ! empty( $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ] ) ){
+
+            //get the Props
+            $config[ 'prop' ] = json_encode( [
+                    "match-quality" => $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ]
+            ] );
+
+        }
+
+        $engine->set( $config );
 
     }
 
@@ -2477,7 +2531,10 @@ class ProjectManager {
      *
      * @param $firstTMXFileName
      *
-     * @return array
+     * @return bool
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
      */
     private function setPrivateTMKeys( $firstTMXFileName ) {
 
@@ -2605,6 +2662,7 @@ class ProjectManager {
      *
      * @return bool|mixed
      * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {

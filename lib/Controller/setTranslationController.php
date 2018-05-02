@@ -854,7 +854,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct = $this->featureSet->filter(
                 'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
 
-        /** TODO Remove */
+        /** TODO Remove , is only for debug purposes */
         try {
             $element            = new \TaskRunner\Commons\QueueElement();
             $element->params    = $contributionStruct;
