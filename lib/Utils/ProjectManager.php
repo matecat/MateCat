@@ -1993,7 +1993,8 @@ class ProjectManager {
         if (
                 empty( $xliff_file_attributes[ 'source-language' ] ) ||
                 empty( $xliff_file_attributes[ 'target-language' ] ) ||
-                count( $this->projectStructure[ 'private_tm_key' ] ) == 0
+                count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
+                $this->features->filter( 'manageAlternativeTranslations', false )
         ) {
             return;
         }
