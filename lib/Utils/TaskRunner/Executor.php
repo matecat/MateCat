@@ -301,7 +301,6 @@ class Executor implements SplObserver {
      *
      * @return array[ \StompFrame, QueueElement ]
      * @throws FrameException
-     * @throws WorkerClassException
      */
     protected function _readAMQFrame() {
 
@@ -337,6 +336,7 @@ class Executor implements SplObserver {
         } catch ( Exception $e ) {
 //            self::_TimeStampMsg( $e->getMessage() );
 //            self::_TimeStampMsg( $e->getTraceAsString() );
+            $this->_logMsg( $e->getMessage() );
             throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
             /* jump the ack */
         }
@@ -362,12 +362,14 @@ class Executor implements SplObserver {
         die();
 
     }
-    
+
     /**
      * Check on redis Set for this process ID
+     *
      * @param $pid
      *
      * @return int
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _myProcessExists( $pid ) {
 
@@ -403,6 +405,7 @@ class Executor implements SplObserver {
 // $argv[ 1 ] = '{"queue_name":"dqf","pid_set_name":"ch_pid_dqf","max_executors":"1","redis_key":"dqf_list","loggerName":"dqf.log"}';
 //$argv[ 1 ] = '{"queue_length":0,"queue_name":"set_contribution_mt","pid_set_name":"ch_pid_set_contribution_mt","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"set_contribution_mt.log"}';
 //$argv[ 1 ] = '{"queue_name":"jobs","pid_set_name":"ch_pid_jobs","max_executors":"1","redis_key":"jobs_list","loggerName":"jobs.log"}';
+//$argv[ 1 ] = '{"queue_name":"qa_checks","pid_set_name":"qa_checks_set","max_executors":"1","redis_key":"qa_checks_key","loggerName":"qa_checks.log"}';
 
 /** @var array $argv */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

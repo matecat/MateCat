@@ -18,4 +18,5 @@ class Constants {
 
     const PUBLIC_TM  = "Public TM";
     const NO_DESCRIPTION_TM = "No description";
+
 }

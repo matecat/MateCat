@@ -588,7 +588,8 @@ class QA {
      */
     public static function JSONtoExceptionList( $jsonString ){
         $that = new static( null, null );
-        array_walk( json_decode( $jsonString, true ), function( $errArray, $key ) use ( $that ){
+        $jsonValue = json_decode( $jsonString, true );
+        array_walk( $jsonValue, function( $errArray, $key ) use ( $that ){
             $that->_addError( $errArray[ 'outcome' ] );
         });
         return $that->exceptionList;
@@ -1060,9 +1061,9 @@ class QA {
 //        Log::doLog( $this->source_seg );
 //        Log::doLog( $this->target_seg );
 
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
 //        Log::doLog( $malformedXmlSrcStruct );
@@ -1106,8 +1107,8 @@ class QA {
         }
 
         $totalResult = array(
-                'source' => array_merge( $clonedSrc, $clonedClosingSrc ),
-                'target' => array_merge( $clonedTrg, $clonedClosingTrg ),
+                'source' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedSrc, $clonedClosingSrc ) ),
+                'target' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedTrg, $clonedClosingTrg ) ),
         );
 
 //        Log::doLog($totalResult);
@@ -1221,7 +1222,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( trim( $open_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1230,7 +1231,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( trim( $closing_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1239,14 +1240,14 @@ class QA {
         /*
          * Check for corresponding self closing tags like <g id="pt673"/>
          */
-        preg_match_all( '#<([^>]+)/>#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#<([^>]+)/>#', $this->target_seg, $selfClosingTags_trg );
+        preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ) {
-                $this->_addError( self::ERR_TAG_MISMATCH );
-                $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
+                $this->_addError( self::ERR_TAG_ORDER );
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $selfClosingTags_trg[ $pos ] );
 
                 return;
             }

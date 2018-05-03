@@ -19,6 +19,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $pretranslate_100 ;
     public $id_qa_model ;
     public $id_assignee ;
+    public $due_date;
 
 
     /**
@@ -143,10 +144,11 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @deprecated $id_customer could not correspond to the real team/assignee
+     * WARNING $id_customer could not correspond to the real team/assignee
+     *
      * @return Users_UserStruct
      */
-    public function getOwner() {
+    public function getOriginalOwner() {
         return ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $this->id_customer ) ;
     }
 
@@ -166,7 +168,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public function getFeatures() {
         return $this->cachable(__METHOD__, $this, function( Projects_ProjectStruct $project ) {
             $featureSet = new FeatureSet() ;
-            $featureSet->loadForProject( $project );
+            $featureSet->loadForProject( $project ) ;
             return $featureSet ;
         });
     }

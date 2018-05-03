@@ -3,39 +3,20 @@
 if ( ReviewImproved.enabled() ) {
 
     $(document).on('files:appended', function initReactComponents() {
-        // Lock tags
-        $('.errorTaggingArea').each(function() {
-             UI.lockTags(this);
-        });
 
         loadDataPromise.done(function() {
-            $('section [data-mount=translation-issues-button]').each(function() {
-                var segment = new UI.Segment( this )  ;
-                if ( issuesPanelSideButtonEnabled( segment ) ) {
-                    ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
-                        sid : segment.absoluteId
-                    } ), this );
-                }
-            });
+            SegmentActions.mountTranslationIssues();
         });
-    });
-
-    $(document).on('header-tool:open', function(e, data) {
-        if ( data.name == 'search' ) {
-            ReviewImproved.closePanel();
-        }
-    });
-
-    $(document).on('ready', function() {
-        ReviewImproved.mountPanelComponent();
     });
 
     var issuesPanelSideButtonEnabled = function( segment ) {
-        return !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() );
+        return segment.isICELocked() || (
+            !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() )
+        );
     }
 
     $(document).on('segment-filter:filter-data:load', function() {
-        ReviewImproved.closePanel();
+        UI.closeIssuesPanel();
     });
 
     var updateLocalTranslationVersions = function( data ) {
@@ -70,18 +51,9 @@ if ( ReviewImproved.enabled() ) {
         );
     })();
 
-    $( document ).on( 'keydown', function ( e ) {
-        var esc = '27' ;
-        if ( e.which == esc ) {
-            if (!$('.modal').is(':visible')) {
-                ReviewImproved.closePanel();
-            }
-        }
-    });
-
     $(document).on('editingSegment:change', function(e, data) {
         if ( data.segment == null ) {
-            ReviewImproved.closePanel();
+            UI.closeIssuesPanel();
         }
     });
 
@@ -91,7 +63,7 @@ if ( ReviewImproved.enabled() ) {
             return ;
         }
         if ($(e.target).closest('header, .modal, section, #review-side-panel') == null) {
-            ReviewImproved.closePanel( );
+            UI.closeIssuesPanel( );
         }
     });
 
@@ -105,7 +77,7 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('sidepanel:close', function() {
-        ReviewImproved.closePanel();
+        UI.closeIssuesPanel();
     });
 
 }

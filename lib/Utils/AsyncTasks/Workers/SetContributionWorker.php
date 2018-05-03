@@ -46,10 +46,11 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
+     * @return null
      * @throws EndQueueException
      * @throws ReQueueException
-     *
-     * @return null
+     * @throws \Exception
+     * @throws \Exceptions\ValidationError
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -69,15 +70,13 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param ContributionStruct $contributionStruct
      *
-     * @throws EndQueueException
      * @throws ReQueueException
      * @throws \Exception
      * @throws \Exceptions\ValidationError
      */
     protected function _execContribution( ContributionStruct $contributionStruct ){
 
-        $jobStructList = $contributionStruct->getJobStruct();
-        $jobStruct = array_pop( $jobStructList );
+        $jobStruct = $contributionStruct->getJobStruct();
 //        $userInfoList = $contributionStruct->getUserInfo();
 //        $userInfo = array_pop( $userInfoList );
 
@@ -118,17 +117,31 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
+    /**
+     * !Important Refresh the engine ID for each queueElement received
+     * to avoid set contributions on the wrong engine ID
+     *
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws \Exception
+     * @throws \Exceptions\ValidationError
+     */
     protected function _loadEngine( ContributionStruct $contributionStruct ){
 
-        $jobStructList = $contributionStruct->getJobStruct();
-        $jobStruct = array_pop( $jobStructList );
-
+        $jobStruct = $contributionStruct->getJobStruct();
         if( empty( $this->_engine ) ){
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
     }
 
+    /**
+     * @param array              $config
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws ReQueueException
+     * @throws \Exceptions\ValidationError
+     */
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
 
         $config[ 'segment' ]        = $contributionStruct->segment;

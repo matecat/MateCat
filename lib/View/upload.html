@@ -61,7 +61,7 @@
             ownerIsMe: true,
             blueimp_dataType: 'json',
             defaults : {
-                tag_projection : true,
+                tag_projection : ${tag_projection_default},
                 speech2text : false,
                 lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
             },
@@ -104,7 +104,7 @@
 
 <div class="wrapper-upload">
 
-    <div class="translate-box">
+    <div class="translate-box project-name">
         <h2>Project name</h2>
         <input name="project-name" tal:attributes="value project_name|nothing" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
     </div>
@@ -158,13 +158,14 @@
                 </div>
                 <div class="divider"></div>
                 <div class="header" id="add-multiple-lang">
-                    Multiple Languages
+                    <div class="multiple-none-text">Multiple</div>
+                    <div class="multiple-text">Languages</div>
                     <i class="icon-plus3 icon"></i>
                 </div>
                 <div class="divider"></div>
                 <div class="scrolling menu">
                     <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
-                        <div class="item custom" tal:condition="language/selected" dat-selected="true" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
+                        <div class="item custom" tal:condition="language/selected" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
                         <div class="item custom" tal:condition="not:language/selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name"></div>
                     </tal:block>
 
@@ -187,10 +188,36 @@
         <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
     </div>
 
+
+    <div class="translate-box project-subject">
+        <h2>Select subject</h2>
+        <div class="ui fluid selection dropdown" id="project-subject">
+            <i class="dropdown icon"></i>
+            <span class="text">Select Subject</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="sourceLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:repeat="subject subject_array">
+                    <div class="item" tal:attributes="data-value subject/key" tal:content="subject/display">
+                          ---
+                    </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="translate-box tmx-select">
 
         <div class="tm-info-title">
-            <h2>TM and Glossary</h2>
+            <h2>TM & Glossary</h2>
             <i class="icon-info icon" />
         </div>
 
@@ -918,51 +945,6 @@
 <div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
 
 <div id="uploadCallback"></div>
-
-
-<script type="text/javascript">
-
-    // script per il funzionamento del dropdown menu del profilo utente
-
-    function DropDown( el ) {
-        this.dd = el;
-        this.initEvents();
-    }
-    DropDown.prototype = {
-        initEvents: function () {
-            var obj = this;
-
-            obj.dd.on( 'click', function ( event ) {
-                $( this ).toggleClass( 'active' );
-                event.stopPropagation();
-            } );
-        }
-    }
-
-    $( ".open-more" ).click( function () {
-        $(".hide-payoff").hide();
-        $( ".learnmore" ).slideToggle( "700", function () {
-            // Animation complete.
-        } );
-    } );
-    $( ".learnmore .open-more" ).click( function () {
-        $(".hide-payoff").show();
-       
-    } );
-
-    $( function () {
-
-        var dd = new DropDown( $( '#dd' ) );
-
-        $( document ).click( function () {
-            // all dropdowns
-            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
-        } );
-
-    } );
-
-</script>
-
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 

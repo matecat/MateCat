@@ -13,7 +13,10 @@ class Bootstrap {
     protected static $CONFIG;
     protected static $_ROOT;
 
-    private  $mandatoryFeatureSet ;
+    /**
+     * @var FeatureSet
+     */
+    private $autoLoadedFeatureSet ;
 
     public static function start() {
         new self();
@@ -44,6 +47,7 @@ class Bootstrap {
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
+
 
         //get the environment configuration
         self::initConfig();
@@ -144,11 +148,11 @@ class Bootstrap {
     }
 
     private function initMandatoryPlugins() {
-        $this->mandatoryFeatureSet = new FeatureSet();
+        $this->autoLoadedFeatureSet = new FeatureSet();
     }
 
     private function notifyBootCompleted() {
-        $this->mandatoryFeatureSet->run('bootstrapCompleted');
+        $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
     public static function fatalErrorHandler() {
@@ -190,8 +194,8 @@ class Bootstrap {
                 $output .= "{$error['message']}\n\t";
                 $output .= "Not Recoverable Error on line {$error['line']} in file " . $error[ 'file' ];
                 $output .= " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+                $output .= " - REQUEST URI: " . var_export( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+                $output .= " - REQUEST Message: " . var_export( $_REQUEST, true ) . "\n";
                 $output .= "\n\t";
                 $output .= "Aborting...\n";
                 $output .= "</pre>";
@@ -214,7 +218,7 @@ class Bootstrap {
                                 "errors"  => array(
                                         array(
                                                 "code"    => -1000,
-                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
+                                                "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
                                         )
                                 ), "data" => array()
                         ) );
@@ -370,13 +374,11 @@ class Bootstrap {
             }
         }
 
-        if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
-            set_include_path( get_include_path() .
-                    PATH_SEPARATOR .
-                    implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS )
-            );
-        }
+        Features::setIncludePath();
 
+        if (!empty( INIT::$MANDATORY_PLUGINS ) ) {
+            INIT::$AUTOLOAD_PLUGINS = array_merge( INIT::$AUTOLOAD_PLUGINS, INIT::$MANDATORY_PLUGINS );
+        }
     }
 
     /**

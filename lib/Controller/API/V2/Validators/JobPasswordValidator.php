@@ -28,14 +28,18 @@ class JobPasswordValidator extends Base {
         parent::__construct( $controller->getRequest() );
         $this->controller = $controller;
 
-        $this->jStruct = new Jobs_JobStruct();
-        $this->jStruct->id = $this->controller->params[ 'id_job' ];
+        $this->jStruct           = new Jobs_JobStruct();
+        $this->jStruct->id       = $this->controller->params[ 'id_job' ];
         $this->jStruct->password = $this->controller->params[ 'password' ];
-        $this->jStruct = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
+        $this->jStruct           = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
 
     }
 
-    public function validate() {
+    /**
+     * @return mixed|void
+     * @throws NotFoundException
+     */
+    protected function _validate() {
 
         if ( empty( $this->jStruct ) ) {
             throw new NotFoundException( "Not Found.", 404 );

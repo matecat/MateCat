@@ -8,12 +8,7 @@
 
 namespace Features\Dqf\Decorator;
 
-
 use AbstractDecorator;
-use Features\Dqf\Model\CachedAttributes\ContentType;
-use Features\Dqf\Model\CachedAttributes\Industry;
-use Features\Dqf\Model\CachedAttributes\Process;
-use Features\Dqf\Model\CachedAttributes\QualityLevel;
 use Features\Dqf\Utils\Functions;
 
 class NewProjectDecorator extends AbstractDecorator {

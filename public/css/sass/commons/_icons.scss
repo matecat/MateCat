@@ -1,14 +1,13 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?evucq0');
-  src:  url('fonts/icomoon.eot?evucq0#iefix') format('embedded-opentype'),
-  url('fonts/icomoon.ttf?evucq0') format('truetype'),
-  url('fonts/icomoon.woff?evucq0') format('woff'),
-  url('fonts/icomoon.svg?evucq0#icomoon') format('svg');
+  src:  url('fonts/icomoon.eot?d3wb9z');
+  src:  url('fonts/icomoon.eot?d3wb9z#iefix') format('embedded-opentype'),
+  url('fonts/icomoon.ttf?d3wb9z') format('truetype'),
+  url('fonts/icomoon.woff?d3wb9z') format('woff'),
+  url('fonts/icomoon.svg?d3wb9z#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
-
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
@@ -25,6 +24,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-go-to-first:before {
+  content: "\ea8e";
+}
+.icon-go-to-last:before {
+  content: "\ea8f";
+}
+.icon-no-preview:before {
+  content: "\ea8d";
+}
 .icon-quote-client:before {
   content: "\ea89";
 }
@@ -150,6 +158,12 @@
 }
 .icon-play-circle:before {
   content: "\f144";
+}
+.icon-preview-bottom-window:before {
+  content: "\ea8b";
+}
+.icon-preview-new-window:before {
+  content: "\ea8c";
 }
 .icon-notice:before {
   content: "\e903";
@@ -1297,6 +1311,9 @@
 .icon-arrow-left22:before {
   content: "\ea41";
 }
+.icon-unlocked3:before {
+  content: "\ea8a";
+}
 .icon-search:before {
   content: "\f002";
 }
@@ -1401,7 +1418,4 @@
 }
 .icon-paw:before {
   content: "\f1b0";
-}
-.icon-unlocked3:before {
-  content: "\ea89";
 }

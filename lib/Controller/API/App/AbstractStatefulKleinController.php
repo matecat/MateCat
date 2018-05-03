@@ -8,15 +8,15 @@
 
 namespace API\App;
 
-
 use API\V2\KleinController;
+use Bootstrap;
 
 abstract class AbstractStatefulKleinController extends KleinController {
 
 
     public function __construct($request, $response, $service, $app)
     {
-        \Bootstrap::sessionStart();
+        Bootstrap::sessionStart();
         parent::__construct($request, $response, $service, $app);
     }
 

@@ -22,6 +22,7 @@ class ConvertFileWrapper extends convertFileController {
     public function __construct( $stdResult, $convertZipFile = true ) {
         $this->fileStruct     = $stdResult;
         $this->convertZipFile = $convertZipFile;
+        $this->readLoginInfo();
     }
 
     public function doAction() {

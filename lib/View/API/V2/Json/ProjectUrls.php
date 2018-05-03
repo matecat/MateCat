@@ -8,35 +8,47 @@
 
 namespace API\V2\Json;
 
+use DataAccess\ShapelessConcreteStruct;
+use LQA\ChunkReviewDao;
 use Routes ;
 
 
 class ProjectUrls {
 
-    private $data ;
+    protected $data ;
+
+    protected $jobs = [];
+    protected $files = array();
+    protected $chunks = array();
 
     /*
      * @var array
      */
     private $formatted = array('files' => array(), 'jobs' => array() );
 
+    /**
+     * ProjectUrls constructor.
+     *
+     * @param $data ShapelessConcreteStruct[]
+     */
     public function __construct( $data ) {
         $this->data = $data;
-
-
     }
 
-    public function render() {
+    /**
+     * @param bool $keyAssoc
+     *
+     * @return array
+     */
+    public function render( $keyAssoc = false ) {
 
-        $files = array();
+        /**
+         * @var $record ShapelessConcreteStruct
+         */
+        foreach( $this->data as $key => $record ) {
 
-        $jobs = array();
-        $chunks = array();
-
-        foreach($this->data as $key => $record ) {
-
-            if (!array_key_exists( $record['id_file'], $files ) ) {
-                $files[ $record['id_file'] ] = array(
+            if (!array_key_exists( $record['id_file'], $this->files ) ) {
+                $this->files[ $record['id_file'] ] = array(
                     'id' => $record['id_file'],
                     'name' => $record['filename'],
                     'original_download_url' => $this->downloadOriginalUrl( $record ),
@@ -45,8 +57,8 @@ class ProjectUrls {
                 );
             }
 
-            if ( !array_key_exists( $record['jid'], $jobs ) ) {
-                $jobs[ $record['jid'] ] = array(
+            if ( !array_key_exists( $record['jid'], $this->jobs ) ) {
+                $this->jobs[ $record['jid'] ] = array(
                     'id' => $record['jid'],
                     'target_lang' => $record['target'],
                     'original_download_url' => $this->downloadOriginalUrl( $record ),
@@ -56,28 +68,47 @@ class ProjectUrls {
                 );
             }
 
-            if ( !array_key_exists( $record['jpassword'], $chunks ) ) {
-                $chunks[ $record['jpassword'] ] = 1 ;
-
-                $jobs[ $record['jid'] ][ 'chunks' ][] = array(
-                    'password'      => $record['jpassword'],
-                    'translate_url' => $this->translateUrl( $record ),
-                    'revise_url'    => $this->reviseUrl( $record )
-                );
-            }
+            $this->generateChunkUrls( $record );
 
         }
 
-        $this->formatted['jobs'] = array_values( $jobs );
-        $this->formatted['files'] = array_values( $files );
+        //maintain index association for external array access
+        if( !$keyAssoc ){
+            $this->formatted['jobs'] = array_values( $this->jobs );
+            foreach( $this->formatted['jobs'] as &$chunks ){
+                $chunks[ 'chunks' ] = array_values( $chunks[ 'chunks' ] );
+            }
+            $this->formatted['files'] = array_values( $this->files );
+        } else {
+            $this->formatted['jobs'] = $this->jobs;
+            $this->formatted['files'] = $this->files;
+        }
 
         // start over for jobs
 
-        return array( 'urls' => $this->formatted );
+        return $this->formatted;
+    }
+
+    protected function generateChunkUrls( $record ){
+
+        if ( !array_key_exists( $record['jpassword'], $this->chunks ) ) {
+            $this->chunks[ $record['jpassword'] ] = 1 ;
+
+            $this->jobs[ $record['jid'] ][ 'chunks' ][ $record['jpassword'] ] = array(
+                    'password'      => $record['jpassword'],
+                    'translate_url' => $this->translateUrl( $record ),
+                    'revise_url'    => $this->reviseUrl( $record )
+            );
+        }
+
+    }
+
+    public function getData(){
+        return $this->data;
     }
 
 
-    private function downloadOriginalUrl($record) {
+    protected function downloadOriginalUrl($record) {
         return \Routes::downloadOriginal(
             $record['jid'],
             $record['jpassword'],
@@ -85,7 +116,7 @@ class ProjectUrls {
         );
     }
 
-    private function downloadXliffUrl( $record ) {
+    protected function downloadXliffUrl( $record ) {
         return Routes::downloadXliff(
             $record['jid'],
             $record['jpassword'],
@@ -93,7 +124,7 @@ class ProjectUrls {
         );
     }
 
-    private function downloadFileTranslationUrl($record ) {
+    protected function downloadFileTranslationUrl($record ) {
         return Routes::downloadTranslation(
                 $record['jid'],
                 $record['jpassword'],
@@ -101,7 +132,7 @@ class ProjectUrls {
         );
     }
 
-    private function downloadTranslationUrl($record) {
+    protected function downloadTranslationUrl($record) {
         return Routes::downloadTranslation(
             $record['jid'],
             $record['jpassword'],
@@ -109,7 +140,7 @@ class ProjectUrls {
         );
     }
 
-    private function translateUrl( $record ) {
+    protected function translateUrl( $record ) {
         return Routes::translate(
             $record['name'],
             $record['jid'],
@@ -119,7 +150,7 @@ class ProjectUrls {
         );
     }
 
-    private function reviseUrl( $record ) {
+    protected function reviseUrl( $record ) {
         return \Routes::revise(
             $record['name'],
             $record['jid'],
@@ -127,7 +158,6 @@ class ProjectUrls {
             $record['source'],
             $record['target']
         );
-
 
     }
 }

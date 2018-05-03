@@ -7,16 +7,12 @@
         <input class="required" id="new-engine-name" />
         <div class="provider-data">
             <div class="provider-field">
-                <label>ClientID<sup>*</sup></label>
-                <input class="required" data-field-name="client_id" />
-            </div>
-            <div class="provider-field">
-                <label>Client Secret<sup>*</sup></label>
-                <input class="required" data-field-name="secret" />
+                <label>KeyId<sup>*</sup></label>
+                <input class="required" data-field-name="client_id"/>
             </div>
             <div class="provider-field">
                 <label>Category</label>
-                <input data-field-name="category" />
+                <input data-field-name="category"/>
             </div>
         </div>
     </template>
@@ -601,5 +597,25 @@
     <template id="mt-provider-yandextranslate-msg">
         <p>Yandex.Translate is a modern statistical MT system available as an online public service, an application for major mobile platforms and a commercial API. The service currently supports more than 90 languages and this number is continuously growing. Yandex.Translate API processes billions of translations daily for its customers ranging from LSPs and language learning applications to worldwide media monitoring companies. Customer data security is a key priority for Yandex.Translate API - it uses secure connections and carefully handles sensitive data.</p>
         <a href="https://translate.yandex.com/developers" target="_blank" class="continuebtn btn-ok">Find out more</a>
+    </template>
+</div>
+
+
+<div metal:define-macro="template-googletranslate">
+    <template id="mt-provider-googletranslate-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>API-key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" placeholder="here" />
+            </div>
+        </div>
+    </template>
+    <template id="mt-provider-googletranslate-msg">
+        <p>Google Translate is a free multilingual machine translation service developed by Google, to translate text from one language into another. It offers a website interface, mobile apps for Android and iOS, and an API that helps developers build browser extensions and software applications. Google Translate supports over 100 languages at various levels and as of May 2017, serves over 500 million people daily.</p>
+        <a href="https://cloud.google.com/translate/" target="_blank" class="continuebtn btn-ok">Find out more</a>
     </template>
 </div>

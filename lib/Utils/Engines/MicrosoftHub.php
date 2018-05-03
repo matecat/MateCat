@@ -41,7 +41,6 @@ TAG;
 
     protected $_auth_parameters = array(
             'client_id'     => "",
-            'client_secret' => "",
 
             /**
              * Hardcoded params, from documentation
@@ -67,28 +66,49 @@ TAG;
 
     }
 
+
+    protected function getAuthParameters(){
+        return [
+                CURLOPT_POST       => true,
+                CURLOPT_POSTFIELDS => "",
+                CURLOPT_HTTPHEADER => [
+                        'Ocp-Apim-Subscription-Key: '. $this->client_id, //key1
+                        'Accept: application/jwt',
+                        'Content-Type: application/json',
+                ]
+        ];
+    }
+
     protected function _decode( $rawValue ) {
 
-        $all_args =  func_get_args();
+        $all_args = func_get_args();
 
-        $xmlObj = simplexml_load_string( $rawValue,'SimpleXMLElement', LIBXML_NOENT );
-        foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
-            if( $key === 'body' ){ //WHY IN THIS STUPID LANGUAGE EVERY STRING EQUALS TO ZERO???......
-                $error = (array)$val;
-                $decoded = array(
-                    'error' => array( "message" => $error['h1'] . ": " . $error['p'][2], 'code' => -1 )
-                );
-                break;
+        if ( isset( $rawValue[ 'error' ] ) && !empty( $rawValue[ 'error' ] ) ) {
+            $xmlObj = simplexml_load_string( $rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT );
+            if ( empty( $xmlObj ) ) {
+                $jsonObj = json_decode( $rawValue[ 'error' ][ 'response' ] );
+                $decoded = [
+                        'error' => [ "message" => $jsonObj->message, 'code' => -1 ]
+                ];
             } else {
-                $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) )
-                                )
-                        )
-                );
+                $decoded = [
+                        'error' => [ "message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1 ]
+                ];
             }
 
+
+            return $decoded;
+        }
+
+        $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT );
+        foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
+            $decoded = [
+                    'data' => [
+                            "translations" => [
+                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) ]
+                            ]
+                    ]
+            ];
         }
 
         return $this->_composeResponseAsMatch( $all_args, $decoded );
@@ -157,11 +177,14 @@ TAG;
     }
 
     protected function _fillCallParameters( $_config ) {
-        $parameters = array();
-        $parameters['text']       = $_config[ 'segment' ];
-        $parameters['from']       = $_config[ 'source' ];
-        $parameters['to']         = $_config[ 'target' ];
-        $parameters['category']   = $this->engineRecord->extra_parameters[ 'category' ];
+        $parameters = [];
+
+        $parameters[ 'appId' ]    = 'Bearer ' . $this->token;
+        $parameters[ 'to' ]       = $this->_fixLangCode( $_config[ 'target' ] );
+        $parameters[ 'from' ]     = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'text' ]     = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $parameters[ 'category' ] = $this->engineRecord->extra_parameters[ 'category' ];
+
         return $parameters;
 
     }

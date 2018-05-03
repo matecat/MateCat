@@ -124,7 +124,8 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.shouldEmptyTargetElement( segmentRecord )) {
                     Speech2Text.finalTranscript = '';
-                    Speech2Text.targetElement.html('');
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), '');
+                    // Speech2Text.targetElement.html('');
                 } else {
 
                     Speech2Text.finalTranscript = Speech2Text.targetElement.html() + ' ';
@@ -148,7 +149,6 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.recognizing) {
                     Speech2Text.isStopingRecognition = true;
-                    Speech2Text.hideMatches();
                 }
             },
             onRecognitionStart: function () {
@@ -187,10 +187,10 @@ Speech2Text.init  = function () {
                 }
 
                 if (!Speech2Text.isStopingRecognition) {
-                    Speech2Text.targetElement.html(
-                        Speech2Text.linebreak(Speech2Text.finalTranscript)
+                    var html  = Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript)
-                    );
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), html);
+
                     UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
             },
@@ -216,19 +216,7 @@ Speech2Text.init  = function () {
                 Speech2Text.isToKeepRecognizing = false;
             },
             showMatches: function () {
-                if ($('body').hasClass('hideMatches')) {
-                    $('body').removeClass('hideMatches');
-                    Speech2Text.wereMatchesPreviouslyOpened = false;
-                } else {
-                    Speech2Text.wereMatchesPreviouslyOpened = true;
-                }
-            },
-            hideMatches: function () {
-                if (!Speech2Text.wereMatchesPreviouslyOpened) {
-                    if (!$('body').hasClass('hideMatches')) {
-                        $('body').addClass('hideMatches');
-                    }
-                }
+                SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment, 'matches'));
             },
             animateSpeechActive: function () {
                 Speech2Text.microphone.removeClass('micSpeechReceiving');

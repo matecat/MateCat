@@ -2,7 +2,8 @@
 /**
  * Created by PhpStorm.
  */
-use ConnectedServices\GDrive;
+use AbstractControllers\IController;
+use Utils;
 
 
 /**
@@ -22,22 +23,11 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * Flag to get info about browser support
-     *
-     * @var bool
-     */
-    protected $supportedBrowser = false;
-    /*
-     * The user os
-     * @var string
-     */
-    protected $userPlatform;
-    /**
      * The os platform
      *
      * @var string
      */
-    protected $browser_platform;
+    protected $platform;
     /**
      * @var Google_Client
      */
@@ -50,118 +40,47 @@ abstract class viewController extends controller {
 
     protected $login_required = false ;
 
+    protected $supportedBrowser ;
+
     /**
      * Try to identify the browser of users
      *
      * @return array
      */
     private function getBrowser() {
-        $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-
-        //First get the platform?
-        if ( preg_match( '/linux/i', $u_agent ) ) {
-            $platform = 'linux';
-        } elseif ( preg_match( '/macintosh|mac os x/i', $u_agent ) ) {
-            $platform = 'mac';
-        } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
-            $platform = 'windows';
-        } else {
-            $platform = 'Unknown';
-        }
-
-        // Next get the name of the useragent yes seperately and for good reason
-        if ( preg_match( '/MSIE|Trident|Edge/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Internet Explorer';
-            $ub    = "MSIE";
-        } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
-            $bname = 'Mozilla Firefox';
-            $ub    = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
-            $bname = 'Google Chrome';
-            $ub    = "Chrome";
-        } elseif ( preg_match( '/Opera|OPR/i', $u_agent ) ) {
-            $bname = 'Opera';
-            $ub    = "Opera";
-        } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
-            $bname = 'Netscape';
-            $ub    = "Netscape";
-        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
-            $bname = 'Mozilla Generic';
-            $ub    = "Mozillageneric";
-        } else {
-            $bname = 'Unknown';
-            $ub    = "Unknown";
-        }
-        // finally get the correct version number
-        $known   = array( 'Version', $ub, 'other' );
-        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
-        if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
-            // we have no matching number just continue
-        }
-
-        // see how many we have
-        $i = count( $matches[ 'browser' ] );
-        if ( $i != 1 ) {
-            //we will have two since we are not using 'other' argument yet
-            //see if version is before or after the name
-            if ( strripos( $u_agent, "Version" ) < strripos( $u_agent, $ub ) ) {
-                $version = $matches[ 'version' ][ 0 ];
-            } else {
-                $version = @$matches[ 'version' ][ 1 ];
-            }
-        } else {
-            $version = $matches[ 'version' ][ 0 ];
-        }
-
-        // check if we have a number
-        if ( $version == null || $version == "" ) {
-            $version = "?";
-        }
-
-        return array(
-                'userAgent' => $u_agent,
-                'name'      => $bname,
-                'version'   => $version,
-                'platform'  => $platform,
-                'pattern'   => $pattern
-        );
-
+        return Utils::getBrowser();
     }
 
     /**
      * Class constructor
      *
-     * @param bool $isAuthRequired
      */
     public function __construct() {
 
 	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
-		    exit;
+	        $controllerInstance = new CustomPage();
+	        $controllerInstance->setTemplate( "badConfiguration.html" );
+	        $controllerInstance->setCode( 503 );
+	        $controllerInstance->doAction();
+            die(); // do not complete klein response, set 404 header in render404 instead of 200
 	    }
-
-        //SESSION ENABLED
-        parent::sessionStart();
 
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
         $this->setBrowserSupport();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
+
+        //SESSION ENABLED
+        $this->readLoginInfo( false );
+
+        $this->featureSet = new FeatureSet();
 
     }
 
     /**
      * Perform Authentication Requests and set incoming url
      */
-    protected function checkLoginRequiredAndRedirect() {
+    public function checkLoginRequiredAndRedirect() {
         if ( !$this->login_required ) {
             return true ;
         }
@@ -191,63 +110,6 @@ abstract class viewController extends controller {
     }
 
     /**
-     * isLoggedIn
-     *
-     * @return bool
-     */
-    public function isLoggedIn() {
-        return $this->userIsLogged;
-    }
-
-    /**
-     * getLoginUserParams
-     *
-     * TODO: clarify. We check from session variables and then rely $this->logged_user ??
-     *
-     * @deprecated
-     *
-     * @return array()
-     */
-    public function getLoginUserParams() {
-        if ( $this->isLoggedIn() ) {
-            return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
-        }
-        return array( null, null );
-    }
-
-    /**
-     * Check for browser support
-     *
-     * @return bool
-     */
-    private function isSupportedWebBrowser($browser_info) {
-
-        $browser_name = strtolower( $browser_info[ 'name' ] );
-        $browser_platform = strtolower( $browser_info[ 'platform' ] );
-        $return_value = 0;
-
-        foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                // Safari supported only on Mac
-                if (stripos( "apple safari", $browser_name ) === false ||
-                    (stripos( "apple safari", $browser_name ) !== false && stripos("mac", $browser_platform) !== false) )
-                    return 1;
-            }
-        }
-
-        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
-            if ( stripos( $browser_name, $untested_browser ) !== false ) {
-                return -1;
-            }
-        }
-
-        // unsupported browsers: hack for home page
-        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
-
-        return 0;
-    }
-
-    /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
      * @see controller::finalize
@@ -259,8 +121,7 @@ abstract class viewController extends controller {
 
         $this->setTemplateVars();
 
-        $featureSet = new FeatureSet();
-        $featureSet->run('appendDecorators', $this, $this->template);
+        $this->featureSet->run('appendDecorators', $this, $this->template);
 
         $this->setTemplateFinalVars();
 
@@ -294,7 +155,7 @@ abstract class viewController extends controller {
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template) ) {
-            throw new Exception('Tempalte is not defined');
+            throw new Exception('Tamplate is not defined');
         }
 
         $this->template->footer_js = array();
@@ -312,16 +173,12 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        if( $this->logged_user instanceof Users_UserStruct ){
-            $this->template->logged_user   = $this->logged_user->shortName() ;
-            $this->template->extended_user = $this->logged_user->fullName() ;
+        $this->template->logged_user   = $this->user->shortName() ;
+        $this->template->extended_user = $this->user->fullName() ;
 
-            $this->template->isLoggedIn    = $this->isLoggedIn();
-            $this->template->userMail      = $this->logged_user->getEmail() ;
-            $this->collectFlashMessages();
-        } else {
-            Log::doLog( "Bad Configuration" );
-        }
+        $this->template->isLoggedIn    = $this->userIsLogged;
+        $this->template->userMail      = $this->user->email;
+        $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
 
@@ -332,10 +189,10 @@ abstract class viewController extends controller {
      * Set the variables for the browser support
      *
      */
-    private function setBrowserSupport() {
-        $browser_info = $this->getBrowser();
-        $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
-        $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
+    protected function setBrowserSupport() {
+        $browser_info = Utils::getBrowser() ;
+        $this->supportedBrowser = Utils::isSupportedWebBrowser($browser_info);
+        $this->platform = strtolower( $browser_info[ 'platform' ] );
     }
 
     /**
@@ -344,21 +201,6 @@ abstract class viewController extends controller {
      * @return mixed
      */
     abstract function setTemplateVars();
-
-    /**
-     * @return Users_UserStruct
-     */
-    public function getLoggedUser(){
-        return $this->logged_user;
-    }
-
-    /**
-     * @deprecated TODO remove in the next Release ( plugin compatibility method )
-     * @return Users_UserStruct
-     */
-    public function getUser(){
-        return $this->logged_user;
-    }
 
     /**
      * @return string
@@ -378,28 +220,38 @@ abstract class viewController extends controller {
         return $is_revision_url;
     }
 
-    protected function render404() {
-        header( "HTTP/1.0 404 Not Found" );
-        $this->makeTemplate('404.html');
+    protected function render404( $customTemplate = '404.html' ) {
+        $this->renderCustomHTTP( $customTemplate, 404 );
+    }
+
+    protected function renderCustomHTTP( $customTemplate, $httpCode ){
+        $status = new \Klein\HttpStatus( $httpCode );
+        header( "HTTP/1.0 " . $status->getFormattedString() );
+        $this->makeTemplate( $customTemplate );
         $this->finalize();
+        die();
     }
 
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param $skeleton_file
-     *
+     * @param  PHPTAL|string $skeleton_file
      */
     protected function makeTemplate( $skeleton_file ) {
         try {
-            $this->template                       = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            $this->template->basepath             = INIT::$BASEURL;
-            $this->template->hostpath             = INIT::$HTTPHOST;
-            $this->template->supportedBrowser     = $this->supportedBrowser;
-            $this->template->platform             = $this->userPlatform;
-            $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
-            $this->template->build_number         = INIT::$BUILD_NUMBER;
-            $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
+
+            $this->template = $skeleton_file;
+            if( !$this->template instanceof PHPTAL ) {
+                $this->template                   = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            }
+
+            $this->template->basepath            = INIT::$BASEURL;
+            $this->template->hostpath            = INIT::$HTTPHOST;
+            $this->template->build_number        = INIT::$BUILD_NUMBER;
+            $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS;
+            $this->template->supportedBrowser    = $this->supportedBrowser;
+            $this->template->platform            = $this->platform;
+            $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
 
             $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
@@ -420,6 +272,25 @@ abstract class viewController extends controller {
     protected function collectFlashMessages() {
         $messages = FlashMessage::flush() ;
         $this->template->flashMessages = $messages ;
+    }
+
+    /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->project;
+    }
+
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @return $this
+     */
+    public function setProject( $project ) {
+        $this->project = $project;
+
+        return $this;
     }
 
 }

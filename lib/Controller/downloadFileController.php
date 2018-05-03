@@ -68,6 +68,8 @@ class downloadFileController extends downloadController {
         if ( empty( $this->id_job ) ) {
             $this->id_job = "Unknown";
         }
+
+        $this->featureSet = new FeatureSet();
     }
 
     public function doAction() {
@@ -86,12 +88,16 @@ class downloadFileController extends downloadController {
         $this->job      = $this->getJob();
         $this->project  = $this->job->getProject();
 
+        $this->featureSet->loadForProject( $this->project ) ;
+
         //get storage object
         $fs        = new FilesStorage();
         $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
 
         $nonew                 = 0;
         $output_content        = array();
+
+
 
         /*
            the procedure:
@@ -306,6 +312,8 @@ class downloadFileController extends downloadController {
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
+                    $this->featureSet->run('processZIPDownloadPreview', $this, $output_content);
+
                     if ( count( $output_content ) > 1 ) {
 
                         //cast $output_content elements to ZipContentObject
@@ -331,6 +339,7 @@ class downloadFileController extends downloadController {
                         //always an array with 1 element, pop it, Ex: array( array() )
                         $this->setZipContent( $output_content );
                     }
+
                 }
 
             }
@@ -381,14 +390,14 @@ class downloadFileController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->checkLogin();
+        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
         $activity->id_project = $this->jobInfo['id_project'];
         $activity->action     = $action;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->uid;
+        $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 

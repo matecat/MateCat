@@ -2,9 +2,6 @@
 	Component: ui.tags
  */
 
-$('html').on('copySourceToTarget', 'section', function( el ) {
-    UI.lockTags(UI.editarea);
-});
 
 $.extend(UI, {
     noTagsInSegment: function(options) {
@@ -44,25 +41,16 @@ $.extend(UI, {
 		return(mismatch);
 	},
     disableTagMark: function() {
-		this.taglockEnabled = false;
-		this.body.addClass('tagmarkDisabled');
-		$('.source span.locked').each(function() {
-			$(this).replaceWith($(this).html());
-		});
-		$('.editarea span.locked').each(function() {
-			$(this).replaceWith($(this).html());
-		});
+		this.tagLockEnabled = false;
+        SegmentActions.disableTagLock();
+
 	},
 	enableTagMark: function() {
-		this.taglockEnabled = true;
-		this.body.removeClass('tagmarkDisabled');
-		saveSelection();
-		this.markTags();
-		restoreSelection();
+		this.tagLockEnabled = true;
+        SegmentActions.enableTagLock();
 	},
+    //TODO This method do the same of UI.transformTextForLockTags that receive the text not the segment
 	markSuggestionTags: function(segment) {
-		if (!this.taglockEnabled)
-			return false;
 		$('.footer .suggestion_source', segment).each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
@@ -83,126 +71,121 @@ $.extend(UI, {
         });
 
     },
-	markTags: function() {
-		if (!this.taglockEnabled) return false;
-
-		if(this.noTagsInSegment({
-            area: false,
-            starting: true
-        })) {
-            return false;
-        }
-
-		$('.source, .editarea, .ice-locked .targetarea').each(function() {
-			UI.lockTags(this);
-		});
-	},
 
 
-    transformTextForLockTags : function( tx ) {
-        var brTx1 = (UI.isFirefox)? "<_plh_ class=\"locked\" contenteditable=\"false\">$1</_plh_>" : "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
-        var brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+    transformTextForLockTags: function ( tx ) {
+        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
+        var brTx2 =  "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 
-        tx = tx.replace(/<span/gi, "<_plh_")
-            .replace(/<\/span/gi, "</_plh_")
-            .replace(/&lt;/gi, "<")
-            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1)
-            .replace(/</gi, "&lt;")
-            .replace(/\&lt;_plh_/gi, "<span")
-            .replace(/\&lt;\/_plh_/gi, "</span")
-            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
-            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
-            .replace(/\&lt;div\>/gi, "<div>")
-            .replace(/\&lt;\/div\>/gi, "</div>")
-            .replace(/\&lt;br\>/gi, "<br>")
-            .replace(/\&lt;mark/gi, "<mark")
-            .replace(/\&lt;\/mark/gi, "</mark")
-            .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
-            .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+        tx = tx.replace( /&amp;/gi, "&" )
+            .replace( /<span/gi, "<_plh_" )
+            .replace( /<\/span/gi, "</_plh_" )
+            .replace( /&lt;/gi, "<" )
+            .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTx1 )
+            .replace( /(<(g|x|bx|ex|bpt|ept|ph.*?|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /(<(ph.*?)\sid[^<“]*?\/>)/gi, brTx1 )
+            .replace( /</gi, "&lt;" )
+            .replace( /\&lt;_plh_/gi, "<span" )
+            .replace( /\&lt;\/_plh_/gi, "</span" )
+            .replace( /\&lt;lxqwarning/gi, "<lxqwarning" )
+            .replace( /\&lt;\/lxqwarning/gi, "</lxqwarning" )
+            .replace( /\&lt;div\>/gi, "<div>" )
+            .replace( /\&lt;\/div\>/gi, "</div>" )
+            .replace( /\&lt;br\>/gi, "<br />" )
+            .replace( /\&lt;br \/>/gi, "<br />" )
+            .replace( /\&lt;mark/gi, "<mark" )
+            .replace( /\&lt;\/mark/gi, "</mark" )
+            .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
+            .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
+            .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
+            .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
+            .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
+            .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
-            if (UI.isFirefox) {
-                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            } else {
-                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            }
 
-            tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
-            tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+        tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
+        tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
+        tx = this.transformTagsWithHtmlAttribute(tx);
+        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
         return tx;
     },
 
-
-	markTagsInSearch: function(el) {
-		if (!this.taglockEnabled)
-			return false;
-		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
-	},
-
     /**
-     * This function replaces tags with monads
+     * Used to transform special ph tags that may contain html within the equiv-text attribute.
+     * Example: &lt;ph id="2" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9JnF1b3Q7c3BhbmNsYXNzJnF1b3Q7IGlkPSZxdW90OzEwMDAmcXVvdDsgJmd0Ow=="/&gt;
+     * The attribute is encoded in base64
+     * @param tx
+     * @returns {*}
      */
-	lockTags: function(el) {
-        var self = this;
-		if (this.body.hasClass('tagmarkDisabled')) {
-			return false;
+    transformTagsWithHtmlAttribute: function (tx) {
+        try {
+            var base64Array=[];
+            var phIDs =[];
+            tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?id="(.*?)"/gi, function (match, text) {
+                phIDs.push(text);
+                return match;
+            });
+
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
+            });
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                base64Array.push(text);
+                var id = phIDs.shift();
+                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
+            });
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                var base = base64Array.shift();
+                return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
+            });
+            delete(base64);
+            return tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
         }
 
-        if (!this.taglockEnabled) {
-            return false;
+
+    },
+    /**
+     * To transform text with the' ph' tags that have the attribute' equival-text' into text only, without html
+     */
+    removePhTagsWithEquivTextIntoText: function ( tx ) {
+        try {
+            tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                return "";
+            });
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                return Base64.decode(text);
+            });
+            return tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in removePhTagsWithEquivTextIntoText function");
         }
+    },
 
-		var area = (typeof el == 'undefined') ? UI.editarea : el;
+    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+        if ( segment.length == 0 ) return ;
 
-        if (this.noTagsInSegment({
-            area: area,
-            starting: false
-        })) {
-            return false;
-        }
-
-        $(area).first().each(function() {
-            var segment = $(this).closest('section');
-			if (LXQ.enabled()) {
-            	$.powerTip.destroy($('.tooltipa',segment));
-            	$.powerTip.destroy($('.tooltipas',segment));
-            }
-            saveSelection();
-
-            var html = $(this).html() ;
-
-            var tx = UI.transformTextForLockTags( html ) ;
-            $(this).html(tx);
-
-            var prevNumTags = $('span.locked', this).length;
-
-            restoreSelection();
-            if (LXQ.enabled())
-                LXQ.reloadPowertip(segment);
-            if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
-
-
-
-            UI.evalCurrentSegmentTranslationAndSourceTags( segment );
-
-            if ( UI.hasSourceOrTargetTags( segment ) ) {
-                segment.addClass( 'hasTagsToggle' );
-            } else {
-                segment.removeClass( 'hasTagsToggle' );
-            }
-
-            if ( UI.hasMissingTargetTags( segment ) ) {
-                segment.addClass( 'hasTagsAutofill' );
-            } else {
-                segment.removeClass( 'hasTagsAutofill' );
-            }
-
-            $('span.locked', this).addClass('monad');
-
-            UI.detectTagType(this);
-        });
+        var sourceTags = htmlDecode($('.source', segment).data('original'))
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+        this.sourceTags = sourceTags || [];
+        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 
     detectTagType: function (area) {
+        if (!this.tagLockEnabled || config.tagLockCustomizable ) {
+            return false;
+        }
         $('span.locked', area).each(function () {
             if($(this).text().startsWith('</')) {
                 $(this).addClass('endTag')
@@ -216,110 +199,14 @@ $.extend(UI, {
         })
     },
 
-    unlockTags: function() {
-		if (!this.taglockEnabled)
-			return false;
-        this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
-	},
-
-    toggleTagsMode: function (elem) {
-        if (elem) {
-            $(elem).toggleClass('active');
+    toggleTagsMode: function () {
+        if (UI.body.hasClass('tagmode-default-extended')) {
+            this.setCrunchedTagMode();
+        } else {
+            this.setExtendedTagMode();
         }
-        UI.body.toggleClass('tagmode-default-extended');
     },
 
-    removeLockTagsFromString: function (str) {
-        return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
-    },
-
-    // TAG CLEANING
-    cleanDroppedTag: function ( area, beforeDropHTML ) {
-
-        this.droppingInEditarea = false;
-
-        //detect selected text
-        var html = "";
-        if ( typeof window.getSelection != "undefined" ) {
-            var sel = window.getSelection();
-            if ( sel.rangeCount ) {
-                var container = document.createElement( "div" );
-                for ( var i = 0, len = sel.rangeCount; i < len; ++i ) {
-                    container.appendChild( sel.getRangeAt( i ).cloneContents() );
-                }
-                html = container.innerHTML;
-            }
-        } else if ( typeof document.selection != "undefined" ) {
-            if ( document.selection.type == "Text" ) {
-                html = document.selection.createRange().htmlText;
-            }
-        }
-        var draggedText = html;
-
-
-        draggedText = draggedText.replace( /^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2" );
-        var dr2 = draggedText.replace( /(<br>)$/, '' );
-
-        area.html( area.html().replace( draggedText, dr2 ) );
-        saveSelection();
-
-        if ( $( 'span .rangySelectionBoundary', area ).length > 1 ) {
-            $( '.rangySelectionBoundary', area ).last().remove();
-        }
-
-        if ( $( 'span .rangySelectionBoundary', area ).length ) {
-            spel = $( 'span', area ).has( '.rangySelectionBoundary' );
-            rsb = $( 'span .rangySelectionBoundary', area ).detach();
-            spel.after( rsb );
-        }
-
-        var phcode = $( '.rangySelectionBoundary', area )[0].outerHTML;
-        $( '.rangySelectionBoundary', area ).text( this.cursorPlaceholder );
-
-
-        //map with special simbols
-        var mapSpecialSimbols = {
-            "<span class=\"tab-marker monad marker _09\">⇥</span>": "##PlaceHolderTABS##"
-        };
-
-        var clonedEl = area.clone();
-        //replace special simbol with placeholder
-        var replacementSpecialSimbol = clonedEl.html();
-        for ( key in mapSpecialSimbols ) {
-            if ( clonedEl.html().indexOf( key ) > -1 ) {
-                var reg = new RegExp( key, "g" );
-                replacementSpecialSimbol = replacementSpecialSimbol.replace( reg, mapSpecialSimbols[key] );
-            }
-        }
-
-        // encode br before textification
-        $( 'br', clonedEl ).each( function () {
-            $( this ).replaceWith( '[**[br class="' + this.className + '"]**]' );
-        } );
-
-        //new target text with placeholder
-        var drag = document.createElement( "drag" );
-        var newText = $( drag ).html( replacementSpecialSimbol ).text().replace( /(<span.*?>)\&nbsp;/, '$1' );
-
-        if ( typeof phcode == 'undefined' ) phcode = '';
-
-        clonedEl.text( newText );
-
-        //replace placeholder with special simbol
-        var areaHTML = clonedEl.html();
-        for ( key in mapSpecialSimbols ) {
-            if ( areaHTML.indexOf( mapSpecialSimbols[key] ) > -1 ) {
-                var reg = new RegExp( mapSpecialSimbols[key], "g" );
-                areaHTML = areaHTML.replace( reg, key );
-            }
-        }
-
-        clonedEl.html( areaHTML );
-        clonedEl.html( clonedEl.html().replace( this.cursorPlaceholder, phcode ) );
-        restoreSelection();
-        area.html( clonedEl.html().replace( this.cursorPlaceholder, '' ).replace( /\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>" ) );
-
-    },
     setTagMode: function () {
         if(this.custom.extended_tagmode) {
             this.setExtendedTagMode();
@@ -329,12 +216,14 @@ $.extend(UI, {
     },
     setExtendedTagMode: function () {
         this.body.addClass('tagmode-default-extended');
+        $(".tagModeToggle").addClass('active');
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = true;
         this.saveCustomization();
     },
     setCrunchedTagMode: function () {
         this.body.removeClass('tagmode-default-extended');
+        $(".tagModeToggle").removeClass('active');
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = false;
         this.saveCustomization();
@@ -404,42 +293,37 @@ $.extend(UI, {
         }
     },
     checkTagProximity: function () {
-        if(UI.editarea.html() == '') return false;
+        if(!UI.editarea || UI.editarea.html() == '') return false;
 
         var selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         var range = selection.getRangeAt(0);
         if(!range.collapsed) return true;
-        var nextEl = $(range.endContainer.nextElementSibling);
-        var prevEl = $(range.endContainer.previousElementSibling);
-        var tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
-        var coso = $.parseHTML(UI.editarea.html());
-        $.each(coso, function (index) {
-            if($(this).hasClass('test-invisible')) {
-                UI.numCharsUntilTagRight = 0;
-                UI.numCharsUntilTagLeft = 0;
-                nearTagOnRight = UI.nearTagOnRight(index+1, coso);
-                nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
+        var htmlEditarea = $.parseHTML(UI.editarea.html());
+        if (htmlEditarea) {
+            $.each(htmlEditarea, function (index) {
+                if($(this).hasClass('test-invisible')) {
+                    UI.numCharsUntilTagRight = 0;
+                    UI.numCharsUntilTagLeft = 0;
+                    var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
+                    var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
+                    if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
+                        (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
+                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                    }
                     UI.removeHighlightCorrespondingTags();
-                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else if((typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {//console.log('2');
-                    UI.removeHighlightCorrespondingTags();
-                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else {
-                    UI.removeHighlightCorrespondingTags();
+
+                    UI.numCharsUntilTagRight = null;
+                    UI.numCharsUntilTagLeft = null;
+                    UI.editarea.find('.test-invisible').remove();
+                    UI.editarea.get(0).normalize();
+                    return false;
                 }
-
-                UI.numCharsUntilTagRight = null;
-                UI.numCharsUntilTagLeft = null;
-                UI.editarea.find('.test-invisible').remove();
-                UI.editarea.get(0).normalize();
-                return false;
-            }
-        });
+            });
+        }
         // TODO test.inivisible break some doms with text
         $('body').find('.test-invisible').remove();
 
@@ -509,36 +393,41 @@ $.extend(UI, {
     // TAG MISMATCH
 	markTagMismatch: function(d) {
 
-        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
-            if(typeof d.tag_mismatch.source != 'undefined') {
-                $.each(d.tag_mismatch.source, function(index) {
-                    $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
-                        return $(this).text() === d.tag_mismatch.source[index];
-                    }).last().addClass('temp');
-                });
-            }
-            if(typeof d.tag_mismatch.target != 'undefined') {
-                $.each(d.tag_mismatch.target, function(index) {
-                    $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
-                        return $(this).text() === d.tag_mismatch.target[index];
-                    }).last().addClass('temp');
-                });
-            }
-
-            $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-            $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-            $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
-        } else {
-            $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
-                return $(this).text() === d.tag_mismatch.order[0];
-            }).addClass('order-error');
+        if( !_.isUndefined(d.tag_mismatch.source) && d.tag_mismatch.source.length > 0 ) {
+            $.each(d.tag_mismatch.source, function(index) {
+                $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+                    var clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === d.tag_mismatch.source[index];
+                }).last().addClass('temp');
+            });
+        }
+        if( !_.isUndefined(d.tag_mismatch.target) && d.tag_mismatch.target.length > 0 ) {
+            $.each(d.tag_mismatch.target, function(index) {
+                $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+                    var clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === d.tag_mismatch.target[index];
+                }).last().addClass('temp');
+            });
         }
 
+        $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+        $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+        $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+
+        if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
+            $( '#segment-' + d.id_segment + ' .editarea .locked' ).filter( function () {
+                var clone = $( this ).clone();
+                clone.find( '.inside-attribute' ).remove();
+                return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
+            } ).addClass( 'order-error' );
+        }
 	},	
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {
-		added = this.getPartialTagAutocomplete();
+		var added = this.getPartialTagAutocomplete();
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
@@ -574,6 +463,7 @@ $.extend(UI, {
 		return added;
 	},
 	openTagAutocompletePanel: function() {
+        var self = this;
         if(!UI.sourceTags.length) return false;
         $('.tag-autocomplete-marker').remove();
 
@@ -594,8 +484,9 @@ $.extend(UI, {
             }, []);
         };
         UI.sourceTags = arrayUnique(UI.sourceTags);
-        $.each(UI.sourceTags, function(index) {
-            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
+        $.each(UI.sourceTags, function(index, text) {
+            var textDecoded = UI.transformTextForLockTags(text);
+            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
         $('.tag-autocomplete').css('top', offset.top + addition);
         $('.tag-autocomplete').css('left', offset.left);
@@ -610,7 +501,7 @@ $.extend(UI, {
 	},
 
     hasSourceOrTargetTags: function ( segment ) {
-        return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
+        return ( $(segment).find( '.locked' ).length > 0 || (UI.sourceTags && UI.sourceTags.length > 0) )
     },
     hasMissingTargetTags: function ( segment ) {
         if ( segment.length == 0 ) return ;
@@ -660,6 +551,157 @@ $.extend(UI, {
     checkXliffTagsInText: function (text) {
         var reg = this.getXliffRegExpression();
         return reg.test(text);
+    },
+    /**
+     * Call from UI. events when clicking on a menu item to add tags
+     * @param tag: the jquery object of the chosen tag
+     */
+    chooseTagAutocompleteOption: function ($tag) {
+        if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
+        }
+        saveSelection();
+
+        // Todo: refactor this part
+        var editareaClone = UI.editarea.clone();
+        editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+        editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\>.+<\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
+        var ph = "";
+        if($('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
+            ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
+        }
+
+        $('.rangySelectionBoundary', editareaClone).remove();
+        $('.rangySelectionBoundary', $tag).remove();
+        $('br.end', $tag).remove();
+        $('.tag-autocomplete-endcursor', editareaClone).after(ph);
+        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html());
+        $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
+        UI.closeTagAutocompletePanel();
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        setTimeout(function () {
+            restoreSelection();
+        });
+        UI.segmentQA(UI.currentSegment);
+    },
+    /**
+     *
+     * This function is used before the text is sent to the server or to transform editArea content.
+     * @return Return a cloned element without tag inside
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
+    postProcessEditarea: function(context, selector) {
+        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
+        var area = $( selector, context ).clone();
+        area = this.transformPlaceholdersHtml(area);
+
+        area.find('span.space-marker').replaceWith(' ');
+        area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        area = this.encodeTagsWithHtmlAttribute(area);
+        return area.text();
+    },
+
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        $div = this.transformPlaceholdersHtml($div);
+
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    /**
+     * It does the same as postProcessEditarea function but does not remove the cursor span
+     * @param text
+     * @returns {*}
+     */
+
+    cleanTextFromPlaceholdersSpan: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        div = this.transformPlaceholdersHtml($div);
+        $div.find('span.space-marker').replaceWith(' ');
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
+
+    transformPlaceholdersHtml: function ($elem) {
+        var divs = $elem.find( 'div' );
+
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
+            $elem.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $elem.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $elem.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $elem.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+        }
+
+        $elem.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $elem.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+
+        return $elem;
+    },
+
+    /**
+     * This function is called to return the tag inside ph attribute 'equiv-text' to base64
+     * @param $elem
+     * @returns {*}
+     */
+    encodeTagsWithHtmlAttribute: function ($elem) {
+        $elem.find('.inside-attribute').remove();
+        return $elem;
+    },
+
+    handleSourceCopyEvent: function ( e ) {
+        var elem = $(e.target);
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
+            var cloneTag = tag.clone();
+            cloneTag.find('.inside-attribute').remove();
+            var text = cloneTag.text();
+            e.clipboardData.setData('text/plain', text);
+            e.preventDefault();
+        }
+    },
+    handleDragEvent: function ( e ) {
+        var elem = $(e.target);
+        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            var tag = elem.parent('span.locked:not(.inside-attribute)');
+            var cloneTag = tag.clone();
+            cloneTag.find('.inside-attribute').remove();
+            var text = htmlEncode(cloneTag.text());
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+        } else if (elem.hasClass('locked')) {
+            var text = htmlEncode(elem.text());
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+        }
+    },
+    /**
+     * When you click on a tag, it is selected and the selected class is added (ui.events->382).
+     * Clicking on the edititarea to remove the tags with the selected class that otherwise are
+     * removed the first time you press the delete key (ui.editarea-> 51 )
+     */
+    removeSelectedClassToTags: function (  ) {
+        UI.editarea.find('.locked.selected').removeClass('selected');
     }
 
 });

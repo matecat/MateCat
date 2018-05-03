@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
+
 class commentController extends ajaxController {
 
     protected $id_segment;
@@ -44,7 +46,7 @@ class commentController extends ajaxController {
         $this->job = getJobData( $this->__postInput[ 'id_job' ],
             $this->__postInput['password'] );
 
-        $this->checkLogin() ;
+        $this->readLoginInfo() ;
         if ( $this->userIsLogged ) {
             $this->loadUser();
         }
@@ -158,9 +160,13 @@ class commentController extends ajaxController {
 
     private function projectData() {
         if ( $this->project_data == null ) {
-            // FIXME: this is not optimal, should make use of DAO and
-            // return just one record, not an array of records.
-            $this->project_data = getProjectData( $this->job[ 'id_project' ] );
+
+            // FIXME: this is not optimal, should return just one record, not an array of records.
+            /**
+             * @var $projectData ShapelessConcreteStruct[]
+             */
+            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->job[ 'id_project' ] );
+
         }
 
         return $this->project_data ;
@@ -228,7 +234,7 @@ class commentController extends ajaxController {
 
     private function loadUser() {
         $userStruct = new Users_UserStruct();
-        $userStruct->uid = $this->uid;
+        $userStruct->uid = $this->user->uid;
 
         $userDao = new Users_UserDao( Database::obtain() ) ;
         $result = $userDao->read( $userStruct );

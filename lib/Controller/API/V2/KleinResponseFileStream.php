@@ -17,7 +17,10 @@ use Klein\DataCollection\ResponseCookieDataCollection;
 
 class KleinResponseFileStream  {
 
-    private $response ;
+    /**
+     * @var Response
+     */
+    protected $response ;
 
     public function __construct(Response $response )
     {
@@ -36,12 +39,14 @@ class KleinResponseFileStream  {
      * currently in the response body and replaces it with
      * the file's data
      *
-     * @param resource $filePointer      The pointer to the file to send
-     * @param string $filename  The file's name
-     * @param KleinController $controller  The MIME type of the file
+     * @param resource $filePointer The pointer to the file to send
+     * @param string   $filename    The file's name
+     * @param string   $mimeType
+     * @param string   $disposition
+     *
+     * @internal param KleinController $controller The MIME type of the file
      */
-    public function streamFileFromPointer( $filePointer, $filename = null )
-    {
+    public function streamFileFromPointer( $filePointer, $filename = null, $mimeType , $disposition ) {
 
         $this->response->body('');
         $this->response->noCache();
@@ -50,8 +55,8 @@ class KleinResponseFileStream  {
             $filename = FilesStorage::basename_fix( $filename );
         }
 
-        $this->response->header('Content-type', "application/download" );
-        $this->response->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $this->response->header('Content-type', $mimeType );
+        $this->response->header('Content-Disposition', $disposition . '; filename="'.$filename.'"');
         $this->response->header('Expires', "0" );
         $this->response->header('Connection', "close" );
 
@@ -62,6 +67,15 @@ class KleinResponseFileStream  {
         }
 
         fclose( $filePointer );
+
+    }
+
+    public function streamFileDownloadFromPointer( $filePointer, $filename = null ){
+        $this->streamFileFromPointer( $filePointer, $filename, "application/download", 'attachment' );
+    }
+
+    public function streamFileInlineFromPointer( $filePointer, $filename, $mimeType  ){
+        $this->streamFileFromPointer( $filePointer, $filename, $mimeType, 'inline' );
     }
 
 }

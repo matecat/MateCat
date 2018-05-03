@@ -25,7 +25,7 @@ if ( MBC.enabled() )
         var customUserName = null;
         var lastCommentHash = null;
 
-        var tpls;
+        var tpls = MBC.const.tpls;
 
         var initConstants = function () {
             tpls = MBC.const.tpls;
@@ -652,7 +652,7 @@ if ( MBC.enabled() )
             }
         });
 
-        $( document ).on( 'ready', function () {
+        $( document ).ready( function () {
             initConstants();
 
             // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
@@ -846,6 +846,7 @@ if ( MBC.enabled() )
             if ( $( '.mbc-history-balloon-outer' ).hasClass('mbc-visible') ) {
                 UI.closeAllMenus(ev);
             } else {
+                UI.closeAllMenus(ev);
                 $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
             }
         } );

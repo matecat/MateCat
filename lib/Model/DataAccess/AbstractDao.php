@@ -515,7 +515,14 @@ abstract class DataAccess_AbstractDao {
 
         $attrs = $struct->attributes();
 
-        $fields = isset( $options['fields'] ) ? $options['fields'] : null ;
+        $fields = [];
+
+        if ( isset( $options['fields'] ) ) {
+            if ( !is_array( $options['fields'] )) {
+                throw new Exception('`fields` must be an array' );
+            }
+            $fields = $options['fields'] ;
+        }
 
         $sql = " UPDATE " . static::TABLE;
         $sql .= " SET " . static::buildUpdateSet( $attrs, $fields );
@@ -584,11 +591,24 @@ abstract class DataAccess_AbstractDao {
         }
     }
 
+    /**
+     * Normally, insertStruct strips any field_defined as auto_increment because it relies on MySQL
+     * AUTO_INCREMENT. This method allows for auto_increment fields (e.g. `id` field) to be treated as
+     * any other field in the struct.
+     *
+     * Use this method when you want to pass the id field, for instance when it comes from a generated sequence.
+     *
+     * @param       $struct
+     * @param array $options
+     *
+     * @return bool|string
+     */
     public static function insertStructWithAutoIncrements( $struct, $options = [] ) {
         $auto_increment_fields = static::$auto_increment_fields ;
         static::$auto_increment_fields = [] ;
-        self::insertStruct( $struct, $options ) ;
+        $id = self::insertStruct( $struct, $options ) ;
         static::$auto_increment_fields =  $auto_increment_fields ;
+        return $id ;
     }
 
     /**

@@ -23,7 +23,7 @@ class TranslationIssueComment {
     /**
      * @return array
      */
-    public function renderArray( $array ) {
+    public function render( $array ) {
         $out = array();
         foreach ( $array as $record ) {
             $out[] = $this->renderItem( $record );

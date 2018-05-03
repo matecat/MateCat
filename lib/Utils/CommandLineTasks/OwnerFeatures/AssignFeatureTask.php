@@ -27,7 +27,7 @@ class AssignFeatureTask extends Command {
                 ->setName( 'features:assign' )
                 ->setDescription( 'Adds feature to a user or a team.' )
                 ->addArgument( 'user_or_team_id', InputArgument::REQUIRED, 'Id of the user to assign the feature to. Default is user id.' )
-                ->addArgument( 'features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ', Features::$VALID_CODES ) )
+                ->addArgument( 'features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ', Features::getValidCodes() ) )
                 ->addOption( 'email', 'e', null, 'Find user by email instead of uid' )
                 ->addOption( 'team', 't', null, 'Take the input id as a team id' )
                 ->addOption( 'force', 'f', null, 'Force the name of a feature even if validation fails' );
@@ -56,6 +56,14 @@ class AssignFeatureTask extends Command {
 
             $insert = $featureDao->create( new OwnerFeatures_OwnerFeatureStruct( $values ) );
         }
+
+        /*
+         * WARNING: this works only with --email option or UID and not with --id_team option
+         */
+        if( isset( $reference[ 'UserStruct' ] ) ){
+            $featureDao->destroyCacheByIdCustomer( $reference[ 'UserStruct' ]->email );
+        }
+
     }
 
     private function __getReference( InputInterface $input ) {
@@ -82,13 +90,13 @@ class AssignFeatureTask extends Command {
                 throw new Exception( 'user not found' );
             }
 
-            return array( 'uid' => $user->uid, 'id_team' => null );
+            return array( 'uid' => $user->uid, 'id_team' => null, 'UserStruct' => $user );
         }
     }
 
     private function __validateFeatures( $features ) {
         foreach ( $features as $k ) {
-            if ( !in_array( $k, Features::$VALID_CODES ) ) {
+            if ( !in_array( $k, Features::getValidCodes() ) ) {
                 throw  new Exception( 'feature ' . $k . ' is not valid' );
             }
         }

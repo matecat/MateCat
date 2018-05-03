@@ -1,0 +1,272 @@
+#review-side-panel.review-extended-panel {
+	overflow: auto !important;
+	padding-bottom: 84px;
+	top: 16px;
+}
+#review-side-panel.review-extended-panel h4 {
+	margin: unset;
+}
+
+h1, h2, h3, h4, h5, a, input {
+	font-family: Calibri, Arial, Helvetica, sans-serif !important;
+}
+.review-extended-panel {
+	position: absolute !important;
+	background: #efeef4 !important;
+	h4 {
+		padding: 10px;
+	}
+	.re-wrapper{
+		.re-version-diff {
+			display: none;
+			position: relative;
+			padding: 10px;
+			.re-header-track {
+
+				.explain-selection {
+					padding: 5px 10px 0;
+				}
+			}
+		}
+		.re-issues {
+			padding: 10px 10px 0;
+			background: #dedde4;
+			position: relative;
+			.re-issues-inner{
+				overflow-y: auto;
+			}
+			.issues-list-title {
+				margin-bottom: 5px;
+				padding-left: 10px;
+				font-weight: 700;
+			}
+			.issues-list {
+				position: relative;
+				max-height: 260px;
+				.issue-item {
+					.issue {
+						background: #FFFFFF;
+						padding: 5px 5px 5px 10px;
+						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+						.issue-head {
+							width: 50%;
+							display: inline-block;
+							vertical-align: middle;
+							.issue-number, .issue-title, .issue-severity {
+								display: inline-block;
+							}
+							.issue-title {
+								font-weight: 700;
+							}
+						}
+						.issue-activity-icon {
+							width: 50%;
+							display: inline-block;
+							vertical-align: top;
+							text-align: right;
+							button {
+								padding: 3px;
+								text-align: center;
+								margin-right: 5px;
+								background: transparent;
+								box-shadow: 0 0 0 1px #BCBCBC inset;
+								border: none;
+								outline: none;
+								&.re-active {
+									background: #e9e9e9;
+									i {
+										color: #333333;
+									}
+								}
+								&:hover {
+									box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset;
+									i {
+										color: #333333;
+									}
+								}
+								&:active {
+									background: #e3e3e3;
+								}
+								&:focus {
+									box-shadow: 0 0 0 1px #96C8DA inset;
+								}
+								&:last-child {
+									margin-right: 0;
+								}
+								i {
+									margin-right: 0;
+									color: grey;
+								}
+								&.re-message {
+									i {
+										color: #7cc576;
+									}
+									&:hover {
+										i {
+											color: #65a060;
+										}
+									}
+								}
+							}
+
+							.trash {
+
+							}
+							.message {
+
+							}
+							.view-changes {
+
+							}
+						}
+					}
+					.selected-text {
+						background: #FFFFFF;
+						padding: 5px 10px;
+						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+					}
+					.issue-date {
+						color: gray;
+						font-size: 12px;
+						padding: 3px 5px 5px;
+						text-align: right;
+					}
+				}
+			}
+		}
+		.re-warning-not-added-issue {
+			padding: 10px;
+			p {
+				padding: 10px;
+				background: #f05148;
+				color: #ffffff;
+				font-size: 16px;
+			}
+		}
+		.re-create-issue {
+			padding: 10px;
+			position: relative;
+			.accordion {
+				h4{
+					cursor: pointer;
+					-webkit-touch-callout: none;
+					-webkit-user-select: none;
+					-khtml-user-select: none;
+					-moz-user-select: none;
+					-ms-user-select: none;
+					user-select: none;
+				}
+				.create-issue-title {
+					i.icon-sort-up.icon {
+					position: relative;
+					top: 5px;
+					}
+				}
+
+				.error-list {
+					.error-item {
+						line-height: 40px;
+						padding: 0 10px;
+						box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+						background: #ffffff;
+						.error-name {
+							width: 80%;
+							display: inline-block;
+							line-height: 20px;
+							vertical-align: middle;
+						}
+						.error-level {
+							/*display: none;*/
+							display: inline-block;
+							width: 20%;
+							text-align: right;
+							.ui.dropdown {
+								width: 30px;
+								height: 30px;
+								vertical-align: middle;
+								padding: 0;
+								text-align: center;
+								background: transparent;
+								/*line-height: 30px;*/
+								i {
+									vertical-align: middle;
+								}
+								&:hover {
+									box-shadow: inset 0 0 1px black;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+	.re-track-changes, .re-add-comment, .re-comment-list {
+		padding: 5px 10px;
+		font-size: 18px;
+		background: #f0f2f5;
+		color: #787878;
+		box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+	}
+    .re-track-changes {
+        .added {
+            background: #b0ffb3;
+            text-decoration: none;
+            color: #000;
+        }
+        .deleted {
+            background: #ffc7ca;
+            text-decoration: line-through;
+            color: #000;
+        }
+        &::selection {
+            background-color: #FFFF00;
+        }
+        &.no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        &.head {
+			min-height: 65px;
+			padding: 10px;
+			word-wrap: break-word;
+        }
+    }
+	.re-add-comment {
+		.re-comment-input {
+			border-radius: 20px !important;
+			padding: 5px 10px !important;
+			margin: 5px 0 !important;
+			&:focus {
+				border-radius: 20px;
+			}
+		}
+	}
+	.re-comment-list {
+		font-size: 14px;
+		background: #ffffff;
+		.re-comment {
+			margin-bottom: 0;
+			.re-revisor {
+				color: #00b76c;
+			}
+			.re-translator {
+				color: #0997bc;
+			}
+			.re-comment-date{
+				font-size: 13px;
+			}
+		}
+	}
+    .selected {
+		display: inline-block;
+		background-color: #FFFF00;
+		padding: 0 4px;
+		margin: 0 5px;
+    }
+}

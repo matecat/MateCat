@@ -2,6 +2,7 @@
 
 namespace Features ;
 use BasicFeatureStruct;
+use Exception;
 use INIT;
 use Klein\Klein;
 use Monolog\Logger;
@@ -9,8 +10,11 @@ use Monolog\Handler\StreamHandler;
 
 
 use ReflectionClass ;
+use LogicException;
 
-abstract class BaseFeature  {
+abstract class BaseFeature implements IBaseFeature {
+
+    const FEATURE_CODE = null;
 
     protected $feature;
 
@@ -18,7 +22,30 @@ abstract class BaseFeature  {
 
     private $logger_name ;
 
+    /**
+     * @var bool This property defines if the feature is automatically active when projects are created,
+     *           or if it requires an explicit activation from the user when the project is created.
+     */
     protected $autoActivateOnProject = true ;
+
+    protected static $dependencies = [];
+
+    protected static $conflictingDependencies = [];
+
+    /**
+     * @return array
+     */
+    public static function getConflictingDependencies() {
+        return static::$conflictingDependencies;
+    }
+
+    public static function getConfig() {
+        $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
+        if ( ! file_exists( $config_file_path ) ) {
+            throw new Exception('Config file not found', 500 );
+        }
+        return parse_ini_file( $config_file_path ) ;
+    }
 
     /**
      * Warning: passing a $projectStructure prevents the possibility to pass
@@ -31,12 +58,18 @@ abstract class BaseFeature  {
      * @param BasicFeatureStruct $feature
      */
     public function __construct( BasicFeatureStruct $feature ) {
+        $fCode = static::FEATURE_CODE;
+        if( empty( $fCode ) ) throw new LogicException( "Plugin code not defined." );
         $this->feature = $feature ;
         $this->logger_name = $this->feature->feature_code . '_plugin' ;
     }
 
-    public function autoActivateOnProject() {
+    public function isAutoActivableOnProject() {
         return $this->autoActivateOnProject ;
+    }
+
+    public static function getDependencies() {
+        return static::$dependencies ;
     }
 
     // gets a feature specific logger

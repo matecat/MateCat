@@ -80,7 +80,7 @@ if ( ProjectCompletion.enabled() ) {
         button.removeClass('isMarkableAsComplete isMarkedComplete');
         button.addClass('notMarkedComplete');
 
-        if ( isClickableStatus( stats ) ) {
+        if ( UI.isMarkedAsCompleteClickable( stats ) ) {
             button.addClass('isMarkableAsComplete');
             button.removeAttr('disabled');
         } else {
@@ -142,7 +142,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var messageForClickOnReadonly = function( section ) {
-        if ( translateAndReadonly() ) {
+        if ( UI.translateAndReadonly()) {
             return 'This job is currently under review. Segments are in read-only mode.';
         }
         else {
@@ -151,7 +151,7 @@ if ( ProjectCompletion.enabled() ) {
     };
 
     var isReadonlySegment = function( segment ) {
-        return translateAndReadonly() || original_isReadonlySegment( segment ) ;
+        return UI.translateAndReadonly() || original_isReadonlySegment( segment ) ;
     }
 
     var original_isReadonlySegment = UI.isReadonlySegment ;
@@ -174,10 +174,35 @@ if ( ProjectCompletion.enabled() ) {
 
     var markJobAsComplete = function (  ) {
         if ( config.isReview ) {
-            clickMarkAsCompleteForReview();
+            UI.clickMarkAsCompleteForReview();
         } else {
-            clickMarkAsCompleteForTranslate();
+            UI.clickMarkAsCompleteForTranslate();
         }
+    };
+
+    var clickOnMarkAsComplete = function (  ) {
+        if ( !button.hasClass('isMarkableAsComplete') ) {
+            return;
+        }
+        if (UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length > 0) {
+            UI.showFixWarningsModal();
+            return;
+        } else {
+            UI.markJobAsComplete()
+        }
+        $(document).trigger('sidepanel:close');
+    };
+
+    var showFixWarningsModal = function (  ) {
+        APP.confirm({
+            name: 'markJobAsComplete', // <-- this is the name of the function that gets invoked?
+            cancelTxt: 'Fix errors',
+            onCancel: 'goToFirstError',
+            callback: 'markJobAsComplete',
+            okTxt: 'Mark as complete',
+            msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
+            ' underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> '
+        });
     };
 
     $.extend( UI, {
@@ -186,7 +211,12 @@ if ( ProjectCompletion.enabled() ) {
         isReadonlySegment         : isReadonlySegment,
         messageForClickOnReadonly : messageForClickOnReadonly,
         handleClickOnReadOnly     : handleClickOnReadOnly,
-        markJobAsComplete         : markJobAsComplete
+        markJobAsComplete         : markJobAsComplete,
+        isMarkedAsCompleteClickable: isClickableStatus,
+        translateAndReadonly      : translateAndReadonly,
+        clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
+        clickMarkAsCompleteForReview : clickMarkAsCompleteForReview,
+        showFixWarningsModal : showFixWarningsModal
     });
 
 
@@ -209,6 +239,11 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var checkCompletionOnReady = function (  ) {
+        UI.translateAndReadonly() && showTranslateWarningMessage();
+        evalReviseNotice();
+    };
+
     $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
         e.preventDefault();
 
@@ -223,7 +258,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     var evalReviseNotice = function() {
-        if ( config.isReview && config.job_completion_current_phase == 'translate' ) {
+        if ( config.isReview && config.job_completion_current_phase == 'translate' && config.job_marked_complete == 0 ) {
             warningNotification = APP.addNotification({
                 type: 'warning',
                 title: 'Warning',
@@ -236,35 +271,15 @@ if ( ProjectCompletion.enabled() ) {
 
     $(document).on('click', '#markAsCompleteButton', function(ev) {
         ev.preventDefault();
-        if ( !button.hasClass('isMarkableAsComplete') ) {
-            return;
-        }
-        if (UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length > 0) {
-            APP.confirm({
-                name: 'markJobAsComplete', // <-- this is the name of the function that gets invoked?
-                cancelTxt: 'Fix errors',
-                onCancel: 'goToFirstError',
-                callback: 'markJobAsComplete',
-                okTxt: 'Mark as complete',
-                msg: 'Unresolved tag issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
-                ' underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> '
-            });
-            return;
-        } else {
-            UI.markJobAsComplete()
-        }
-        $(document).trigger('sidepanel:close');
-
-
+        clickOnMarkAsComplete();
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
         evalSendButtonStatus( data.stats );
     });
 
-    $(document).on('ready',  function() {
-        translateAndReadonly() && showTranslateWarningMessage();
-        evalReviseNotice();
+    $(document).ready(function() {
+        checkCompletionOnReady()
     });
 
 

@@ -13,7 +13,9 @@ namespace API\V2\Json;
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
+use DataAccess\ShapelessConcreteStruct;
 use Langs_Languages;
+use Langs_LanguageDomains;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use Routes;
@@ -108,9 +110,13 @@ class Job {
 
         $lang_handler = Langs_Languages::getInstance();
 
-        $warningsCount = $jStruct->getWarningsCount();
+        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subjects        = $subject_handler->getEnabledDomains();
 
-        $project = $jStruct->getProject();
+        $subjects_keys = Utils::array_column( $subjects, "key" );
+        $subject_key   = array_search( $jStruct->subject, $subjects_keys );
+
+        $warningsCount = $jStruct->getWarningsCount();
 
         $result = [
                 'id'                    => (int)$jStruct->id,
@@ -121,6 +127,7 @@ class Job {
                 'targetTxt'             => $lang_handler->getLocalizedName( $jStruct->target ),
                 'status'                => $jStruct->status_owner,
                 'subject'               => $jStruct->subject,
+                'subject_printable'     => $subjects[$subject_key]['display'],
                 'owner'                 => $jStruct->owner,
                 'open_threads_count'    => (int)$jStruct->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $jStruct->create_date ),
@@ -136,15 +143,6 @@ class Job {
                 'outsource'             => $outsource,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$jStruct->total_raw_wc,
-                'urls'                  => [
-                        'translate' => Routes::translate(
-                                $project->name,
-                                $jStruct->id,
-                                $jStruct->password,
-                                $jStruct->source,
-                                $jStruct->target
-                        )
-                ],
                 'quality_summary'       => [
                         'equivalent_class' => $jStruct->getQualityInfo(),
                         'quality_overall'  => $jStruct->getQualityOverall(),
@@ -152,21 +150,20 @@ class Job {
                 ]
         ];
 
-        if ( !$project->isFeatureEnabled( \Features::REVIEW_IMPROVED ) ) {
 
-            $reviewChunk = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                    $jStruct->id, $jStruct->password
-            );
+        $project = $jStruct->getProject();
 
-            $result[ 'urls' ][ 'revise' ] = Routes::revise(
-                    $project->name,
-                    $jStruct->id,
-                    ( !empty( $reviewChunk ) ? $reviewChunk->review_password : $jStruct->password ),
-                    $jStruct->source,
-                    $jStruct->target
-            );
+        /**
+         * @var $projectData ShapelessConcreteStruct[]
+         */
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
-        }
+        $formatted = new ProjectUrls( $projectData );
+
+        /** @var $formatted ProjectUrls */
+        $formatted = $project->getFeatures()->filter( 'projectUrls', $formatted );
+
+        $result[ 'urls' ] = $formatted->render( true )[ 'jobs' ][ $jStruct->id ][ 'chunks' ][ $jStruct->password ];
 
         return $result;
 

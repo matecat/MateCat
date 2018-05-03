@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers Chunks_ChunkDao::getByJobIdProjectAndIdJob
+ * @covers Chunks_ChunkDao::getByIdProjectAndIdJob
  * User: dinies
  * Date: 30/06/16
  * Time: 19.01
@@ -46,12 +46,12 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers Chunks_ChunkDao::getByJobIdProjectAndIdJob
+     * @covers Chunks_ChunkDao::getByIdProjectAndIdJob
      */
     function test_getByJobId()
     {
         $expected_chunk= $this->test_initializer->getJob();
-        $wrapped_result=$this->chunk_Dao->getByJobIdProjectAndIdJob($this->project['id'],$this->job['id']);
+        $wrapped_result=$this->chunk_Dao->getByIdProjectAndIdJob($this->project['id'],$this->job['id']);
         $result= $wrapped_result['0'];
         $this->assertTrue($result instanceof Chunks_ChunkStruct);
         $this->assertEquals($expected_chunk['id'],$result['id']);

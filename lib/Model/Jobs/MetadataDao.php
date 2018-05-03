@@ -22,7 +22,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
             'id_job' => $id_job,
             'key' => $key
         ] );
-        return @$result;
+        return $result;
     }
 
     public function destroyCacheByJobId( $id_job, $key ){

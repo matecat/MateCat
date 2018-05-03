@@ -6,29 +6,52 @@
  *
  */
 
+use AbstractControllers\IController;
+
 /**
  * Abstract Class controller
  */
-abstract class controller {
+abstract class controller implements IController {
 
     protected $model;
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
     /**
      * @var Users_UserStruct
-     * @deprecated Use getUser method instead
      */
-    protected $logged_user;
+    protected $user;
 
     protected $uid;
     protected $userIsLogged = false;
-    protected $userMail;
+
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet() {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featuresSet ) {
+        $this->featureSet = $featuresSet;
+
+        return $this;
+    }
 
     /**
      * @return Users_UserStruct
      */
-    public function getLoggedUser() {
-        return $this->logged_user;
+    public function getUser() {
+        return $this->user;
     }
 
     /**
@@ -49,11 +72,8 @@ abstract class controller {
             }
 
             $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
+            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', function ( $c ) { return strtoupper( $c[ 1 ] ); }, $_REQUEST[ 'action' ] );
 
-            //PHP 5.2 compatibility, don't use a lambda function
-            $func                 = create_function( '$c', 'return strtoupper($c[1]);' );
-
-            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', $func, $_REQUEST[ 'action' ] );
             $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
 
             //set the log to the API Log
@@ -122,21 +142,25 @@ abstract class controller {
 
     public function setUserCredentials() {
 
-        $this->logged_user        = new Users_UserStruct();
-        $this->logged_user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->logged_user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->user        = new Users_UserStruct();
+        $this->user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
 
         try {
-            $userDao           = new Users_UserDao( Database::obtain() );
-            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[ 0 ]; // one hour cache
-            $this->logged_user = ( !empty( $loggedUser ) ? $loggedUser : $this->logged_user );
+
+            $userDao    = new Users_UserDao( Database::obtain() );
+            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
+            $this->userIsLogged = (
+                    !empty( $loggedUser->uid ) &&
+                    !empty( $loggedUser->email ) &&
+                    !empty( $loggedUser->first_name ) &&
+                    !empty( $loggedUser->last_name )
+            );
+
         } catch ( Exception $e ) {
             Log::doLog( 'User not logged.' );
         }
-
-        $this->userIsLogged = ( !empty( $this->logged_user->email ) );
-        $this->uid          = $this->logged_user->getUid();
-        $this->userMail     = $this->logged_user->getEmail();
+        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 
     }
 
@@ -152,6 +176,27 @@ abstract class controller {
                 $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
             }
         }
+    }
+
+    public function readLoginInfo( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        self::sessionStart();
+        $this->_setUserFromAuthCookie();
+        $this->setUserCredentials();
+
+        if ( $close ) {
+            self::disableSessions();
+        }
+
+    }
+
+    /**
+     * isLoggedIn
+     *
+     * @return bool
+     */
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
 }

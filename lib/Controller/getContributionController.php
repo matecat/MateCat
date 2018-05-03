@@ -26,8 +26,6 @@ class getContributionController extends ajaxController {
      */
     private $jobData;
 
-    private $feature_set;
-
     private $__postInput = array();
 
     public function __construct() {
@@ -65,8 +63,6 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
-
-        $this->feature_set = new FeatureSet();
 
     }
 
@@ -107,6 +103,8 @@ class getContributionController extends ajaxController {
 
             return -1;
         }
+
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /*
          * string manipulation strategy
@@ -210,7 +208,7 @@ class getContributionController extends ajaxController {
             }
 
             //get job's TM keys
-            $this->checkLogin();
+            $this->readLoginInfo();
 
             try{
 
@@ -218,7 +216,7 @@ class getContributionController extends ajaxController {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 
-                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->user->uid, $this->userRole );
 
                 if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                     foreach ( $tm_keys as $tm_key ) {
@@ -246,7 +244,7 @@ class getContributionController extends ajaxController {
             $config = $mt_engine->getConfigStruct();
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
-            $config = $this->feature_set->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+            $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
 
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
@@ -353,9 +351,9 @@ class getContributionController extends ajaxController {
             } else {
 
                 $uid = null;
-                $this->checkLogin();
+                $this->readLoginInfo();
                 if($this->userIsLogged){
-                    $uid = $this->uid;
+                    $uid = $this->user->uid;
                 }
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                         $match,
@@ -365,7 +363,7 @@ class getContributionController extends ajaxController {
                 );
             }
 
-            $match = $this->_iceMatchRewrite( $match );
+            $match = $this->_matchRewrite( $match );
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
                 $match[ 'sentence_confidence' ] = round( $match[ 'sentence_confidence' ], 0 ) . "%";
@@ -385,8 +383,9 @@ class getContributionController extends ajaxController {
         $this->result[ 'data' ][ 'matches' ] = $matches;
     }
 
-    protected function _iceMatchRewrite( $match ){
+    protected function _matchRewrite( $match ){
 
+        //Rewrite ICE matches as 101%
         if( $match[ 'match' ] == '100%' ){
             list( $lang, ) = explode( '-', $this->jobData[ 'target' ] );
             if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ){
@@ -394,6 +393,9 @@ class getContributionController extends ajaxController {
             }
             //else do not rewrite the match value
         }
+
+        //Allow the plugins to customize matches
+        $match = $this->featureSet->filter( 'matchRewriteForContribution', $match );
 
         return $match;
 
@@ -409,9 +411,9 @@ class getContributionController extends ajaxController {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
                 } else {
                     $uid = null;
-                    $this->checkLogin();
+                    $this->readLoginInfo();
                     if($this->userIsLogged){
-                        $uid = $this->uid;
+                        $uid = $this->user->uid;
                     }
                     $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                             $m,
@@ -431,10 +433,18 @@ class getContributionController extends ajaxController {
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
+            $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
+            $statuses = $this->featureSet->filter('filterSetSuggestionReportStatuses', $statuses );
+
+            $statuses_condition = implode(' OR ', array_map( function($status) {
+                return " status = '$status' " ;
+            }, $statuses ) ) ;
+
+            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " AND ( $statuses_condition ) ";
 
             $db = Database::obtain();
 

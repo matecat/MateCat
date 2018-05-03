@@ -13,7 +13,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
     var clickOnRebutted = function(sid) {
         var el = UI.Segment.findEl(sid);
-        el.removeClass('modified');
+        SegmentActions.removeClassToSegment(sid, 'modified');
         UI.changeStatus(el, 'rebutted', true);
         UI.gotoNextSegment();
     };
@@ -24,7 +24,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
             return ;
         }
 
-        el.removeClass('modified');
+        SegmentActions.removeClassToSegment(sid, 'modified');
         el.data('modified',  false);
         UI.changeStatus(el, 'fixed', true);
         UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
@@ -48,13 +48,10 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
         bindShortcuts: function() {
             originalBindShortcuts();
-            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, handleKeyPressOnMainButton );
-            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes.standard, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes.mac, handleKeyPressOnMainButton );
         },
 
-        showRevisionStatuses : function() {
-            return false;
-        },
         cleanupLegacyButtons : function( segment ) {
             var segObj ;
 

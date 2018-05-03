@@ -11,6 +11,7 @@ namespace API\V2\Json;
 
 
 use ActivityLog\ActivityLogStruct;
+use FeatureSet;
 
 class Activity {
     /**
@@ -25,7 +26,7 @@ class Activity {
     public function render() {
         $out = [];
 
-        $featureSet = new \FeatureSet();
+        $featureSet = new FeatureSet();
 
         /**
          * @var $record ActivityLogStruct

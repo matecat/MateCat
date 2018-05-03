@@ -109,12 +109,14 @@ class INIT {
      * DQF configuration
      *
      */
-    public static $DQF_ENABLED = true;
     public static $DQF_BASE_URL;
     public static $DQF_ID_PREFIX = '' ;
     public static $DQF_API_KEY;
     public static $DQF_ENCRYPTION_KEY;
     public static $DQF_ENCRYPTION_IV ;
+
+    public static $DQF_GENERIC_USERNAME ;
+    public static $DQF_GENERIC_PASSWORD ;
 
     /**
      * We proose that lxq_server is in a configuration file
@@ -269,10 +271,10 @@ class INIT {
 
     public function __construct(){
 
-        self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
-        self::$OAUTH_CLIENT_SECRET   = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
-        self::$OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
-        self::$OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
+        self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
+        self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
+        self::$OAUTH_CLIENT_APP_NAME = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
+        self::$OAUTH_BROWSER_API_KEY = @INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
 
@@ -396,7 +398,13 @@ class INIT {
 
     public static $PLUGIN_LOAD_PATHS = array();
 
+    /**
+     * @deprecated use AUTOLOAD_PLUGINS
+     * @var array
+     */
     public static $MANDATORY_PLUGINS = array();
+
+    public static $AUTOLOAD_PLUGINS = [] ;
 
     /**
      * Definitions for the asynchronous task runner

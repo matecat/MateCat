@@ -121,7 +121,23 @@ th.headerSortDown, th.tablesorter-headerDesc {
 
 .api .block-swagger {
     margin-top: -20px;
+    background: #fafafa;
 }
+
+/* Bruteforce Override style.css and legacy.min.css */
+section {
+    float: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+.swagger-ui .wrapper {
+    padding: 20px !important;
+}
+.scheme-container {
+    padding: 12px 0 !important;
+}
+/* Bruteforce Override style.css and legacy.min.css */
 
 .api a {
     color: #39699a;
@@ -133,10 +149,6 @@ th.headerSortDown, th.tablesorter-headerDesc {
 
 .api a:hover {
     text-decoration: none;
-}
-
-#contentBox pre {
-    background: #fbfbfb;
 }
 
 #contentBox pre.literal-block {
@@ -232,10 +244,6 @@ ul.office {
     -moz-column-count: 5;
     text-align: left;
     line-height: 30px;
-}
-
-.api .block:last-child {
-    min-height: 20px;
 }
 
 .fileformat th {

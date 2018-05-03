@@ -75,7 +75,7 @@ class downloadTMXController extends ajaxController {
         /**
          * Retrieve user information
          */
-        $this->checkLogin();
+        $this->readLoginInfo();
 
         $filterArgs = array(
                 'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -133,8 +133,6 @@ class downloadTMXController extends ajaxController {
             exit;
         }
 
-        $this->user = $this->logged_user;
-
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
         $this->tmxHandler->setName( $this->tm_name );
@@ -170,7 +168,7 @@ class downloadTMXController extends ajaxController {
                 $activity->id_job     = $this->id_job;
                 $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
                 $activity->ip         = Utils::getRealIpAddr();
-                $activity->uid        = $this->uid;
+                $activity->uid        = $this->user->uid;
                 $activity->event_date = date( 'Y-m-d H:i:s' );
                 Activity::save( $activity );
             */
@@ -180,7 +178,7 @@ class downloadTMXController extends ajaxController {
             $r = "<pre>";
 
             $r .= print_r( "User Email: " . $this->download_to_email, true ) . "\n";
-            $r .= print_r( "User ID: " . $this->uid, true ) . "\n";
+            $r .= print_r( "User ID: " . $this->user->uid, true ) . "\n";
             $r .= print_r( $e->getMessage(), true ) . "\n";
             $r .= print_r( $e->getTraceAsString(), true ) . "\n";
 

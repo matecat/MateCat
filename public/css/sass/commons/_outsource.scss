@@ -12,7 +12,7 @@
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
-        padding: 5px 40px !important;
+        padding: 5px 35px 5px 40px !important;
         z-index: 1;
         .job-id {}
         .source-target {
@@ -32,6 +32,14 @@
             font-weight: 700;
             font-size: 16px;
         }
+        .project-subject {
+            display: inline-block;
+            line-height: 30px;
+            position: relative;
+            top: 2px;
+            font-size: 16px;
+            float: right;
+        }
     }
     &.transitionOutsource-enter {
         height: 0;
@@ -43,7 +51,7 @@
     }
 
     &.no-outsource.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 179px;
+        height: 140px;
         -webkit-transition: all .3s ease;
     }
 
@@ -608,7 +616,7 @@
                                     box-shadow: inset 0 1px 3px #ddd;
                                     border: 1px solid #ccc;
                                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                                    border-radius: 2px
+                                    border-radius: 2px;
                                     &:focus {
                                         border-color: #85B7D9;
                                     }

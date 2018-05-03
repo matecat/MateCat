@@ -21,12 +21,12 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
     protected function _buildResult( $result_array ) {}
 
     public function archiveQualityReport( ArchivedQualityReportStruct $report ) {
-        self::insertStruct( $report, [ 'no_nulls' => true ] );
+        return self::insertStruct( $report, [ 'no_nulls' => true ] );
     }
 
     /**
      * @param Chunks_ChunkStruct $chunk
-     * @param                    $versionNumbero
+     * @param                    $versionNumber
      * @return ArchivedQualityReportStruct
      */
     public function getByChunkAndVersionNumber( Chunks_ChunkStruct $chunk, $versionNumber ) {

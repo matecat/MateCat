@@ -23,7 +23,7 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "http://api.microsofttranslator.com/v2/Http.svc/";
+    public $base_url = "https://api.microsofttranslator.com/v2/Http.svc/";
 
     /**
      * @var string
@@ -34,7 +34,7 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
      * @var array
      */
     public $others = array(
-            'oauth_url' => 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/'
+            'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
     );
 
     /**

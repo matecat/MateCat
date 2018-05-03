@@ -11,6 +11,7 @@ namespace API\V2\Json;
 
 use Chunks_ChunkStruct;
 use Constants_JobStatus;
+use DataAccess\ShapelessConcreteStruct;
 use Projects_ProjectStruct;
 use Utils;
 
@@ -76,7 +77,7 @@ class Project {
      */
     public function renderItem( Projects_ProjectStruct $data ) {
 
-        $jobs = $data->getJobs(); //cached
+        $jobs = $data->getJobs(60 * 10 ); //cached
 
         $jobJSONs    = [];
         $jobStatuses = [];
@@ -119,7 +120,8 @@ class Project {
                 'features'             => implode( ",", $data->getFeatures()->getCodes() ),
                 'is_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
                 'is_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
-                'remote_file_service'  => $data->getRemoteFileServiceName()
+                'remote_file_service'  => $data->getRemoteFileServiceName(),
+                'due_date'             => Utils::api_timestamp( $data->due_date )
         ];
 
         return $projectOutputFields;

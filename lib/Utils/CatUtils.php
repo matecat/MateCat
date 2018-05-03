@@ -144,7 +144,8 @@ class CatUtils {
 
         if( !function_exists( 'callback_decode' ) ){
             function callback_decode( $matches ) {
-                return LTPLACEHOLDER . base64_decode( $matches[1] ) . GTPLACEHOLDER;
+                $_match =  base64_decode( $matches[1] );
+                return LTPLACEHOLDER . $_match . GTPLACEHOLDER;
             }
         }
 
@@ -157,6 +158,12 @@ class CatUtils {
 
     private static function restore_xliff_tags($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/[\'"]base64:(.+)[\'"]/U', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/[\'"]base64:(.+)[\'"]/U', '"' . base64_decode( $tag_attribute[ 1 ] ) . '"', $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(GTPLACEHOLDER, ">", $segment);
         return $segment;
@@ -164,6 +171,13 @@ class CatUtils {
 
     public static function restore_xliff_tags_for_view($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/equiv-text\s*?=\s*?"(.*?)"|equiv-text\s*?=\s*?\'(.*?)\'/', $segment, $html, PREG_SET_ORDER );
+        foreach( $html as $tag_attribute ){
+            //replace subsequent elements excluding already encoded
+            $segment = preg_replace( '/equiv-text\s*?=\'(?!base64:)(.*?)\'|equiv-text\s*?="(?!base64:)(.*?)"/', 'equiv-text="base64:' . base64_encode( $tag_attribute[ 1 ] ) . "\"", $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
@@ -942,46 +956,6 @@ class CatUtils {
         }
         return $wStruct;
     }
-
-    public static function getTMProps( $job_data ){
-
-        //TODO this should use the Project DAO instead and use internal cache system to store the record
-        try {
-            $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-            $redisHandler->get(1); //ping established connection
-        } catch ( Exception $e ) {
-            $redisHandler = null;
-            Log::doLog( $e->getMessage() );
-            Log::doLog( "No Redis server(s) available." );
-        }
-
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $_existingResult = $redisHandler->get( "project_data_for_job_id:" . $job_data['id'] );
-            if ( !empty( $_existingResult ) ) {
-                return unserialize( $_existingResult );
-            }
-        }
-
-        $projectData = getProjectJobData( $job_data['id_project'] );
-
-        $result = array(
-                'project_id'   => $projectData[ 0 ][ 'pid' ],
-                'project_name' => $projectData[ 0 ][ 'pname' ],
-                'job_id'       => $job_data[ 'id' ],
-        );
-
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $redisHandler->setex(
-                    "project_data_for_job_id:" . $job_data['id'],
-                    60 * 60 * 24 * 15, /* 15 days of lifetime */
-                    serialize( $result )
-            );
-        }
-
-        return $result;
-
-    }
-
 
 }
 

@@ -35,9 +35,6 @@ RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&p
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 
-RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
-RewriteRule ^(configMissing)[/]?$ lib/View/configMissing.html [L]
-
 RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
@@ -65,6 +62,7 @@ RewriteRule ^utils/pee$ router.php [L]
 
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
 RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
+RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
 RedirectMatch 404 /\.git
 </IfModule>

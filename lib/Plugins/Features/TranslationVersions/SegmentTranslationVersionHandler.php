@@ -93,9 +93,30 @@ class SegmentTranslationVersionHandler {
             return false;
         }
 
-        $this->prepareDao();
 
         $new_translation['version_number'] += 1 ;
+
+        return $this->saveOrUpdateOldVersion( $old_translation, $new_translation );
+
+    }
+
+    /**
+     * In some cases, version 0 may already be there among saved_versions, because
+     * an issue for ReviewExtended has been saved on version 0.
+     *
+     * In any other case we expect the version record NOT to be there when we reach this point.
+     */
+
+    private function saveOrUpdateOldVersion( $old_translation, $new_translation) {
+        $this->prepareDao();
+
+        $version_record = $this->dao->getVersionNumberForTranslation(
+                $this->id_job, $this->id_segment, $old_translation['version_number']
+        );
+
+        if ( $version_record ) {
+            return $this->dao->updateVersion( $old_translation ) ;
+        }
 
         return $this->dao->saveVersion( $old_translation );
     }
@@ -103,24 +124,28 @@ class SegmentTranslationVersionHandler {
     /**
      * translationIsEqual
      *
-     * Here we need to handle a special case, the one in which the old translation
-     * is the first version that was popuplated by a pre-translated XLIFF with chars that
-     * can be HTML encoded. In such case the old_translation contains the HTML entity,
-     * while we receive the entity decoded even if the segment was not changed by the translator.
+     * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
+     * encoding is different than the one receiveed from the UI. Quotes are different for instance.
      *
-     * html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES) resolves this issue.
+     * So we compare the decoded version of the two strings. Should always work.
+     *
+     * TODO: this may give false negatives when string changes but decoded version doesn't
      *
      * @param $new_translation
      * @param $old_translation
+     *
+     * @return bool
      */
     private function translationIsEqual( $new_translation, $old_translation ) {
-        return html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  == $new_translation['translation'] ;
+        $old = html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
+        $new = html_entity_decode($new_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
+
+        return $new == $old ;
     }
 
     private function prepareDao() {
         $this->db         = Database::obtain();
         $this->dao = new Translations_TranslationVersionDao( $this->db );
-        $this->dao->uid         = $this->uid ;
         $this->dao->source_page = $this->source_page ;
 
         // TODO: ^^^ this is safe for now because we have

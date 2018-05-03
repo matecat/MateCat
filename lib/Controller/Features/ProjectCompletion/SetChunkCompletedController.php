@@ -59,9 +59,9 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function getUid() {
-        $this->checkLogin();
+        $this->readLoginInfo();
         if ( $this->userIsLogged ) {
-            return $this->uid ;
+            return $this->user->uid ;
         } else {
             return null;
         }

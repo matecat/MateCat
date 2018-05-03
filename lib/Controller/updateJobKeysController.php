@@ -75,11 +75,11 @@ class updateJobKeysController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "Wrong password" );
         }
 
-        $this->checkLogin();
+        $this->readLoginInfo();
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->userMail == $this->jobData['owner'] ){
+        } elseif( $this->user->email == $this->jobData['owner'] ){
             $this->userRole = TmKeyManagement_Filter::OWNER;
         }
 
@@ -164,7 +164,7 @@ class updateJobKeysController extends ajaxController {
         $this->tm_keys = json_encode( $tm_keys );
 
         try {
-            $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->uid );
+            $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->user->uid );
 
             Log::doLog('Before:');
             Log::doLog($this->jobData['tm_keys']);
@@ -188,7 +188,7 @@ class updateJobKeysController extends ajaxController {
     }
 
     private function jobOwnerIsMe() {
-        return $this->userIsLogged && $this->jobData['owner'] == $this->getLoggedUser()->email ;
+        return $this->userIsLogged && $this->jobData['owner'] == $this->user->email ;
     }
 
 } 

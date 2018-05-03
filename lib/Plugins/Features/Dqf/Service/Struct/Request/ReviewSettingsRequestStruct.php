@@ -28,7 +28,7 @@ class ReviewSettingsRequestStruct extends BaseRequestStruct {
     public $sampling ;
 
     public function getHeaders() {
-        return $this->toArray(['sessonId', 'apiKey', 'projectKey'] ) ;
+        return $this->toArray(['sessionId', 'apiKey', 'projectKey'] ) ;
     }
 
     public function getPathParams() {
