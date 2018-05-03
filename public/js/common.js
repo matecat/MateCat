@@ -276,7 +276,7 @@ APP = {
 
             if ( typeof options['checkbox_label'] != 'undefined' ) {
                 filled_tpl.find('.dont_show + label' )
-                        .html("Don't show this dialog again for the current job");
+                        .html(" Don't show this dialog again for the current job");
             }
             return filled_tpl;
         };
