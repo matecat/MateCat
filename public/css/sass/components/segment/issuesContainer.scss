@@ -3,6 +3,9 @@ section  {
         display: none;
    }
 }
+section.readonly .issues-container {
+    display: none;
+}
 
 .editor {
     &.loaded {
