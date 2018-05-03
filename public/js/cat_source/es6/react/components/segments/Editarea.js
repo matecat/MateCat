@@ -34,12 +34,12 @@ class Editarea extends React.Component {
             let editAreaClasses = this.state.editAreaClasses.slice();
             editAreaClasses.push('highlighted1');
             this.setState({
-                editAreaClasses: editAreaClasses
+                editAreaClasses: editAreaClasses.slice()
             });
             setTimeout(function() {
                 editAreaClasses.push.apply(editAreaClasses, ['highlighted2']);
                 self.setState({
-                    editAreaClasses: editAreaClasses
+                    editAreaClasses: editAreaClasses.slice()
                 });
             }, 300);
             setTimeout(function() {
@@ -48,7 +48,7 @@ class Editarea extends React.Component {
                 index = editAreaClasses.indexOf('highlighted2');
                 editAreaClasses.splice(index, 1);
                 self.setState({
-                    editAreaClasses: editAreaClasses
+                    editAreaClasses: editAreaClasses.slice()
                 });
             }, 2000);
         }

@@ -1177,6 +1177,7 @@ UI = {
             // Make the diff between the text with the same codification
             var diff_obj = UI.execDiff(mainStr, transDecoded);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            var html =
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
                 '<li class="sugg-source">' +
                 '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
@@ -1191,18 +1192,18 @@ UI = {
                 '<a href="#" data-goto="' + this.involved_id[0]+ '">View</a>' +
                 '</li>' +
             '</ul>');
-            $('.sub-editor.alternatives .overflow', segment).find('.sugg-target .translation').html(translation);
+            $('.sub-editor.alternatives .overflow .graysmall[data-item='+ (index + 1) +']', segment).find('.sugg-target .translation').html(translation);
         });
 
         $.each(d.data.not_editable, function(index1) {
             var diff_obj = UI.execDiff(mainStr, this.translation);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '">' +
+                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li>' +
+                '<li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span>' +
+                '<span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li>' +
+                '<li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
-        // Transform the tags
-        // UI.markSuggestionTags(segment);
-
-
     },
     execDiff: function (mainStr, cfrStr) {
         _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
