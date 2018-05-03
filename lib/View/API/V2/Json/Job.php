@@ -156,14 +156,14 @@ class Job {
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id );
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );
 
         /** @var $formatted ProjectUrls */
         $formatted = $project->getFeatures()->filter( 'projectUrls', $formatted );
 
-        $result[ 'urls' ] = $formatted->render()[ 'jobs' ][ 0 ];
+        $result[ 'urls' ] = $formatted->render( true )[ 'jobs' ][ $jStruct->id ][ 'chunks' ][ $jStruct->password ];
 
         return $result;
 
