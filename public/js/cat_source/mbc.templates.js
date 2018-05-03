@@ -94,7 +94,7 @@ if ( MBC.enabled() )
             ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="Write a comment..."></textarea>' +
             ' <div>' +
-            ' <a href="javascript:;" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +
+            ' <a href="javascript:;" class="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide">Comment</a>' +
             ' </div>' +
             ' <div class="mbc-ajax-message-wrap hide">' +
             ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +

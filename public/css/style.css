@@ -1604,15 +1604,15 @@ body .footer.showMatches .sub-editor.open {
     height: 17px;
     width: 140px;
     position: absolute;
-    bottom: -26px;
+    bottom: -31px;
     right: 0px;
     border-radius: 0 0 0 2px;
     color: #fff;
-    padding: 4px 10px 4px 4px;
+    padding: 6px 10px 7px 4px;
     font-size: 12px;
     background: #09beec;
-    box-shadow: 0 0 10px #868686;
-    z-index: -1;
+    box-shadow: 0px 2px 4px 0px #868686;
+    z-index: 2px
 }
 
 .sub-editor.concordances .results {
@@ -3158,15 +3158,12 @@ section.readonly:hover .ice-locked-label {
     right: 0;
     height: 100%;
     background: #ccced2;
-    top: 4%;
-    margin: -4px 0 0 0 !important;
+    top: 0;
     border-bottom: 0;
+    z-index: 0;
 }
 .editor .status-container .status {
-    top: 4px !important;
-    height: 100% !important;
-    z-index: 1;
-    padding-bottom: 0;
+    padding-bottom: 30px;
 }
 
 section.readonly .status-container a.status:hover,
@@ -3174,17 +3171,6 @@ body.archived section .status-container a.status:hover {
     cursor: default !important;
 }
 
-/*.editor .status {
-    width: 8px;
-    display: block;
-    position: absolute;
-    right: 0;
-    height: 97%;
-    padding-bottom: 7px;
-    background: #f5f5f5;
-    margin: -6px 0 0 0 !important;
-    border-bottom: 0;
-}*/
 
 .status img {
     display: none
@@ -3196,11 +3182,6 @@ body.archived section .status-container a.status:hover {
     position: absolute;
     top: 0;
     right: 0px
-}
-
-.status-container {
-    float: right;
-    margin: 0 0px 0 0 !important;
 }
 
 section.status-translated .status {
@@ -5050,7 +5031,7 @@ section.loaded .footer .tab.open {
  */
 .segment-side-buttons {
     /* styles based on .sid line 376 style.css */
-    color: #999;
+/*    color: #999;
     cursor: default;
     display: block;
     font-size: 12px;
@@ -5061,7 +5042,7 @@ section.loaded .footer .tab.open {
     text-decoration: none;
     right: -8%;
     width: 8%;
-    top: 0px;
+    top: 0px;*/
 }
 
 section:hover .segment-side-buttons {
