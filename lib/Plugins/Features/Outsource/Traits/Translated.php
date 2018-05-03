@@ -8,6 +8,8 @@
 
 namespace Features\Outsource\Traits;
 
+use API\V2\Json\ProjectUrls;
+use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
@@ -34,6 +36,12 @@ trait Translated {
         $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id, 3600 );
         /** @var $jobs \Jobs_JobStruct[] */
         $project = $jobs[ 0 ]->getProject();
+
+        /**
+         * @var $projectData ShapelessConcreteStruct[]
+         */
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $formatted = new ProjectUrls( $projectData );
 
         $config = self::getConfig();
 
@@ -70,13 +78,17 @@ trait Translated {
                 return;
             }
 
+            /** @var $formatted ProjectUrls */
+            $urls = $formatted->render( true )[ 'jobs' ][ $job['id'] ][ 'chunks' ][ $job['password'] ];
+
             $confirmation_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
-                            'f'   => 'confirm',
-                            'cid' => $config[ 'translated_username' ],
-                            'p'   => $config[ 'translated_password' ],
-                            'pid' => $quote_response->pid,
-                            'c'   => 1,
-                            'of'  => "json"
+                            'f'    => 'confirm',
+                            'cid'  => $config[ 'translated_username' ],
+                            'p'    => $config[ 'translated_password' ],
+                            'pid'  => $quote_response->pid,
+                            'c'    => 1,
+                            'of'   => "json",
+                            'urls' => $urls
                     ], PHP_QUERY_RFC3986 );
 
             try {

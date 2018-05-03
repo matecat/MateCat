@@ -281,7 +281,10 @@ $.extend(UI, {
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
-		}).on('dblclick', '.alternatives .graysmall', function() {
+		}).on('dblclick', '.alternatives .graysmall', function(e) {
+            if ($(e.target).closest('li').hasClass('goto')) {
+                return;
+            }
 			UI.chooseAlternative($(this));
         });
 
@@ -423,6 +426,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
+			e.stopPropagation();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
 			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});

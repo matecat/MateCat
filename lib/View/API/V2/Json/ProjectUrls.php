@@ -35,7 +35,12 @@ class ProjectUrls {
         $this->data = $data;
     }
 
-    public function render() {
+    /**
+     * @param bool $keyAssoc
+     *
+     * @return array
+     */
+    public function render( $keyAssoc = false ) {
 
         /**
          * @var $record ShapelessConcreteStruct
@@ -67,20 +72,29 @@ class ProjectUrls {
 
         }
 
-        $this->formatted['jobs'] = array_values( $this->jobs );
-        $this->formatted['files'] = array_values( $this->files );
+        //maintain index association for external array access
+        if( !$keyAssoc ){
+            $this->formatted['jobs'] = array_values( $this->jobs );
+            foreach( $this->formatted['jobs'] as &$chunks ){
+                $chunks[ 'chunks' ] = array_values( $chunks[ 'chunks' ] );
+            }
+            $this->formatted['files'] = array_values( $this->files );
+        } else {
+            $this->formatted['jobs'] = $this->jobs;
+            $this->formatted['files'] = $this->files;
+        }
 
         // start over for jobs
 
         return $this->formatted;
     }
 
-    protected function generateChunkUrls( $record){
+    protected function generateChunkUrls( $record ){
 
         if ( !array_key_exists( $record['jpassword'], $this->chunks ) ) {
             $this->chunks[ $record['jpassword'] ] = 1 ;
 
-            $this->jobs[ $record['jid'] ][ 'chunks' ][] = array(
+            $this->jobs[ $record['jid'] ][ 'chunks' ][ $record['jpassword'] ] = array(
                     'password'      => $record['jpassword'],
                     'translate_url' => $this->translateUrl( $record ),
                     'revise_url'    => $this->reviseUrl( $record )
