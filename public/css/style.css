@@ -2837,6 +2837,15 @@ body.rtl-target .editor .editarea span {
     padding: 12px 5px 30px 5px;
 }
 
+.alternatives.tab ul li.sugg-source {
+    padding-left: 20px;
+    width: 50%;
+}
+
+/*.alternatives.tab ul li.sugg-target {
+    width: 42% !important;
+}*/
+
 .suggestion-item li.sugg-source {
     padding-left: 25px;
 }
