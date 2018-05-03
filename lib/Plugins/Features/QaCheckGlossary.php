@@ -13,7 +13,7 @@ use WorkerClient ;
 
 class QaCheckGlossary extends BaseFeature {
 
-    const FEATURE_CODE = 'qa_check_blacklist';
+    const FEATURE_CODE = 'qa_check_glossary';
 
     const GLOSSARY_SCOPE = 'glossary';
 
