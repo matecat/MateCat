@@ -346,7 +346,7 @@ APP = {
                     case 'confirm':
                     case 'confirm_checkbox' :
                         if ( options['type'] == 'confirm_checkbox' ) {
-                            filled_tpl.find( '.popup p' )
+                            filled_tpl.find( '.popup p.buttons-popup-container' )
                                     .append( renderCheckbox( options ) );
                         }
 
