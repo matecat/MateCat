@@ -196,9 +196,15 @@ class Xliff_Parser {
 
                         unset($temp);
 
+                        /**
+                         * Rebuild the trans-unit tag integrity after preg_split
+                         */
+                        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[ 0 ] . '</trans-unit>';
+
                         // Getting Source and Target raw content
                         $this->getSource( $xliff, $i, $j, $trans_unit );
 						$this->getTarget( $xliff, $i, $j, $trans_unit );
+						$this->getAltTrans( $xliff, $i, $j, $trans_unit );
 						$this->getSDLStatus( $xliff, $i, $j, $trans_unit );
 
                         $this->evalNotes($xliff, $i, $j, $trans_unit);
@@ -419,8 +425,8 @@ class Xliff_Parser {
      */
     private function getSource( &$xliff, $i, $j, $trans_unit ) {
         try {
-            $tagContent = $this->_getTagContent( 'source', $trans_unit );
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagContent );
+            $tagArray = $this->_getTagContent( 'source', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
         } catch( UnexpectedValueException $e ){
             //Found Empty Source Tag
             Log::doLog( $e->getMessage() );
@@ -435,8 +441,26 @@ class Xliff_Parser {
      */
     private function getTarget( &$xliff, $i, $j, $trans_unit ) {
         try {
-            $tagContent = $this->_getTagContent( 'target', $trans_unit );
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagContent );
+            $tagArray = $this->_getTagContent( 'target', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Target Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    private function getAltTrans(  &$xliff, $i, $j, $trans_unit  ){
+        try {
+
+            $tagArray = $this->_getTagContent( 'alt-trans', $trans_unit );
+
+            $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
+            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
+
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'attr' ] = $tagArray[ 'attributes' ];
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'target' ] = self::fix_non_well_formed_xml( $targetArray[ 'content' ] );
+
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
             Log::doLog( $e->getMessage() );
@@ -446,50 +470,66 @@ class Xliff_Parser {
     /**
      * Extract tag content using DOM ( fallback to old implementation on failure )
      *
-     * @param $tagName
-     * @param $trans_unit
+     * @param string $tagName
+     * @param string $domString
+     * @param string $parentNodeName
      *
-     * @return string
-     * @throws UnexpectedValueException
+     * @return array
      */
-    private function _getTagContent( $tagName, $trans_unit ) {
-
-        /**
-         * Rebuild the trans-unit tag integrity after preg_split
-         */
-        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[ 0 ] . '</trans-unit>';
+    private function _getTagContent( $tagName, $domString, $parentNodeName = 'trans-unit' ) {
 
         libxml_use_internal_errors( true );
         $dDoc          = new DOMDocument();
-        $trg_xml_valid = @$dDoc->loadXML( "<root>$trans_unit</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG );
+        $trg_xml_valid = @$dDoc->loadXML( "<root>$domString</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG );
 
         /**
          * Get all tags by their name
          */
         $tagList = $dDoc->getElementsByTagName( $tagName );
 
+        $tmpTag = null;
+        $tagAttributes = [];
+
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
             Log::doLog( "Invalid target found, fallback to old implementation to get the content by regular expression" );
-            Log::doLog( "<trans-unit $trans_unit" );
+            Log::doLog( "$domString" );
             Log::doLog( $errorList );
 
             //fallback to old regexp wrong implementation
             $regexp = "|<{$tagName}[^>]*?>(.*?)</{$tagName}>|si";
 
-            preg_match( $regexp, $trans_unit, $temp );
+            preg_match( $regexp, $domString, $temp );
             $tmpTag = $temp[ 1 ];
 
         } elseif ( $tagList->length ) {
 
-            $tmpTag = '';
             foreach ( $tagList as $_tag ) {
+
+                /**
+                 * Extract Attributes if they are present
+                 *
+                 * Ex:
+                 * <p align=center style="font-size: 12px;">some text</p>
+                 *
+                 * $attr->nodeName == 'align' :: $attr->nodeValue == 'center'
+                 * $attr->nodeName == 'style' :: $attr->nodeValue == 'font-size: 12px;'
+                 *
+                 * @var $_tag DOMNode
+                 */
+                if ( $_tag->hasAttributes() ) {
+                    foreach ( $_tag->attributes as $attr ) {
+                        $tagAttributes[ $attr->nodeName ] = $attr->nodeValue;
+                    }
+                }
+
                 /** @var $_tag DOMElement|DOMNode */
                 $childNodes = $_tag->hasChildNodes();
 
-                //<alt-trans> has also <source> and <target> tags inside, we want only those of the <trans-unit>
-                if ( $_tag->parentNode->nodeName == 'trans-unit' && !empty( $childNodes ) ) {
+                //<alt-trans> has also <source> and <target> tags inside, we want only tags which have <trans-unit> as root element
+                //if not specified
+                if ( $_tag->parentNode->nodeName == $parentNodeName && !empty( $childNodes ) ) {
 
                     //Loop on the child nodes, saveXML concatenation
                     foreach ( $_tag->childNodes as $node ) {
@@ -505,7 +545,10 @@ class Xliff_Parser {
             throw new UnexpectedValueException( "The content of the tag $tagName is empty." );
         }
 
-        return $tmpTag;
+        return [
+                'content' => $tmpTag,
+                'attributes' => $tagAttributes
+        ];
 
     }
 
