@@ -88,7 +88,7 @@ trait Translated {
                             'pid'  => $quote_response->pid,
                             'c'    => 1,
                             'of'   => "json",
-                            'urls' => $urls
+                            'urls' => json_encode( $urls )
                     ], PHP_QUERY_RFC3986 );
 
             try {
