@@ -16,7 +16,7 @@ use \Exception;
 use Utils;
 use \INIT;
 
-trait Translated {
+trait TranslatedTrait {
 
     protected $successEmailObject;
     protected $failureEmailObject;
