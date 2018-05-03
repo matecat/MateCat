@@ -41,23 +41,16 @@ class QAComponent extends React.Component {
     getTotalIssues() {
         let total = 0;
         //Show the total only if more than 1 arrays exist
-        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts, this.state.glossary_issues], function (item) {
-            if (item.length) {
-                total++;
-            }
-        });
         if (this.state.total_issues.length) {
             return this.state.total_issues.length;
         } else {
-            return this.state.lxq_issues.length + this.state.tag_issues.length + this.state.translation_conflicts + this.state.glossary_issues;
+            return this.state.lxq_issues.length + this.state.tag_issues.length + this.state.translation_conflicts.length + this.state.glossary_issues.length;
         }
     }
 
     scrollToSegment(segmentId) {
         let $segment = $('#segment-' + segmentId);
-        if ($segment.hasClass('ice-locked')) {
-            UI.unlockIceSegment($segment)
-        }
+
         if ( segmentId) {
             if ( $segment.length ) {
                 window.location.hash = segmentId;
@@ -65,6 +58,9 @@ class QAComponent extends React.Component {
                 window.location.hash = segmentId + '-1';
             }
             UI.scrollSegment($segment, segmentId);
+            if ($segment.hasClass('ice-locked')) {
+                UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
+            }
         }
     }
 
