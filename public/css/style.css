@@ -2818,6 +2818,7 @@ body.rtl-target .editor .editarea span {
 .concordances .graysmall li.sugg-source {
     padding-left: 34px;
 }
+
 .suggestion-item.graysmall > li {
     width: 48%;
     float: left;
@@ -2832,12 +2833,17 @@ body.rtl-target .editor .editarea span {
     line-height: 26px;
 }
 
+.alternatives.tab ul li {
+    padding: 12px 5px 30px 5px;
+}
+
 .suggestion-item li.sugg-source {
     padding-left: 25px;
 }
 
 .graysmall li.goto {
-    width: 10px;
+    width: 10px !important;
+    padding: 15px !important;
 }
 
 .graysmall li.details {

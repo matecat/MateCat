@@ -99,8 +99,8 @@ class QAComponent extends React.Component {
         this.updatePanel();
     }
 
-    createTotalIssues(tag_issues, lxq_issues, traslation_conflicts) {
-        return this._uniqueArray(tag_issues.concat(lxq_issues, traslation_conflicts)).sort();
+    createTotalIssues(tag_issues, glossaryIssues, lxq_issues, traslation_conflicts) {
+        return this._uniqueArray(tag_issues.concat(glossaryIssues, lxq_issues, traslation_conflicts)).sort();
     }
     _uniqueArray(arrArg) {
         return arrArg.filter((elem, pos, arr) => {
