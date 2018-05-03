@@ -9,7 +9,7 @@ class SegmentsFilter extends React.Component {
             {value: 'repetitions', label: 'Repetitions'},
             {value: 'mt', label: 'MT'},
             {value: 'matches', label: '100% Matches'},
-            {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
+            // {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
             {value: 'fuzzies_75_84', label: 'fuzzies_75_84'},
             {value: 'fuzzies_85_94', label: 'fuzzies_85_94'},
             {value: 'fuzzies_95_99', label: 'fuzzies_95_99'},
