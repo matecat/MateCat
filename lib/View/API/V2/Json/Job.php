@@ -163,7 +163,12 @@ class Job {
         /** @var $formatted ProjectUrls */
         $formatted = $project->getFeatures()->filter( 'projectUrls', $formatted );
 
-        $result[ 'urls' ] = $formatted->render( true )[ 'jobs' ][ $jStruct->id ][ 'chunks' ][ $jStruct->password ];
+        $urlsObject = $formatted->render( true );
+        $result[ 'urls' ] = $urlsObject[ 'jobs' ][ $jStruct->id ][ 'chunks' ][ $jStruct->password ];
+
+        $result[ 'urls' ][ 'original_download_url' ]    = $urlsObject[ 'jobs' ][ $jStruct->id ][ 'original_download_url' ];
+        $result[ 'urls' ][ 'translation_download_url' ] = $urlsObject[ 'jobs' ][ $jStruct->id ][ 'translation_download_url' ];
+        $result[ 'urls' ][ 'xliff_download_url' ]       = $urlsObject[ 'jobs' ][ $jStruct->id ][ 'xliff_download_url' ];
 
         return $result;
 
