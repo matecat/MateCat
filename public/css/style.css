@@ -597,6 +597,7 @@ p.split-shortcut {
     padding: 1px 0px;
     width: 55px;
     margin: 0 auto;
+    margin-top: 5px;
 }
 
 .splitStart .sid {
@@ -4401,6 +4402,7 @@ section .toolbar .autofillTag {
     width: 25px;
     height: 25px;
     outline: none;
+    margin-top: 5px;
 }
 
 .split i {
