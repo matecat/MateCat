@@ -192,7 +192,7 @@ UI = {
             propagate: !noPropagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-
+        UI.setSegmentModified( UI.currentSegment, false ) ;
         $(document).trigger('segment:status:change', [segment, options]);
     },
 
@@ -2483,7 +2483,7 @@ UI = {
         //??
         $('.test-invisible').remove();
 
-        UI.setSegmentModified( UI.currentSegment, false ) ;
+        // UI.setSegmentModified( UI.currentSegment, false ) ;
 
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {

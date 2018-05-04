@@ -198,6 +198,8 @@ $.extend(UI, {
             var match = d.data.matches[0].match;
 
             var segment_id = segment.attr('id');
+            $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
+            $('.tab-switcher-tm .number', segment).text('');
             SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
 
             // UI.setDeleteSuggestion(segment);
@@ -243,6 +245,7 @@ $.extend(UI, {
             $('.draft', segment).removeAttr('disabled');
         } else {
             // TODO Move to SegmentFooter Component
+            $('.tab-switcher-tm .number', segment).text('');
             if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a' +
                     ' href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');

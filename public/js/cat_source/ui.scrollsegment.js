@@ -132,7 +132,7 @@
         var article = segment.closest('article');
 
         if ( prev.length ) {
-            pos = prev.offset().top ; // to show also the segment beforeq
+            pos = prev.offset().top ; // to show also the segment before
         } else {
             pos = segment.offset().top ;
         }
@@ -143,10 +143,6 @@
                 pos = pos + $(item).outerHeight() + 140;
             });
         }
-        if ( segmentOpen.length && UI.getSegmentId(segment) !== UI.getSegmentId(segmentOpen)) {
-            pos = pos - segmentOpen.find('.footer').height();
-        }
-
 
         scrollAnimation.animate({
             scrollTop: pos
