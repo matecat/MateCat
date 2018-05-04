@@ -1107,8 +1107,8 @@ class QA {
         }
 
         $totalResult = array(
-                'source' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedSrc, $clonedClosingSrc ) ),
-                'target' => CatUtils::restore_xliff_tags_for_view( array_merge( $clonedTrg, $clonedClosingTrg ) ),
+                'source' => call_user_func_array( [ 'CatUtils', 'restore_xliff_tags_for_view' ], array_merge( $clonedSrc, $clonedClosingSrc ) ),
+                'target' => call_user_func_array( [ 'CatUtils', 'restore_xliff_tags_for_view' ], array_merge( $clonedTrg, $clonedClosingTrg ) ),
         );
 
 //        Log::doLog($totalResult);
