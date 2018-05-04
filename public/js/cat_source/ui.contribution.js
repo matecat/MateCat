@@ -198,7 +198,7 @@ $.extend(UI, {
             var match = d.data.matches[0].match;
 
             var segment_id = segment.attr('id');
-            $('.sub-editor.matches .overflow', segment).html('');
+            $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
             $('.tab-switcher-tm .number', segment).text('');
             SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
 
