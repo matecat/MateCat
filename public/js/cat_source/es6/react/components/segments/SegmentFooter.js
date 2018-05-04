@@ -79,10 +79,9 @@ class SegmentFooter extends React.Component {
             }
         };
 
-        let hideMatches = this.getHideMatchesCookie();
+        // let hideMatches = this.getHideMatchesCookie();
         this.state = {
-            tabs: {},
-            hideMatches : hideMatches
+            tabs: {}
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);
@@ -225,8 +224,7 @@ class SegmentFooter extends React.Component {
         tabs[tabName] = tab;
 
         this.setState({
-            tabs: tabs,
-            hideMatches: !tab.open
+            tabs: tabs
         });
     }
     componentDidMount() {
@@ -271,11 +269,12 @@ class SegmentFooter extends React.Component {
         let labels = [];
         let containers = [];
         let self = this;
+        let hideMatches = this.getHideMatchesCookie();
         for ( let key in this.state.tabs ) {
             let tab = this.state.tabs[key];
             if ( tab.enabled) {
                 let hidden_class = (tab.visible) ? '' : 'hide';
-                let active_class = (tab.open && !this.state.hideMatches) ? 'active' : '';
+                let active_class = (tab.open && !hideMatches) ? 'active' : '';
                 let label = <li
                     key={ tab.code }
                     ref={(elem)=> this[tab.code] = elem}
