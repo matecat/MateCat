@@ -669,6 +669,8 @@ if ( MBC.enabled() )
             $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
                 e.stopPropagation();
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+                var $section = $( e.target ).closest( 'section' );
+                UI.scrollSegment($section, UI.getSegmentId($section));
             } );
 
             // TODO: investigate and explain why this is needed
@@ -794,6 +796,8 @@ if ( MBC.enabled() )
             } ).toString();
 
             window.location.hash = new_hash;
+            UI.scrollSegment(UI.getSegmentById(segmentId), segmentId);
+
         } );
 
         $( window ).on( 'segmentsAdded', function ( e ) {
