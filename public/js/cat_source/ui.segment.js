@@ -666,6 +666,7 @@
                     segmentsArray.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
+                        UI.setSegmentModified( UI.currentSegment, false ) ;
                     })
                 } else if (response.unchangeble_segments.length > 0) {
                     let arrayMapped = _.map(segmentsArray, function ( item ) {
@@ -675,6 +676,7 @@
                     array.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
+                        UI.setSegmentModified( UI.currentSegment, false ) ;
                     });
                     UI.showApproveAllModalWarnirng();
                 }
@@ -686,6 +688,7 @@
                     segmentsArray.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
+                        UI.setSegmentModified( UI.currentSegment, false ) ;
                     })
                 } else if (response.unchangeble_segments.length > 0) {
                     let arrayMapped = _.map(segmentsArray, function ( item ) {
@@ -695,6 +698,7 @@
                     array.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
+                        UI.setSegmentModified( UI.currentSegment, false ) ;
                     });
                     UI.showTranslateAllModalWarnirng();
                 }
