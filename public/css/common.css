@@ -424,25 +424,34 @@ border-bottom: 3px solid #1B5D7B!important;
 	    line-height: 27px;
     }
 
-.topMenu
-{
+.topMenu {
     position: fixed;
-    top: -1000px;
+    /*top: -1000px;*/
     left: 135px;
     width: 400px;
     background: #fff;
-    border: 1px solid #333;
     z-index: 2;
     text-align: left;
     padding: 0;
     font-size:14px;
-    box-shadow: 0px 0px 10px #888888;
+    display: none;
+}
 
-    }
+.topMenu.open {
+    max-height: 64%;
+    overflow: scroll;
+    top: 48px !important;
+    display: block;
+}
 
-    .topMenu ul {
-    }
+.topMenu ul.gotocurrentsegment {
+    position: fixed;
+    width: 400px;
+}
 
+.topMenu ul.jobmenu-list {
+    margin-top: 45px;
+}
 
 /*scrollbar*/
 
@@ -564,6 +573,7 @@ color:#333;}
 
 .topMenu ul li {
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    background: #fff;
 }
 
 .topMenu ul li a {
@@ -3646,7 +3656,9 @@ float: left;
 .more:before,
 .more.minus:before,
 .more-options:before {
-    margin-right: 3px;
+    margin-right: 5px;
+    position: relative;
+    top: 2px;
 }
 
 .more-options:before {
