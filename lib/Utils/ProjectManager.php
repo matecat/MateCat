@@ -1991,6 +1991,8 @@ class ProjectManager {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
+                empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ||
+                empty( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] ) ||
                 empty( $xliff_file_attributes[ 'source-language' ] ) ||
                 empty( $xliff_file_attributes[ 'target-language' ] ) ||
                 count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
@@ -2006,7 +2008,9 @@ class ProjectManager {
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $tm_info ) {
-                $config[ 'id_user' ][] = $tm_info['key'];
+                if( $tm_info[ 'w' ] == 1 ){
+                    $config[ 'id_user' ][] = $tm_info['key'];
+                }
             }
 
         }
@@ -2014,8 +2018,8 @@ class ProjectManager {
         $config[ 'source' ]         = $xliff_file_attributes[ 'source-language' ];
         $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
         $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
-        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
+        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
         $config[ 'context_after' ]  = null;
         $config[ 'context_before' ] = null;
 
