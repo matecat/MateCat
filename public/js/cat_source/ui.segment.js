@@ -131,7 +131,7 @@
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
                 var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP');
                 // The segment is already been tagged
-                var dataAttribute = currentSegment.data('tagprojection');
+                var dataAttribute = currentSegment.attr('data-tagprojection');
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = ( !_.isUndefined(dataAttribute) && dataAttribute === 'tagged')? true : false;
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged );

@@ -79,7 +79,6 @@ class SegmentFooter extends React.Component {
             }
         };
 
-        // let hideMatches = this.getHideMatchesCookie();
         this.state = {
             tabs: {}
         };
@@ -196,10 +195,14 @@ class SegmentFooter extends React.Component {
 
     getHideMatchesCookie() {
         let cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-        if( !_.isUndefined(Cookies.get(cookieName + '-' + config.id_job)) && Cookies.get(cookieName + '-' + config.id_job) == "true") {
-            return true;
+        if( !_.isUndefined(Cookies.get(cookieName + '-' + config.id_job))) {
+            if (Cookies.get(cookieName + '-' + config.id_job) == "true") {
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     changeTab(tabName, forceOpen) {
@@ -213,7 +216,8 @@ class SegmentFooter extends React.Component {
         for ( let item in tabs ) {
             tabs[item].open = false
         }
-        if (tab.open && !forceOpen) {
+        let hideMatches = this.getHideMatchesCookie();
+        if (tab.open && !forceOpen && !hideMatches) {
             tab.open = false;
             this.setHideMatchesCookie(true);
         } else {
