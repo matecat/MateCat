@@ -616,11 +616,11 @@ p.split-shortcut {
 }
 
 .editor.splitStart .sid {
-    background-position: 50% 43px;
+    background-position: 49% 43px;
 }
 
 .editor.splitInner .sid {
-    background-position: 50.5% -40px;
+    background-position: 49% -40px;
 }
 
 .editor.splitEnd .sid {
@@ -1634,6 +1634,7 @@ body .footer.showMatches .sub-editor.open {
     line-height: 20px;
     position: relative;
     top: 2px;
+    cursor: pointer;
 }
 
 .sub-editor .cc-search, .sub-editor .gl-search {
@@ -1642,7 +1643,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor .cc-search.loading, .sub-editor .gl-search.loading {
-    background: url(../img/loading.gif) 47% 20px no-repeat;
+    background: url(../img/loading.gif) 50% 22px no-repeat;
     float: left;
     width: 100%;
     background-size: 20px 20px;
@@ -2881,7 +2882,8 @@ body.rtl-target .editor .editarea span {
 
 .graysmall .b {
     padding-left: 12px !important;
-    position: relative
+    position: relative;
+    padding-right: 0;
 }
 
 .suggestion-item.graysmall .b {
@@ -4402,7 +4404,7 @@ section .toolbar .autofillTag {
     width: 25px;
     height: 25px;
     outline: none;
-    margin-top: 5px;
+    margin-top: 10px;
 }
 
 .split i {
