@@ -65,7 +65,6 @@ class QALocalWarning {
             $out[ 'details' ]                              = [];
             $out[ 'details' ][ 'issues_info' ]             = $issues_detail;
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
-            $out[ 'details' ][ 'warnings' ]                = $notices;
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
             $out[ 'total' ]                                = count( $notices );
