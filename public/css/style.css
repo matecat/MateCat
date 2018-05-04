@@ -127,16 +127,15 @@ body.searchActive #filterSwitch {
     color: #fff;
     background: #e20001;
     margin-left: 20px;
-    margin-top: -2px;
+    margin-top: -8px;
     -moz-border-radius: 10px;
     border-radius: 10px;
     border: 1px solid #fff;
     display: block;
     font-size: 11px;
-    font-weight: bold;
     padding: 0 4px;
     text-align: center;
-    width: 8px;
+    min-width: 8px;
     height: 15px;
     line-height: 1.5;
     box-sizing: content-box;
@@ -598,6 +597,7 @@ p.split-shortcut {
     padding: 1px 0px;
     width: 55px;
     margin: 0 auto;
+    margin-top: 5px;
 }
 
 .splitStart .sid {
@@ -616,11 +616,11 @@ p.split-shortcut {
 }
 
 .editor.splitStart .sid {
-    background-position: 50% 43px;
+    background-position: 49% 43px;
 }
 
 .editor.splitInner .sid {
-    background-position: 50.5% -40px;
+    background-position: 49% -40px;
 }
 
 .editor.splitEnd .sid {
@@ -1613,7 +1613,7 @@ body .footer.showMatches .sub-editor.open {
     font-size: 12px;
     background: #09beec;
     box-shadow: 0px 2px 4px 0px #868686;
-    z-index: 2px
+    z-index: 2;
 }
 
 .sub-editor.concordances .results {
@@ -1631,6 +1631,10 @@ body .footer.showMatches .sub-editor.open {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     min-width: 40px;
+    line-height: 20px;
+    position: relative;
+    top: 2px;
+    cursor: pointer;
 }
 
 .sub-editor .cc-search, .sub-editor .gl-search {
@@ -1639,7 +1643,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor .cc-search.loading, .sub-editor .gl-search.loading {
-    background: url(../img/loading.gif) 47% 20px no-repeat;
+    background: url(../img/loading.gif) 50% 22px no-repeat;
     float: left;
     width: 100%;
     background-size: 20px 20px;
@@ -2431,12 +2435,12 @@ section.editor {
     z-index: 2;
     position: relative;
     height: 100%;
-    width: 102%;
-    margin-left: -1%;
+    width: 101%;
+    margin-left: -.5%;
 }
 
 section.editor .sid {
-    left: -4.5%;
+    left: -5%;
     color: black;
 }
 
@@ -2682,7 +2686,7 @@ body.rtl-target .editor .editarea span {
     height: 16px;
     cursor: pointer;
     right: 40px;
-    top: 16px;
+    top: 15px;
 }
 
 .graysmall:hover .switch-editing {
@@ -2878,7 +2882,8 @@ body.rtl-target .editor .editarea span {
 
 .graysmall .b {
     padding-left: 12px !important;
-    position: relative
+    position: relative;
+    padding-right: 0;
 }
 
 .suggestion-item.graysmall .b {
@@ -3746,11 +3751,9 @@ span.locked.tag-html-container-close {
     .graysmall li {
         width: 45.5%;
     }
-
     .header-menu {
         margin-right: 18px
     }
-
     #stat-completion, #stat-wph {
         display: block;
     }
@@ -3758,7 +3761,14 @@ span.locked.tag-html-container-close {
     p.split-shortcut, .editing .sid .txt {
         font-size: 10px;
     }
-
+    .sid {
+        width: 4.5%;
+        left: -5.5%;
+    }
+    section.editor .sid {
+        left: -5.1%;
+        width: 4.5%;
+    }
 }
 
 @media screen and (max-width: 1280px) {
@@ -3885,14 +3895,6 @@ span.locked.tag-html-container-close {
     article {
         margin-left: 6%;
     }
-
-    /*.sid {
-        left: -5.5%;
-    }*/
-
-    /*section.editor .sid {
-        left: -5%;
-    }*/
 }
 
 @media screen and (max-width: 1100px) {
@@ -4402,6 +4404,7 @@ section .toolbar .autofillTag {
     width: 25px;
     height: 25px;
     outline: none;
+    margin-top: 10px;
 }
 
 .split i {
@@ -5023,34 +5026,6 @@ section.loaded .footer .tab.open {
     position: relative;
     border-top: 1px solid #cccccc;
     top: -1px;
-}
-
-
-/*This going to paypal*/
-/*section.editor .footer .tab.issues {
-    display: block !important;
-}*/
-/*Close - css going to paypal*/
-
-/*
- ******
- Comment intent element
- ******
- */
-.segment-side-buttons {
-    /* styles based on .sid line 376 style.css */
-/*    color: #999;
-    cursor: default;
-    display: block;
-    font-size: 12px;
-    height: inherit;
-    padding-bottom: 1px;
-    position: absolute;
-    text-align: center;
-    text-decoration: none;
-    right: -8%;
-    width: 8%;
-    top: 0px;*/
 }
 
 section:hover .segment-side-buttons {

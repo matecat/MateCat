@@ -784,7 +784,7 @@ LXQ.init  = function () {
             });
         }
         var reloadPowertip = function(segment) {
-            if (segment!==undefined && segment!==null && LXQ.lexiqaData.segments.indexOf(segment) > -1) {
+            if (segment!==undefined && segment!==null && LXQ.lexiqaData.segments.indexOf(UI.getSegmentId(segment)) > -1) {
                 buildPowertipDataForSegment(segment);
                 $('.tooltipa',segment).powerTip({
                     placement: 'sw',
