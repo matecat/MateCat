@@ -57,7 +57,7 @@ trait Translated {
 
         foreach ( $jobs as $job ) {
 
-            $quote_url = "http://www.translated.net/hts/index_EMILIO.php?" . http_build_query( [
+            $quote_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
                             'f'             => 'quote',
                             'cid'           => $config[ 'translated_username' ],
                             'p'             => $config[ 'translated_password' ],
@@ -91,7 +91,7 @@ trait Translated {
             /** @var $formatted ProjectUrls */
             $urls = $formatted->render( true )[ 'jobs' ][ $job['id'] ][ 'chunks' ][ $job['password'] ];
 
-            $confirmation_url = "http://www.translated.net/hts/index_EMILIO.php?" . http_build_query( [
+            $confirmation_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
                             'f'    => 'confirm',
                             'cid'  => $config[ 'translated_username' ],
                             'p'    => $config[ 'translated_password' ],
