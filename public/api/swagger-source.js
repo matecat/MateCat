@@ -3170,8 +3170,11 @@ var spec = {
         "JobUrl": {
             "type": "object",
             "properties": {
-                "translate": {"type": "string"},
-                "revise": {"type": "string"}
+                "translate_url": {"type": "string"},
+                "revise_url": {"type": "string"},
+                "original_download_url": {"type": "string"},
+                "translation_download_url": {"type": "string"},
+                "xliff_download_url": {"type": "string"}
             }
         },
 
