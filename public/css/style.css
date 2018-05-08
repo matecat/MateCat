@@ -539,7 +539,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     cursor: default;
     height: inherit;
     padding-bottom: 1px;
-    width: 4%;
+    width: 4.5%;
 }
 
 .sid .txt {
@@ -3762,8 +3762,8 @@ span.locked.tag-html-container-close {
         font-size: 10px;
     }
     .sid {
-        width: 4.5%;
-        left: -5.5%;
+        width: 5.3%;
+        left: -5.7%;
     }
     section.editor .sid {
         left: -5.1%;
@@ -3894,6 +3894,15 @@ span.locked.tag-html-container-close {
 
     article {
         margin-left: 6%;
+    }
+
+    .sid {
+        width: 6%;
+        left: -6.5%;
+    }
+    section.editor .sid {
+        left: -6.2%;
+        width: 6%;
     }
 }
 
