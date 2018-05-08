@@ -20,6 +20,7 @@ window.QualityReportVersions = require('./components/review_improved/QualityRepo
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
 window.SubHeaderContainer = require('./components/header/SubHeaderContainer').default ;
+window.SegmentFilter = require('./components/header/segment_filter/SegmentsFilter').default;
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
