@@ -347,7 +347,7 @@ class SegmentsFilter extends React.Component {
 
         if (window.config.isReview) {
             controlsForSampling = <div>
-                <div className="block">
+                <div className="block data-sample-checkbox-container">
                     <label htmlFor="data-sample-checkbox">Data sample</label>
                     <input type="checkbox"
                            id="data-sample-checkbox"
@@ -363,7 +363,7 @@ class SegmentsFilter extends React.Component {
 
         return (this.props.active ? <div className="advanced-filter-searchbox searchbox">
             <form>
-                <div className="block">
+                <div className="block filter-status-container">
                     <label htmlFor="search-projectname">segment status</label>
                     <select
                         onChange={this.filterSelectChanged.bind(this)}
@@ -372,7 +372,7 @@ class SegmentsFilter extends React.Component {
                     </select>
                 </div>
 
-                <div className="block">
+                <div className="block filters-container">
                     <label htmlFor="search-projectname">Filters</label>
                     <select
                         onChange={this.moreFilterSelectChanged.bind(this)}
@@ -395,7 +395,7 @@ class SegmentsFilter extends React.Component {
                            disabled={!this.state.filtering}
                            value="Select All"/>
 
-                    <input id="clear-filter"
+                    <input id="close-filter"
                            type="button"
                            onClick={this.closeClick.bind(this)}
                            className={classnames({btn: true})}
