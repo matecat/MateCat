@@ -19,6 +19,7 @@ class Search extends React.Component {
                 searchTarget: null,
                 searchSource: null
             },
+            focus: true,
             currentTargetSearch: null,
             currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
@@ -35,7 +36,21 @@ class Search extends React.Component {
     }
 
 
-    componentDidMount() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.active){
+            if(this.sourceEl && this.state.focus){
+                this.sourceEl.focus();
+                this.setState({
+                    focus: false
+                });
+            }
+        }else{
+            if(!this.state.focus){
+                this.setState({
+                    focus: true
+                });
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -155,6 +170,7 @@ class Search extends React.Component {
                     <div className="block">
                         <label htmlFor="search-source">Find in source</label>
                         <input id="search-source" className="search-input" type="text" name="searchSource"
+                               ref={(input) => { this.sourceEl = input; }}
                                checked={this.state.search.searchSource}
                                onChange={this.handleInputChange}/>
                     </div>
