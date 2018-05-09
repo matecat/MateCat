@@ -26,6 +26,7 @@ if ( ReviewExtended.enabled() ) {
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
+                    ReviewExtended.reloadQualityReport();
                 });
             },
 
@@ -36,6 +37,9 @@ if ( ReviewExtended.enabled() ) {
                         UI.getSegmentVersionsIssues(id_segment, fid);
                     });
             },
+            reloadQualityReport : function() {
+                UI.reloadQualityReport();
+            }
         });
 
         let originalRender = UI.render;
@@ -116,6 +120,7 @@ if ( ReviewExtended.enabled() ) {
                 }).done( function( data ) {
                     SegmentActions.confirmDeletedIssue(parsed.id_segment,issue_id);
                     UI.getSegmentVersionsIssues(parsed.id_segment, fid);
+                    UI.reloadQualityReport();
                 });
             },
             submitComment : function(id_segment, id_issue, data) {
