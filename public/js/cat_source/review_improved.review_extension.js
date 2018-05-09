@@ -126,7 +126,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                     .by('id', parseInt(parsed.id_issue));
                 MateCat.db.segment_translation_issues.remove( record );
                 root.ReviewImproved.reloadQualityReport();
-                UI.reloadQualityReport();
             });
         },
         createButtons: function(segment) {
