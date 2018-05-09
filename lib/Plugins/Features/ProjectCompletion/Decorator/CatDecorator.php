@@ -28,20 +28,32 @@ class CatDecorator extends AbstractDecorator {
         $dao = new \Chunks_ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase( $this->controller->getChunk() );
 
-        $this->template->project_completion_feature_enabled = true ;
-        $this->template->header_main_button_id  = 'markAsCompleteButton' ;
-        $this->template->job_completion_current_phase = $this->current_phase ;
+        $displayButton = true ;
+        $displayButton = $job->getProject()->getFeatures()->filter('filterProjectCompletionDisplayButton', $displayButton, $this);
 
-        if ( $lastCompletionEvent ) {
-            $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'] ;
-        }
+        if ( $displayButton ) {
+            $this->template->project_completion_feature_enabled = true ;
+            $this->template->header_main_button_id  = 'markAsCompleteButton' ;
+            $this->template->job_completion_current_phase = $this->current_phase ;
 
-        if ( $completed ) {
-            $this->varsForComplete();
+            if ( $lastCompletionEvent ) {
+                $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'] ;
+            }
+
+            if ( $completed ) {
+                $this->varsForComplete();
+            }
+            else {
+                $this->varsForUncomplete();
+            }
         }
-        else {
-            $this->varsForUncomplete();
-        }
+    }
+
+    /**
+     * @return catController
+     */
+    public function getController() {
+        return $this->controller ;
     }
 
     private function varsForUncomplete() {
