@@ -12,7 +12,7 @@ class SegmentTranslationIssue {
     public function __construct( ) {
     }
 
-    public function renderItem( \DataAccess_AbstractDaoSilentStruct $record ) {
+    public function renderItem( $record ) {
 
         $dao = new EntryCommentDao();
 

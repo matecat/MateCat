@@ -119,7 +119,7 @@ class BulkSelectionBar extends React.Component {
 
             </div>
             <div className="bulk-activity-icons">
-                <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'APPROVE ALL' : 'TRANSLATE ALL'}</button>
+                <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}</button>
             </div>
         </div> : null)
     }

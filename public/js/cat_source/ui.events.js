@@ -5,7 +5,7 @@ $.extend(UI, {
 	bindShortcuts: function() {
 		$("body").removeClass('shortcutsDisabled');
 
-		$("body").on('keydown.shortcuts', null, "alt+s", function(e) {
+		$("body").on('keydown.shortcuts', null, "alt+h", function(e) {
             UI.openShortcutsModal();
 		});
 
