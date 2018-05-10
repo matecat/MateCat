@@ -78,13 +78,6 @@ class NewController extends ajaxController {
 
     private $owner = "";
 
-    /**
-     * This property is set by `validateAuthHeader` method in `doAction`.
-     *
-     * @var Users_UserStruct
-     */
-    private $current_user;
-
     private $lexiqa             = false;
     private $speech2text        = false;
     private $tag_projection     = false;
@@ -135,13 +128,14 @@ class NewController extends ajaxController {
 
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
-            $this->api_output[ 'message' ] = 'Authentication failed';
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ] = 'Authentication failed';
             $this->finalize ();
             die();
         }
 
-        if ( $this->current_user ) {
-            $this->featureSet->loadFromUserEmail( $this->current_user->email );
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
         $filterArgs = [
@@ -245,7 +239,8 @@ class NewController extends ajaxController {
             $this->validateMetadataParam( $__postInput );
 
         } catch ( Exception $ex ) {
-            $this->api_output[ 'message' ] = 'Error evaluating metadata param';
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ] = 'Error evaluating metadata param';
             Log::doLog( $ex->getMessage() );
             return -1;
         }
@@ -253,9 +248,10 @@ class NewController extends ajaxController {
         try {
             $this->validateEngines();
         } catch ( Exception $ex ) {
-            $this->api_output[ 'message' ] = $ex->getMessage();
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
-            return -1;
+            return $ex->getCode();
         }
 
         $langDomains = Langs_LanguageDomains::getInstance();
@@ -332,7 +328,14 @@ class NewController extends ajaxController {
         }
 
         if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-            throw new Exception( "Invalid MT Engine.", -2 );
+            if( !$this->userIsLogged ){
+                throw new Exception( "Invalid MT Engine.", -2 );
+            } else {
+                $testEngine = Engine::getInstance( $this->mt_engine );
+                if( $testEngine->getEngineRow()->uid != $this->getUser()->uid ){
+                    throw new Exception( "Invalid MT Engine.", -21 );
+                }
+            }
         }
 
     }
@@ -635,11 +638,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
         $projectStructure[ 'due_date' ]  = $this->due_date;
 
-        if ( $this->current_user ) {
+        if ( $this->user ) {
             $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->current_user->getUid();
-            $projectStructure[ 'id_customer' ]  = $this->current_user->getEmail();
-            $projectStructure[ 'owner' ]        = $this->current_user->getEmail();
+            $projectStructure[ 'uid' ]          = $this->user->getUid();
+            $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
+            $projectStructure[ 'owner' ]        = $this->user->getEmail();
             $this->projectManager->setTeam( $this->team );
         }
 
@@ -757,13 +760,13 @@ class NewController extends ajaxController {
             }
 
             Log::doLog( $key );
-            $this->current_user = $key->getUser();
+            $this->user = $key->getUser();
 
             $this->userIsLogged = (
-                    !empty( $this->current_user->uid ) &&
-                    !empty( $this->current_user->email ) &&
-                    !empty( $this->current_user->first_name ) &&
-                    !empty( $this->current_user->last_name )
+                    !empty( $this->user->uid ) &&
+                    !empty( $this->user->email ) &&
+                    !empty( $this->user->first_name ) &&
+                    !empty( $this->user->last_name )
             );
 
         }
@@ -931,7 +934,7 @@ class NewController extends ajaxController {
             } //if a string is sent, transform it into a valid array
             elseif ( !empty( $tm_key ) ) {
 
-                $uid = $this->current_user->uid;
+                $uid = $this->user->uid;
 
                 $this_tm_key = [
                         'key'  => $tm_key[ 'key' ],
@@ -973,9 +976,9 @@ class NewController extends ajaxController {
 
 
     private function __validateTeam() {
-        if ( $this->current_user && !empty( $this->id_team ) ) {
+        if ( $this->user && !empty( $this->id_team ) ) {
             $dao = new MembershipDao();
-            $org = $dao->findTeamByIdAndUser( $this->id_team, $this->current_user );
+            $org = $dao->findTeamByIdAndUser( $this->id_team, $this->user );
 
             if ( !$org ) {
                 throw new Exception( 'Team and user membership does not match' );
@@ -983,8 +986,8 @@ class NewController extends ajaxController {
                 $this->team = $org;
             }
         } else {
-            if ( $this->current_user ) {
-                $this->team = $this->current_user->getPersonalTeam();
+            if ( $this->user ) {
+                $this->team = $this->user->getPersonalTeam();
             }
         }
     }
