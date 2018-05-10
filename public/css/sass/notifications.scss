@@ -62,7 +62,6 @@
 .notification-type {
   position: relative;
   width: 100%;
-  cursor: pointer;
   text-align:left;
   background-color: #fff;
   @include border-radius(2px);
@@ -110,12 +109,28 @@
   position: relative;
 }
 
+.notification-message {
+  .warning-call-to {
+    text-transform: uppercase;
+    margin: 5px 0 0;
+    text-align: right;
+    a {
+      text-decoration: underline;
+      color: #4183C4;
+      font-weight: 700;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}
+
 .notification-close-button {
-  font-size: 13px;
+  font-size: 14px;
   position: absolute;
   top: 10px;
   right: 10px;
-  line-height: 15px;
+  line-height: 14px;
   background-color: #333;
   color: #ffffff;
   border-radius: 50%;
@@ -123,13 +138,11 @@
   height: 14px;
   font-weight: bold;
   text-align: center;
-  cursor:pointer;
+  cursor: pointer;
   &:hover {
     background-color: #666;
   }
 }
-
-
 
 .notification-title {
   font-size: 18px;
