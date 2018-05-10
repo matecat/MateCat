@@ -47,4 +47,9 @@ interface Engines_EngineInterface {
      */
     public function setAnalysis();
 
+    /**
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRow();
+
 }
