@@ -4,7 +4,6 @@ var CatToolStore = require('../../stores/CatToolStore');
 var SegmentSelectionPanel = require('./bulk_selection_bar/BulkSelectionBar').default ;
 var Search = require('./search/Search').default;
 var QaComponent = require('./QAComponent').default;
-var SegmentFilter = require('./segment_filter/SegmentsFilter').default;
 
 class SubHeaderContainer extends React.Component {
 
