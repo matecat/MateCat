@@ -560,10 +560,6 @@ section:hover .sid .txt input {
     display: unset;
 }
 
-section.editor .sid .txt input {
-    display: unset;
-}
-
 section.readonly .txt input {
     display: none !important;
 }
@@ -571,9 +567,9 @@ section.readonly .txt input {
 section.segment-selected-inBulk .sid .txt input {
     display: unset;
 }
-section.editor .sid .txt input {
+/*section.editor .sid .txt input {
     display: unset;
-}
+}*/
 
 section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
     display: unset;
@@ -593,7 +589,7 @@ section.segment-selected-inBulk .body .text:hover {
 
 
 p.split-shortcut {
-    background: #dde0e4;
+    background: #f2f4f7;
     padding: 1px 0px;
     width: 55px;
     margin: 0 auto;
@@ -607,7 +603,7 @@ p.split-shortcut {
 
 .splitInner .sid {
     background: url(../img/split-bg.png) no-repeat;
-    background-position: 48.5% 23px;
+    background-position: 48.5% 16px;
 }
 
 .splitEnd .sid {
@@ -620,7 +616,7 @@ p.split-shortcut {
 }
 
 .editor.splitInner .sid {
-    background-position: 49% -40px;
+    background-position: 52% -40px;
 }
 
 .editor.splitEnd .sid {
