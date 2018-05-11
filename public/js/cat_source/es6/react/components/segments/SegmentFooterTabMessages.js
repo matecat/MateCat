@@ -24,7 +24,7 @@ class SegmentFooterTabMessages extends React.Component {
         if (this.props.notes) {
             this.props.notes.forEach(function (item, index) {
                 if (item.note && item.note !== "") {
-                    let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/gmi;
+                    let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gmi;
                     let note = item.note.replace(regExpUrl, function ( match, text ) {
                         return '<a href="'+ text +'" target="_blank">' + text + '</a>';
                     });

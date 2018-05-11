@@ -84,7 +84,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
         this.checkIssue( issue );
 
         MateCat.db.addListener('segment_translation_issues',
-            ['insert', 'update', 'delete'], this.issueChanged.bind(this));
+            ['insert', 'update'], this.issueChanged.bind(this));
 
     }
     componentWillUnmount() {
@@ -92,7 +92,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
             ['insert', 'delete'], this.commentsChanged);
 
         MateCat.db.removeListener('segment_translation_issues',
-            ['insert', 'update', 'delete'], this.issueChanged);
+            ['insert', 'update'], this.issueChanged);
 
     }
     handleFail() {

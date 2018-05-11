@@ -26,6 +26,7 @@ if ( ReviewExtendedFooter.enabled() ) {
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
+                    ReviewExtendedFooter.reloadQualityReport();
                 });
             },
             submitComment : function(id_segment, id_issue, data) {
@@ -35,6 +36,9 @@ if ( ReviewExtendedFooter.enabled() ) {
                         UI.getSegmentVersionsIssues(id_segment, fid);
                     });
             },
+            reloadQualityReport : function() {
+                UI.reloadQualityReport();
+            }
         });
 
         $.extend(UI, {
@@ -113,7 +117,8 @@ if ( ReviewExtendedFooter.enabled() ) {
                     url: issue_path,
                     type: 'DELETE'
                 }).done( function( data ) {
-                    UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
+                    UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id);
+                    UI.reloadQualityReport();
                 });
             },
             /**

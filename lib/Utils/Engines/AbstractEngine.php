@@ -272,4 +272,13 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
         return $this->engineRecord->name;
     }
 
+    /**
+     * Read Only
+     *
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRow(){
+        return clone $this->engineRecord;
+    }
+
 }

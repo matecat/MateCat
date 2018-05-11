@@ -71,13 +71,14 @@ if ( Review.enabled() )
             },
 
             trackChanges: function (editarea) {
-                var source = UI.currentSegment.find('.original-translation').html();
+                var $segment = $(editarea).closest('section');
+                var source = $segment.find('.original-translation').html();
                 source = UI.clenaupTextFromPleaceholders( source );
 
                 var target = $(editarea).text();
                 var diffHTML = trackChangesHTML( source, htmlEncode(target) );
 
-                $('.editor .sub-editor.review .track-changes p').html( diffHTML );
+                $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
 
             setReviewErrorData: function (d) {

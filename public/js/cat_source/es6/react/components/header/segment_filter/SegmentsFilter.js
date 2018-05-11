@@ -43,7 +43,7 @@ class SegmentsFilter extends React.Component {
                 segmentsArray: [],
                 moreFilters: this.moreFilters
 
-        }
+            }
         }
     }
 

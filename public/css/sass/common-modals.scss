@@ -1538,3 +1538,26 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
         padding: 10px 25px;
     }
 }
+
+
+
+[data-name="confirmCopyAllSources"] {
+    input, label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    label {
+        margin-left: 5px;
+    }
+    .text-container-top {
+        padding: 20px !important;
+        margin-top: 0 !important;
+    }
+    .popup p {
+        margin-bottom: 0;
+    }
+    .boxed {
+        padding-right: 20px;
+        padding-bottom: 0 !important;
+    }
+}

@@ -127,9 +127,12 @@ if ( QaCheckGlossary.enabled() )
                 re , '<span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span>'
             );
         });
-        SegmentActions.replaceSourceText(UI.getSegmentId(container), UI.getSegmentFileId(container), newHTML);
+        setTimeout(function (  ) {
+            SegmentActions.replaceSourceText(UI.getSegmentId(container), UI.getSegmentFileId(container), newHTML);
+            bindEvents( container, unusedMatches );
 
-        bindEvents( container, unusedMatches );
+        }, 200);
+
     }
 
     function findUnusedGlossaryMatches( record ) {

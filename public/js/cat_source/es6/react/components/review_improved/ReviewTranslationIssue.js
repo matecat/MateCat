@@ -21,7 +21,7 @@ class ReviewTranslationIssue extends React.Component{
     deleteIssue(event) {
         event.preventDefault();
         event.stopPropagation();
-        ReviewImproved.deleteIssue(this.state.issue);
+        SegmentActions.deleteIssue(this.state.issue);
     }
     render() {
         var category_label = this.categoryLabel();

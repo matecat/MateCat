@@ -18,6 +18,13 @@ use \Exception;
 use Utils;
 use \INIT;
 
+/**
+ * Trait Translated
+ *
+ * This trait is meant to be used as Features\BaseFeature concrete class
+ *
+ * @package Features\Outsource\Traits
+ */
 trait Translated {
 
     protected $successEmailObject;
@@ -42,6 +49,9 @@ trait Translated {
          */
         $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
         $formatted = new ProjectUrls( $projectData );
+
+        //Let the Feature Class decide about Urls
+        $formatted = $this->projectUrls( $formatted );
 
         $config = self::getConfig();
 
@@ -88,7 +98,7 @@ trait Translated {
                             'pid'  => $quote_response->pid,
                             'c'    => 1,
                             'of'   => "json",
-                            'urls' => $urls
+                            'urls' => json_encode( $urls )
                     ], PHP_QUERY_RFC3986 );
 
             try {
