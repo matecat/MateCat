@@ -354,13 +354,6 @@ body.manage {
                             padding: 8px 15px;
                             &.outsource-container {
                             }
-                            /*&.after-outsource-container {
-                                @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                                    .outsource-container {
-                                        width: 105%;
-                                    }
-                                }
-                            }*/
                             .outsource.modal .popup {
                                 box-shadow: none;
                             }
@@ -459,6 +452,7 @@ body.manage {
                             .outsource-job {
                                 display: inline-block;
                                 min-width: 34%;
+                                padding-left: 5px;
                                 .translated-outsourced {
                                     top: 1px;
                                     bottom: 6px;
@@ -489,7 +483,7 @@ body.manage {
                                     margin-left: 5px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    width: 180px;
+                                    max-width: 140px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -504,16 +498,14 @@ body.manage {
                                     a {
                                         text-decoration: underline;
                                         font-weight: 700;
-                                        /*&:hover {
-                                            text-decoration: none;
-                                        }*/
+
                                     }
                                     &.not-assigned {
                                         width: fit-content;
                                     }
                                 }
                                 &:hover .job-to-translator{
-                                    /*width: inherit;*/
+
                                 }
 
                                 .job-delivery {
@@ -920,7 +912,7 @@ footer nav ul a:hover {
             margin-right: 5px;
             margin-left: 15px;
             min-width: 0px;
-            max-width: 210px;
+            max-width: 210px !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

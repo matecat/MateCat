@@ -90,7 +90,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         status: status,
                         time_to_edit: "0",
                         translation: translation,
-                        decoded_translation:  UI.decodeText(segment, segment.translation),
+                        decoded_translation:  UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
                         tagged: false,
