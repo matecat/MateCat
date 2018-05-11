@@ -1608,14 +1608,14 @@ UI = {
         });
 	},
     updateQAPanel: function () {
-        if ( UI.globalWarnings.tag_issues && UI.globalWarnings.tag_issues.length > 0 ) {
+        if ( !_.isUndefined(UI.globalWarnings.tag_issues) ) {
             CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
         }
 
-        if ( UI.globalWarnings.glossary_issues && UI.globalWarnings.glossary_issues.length > 0 ) {
+        if ( !_.isUndefined( UI.globalWarnings.glossary_issues ) ) {
             CatToolActions.qaComponentSetGlossaryIssues(UI.globalWarnings.glossary_issues)
         }
-        if ( UI.globalWarnings.translation_mismatches && UI.globalWarnings.translation_mismatches.length > 0 ) {
+        if ( !_.isUndefined( UI.globalWarnings.translation_mismatches ) ) {
             CatToolActions.qaComponentsetTranslationConflitcts(UI.globalWarnings.translation_mismatches);
         }
     },
