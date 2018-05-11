@@ -207,7 +207,7 @@ class SegmentFooterTabConcordance extends React.Component {
             </div>;
         } else {
             html = <ul className={"graysmall message prime"}>
-                <li>Concordance is not available when the TM feature is disabled</li>
+                <li>TM Search is not available when the TM feature is disabled</li>
             </ul>;
         }
 
