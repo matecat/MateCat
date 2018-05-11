@@ -439,7 +439,7 @@ border-bottom: 3px solid #1B5D7B!important;
 
 .topMenu.open {
     max-height: 64%;
-    overflow: scroll;
+    overflow: auto;
     top: 48px !important;
     display: block;
 }

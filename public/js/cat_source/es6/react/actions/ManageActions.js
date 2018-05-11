@@ -385,7 +385,7 @@ let ManageActions = {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.RENDER_PROJECTS,
                     projects: response.data,
-                    team: team,
+                    team: UI.selectedTeam,
                     hideSpinner: false,
                     filtering: false
                 });

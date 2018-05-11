@@ -98,7 +98,7 @@ $.extend(UI, {
                         }
                     },
                     "searchInConcordance": {
-                        "label": "Perform Concordance search on word(s) selected in the source or target segment",
+                        "label": "Perform TM Search search on word(s) selected in the source or target segment",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "alt+k",
