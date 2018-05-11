@@ -53,6 +53,10 @@
   box-sizing: border-box;
 }
 
+.qa-issues-container.segments-with-issues {
+  width: 190px;
+}
+
 .qa-issues-container:hover, .qa-lexiqa-container:hover {
   background-color: #d0d0d0;
 }
@@ -134,7 +138,7 @@
 
 .qa-total-issues-counter {
   top: 10px;
-  left: 50px;
+  left: 10px;
 }
 
 .qa-issues-counter {
