@@ -33,7 +33,7 @@ class SegmentFooter extends React.Component {
                 elements: []
             },
             concordances: {
-                label: 'Concordance',
+                label: 'TM Search',
                 code : 'cc',
                 tab_class : 'concordances',
                 enabled : false,
