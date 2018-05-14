@@ -1106,10 +1106,17 @@ class QA {
             }
         }
 
-        $totalResult = array(
-                'source' => call_user_func_array( [ 'CatUtils', 'restore_xliff_tags_for_view' ], array_merge( $clonedSrc, $clonedClosingSrc ) ),
-                'target' => call_user_func_array( [ 'CatUtils', 'restore_xliff_tags_for_view' ], array_merge( $clonedTrg, $clonedClosingTrg ) ),
-        );
+        $totalResult     = [ 'source' => [], 'target' => [] ];
+        $source_segments = array_merge( $clonedSrc, $clonedClosingSrc );
+        foreach ( $source_segments as $source_segment ) {
+            $totalResult[ 'source' ][] = CatUtils::restore_xliff_tags_for_view( $source_segment );
+        }
+
+        $target_segments = array_merge( $clonedTrg, $clonedClosingTrg );
+        foreach ( $target_segments as $target_segment ) {
+            $totalResult[ 'target' ][] = CatUtils::restore_xliff_tags_for_view( $target_segment );
+        }
+
 
 //        Log::doLog($totalResult);
 

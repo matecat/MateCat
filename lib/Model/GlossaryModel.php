@@ -22,8 +22,13 @@ class GlossaryModel {
 
     private $uid ;
 
+    private $featureSet;
+
     public function __construct( Jobs_JobStruct $job ) {
         $this->job = $job ;
+
+        $this->featureSet = new FeatureSet;
+        $this->featureSet->loadFromString($this->job->getProjectFeatures());
 
         $this->_TMS = Engine::getInstance( self::MYMEMORY_ID );
 
@@ -40,7 +45,8 @@ class GlossaryModel {
 
     private function __matchWithWordBoundary( $what, $where ) {
         $quoted = preg_quote( $what );
-        return preg_match_all("/\\b$quoted\\b/u", $where ) ;
+        $preg_match_pattern =  $this->featureSet->filter('glossaryMatchPattern', "/\\b$quoted\\b/u");
+        return preg_match_all($preg_match_pattern, $where ) ;
     }
 
     /**

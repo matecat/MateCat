@@ -6,7 +6,7 @@
     &.concordances {
         &.extended.have-results{
             .overflow{
-                height: 175px;
+                max-height: 280px;
             }
         }
         .cc-search{

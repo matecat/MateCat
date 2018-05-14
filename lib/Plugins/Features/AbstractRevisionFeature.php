@@ -309,9 +309,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * a __meta folder. The qa_model.json file must be valid too.
      *
      * If validation fails, adds errors to the projectStructure.
+     *
+     * @param      $projectStructure
+     * @param null|string $jsonPath
      */
 
-    public static function loadAndValidateModelFromJsonFile( $projectStructure ) {
+    public static function loadAndValidateModelFromJsonFile( $projectStructure, $jsonPath = null ) {
         // detect if the project created was a zip file, in which case try to detect
         // id_qa_model from json file.
         // otherwise assign the default model
@@ -333,7 +336,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         Log::doLog( "QA model is : " . var_export( $qa_model, true ) ) ;
 
         if ( $qa_model === false ) {
-            $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
+            if( $jsonPath == null ){
+                $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
+            } else {
+                $qa_model = file_get_contents( $jsonPath );
+            }
         }
 
         $decoded_model = json_decode( $qa_model, true ) ;
