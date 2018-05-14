@@ -120,6 +120,9 @@ if ( QaCheckGlossary.enabled() )
         //clean up lexiqa highlighting - if enabled
         if (LXQ.enabled())
           newHTML = LXQ.cleanUpHighLighting(newHTML);
+        unusedMatches = unusedMatches.sort(function(a, b){
+            return b.raw_segment.length - a.raw_segment.length;
+        });
         $.each(unusedMatches, function( index ) {
             var value = (this.raw_segment) ? this.raw_segment : this.translation ;
             value = escapeRegExp( value );
