@@ -442,6 +442,7 @@ border-bottom: 3px solid #1B5D7B!important;
     overflow: auto;
     top: 48px !important;
     display: block;
+    box-shadow: 0 0 4px #cecccc;
 }
 
 .topMenu ul.gotocurrentsegment {
@@ -571,16 +572,16 @@ color:#333;}
 
 /*end dropdown menu profile */
 
-.topMenu ul li {
+/*.topMenu ul li {
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
     background: #fff;
-}
+}*/
 
 .topMenu ul li a {
-	text-decoration: none;
-	color: #333;
-	padding: 13px 10px 10px 22px;
-	display: block;
+    text-decoration: none;
+    color: #333;
+    padding: 13px 10px 10px 22px;
+    display: block;
 	background-size: 24px; -webkit-transition: all 100ms ease-in;
 	-moz-transition: all 100ms ease-in;
 }
@@ -588,43 +589,19 @@ color:#333;}
 
 
 
-    .currSegment a {box-shadow: inset 0px 1px #fff, 0px 1px #fff;
-	    box-shadow: inset 0px 1px #fff, 0px 1px #fff;
-	    -moz-box-shadow: inset 0px 1px #fff, 0px 1px #fff;
-	    -webkit-box-shadow: inset 0px 1px #fff, 0px 1px #fff;}
+.currSegment a {
+    background: #efefef;
+}
 
-    .topMenu ul li:last-child
-    {
-	    border-bottom:0;
-
-    }
-
-    .topMenu ul li.current a
-    {
-	    font-weight: bold;
-	    border-left: 3px solid #ffcc00;
-    }
-
-
-
-    .currSegment a
-
-    {
-	    background: #efefef;
-	    border-top: 1px solid #ccc;
-	    box-shadow: inset 0px 1px #fff;
-	    -moz-box-shadow: inset 0px 1px #fff;
-	    -webkit-box-shadow: inset 0px 1px #fff;
-
-  }
-
-
-  .topMenu ul li a:hover
-  {
-	  text-decoration: underline;
+.topMenu ul li.current a {
+    font-weight: bold;
+    border-left: 3px solid #ffcc00;
 }
 
 
+.topMenu ul li a:hover {
+  background: #f2f4f7;
+}
 
 .tooltip {
   cursor: help;
@@ -3112,7 +3089,8 @@ font-weight: normal !important;
 .extgsheet {background: url(../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
 
-#jobMenu span {height: 25px;
+#jobMenu span {
+    height: 30px;
 	padding: 5px;
 	margin: 4px 8px 0px 7px;
 	width: 30px;
