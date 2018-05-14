@@ -285,10 +285,10 @@ class QAComponent extends React.Component {
                 counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.total_issues.length + ' ' + counterLabel}</div>;
                 selected = 'selected';
             }
-            total_issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'total_issues')}>
+            total_issues_html = <div className={"qa-issues-container segments-with-issues " + selected} onClick={this.selectBox.bind(this, 'total_issues')}>
                 <span className="icon-qa-total-issues"/>
                 <span className="qa-total-issues-counter">{this.state.total_issues.length}</span>
-                All
+                Segments with issues
             </div>;
         }
         if ( this.state.translation_conflicts.length > 0 ) {
