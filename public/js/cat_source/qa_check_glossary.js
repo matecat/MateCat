@@ -125,7 +125,7 @@ if ( QaCheckGlossary.enabled() )
             value = escapeRegExp( value );
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             newHTML = newHTML.replace(
-                re , '<span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span>'
+                re , '<span data-id="' + this.index + '" class="unusedGlossaryTerm">$1</span>'
             );
         });
         setTimeout(function (  ) {
