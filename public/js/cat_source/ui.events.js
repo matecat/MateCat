@@ -461,7 +461,7 @@ $.extend(UI, {
             UI.saveSegment(UI.currentSegment);
 			UI.renderAndScrollToSegment($(this).attr('data-segment'));
 		});
-		$("#jobMenu").on('click', 'li.currSegment', function(e) {
+		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
 		});

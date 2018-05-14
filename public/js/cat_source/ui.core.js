@@ -27,9 +27,9 @@ UI = {
 		} else {
             currSegment = jobMenu.find('.currSegment');
             if (this.body.hasClass('editing')) {
-                currSegment.show();
+                currSegment.removeClass('disabled');
             } else {
-                currSegment.hide();
+                currSegment.addClass('disabled');
             }
             var menuHeight = jobMenu.height();
             if (LXQ.enabled()) {
@@ -506,7 +506,7 @@ UI = {
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>' +
+            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)">Go to current segment</a></li>' +
             '</ul>' +
             '<ul class="jobmenu-list">';
         $.each(config.firstSegmentOfFiles, function() {
