@@ -58,7 +58,7 @@ if (true)
                 segment = segmentToLookForGlossary.el ;
             }
 
-            txt = htmlDecode( $( '.text .source', segment ).attr( 'data-original' ) );
+            txt =  $( '.text .source', segment ).text() ;
             if ( _.isUndefined(txt) || (txt === '') ) return false;
             setTimeout(function (  ) {
                 SegmentActions.renderSegmentGlossary(UI.getSegmentId(segment), txt);

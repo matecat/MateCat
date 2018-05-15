@@ -120,12 +120,15 @@ if ( QaCheckGlossary.enabled() )
         //clean up lexiqa highlighting - if enabled
         if (LXQ.enabled())
           newHTML = LXQ.cleanUpHighLighting(newHTML);
+        unusedMatches = unusedMatches.sort(function(a, b){
+            return b.raw_segment.length - a.raw_segment.length;
+        });
         $.each(unusedMatches, function( index ) {
             var value = (this.raw_segment) ? this.raw_segment : this.translation ;
             value = escapeRegExp( value );
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             newHTML = newHTML.replace(
-                re , '<span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span>'
+                re , '<span data-id="' + this.index + '" class="unusedGlossaryTerm">$1</span>'
             );
         });
         setTimeout(function (  ) {
