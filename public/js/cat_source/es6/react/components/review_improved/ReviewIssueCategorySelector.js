@@ -18,7 +18,9 @@ class ReviewIssueCategorySelector extends React.Component{
         // the category should be considered to be a header for the nested
         // subcategories. Don't print the select box if no severity is found.
         let select = null;
-
+        let classname = classnames({
+            "category-title" : !this.props.category.severities
+        });
         if ( this.props.category.severities ) {
             var default_severity = <option key={'value-'} value="" >---</option>;
             var severities = this.props.category.severities.map(function(severity, i) {
@@ -35,10 +37,12 @@ class ReviewIssueCategorySelector extends React.Component{
                 name="severities">
             {full_severities}
             </select>
+        } else {
+
         }
 
         return <tr>
-        <td>{this.props.category.label}</td>
+        <td className={classname}>{this.props.category.label}</td>
         <td>
             { select }
         </td>
