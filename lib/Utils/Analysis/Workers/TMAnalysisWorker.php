@@ -777,7 +777,7 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             try {
-                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id );
+                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );
             } catch(\Exception $e) {
                 //ignore Exception the analysis is finished anyway
                 $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
