@@ -458,7 +458,9 @@ $.extend(UI, {
 
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-            UI.saveSegment(UI.currentSegment);
+			if (UI.currentSegment) {
+                UI.saveSegment(UI.currentSegment);
+            }
 			UI.renderAndScrollToSegment($(this).attr('data-segment'));
 		});
 		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
