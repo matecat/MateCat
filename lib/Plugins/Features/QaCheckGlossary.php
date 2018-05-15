@@ -5,6 +5,7 @@ namespace Features;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningModel;
 use Translations\WarningStruct;
+use QA;
 
 use Translations\WarningDao ;
 
@@ -94,9 +95,11 @@ class QaCheckGlossary extends BaseFeature {
         }
 
         $result[ 'data' ][ self::GLOSSARY_SCOPE ]                = [ 'matches' => $data_elements ];
+        sort($segments_ids);
+        $segments_ids = array_unique($segments_ids);
         $result[ 'details' ][ self::GLOSSARY_SCOPE . "_issues" ] = $segments_ids;
-        if ( isset( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) && is_array( $result[ 'details' ][ 'totals' ][ 'ERROR' ] ) ) {
-            $result[ 'details' ][ 'totals' ][ 'ERROR' ] = array_unique( array_merge( $result[ 'details' ][ 'totals' ][ 'ERROR' ], $segments_ids ) );
+        if ( isset( $result[ 'details' ][ 'totals' ][ QA::ERROR ] ) && is_array( $result[ 'details' ][ 'totals' ][ QA::ERROR ] ) ) {
+            $result[ 'details' ][ 'totals' ][ QA::ERROR ] = array_unique( array_merge( $result[ 'details' ][ 'totals' ][ QA::ERROR ], $segments_ids ) );
         }
 
         return $result;
