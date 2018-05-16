@@ -59,6 +59,7 @@ if (true)
             }
 
             txt =  $( '.text .source', segment ).text() ;
+            txt = txt.replace(/\"/g, "");
             if ( _.isUndefined(txt) || (txt === '') ) return false;
             setTimeout(function (  ) {
                 SegmentActions.renderSegmentGlossary(UI.getSegmentId(segment), txt);
