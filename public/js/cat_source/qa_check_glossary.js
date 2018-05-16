@@ -115,20 +115,24 @@ if ( QaCheckGlossary.enabled() )
         var container = segment.el.find('.source');
 
         removeUnusedGlossaryMarks( container ) ;
-
+        if (unusedMatches.length === 0) {
+            return;
+        }
         var newHTML = container.html();
         //clean up lexiqa highlighting - if enabled
-        if (LXQ.enabled())
-          newHTML = LXQ.cleanUpHighLighting(newHTML);
+        if (LXQ.enabled()) {
+            newHTML = LXQ.cleanUpHighLighting(newHTML);
+        }
         unusedMatches = unusedMatches.sort(function(a, b){
             return b.raw_segment.length - a.raw_segment.length;
         });
         $.each(unusedMatches, function( index ) {
             var value = (this.raw_segment) ? this.raw_segment : this.translation ;
             value = escapeRegExp( value );
+            value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             newHTML = newHTML.replace(
-                re , '<span data-id="' + this.index + '" class="unusedGlossaryTerm">$1</span>'
+                re , '<span data-id="' + index + '" class="unusedGlossaryTerm">$1</span>'
             );
         });
         setTimeout(function (  ) {

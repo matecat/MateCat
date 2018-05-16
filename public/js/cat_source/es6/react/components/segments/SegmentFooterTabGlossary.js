@@ -34,10 +34,10 @@ class SegmentFooterTabGlossary extends React.Component {
                     self.processLoadedGlossary( response.data.matches );
                     SegmentActions.addClassToSegment( self.props.id_segment, 'glossary-loaded' );
                     self.setTotalMatchesInTab( response.data.matches );
-                    UI.cacheGlossaryData( response, self.props.id_segment );
+                    UI.cacheGlossaryData( response.data.matches, self.props.id_segment );
                     // Todo: refactor
                     if ( !UI.body.hasClass( 'searchActive' )) {
-                        UI.markGlossaryItemsInSource( response );
+                        UI.markGlossaryItemsInSource( response.data.matches );
                     }
                 });
         }
@@ -73,7 +73,7 @@ class SegmentFooterTabGlossary extends React.Component {
                         SegmentActions.addClassToSegment(self.props.id_segment, 'glossary-loaded');
                         self.setTotalMatchesInTab( response.data.matches );
                         // Todo: refactor
-                        UI.markGlossaryItemsInSource( response );
+                        UI.markGlossaryItemsInSource( response.data.matches );
                     });
             } else if (txt && target){
                 this.setGlossaryItem();
@@ -206,15 +206,15 @@ class SegmentFooterTabGlossary extends React.Component {
                     self.source.textContent = '';
                     self.target.textContent = '';
 
-                    let matches = $.extend(true, response.data.matches, self.state.matches);
+                    let matches = $.extend({}, response.data.matches, self.state.matches);
                     self.setState({
                         loading: false,
                         openComment: false,
                         enableAddButton: false,
                         matches: matches
                     });
-                    self.setTotalMatchesInTab( response.data.matches );
-                    UI.markGlossaryItemsInSource(response);
+                    self.setTotalMatchesInTab( matches );
+                    UI.markGlossaryItemsInSource(matches);
                 });
 
         } else {
