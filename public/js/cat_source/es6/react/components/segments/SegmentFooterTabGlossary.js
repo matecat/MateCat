@@ -114,7 +114,7 @@ class SegmentFooterTabGlossary extends React.Component {
                 UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(self.props.id_segment) );
             });
         let matches = $.extend(true, {}, this.state.matches);
-        matches = _.remove(matches, function(n) { return n===name });
+        delete matches[name];
         this.setState({
             matches: matches
         });
