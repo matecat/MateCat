@@ -3683,6 +3683,7 @@ span.locked.tag-html-container-close {
     padding: 3px;
 }
 
+
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
@@ -4465,6 +4466,13 @@ body.tagModes:not(.tagmode-default-extended) .endTag {
     width: 7px;
     height: 8px;
     padding-top: 0px;
+}
+
+body span.endTag {
+    top: -3.4px;
+}
+body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
+    vertical-align: middle;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
