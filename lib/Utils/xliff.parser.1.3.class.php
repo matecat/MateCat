@@ -453,13 +453,20 @@ class Xliff_Parser {
         try {
 
             $tagArray = $this->_getTagContent( 'alt-trans', $trans_unit );
-
-            $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
-            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
-
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'attr' ] = $tagArray[ 'attributes' ];
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+
+            try{
+                $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+            }
+            catch( UnexpectedValueException $e ){
+                //Found Empty Target Tag
+                Log::doLog( $e->getMessage() );
+            }
+
+            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'target' ] = self::fix_non_well_formed_xml( $targetArray[ 'content' ] );
+
 
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
