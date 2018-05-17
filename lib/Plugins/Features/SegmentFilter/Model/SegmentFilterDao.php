@@ -65,6 +65,11 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             $where_data = [ 'status' => $filter->getSegmentStatus() ];
         }
 
+        if ( $filter->hasCustomCondition() ) {
+            $where .= " AND ( " . $filter->getCustomConditionSQL() . " ) " ;
+            array_merge( $where_data, $filter->getCustomConditionData() ) ;
+        }
+
         return (object)[ 'sql' => $where, 'data' => $where_data ];
     }
 
