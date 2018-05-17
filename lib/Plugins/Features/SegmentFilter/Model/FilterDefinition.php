@@ -16,6 +16,9 @@ class FilterDefinition {
      */
     private $filter_data;
 
+    private $custom_conditions_sql  = [] ;
+    private $custom_conditions_data = [] ;
+
     /**
      * @param array $filter_data
      */
@@ -49,6 +52,23 @@ class FilterDefinition {
 
     public function isValid() {
         return ( $this->isSampled() || $this->getSegmentStatus() != '' ) ;
+    }
+
+    public function setCustomCondition( $condition, $data ) {
+        $this->custom_conditions_sql [] = $condition ;
+        array_merge( $this->custom_conditions_data, $data) ;
+    }
+
+    public function hasCustomCondition() {
+        return !empty( $this->custom_conditions_sql );
+    }
+
+    public function getCustomConditionSQL() {
+        return implode(" AND ", $this->custom_conditions_sql ) ;
+    }
+
+    public function getCustomConditionData() {
+        return $this->custom_conditions_data ;
     }
 
 }
