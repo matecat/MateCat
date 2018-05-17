@@ -111,7 +111,7 @@ class OutsourceVendor extends React.Component {
 
     getCurrentCurrency() {
         let currency = Cookies.get( "matecat_currency");
-        if (!_.isUndefined(currency) || !_.isNull(currency)) {
+        if (!_.isUndefined(currency) && !_.isNull(currency)) {
             return currency;
         } else {
             Cookies.set( "matecat_currency", 'EUR');
