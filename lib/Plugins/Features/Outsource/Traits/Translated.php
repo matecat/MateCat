@@ -151,6 +151,9 @@ trait Translated {
             $cDao               = new ConfirmationDao;
             $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
 
+            $outsourceDao = new ConfirmationDao();
+            $outsourceDao->destroyConfirmationCache( $job );
+            
         }
 
     }
