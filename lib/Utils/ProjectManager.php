@@ -2019,15 +2019,21 @@ class ProjectManager {
         $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
         $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
 
+
         if(!empty($xliff_trans_unit[ 'source' ])){
-            $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ]['raw-content'] );
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+
         }
 
         if(!empty($xliff_trans_unit[ 'alt-trans' ]['source'])){
-            $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ]['source'] );
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ]['source'] );
         }
 
-        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+
+        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $source_extract_external['seg'] );
+
+        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external['seg'] );
         $config[ 'context_after' ]  = null;
         $config[ 'context_before' ] = null;
 
@@ -2681,7 +2687,15 @@ class ProjectManager {
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
-            return true;
+            // evaluate if different source and target should be considered translated
+            $differentSourceAndTargetIsTranslated = true;
+            $differentSourceAndTargetIsTranslated = $this->features->filter(
+                    'filterDifferentSourceAndTargetIsTranslated',
+                    $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+            );
+
+            return $differentSourceAndTargetIsTranslated;
+           //return true;
         } else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;
