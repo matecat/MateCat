@@ -1711,7 +1711,11 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-				if (segment.el.hasClass('waiting_for_check_result')) {
+			    if(d.details){
+                    SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
+                }
+                // Todo: ###REMOVE###
+				/*if (segment.el.hasClass('waiting_for_check_result')) {
                     // TODO: define d.total more explicitly
 					if ( !d.total ) {
 						$('p.warnings', segment.el).empty();
@@ -1725,7 +1729,8 @@ UI = {
                         delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
                         SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
                     }
-				}
+				}*/
+
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');

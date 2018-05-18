@@ -69,4 +69,5 @@ window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
+window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
 

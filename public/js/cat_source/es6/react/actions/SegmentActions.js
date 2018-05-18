@@ -170,6 +170,15 @@ var SegmentActions = {
             actionType: SegmentConstants.ENABLE_TAG_LOCK
         });
     },
+
+
+    setSegmentWarnings: function(sid, warnings){
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
+            sid: sid,
+            warnings: warnings
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
