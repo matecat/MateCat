@@ -785,6 +785,8 @@ class TMAnalysisWorker extends AbstractWorker {
                 $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
             }
 
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
+
         }
 
     }
