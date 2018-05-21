@@ -59,6 +59,7 @@ if (true)
             }
 
             txt =  $( '.text .source', segment ).text() ;
+            txt = UI.removeAllTags( htmlEncode(txt) );
             txt = txt.replace(/\"/g, "");
             if ( _.isUndefined(txt) || (txt === '') ) return false;
             setTimeout(function (  ) {
