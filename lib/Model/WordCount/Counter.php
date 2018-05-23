@@ -159,7 +159,7 @@ class WordCount_Counter {
 
         $queryStats = "select
                         st.status,
-                        sum(s.raw_word_count) as wc_sum
+                        $sum_sql as wc_sum
                         from
                             jobs j join segment_translations st  on j.id = st.id_job
                           join segments s on s.id = st.id_segment
