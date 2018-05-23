@@ -443,6 +443,7 @@ class Xliff_Parser {
         try {
             $tagArray = $this->_getTagContent( 'target', $trans_unit );
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attributes' ];
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
             Log::doLog( $e->getMessage() );
@@ -458,8 +459,7 @@ class Xliff_Parser {
             try{
                 $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
                 $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
-            }
-            catch( UnexpectedValueException $e ){
+            } catch( UnexpectedValueException $e ){
                 //Found Empty Target Tag
                 Log::doLog( $e->getMessage() );
             }
