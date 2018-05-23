@@ -8,7 +8,7 @@ class OutsourceVendor extends React.Component {
 
     constructor(props) {
         super(props);
-        let changesRates = (!_.isUndefined(Cookies.get( "matecat_changeRates")) ) ? $.parseJSON( Cookies.get( "matecat_changeRates"))
+        let changesRates = (!_.isUndefined(Cookies.get( "matecat_changeRates")) && !_.isNull(Cookies.get( "matecat_changeRates")) ) ? $.parseJSON( Cookies.get( "matecat_changeRates"))
             : {};
         this.state = {
             outsource: false,
@@ -26,9 +26,10 @@ class OutsourceVendor extends React.Component {
             errorOutsource: false
         };
         this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
-        if ( config.enable_outsource ) {
+        if ( config.enable_outsource) {
             this.getOutsourceQuote();
         }
+
         this.getChangeRates();
 
         this.currencies = {
@@ -111,7 +112,7 @@ class OutsourceVendor extends React.Component {
 
     getCurrentCurrency() {
         let currency = Cookies.get( "matecat_currency");
-        if (!_.isUndefined(currency) || !_.isNull(currency)) {
+        if (!_.isUndefined(currency) && !_.isNull(currency) && currency !== "null") {
             return currency;
         } else {
             Cookies.set( "matecat_currency", 'EUR');
@@ -130,8 +131,12 @@ class OutsourceVendor extends React.Component {
 
     getCurrencyPrice(price) {
         let current = this.getCurrentCurrency();
-        return parseFloat(price * this.state.changeRates[current]/this.state.changeRates['EUR'])
-            .toFixed(2);
+        if ( this.state.changeRates ) {
+            return parseFloat(price * this.state.changeRates[current]/this.state.changeRates['EUR'])
+                .toFixed(2);
+        } else {
+            return price;
+        }
     }
 
     changeTimezone(value) {
@@ -144,10 +149,10 @@ class OutsourceVendor extends React.Component {
     getChangeRates() {
         let self = this;
         let changeRates = Cookies.get( "matecat_changeRates");
-        if( _.isUndefined(changeRates)) {
+        if( _.isUndefined(changeRates) || _.isNull(changeRates) || changeRates === "null") {
             API.OUTSOURCE.fetchChangeRates().done(function (response) {
                 var rates = $.parseJSON(response.data);
-                if (!_.isUndefined(rates)) {
+                if (!_.isUndefined(rates) && !_.isNull(changeRates)) {
                     self.setState({
                         changeRates: rates
                     });
