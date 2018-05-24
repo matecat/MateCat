@@ -79,7 +79,7 @@ trait Translated {
         $this->setInternalIdProject( $project_id );
         $eq_words_count = [];
         foreach ( $_analyzed_report as $job_info ) {
-            $eq_words_count[ $job_info[ 'id_job' ] ] = number_format( $job_info[ 'eq_wc' ] + 0.00000001, 0, ".", "," );
+            $eq_words_count[ $job_info[ 'id_job' ] ] = $job_info[ 'eq_wc' ];
         }
 
         $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id, 3600 );
@@ -106,6 +106,8 @@ trait Translated {
     }
 
     public function requestJobQuote(\Jobs_JobStruct $job, $eq_word, $project, $formatted_urls){
+
+        $eq_word = number_format( $eq_word + 0.00000001, 0);
 
         $this->setInternalIdProject( $job->id_project );
 
