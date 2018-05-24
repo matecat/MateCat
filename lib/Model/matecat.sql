@@ -1176,7 +1176,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-05-23 14:46:19
+-- Dump completed on 2018-05-24 10:02:40
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1186,7 +1186,7 @@ UPDATE engines SET id = 0 WHERE id = 10 ;
 UPDATE engines SET id = 1 WHERE id = 11 ;
 
 -- populate sequences
-INSERT INTO sequences ( id_segment, id_project ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1), IFNULL( (SELECT MAX(id) + 1 FROM projects), 1)  );
+INSERT INTO sequences ( id_segment, id_project, id_dqf_project ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1), IFNULL( (SELECT MAX(id) + 1 FROM projects), 1), 1 );
 
 #Create the user 'matecat'@'%' IF NOT EXISTS
 -- CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
@@ -1351,4 +1351,4 @@ INSERT INTO `phinxlog` VALUES (20180330145502,'2018-03-30 17:15:03','2018-03-30 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-05-23 14:46:19
+-- Dump completed on 2018-05-24 10:02:40
