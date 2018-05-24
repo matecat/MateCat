@@ -17,6 +17,7 @@ class setRevisionController extends ajaxController {
     private $err_language;
     private $err_style;
     private $original_translation;
+    private $reviseClass;
 
     private static $accepted_values = array(
             Constants_Revise::CLIENT_VALUE_NONE,
@@ -167,11 +168,19 @@ class setRevisionController extends ajaxController {
         $errorCountDao = new ErrorCount_ErrorCountDAO( Database::obtain() );
         try {
 
+            $this->reviseClass = new Constants_Revise;
+
             $jobQA = new Revise_JobQA(
                 $this->id_job,
                 $this->password_job,
-                $wStruct->getTotal()
+                $wStruct->getTotal(),
+                $this->reviseClass
             );
+
+            list($jobQA, $this->reviseClass) = $this->featureSet->filter("overrideReviseJobQA", [$jobQA, $this->reviseClass], $this->id_job,
+                    $this->password_job,
+                    $wStruct->getTotal());
+
 
             if( $errorCountStruct->thereAreDifferences() ){
                 $errorCountDao->update( $errorCountStruct );

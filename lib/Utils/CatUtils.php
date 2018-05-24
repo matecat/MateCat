@@ -913,14 +913,24 @@ class CatUtils {
 
         $result = null ;
 
-        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+        $project = $job->getProject();
+        $featureSet = $project->getFeatures();
+
+        if ( in_array( Features::REVIEW_IMPROVED, $featureSet->getCodes() ) ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
             $result = $review;
         } else {
-            $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
+            $struct = CatUtils::getWStructFromJobStruct( $job, $project->status_analysis ) ;
+
+            $reviseClass = new Constants_Revise;
+
             $jobQA = new Revise_JobQA(
                     $job->id, $job->password, $struct->getTotal()
+                    , $reviseClass
             );
+
+
+            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
             $jobQA->retrieveJobErrorTotals();
             $result = $jobQA->evalJobVote();
         }
