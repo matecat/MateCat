@@ -53,10 +53,12 @@
                     UI.disableTPOnSegment()
                 } else {
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
+                    UI.autoFillTagsInTarget();
                 }
 
             }).fail(function () {
                 UI.copyTagProjectionInCurrentSegment();
+                UI.autoFillTagsInTarget();
                 UI.startOfflineMode();
             }).always(function () {
                 UI.setSegmentAsTagged();
