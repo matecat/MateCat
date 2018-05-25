@@ -82,7 +82,7 @@ trait Translated {
             $eq_words_count[ $job_info[ 'id_job' ] ] = $job_info[ 'eq_wc' ];
         }
 
-        $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id, 3600 );
+        $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id );
         /** @var $jobs \Jobs_JobStruct[] */
         $project = $jobs[ 0 ]->getProject();
 
