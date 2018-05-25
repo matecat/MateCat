@@ -255,9 +255,9 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
-    public static function getEQWord( Jobs_JobStruct $jStruct ){
+    public static function getTODOWords( Jobs_JobStruct $jStruct ){
 
-        return array_sum([$jStruct->new_words, $jStruct->draft_words, $jStruct->translated_words, $jStruct->approved_words, $jStruct->rejected_words]);
+        return array_sum([$jStruct->new_words, $jStruct->draft_words]);
 
     }
 
