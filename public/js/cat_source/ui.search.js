@@ -31,13 +31,13 @@ $.extend(UI, {
 		$('.search-display').removeClass('displaying');
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
-		if ($('#search-source').val() !== '') {
+		if ($('#search-source').val() !== '' && $('#search-source').val() !== ' ') {
 			this.searchParams.source = $('#search-source').val();
 		} else {
 			delete this.searchParams.source;
 		}
 
-		if ($('#search-target').val() !== '') {
+		if ($('#search-target').val() !== '' && $('#search-target').val() !== ' ') {
 			this.searchParams.target = $('#search-target').val();
 		} else {
 			delete this.searchParams.target;
