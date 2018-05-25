@@ -7,6 +7,7 @@ QaCheckGlossary.enabled = function() {
 if ( QaCheckGlossary.enabled() )
 (function($, QaCheckGlossary, undefined) {
     var matchRegExp = '\\b(%s)\\b' ;
+    var cjkRegExp = '(%s)'
     var regExpFlags = 'g';
 
     var globalReceived = false ;
@@ -162,6 +163,11 @@ if ( QaCheckGlossary.enabled() )
             var translation = (item.raw_translation) ? item.raw_translation : item.translation;
             var value = escapeRegExp( translation );
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
+
+            if ( config.targetIsCJK ) {
+                re = new RegExp( sprintf( cjkRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
+            }
+
             var match = currentText.match( re ) ;
             return match == null ;
         });
