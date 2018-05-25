@@ -103,6 +103,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.decoded_translation =  UI.decodeText(segment, segment.translation);
                 segment.decoded_source =  UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
+                segment.tagged = false;
                 newSegments.push(this);
             }
 
