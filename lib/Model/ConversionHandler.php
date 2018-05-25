@@ -142,21 +142,8 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            /**
-             * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )
-             * we add an hook to allow some plugins to force the conversion parameters ( languages for example )
-             * TODO: ( 25/05/2018 ) Remove when the issue will be fixed
-             */
-            list( $_file_path, $_source_lang, $_target_lang, $_segmentation_rule ) = array_values( $this->features->filter( 'overrideConversionRequest', [
-                    'path'         => $file_path,
-                    'source'       => $this->source_lang,
-                    'target'       => $single_language,
-                    'segmentation' => $this->segmentation_rule
-                ] )
-            );
-
-            $convertResult = Filters::sourceToXliff( $_file_path, $_source_lang, $_target_lang, $_segmentation_rule );
-            Filters::logConversionToXliff( $convertResult, $_file_path, $_source_lang, $_target_lang, $_segmentation_rule );
+            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule);
+            Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule);
 
             if ( $convertResult[ 'isSuccess' ] == 1 ) {
 
