@@ -62,7 +62,7 @@ class downloadAnalysisReportController extends downloadController {
             return null;
         }
 
-        $analysisStatus = new Analysis_XTRFStatus( $_project_data );
+        $analysisStatus = new Analysis_XTRFStatus( $_project_data, $this->featureSet );
         $outputContent = $analysisStatus->fetchData()->getResult();
 
         $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
