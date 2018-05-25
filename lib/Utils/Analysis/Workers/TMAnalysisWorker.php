@@ -778,14 +778,14 @@ class TMAnalysisWorker extends AbstractWorker {
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
             }
 
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
+
             try {
                 $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );
             } catch(\Exception $e) {
                 //ignore Exception the analysis is finished anyway
                 $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
             }
-
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
 
         }
 
