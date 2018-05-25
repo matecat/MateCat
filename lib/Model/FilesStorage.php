@@ -659,12 +659,14 @@ class FilesStorage {
     }
 
     /**
+     * PHP Pathinfo is not UTF-8 aware, so we rewrite it
+     *
      * @param     $path
      * @param int $options
      *
      * @return array|mixed
      */
-    public static function pathinfo_fix( $path, $options=15) {
+    public static function pathinfo_fix( $path, $options = 15 ) {
         $rawPath = explode( DIRECTORY_SEPARATOR, $path );
 
         $basename = array_pop( $rawPath );
@@ -674,17 +676,17 @@ class FilesStorage {
         $extension        = strtolower( array_pop( $explodedFileName ) );
         $filename         = implode( ".", $explodedFileName );
 
-        $return_array = array();
+        $return_array = [];
 
-        $flagMap = array(
+        $flagMap = [
                 'dirname'   => PATHINFO_DIRNAME,
                 'basename'  => PATHINFO_BASENAME,
                 'extension' => PATHINFO_EXTENSION,
                 'filename'  => PATHINFO_FILENAME
-        );
+        ];
 
         // foreach flag, add in $return_array the corresponding field,
-        // obtained by variable name correspondance
+        // obtained by variable name correspondence
         foreach ( $flagMap as $field => $i ) {
             //binary AND
             if ( ( $options & $i ) > 0 ) {
