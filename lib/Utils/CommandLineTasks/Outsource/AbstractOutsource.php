@@ -45,6 +45,7 @@ abstract class AbstractOutsource extends Command {
                 // the full command description shown when running the command with
                 // the "--help" option
                 ->setHelp( "This command allows you to send a job to hts from a specified user..." )
+                ->addOption( 'test', 't', InputOption::VALUE_NONE )
                 ->addOption( 'jid', null, InputOption::VALUE_OPTIONAL )
                 ->addOption( 'jp', null, InputOption::VALUE_OPTIONAL )
                 ->addOption( 'pid', null, InputOption::VALUE_OPTIONAL )

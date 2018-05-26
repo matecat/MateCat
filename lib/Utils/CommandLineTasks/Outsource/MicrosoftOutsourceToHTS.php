@@ -39,14 +39,19 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
         $eq_word = \Jobs_JobDao::getTODOWords( $job );
 
 
+        if( $this->input->getOption( 'test' ) ){
+            $this->output->writeln( "  - Quote would have been sent, Job ID {$job->id} and password {$job->password}" , true );
+            return;
+        }
+
         $this->setSuccessMailSender( new ConfirmedQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/confirmed_quotation.html' ) );
         $this->setFailureMailSender( new ErrorQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/error_quotation.html' ) );
         $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted );
 
         if ( !empty( $response ) ) {
-            $this->output->write( " Quote Success: " . $this->getExternalProjectId(), true );
+            $this->output->writeln( " Quote Success, HTS PID:" . $this->getExternalProjectId(), true );
         } else {
-            $this->output->write( "ko" );
+            $this->output->writeln( "FAILED...." );
         }
 
     }
