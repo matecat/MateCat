@@ -44,6 +44,8 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
             return;
         }
 
+        $this->output->writeln( "  - Sending Quote and Confirm, Job ID {$job->id} and password {$job->password}. Words: $eq_word" , true );
+
         $this->setSuccessMailSender( new ConfirmedQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/confirmed_quotation.html' ) );
         $this->setFailureMailSender( new ErrorQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/error_quotation.html' ) );
         $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted );
