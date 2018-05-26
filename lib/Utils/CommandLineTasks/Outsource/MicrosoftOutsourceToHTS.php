@@ -40,7 +40,7 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
 
 
         if( $this->input->getOption( 'test' ) ){
-            $this->output->writeln( "  - Quote would have been sent, Job ID {$job->id} and password {$job->password}" , true );
+            $this->output->writeln( "  - Quote would have been sent, Job ID {$job->id} and password {$job->password}. Words: $eq_word" , true );
             return;
         }
 
@@ -49,9 +49,9 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
         $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted );
 
         if ( !empty( $response ) ) {
-            $this->output->writeln( " Quote Success, HTS PID:" . $this->getExternalProjectId(), true );
+            $this->output->writeln( "  - Quote Success, HTS PID: " . $this->getExternalProjectId() . " - Words: $eq_word", true );
         } else {
-            $this->output->writeln( "FAILED...." );
+            $this->output->writeln( "  - FAILED...." );
         }
 
     }
