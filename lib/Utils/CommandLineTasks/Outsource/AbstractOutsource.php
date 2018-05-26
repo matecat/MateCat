@@ -13,6 +13,7 @@ use Features\Microsoft;
 use Features\Microsoft\Utils\Email\ConfirmedQuotationEmail;
 use Features\Microsoft\Utils\Email\ErrorQuotationEmail;
 use Features\Outsource\Traits\Translated;
+use SplFileObject;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -39,6 +40,8 @@ abstract class AbstractOutsource extends Command {
      * @var OutputInterface
      */
     protected $output;
+    protected $fromFileProject;
+    protected $fromFileJob;
 
     protected function configure() {
         $this
@@ -51,7 +54,9 @@ abstract class AbstractOutsource extends Command {
                 ->addOption( 'jp', null, InputOption::VALUE_OPTIONAL )
                 ->addOption( 'pid', null, InputOption::VALUE_OPTIONAL )
                 ->addOption( 'ppass', null, InputOption::VALUE_OPTIONAL )
-                ->addOption( 'all', 'a', InputOption::VALUE_NONE );
+                ->addOption( 'all', 'a', InputOption::VALUE_NONE )
+                ->addOption( 'from-file-job', null, InputOption::VALUE_OPTIONAL )
+                ->addOption( 'from-file-project', null, InputOption::VALUE_OPTIONAL );
 
     }
 
@@ -59,6 +64,9 @@ abstract class AbstractOutsource extends Command {
 
         $this->input  = $input;
         $this->output = $output;
+
+        $this->fromFileJob     = $input->getOption( 'from-file-job' );
+        $this->fromFileProject = $input->getOption( 'from-file-project' );
 
         $this->jobId       = $input->getOption( 'jid' );
         $this->jobPass     = $input->getOption( 'jp' );
@@ -88,6 +96,8 @@ abstract class AbstractOutsource extends Command {
 
             $this->_callByProject();
 
+        } elseif ( $this->fromFileJob || $this->fromFileProject ) {
+            $this->_callFromFile();
         } else {
             $this->output->writeln( "No input parameters provided." );
         }
@@ -119,7 +129,7 @@ abstract class AbstractOutsource extends Command {
         try {
             $project = @\Projects_ProjectDao::findByIdAndPassword( $this->projectId, $this->projectPass, 0 );
         } catch ( \Exception $e ) {
-            throw new \OutOfBoundsException( $e->getMessage(), $e->getCode() );
+            throw new \OutOfBoundsException( $e->getMessage() . " {$this->projectId} - {$this->projectPass} ", $e->getCode() );
         }
 
         $jobs = $project->getJobs();
@@ -136,5 +146,35 @@ abstract class AbstractOutsource extends Command {
 
     }
 
+    protected function _callFromFile(){
+
+        if ( $this->fromFileJob ) {
+            $file = $this->fromFileJob;
+        } else {
+            $file = $this->fromFileProject;
+        }
+
+        $file = new SplFileObject( $file );
+        $file->setFlags( SplFileObject::READ_CSV );
+        foreach ( $file as $row ) {
+
+            list( $id, $pass ) = $row;
+
+            if( $this->fromFileJob ){
+                $this->output->writeln( "Found Job with ID $id and password $pass" );
+                $this->jobId = $id;
+                $this->jobPass = $pass;
+                $this->_callByJob();
+            } else {
+                $this->output->writeln( "Found Project with ID $id and password $pass" );
+                $this->projectId = $id;
+                $this->projectPass = $pass;
+                $this->_callByProject();
+            }
+
+        }
+
+
+    }
 
 }
