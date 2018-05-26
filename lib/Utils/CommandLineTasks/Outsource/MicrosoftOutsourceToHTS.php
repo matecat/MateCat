@@ -12,13 +12,6 @@ use API\V2\Json\ProjectUrls;
 use Features\Microsoft;
 use Features\Microsoft\Utils\Email\ConfirmedQuotationEmail;
 use Features\Microsoft\Utils\Email\ErrorQuotationEmail;
-use Features\Outsource\Traits\Translated;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 
 class MicrosoftOutsourceToHTS extends AbstractOutsource {
