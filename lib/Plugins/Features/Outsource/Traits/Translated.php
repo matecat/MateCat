@@ -34,7 +34,7 @@ trait Translated {
     protected $internal_job_id;
     protected $external_project_id;
 
-    private $config;
+    protected $config;
 
     public function setSuccessMailSender( AbstractEmail $emailObject ) {
         $this->successEmailObject = $emailObject;
