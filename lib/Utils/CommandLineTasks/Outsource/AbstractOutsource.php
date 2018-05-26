@@ -151,10 +151,11 @@ abstract class AbstractOutsource extends Command {
         }
 
         $file = new SplFileObject( $file );
-        $file->setFlags( SplFileObject::READ_CSV );
-        foreach ( $file as $row ) {
+        $file->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
 
-            list( $id, $pass ) = $row;
+        while ( !$file->eof() ) {
+            
+            list( $id, $pass ) = $file->fgetcsv();
 
             if( $this->fromFileJob ){
                 $this->output->writeln( "Found Job with ID $id and password $pass" );
