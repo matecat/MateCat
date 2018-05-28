@@ -107,12 +107,10 @@ class SegmentBody extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentBody" + this.props.segment.sid);
         document.addEventListener('mousedown', this.handleClickOutside);
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentBody" + this.props.segment.sid);
         document.removeEventListener('mousedown', this.handleClickOutside);
     }
 

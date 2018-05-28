@@ -232,7 +232,6 @@ class SegmentFooter extends React.Component {
         });
     }
     componentDidMount() {
-        console.log("Mount SegmentFooter" + this.props.sid);
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
@@ -241,7 +240,6 @@ class SegmentFooter extends React.Component {
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooter" + this.props.sid);
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);

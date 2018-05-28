@@ -87,13 +87,11 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterMessages" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview.bind(this));
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview);
-        console.log("Unmount SegmentFooterMessages" + this.props.id_segment);
     }
 
     componentWillMount() {}
