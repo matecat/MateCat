@@ -47,9 +47,11 @@ if ( QaCheckGlossary.enabled() )
         var mapped = {} ;
 
         // group by segment id
-        var segments_to_refresh = _.each( globalWarnings.matches, function ( item ) {
-            mapped[ item.id_segment ] ? null : mapped[ item.id_segment ] = []  ;
-            mapped[ item.id_segment ].push( item.data );
+        _.each( globalWarnings.matches, function ( item ) {
+            mapped[ item.id_segment ] ? null : mapped[ item.id_segment ] = {};
+            mapped[ item.id_segment ].sid = item.id_segment;
+            mapped[ item.id_segment ].glossary_matches = item.data;
+            // mapped[ item.id_segment ].push( item.data );
         });
 
         _.each(Object.keys( mapped ) , function(item, index) {
@@ -58,9 +60,9 @@ if ( QaCheckGlossary.enabled() )
 
             var unusedGlossaryTerms = mapped[item];
 
-            var container = segment.el.find( '.source' ) ;
+            var unusedMatches = findUnusedGlossaryMatches( unusedGlossaryTerms ) ;
 
-            updateGlossaryUnusedMatches( segment, unusedGlossaryTerms );
+            updateGlossaryUnusedMatches( segment, unusedMatches ) ;
         });
 
         globalReceived = true ;
