@@ -524,6 +524,7 @@ class NewController extends ajaxController {
                 $converter->source_lang = $this->source_lang;
                 $converter->target_lang = $this->target_lang;
                 $converter->featureSet  = $this->featureSet;
+                $converter->setUser( $this->user );
                 $converter->doAction();
 
                 $status = $errors = $converter->checkResult();

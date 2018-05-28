@@ -25,6 +25,15 @@ class ConvertFileWrapper extends convertFileController {
         $this->readLoginInfo();
     }
 
+    public function setUser( Users_UserStruct $user = null ){
+        $this->user = new Users_UserStruct();
+        $this->userIsLogged = false;
+        if( !empty( $user ) ){
+            $this->user = $user;
+            $this->userIsLogged = true;
+        }
+    }
+
     public function doAction() {
 
         foreach ( $this->fileStruct as $_file ) {
