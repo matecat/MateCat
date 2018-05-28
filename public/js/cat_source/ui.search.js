@@ -74,7 +74,10 @@ $.extend(UI, {
 		var source = (p.source) ? p.source : '';
 		var target = (p.target) ? p.target : '';
 		var replace = (p.replace) ? p.replace : '';
-		this.markSearchResults();
+		var options = {
+			singleSegment: true
+		};
+		this.markSearchResults(options);
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
