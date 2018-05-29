@@ -557,7 +557,11 @@ $.extend(UI, {
         var newhtml = UI.editarea.html();
         //add tags into the target segment
         for(var i = 0; i < missingTags.length; i++){
-            newhtml = newhtml + UI.transformTextForLockTags(missingTags[i]);
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
+                newhtml = newhtml + UI.transformTextForLockTags(missingTags[i]);
+            } else {
+                newhtml = newhtml + missingTags[i];
+            }
         }
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
         //add again undoCursorPlaceholder
