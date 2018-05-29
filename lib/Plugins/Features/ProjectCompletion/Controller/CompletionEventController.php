@@ -9,7 +9,6 @@
 
 namespace Features\ProjectCompletion\Controller;
 
-use API\V2\Exceptions\ValidationError;
 use API\V2\Validators\ChunkPasswordValidator;
 use BaseKleinViewController;
 use Chunks_ChunkCompletionEventDao;
@@ -18,9 +17,6 @@ use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Exceptions_RecordNotFound;
-use Log;
-use LQA\ChunkReviewDao;
-use Utils;
 
 class CompletionEventController extends BaseKleinViewController {
 
@@ -28,6 +24,18 @@ class CompletionEventController extends BaseKleinViewController {
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @var \Projects_ProjectStruct
+     */
+    protected $project;
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     */
+    public function setProject( \Projects_ProjectStruct $project ){
+        $this->project = $project;
+    }
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -53,32 +61,6 @@ class CompletionEventController extends BaseKleinViewController {
     }
 
     /**
-     * @throws Exceptions_RecordNotFound
-     * @throws ValidationError
-     * @throws \Exceptions\ValidationError
-     */
-    public function delete() {
-        // TODO: The following code does not really belong here. It's related to ReviewImproved
-        // and should be properly decoupled.
-
-        $project  = $this->chunk->getProject( 60 * 60 );
-        $undoable = true;
-
-        $this->featureSet->loadForProject( $project );
-
-        $undoable = $this->featureSet->filter( 'filterIsChunkCompletionUndoable', $undoable, $project, $this->chunk );
-
-        if ( $undoable ) {
-            $this->__evalDelete();
-            $this->response->code( 200 );
-            $this->response->send();
-        } else {
-            $this->response->code( 400 );
-        }
-
-    }
-
-    /**
      * @throws Exception
      */
     protected function afterConstruct() {
@@ -94,7 +76,11 @@ class CompletionEventController extends BaseKleinViewController {
             }
 
             $Controller->setChunk( $Validator->getChunk() );
+
+            $project = $this->chunk->getProject( 60 * 60 );
+            $Controller->setProject( $project );
             $Controller->setEvent( $event );
+            $Controller->featureSet->loadForProject( $project );
 
         } );
 
@@ -103,59 +89,43 @@ class CompletionEventController extends BaseKleinViewController {
     }
 
     /**
-     * @throws ValidationError
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
-    private function __evalDelete() {
-        $review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $this->request->id_job, $this->request->password
-        );
+    public function delete() {
 
-        $undo_data = $review->getUndoData();
-        if ( is_null( $undo_data ) ) {
-            throw new ValidationError( 'undo data is not available' );
+        $undoable = true;
+
+        $undoable = $this->featureSet->filter( 'filterIsChunkCompletionUndoable', $undoable, $this->project, $this->chunk );
+
+        if ( $undoable ) {
+            $this->__performUndo();
+            $this->response->code( 200 );
+            $this->response->send();
+        } else {
+            $this->response->code( 400 );
         }
 
-        $this->__validateUndoData( $undo_data );
-
-        $review->is_pass              = $undo_data[ 'is_pass' ];
-        $review->penalty_points       = $undo_data[ 'penalty_points' ];
-        $review->reviewed_words_count = $undo_data[ 'reviewed_words_count' ];
-        $review->undo_data            = null;
-
-        Database::obtain()->begin();
-        ChunkReviewDao::updateStruct( $review, [
-                'fields' => [
-                        'is_pass', 'penalty_points', 'reviewed_words_count', 'undo_data'
-                ]
-        ] );
-
-        Log::doLog( "CompletionEventController deleting event: " . var_export( $this->event->getArrayCopy(), true ) );
-
-        ( new Chunks_ChunkCompletionEventDao() )->deleteEvent( $this->event );
-        Database::obtain()->commit();
     }
 
     /**
-     * @param $undo_data
-     *
-     * @throws ValidationError
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
      */
-    private function __validateUndoData( $undo_data ) {
-        try {
-            Utils::ensure_keys( $undo_data, [
-                    'reset_by_event_id', 'penalty_points', 'reviewed_words_count', 'is_pass'
-            ] );
+    private function __performUndo() {
 
-        } catch ( Exception $e ) {
-            throw new ValidationError( 'undo data is missing some keys. ' . $e->getMessage() );
-        }
+        Database::obtain()->begin();
 
-        if ( $undo_data[ 'reset_by_event_id' ] != (string)$this->event->id ) {
-            throw new ValidationError( 'event does not match with latest revision data' );
-        }
+        /**
+         * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
+         */
+        $this->featureSet->filter( 'alter_chunk_review_struct', $this->event );
+
+        ( new Chunks_ChunkCompletionEventDao() )->deleteEvent( $this->event );
+        Database::obtain()->commit();
 
     }
-
 
 }
