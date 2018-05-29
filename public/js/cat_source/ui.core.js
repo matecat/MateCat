@@ -2359,7 +2359,7 @@ UI = {
         SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(action) {
 		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
         if (typeof currentItem != 'undefined') {
@@ -2403,14 +2403,19 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
+        if(action !== 'paste'){
+            saveSelection();
+        }
 
-        saveSelection();
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
         if ($('.rangySelectionBoundary').closest('.editarea').length) {
             $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         }
-        restoreSelection();
+        if(action !== 'paste'){
+            restoreSelection();
+        }
+
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
         // $('.undoCursorPlaceholder').remove();
