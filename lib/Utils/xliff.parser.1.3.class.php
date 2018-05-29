@@ -369,7 +369,7 @@ class Xliff_Parser {
 		}
 
 		// Escape the string with the remaining non-XLIFF tags
-		$content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8', false);
+		$content = htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8', false);
 
 		// Put again in place the original XLIFF tags replacing placeholders
 		foreach ($tags_placeholders as $tag => $placeholder) {
