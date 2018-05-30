@@ -147,6 +147,19 @@
         </div>
 
         <script>
+            // Patch some letsmt-selector web components styles.
+            // I'd use css mixins instead but they're not supported in any of the browsers yet
+            var style = document.createElement( 'style' );
+            style.innerHTML =
+                   '#add_button, .ok-button, .cancel-button  { \
+                    background-color: #09beec !important; \
+                    font-size: 18px !important; \
+                    border: 1px solid #797979 !important; \
+                    border-radius: 2px !important; \
+                    font-weight: bold !important; } \
+                    .cancel-button { background-color: #f26522 !important; }';
+            document.getElementById("tildemt").shadowRoot.appendChild( style );
+            
             var tildemtConfig = {};
             document.getElementById("tildemt").addEventListener("save", function(details){
                 //console.log(details.detail);
