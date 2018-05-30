@@ -42,17 +42,7 @@ class Engines_LetsMT extends Engines_AbstractEngine {
             if ( !empty( $parsed[ 'translation' ] ) ) {
                 // this is a response from a translate request
 
-                // TODO: fix QE stuff
-                if ( $this->use_qe && floatval( $parsed[ 'qualityEstimate' ] ) < $this->minimum_qe ) {
-                    $mt_result = array(
-                            'error' => array(
-                                    'code'    => -3001,
-                                    'message' => 'Translation QE score below treshold'
-                            )
-                    );
-
-                    return $mt_result;
-                }
+                $qe_score = floatval( $parsed[ 'qualityEstimate' ] );
 
                 $decoded = array(
                         'data' => array(
@@ -82,7 +72,10 @@ class Engines_LetsMT extends Engines_AbstractEngine {
                 $mt_res                          = $mt_match_res->get_as_array();
                 $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
-                return $mt_res;
+                $retObj = new stdClass();
+                $retObj->mtResult = $mt_res;
+                $retObj->qeScore = $qe_score;
+                return $retObj;
             }
         }
         else {
@@ -124,8 +117,10 @@ class Engines_LetsMT extends Engines_AbstractEngine {
 
         }
 
-        return $decoded;
-
+        
+        $retObj = new stdClass();
+        $retObj->errorResult = $decoded;
+        return $retObj;
     }
 
     public function get( $_config ) {
@@ -153,7 +148,19 @@ class Engines_LetsMT extends Engines_AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters );
 
-        return $this->result;
+        if (isset($this->result->errorResult)){
+            return $this->result->errorResult;
+        }
+
+        $qe_threshold = $lang_config[ 'qeThreshold' ];
+        if (isset($qe_threshold)
+                && $this->result->qeScore != null
+                && floatval( $qe_threshold ) > $this->result->qeScore){
+            $mt_result = null;
+        } else {
+            $mt_result = $this->result->mtResult;
+        }
+        return $mt_result;
 
     }
 
