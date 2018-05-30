@@ -773,12 +773,17 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
             $wordCountStructs = [];
+
+            $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new \WordCount_Counter();
+                $database->begin();
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                $database->commit();
             }
 
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
+            Projects_ProjectDao::destroyCacheById( $_project_id );
 
             try {
                 $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );
