@@ -158,7 +158,7 @@
          */
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            var source = currentSegment.find('.source').data('original');
+            var source = htmlDecode(currentSegment.find('.source').data('original'));
             source = UI.transformPlaceholdersAndTags(source);
             // source = source.replace(/\n/g , config.lfPlaceholder)
             //         .replace(/\r/g, config.crPlaceholder )
