@@ -107,7 +107,7 @@ trait Translated {
 
     public function requestJobQuote(\Jobs_JobStruct $job, $eq_word, $project, $formatted_urls){
 
-        $eq_word = max( number_format( $eq_word + 0.00000001, 0), 1 );
+        $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
 
         $this->setInternalIdProject( $job->id_project );
 
