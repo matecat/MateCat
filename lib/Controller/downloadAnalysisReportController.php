@@ -39,6 +39,8 @@ class downloadAnalysisReportController extends downloadController {
         $this->password      = $__postInput[ 'password' ];
         $this->download_type = $__postInput[ 'download_type' ]; // switch flag, for now not important
 
+        $this->featureSet = new FeatureSet();
+
     }
 
 
@@ -46,6 +48,7 @@ class downloadAnalysisReportController extends downloadController {
      * When Called it perform the controller action to retrieve/manipulate data
      *
      * @return mixed
+     * @throws Exception
      */
     function doAction() {
 
@@ -61,6 +64,8 @@ class downloadAnalysisReportController extends downloadController {
             Utils::sendErrMailReport( $msg );
             return null;
         }
+
+        $this->featureSet->loadForProject( Projects_ProjectDao::findById( $this->id_project, 60 * 60 * 24 ) );
 
         $analysisStatus = new Analysis_XTRFStatus( $_project_data, $this->featureSet );
         $outputContent = $analysisStatus->fetchData()->getResult();
