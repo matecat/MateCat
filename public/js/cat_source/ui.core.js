@@ -2458,7 +2458,7 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        var initialRenderPromise = UI.render();;
+        var initialRenderPromise = UI.render();
 
         initialRenderPromise.done(function() {
             if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
