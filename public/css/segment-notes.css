@@ -22,7 +22,7 @@ div.segment-notes ul.graysmall li span.note-label {
 
 .segment-notes-container {
     display: inline-block;
-    max-width: 80%;
+    max-width: 50%;
     box-sizing: border-box;
     vertical-align: top;
     text-align: left;
