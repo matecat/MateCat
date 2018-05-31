@@ -118,6 +118,7 @@ section.readonly .issues-container {
                                     position: relative;
                                     top: 3px;
                                     font-weight: 700;
+                                    margin-right: 4px;
                                 }
                                 .type_issue_name {}
                                 .sub_type_issue_name {
@@ -127,10 +128,8 @@ section.readonly .issues-container {
                                     overflow: hidden;
                                     text-overflow: ellipsis;
                                     font-weight: 100;
-                                    margin-left: 4px;
                                 }
                                 .severity_issue_name {
-                                    margin-left: 4px;
                                 }
                             }
                             .issue-activity-icon {
