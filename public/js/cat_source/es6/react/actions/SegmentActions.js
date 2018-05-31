@@ -186,6 +186,13 @@ var SegmentActions = {
             warnings: warnings
         });
     },
+
+    qaComponentsetLxqIssues: function ( issues ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.QA_LEXIQA_ISSUES,
+            warnings: issues
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

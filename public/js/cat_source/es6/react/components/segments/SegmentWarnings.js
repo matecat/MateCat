@@ -102,30 +102,6 @@ class SegmentWarnings extends React.Component {
                     </div>)
                 })
             }
-            {/* {
-                this.props.warnings.ERROR ?
-                    this.props.warnings.ERROR.map((el, index) => {
-                        return <div key={index} className="error-alert alert-block">
-                            <i className="icon-cancel-circle icon"></i> {el.debug}
-                        </div>;
-                    }) : null
-            }
-            {
-                this.props.warnings.WARNING ?
-                    this.props.warnings.WARNING.map((el, index) => {
-                        return <div key={index} className="warning-alert alert-block">
-                            <i className="icon-warning2 icon"></i> {el.debug}
-                        </div>;
-                    }) : null
-            }
-            {
-                this.props.warnings.INFO ?
-                    this.props.warnings.INFO.map((el, index) => {
-                        return <div key={index} className="info-alert alert-block">
-                            <i className="icon-info icon"></i> {el.debug}
-                        </div>;
-                    }) : null
-            }*/}
         </div>;
     }
 }

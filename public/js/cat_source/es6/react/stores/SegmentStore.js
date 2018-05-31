@@ -367,7 +367,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
-
+    updateLexiqaWarnings: function(warnings){
+        this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning);;
+    },
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     }
@@ -535,6 +537,11 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
             SegmentStore.updateGlobalWarnings(action.warnings);
             SegmentStore.emitChange(action.actionType, SegmentStore._globalWarnings);
+            break;
+
+        case SegmentConstants.QA_LEXIQA_ISSUES:
+            SegmentStore.updateLexiqaWarnings(action.warnings);
+            SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

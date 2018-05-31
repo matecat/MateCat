@@ -1,9 +1,11 @@
-var React = require('react');
-var CatToolConstants = require('../../constants/CatToolConstants');
-var CatToolStore = require('../../stores/CatToolStore');
-var SegmentSelectionPanel = require('./bulk_selection_bar/BulkSelectionBar').default ;
-var Search = require('./search/Search').default;
-var QaComponent = require('./QAComponent').default;
+let React = require('react');
+let CatToolConstants = require('../../constants/CatToolConstants');
+let CatToolStore = require('../../stores/CatToolStore');
+let SegmentSelectionPanel = require('./bulk_selection_bar/BulkSelectionBar').default ;
+let Search = require('./search/Search').default;
+let QaComponent = require('./QAComponent').default;
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
 
 class SubHeaderContainer extends React.Component {
 
@@ -13,11 +15,25 @@ class SubHeaderContainer extends React.Component {
             selectionBar: true,
             search: false,
             segmentFilter: false,
-            qaComponent: false
+            qaComponent: false,
+            totalWarnings: 0,
+            warnings: {
+                ERRORS: {
+                    categories: {}
+                },
+                WARNINGS: {
+                    categories: {}
+                },
+                INFO: {
+                    categories: {}
+                }
+            }
+
         };
         this.closeSubHeader = this.closeSubHeader.bind(this);
         this.toggleContainer = this.toggleContainer.bind(this);
         this.showContainer = this.showContainer.bind(this);
+        this.receiveGlobalWarnings = this.receiveGlobalWarnings.bind(this);
     }
     showContainer(container) {
         switch(container) {
@@ -69,6 +85,13 @@ class SubHeaderContainer extends React.Component {
                 break;
         }
     }
+    updateIcon(total) {
+        if (total > 0) {
+            $('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(total);
+        } else {
+            $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('')
+        }
+    }
     closeSubHeader() {
         this.setState({
             search: false,
@@ -80,13 +103,41 @@ class SubHeaderContainer extends React.Component {
         CatToolStore.addListener(CatToolConstants.SHOW_CONTAINER, this.showContainer);
         CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, this.toggleContainer);
         CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, this.closeSubHeader);
+        SegmentStore.addListener(SegmentConstants.UPDATE_GLOBAL_WARNINGS, this.receiveGlobalWarnings);
     }
 
     componentWillUnmount() {
         CatToolStore.removeListener(CatToolConstants.SHOW_CONTAINER, this.showContainer);
         CatToolStore.removeListener(CatToolConstants.TOGGLE_CONTAINER, this.toggleContainer);
         CatToolStore.removeListener(CatToolConstants.CLOSE_SUBHEADER, this.closeSubHeader);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_GLOBAL_WARNINGS, this.receiveGlobalWarnings)
     }
+
+    receiveGlobalWarnings(warnings) {
+        let totalWarnings = [];
+        if (warnings.lexiqa && warnings.lexiqa.length > 0) {
+            warnings.matecat.INFO.categories['lexiqa'] = warnings.lexiqa;
+        }
+        Object.keys(warnings.matecat).map(key => {
+            let totalCategoryWarnings = [];
+            Object.keys(warnings.matecat[key].categories).map(key2 => {
+                totalCategoryWarnings.push(...warnings.matecat[key].categories[key2]);
+                totalWarnings.push(...warnings.matecat[key].categories[key2]);
+            });
+            warnings.matecat[key].total = totalCategoryWarnings.filter((value, index, self) => {
+                return self.indexOf(value) === index;
+            }).length
+        });
+        let tot = totalWarnings.filter((value, index, self) => {
+            return self.indexOf(value) === index;
+        }).length;
+        this.updateIcon(tot);
+        this.setState({
+            warnings: warnings.matecat,
+            totalWarnings: tot
+        })
+    }
+
 
     render() {
         return <div>
@@ -104,6 +155,8 @@ class SubHeaderContainer extends React.Component {
             <QaComponent
                 active={this.state.qaComponent}
                 isReview={config.isReview}
+                warnings={this.state.warnings}
+                totalWarnings={this.state.totalWarnings}
             />
             <SegmentSelectionPanel
                 active={this.state.selectionBar}

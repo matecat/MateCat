@@ -1578,23 +1578,21 @@ UI = {
         const mock = {
             ERRORS: {
                 categories: {
-                    'TAG': [0,1,2,3,4,5],
+                    'TAG': ['23853','23854','23855','23856','23857'],
                 }
             },
             WARNINGS: {
                 categories: {
-                    'TAG': [0,1,2,3,4,5],
-                    'GLOSSARY': [0,1,2,3,4,5]
+                    'TAG': ['23857','23858','23859'],
+                    'GLOSSARY': ['23860','23863','23864','23866',],
+                    'MISMATCH': ['23860','23863','23864','23866',]
                 }
             },
             INFO: {
                 categories: {
-                    'TAG': [0,1,2,3,4,5]
                 }
             }
         };
-
-        SegmentActions.updateGlobalWarnings(mock);
 
         APP.doRequest({
             data: dataMix,
@@ -1605,14 +1603,12 @@ UI = {
             success: function(data) {//console.log('check warnings success');
                 UI.startWarning();
 
-                UI.translationMismatches = data.translation_mismatches;
                 UI.globalWarnings = data.details;
                 //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
-                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
 
                 //check for errors
-                if (UI.globalWarnings) {
-                    UI.updateQAPanel();
+                if(data.details){
+                    SegmentActions.updateGlobalWarnings(mock);
                 }
 
                 // check for messages
@@ -1628,18 +1624,6 @@ UI = {
             }
         });
 	},
-    updateQAPanel: function () {
-        if ( !_.isUndefined(UI.globalWarnings.tag_issues) ) {
-            CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
-        }
-
-        if ( !_.isUndefined( UI.globalWarnings.glossary_issues ) ) {
-            CatToolActions.qaComponentSetGlossaryIssues(UI.globalWarnings.glossary_issues)
-        }
-        if ( !_.isUndefined( UI.globalWarnings.translation_mismatches ) ) {
-            CatToolActions.qaComponentsetTranslationConflitcts(UI.globalWarnings.translation_mismatches);
-        }
-    },
 	displayMessage: function(messages) {
         var self = this;
 		if($('body').hasClass('incomingMsg')) return false;
@@ -1735,23 +1719,6 @@ UI = {
 			    if(d.details){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                 }
-                // Todo: ###REMOVE###
-				/*if (segment.el.hasClass('waiting_for_check_result')) {
-                    // TODO: define d.total more explicitly
-					if ( !d.total ) {
-						$('p.warnings', segment.el).empty();
-						$('span.locked.mismatch', segment.el).removeClass('mismatch');
-                        $('.editor .editarea .order-error').removeClass('order-error');
-
-					}
-                    else {
-                        UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
-                        UI.markTagMismatch(d.details);
-                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-                        SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-                    }
-				}*/
-
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');

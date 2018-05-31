@@ -54,5 +54,6 @@ module.exports = keyMirror({
     DISABLE_TAG_LOCK: null,
     ENABLE_TAG_LOCK: null,
     SET_SEGMENT_WARNINGS: null,
-    UPDATE_GLOBAL_WARNINGS: null
+    UPDATE_GLOBAL_WARNINGS: null,
+    QA_LEXIQA_ISSUES: null
 });
