@@ -43,6 +43,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: {},
     _segmentsFiles: Immutable.fromJS({}),
+    _globalWarnings: {
+        lexiqa: [],
+        matecat: {}
+    },
     segmentsInBulk: [],
     /**
      * Update all
@@ -115,9 +119,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         return newSegments;
     },
-    buildSegmentsFiles: function(fid,segments){
-        segments.map(segment =>{
-            this._segmentsFiles = this._segmentsFiles.set(segment.sid,fid);
+    buildSegmentsFiles: function (fid, segments) {
+        segments.map(segment => {
+            this._segmentsFiles = this._segmentsFiles.set(segment.sid, fid);
         });
     },
 
@@ -351,6 +355,19 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
+    filterGlobalWarning: function (sid) {
+        return sid > -1
+    },
+
+    updateGlobalWarnings: function (warnings) {
+        Object.keys(warnings).map(key => {
+            Object.keys(warnings[key].categories).map(key2 => {
+                warnings[key].categories[key2] = warnings[key].categories[key2].filter(this.filterGlobalWarning);
+            });
+        });
+        this._globalWarnings.matecat = warnings;
+    },
+
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     }
@@ -513,6 +530,11 @@ AppDispatcher.register(function (action) {
             });
             // Todo remove this
             SegmentStore.emitChange(action.actionType);
+            break;
+
+        case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
+            SegmentStore.updateGlobalWarnings(action.warnings);
+            SegmentStore.emitChange(action.actionType, SegmentStore._globalWarnings);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

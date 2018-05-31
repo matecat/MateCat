@@ -179,6 +179,13 @@ var SegmentActions = {
             warnings: warnings
         });
     },
+
+    updateGlobalWarnings: function(warnings){
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_GLOBAL_WARNINGS,
+            warnings: warnings
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

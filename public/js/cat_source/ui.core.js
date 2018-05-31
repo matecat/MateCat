@@ -1575,6 +1575,27 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
+        const mock = {
+            ERRORS: {
+                categories: {
+                    'TAG': [0,1,2,3,4,5],
+                }
+            },
+            WARNINGS: {
+                categories: {
+                    'TAG': [0,1,2,3,4,5],
+                    'GLOSSARY': [0,1,2,3,4,5]
+                }
+            },
+            INFO: {
+                categories: {
+                    'TAG': [0,1,2,3,4,5]
+                }
+            }
+        };
+
+        SegmentActions.updateGlobalWarnings(mock);
+
         APP.doRequest({
             data: dataMix,
             error: function() {

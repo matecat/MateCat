@@ -53,5 +53,6 @@ module.exports = keyMirror({
     FIND_CONCORDANCE: null,
     DISABLE_TAG_LOCK: null,
     ENABLE_TAG_LOCK: null,
-    SET_SEGMENT_WARNINGS: null
+    SET_SEGMENT_WARNINGS: null,
+    UPDATE_GLOBAL_WARNINGS: null
 });
