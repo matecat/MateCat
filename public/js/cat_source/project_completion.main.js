@@ -216,7 +216,8 @@ if ( ProjectCompletion.enabled() ) {
         translateAndReadonly      : translateAndReadonly,
         clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
         clickMarkAsCompleteForReview : clickMarkAsCompleteForReview,
-        showFixWarningsModal : showFixWarningsModal
+        showFixWarningsModal : showFixWarningsModal,
+        checkCompletionOnReady: checkCompletionOnReady
     });
 
 
@@ -279,7 +280,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).ready(function() {
-        checkCompletionOnReady()
+        UI.checkCompletionOnReady()
     });
 
 
