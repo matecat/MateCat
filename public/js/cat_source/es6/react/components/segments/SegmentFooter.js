@@ -259,7 +259,7 @@ class SegmentFooter extends React.Component {
 
     addTabIndex(sid, tab, index) {
         if (this.props.sid == sid) {
-            let tabs = $.extend(true, {}, this.state.tabs);
+            let tabs = $.extend({}, {}, this.state.tabs);
             if (tabs[tab]) {
                 tabs[tab].index = index;
                 this.setState({

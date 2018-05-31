@@ -509,11 +509,67 @@ $.extend(UI, {
         var sourceTags = $( '.source', segment ).html()
             .match( regExp );
 
-        var targetTags = $( '.target', segment ).html()
+        var targetTags = $( '.targetarea', segment ).html()
             .match( regExp );
 
-        return ( $( sourceTags ).not( targetTags ).length > 0 )
+        return $(sourceTags).length > $(targetTags).length ;
 
+    },
+
+    /**
+     *
+     */
+    autoFillTagsInTarget: function (  ) {
+        //get source tags from the segment
+        var sourceClone = $( '.source', UI.currentSegment ).clone();
+        sourceClone.find('.locked.inside-attribute').remove();
+        var sourceTags = sourceClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        //get target tags from the segment
+        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+        targetClone.find('.locked.inside-attribute').remove();
+        var targetTags = targetClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        if(targetTags == null ) {
+            targetTags = [];
+        } else {
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
+        }
+
+        var missingTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+        });
+        //remove from source tags all the tags in target segment
+        for(var i = 0; i < targetTags.length; i++ ){
+            var pos = missingTags.indexOf(targetTags[i]);
+            if( pos > -1){
+                missingTags.splice(pos,1);
+            }
+        }
+
+        var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
+        var brEnd = $('br.end', UI.currentSegment ).detach();
+
+        var newhtml = UI.editarea.html();
+        //add tags into the target segment
+        for(var i = 0; i < missingTags.length; i++){
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
+                newhtml = newhtml + UI.transformTextForLockTags(missingTags[i]);
+            } else {
+                newhtml = newhtml + missingTags[i];
+            }
+        }
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
+        //add again undoCursorPlaceholder
+        UI.editarea.append(undoCursorPlaceholder );
+        // .append(brEnd);
+
+        //lock tags and run again getWarnings
+        UI.segmentQA(UI.currentSegment);
     },
     /**
      * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>z)

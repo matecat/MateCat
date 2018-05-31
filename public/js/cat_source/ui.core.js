@@ -2359,7 +2359,7 @@ UI = {
         SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(action) {
 		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
         if (typeof currentItem != 'undefined') {
@@ -2403,14 +2403,19 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
+        if(action !== 'paste'){
+            saveSelection();
+        }
 
-        saveSelection();
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
         if ($('.rangySelectionBoundary').closest('.editarea').length) {
             $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         }
-        restoreSelection();
+        if(action !== 'paste'){
+            restoreSelection();
+        }
+
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
         // $('.undoCursorPlaceholder').remove();
@@ -2453,7 +2458,7 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        var initialRenderPromise = UI.render();;
+        var initialRenderPromise = UI.render();
 
         initialRenderPromise.done(function() {
             if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
@@ -2582,6 +2587,17 @@ UI = {
     },
     closeAllMenus: function (e, fromQA) {
         CatToolActions.closeSubHeader();
+    },
+
+    showFixWarningsOnDownload( continueDownloadFunction ) {
+        APP.confirm({
+            name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
+            cancelTxt: 'Fix errors',
+            onCancel: 'goToFirstError',
+            callback: continueDownloadFunction,
+            okTxt: 'Download anyway',
+            msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
+        });
     }
 };
 

@@ -84,7 +84,7 @@ body.manage {
                 margin-left: 17px;
                 display: inline-block;
                 vertical-align: text-bottom;
-                min-width: 70px;
+                min-width: 72px;
                 color: #5a5a5a;
             }
             .ui.form .field :disabled {
@@ -361,15 +361,15 @@ body.manage {
                                 float: left;
                                 min-width: 70px;
                                 color: #969696;
-                                font-size: 13px;
+                                font-size: 12px;
                                 position: relative;
                                 line-height: 28px;
-                                top: 1px;
+                                top: 2px;
+                                margin-right: 5px;
                             }
                             .source-target {
                                 min-width: 140px;
                                 float: left;
-                                margin-right: 10px;
                                 font-weight: bold;
                                 position: relative;
                                 top: 1px;
@@ -483,7 +483,7 @@ body.manage {
                                     margin-left: 5px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    max-width: 140px;
+                                    max-width: 150px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -493,7 +493,10 @@ body.manage {
 
                                     @media only screen and (max-width: 1199px) and (min-width: 992px) {
                                         width: fit-content;
-                                        max-width: 178px;
+                                        max-width: 190px;
+                                        &:hover {
+
+                                        }
                                     }
                                     a {
                                         text-decoration: underline;
@@ -510,7 +513,7 @@ body.manage {
 
                                 .job-delivery {
                                     display: inline-block;
-                                    margin-right: 10px;
+                                    margin-right: 5px;
                                     margin-left: 5px;
                                     vertical-align: text-bottom;
                                     line-height: 20px;
@@ -588,10 +591,10 @@ body.manage {
                                 }
                             }
                             .job-payable {
-                                padding: 0 5px 0 10px !important;
+                                padding: 0 5px 0 5px !important;
                                 float: left;
                                 text-decoration: underline;
-                                min-width: 105px;
+                                min-width: 106px;
                                 line-height: 30px;
                                 font-weight: 700;
                                 position: relative;

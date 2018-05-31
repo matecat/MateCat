@@ -4280,6 +4280,7 @@ section .toolbar .autofillTag {
     float: left;
     font-size: 60%;
     text-decoration: none;
+    display: none;
 }
 
 section .toolbar span {
@@ -4471,6 +4472,10 @@ body.tagModes:not(.tagmode-default-extended) .endTag {
 body span.endTag {
     top: -3.4px;
 }
+body:not(.tagModes) .tagModeToggle {
+    display: none;
+}
+
 body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
     vertical-align: middle;
 }
@@ -4568,7 +4573,7 @@ body.tagModes .editor.hasTags .textarea-container .tagMode {
 
 body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
 body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
-body.tagModes .editor.hasTagsAutofill .toolbar .autofillTag {
+body .editor.hasTagsAutofill .toolbar .autofillTag {
     display: block;
 }
 

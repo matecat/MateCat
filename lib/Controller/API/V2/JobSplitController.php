@@ -12,6 +12,7 @@ use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
 use ProjectManager;
+use Projects_ProjectStruct;
 
 
 class JobSplitController extends KleinController {
@@ -23,6 +24,9 @@ class JobSplitController extends KleinController {
      */
     private $project_struct;
 
+    /**
+     * @var ProjectManager
+     */
     private $pManager;
 
     protected function afterConstruct() {

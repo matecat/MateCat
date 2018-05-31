@@ -93,7 +93,7 @@ class StatusController extends ajaxController {
             return -1;
         }
 
-        $analysisStatus   = new Analysis_APIStatus( $_project_data );
+        $analysisStatus   = new Analysis_APIStatus( $_project_data, $this->featureSet );
         $this->api_output = $analysisStatus->fetchData()->getResult();
 
     }

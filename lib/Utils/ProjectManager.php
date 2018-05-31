@@ -10,6 +10,7 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
+use ConnectedServices\GDrive\Session;
 use Jobs\SplitQueue;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
@@ -59,6 +60,9 @@ class ProjectManager {
      */
     protected $project;
 
+    /**
+     * @var Session
+     */
     protected $gdriveSession;
 
     /**
@@ -455,7 +459,7 @@ class ProjectManager {
             $forceXliff = $this->features->filter(
                     'forceXLIFFConversion',
                     INIT::$FORCE_XLIFF_CONVERSION,
-                    ( isset( $this->projectStructure[ 'session' ][ 'uid' ] ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] )
             );
 
             /*
@@ -1366,10 +1370,10 @@ class ProjectManager {
 
         $translatorModel   = new TranslatorsModel( $jobInfo );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
-        if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
+        if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
 
             $translatorModel
-                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )

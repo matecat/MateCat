@@ -231,11 +231,17 @@ class catController extends viewController {
          * @see setRevisionController
          */
 
+        $reviseClass = new Constants_Revise;
+
         $jobQA = new Revise_JobQA(
                 $this->jid,
                 $this->password,
-                $this->wStruct->getTotal()
+                $this->wStruct->getTotal(),
+                $reviseClass
         );
+
+        list( $jobQA, $reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $this->jid, $this->password, $this->wStruct->getTotal() );
+
 
         $jobQA->retrieveJobErrorTotals();
 

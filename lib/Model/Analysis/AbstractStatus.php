@@ -35,9 +35,12 @@ abstract class Analysis_AbstractStatus {
         "NUMBERS_ONLY"  => array( 0, "0" )
     );
 
-    public function __construct( $_project_data ) {
+    protected   $featureSet;
+
+    public function __construct( $_project_data , FeatureSet $features) {
         $this->id_project = $_project_data[0]['pid'];
         $this->_project_data = $_project_data;
+        $this->featureSet = $features;
     }
 
     /**
