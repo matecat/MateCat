@@ -205,6 +205,11 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var checkCompletionOnReady = function (  ) {
+        UI.translateAndReadonly() && showTranslateWarningMessage();
+        evalReviseNotice();
+    };
+
     $.extend( UI, {
         // This is necessary because of the way APP.popup works
         markAsCompleteSubmit      : markAsCompleteSubmit,
@@ -238,11 +243,6 @@ if ( ProjectCompletion.enabled() ) {
             type : "warning",
             allowHtml : true
         });
-    };
-
-    var checkCompletionOnReady = function (  ) {
-        UI.translateAndReadonly() && showTranslateWarningMessage();
-        evalReviseNotice();
     };
 
     $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
