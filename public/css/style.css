@@ -1892,11 +1892,17 @@ body.searchActive .search-display {
     font-size: 13px;
 }
 
-.search-display p.found {
+.search-display p.found,
+.search-display .search-result-buttons {
     display: none;
 }
 
-.search-display.displaying p.found {
+.search-display .no-results .search-result-buttons {
+    display: none;
+}
+
+.search-display.displaying p.found,
+.search-display.displaying .search-result-buttons {
     display: block;
 }
 

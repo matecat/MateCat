@@ -57,17 +57,32 @@ class Search extends React.Component {
         event.preventDefault();
         if (this.state.funcFindButton) {
             UI.execFind();
-        } else {
-            if (!UI.goingToNext) {
-                UI.goingToNext = true;
-                UI.execNext();
-            }
         }
+        // else {
+        //     if (!UI.goingToNext) {
+        //         UI.goingToNext = true;
+        //         UI.execNext();
+        //     }
+        // }
         this.setState({
             currentSourceSearch: this.state.search.searchSource,
             currentTargetSearch: this.state.search.searchTarget,
             funcFindButton: false
         })
+    }
+
+    goToNext() {
+        if (!UI.goingToNext) {
+            UI.goingToNext = true;
+            UI.execNext();
+        }
+    }
+
+    goToPrev() {
+        if (!UI.goingToNext) {
+            UI.goingToNext = true;
+            UI.execPrev();
+        }
     }
 
     handleCancelClick(event) {
@@ -223,7 +238,7 @@ class Search extends React.Component {
                             <input id="exec-cancel" type="button" className="btn" onClick={this.handleCancelClick}
                                    defaultValue="Cancel"/>
                             <input id="exec-find" type="submit" className="btn" data-func="find"
-                                   defaultValue={(this.state.funcFindButton ? 'Find' : 'Next')} disabled={findIsDisabled}/>
+                                   defaultValue="FIND" disabled={!this.state.funcFindButton}/>
                         </div>
                     </div>
                 </div>
@@ -247,6 +262,10 @@ class Search extends React.Component {
                 <p className="found"><span className="numbers">Found <span
                     className="results">...</span> results in <span
                     className="segments">...</span> segments</span> having<span className="query">...</span></p>
+                <div className="search-result-buttons">
+                    <div onClick={this.goToPrev.bind(this)}>PREV</div>
+                    <div onClick={this.goToNext.bind(this)}>NEXT</div>
+                </div>
             </div>
         </div> : (null) )
     }
