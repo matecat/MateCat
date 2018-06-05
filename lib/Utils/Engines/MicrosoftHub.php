@@ -96,19 +96,44 @@ TAG;
                 ];
             }
 
-
             return $decoded;
         }
 
-        $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT );
+        $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NOEMPTYTAG );
+
         foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
+
+            /*$decoded = [
+                    'data' => [
+                            "translations" => [
+                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16  ) ) ]
+                            ]
+                    ]
+            ];*/
+
+            $val = preg_replace( '|(<[^>]+>) (<[^>]+>)|', '${1}${2}', $val );
+
+            $dDoc          = new DOMDocument();
+            @$dDoc->loadXML( "<root>$val</root>", LIBXML_NOENT | LIBXML_NOEMPTYTAG );
+            $tagList = $dDoc->getElementsByTagName( "root" );
+            $tmpTag = "";
+
+            foreach ( $tagList as $_tag ) {
+                foreach ( $_tag->childNodes as $node ) {
+                    $tmpTag .= $dDoc->saveXML( $node );
+                }
+            }
+
+
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) ]
+                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode($tmpTag, ENT_QUOTES | 16  ) ) ]
                             ]
                     ]
             ];
+
+
         }
 
         return $this->_composeResponseAsMatch( $all_args, $decoded );
