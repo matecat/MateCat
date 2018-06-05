@@ -297,7 +297,7 @@ class SearchModel {
         $query = "
         SELECT s.id, sum(
 			ROUND (
-					( LENGTH( st.translation ) - LENGTH( 
+					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->source}' ), ''

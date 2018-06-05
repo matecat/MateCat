@@ -48,6 +48,11 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
 
         $this->setSuccessMailSender( new ConfirmedQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/confirmed_quotation.html' ) );
         $this->setFailureMailSender( new ErrorQuotationEmail( Microsoft::getPluginBasePath() . '/Features/Microsoft/View/Emails/error_quotation.html' ) );
+
+        if( $eq_word != 0 ){
+            $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
+        }
+
         $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted );
 
         if ( !empty( $response ) ) {

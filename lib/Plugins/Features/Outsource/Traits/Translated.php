@@ -33,6 +33,7 @@ trait Translated {
     protected $internal_project_id;
     protected $internal_job_id;
     protected $external_project_id;
+    protected $project_words_count;
 
     protected $config;
 
@@ -62,6 +63,12 @@ trait Translated {
         $this->failureEmailObject->setExternalProjectId( $id );
     }
 
+    public function setProjectWordsCount( $count ) {
+        $this->project_words_count = $count;
+        $this->successEmailObject->setProjectWordsCount( $count );
+        $this->failureEmailObject->setProjectWordsCount( $count );
+    }
+
     public function getInternalIdProject(){
         return $this->internal_project_id;
     }
@@ -72,6 +79,10 @@ trait Translated {
 
     public function getExternalProjectId(){
         return $this->external_project_id;
+    }
+
+    public function getProjectWordsCount(){
+        return $this->project_words_count;
     }
 
     public function requestProjectQuote( $project_id, $_analyzed_report ) {
@@ -115,6 +126,8 @@ trait Translated {
 
         $this->setInternalJobId( $job->id );
 
+        $this->setProjectWordsCount( $eq_word );
+
         $quote_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'             => 'quote',
                         'cid'           => $this->config[ 'translated_username' ],
@@ -140,6 +153,7 @@ trait Translated {
                 throw new Exception( $quote_response->message );
             }
         } catch ( Exception $e ) {
+            \Log::doLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 
@@ -170,6 +184,7 @@ trait Translated {
             }
             $this->successEmailObject->send();
         } catch ( Exception $e ) {
+            \Log::doLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 
@@ -203,7 +218,7 @@ trait Translated {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPGET        => true,
-                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_TIMEOUT        => 30,
                 CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 5
         ];
