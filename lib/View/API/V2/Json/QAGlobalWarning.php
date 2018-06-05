@@ -17,6 +17,11 @@ class QAGlobalWarning {
     protected $tagIssues;
     protected $translationMismatches;
 
+    protected $structure;
+
+    const TAGS_CATEGORY = "TAGS";
+    const MISMATCH_CATEGORY = "MISMATCH";
+
     /**
      * QAGlobalWarning constructor.
      *
@@ -35,38 +40,42 @@ class QAGlobalWarning {
      */
     public function render() {
 
-        $issues_detail = [];
-        $items         = [];
-        $totals        = [ QA::ERROR => [], QA::WARNING => [], QA::INFO => [] ];
+        $this->structure = [
+                'ERROR'   => [
+                        'Categories' => []
+                ],
+                'WARNING' => [
+                        'Categories' => []
+                ],
+                'INFO'     => [
+                        'Categories' => []
+                ]
+        ];
+
 
         foreach ( $this->tagIssues as $position => $_item ) {
 
-            $items[] = $_item[ 'id_segment' ];
-
-            $exceptionList                                          = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::WARNING ] = $exceptionList[ QA::WARNING ];
-            $issues_detail[ $_item[ 'id_segment' ] ][ QA::INFO ]    = $exceptionList[ QA::INFO ];
+            $exceptionList = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
 
             if ( count( $exceptionList[ QA::ERROR ] ) > 0 ) {
-                $totals[ QA::ERROR ][] = $_item[ 'id_segment' ];
+                foreach ( $exceptionList[ QA::ERROR ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::ERROR, $exception_error->outcome, $_item[ 'id_segment' ] );
+                }
             }
 
             if ( count( $exceptionList[ QA::WARNING ] ) > 0 ) {
-                $totals[ QA::WARNING ][] = $_item[ 'id_segment' ];
+                foreach ( $exceptionList[ QA::WARNING ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::WARNING, $exception_error->outcome, $_item[ 'id_segment' ] );
+                }
             }
 
             if ( count( $exceptionList[ QA::INFO ] ) > 0 ) {
-                $totals[ QA::INFO ][] = $_item[ 'id_segment' ];
+                foreach ( $exceptionList[ QA::INFO ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::INFO, $exception_error->outcome, $_item[ 'id_segment' ] );
+                }
             }
 
         }
-
-        $out = [];
-        $out[ 'details' ][ 'tag_issues' ]  = array_values( $items );
-        $out[ 'details' ][ 'issues_info' ] = $issues_detail;
-        $out[ 'details' ][ 'totals' ] = $totals;
-
 
         $result = [ 'total' => count( $this->translationMismatches ), 'mine' => 0, 'list_in_my_job' => [] ];
         foreach ( $this->translationMismatches as $row ) {
@@ -74,14 +83,43 @@ class QAGlobalWarning {
             if ( !empty( $row[ 'first_of_my_job' ] ) ) {
                 $result[ 'mine' ]++;
                 $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
+                $this->structure[ QA::WARNING ][ 'Categories' ][ 'MISMATCH' ][] = $row[ 'first_of_my_job' ];
             }
 
         }
+        $out['details'] = $this->structure;
 
-        $out[ 'details' ][ 'translation_mismatches' ] = $result[ 'list_in_my_job' ];
         $out[ 'translation_mismatches' ] = $result;
 
         return $out;
+
+    }
+
+    public function pushErrorSegment( $error_type, $error_category, $segment_id ) {
+
+        switch ( $error_category ) {
+            case QA::ERR_TAG_MISMATCH:
+            case QA::ERR_TAG_ID:
+            case QA::ERR_UNCLOSED_X_TAG:
+            case QA::ERR_TAG_ORDER:
+                $category = self::TAGS_CATEGORY;
+                break;
+            case QA::ERR_SPACE_MISMATCH_TEXT:
+            case QA::ERR_TAB_MISMATCH:
+            case QA::ERR_SPACE_MISMATCH:
+            case QA::ERR_SYMBOL_MISMATCH:
+            case QA::ERR_NEWLINE_MISMATCH:
+                $category = self::MISMATCH_CATEGORY;
+                break;
+        }
+
+        if ( !isset( $this->structure[ $error_type ][ 'Categories' ][ $category ] ) ) {
+            $this->structure[ $error_type ][ 'Categories' ][ $category ] = [];
+        }
+
+        if ( !in_array( $segment_id, $this->structure[ $error_type ][ 'Categories' ][ $category ] ) ) {
+            $this->structure[ $error_type ][ 'Categories' ][ $category ][] = $segment_id;
+        }
 
     }
 
