@@ -344,7 +344,8 @@ $.extend(UI, {
 				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .targetarea' : '';
 				q = "section" + status + what;
 			}
-			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
+			var matchTags = txt.match(/<.*?\>/gi) ;
+            hasTags = ( matchTags ) ? true : false;
             // var regTxt = txt.replace(/</g, UI.openTagPlaceholder).replace(/>/g, UI.closeTagPlaceholder);
             var regTxt = txt.replace(/(\W)/gi, "\\$1");
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
