@@ -34,6 +34,8 @@ trait Translated {
     protected $internal_job_id;
     protected $external_project_id;
 
+    protected $external_parent_project_id;
+
     protected $config;
 
     public function setSuccessMailSender( AbstractEmail $emailObject ) {
@@ -42,6 +44,13 @@ trait Translated {
 
     public function setFailureMailSender( AbstractEmail $emailObject ) {
         $this->failureEmailObject = $emailObject;
+    }
+
+    /**
+     * @param mixed $external_parent_project_id
+     */
+    public function setExternalParentProjectId( $external_parent_project_id ) {
+        $this->external_parent_project_id = $external_parent_project_id;
     }
 
     public function setInternalIdProject( $id ) {
@@ -159,7 +168,8 @@ trait Translated {
                         'pid'  => $quote_response->pid,
                         'c'    => 1,
                         'of'   => "json",
-                        'urls' => json_encode( $urls )
+                        'urls' => json_encode( $urls ),
+                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null )
                 ], PHP_QUERY_RFC3986 );
 
         try {
