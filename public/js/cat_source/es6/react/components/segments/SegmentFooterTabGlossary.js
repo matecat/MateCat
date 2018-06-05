@@ -17,7 +17,7 @@ class SegmentFooterTabGlossary extends React.Component {
             enableAddButton: false
         };
         this.checkGlossary = this.checkGlossary.bind(this);
-        this.matches = [];
+        this.matches = {};
     }
 
     checkGlossary(sid, txt) {
