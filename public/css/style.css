@@ -1603,14 +1603,14 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .addtmx-tr .open-popup-addtm-tr {
-    height: 17px;
+    height: 13px;
     width: 140px;
     position: absolute;
-    bottom: -31px;
+    bottom: -24px;
     right: 0px;
     border-radius: 0 0 0 2px;
     color: #fff;
-    padding: 6px 10px 7px 4px;
+    padding: 3px 10px 7px 4px;
     font-size: 12px;
     background: #09beec;
     box-shadow: 0px 2px 4px 0px #868686;

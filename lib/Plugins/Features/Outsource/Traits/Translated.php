@@ -140,6 +140,7 @@ trait Translated {
                 throw new Exception( $quote_response->message );
             }
         } catch ( Exception $e ) {
+            \Log::doLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 
@@ -170,6 +171,7 @@ trait Translated {
             }
             $this->successEmailObject->send();
         } catch ( Exception $e ) {
+            \Log::doLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 
@@ -206,7 +208,7 @@ trait Translated {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPGET        => true,
-                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_TIMEOUT        => 30,
                 CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 5
         ];

@@ -380,9 +380,7 @@ if ( MBC.enabled() )
         };
 
         var openSegmentComment = function ( el ) {
-            popLastCommentHash(); 
-            hackIntercomButton( true );
-
+            popLastCommentHash();
             scrollSegment( el ).promise().done( function() {
                 $( 'article' ).addClass( 'mbc-commenting-opened' );
                 $( 'body' ).addClass( 'side-tools-opened' );
@@ -393,7 +391,6 @@ if ( MBC.enabled() )
         var openSegmentCommentNoScroll = function ( el ) {
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
-            hackIntercomButton( true );
             renderSegmentBalloon( el );
         };
 
