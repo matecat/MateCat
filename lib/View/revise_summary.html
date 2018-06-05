@@ -81,7 +81,7 @@
         <tr>
             <th class="issue">Type of Issue</th>
             <th>Issues Found / Max tolerated Issues <br/>for ${job_stats/TOTAL_FORMATTED} words<br/>
-                <small class="weight-normal">1 Enhancement = ${php: Constants_Revise::SERV_VALUE_MINOR} Error</small>
+                <small class="weight-normal">1 Enhancement = ${php: constant(  get_class( reviseClass )  . "::SERV_VALUE_MINOR" )} Error</small>
             </th>
             <th class="score">Score</th>
         </tr>
@@ -101,7 +101,7 @@
         <h2>How MateCat Helps Objective Quality Measurements</h2>
 
         <p>MateCat uses an analytical approach to assess quality. It sets a maximum number of tolerated issues (1
-            Enhancement = ${php: Constants_Revise::SERV_VALUE_MINOR} Error) and uses the data provided by the reviser to calculate an objective score.</p>
+            Enhancement = ${php: constant(  get_class( reviseClass )  . "::SERV_VALUE_MINOR" )} Error) and uses the data provided by the reviser to calculate an objective score.</p>
 
         <p>The level of quality can be agreed upon with your provider. For some projects "Good" or "Acceptable" may be
             ok, whereas others will require an "Excellent" score.</p>
@@ -110,37 +110,37 @@
         <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
                 <th>Type of Issues</th>
-                <th>Max Tolerated Issues for ${php: number_format( Constants_Revise::WORD_INTERVAL )} words<br/>
-                    <small class="weight-normal">1 Enhancement = ${php: Constants_Revise::SERV_VALUE_MINOR} Error</small>
+                <th>Max Tolerated Issues for ${php: number_format( constant(  get_class( reviseClass )  . "::WORD_INTERVAL" ) )} words<br/>
+                    <small class="weight-normal">1 Enhancement = ${php: constant(  get_class( reviseClass )  . "::SERV_VALUE_MINOR" )} Error</small>
                 </th>
             </tr>
             <tr>
                 <td>Tag issues (mismatches, whitespaces)</td>
-                <td class="text-center"><b>${php:Constants_Revise::MAX_TYPING}</b><br/>(99.${php:10-Constants_Revise::MAX_TYPING}%
+                <td class="text-center"><b>${php:constant(  get_class( reviseClass )  . "::MAX_TYPING" )}</b><br/>(99.${php:10-constant(  get_class( reviseClass )  . "::MAX_TYPING" )}%
                     Accuracy)
                 </td>
             </tr>
             <tr>
                 <td>Translation errors (mistranslation, additions/omissions)</td>
-                <td class="text-center"><b>${php:Constants_Revise::MAX_TRANSLATION}</b><br/>(99.${php:10-Constants_Revise::MAX_TRANSLATION}%
+                <td class="text-center"><b>${php:constant(  get_class( reviseClass )  . "::MAX_TRANSLATION" )}</b><br/>(99.${php:10-constant(  get_class( reviseClass )  . "::MAX_TRANSLATION" )}%
                     Accuracy)
                 </td>
             </tr>
             <tr>
                 <td>Terminology and translation consistency</td>
-                <td class="text-center"><b>${php:Constants_Revise::MAX_TERMINOLOGY}</b><br/>(99.${php:10-Constants_Revise::MAX_TERMINOLOGY}%
+                <td class="text-center"><b>${php:constant(  get_class( reviseClass )  . "::MAX_TERMINOLOGY" )}</b><br/>(99.${php:10-constant(  get_class( reviseClass )  . "::MAX_TERMINOLOGY" )}%
                     Accuracy)
                 </td>
             </tr>
             <tr>
                 <td>Language quality (grammar, punctuation, spelling)</td>
-                <td class="text-center"><b>${php:Constants_Revise::MAX_QUALITY}</b><br/>(99.${php:10-Constants_Revise::MAX_QUALITY}%
+                <td class="text-center"><b>${php:constant(  get_class( reviseClass )  . "::MAX_QUALITY" )}</b><br/>(99.${php:10-constant(  get_class( reviseClass )  . "::MAX_QUALITY" )}%
                     Accuracy)
                 </td>
             </tr>
             <tr>
                 <td>Style (readability, consistent style and tone)</td>
-                <td class="text-center"><b>${php:Constants_Revise::MAX_STYLE}</b><br/>(99.${php:10-Constants_Revise::MAX_STYLE}%
+                <td class="text-center"><b>${php:constant(  get_class( reviseClass )  . "::MAX_STYLE" )}</b><br/>(99.${php:10-constant(  get_class( reviseClass )  . "::MAX_STYLE" )}%
                     Accuracy)
                 </td>
             </tr>
@@ -151,7 +151,7 @@
         <h3>Score Calculation</h3>
 
         <p>MateCat uses the following formula to calculate the number of tolerated issues for the Job:</p>
-        <blockquote>N° of Tolerated Issues per Job = ( N° of Payable Words / ${php: number_format( Constants_Revise::WORD_INTERVAL )} ) * N° of Tolerated Issues for ${php: number_format( Constants_Revise::WORD_INTERVAL )}
+        <blockquote>N° of Tolerated Issues per Job = ( N° of Payable Words / ${php: number_format( constant(  get_class( reviseClass )  . "::WORD_INTERVAL" ) )} ) * N° of Tolerated Issues for ${php: number_format( constant(  get_class( reviseClass )  . "::WORD_INTERVAL" ) )}
             words
         </blockquote>
 

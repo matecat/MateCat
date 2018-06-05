@@ -18,16 +18,6 @@ function usage() {
   exit; 
 }
 
-function generateRandomString($length = 20) {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-    $charactersLength = strlen($characters);
-    $randomString = '';
-    for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
-    }
-    return $randomString;
-}
-
 $options = getopt( 'h', array( 'email:')); 
 
 if (array_key_exists('h', $options))          usage() ; 
@@ -42,8 +32,8 @@ $dao = new ApiKeys_ApiKeyDao( Database::obtain() );
 
 $values = array(
   'uid' => $user->uid, 
-  'api_key' => generateRandomString(),
-  'api_secret' => generateRandomString(),
+  'api_key' => Utils::randomString( 20 ),
+  'api_secret' => Utils::randomString( 20 ),
   'enabled' => true
 );
 

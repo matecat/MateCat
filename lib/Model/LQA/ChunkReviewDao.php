@@ -30,7 +30,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
     /**
      * @param $id_job
-     * @return \LQA\ChunkReviewStruct[]
+     *
+     * @return ChunkReviewStruct[]
      */
     public static function findByIdJob( $id_job ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
@@ -44,7 +45,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param $id
-     * @return \LQA\ChunkReviewStruct
+     *
+     * @return ChunkReviewStruct
      */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
@@ -113,7 +115,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param array $chunk_ids Example: array( array($id_job, $password), ... )
-     * @return \LQA\ChunkReviewStruct[]
+     *
+     * @return ChunkReviewStruct[]
      */
 
     public static function findChunkReviewsByChunkIds( array $chunk_ids ) {
@@ -144,7 +147,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     /**
      * @param $id_job
      * @param $password
-     * @return \LQA\ChunkReviewStruct
+     *
+     * @return ChunkReviewStruct
      */
     public static function findOneChunkReviewByIdJobAndPassword($id_job, $password) {
         $records = self::findChunkReviewsByChunkIds(array(
@@ -190,20 +194,27 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param      $data array of data to use
+     *
+     * @param bool $setDefaults
+     *
      * @return ChunkReviewStruct
-     * @param $data array of data to use
+     *
+     * @throws \Exceptions\ValidationError
      */
     public static function createRecord( $data ) {
-        $struct = new \LQA\ChunkReviewStruct( $data );
+        $struct = new ChunkReviewStruct( $data );
 
         $struct->ensureValid();
         $struct->setDefaults();
 
-        $attrs = $struct->attributes(array(
-            'id_project', 'id_job', 'password', 'review_password'
-        ));
+        $attrs = $struct->attributes( [
+                'id_project',
+                'id_job',
+                'password',
+                'review_password'
+        ] );
 
-        // TODO: refactor the following two lines
         $sql = "INSERT INTO " . self::TABLE .
             " ( id_project, id_job, password, review_password ) " .
             " VALUES " .
