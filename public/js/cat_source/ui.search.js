@@ -2,6 +2,10 @@
 	Component: ui.search
  */
 $.extend(UI, {
+    /**
+     * ???
+     * @param segment
+     */
 	applySearch: function(segment) {
 		if (this.body.hasClass('searchActive'))
 			this.markSearchResults({
@@ -9,21 +13,10 @@ $.extend(UI, {
 				where: 'no'
 			});
 	},
-	resetSearch: function() {
-		this.body.removeClass('searchActive');
-		this.clearSearchMarkers();
-		// this.setFindFunction('find');
-		$('#exec-find').removeAttr('disabled');
-		this.enableTagMark();
-        this.markGlossaryItemsInSource(UI.cachedGlossaryData);
-	},
-    checkReplaceAvailability: function () {
-        if(($('#search-target').val() == '') && ($('#replace-target').val() != '') ) {
-            $('#search-target').addClass('warn');
-        } else {
-            $('#search-target').removeClass('warn');
-        }
-    },
+    /**
+     * Called by the search component to execute search
+     * @returns {boolean}
+     */
     execFind: function() {
         this.removeGlossaryMarksFormAllSources();
 
@@ -75,10 +68,10 @@ $.extend(UI, {
 		var source = (p.source) ? p.source : '';
 		var target = (p.target) ? p.target : '';
 		var replace = (p.replace) ? p.replace : '';
-		var options = {
-			singleSegment: true
-		};
-		this.markSearchResults(options);
+		// var options = {
+		// 	singleSegment: true
+		// };
+		// this.markSearchResults(options);
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
@@ -107,6 +100,10 @@ $.extend(UI, {
 		});
 
 	},
+    /**
+     * Call in response to request getSearch
+     * @param d
+     */
 	execFind_success: function(d) {
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
@@ -123,6 +120,10 @@ $.extend(UI, {
 			this.pendingRender = false;
 		}
 	},
+    /**
+     * Executes the replace all for segments if all the params are ok
+     * @returns {boolean}
+     */
 	execReplaceAll: function() {
 		$('.search-display .numbers').text('No segments found');
 		$('.targetarea mark.searchMarker').remove();
@@ -186,7 +187,9 @@ $.extend(UI, {
 			}
 		});
 	},
-
+    /**
+     * Displays the message under the search container that contains the number of results and segments found
+     */
 	updateSearchDisplay: function() {
 		var res,resNumString,numbers;
 
@@ -225,12 +228,6 @@ $.extend(UI, {
 		if (!this.numSearchResultsSegments) {
             $('.search-display').addClass('no-results');
         }
-		// if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
-		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
-		// }
-		// if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
-		// 	/*$('#exec-find[data-func=next]').attr('disabled', 'disabled');*/
-		// }
 		this.updateSearchItemsCount();
 		if (this.someSegmentToSave()) {
 			this.addWarningToSearchDisplay();
@@ -238,14 +235,23 @@ $.extend(UI, {
 			this.removeWarningFromSearchDisplay();
 		}
 	},
+    /**
+     * Displays the warning message that appears when there is an unsaved segment.
+     */
 	addWarningToSearchDisplay: function() {
 		if (!$('.search-display .found .warning').length)
 			$('.search-display .found').append('<span class="warning"></span>');
 		$('.search-display .found .warning').text(' (maybe some results in segments modified but not saved)');
 	},
+    /**
+     * Removes the warning message that appears when there is an unsaved segment
+     */
 	removeWarningFromSearchDisplay: function() {
 		$('.search-display .found .warning').remove();
 	},
+    /**
+     * Update the results counter in the search container
+     */
 	updateSearchDisplayCount: function(segment) {
 		var numRes = $('.search-display .numbers .results'),
 			currRes = parseInt(numRes.text()),
@@ -259,20 +265,30 @@ $.extend(UI, {
 		}
 		this.updateSearchItemsCount();
 	},
+    /**
+     * Update the results counter in the header container
+     */
 	updateSearchItemsCount: function() {
-		c = parseInt($('.search-display .numbers .results').text());
+		var c = parseInt($('.search-display .numbers .results').text());
 		if (c > 0) {
 			$('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
 		} else {
             $('#filterSwitch .numbererror').text('');
 		}
 	},
+    /**
+     * Go to next result
+     */
 	execNext: function() {
 		this.gotoNextResultItem(false);
 	},
     execPrev: function() {
 		this.gotoPrevResultItem(false);
 	},
+    /**
+     * Mark your search results according to the type of search is done
+     * @param options
+     */
 	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
         options = options || {};
 		var where = options.where;
@@ -286,9 +302,6 @@ $.extend(UI, {
 
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
-
-		window.openTagReg = new RegExp(UI.openTagPlaceholder, "g");
-		window.closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
             seg = options.segmentToScroll;
@@ -352,7 +365,6 @@ $.extend(UI, {
 			}
 			var matchTags = txt.match(/<.*?\>/gi) ;
             hasTags = ( matchTags ) ? true : false;
-            // var regTxt = txt.replace(/</g, UI.openTagPlaceholder).replace(/>/g, UI.closeTagPlaceholder);
             var regTxt = txt.replace(/(\W)/gi, "\\$1");
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
@@ -400,11 +412,16 @@ $.extend(UI, {
 				$('section.justAdded').removeClass('justAdded');
 			}
 		}
-		if (!singleSegment) {
-			UI.unmarkNumItemsInSegments();
-			UI.markNumItemsInSegments();
-		}
 	},
+    /**
+     * Check if a segment has tags and call the fn to mark the results
+     * @param hasTags
+     * @param items
+     * @param regex
+     * @param q
+     * @param txt
+     * @param ignoreCase
+     */
 	doMarkSearchResults: function(hasTags, items, regex, q, txt, ignoreCase) {
 		if (!hasTags) {
 			this.execSearchResultsMarking(UI.filterExactMatch(items, txt), regex, false);
@@ -413,6 +430,12 @@ $.extend(UI, {
 			this.execSearchResultsMarking(items, regex, inputReg);
 		}
 	},
+    /**
+     * Put the parker in the search results
+     * @param areas
+     * @param regex
+     * @param testRegex
+     */
 	execSearchResultsMarking: function(areas, regex, testRegex) {
         var searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
@@ -423,25 +446,16 @@ $.extend(UI, {
 					tt = LXQ.cleanUpHighLighting(tt);
 				}
 				tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
-                 //    .replace(/&lt;/g, UI.openTagPlaceholder)
- 				// 	.split(UI.openTagPlaceholder);
-                //
-				// $.each(tt, function(i, elem){
-				// 	elem = elem.replace(/&gt;/g, UI.closeTagPlaceholder)
-				// 			.split(UI.closeTagPlaceholder);
-				// 	$.each(elem, function(j, text){
-				// 		elem[j] = text.replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
-				// 	});
-				// 	tt[i] = elem.join(UI.closeTagPlaceholder);
-				// });
-				// tt = tt.join(UI.openTagPlaceholder)
-				// 		.replace(window.openTagReg, '&lt;')
-				// 		.replace(window.closeTagReg, '&gt;')
-                	// 	.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
                 $(this).html(tt);
 			}
 		});
 	},
+    /**
+     * Filter items that has an exact match
+     * @param items List of jQuery items
+     * @param txt The exact match to look for
+     * @returns the list of items
+     */
 	filterExactMatch: function(items, txt) {
 	    var searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 	    var searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -453,15 +467,26 @@ $.extend(UI, {
 			}
 		}) : items;
 	},
+    /**
+     * Clear all the inputs in the search form
+     */
 	clearSearchFields: function() {
 		$('.searchbox form')[0].reset();
 	},
+    /**
+     * Remove all the markers
+     */
 	clearSearchMarkers: function() {
 		$('mark.searchMarker').each(function() {
 			$(this).replaceWith($(this).html());
 		});
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 	},
+    /**
+     * If the text (in the editarea target) inside a marker is modified remove the marker
+     * and update the counter
+     * @param el the segment modified
+     */
 	rebuildSearchSegmentMarkers: function(el) {
 		var querySearchString = this.searchParams.target,
 			segment = $(el),
@@ -486,6 +511,11 @@ $.extend(UI, {
 			});
 		}
 	},
+
+    /**
+     * Go to next match inside the segment
+     * @param unmark
+     */
 	gotoNextResultItem: function(unmark) {
 		var p = this.searchParams;
 
@@ -568,6 +598,10 @@ $.extend(UI, {
 		}
 	},
 
+    /**
+     * Go to previous match inside the segment
+     * @param unmark
+     */
     gotoPrevResultItem: function(unmark) {
         var p = this.searchParams;
 
@@ -644,6 +678,10 @@ $.extend(UI, {
         }
     },
 
+    /**
+     * Go To next Segment
+     * @param options
+     */
 	gotoSearchResultAfter: function(options) {
 
 		var el = options.el;
@@ -726,54 +764,18 @@ $.extend(UI, {
 			}
 		}
 	},
-	checkSearchChanges: function() {
-		changes = false;
-		var p = this.searchParams;
-		if (p.source != $('#search-source').val()) {
-			if (!((typeof p.source == 'undefined') && ($('#search-source').val() === '')))
-				changes = true;
-		}
-		if (p.target != $('#search-target').val()) {
-			if (!((typeof p.target == 'undefined') && ($('#search-target').val() === '')))
-				changes = true;
-		}
-		if (p.status != $('#select-status').val()) {
-			if ((typeof p.status != 'undefined'))
-				changes = true;
-		}
-		if (p['match-case'] != $('#match-case').is(':checked')) {
-			changes = true;
-		}
-		if (p['exact-match'] != $('#exact-match').is(':checked')) {
-			changes = true;
-		}
-		return changes;
-	},
-	// setFindFunction: function(func) {
-	// 	/*var b = $('#exec-find');*/
-	// 	/*if (func == 'next') {
-	// 		b.attr('data-func', 'next').attr('value', 'Next');
-	// 	} else {
-	// 		b.attr('data-func', 'find').attr('value', 'Find');
-	// 	}*/
-	// 	/*b.removeAttr('disabled');*/
-	// },
-	unmarkNumItemsInSegments: function() {
-		$('section[data-searchItems]').removeAttr("data-searchItems");
-	},
-	markNumItemsInSegments: function() {
-		$('section').has("mark.searchMarker").each(function() {
-			$(this).attr('data-searchItems', $('mark.searchMarker', this).length);
-		});
-	},
 
+    /**
+     * Close search container
+     */
     closeSearch : function() {
 		CatToolActions.closeSubHeader();
     },
-    openSearch : function() {
-        CatToolActions.openSearch();
-        $('#search-source').focus();
-    },
+
+    /**
+     * Toggle the Search container
+     * @param e
+     */
 	toggleSearch: function(e) {
 		if (!this.searchEnabled) return;
 		e.preventDefault();

@@ -27,8 +27,6 @@ $.extend(UI, {
 		this.undoStack = [];
 		this.undoStackPosition = 0;
 		this.nextUntranslatedSegmentIdByServer = 0;
-		this.openTagPlaceholder = 'MATECAT-openTagPlaceholder-MATECAT';
-		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.checkUpdatesEvery = 180000;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;

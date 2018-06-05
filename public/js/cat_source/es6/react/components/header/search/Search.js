@@ -138,7 +138,6 @@ class Search extends React.Component {
             });
 
             UI.updateSearchDisplayCount(segment);
-            $(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
             if (UI.numSearchResultsSegments > 1) UI.gotoNextResultItem(true);
         }

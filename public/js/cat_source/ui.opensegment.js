@@ -67,9 +67,6 @@
                 this.setCurrentSegment();
             }
 
-
-            this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
-
             this.focusEditarea = setTimeout(function() {
                 UI.editarea.focus();
                 clearTimeout(UI.focusEditarea);
