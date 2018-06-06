@@ -68,14 +68,12 @@ $.extend(UI, {
 		var source = (p.source) ? p.source : '';
 		var target = (p.target) ? p.target : '';
 		var replace = (p.replace) ? p.replace : '';
-		// var options = {
-		// 	singleSegment: true
-		// };
-		// this.markSearchResults(options);
-		this.gotoSearchResultAfter({
-			el: 'segment-' + this.currentSegmentId
-		});
-		// this.setFindFunction('next');
+
+        this.clearSearchMarkers();
+        this.pendingRender = {
+            applySearch: true,
+            detectSegmentToScroll: true
+        };
 		this.body.addClass('searchActive');
 		//Save the current segment to not lose the translation
 		UI.saveSegment(UI.currentSegment);
@@ -129,7 +127,8 @@ $.extend(UI, {
 		$('.targetarea mark.searchMarker').remove();
 		this.applySearch();
 
-        if ( $('#search-target').val() !== '' ) {
+        var $searchTarget = $('#search-target');
+        if ($searchTarget.val() !== '' && $searchTarget.val() !== ' ' && $searchTarget.val() !== '\'' && $searchTarget.val() !== '"')  {
             this.searchParams.target = $('#search-target').val();
         } else {
             APP.alert({msg: 'You must specify the Target value to replace.'});
@@ -137,8 +136,9 @@ $.extend(UI, {
             return false;
         }
 
-        if ($('#replace-target').val() !== '') {
-            this.searchParams.replace = $('#replace-target').val();
+        var $replaceTarget = $('#replace-target');
+        if ($replaceTarget.val() !== '' && $replaceTarget.val() !== ' ' && $replaceTarget.val() !== '\'' && $replaceTarget.val() !== '"')  {
+            this.searchParams.replace = $replaceTarget.val();
         } else {
             APP.alert({msg: 'You must specify the replacement value.'});
             delete this.searchParams.replace;
@@ -283,7 +283,7 @@ $.extend(UI, {
 		this.gotoNextResultItem(false);
 	},
     execPrev: function() {
-		this.gotoPrevResultItem(false);
+		this.gotoNextResultItem(false, "prev");
 	},
     /**
      * Mark your search results according to the type of search is done
@@ -468,12 +468,6 @@ $.extend(UI, {
 		}) : items;
 	},
     /**
-     * Clear all the inputs in the search form
-     */
-	clearSearchFields: function() {
-		$('.searchbox form')[0].reset();
-	},
-    /**
      * Remove all the markers
      */
 	clearSearchMarkers: function() {
@@ -513,12 +507,17 @@ $.extend(UI, {
 	},
 
     /**
-     * Go to next match inside the segment
+     * Go to next match inside the segment,
      * @param unmark
+     * @param type next or prev
      */
-	gotoNextResultItem: function(unmark) {
+	gotoNextResultItem: function(unmark, type) {
 		var p = this.searchParams;
 
+        var jQueryFnForNext = "nextAll";
+        if (type === "prev") {
+            jQueryFnForNext = "prevAll";
+        }
 		if (this.searchMode == 'onlyStatus') {
 
 			var status = (p.status == 'all') ? '' : '.status-' + p.status;
@@ -529,8 +528,8 @@ $.extend(UI, {
 				// all combination is denied by UI. Consider removing this block.
 				this.scrollSegment( $(el).next() );
 			} else {
-				if (el.nextAll(status).length) {
-					nextToGo = el.nextAll(status).first();
+				if (el[jQueryFnForNext](status).length) {
+					nextToGo = el[jQueryFnForNext](status).first();
                     SegmentActions.removeClassToSegment(UI.getSegmentId(el), 'currSearchSegment');
                     SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
 					this.scrollSegment(nextToGo);
@@ -539,17 +538,17 @@ $.extend(UI, {
 					// from the server.
 					this.gotoSearchResultAfter({
 						el: el.attr('id'),
-					});
+					}, type);
 				}
 
 			}
 		} else if (this.searchMode == 'source&target') {
 			var m = $(".targetarea mark.currSearchItem");
 
-			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
+			if ($(m)[jQueryFnForNext]('mark.searchMarker').length) { // there are other subsequent results in the segment
 
 				$(m).removeClass('currSearchItem');
-				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+				$(m)[jQueryFnForNext]('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
@@ -562,10 +561,10 @@ $.extend(UI, {
 						el: 'segment-' + $(seg).attr('id').split('-')[1],
 						skipCurrent: skipCurrent,
 						unmark: unmark
-					});
+					}, type);
 				} else {
 					setTimeout(function() {
-						UI.gotoNextResultItem(false);
+						UI.gotoNextResultItem(false, type);
 					}, 500);
 				}
 			}
@@ -573,10 +572,10 @@ $.extend(UI, {
 		} else {
 			var m = $("mark.currSearchItem");
 
-			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
+			if ($(m)[jQueryFnForNext]('mark.searchMarker').length) { // there are other subsequent results in the segment
 
 				$(m).removeClass('currSearchItem');
-				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+				$(m)[jQueryFnForNext]('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
@@ -588,10 +587,10 @@ $.extend(UI, {
 						el: 'segment-' + $(seg).attr('id').split('-')[1],
 						skipCurrent: skipCurrent,
 						unmark: unmark
-					});
+					}, type);
 				} else {
 					setTimeout(function() {
-						UI.gotoNextResultItem(false);
+						UI.gotoNextResultItem(false, type);
 					}, 500);
 				}
 			}
@@ -599,150 +598,73 @@ $.extend(UI, {
 	},
 
     /**
-     * Go to previous match inside the segment
-     * @param unmark
-     */
-    gotoPrevResultItem: function(unmark) {
-        var p = this.searchParams;
-
-        if (this.searchMode == 'onlyStatus') {
-
-            var status = (p.status == 'all') ? '' : '.status-' + p.status;
-            var el = $('section.currSearchSegment');
-
-            if (el.prevAll(status).length) {
-                nextToGo = el.prevAll(status).last();
-                SegmentActions.removeClassToSegment(UI.getSegmentId(el), 'currSearchSegment');
-                SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
-                this.scrollSegment(nextToGo);
-            } else {
-                // We fit this case if the next batch of segments is to load
-                // from the server.
-                this.gotoSearchResultAfter({
-                    el: el.attr('id'),
-                });
-            }
-
-        } else if (this.searchMode == 'source&target') {
-            var m = $(".targetarea mark.currSearchItem");
-
-            if ($(m).prevAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-
-                $(m).removeClass('currSearchItem');
-                $(m).prevAll('mark.searchMarker').last().addClass('currSearchItem');
-                if (unmark)
-                    $(m).replaceWith($(m).text());
-                UI.goingToNext = false;
-            } else { // jump to results in subsequents segments
-
-                var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
-                if (seg.length) {
-                    skipCurrent = $(seg).has("mark.currSearchItem").length;
-                    this.gotoSearchResultAfter({
-                        el: 'segment-' + $(seg).attr('id').split('-')[1],
-                        skipCurrent: skipCurrent,
-                        unmark: unmark
-                    });
-                } else {
-                    setTimeout(function() {
-                        UI.gotoNextResultItem(false);
-                    }, 500);
-                }
-            }
-
-        } else {
-            var m = $("mark.currSearchItem");
-
-            if ($(m).prevAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-
-                $(m).removeClass('currSearchItem');
-                $(m).prevAll('mark.searchMarker').last().addClass('currSearchItem');
-                if (unmark)
-                    $(m).replaceWith($(m).text());
-                UI.goingToNext = false;
-            } else { // jump to results in subsequents segments
-                var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
-                if (seg.length) {
-                    skipCurrent = $(seg).has("mark.currSearchItem").length;
-                    this.gotoSearchResultAfter({
-                        el: 'segment-' + $(seg).attr('id').split('-')[1],
-                        skipCurrent: skipCurrent,
-                        unmark: unmark
-                    });
-                } else {
-                    setTimeout(function() {
-                        UI.gotoNextResultItem(false);
-                    }, 500);
-                }
-            }
-        }
-    },
-
-    /**
      * Go To next Segment
      * @param options
      */
-	gotoSearchResultAfter: function(options) {
+	gotoSearchResultAfter: function(options, type) {
 
 		var el = options.el;
+		var $el = $('#' + el);
 		var skipCurrent = (options.skipCurrent || false);
 		var unmark = (options.unmark || false);
 
 		var p = this.searchParams;
+		var jQueryFnForNext = "nextAll";
+		if (type === "prev") {
+            jQueryFnForNext = "prevAll";
+        }
 
-		if (this.searchMode == 'onlyStatus') { // searchMode: onlyStatus
-			var status = (p.status == 'all') ? '' : '.status-' + p.status;
+		if (this.searchMode === 'onlyStatus' && p.status !== 'all') { // searchMode: onlyStatus
+			var status = '.status-' + p.status;
 
-			if (p.status == 'all') {
-				this.scrollSegment($('#' + el).next());
-			} else {
-				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
-					var nextToGo = $('#' + el).nextAll(status).first();
-                    SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
-					this.scrollSegment(nextToGo);
-				} else {
-					// load new segments
-					if (!this.searchResultsSegments) {
-						this.pendingRender = {
-							applySearch: true,
-							detectSegmentToScroll: true
-						};
-					} else {
-						var seg2scroll = this.nextUnloadedResultSegment();
-						UI.unmountSegments();
-						this.render({
-							firstLoad: false,
-							applySearch: true,
-							segmentToScroll: seg2scroll
-						});
-					}
-				}
-			}
+            if ($el[jQueryFnForNext](status).length) { // there is at least one next result loaded after the currently selected
+                var nextToGo = $el[jQueryFnForNext](status).first();
+                SegmentActions.addClassToSegment(UI.getSegmentId(nextToGo), 'currSearchSegment');
+                this.scrollSegment(nextToGo);
+            } else {
+                // load new segments
+                if (!this.searchResultsSegments) {
+                    this.pendingRender = {
+                        applySearch: true,
+                        detectSegmentToScroll: true
+                    };
+                } else {
+                    var seg2scroll = this.nextUnloadedResultSegment();
+                    UI.unmountSegments();
+                    this.render({
+                        firstLoad: false,
+                        applySearch: true,
+                        segmentToScroll: seg2scroll
+                    });
+                }
+            }
+
 		} else { // searchMode: source&target or normal
-			var wh = (this.searchMode == 'source&target')? ' .targetarea' : '';
-			var seg = $('section' + wh).has("mark.searchMarker");
-			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
+			var wh = (this.searchMode === 'source&target')? ' .targetarea' : '';
+			var segmentsWithMarkers = $('section' + wh).has("mark.searchMarker");
+			var $currentSegment = (this.searchMode === 'source&target')? $el + '-editarea' : $el.find('.targetarea');
 			var found = false;
 			var self = this;
-			$.each(seg, function() {
-				if ($(this).attr('id') >= ss) {
-					if (($(this).attr('id') == ss) && (skipCurrent)) {
-					} else {
+			segmentsWithMarkers = (type === "prev" ) ? segmentsWithMarkers.toArray().reverse() : segmentsWithMarkers ;
+			$.each(segmentsWithMarkers, function() {
+				if ( !( (UI.getSegmentId($(this)) === UI.getSegmentId($currentSegment)) && skipCurrent ) && (
+				        (type === "prev" &&  UI.getSegmentId($(this)) <= UI.getSegmentId($currentSegment)) ||
+                        (type !== "prev" && UI.getSegmentId($(this)) >= UI.getSegmentId($currentSegment) )
+                    )){
 						found = true;
                         self.scrollSegment($(this));
-						// $("html,body").animate({
-						// 	scrollTop: $(this).offset().top - 200
-						// }, 500);
+
 						setTimeout(function() {
 							UI.goingToNext = false;
 						}, 500);
-						var m = $("mark.currSearchItem");
-						$(m).removeClass('currSearchItem');
+
+						var mark = $("mark.currSearchItem");
+                        $(mark).removeClass('currSearchItem');
 						$(this).find('mark.searchMarker').first().addClass('currSearchItem');
-						if (unmark)
-							$(m).replaceWith($(m).text());
+						if (unmark) {
+                            $(mark).replaceWith($(mark).text());
+                        }
 						return false;
-					}
 				}
 			});
 			if (!found) {
@@ -764,6 +686,36 @@ $.extend(UI, {
 			}
 		}
 	},
+
+    nextUnloadedResultSegment: function() {
+        var found = '';
+        var last = this.getSegmentId($('section').last());
+        $.each(this.searchResultsSegments, function() {
+            if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
+                found = parseInt(this);
+                return false;
+            }
+        });
+        if (found === '') {
+            found = this.searchResultsSegments[0];
+        }
+        return found;
+    },
+
+    prevUnloadedResultSegment: function() {
+        var found = '';
+        var last = this.getSegmentId($('section').last());
+        $.each(this.searchResultsSegments, function() {
+            if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
+                found = parseInt(this);
+                return false;
+            }
+        });
+        if (found === '') {
+            found = this.searchResultsSegments[0];
+        }
+        return found;
+    },
 
     /**
      * Close search container

@@ -24,7 +24,7 @@ class Search extends React.Component {
             currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
         };
-        this.state = this.defaultState;
+        this.state = _.cloneDeep(this.defaultState);
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancelClick = this.handleCancelClick.bind(this);
@@ -58,12 +58,6 @@ class Search extends React.Component {
         if (this.state.funcFindButton) {
             UI.execFind();
         }
-        // else {
-        //     if (!UI.goingToNext) {
-        //         UI.goingToNext = true;
-        //         UI.execNext();
-        //     }
-        // }
         this.setState({
             currentSourceSearch: this.state.search.searchSource,
             currentTargetSearch: this.state.search.searchTarget,
@@ -87,11 +81,9 @@ class Search extends React.Component {
 
     handleCancelClick(event) {
         event.preventDefault();
-        $("#filterSwitch").click();
+        CatToolActions.closeSubHeader();
         UI.body.removeClass('searchActive');
         UI.clearSearchMarkers();
-        UI.clearSearchFields();
-        $('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
         UI.enableTagMark();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             UI.gotoOpenSegment();
