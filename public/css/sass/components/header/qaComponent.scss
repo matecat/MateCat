@@ -221,6 +221,22 @@
                     margin-left: 70px
                 }
             }
+            button {
+                font-size: 14px !important;
+                padding: 10px;
+            }
+            .qa-lexiqa-info {
+                margin-left: 5px;
+                font-weight: 700;
+                a {
+                    margin: 0 3px;
+                    font-weight: 700;
+                    text-decoration: underline;
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
         }
         .qa-container .qa-issues-navigator{
           display: flex;
