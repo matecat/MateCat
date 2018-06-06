@@ -90,7 +90,28 @@ class SubHeaderContainer extends React.Component {
     }
     updateIcon(total) {
         if (total > 0) {
-            $('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(total);
+            if(this.state.warnings.ERROR.total>0){
+                $('#notifbox').attr('class', 'warningbox')
+                    .attr("title", "Click to see the segments with potential issues")
+                    .find('.numbererror')
+                    .text(total)
+                    .removeClass('numberwarning numberinfo');
+            }else if(this.state.warnings.WARNING.total>0){
+                $('#notifbox').attr('class', 'warningbox')
+                    .attr("title", "Click to see the segments with potential issues")
+                    .find('.numbererror')
+                    .text(total)
+                    .addClass('numberwarning')
+                    .removeClass('numberinfo');
+            }else{
+                $('#notifbox').attr('class', 'warningbox')
+                    .attr("title", "Click to see the segments with potential issues")
+                    .find('.numbererror')
+                    .text(total)
+                    .addClass('numberinfo')
+                    .removeClass('numberwarning');
+            }
+
         } else {
             $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('')
         }

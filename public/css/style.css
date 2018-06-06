@@ -141,6 +141,13 @@ body.searchActive #filterSwitch {
     box-sizing: content-box;
 }
 
+.numberwarning{
+    background: #e28800!important;
+}
+.numberinfo{
+    background: #333333!important;
+}
+
 .numbererror:empty {
     display: none
 }
