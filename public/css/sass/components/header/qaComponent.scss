@@ -15,15 +15,6 @@
   color: #4d4d4d;
 }
 
-.qa-container-inside {
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0 8% 0 5%;
-  align-items: center;
-}
-
 .qa-issues-types {
   display: flex;
   flex-grow: 1;
@@ -203,14 +194,36 @@
 /************************************************/
 
 
-.qa-container .qa-issues-list{
-  display: flex;
-  flex-grow: 3;
-  align-items: center;
-  .qa-issue{
-  }
-}
-.qa-container .qa-issues-navigator{
-  display: flex;
-  flex-grow: 1;
+.qa-container {
+    .qa-container-inside {
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0 8% 0 5%;
+        align-items: center;
+        .qa-issues-list{
+            display: flex;
+            flex-grow: 3;
+            align-items: center;
+            .qa-issue{
+            }
+            .icon-cancel-circle {
+                color: #E1565A;
+            }
+            .icon-warning2 {
+                color: #EA862C;
+            }
+            .label-issues {
+                font-weight: 700;
+                &.labl {
+                    margin-left: 70px
+                }
+            }
+        }
+        .qa-container .qa-issues-navigator{
+          display: flex;
+          flex-grow: 1;
+        }
+    }
 }

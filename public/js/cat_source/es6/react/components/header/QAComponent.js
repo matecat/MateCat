@@ -134,10 +134,10 @@ class QAComponent extends React.Component {
             <div className="qa-container">
                 <div className="qa-container-inside">
                     <div className="qa-issues-list">
-                        <div>
+                        <div className="label-issues">
                             Segments with:
                         </div>
-                        <div className="ui buttons">
+                        <div className="ui basic tiny buttons">
                             {error}
                             {warning}
                             {info}
@@ -149,8 +149,15 @@ class QAComponent extends React.Component {
                                 <a target="_blank" alt="Read the full QA report"
                                    href={config.lexiqaServer + '/errorreport?id=' + LXQ.partnerid + '-' + config.id_job + '-' + config.password + '&type=' + (config.isReview ? 'revise' : 'translate')}>Report</a>
                             </div> : null}
+                        <div className="label-issues labl">
+                            Repetitions with:
+                        </div>
+                        {mismatch ? <div className="qa-mismatch">
+                            <div className="ui basic tiny buttons">
+                                {mismatch}
+                            </div>
+                        </div> : null}
                     </div>
-                    {mismatch ? <div className="qa-mismatch">{mismatch}</div> : null}
                     {this.state.navigationList.length > 0 ? <div className="qa-issues-navigator">
                         <div className="qa-actions">
                             {this.state.navigationIndex + 1} / {this.state.navigationList.length} Segments
