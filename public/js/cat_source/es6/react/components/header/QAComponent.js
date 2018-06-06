@@ -90,44 +90,46 @@ class QAComponent extends React.Component {
             error = [],
             warning = [],
             info = [];
-
-        if (this.props.warnings.ERRORS.total > 0) {
-            Object.keys(this.props.warnings.ERRORS.categories).map((key, index) => {
-                error.push(<button key={index} className="ui button qa-issue"
-                                   onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERRORS.categories[key], 'error', key)}>
-                    <i className="icon-cancel-circle icon"></i>
-                    {this.state.labels[key] ?
-                        this.state.labels[key] : key} ({this.props.warnings.ERRORS.categories[key].length})</button>)
-            })
-        }
-        if (this.props.warnings.WARNINGS.total > 0) {
-            Object.keys(this.props.warnings.WARNINGS.categories).map((key, index) => {
-                if (key !== 'MISMATCH') {
-                    warning.push(<button key={index} className="ui button qa-issue"
-                                         onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNINGS.categories[key], 'warning', key)}>
-                        <i className="icon-warning2 icon"></i>
+        if (this.props.warnings) {
+            if (this.props.warnings.ERROR.total > 0) {
+                Object.keys(this.props.warnings.ERROR.Categories).map((key, index) => {
+                    error.push(<button key={index} className="ui button qa-issue"
+                                       onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'error', key)}>
+                        <i className="icon-cancel-circle icon"></i>
                         {this.state.labels[key] ?
-                            this.state.labels[key] : key} ({this.props.warnings.WARNINGS.categories[key].length})
-                    </button>)
-                } else {
-                    mismatch = <button key={index} className="ui button qa-issue"
-                                       onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNINGS.categories[key], 'warning', key)}>
-                        <i className="icon-warning2 icon"></i>
-                        {this.state.labels[key] ?
-                            this.state.labels[key] : key} ({this.props.warnings.WARNINGS.categories[key].length})
-                    </button>
-                }
+                            this.state.labels[key] : key} ({this.props.warnings.ERROR.Categories[key].length})</button>)
+                })
+            }
+            if (this.props.warnings.WARNING.total > 0) {
+                Object.keys(this.props.warnings.WARNING.Categories).map((key, index) => {
+                    if (key !== 'MISMATCH') {
+                        warning.push(<button key={index} className="ui button qa-issue"
+                                             onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                            <i className="icon-warning2 icon"></i>
+                            {this.state.labels[key] ?
+                                this.state.labels[key] : key} ({this.props.warnings.WARNING.Categories[key].length})
+                        </button>)
+                    } else {
+                        mismatch = <button key={index} className="ui button qa-issue"
+                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                            <i className="icon-warning2 icon"></i>
+                            {this.state.labels[key] ?
+                                this.state.labels[key] : key} ({this.props.warnings.WARNING.Categories[key].length})
+                        </button>
+                    }
 
-            })
+                })
+            }
+            if (this.props.warnings.INFO.total > 0) {
+                Object.keys(this.props.warnings.INFO.Categories).map((key, index) => {
+                    info.push(<button key={index} className="ui button qa-issue"
+                                      onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'info', key)}>
+                        {this.state.labels[key] ?
+                            this.state.labels[key] : key} ({this.props.warnings.INFO.Categories[key].length})</button>)
+                })
+            }
         }
-        if (this.props.warnings.INFO.total > 0) {
-            Object.keys(this.props.warnings.INFO.categories).map((key, index) => {
-                info.push(<button key={index} className="ui button qa-issue"
-                                  onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.categories[key], 'info', key)}>
-                    {this.state.labels[key] ?
-                        this.state.labels[key] : key} ({this.props.warnings.INFO.categories[key].length})</button>)
-            })
-        }
+
         return ((this.props.active && this.props.totalWarnings > 0) ? <div className="qa-wrapper">
             <div className="qa-container">
                 <div className="qa-container-inside">

@@ -361,8 +361,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
-            Object.keys(warnings[key].categories).map(key2 => {
-                warnings[key].categories[key2] = warnings[key].categories[key2].filter(this.filterGlobalWarning);
+            Object.keys(warnings[key].Categories).map(key2 => {
+                warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(this.filterGlobalWarning);
             });
         });
         this._globalWarnings.matecat = warnings;

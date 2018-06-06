@@ -18,14 +18,17 @@ class SubHeaderContainer extends React.Component {
             qaComponent: false,
             totalWarnings: 0,
             warnings: {
-                ERRORS: {
-                    categories: {}
+                ERROR: {
+                    Categories: {},
+                    total: 0
                 },
-                WARNINGS: {
-                    categories: {}
+                WARNING: {
+                    Categories: {},
+                    total: 0
                 },
                 INFO: {
-                    categories: {}
+                    Categories: {},
+                    total: 0
                 }
             }
 
@@ -116,13 +119,13 @@ class SubHeaderContainer extends React.Component {
     receiveGlobalWarnings(warnings) {
         let totalWarnings = [];
         if (warnings.lexiqa && warnings.lexiqa.length > 0) {
-            warnings.matecat.INFO.categories['lexiqa'] = warnings.lexiqa;
+            warnings.matecat.INFO.Categories['lexiqa'] = warnings.lexiqa;
         }
         Object.keys(warnings.matecat).map(key => {
             let totalCategoryWarnings = [];
-            Object.keys(warnings.matecat[key].categories).map(key2 => {
-                totalCategoryWarnings.push(...warnings.matecat[key].categories[key2]);
-                totalWarnings.push(...warnings.matecat[key].categories[key2]);
+            Object.keys(warnings.matecat[key].Categories).map(key2 => {
+                totalCategoryWarnings.push(...warnings.matecat[key].Categories[key2]);
+                totalWarnings.push(...warnings.matecat[key].Categories[key2]);
             });
             warnings.matecat[key].total = totalCategoryWarnings.filter((value, index, self) => {
                 return self.indexOf(value) === index;

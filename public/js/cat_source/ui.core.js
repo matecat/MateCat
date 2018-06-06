@@ -1608,7 +1608,7 @@ UI = {
 
                 //check for errors
                 if(data.details){
-                    SegmentActions.updateGlobalWarnings(mock);
+                    SegmentActions.updateGlobalWarnings(data.details);
                 }
 
                 // check for messages
@@ -1718,6 +1718,8 @@ UI = {
 			success: function(d) {
 			    if(d.details){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
+                }else{
+                    SegmentActions.setSegmentWarnings(segment.id,{});
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
