@@ -330,17 +330,20 @@ UI = {
 
     copyAllSources: function() {
         if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
-            APP.confirmAndCheckbox({
-                title: 'Copy source to target',
-                name: 'confirmCopyAllSources',
-                okTxt: 'Yes',
-                cancelTxt: 'No',
-                callback: 'continueCopyAllSources',
-                onCancel: 'abortCopyAllSources',
-                closeOnSuccess: true,
-                msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
-                'checkbox-label': "Confirm copy source to target"
-            });
+            var props = {};
+
+            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
+            // APP.confirmAndCheckbox({
+            //     title: 'Copy source to target',
+            //     name: 'confirmCopyAllSources',
+            //     okTxt: 'Yes',
+            //     cancelTxt: 'No',
+            //     callback: 'continueCopyAllSources',
+            //     onCancel: 'abortCopyAllSources',
+            //     closeOnSuccess: true,
+            //     msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
+            //     'checkbox-label': "Confirm copy source to target"
+            // });
         } else {
             this.consecutiveCopySourceNum = [];
         }
