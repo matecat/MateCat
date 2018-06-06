@@ -445,7 +445,15 @@ $.extend(UI, {
 				if (LXQ.cleanUpHighLighting) {
 					tt = LXQ.cleanUpHighLighting(tt);
 				}
+				var spanArray = [];
+				tt = tt.replace(/(<[/]*span.*?>)/g, function ( match, text ) {
+                    spanArray.push(text);
+                    return "$&";
+                });
 				tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
+                tt = tt.replace(/(\$&)/g, function ( match, text ) {
+                    return spanArray.shift();
+                });
                 $(this).html(tt);
 			}
 		});
