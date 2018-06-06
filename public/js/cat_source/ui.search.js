@@ -31,13 +31,14 @@ $.extend(UI, {
 		$('.search-display').removeClass('displaying');
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
-		if ($('#search-source').val() !== '') {
+		var $searchSource = $('#search-source');
+		if ($searchSource.val() !== '' && $searchSource.val() !== ' ' && $searchSource.val() !== '\'' && $searchSource.val() !== '"' ) {
 			this.searchParams.source = $('#search-source').val();
 		} else {
 			delete this.searchParams.source;
 		}
-
-		if ($('#search-target').val() !== '') {
+		var $searchTarget = $('#search-target');
+		if ($searchTarget.val() !== '' && $searchTarget.val() !== ' ' && $searchTarget.val() !== '\'' && $searchTarget.val() !== '"')  {
 			this.searchParams.target = $('#search-target').val();
 		} else {
 			delete this.searchParams.target;
@@ -74,7 +75,10 @@ $.extend(UI, {
 		var source = (p.source) ? p.source : '';
 		var target = (p.target) ? p.target : '';
 		var replace = (p.replace) ? p.replace : '';
-		this.markSearchResults();
+		var options = {
+			singleSegment: true
+		};
+		this.markSearchResults(options);
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});

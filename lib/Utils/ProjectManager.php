@@ -10,6 +10,7 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
+use ConnectedServices\GDrive\Session;
 use Jobs\SplitQueue;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
@@ -59,6 +60,9 @@ class ProjectManager {
      */
     protected $project;
 
+    /**
+     * @var Session
+     */
     protected $gdriveSession;
 
     /**
@@ -455,7 +459,7 @@ class ProjectManager {
             $forceXliff = $this->features->filter(
                     'forceXLIFFConversion',
                     INIT::$FORCE_XLIFF_CONVERSION,
-                    ( isset( $this->projectStructure[ 'session' ][ 'uid' ] ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] )
             );
 
             /*
@@ -1366,10 +1370,10 @@ class ProjectManager {
 
         $translatorModel   = new TranslatorsModel( $jobInfo );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
-        if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
+        if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
 
             $translatorModel
-                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )
@@ -1646,12 +1650,12 @@ class ProjectManager {
                                         }
 
                                         /**
-                                         * Approved Flag
-                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                         * Trans-Unit
+                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                          */
                                         $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
                                                 $seg_source[ 'mid' ],
-                                                new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                                new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
                                         );
 
                                         //seg-source and target translation can have different mrk id
@@ -1721,11 +1725,11 @@ class ProjectManager {
                                     }
 
                                     /**
-                                     * Approved Flag
-                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                                     * Trans-Unit
+                                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                      */
                                     $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
-                                            new ArrayObject( [ 2 => $target, 4 => @$xliff_trans_unit[ 'attr' ][ 'approved' ] ] )
+                                            new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
                                     );
 
                                 }
@@ -1926,8 +1930,8 @@ class ProjectManager {
                     //WARNING offset 2 is the target translation
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
                     /**
-                     * WARNING offset 4 is the Approved Flag
-                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                     * WARNING offset 4 is the Trans-Unit
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                      */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
@@ -1991,7 +1995,7 @@ class ProjectManager {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
-                empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ||
+                (empty( $xliff_trans_unit[ 'source' ] ) && empty($xliff_trans_unit[ 'alt-trans' ]['source'])) ||
                 empty( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] ) ||
                 empty( $xliff_file_attributes[ 'source-language' ] ) ||
                 empty( $xliff_file_attributes[ 'target-language' ] ) ||
@@ -2018,8 +2022,22 @@ class ProjectManager {
         $config[ 'source' ]         = $xliff_file_attributes[ 'source-language' ];
         $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
         $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
-        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] );
-        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+
+
+        if(!empty($xliff_trans_unit[ 'source' ])){
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+
+        }
+
+        if(!empty($xliff_trans_unit[ 'alt-trans' ]['source'])){
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ]['source'] );
+        }
+
+
+        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $source_extract_external['seg'] );
+
+        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external['seg'] );
         $config[ 'context_after' ]  = null;
         $config[ 'context_before' ] = null;
 
@@ -2059,12 +2077,13 @@ class ProjectManager {
 
                 $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
                         [
-                                'approved'         => $translation_row [ 4 ],
+                                'approved'         => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
                                 'locked'           => 0,
                                 'match_type'       => 'ICE',
                                 'eq_word_count'    => 0,
                                 'status'           => $status,
-                                'suggestion_match' => null
+                                'suggestion_match' => null,
+                                'trans-unit'       => $translation_row[ 4 ],
                         ]
                 );
 
@@ -2672,7 +2691,15 @@ class ProjectManager {
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
-            return true;
+            // evaluate if different source and target should be considered translated
+            $differentSourceAndTargetIsTranslated = true;
+            $differentSourceAndTargetIsTranslated = $this->features->filter(
+                    'filterDifferentSourceAndTargetIsTranslated',
+                    $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+            );
+
+            return $differentSourceAndTargetIsTranslated;
+           //return true;
         } else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;

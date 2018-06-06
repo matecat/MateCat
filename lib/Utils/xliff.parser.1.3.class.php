@@ -369,7 +369,7 @@ class Xliff_Parser {
 		}
 
 		// Escape the string with the remaining non-XLIFF tags
-		$content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8', false);
+		$content = htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8', false);
 
 		// Put again in place the original XLIFF tags replacing placeholders
 		foreach ($tags_placeholders as $tag => $placeholder) {
@@ -443,6 +443,7 @@ class Xliff_Parser {
         try {
             $tagArray = $this->_getTagContent( 'target', $trans_unit );
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attributes' ];
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
             Log::doLog( $e->getMessage() );
@@ -453,13 +454,19 @@ class Xliff_Parser {
         try {
 
             $tagArray = $this->_getTagContent( 'alt-trans', $trans_unit );
-
-            $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
-            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
-
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'attr' ] = $tagArray[ 'attributes' ];
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+
+            try{
+                $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+            } catch( UnexpectedValueException $e ){
+                //Found Empty Target Tag
+                Log::doLog( $e->getMessage() );
+            }
+
+            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'target' ] = self::fix_non_well_formed_xml( $targetArray[ 'content' ] );
+
 
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag

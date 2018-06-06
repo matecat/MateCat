@@ -11,7 +11,7 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 .segments-preview-footer {
     display: inline-block;
-    padding: 20px 20px 10px;
+    padding: 15px 20px 0px;
     width: 50%;
     box-sizing: border-box;
     position: relative;
@@ -22,7 +22,7 @@ div.segment-notes ul.graysmall li span.note-label {
 
 .segment-notes-container {
     display: inline-block;
-    max-width: 80%;
+    max-width: 50%;
     box-sizing: border-box;
     vertical-align: top;
     text-align: left;
@@ -30,9 +30,9 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 
 .segments-preview-container {
-    max-width: 408px;
-    max-height: 300px;
-    min-height: 200px;
+    max-width: 380px;
+    max-height: 260px;
+    min-height: 170px;
     background-image: url(../../img/loading.gif);
     background-size: 30px 30px;
     background-repeat: no-repeat;

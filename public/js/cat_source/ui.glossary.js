@@ -58,17 +58,19 @@ if (true)
                 segment = segmentToLookForGlossary.el ;
             }
 
-            txt = htmlDecode( $( '.text .source', segment ).attr( 'data-original' ) );
+            txt =  $( '.text .source', segment ).text() ;
+            txt = UI.removeAllTags( htmlEncode(txt) );
+            txt = txt.replace(/\"/g, "");
             if ( _.isUndefined(txt) || (txt === '') ) return false;
             setTimeout(function (  ) {
                 SegmentActions.renderSegmentGlossary(UI.getSegmentId(segment), txt);
             });
         },
 
-        cacheGlossaryData: function ( data, sid ) {
+        cacheGlossaryData: function ( matches, sid ) {
 
-            if ( UI.currentSegmentId == sid ) {
-                UI.cachedGlossaryData = data;
+            if ( UI.currentSegmentId == sid && matches) {
+                UI.cachedGlossaryData = matches;
             }
         },
 
@@ -76,9 +78,9 @@ if (true)
          * Mark the glossary matches in the source
          * @param d
          */
-        markGlossaryItemsInSource: function ( d ) {
+        markGlossaryItemsInSource: function ( matchesObj ) {
 
-            if ( !d || ! Object.size( d.data.matches ) ) return ;
+            if ( ! Object.size( matchesObj ) ) return ;
 
             var container = $('.source', UI.currentSegment ) ;
 
@@ -88,13 +90,19 @@ if (true)
 
             var intervals = [];
             var matches = [];
-            $.each( d.data.matches, function ( index ) {
-                matches.push( this[0].raw_segment );
+            $.each( matchesObj, function ( index ) {
+                if (this[0].raw_segment) {
+                    matches.push( this[0].raw_segment );
+                } else if (this[0].segment) {
+                    matches.push( this[0].segment );
+                }
             } );
 
             var matchesToRemove = findInclusiveMatches( matches ) ;
-
-            $.each( d.data.matches, function ( k ) {
+            var matches = matches.sort(function(a, b){
+                return b.length - a.length;
+            });
+            $.each( matches, function ( index, k ) {
                 var glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
 
                 if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;

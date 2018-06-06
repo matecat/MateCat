@@ -2,8 +2,12 @@
 
 namespace Features ;
 
+use API\V2\Exceptions\ValidationError;
+use Chunks_ChunkCompletionEventStruct;
+use Chunks_ChunkDao;
 use Contribution\ContributionStruct;
 use Database;
+use Exception;
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
 use FilesStorage ;
@@ -12,8 +16,8 @@ use LQA\ChunkReviewDao;
 use LQA\ModelDao;
 use Projects_ProjectDao;
 use Translations_SegmentTranslationStruct;
+use Utils;
 use ZipArchive ;
-use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
@@ -22,7 +26,6 @@ use Jobs_JobStruct ;
 
 use Features\ProjectCompletion\CompletionEventStruct ;
 
-use Features ;
 use Chunks_ChunkStruct ;
 use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
 use Features\ReviewImproved\Model\QualityReportModel ;
@@ -141,14 +144,52 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * Evaluates if a qa model is present in the feature options.
      * If so, then try to assign the defined qa_model.
      * If not, then try to find the qa_model from the project structure.
+     * @throws \Exceptions\ValidationError
      */
     public function postProjectCreate($projectStructure) {
         Log::doLog( $this->feature );
 
         $this->setQaModelFromJsonFile( $projectStructure );
 
-        foreach( $projectStructure['array_jobs']['job_list'] as $id_job ) {
-            $this->createQaChunkReviewRecord( $id_job, $projectStructure );
+        $this->createChunkReviewRecords( $projectStructure );
+
+    }
+
+    /**
+     * @param       $id_job
+     * @param       $id_project
+     * @param array $options
+     *
+     * @throws \Exceptions\ValidationError
+     */
+    protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+
+        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job );
+
+        foreach ( $chunks as $k => $chunk ) {
+            $data = [
+                    'id_project' => $id_project,
+                    'id_job'     => $chunk->id,
+                    'password'   => $chunk->password
+            ];
+
+            if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
+                $data[ 'review_password' ] = $options[ 'first_record_password' ];
+            }
+
+            ChunkReviewDao::createRecord( $data );
+        }
+
+    }
+
+    /**
+     * @param $projectStructure
+     *
+     * @throws \Exceptions\ValidationError
+     */
+    protected function createChunkReviewRecords( $projectStructure ) {
+        foreach ( $projectStructure[ 'array_jobs' ][ 'job_list' ] as $id_job ) {
+            $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ] );
         }
     }
 
@@ -156,18 +197,22 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * postJobSplitted
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
+     *
+     * @param \ArrayObject $projectStructure
+     *
+     * @throws \Exceptions\ValidationError
      */
-    public function postJobSplitted(\ArrayObject $projectStructure) {
+    public function postJobSplitted( \ArrayObject $projectStructure ) {
+
         $id_job = $projectStructure['job_to_split'];
         $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
         $first_password = $old_reviews[0]->review_password ;
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure, array(
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
                 'first_record_password' => $first_password
-        ));
-        $id_project = $projectStructure['id_project'];
+        ] );
 
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
         foreach( $reviews as $review ) {
@@ -181,6 +226,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * postJobMerged
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
+     *
+     * @param $projectStructure
+     *
+     * @throws \Exceptions\ValidationError
      */
     public function postJobMerged( $projectStructure ) {
         $id_job               = $projectStructure[ 'job_to_merge' ];
@@ -196,9 +245,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
         }
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure, array(
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
                 'first_record_password' => $first_password
-        ));
+        ] );
 
         $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
         $new_reviews[0]->penalty_points = $penalty_points;
@@ -257,32 +306,73 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         }
     }
 
-    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
-        $dao = new ChunkReviewDao();
-        $dao->updatePassword( $job->id, $job->password, $new_password );
+    /**
+     *
+     * @param Chunks_ChunkCompletionEventStruct $event
+     *
+     * @throws ValidationError
+     * @throws \Exceptions\ValidationError
+     * @throws \ReflectionException
+     */
+    public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ){
+
+        $review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                $event->id_job,
+                $event->password
+        );
+
+        $undo_data = $review->getUndoData();
+
+        if ( is_null( $undo_data ) ) {
+            throw new ValidationError( 'undo data is not available' );
+        }
+
+        $this->_validateUndoData( $event, $undo_data );
+
+        $review->is_pass              = $undo_data[ 'is_pass' ];
+        $review->penalty_points       = $undo_data[ 'penalty_points' ];
+        $review->reviewed_words_count = $undo_data[ 'reviewed_words_count' ];
+        $review->undo_data            = null;
+
+        ChunkReviewDao::updateStruct( $review, [
+                'fields' => [
+                        'is_pass',
+                        'penalty_points',
+                        'reviewed_words_count',
+                        'undo_data'
+                ]
+        ] );
+
+        Log::doLog( "CompletionEventController deleting event: " . var_export( $event->getArrayCopy(), true ) );
+
     }
 
     /**
-     * @param $array_jobs array The jobs array coming from the project_structure
+     * @param Chunks_ChunkCompletionEventStruct $event
+     * @param                                   $undo_data
      *
+     * @throws ValidationError
      */
-    private function createQaChunkReviewRecord( $id_job, $projectStructure, $options=array() ) {
-        $id_project = $projectStructure['id_project'];
-        $chunks = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job ) ;
+    protected function _validateUndoData( Chunks_ChunkCompletionEventStruct $event , $undo_data ) {
 
-        foreach( $chunks as $k => $chunk ) {
-            $data = array(
-                    'id_project' => $id_project,
-                    'id_job'     => $chunk->id,
-                    'password'   => $chunk->password
-            );
+        try {
+            Utils::ensure_keys( $undo_data, [
+                    'reset_by_event_id', 'penalty_points', 'reviewed_words_count', 'is_pass'
+            ] );
 
-            if ( $k == 0 && array_key_exists('first_record_password', $options) != null ) {
-                $data['review_password'] = $options['first_record_password'];
-            }
-
-            ChunkReviewDao::createRecord( $data );
+        } catch ( Exception $e ) {
+            throw new ValidationError( 'undo data is missing some keys. ' . $e->getMessage() );
         }
+
+        if ( $undo_data[ 'reset_by_event_id' ] != (string)$event->id ) {
+            throw new ValidationError( 'event does not match with latest revision data' );
+        }
+
+    }
+
+    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
+        $dao = new ChunkReviewDao();
+        $dao->updatePassword( $job->id, $job->password, $new_password );
     }
 
     /**

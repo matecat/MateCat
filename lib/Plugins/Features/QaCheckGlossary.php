@@ -96,8 +96,10 @@ class QaCheckGlossary extends BaseFeature {
             }
         }
 
+        sort($segments_ids);
+        $segments_ids = array_values(array_unique($segments_ids));
         $result[ 'data' ][ self::GLOSSARY_SCOPE ]                                     = [ 'matches' => $data_elements ];
-        $result[ 'details' ][ QA::ERROR ][ 'Categories' ][ self::GLOASSARY_CATEGORY ] = $segments_ids;
+        $result[ 'details' ][ QA::WARNING ][ 'Categories' ][ self::GLOASSARY_CATEGORY ] = $segments_ids;
 
         return $result;
 

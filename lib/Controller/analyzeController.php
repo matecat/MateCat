@@ -102,14 +102,14 @@ class analyzeController extends viewController {
 
     public function doAction() {
 
-        $this->featureSet->run('beginDoAction', $this, array(
-                'project' => $this->project,  'page_type' => $this->page_type
-        ));
-
-        if ( !$this->project ) {
+        if ( $this->project_not_found ) {
             $this->render404() ;
             return ;
         }
+
+        $this->featureSet->run('beginDoAction', $this, array(
+                'project' => $this->project,  'page_type' => $this->page_type
+        ));
 
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();

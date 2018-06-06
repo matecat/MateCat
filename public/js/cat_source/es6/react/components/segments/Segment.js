@@ -112,7 +112,7 @@ class Segment extends React.Component {
     }
 
     addClass(sid, newClass) {
-        if ( this.props.segment.sid == sid || sid === -1 || sid.toString().indexOf(this.props.segment.sid) !== -1 ) {
+        if ( this.props.segment.sid == sid || sid === -1 || sid.split("-")[0] == this.props.segment.sid ) {
             let self = this;
             let classes = this.state.segment_classes.slice();
             if (newClass.indexOf(' ') > 0) {
