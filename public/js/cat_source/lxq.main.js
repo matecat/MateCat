@@ -113,7 +113,6 @@ LXQ.init  = function () {
     });
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
-      console.log('[LEXIQA] got setTranslation:success');
         var segment = data.segment;
         var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
@@ -1380,9 +1379,7 @@ LXQ.init  = function () {
 
                             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
                             if ( callback != null && UI.currentSegmentId == id_segment ) {
-                                setTimeout(function () {
-                                    restoreSelection();
-                                });
+                                restoreSelection();
                             }
                             SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             LXQ.reloadPowertip( segment );

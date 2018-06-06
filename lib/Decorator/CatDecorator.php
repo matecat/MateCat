@@ -59,7 +59,7 @@ class CatDecorator {
             $this->template->header_main_button_class = 'downloadtr-button draft';
         }
 
-        $this->template->segmentFilterEnabled = false;
+        $this->template->segmentFilterEnabled = true;
 
         $this->template->status_labels = json_encode( $this->getStatusLabels() );
 

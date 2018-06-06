@@ -205,6 +205,11 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var checkCompletionOnReady = function (  ) {
+        UI.translateAndReadonly() && showTranslateWarningMessage();
+        evalReviseNotice();
+    };
+
     $.extend( UI, {
         // This is necessary because of the way APP.popup works
         markAsCompleteSubmit      : markAsCompleteSubmit,
@@ -216,7 +221,8 @@ if ( ProjectCompletion.enabled() ) {
         translateAndReadonly      : translateAndReadonly,
         clickMarkAsCompleteForTranslate : clickMarkAsCompleteForTranslate,
         clickMarkAsCompleteForReview : clickMarkAsCompleteForReview,
-        showFixWarningsModal : showFixWarningsModal
+        showFixWarningsModal : showFixWarningsModal,
+        checkCompletionOnReady: checkCompletionOnReady
     });
 
 
@@ -237,11 +243,6 @@ if ( ProjectCompletion.enabled() ) {
             type : "warning",
             allowHtml : true
         });
-    };
-
-    var checkCompletionOnReady = function (  ) {
-        UI.translateAndReadonly() && showTranslateWarningMessage();
-        evalReviseNotice();
     };
 
     $(document).on( 'click', '#showTranslateWarningMessageUndoLink', function(e) {
@@ -279,7 +280,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).ready(function() {
-        checkCompletionOnReady()
+        UI.checkCompletionOnReady()
     });
 
 

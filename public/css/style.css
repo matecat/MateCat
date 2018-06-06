@@ -309,6 +309,10 @@ section.opened .warnings {
 .breadcrumbs #pname {
     margin-left: 2px;
     word-break: break-all;
+    text-decoration: underline;
+}
+.breadcrumbs #pname:hover {
+    text-decoration: none;
 }
 
 .breadcrumbs #pname .details {
@@ -320,11 +324,12 @@ section.opened .warnings {
     float: left;
     border: 0;
     margin-top: 10px;
-    background: url(../img/logo.png) 0px 2px no-repeat;
-    width: 145px;
+    background: url(../../img/logo.png) 0px 2px no-repeat;
+    width: 132px;
     height: 31px;
     background-size: 130px 26px;
     margin-left: 13px;
+    margin-right: 13px;
 }
 
 .grayed {
@@ -1598,14 +1603,14 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .addtmx-tr .open-popup-addtm-tr {
-    height: 17px;
+    height: 13px;
     width: 140px;
     position: absolute;
-    bottom: -31px;
+    bottom: -24px;
     right: 0px;
     border-radius: 0 0 0 2px;
     color: #fff;
-    padding: 6px 10px 7px 4px;
+    padding: 3px 10px 7px 4px;
     font-size: 12px;
     background: #09beec;
     box-shadow: 0px 2px 4px 0px #868686;
@@ -3678,6 +3683,7 @@ span.locked.tag-html-container-close {
     padding: 3px;
 }
 
+
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
@@ -4274,6 +4280,7 @@ section .toolbar .autofillTag {
     float: left;
     font-size: 60%;
     text-decoration: none;
+    display: none;
 }
 
 section .toolbar span {
@@ -4462,6 +4469,17 @@ body.tagModes:not(.tagmode-default-extended) .endTag {
     padding-top: 0px;
 }
 
+body span.endTag {
+    top: -3.4px;
+}
+body:not(.tagModes) .tagModeToggle {
+    display: none;
+}
+
+body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
+    vertical-align: middle;
+}
+
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
@@ -4555,7 +4573,7 @@ body.tagModes .editor.hasTags .textarea-container .tagMode {
 
 body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
 body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
-body.tagModes .editor.hasTagsAutofill .toolbar .autofillTag {
+body .editor.hasTagsAutofill .toolbar .autofillTag {
     display: block;
 }
 

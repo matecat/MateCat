@@ -1,3 +1,4 @@
+
 /**
  * React Component .
 
@@ -156,8 +157,10 @@ class SegmentTarget extends React.Component {
                         <span className="icon-tag-expand"/>
                         <span className="icon-chevron-right"/>
                     </a>;
-                tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target"
-                                   title="Copy missing tags from source to target"/>
+
+            }
+            if (this.props.tagModesEnabled  && UI.tagLockEnabled) {
+                tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
 
             }
 

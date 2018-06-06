@@ -255,6 +255,12 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
+    public static function getTODOWords( Jobs_JobStruct $jStruct ){
+
+        return array_sum([$jStruct->new_words, $jStruct->draft_words]);
+
+    }
+
     public function changePassword( Jobs_JobStruct $jStruct, $new_password ){
 
         if( empty( $new_password ) ) throw new PDOException( "Invalid empty value: password." );

@@ -10,6 +10,8 @@
 namespace Analysis\Workers;
 use Constants\Ices;
 use Engine;
+use Jobs_JobDao;
+use Projects_ProjectDao;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -771,13 +773,20 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
             $wordCountStructs = [];
+
+            $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new \WordCount_Counter();
+                $database->begin();
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                $database->commit();
             }
 
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
+            Projects_ProjectDao::destroyCacheById( $_project_id );
+
             try {
-                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id );
+                $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );
             } catch(\Exception $e) {
                 //ignore Exception the analysis is finished anyway
                 $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
