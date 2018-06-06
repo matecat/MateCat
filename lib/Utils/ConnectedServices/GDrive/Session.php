@@ -520,6 +520,11 @@ class Session {
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir );
 
+        $this->featureSet = new \FeatureSet();
+        $this->featureSet->loadFromUserEmail( $this->__getUser()->email );
+        $conversionHandler->setFeatures( $this->featureSet );
+        $conversionHandler->setUserIsLogged( true );
+
         $conversionHandler->doAction();
 
         return $conversionHandler->getResult();
