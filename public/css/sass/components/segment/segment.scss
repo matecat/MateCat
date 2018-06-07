@@ -50,9 +50,11 @@ section{
     .segment-body-content{
         .warnings-block{
             display: none;
-            width: 100%;
+            width: 103%;
             box-sizing: content-box;
             margin-top: 10px;
+            margin-left: -20px;
+            font-size: 14px;
             .alert-block{
                 display: inline-block;
                 width: 48%;
@@ -82,6 +84,7 @@ section{
                 .icon{
                     padding: 8px 8px 10px 8px;
                     font-size: 18px;
+                    margin: 0;
                 }
             }
             ul{
@@ -92,17 +95,27 @@ section{
                     height: 100%;
                 }
                 .icon-column{
-                    width: 15%;
+                    width: 10%;
                     position: relative;
                     vertical-align: middle;
                     text-align: center;
                 }
                 .content-column{
-                    width: 85%;
+                    width: 90%;
                     position: relative;
                     padding: 0 8px;
-                    p b{
-                        font-size: 80%;
+                    vertical-align: middle;
+                    p:first-child {
+                        margin-top: 0em;
+                        margin-bottom: 0;
+                        line-height: 13px;
+                    }
+                    p:last-child {
+                        margin-bottom: 0em;
+                        line-height: 13px;
+                    }
+                    .error-solution{
+                        font-size: 90%;
                     }
                 }
             }

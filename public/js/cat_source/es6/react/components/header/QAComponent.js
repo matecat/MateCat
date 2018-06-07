@@ -97,7 +97,7 @@ class QAComponent extends React.Component {
                                        onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'error', key)}>
                         <i className="icon-cancel-circle icon"></i>
                         {this.state.labels[key] ?
-                            this.state.labels[key] : key} ({this.props.warnings.ERROR.Categories[key].length})</button>)
+                            this.state.labels[key] : key} <b>({this.props.warnings.ERROR.Categories[key].length})</b></button>)
                 })
             }
             if (this.props.warnings.WARNING.total > 0) {
@@ -107,14 +107,14 @@ class QAComponent extends React.Component {
                                              onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
                             <i className="icon-warning2 icon"></i>
                             {this.state.labels[key] ?
-                                this.state.labels[key] : key} ({this.props.warnings.WARNING.Categories[key].length})
+                                this.state.labels[key] : key} <b>({this.props.warnings.WARNING.Categories[key].length})</b>
                         </button>)
                     } else {
                         mismatch = <button key={index} className="ui button qa-issue"
                                            onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
                             <i className="icon-warning2 icon"></i>
                             {this.state.labels[key] ?
-                                this.state.labels[key] : key} ({this.props.warnings.WARNING.Categories[key].length})
+                                this.state.labels[key] : key} <b>({this.props.warnings.WARNING.Categories[key].length})</b>
                         </button>
                     }
 
@@ -125,7 +125,7 @@ class QAComponent extends React.Component {
                     info.push(<button key={index} className="ui button qa-issue"
                                       onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'info', key)}>
                         {this.state.labels[key] ?
-                            this.state.labels[key] : key} ({this.props.warnings.INFO.Categories[key].length})</button>)
+                            this.state.labels[key] : key} <b>({this.props.warnings.INFO.Categories[key].length})</b></button>)
                 })
             }
         }
@@ -134,36 +134,43 @@ class QAComponent extends React.Component {
             <div className="qa-container">
                 <div className="qa-container-inside">
                     <div className="qa-issues-list">
-                        <div>
+                        <div className="label-issues">
                             Segments with:
                         </div>
-                        <div className="ui buttons">
+                        <div className="ui basic tiny buttons">
                             {error}
                             {warning}
                             {info}
                         </div>
                         {(this.state.currentPriority === 'info' && this.state.currentCategory === 'lexiqa') ?
                             <div className="qa-lexiqa-info">
-                                <span>QA</span>
+                                <span>QA:</span>
                                 <a href={config.lexiqaServer + '/documentation.html'} target="_blank">Guide</a>
                                 <a target="_blank" alt="Read the full QA report"
                                    href={config.lexiqaServer + '/errorreport?id=' + LXQ.partnerid + '-' + config.id_job + '-' + config.password + '&type=' + (config.isReview ? 'revise' : 'translate')}>Report</a>
                             </div> : null}
+                        <div className="label-issues labl">
+                            Repetitions with:
+                        </div>
+                        {mismatch ? <div className="qa-mismatch">
+                            <div className="ui basic tiny buttons">
+                                {mismatch}
+                            </div>
+                        </div> : null}
                     </div>
-                    {mismatch ? <div className="qa-mismatch">{mismatch}</div> : null}
                     {this.state.navigationList.length > 0 ? <div className="qa-issues-navigator">
                         <div className="qa-actions">
-                            {this.state.navigationIndex + 1} / {this.state.navigationList.length} Segments
+                            <div className="info-navigation-issues"><b>{this.state.navigationIndex + 1} </b> / {this.state.navigationList.length} Segments</div>
                             <div className={'qa-arrows qa-arrows-enabled'}>
-                                <button className="qa-move-up"
+                                <button className="qa-move-up ui basic button"
                                         disabled={this.state.navigationIndex - 1 < 0}
                                         onClick={this.scrollToSegment.bind(this, -1)}>
-                                    <span className="icon-qa-left-arrow"/>
+                                    <i className="icon-chevron-left"/>
                                 </button>
-                                <button className="qa-move-down"
+                                <button className="qa-move-down ui basic button"
                                         disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}
                                         onClick={this.scrollToSegment.bind(this, 1)}>
-                                    <span className="icon-qa-right-arrow"/>
+                                    <i className="icon-chevron-right"/>
                                 </button>
                             </div>
                         </div>

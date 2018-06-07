@@ -92,9 +92,9 @@ class SegmentWarnings extends React.Component {
                                 <i className={classes_icon}></i>
                             </li>
                             <li className="content-column">
-                                {el.debug} <b>({warnings_count[el.outcome]})</b>
+                                <p>{el.debug} <b>({warnings_count[el.outcome]})</b></p>
                                 {el.tip !== '' ?
-                                    ( <p><b>{el.tip}</b></p>)
+                                    ( <p className="error-solution"><b>{el.tip}</b></p>)
                                     : null
                                 }
                             </li>
