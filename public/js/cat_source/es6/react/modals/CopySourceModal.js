@@ -6,6 +6,34 @@ class CopySourceModal extends React.Component {
 
     }
 
+    copyAllSources() {
+        this.props.confirmCopyAllSources();
+        this.checkCheckbox();
+        APP.ModalWindow.onCloseModal();
+    }
+
+    copySegmentOnly() {
+        this.props.abortCopyAllSources();
+        this.checkCheckbox();
+        APP.ModalWindow.onCloseModal();
+    }
+
+    checkCheckbox() {
+        var checked = this.checkbox.checked;
+        if ( checked ) {
+            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
+                '0',
+                //expiration: 1 day
+                { expires: 30 });
+        }
+        else {
+            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
+                null,
+                //set expiration date before the current date to delete the cookie
+                {expires: new Date(1)});
+        }
+    }
+
     componentDidUpdate() {}
 
     componentDidMount() {}
@@ -17,18 +45,17 @@ class CopySourceModal extends React.Component {
     render() {
 
         return <div className="copy-source-modal">
-                <p className="text-container-top">Copy source to target for all new segments?
-                    <b>This action cannot be undone.</b>
+                <p className="text-container-top">
+                    Do you really want to copy source to target for all new segments?
                 </p>
 
-            <p className="buttons-popup-container button-aligned-right">
-                <input type="checkbox" id="popup-checkbox" className="confirm_checkbox"/>
-                    <label>Confirm copy source to target</label>
-                <a href="javascript:;" className="btn-cancel" data-callback="abortCopyAllSources">No</a>
-                <a href="javascript:;" className="btn-ok disabled" disabled="disabled" data-callback-disabled="continueCopyAllSources">Yes</a>
-            </p>
+            <div className="buttons-popup-container button-aligned-right">
+                <label>Copy source to target for:</label>
+                <button className="btn-cancel" onClick={this.copyAllSources.bind(this)}>ALL new segments</button>
+                <button className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>This segment only</button>
+            </div>
             <div className="boxed">
-                <input type="checkbox" className="dont_show"/>
+                <input type="checkbox" className="dont_show" ref={(checkbox)=>this.checkbox=checkbox}/>
                     <label> Don't show this dialog again for the current job</label>
             </div>
         </div>;

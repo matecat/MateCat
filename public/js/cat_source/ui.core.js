@@ -309,7 +309,7 @@ UI = {
         this.saveInUndoStack('copysource');
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-
+        UI.setSegmentModified(UI.currentSegment, true);
         this.segmentQA(UI.currentSegment );
         $(this.currentSegment).trigger('copySourceToTarget');
 
@@ -330,7 +330,10 @@ UI = {
 
     copyAllSources: function() {
         if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
-            var props = {};
+            var props = {
+                confirmCopyAllSources: UI.continueCopyAllSources.bind(this),
+                abortCopyAllSources: UI.abortCopyAllSources.bind(this)
+            };
 
             APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
             // APP.confirmAndCheckbox({
@@ -350,9 +353,7 @@ UI = {
 
     },
     continueCopyAllSources: function () {
-        var mod = $('.modal .popup');
-        mod.find('.btn-ok, .btn-cancel').remove();
-        mod.find('p').addClass('waiting').text('Copying...');
+        this.consecutiveCopySourceNum = [];
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',
@@ -360,8 +361,6 @@ UI = {
                 pass: config.password
             },
             error: function() {
-                console.log('error');
-                APP.closePopup();
                 var notification = {
                     title: 'Error',
                     text: 'Error copying all sources to target. Try again!',
@@ -369,9 +368,6 @@ UI = {
                     position: "bl"
                 };
                 APP.addNotification(notification);
-                /*UI.showMessage({
-                    msg: 'Error copying all sources to target. Try again!'
-                });*/
             },
             success: function(d) {
                 if(d.errors.length) {
@@ -383,12 +379,7 @@ UI = {
                         position: "bl"
                     };
                     APP.addNotification(notification);
-                    /*UI.showMessage({
-                        msg: d.errors[0].message
-                    });*/
                 } else {
-                    Cookies.set('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
-                    APP.closePopup();
                     UI.unmountSegments();
                     UI.render({
                         segmentToOpen: UI.currentSegmentId
@@ -400,18 +391,6 @@ UI = {
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
-        if ( typeof dont_show != 'undefined' && dont_show) {
-            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
-                    '0',
-                    //expiration: 1 day
-                    { expires: 30 });
-        }
-        else {
-            Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
-                    null,
-                    //set expiration date before the current date to delete the cookie
-                    {expires: new Date(1)});
-        }
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
