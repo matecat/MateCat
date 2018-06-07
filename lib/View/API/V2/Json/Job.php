@@ -23,6 +23,7 @@ use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
 use WordCount_Struct;
+use FeatureSet;
 
 class Job {
 
@@ -91,6 +92,8 @@ class Job {
      */
     public function renderItem( Chunks_ChunkStruct $jStruct ) {
 
+        $featureSet = new FeatureSet();
+
         $outsourceInfo = $jStruct->getOutsource();
         $tStruct       = $jStruct->getTranslator();
         $outsource     = null;
@@ -117,6 +120,33 @@ class Job {
         $subject_key   = array_search( $jStruct->subject, $subjects_keys );
 
         $warningsCount = $jStruct->getWarningsCount();
+
+        $reviseClass = new \Constants_Revise();
+
+        $jobQA = new \Revise_JobQA(
+                $jStruct->id,
+                $jStruct->password,
+                $jobStats->getTotal(),
+                $reviseClass
+        );
+
+        $featureSet->loadForProject($jStruct->getJob()->getProject());
+        list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
+                $jStruct->password,
+                $jobStats->getTotal() );
+
+        $jobQA->retrieveJobErrorTotals();
+        $jobQA->evalJobVote();
+        $qa_data      = $jobQA->getQaData();
+        $reviseIssues = [];
+        foreach ( $qa_data as $issue ) {
+            $reviseIssues[ strtolower( $issue[ 'type' ] ) ] = [
+                    'allowed' => $issue[ 'allowed' ],
+                    'found'   => $issue[ 'found' ]
+            ];
+        }
+
+
 
         $result = [
                 'id'                    => (int)$jStruct->id,
@@ -146,8 +176,9 @@ class Job {
                 'quality_summary'       => [
                         'equivalent_class' => $jStruct->getQualityInfo(),
                         'quality_overall'  => $jStruct->getQualityOverall(),
-                        'errors_count'     => (int)$jStruct->getErrorsCount()
-                ]
+                        'errors_count'     => (int)$jStruct->getErrorsCount(),
+                ],
+                'revise_issues' => $reviseIssues
         ];
 
 
