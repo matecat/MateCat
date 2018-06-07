@@ -253,12 +253,12 @@ class SegmentsFilter extends React.Component {
 
         navigation = <div className="sf-segment-navigation-arrows">
             <div className={'qa-arrows ' + buttonArrowsClass}>
-                <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
-                    <span className="icon-qa-left-arrow"/>
-                </div>
-                <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
-                    <span className="icon-qa-right-arrow"/>
-                </div>
+                <button className="qa-move-up ui basic button" onClick={this.moveUp.bind(this)}>
+                    <i className="icon-chevron-left"/>
+                </button>
+                <button className="qa-move-down ui basic button" onClick={this.moveDown.bind(this)}>
+                    <i className="icon-chevron-right"/>
+                </button>
             </div>
         </div>;
 
