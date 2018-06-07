@@ -160,17 +160,17 @@ class QAComponent extends React.Component {
                     </div>
                     {this.state.navigationList.length > 0 ? <div className="qa-issues-navigator">
                         <div className="qa-actions">
-                            {this.state.navigationIndex + 1} / {this.state.navigationList.length} Segments
+                            <div className="info-navigation-issues"><b>{this.state.navigationIndex + 1} </b> / {this.state.navigationList.length} Segments</div>
                             <div className={'qa-arrows qa-arrows-enabled'}>
-                                <button className="qa-move-up"
+                                <button className="qa-move-up ui basic button"
                                         disabled={this.state.navigationIndex - 1 < 0}
                                         onClick={this.scrollToSegment.bind(this, -1)}>
-                                    <span className="icon-qa-left-arrow"/>
+                                    <i className="icon-chevron-left"/>
                                 </button>
-                                <button className="qa-move-down"
+                                <button className="qa-move-down ui basic button"
                                         disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}
                                         onClick={this.scrollToSegment.bind(this, 1)}>
-                                    <span className="icon-qa-right-arrow"/>
+                                    <i className="icon-chevron-right"/>
                                 </button>
                             </div>
                         </div>

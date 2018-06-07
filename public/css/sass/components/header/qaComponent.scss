@@ -22,13 +22,7 @@
   justify-content: flex-start;
 }
 
-.qa-actions {
-  display: flex;
-  flex-grow: 1;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-}
+
 
 .qa-issues-container, .qa-lexiqa-container {
   width: 150px;
@@ -60,28 +54,6 @@
   width: 125px;
   font-size: 16px;
   color: #333;
-}
-
-.qa-arrows {
-  width: 80px;
-}
-
-.qa-move-up, .qa-move-down {
-  width: 25px;
-  float: left;
-  height: 22px;
-  cursor: pointer;
-  border-radius: 3px;
-  padding: 5px 2px 2px;
-  border: 1px solid #C6C6C6;
-  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  background-color: #f8f8f8;
-  background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
-  background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
-  background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
-  background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
 }
 
 .icon-qa-issues,
@@ -200,8 +172,15 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        padding: 0 8% 0 5%;
+        padding: 0 6.5% 0 5%;
         align-items: center;
+        .label-issues {
+            font-weight: 700;
+            margin-right: 5px;
+            &.labl {
+                margin-left: 70px
+            }
+        }
         .qa-issues-list{
             display: flex;
             flex-grow: 3;
@@ -214,16 +193,24 @@
             .icon-warning2 {
                 color: #EA862C;
             }
-            .label-issues {
-                font-weight: 700;
-                margin-right: 5px;
-                &.labl {
-                    margin-left: 70px
+            .ui.basic.buttons {
+                button {
+                    font-size: 14px !important;
+                    padding: 10px;
+                    color: #000000 !important;
+                    &:hover {
+                        background: #f2f4f7 !important;
+                    }
+                    /*&:active {
+                        background: #f2f4f7 !important;
+                    }
+                    &:focus {
+                        background: #f2f4f7 !important;
+                    }*/
+                    &.mc-bg-gray {
+                        background: #f2f4f7 !important;
+                    }
                 }
-            }
-            button {
-                font-size: 14px !important;
-                padding: 10px;
             }
             .qa-lexiqa-info {
                 margin-left: 5px;
@@ -238,9 +225,26 @@
                 }
             }
         }
-        .qa-container .qa-issues-navigator{
-          display: flex;
-          flex-grow: 1;
+        .qa-issues-navigator{
+            display: flex;
+            flex-grow: 1;
+            .qa-actions {
+                display: flex;
+                flex-grow: 1;
+                flex-direction: row;
+                justify-content: flex-end;
+                align-items: center;
+                .info-navigation-issues {
+                    margin-right: 10px;
+                }
+                .qa-arrows {
+                    .button {
+                        padding: 10px 13px;
+                        display: inline-block;
+                        width: 11px;
+                    }
+                }
+            }
         }
     }
 }
