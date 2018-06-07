@@ -45,14 +45,15 @@ class CopySourceModal extends React.Component {
     render() {
 
         return <div className="copy-source-modal">
-                <p className="text-container-top">
+                <h3 className="text-container-top">
                     Do you really want to copy source to target for all new segments?
-                </p>
+                </h3>
 
-            <div className="buttons-popup-container button-aligned-right">
+            <div className="buttons-popup-container">
                 <label>Copy source to target for:</label>
                 <button className="btn-cancel" onClick={this.copyAllSources.bind(this)}>ALL new segments</button>
                 <button className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>This segment only</button>
+                <div className="notes-action"><b>Note</b>: This action cannot be undone.</div>
             </div>
             <div className="boxed">
                 <input type="checkbox" className="dont_show" ref={(checkbox)=>this.checkbox=checkbox}/>
