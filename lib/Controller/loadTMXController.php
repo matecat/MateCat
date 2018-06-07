@@ -142,7 +142,7 @@ class loadTMXController extends ajaxController {
 
             } else {
 
-                $this->TMService->setName( $this->name );
+                $this->TMService->setName( Upload::fixFileName( $this->name ) );
                 $status                      = $this->TMService->tmxUploadStatus();
                 $this->result[ 'data' ]      = $status[ 'data' ];
                 $this->result[ 'completed' ] = $status[ 'completed' ];
