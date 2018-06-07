@@ -281,7 +281,8 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') &&
-					!$("body").hasClass("side-popup" ) ) {
+					!UI.body.hasClass("side-popup" ) &&
+                    !UI.body.hasClass('search-open')) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }

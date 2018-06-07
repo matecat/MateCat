@@ -35,24 +35,6 @@ class Search extends React.Component {
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
     }
 
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.active){
-            if(this.sourceEl && this.state.focus){
-                this.sourceEl.focus();
-                this.setState({
-                    focus: false
-                });
-            }
-        }else{
-            if(!this.state.focus){
-                this.setState({
-                    focus: true
-                });
-            }
-        }
-    }
-
     handleSubmit(event) {
         event.preventDefault();
         if (this.state.funcFindButton) {
@@ -156,6 +138,39 @@ class Search extends React.Component {
         this.setState({
             search: search
         })
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.active){
+            $('body').addClass("search-open");
+            if(this.sourceEl && this.state.focus){
+                this.sourceEl.focus();
+                this.setState({
+                    focus: false
+                });
+            }
+        }else{
+            $('body').removeClass("search-open");
+            if(!this.state.focus){
+                this.setState({
+                    focus: true
+                });
+            }
+        }
+    }
+
+    escFunction(event){
+        if(event.keyCode === 27) {
+            event.stopPropagation();
+            event.preventDefault();
+            CatToolActions.closeSubHeader();
+        }
+    }
+    componentDidMount(){
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.escFunction, false);
     }
 
     render() {
