@@ -3117,7 +3117,7 @@ var spec = {
 
             "properties": {
                 "id": {"type": "integer"},
-                "password": {"type": "password"},
+                "password": {"type": "string"},
                 "source": {"type": "string"},
                 "target": {"type": "string"},
                 "sourceTxt": {"type": "string"},
@@ -3163,7 +3163,39 @@ var spec = {
                 "stats": {
                     "type": "object",
                     "$ref": "#/definitions/Stats"
+                },
+                "quality_summary": {
+                    "type": "object",
+                    "$ref": "#/definitions/QualitySummary"
+                },
+            }
+        },
+
+        "QualitySummary": {
+            "type": "object",
+            "properties": {
+                "equivalent_class": {"type": "integer"},
+                "quality_overall": {"type": "string"},
+                "errors_count": {"type": "integer"},
+                "revise_issues": {
+                    "type": "object",
+                    "properties": {
+                        "typing": {"type": "object", "$ref": "#/definitions/ReviseIssue"},
+                        "translation": {"type": "object", "$ref": "#/definitions/ReviseIssue"},
+                        "terminology": {"type": "object", "$ref": "#/definitions/ReviseIssue"},
+                        "language_quality": {"type": "object", "$ref": "#/definitions/ReviseIssue"},
+                        "style": {"type": "object", "$ref": "#/definitions/ReviseIssue"},
+
+                    }
                 }
+            }
+        },
+
+        "ReviseIssue": {
+            "type": "object",
+            "properties": {
+                "allowed": {"type": "number"},
+                "found": {"type": "integer"},
             }
         },
 

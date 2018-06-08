@@ -14,6 +14,8 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
+use Features\ReviewExtended;
+use Features\ReviewImproved;
 use Langs_Languages;
 use Langs_LanguageDomains;
 use LQA\ChunkReviewDao;
@@ -121,32 +123,41 @@ class Job {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-        $reviseClass = new \Constants_Revise();
 
-        $jobQA = new \Revise_JobQA(
-                $jStruct->id,
-                $jStruct->password,
-                $jobStats->getTotal(),
-                $reviseClass
-        );
+
+
+
 
         $featureSet->loadForProject($jStruct->getJob()->getProject());
-        list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
-                $jStruct->password,
-                $jobStats->getTotal() );
 
-        $jobQA->retrieveJobErrorTotals();
-        $jobQA->evalJobVote();
-        $qa_data      = $jobQA->getQaData();
-        $reviseIssues = [];
-        foreach ( $qa_data as $issue ) {
-            $reviseIssues[ strtolower( $issue[ 'type' ] ) ] = [
-                    'allowed' => $issue[ 'allowed' ],
-                    'found'   => $issue[ 'found' ]
-            ];
+        if(in_array(ReviewImproved::FEATURE_CODE, $featureSet->getCodes()) || in_array(ReviewExtended::FEATURE_CODE, $featureSet->getCodes())){
+            $reviseIssues = [];
+
+        } else{
+            $reviseClass = new \Constants_Revise();
+
+            $jobQA = new \Revise_JobQA(
+                    $jStruct->id,
+                    $jStruct->password,
+                    $jobStats->getTotal(),
+                    $reviseClass
+            );
+            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
+                    $jStruct->password,
+                    $jobStats->getTotal() );
+
+            $jobQA->retrieveJobErrorTotals();
+            $jobQA->evalJobVote();
+            $qa_data      = $jobQA->getQaData();
+
+            $reviseIssues = [];
+            foreach ( $qa_data as $issue ) {
+                $reviseIssues[ strtolower( $issue[ 'type' ] ) ] = [
+                        'allowed' => $issue[ 'allowed' ],
+                        'found'   => $issue[ 'found' ]
+                ];
+            }
         }
-
-
 
         $result = [
                 'id'                    => (int)$jStruct->id,
@@ -177,8 +188,9 @@ class Job {
                         'equivalent_class' => $jStruct->getQualityInfo(),
                         'quality_overall'  => $jStruct->getQualityOverall(),
                         'errors_count'     => (int)$jStruct->getErrorsCount(),
+                        'revise_issues' => $reviseIssues
                 ],
-                'revise_issues' => $reviseIssues
+
         ];
 
 
