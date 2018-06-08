@@ -11,6 +11,8 @@ namespace Features\Outsource\Traits;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
+use Features\Outsource\Email\ConfirmedQuotationEmail;
+use Features\Outsource\Email\ErrorQuotationEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
@@ -27,7 +29,14 @@ use \INIT;
  */
 trait Translated {
 
+    /**
+     * @var ConfirmedQuotationEmail
+     */
     protected $successEmailObject;
+
+    /**
+     * @var ErrorQuotationEmail
+     */
     protected $failureEmailObject;
 
     protected $internal_project_id;
@@ -152,7 +161,8 @@ trait Translated {
                         'subject'       => $job->subject,
                         'jt'            => 'T',
                         'fd'            => 0,
-                        'of'            => 'json'
+                        'of'            => 'json',
+                        'matecat_raw'   => $job->total_raw_wc
                 ], PHP_QUERY_RFC3986 );
 
         try {
