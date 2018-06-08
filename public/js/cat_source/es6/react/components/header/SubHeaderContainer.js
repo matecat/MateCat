@@ -88,15 +88,15 @@ class SubHeaderContainer extends React.Component {
                 break;
         }
     }
-    updateIcon(total) {
+    updateIcon(total,warnings) {
         if (total > 0) {
-            if(this.state.warnings.ERROR.total>0){
+            if(warnings.ERROR.total>0){
                 $('#notifbox').attr('class', 'warningbox')
                     .attr("title", "Click to see the segments with potential issues")
                     .find('.numbererror')
                     .text(total)
                     .removeClass('numberwarning numberinfo');
-            }else if(this.state.warnings.WARNING.total>0){
+            }else if(warnings.WARNING.total>0){
                 $('#notifbox').attr('class', 'warningbox')
                     .attr("title", "Click to see the segments with potential issues")
                     .find('.numbererror')
@@ -155,7 +155,7 @@ class SubHeaderContainer extends React.Component {
         let tot = totalWarnings.filter((value, index, self) => {
             return self.indexOf(value) === index;
         }).length;
-        this.updateIcon(tot);
+        this.updateIcon(tot,warnings.matecat);
         this.setState({
             warnings: warnings.matecat,
             totalWarnings: tot
