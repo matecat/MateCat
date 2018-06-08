@@ -24,23 +24,23 @@ class QAComponent extends React.Component {
     }
 
     scrollToSegment(increment) {
-        let newIndex = this.state.navigationIndex + increment;
 
-        if (newIndex < this.state.navigationList.length && newIndex >= 0) {
-            let segmentId = this.state.navigationList[newIndex];
+        let newIndex = (this.state.navigationIndex + increment);
+        newIndex = newIndex === -1 ? this.state.navigationList.length - 1 : newIndex % this.state.navigationList.length;
 
-            let $segment = $('#segment-' + segmentId);
+        let segmentId = this.state.navigationList[newIndex];
 
-            if (segmentId) {
-                if ($segment.length) {
-                    window.location.hash = segmentId;
-                } else if ($('#segment-' + segmentId + '-1').length) {
-                    window.location.hash = segmentId + '-1';
-                }
-                UI.scrollSegment($segment, segmentId);
-                if ($segment.hasClass('ice-locked')) {
-                    UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
-                }
+        let $segment = $('#segment-' + segmentId);
+
+        if (segmentId) {
+            if ($segment.length) {
+                window.location.hash = segmentId;
+            } else if ($('#segment-' + segmentId + '-1').length) {
+                window.location.hash = segmentId + '-1';
+            }
+            UI.scrollSegment($segment, segmentId);
+            if ($segment.hasClass('ice-locked')) {
+                UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
             }
         }
         this.setState({
@@ -84,6 +84,16 @@ class QAComponent extends React.Component {
     componentWillUnmount() {
     }
 
+    componentWillReceiveProps(nextProps) {
+        const category = (nextProps.warnings[this.state.currentPriority])?
+            nextProps.warnings[this.state.currentPriority].Categories[this.state.currentCategory] : null;
+        if (nextProps.warnings && category) {
+            this.setState({
+                navigationList: category
+            });
+        }
+    }
+
     render() {
 
         let mismatch = '',
@@ -93,46 +103,53 @@ class QAComponent extends React.Component {
         if (this.props.warnings) {
             if (this.props.warnings.ERROR.total > 0) {
                 Object.keys(this.props.warnings.ERROR.Categories).map((key, index) => {
-                    let activeClass = (this.state.currentPriority === 'error' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
-                    error.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                       onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'error', key)}>
-                        <i className="icon-cancel-circle icon"></i>
-                        {this.state.labels[key] ?
-                            this.state.labels[key] : key} <b>({this.props.warnings.ERROR.Categories[key].length})</b>
-                    </button>)
+                    if (this.props.warnings.ERROR.Categories[key].length > 0) {
+                        let activeClass = (this.state.currentPriority === 'error' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        error.push(<button key={index} className={"ui button qa-issue" + activeClass}
+                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'error', key)}>
+                            <i className="icon-cancel-circle icon"></i>
+                            {this.state.labels[key] ?
+                                this.state.labels[key] : key}
+                            <b>({this.props.warnings.ERROR.Categories[key].length})</b>
+                        </button>)
+                    }
                 })
             }
             if (this.props.warnings.WARNING.total > 0) {
                 Object.keys(this.props.warnings.WARNING.Categories).map((key, index) => {
-                    let activeClass = (this.state.currentPriority === 'warning' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
-                    if (key !== 'MISMATCH') {
-                        warning.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                             onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
-                            <i className="icon-warning2 icon"></i>
-                            {this.state.labels[key] ?
-                                this.state.labels[key] : key}
-                            <b> ({this.props.warnings.WARNING.Categories[key].length}) </b>
-                        </button>)
-                    } else {
-                        mismatch = <button key={index} className={"ui button qa-issue" + activeClass}
-                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
-                            <i className="icon-warning2 icon"></i>
-                            {this.state.labels[key] ?
-                                this.state.labels[key] : key}
-                            <b> ({this.props.warnings.WARNING.Categories[key].length}) </b>
-                        </button>
+                    if (this.props.warnings.WARNING.Categories[key].length > 0) {
+                        let activeClass = (this.state.currentPriority === 'warning' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        if (key !== 'MISMATCH') {
+                            warning.push(<button key={index} className={"ui button qa-issue" + activeClass}
+                                                 onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                                <i className="icon-warning2 icon"></i>
+                                {this.state.labels[key] ?
+                                    this.state.labels[key] : key}
+                                <b> ({this.props.warnings.WARNING.Categories[key].length}) </b>
+                            </button>)
+                        } else {
+                            mismatch = <button key={index} className={"ui button qa-issue" + activeClass}
+                                               onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                                <i className="icon-warning2 icon"></i>
+                                {this.state.labels[key] ?
+                                    this.state.labels[key] : key}
+                                <b> ({this.props.warnings.WARNING.Categories[key].length}) </b>
+                            </button>
+                        }
                     }
 
                 })
             }
             if (this.props.warnings.INFO.total > 0) {
                 Object.keys(this.props.warnings.INFO.Categories).map((key, index) => {
-                    let activeClass = (this.state.currentPriority === 'info' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
-                    info.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                      onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'info', key)}>
-                        {this.state.labels[key] ?
-                            this.state.labels[key] : key} <b>({this.props.warnings.INFO.Categories[key].length})</b>
-                    </button>)
+                    if (this.props.warnings.INFO.Categories[key].length > 0) {
+                        let activeClass = (this.state.currentPriority === 'info' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        info.push(<button key={index} className={"ui button qa-issue" + activeClass}
+                                          onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'info', key)}>
+                            {this.state.labels[key] ?
+                                this.state.labels[key] : key} <b>({this.props.warnings.INFO.Categories[key].length})</b>
+                        </button>)
+                    }
                 })
             }
         }
@@ -156,9 +173,9 @@ class QAComponent extends React.Component {
                                 <a target="_blank" alt="Read the full QA report"
                                    href={config.lexiqaServer + '/errorreport?id=' + LXQ.partnerid + '-' + config.id_job + '-' + config.password + '&type=' + (config.isReview ? 'revise' : 'translate')}>Report</a>
                             </div> : null}
-                        <div className="label-issues labl">
+                        {mismatch ? <div className="label-issues labl">
                             Repetitions with:
-                        </div>
+                        </div> : null}
                         {mismatch ? <div className="qa-mismatch">
                             <div className="ui basic tiny buttons">
                                 {mismatch}
@@ -169,7 +186,7 @@ class QAComponent extends React.Component {
                         <div className="qa-actions">
                             <div className={'qa-arrows qa-arrows-enabled'}>
                                 <button className="qa-move-up ui basic button"
-                                        disabled={this.state.navigationIndex - 1 < 0}
+                                        /*disabled={this.state.navigationIndex - 1 < 0}*/
                                         onClick={this.scrollToSegment.bind(this, -1)}>
                                     <i className="icon-chevron-left"/>
                                 </button>
@@ -177,7 +194,7 @@ class QAComponent extends React.Component {
                                     <b>{this.state.navigationIndex + 1} </b> / {this.state.navigationList.length} {/*Segments*/}
                                 </div>
                                 <button className="qa-move-down ui basic button"
-                                        disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}
+                                        /*disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}*/
                                         onClick={this.scrollToSegment.bind(this, 1)}>
                                     <i className="icon-chevron-right"/>
                                 </button>
