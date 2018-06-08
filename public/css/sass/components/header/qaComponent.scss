@@ -195,18 +195,13 @@
             }
             .ui.basic.buttons {
                 button {
-                    font-size: 14px !important;
+                    font-size: 16px !important;
                     padding: 10px;
                     color: #000000 !important;
+                    font-family: calibri;
                     &:hover {
                         background: #f2f4f7 !important;
                     }
-                    /*&:active {
-                        background: #f2f4f7 !important;
-                    }
-                    &:focus {
-                        background: #f2f4f7 !important;
-                    }*/
                     &.mc-bg-gray {
                         background: #f2f4f7 !important;
                     }
@@ -235,7 +230,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 .info-navigation-issues {
-                    margin-right: 10px;
+                    display: inline-block;
+                    margin: 0 15px 0 10px;
                 }
             }
         }
