@@ -85,11 +85,15 @@ class QAComponent extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        const category = (nextProps.warnings[this.state.currentPriority])?
+        const category = (nextProps.warnings[this.state.currentPriority]) ?
             nextProps.warnings[this.state.currentPriority].Categories[this.state.currentCategory] : null;
         if (nextProps.warnings && category) {
             this.setState({
                 navigationList: category
+            });
+        }else{
+            this.setState({
+                navigationList: []
             });
         }
     }
@@ -104,9 +108,9 @@ class QAComponent extends React.Component {
             if (this.props.warnings.ERROR.total > 0) {
                 Object.keys(this.props.warnings.ERROR.Categories).map((key, index) => {
                     if (this.props.warnings.ERROR.Categories[key].length > 0) {
-                        let activeClass = (this.state.currentPriority === 'error' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        let activeClass = (this.state.currentPriority === 'ERROR' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
                         error.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'error', key)}>
+                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'WARNING', key)}>
                             <i className="icon-cancel-circle icon"></i>
                             {this.state.labels[key] ?
                                 this.state.labels[key] : key}
@@ -118,10 +122,10 @@ class QAComponent extends React.Component {
             if (this.props.warnings.WARNING.total > 0) {
                 Object.keys(this.props.warnings.WARNING.Categories).map((key, index) => {
                     if (this.props.warnings.WARNING.Categories[key].length > 0) {
-                        let activeClass = (this.state.currentPriority === 'warning' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        let activeClass = (this.state.currentPriority === 'WARNING' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
                         if (key !== 'MISMATCH') {
                             warning.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                                 onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                                                 onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'WARNING', key)}>
                                 <i className="icon-warning2 icon"></i>
                                 {this.state.labels[key] ?
                                     this.state.labels[key] : key}
@@ -129,7 +133,7 @@ class QAComponent extends React.Component {
                             </button>)
                         } else {
                             mismatch = <button key={index} className={"ui button qa-issue" + activeClass}
-                                               onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'warning', key)}>
+                                               onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.WARNING.Categories[key], 'WARNING', key)}>
                                 <i className="icon-warning2 icon"></i>
                                 {this.state.labels[key] ?
                                     this.state.labels[key] : key}
@@ -143,9 +147,9 @@ class QAComponent extends React.Component {
             if (this.props.warnings.INFO.total > 0) {
                 Object.keys(this.props.warnings.INFO.Categories).map((key, index) => {
                     if (this.props.warnings.INFO.Categories[key].length > 0) {
-                        let activeClass = (this.state.currentPriority === 'info' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
+                        let activeClass = (this.state.currentPriority === 'INFO' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
                         info.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                          onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'info', key)}>
+                                          onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.INFO.Categories[key], 'INFO', key)}>
                             {this.state.labels[key] ?
                                 this.state.labels[key] : key} <b>({this.props.warnings.INFO.Categories[key].length})</b>
                         </button>)
@@ -153,20 +157,22 @@ class QAComponent extends React.Component {
                 })
             }
         }
-
+        let segmentsWithActive = (error.length > 0 || warning.length > 0 || info.length > 0) ? true : false;
         return ((this.props.active && this.props.totalWarnings > 0) ? <div className="qa-wrapper">
             <div className="qa-container">
                 <div className="qa-container-inside">
                     <div className="qa-issues-list">
-                        <div className="label-issues">
-                            Segments with:
-                        </div>
-                        <div className="ui basic tiny buttons">
-                            {error}
-                            {warning}
-                            {info}
-                        </div>
-                        {(this.state.currentPriority === 'info' && this.state.currentCategory === 'lexiqa') ?
+                        {(segmentsWithActive) ?
+                            <div className="label-issues">
+                                Segments with:
+                            </div> : null}
+                        {(segmentsWithActive) ?
+                            <div className="ui basic tiny buttons">
+                                {error}
+                                {warning}
+                                {info}
+                            </div> : null}
+                        {(this.state.currentPriority === 'INFO' && this.state.currentCategory === 'lexiqa') ?
                             <div className="qa-lexiqa-info">
                                 <span>QA:</span>
                                 <a href={config.lexiqaServer + '/documentation.html'} target="_blank">Guide</a>
@@ -186,7 +192,7 @@ class QAComponent extends React.Component {
                         <div className="qa-actions">
                             <div className={'qa-arrows qa-arrows-enabled'}>
                                 <button className="qa-move-up ui basic button"
-                                        /*disabled={this.state.navigationIndex - 1 < 0}*/
+                                    /*disabled={this.state.navigationIndex - 1 < 0}*/
                                         onClick={this.scrollToSegment.bind(this, -1)}>
                                     <i className="icon-chevron-left"/>
                                 </button>
@@ -194,7 +200,7 @@ class QAComponent extends React.Component {
                                     <b>{this.state.navigationIndex + 1} </b> / {this.state.navigationList.length} {/*Segments*/}
                                 </div>
                                 <button className="qa-move-down ui basic button"
-                                        /*disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}*/
+                                    /*disabled={this.state.navigationIndex + 1 >= this.state.navigationList.length}*/
                                         onClick={this.scrollToSegment.bind(this, 1)}>
                                     <i className="icon-chevron-right"/>
                                 </button>
