@@ -4208,6 +4208,7 @@ body.searchActive #filterSwitch .numbererror:empty {
 
 .editor .source mark.inGlossary {
     border-bottom: 1px dotted #c0c;
+    cursor: pointer;
 }
 
 .monad mark.inGlossary {
