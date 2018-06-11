@@ -171,7 +171,6 @@ var SegmentActions = {
         });
     },
 
-
     setSegmentWarnings: function(sid, warnings){
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
