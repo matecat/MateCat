@@ -16,6 +16,7 @@ use API\V2\Validators\TeamAccessValidator;
 use API\V2\Validators\TeamProjectValidator;
 use FeatureSet;
 use Projects\ProjectModel;
+use ManageUtils;
 
 class TeamsProjectsController extends KleinController {
 
@@ -58,10 +59,38 @@ class TeamsProjectsController extends KleinController {
         return $this;
     }
 
+    protected function _appendProjectTeamValidators($project){
+        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $project ) );
+        $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $project ) );
+        return $this;
+    }
+
     public function get(){
         $this->_appendSingleProjectTeamValidators()->validateRequest();
         $formatted     = new Project();
         $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
+    }
+
+    public function getByName() {
+        $start                 = 0;
+        $step                  = 1000;
+        $search_in_pname       = $this->request->project_name;
+        $search_source         = null;
+        $search_target         = null;
+        $search_status         = "active";
+        $search_only_completed = null;
+        $project_id            = null;
+        $assignee              = null;
+        $no_assignee           = null;
+
+        $projects = ManageUtils::queryProjects( $this->user, $start, $step,
+                $search_in_pname,
+                $search_source, $search_target, $search_status,
+                $search_only_completed, $project_id,
+                $this->team, $assignee,
+                $no_assignee);
+
+        $this->response->json( [ 'projects' => $projects ] );
     }
 
     public function getAll(){
@@ -89,6 +118,10 @@ class TeamsProjectsController extends KleinController {
             $projects[ $key ] = $features->filter('filter_manage_single_project', $project );
         }
         return $projects ;
+    }
+
+    public function setTeam($team){
+        $this->team = $team;
     }
 
 }
