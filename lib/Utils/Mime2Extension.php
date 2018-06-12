@@ -229,6 +229,7 @@ $reference = array(
                         9         => 'dump',
                         10        => 'elc',
                         11        => 'deploy',
+                        12        => 'doc',
                 ),
         'application/oda'                                                           =>
                 array(
@@ -2143,6 +2144,10 @@ $reference = array(
                         0 => 'ttf',
                         1 => 'ttc',
                 ),
+        'application/x-font-ttx'                                                    =>
+                array(
+                        0 => 'ttx'
+                ),
         'application/x-font-type1'                                                  =>
                 array(
                         0 => 'pfa',
@@ -2414,6 +2419,12 @@ $reference = array(
         'application/x-xliff+xml'                                                   =>
                 array(
                         0 => 'xlf',
+                ),
+        'application/x-xliff'                                                       =>
+                array(
+                        0 => 'xlf',
+                        1 => 'sdlxliff',
+                        2 => 'xliff',
                 ),
         'application/x-xpinstall'                                                   =>
                 array(
@@ -3108,6 +3119,10 @@ $reference = array(
         'text/x-vcard'                                                              =>
                 array(
                         0 => 'vcf',
+                ),
+        'text/xml'                                                           =>
+                array(
+                        0 => 'xml'
                 ),
         'video/3gpp'                                                                =>
                 array(
