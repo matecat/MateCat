@@ -437,7 +437,7 @@ class SegmentsFilter extends React.Component {
                                 <div className="ui top left pointing dropdown basic tiny button filtered">
                                     <div className="text">
                                         <div>Status Segment</div>
-                                        {/*<div className="ui cancel label"><i className="icon-cancel3" /></div>*/}
+                                        <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                     </div>
                                     <div className="menu">
                                         <div className="item">
@@ -468,7 +468,6 @@ class SegmentsFilter extends React.Component {
                             <div className="filter-activities">
                                 <div className="ui top left pointing dropdown basic tiny button not-filtered disabled">
                                     <div className="text">Filters</div>
-                                    <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                     <div className="menu">
                                         <div className="item">
                                             Unlocked
