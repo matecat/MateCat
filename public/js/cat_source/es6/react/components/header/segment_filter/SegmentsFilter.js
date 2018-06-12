@@ -218,14 +218,18 @@ class SegmentsFilter extends React.Component {
         if (storedState.reactState) {
             this.doSubmitFilter(storedState.lastSegmentId);
         }
-
+        $('.ui.dropdown')
+            .dropdown()
+        ;
+        $('.ui.checkbox').checkbox(<i>toggle</i>);
     }
 
     componentWillUnmount() {
         CatToolStore.removeListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
     }
 
-    render() {
+
+   /* render() {
 
         let searchSettingsClass = classnames({
             hide: !this.state.searchSettingsOpen,
@@ -421,6 +425,144 @@ class SegmentsFilter extends React.Component {
             {filteringInfo}
 
         </div> : (null));
+    }*/
+
+    render () {
+        return <div className="filter-wrapper">
+            <div className="filter-container">
+                <div className="filter-container-inside">
+                    <div className="filter-list">
+                        <div className="filter-dropdown">
+                            <div className="filter-status">
+                                <div className="ui top left pointing dropdown basic tiny button filtered">
+                                    <div className="text">
+                                        <div>Status Segment</div>
+                                        {/*<div className="ui cancel label"><i className="icon-cancel3" /></div>*/}
+                                    </div>
+                                    <div className="menu">
+                                        <div className="item">
+                                            <div className="ui gray empty circular label" />
+                                            New
+                                        </div>
+                                        <div className="item">
+                                            <div className="ui black empty circular label" />
+                                            Draft
+                                        </div>
+                                        <div className="item">
+                                            <div className="ui blue empty circular label" />
+                                            Translated
+                                        </div>
+                                        <div className="item">
+                                            <div className="ui green empty circular label" />
+                                            Approved
+                                        </div>
+                                        <div className="item">
+                                            <div className="ui red empty circular label" />
+                                            Rejected
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="filter-dropdown">
+                            <div className="filter-activities">
+                                <div className="ui top left pointing dropdown basic tiny button not-filtered disabled">
+                                    <div className="text">Filters</div>
+                                    <div className="ui cancel label"><i className="icon-cancel3" /></div>
+                                    <div className="menu">
+                                        <div className="item">
+                                            Unlocked
+                                        </div>
+                                        <div className="item">
+                                            Repetitions
+                                        </div>
+                                        <div className="item">
+                                            MT
+                                        </div>
+                                        <div className="item">
+                                            100% Matches
+                                        </div>
+                                        <div className="item">
+                                            fuzzies_75_84
+                                        </div>
+                                        <div className="item">
+                                            fuzzies_85_94
+                                        </div>
+                                        <div className="item">
+                                            fuzzies_95_99
+                                        </div>
+                                        <div className="item">
+                                            To_Do
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="filter-dropdown">
+                            <div className="filter-toggle">
+                                <div className="ui toggle checkbox">
+                                    <input type="checkbox" name="public" />
+                                </div>
+                            </div>
+                            <div className="filter-data-sample">
+                                <div className="ui top left pointing dropdown basic tiny button">
+                                    <div className="text">Data Sample</div>
+                                    <div className="menu">
+                                        <div className="head-dropdown">
+                                            <div className="ui mini input">
+                                                <label>Sample size <b>(%)</b></label>
+                                                <input type="number" placeholder="percent value" value="5"/>
+                                            </div>
+                                        </div>
+                                        <div className="divider" />
+                                        <div className="item">
+                                            <div className="type-item">Edit distance</div>
+                                            <div className="order-item">(A - Z)</div>
+                                        </div>
+                                        <div className="item">
+                                            <div className="type-item">Edit distance</div>
+                                            <div className="order-item">(Z - A)</div>
+                                        </div>
+                                        <div className="item">
+                                            <div className="type-item">Segment length</div>
+                                            <div className="order-item">(A - Z)</div>
+                                        </div>
+                                        <div className="item">
+                                            <div className="type-item">Segment length</div>
+                                            <div className="order-item">(Z - A)</div>
+                                        </div>
+                                        <div className="item">
+                                            Regular interval
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="clear-filter-element">
+                            <div className="clear-filter">
+                                <a href="#">Clear all</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="filter-navigator">
+                        <div className="filter-actions">
+                            <div className="filter-arrows filter-arrows-enabled">
+                                <div className="label-filters labl">Filtered segments</div>
+                                <button className="filter-move-up ui basic button">
+                                    <i className="icon-chevron-left" />
+                                </button>
+                                <div className="info-navigation-filters">
+                                    <b>1</b> / 2
+                                </div>
+                                <button className="filter-move-up ui basic button">
+                                    <i className="icon-chevron-right" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 }
 
