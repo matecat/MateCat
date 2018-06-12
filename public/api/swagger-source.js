@@ -1487,6 +1487,41 @@ var spec = {
                 }
             }
         },
+        "/api/v2/teams/{id_team}/projects/{project_name}": {
+            "get": {
+                "tags": [
+                    "Teams",
+                ],
+                "summary": "Get projects in a team scope",
+                "description": "Get projects in a team scope by name.",
+                "parameters": [
+                    {
+                        "name": "id_team",
+                        "type": "integer",
+                        "in": "path",
+                        "required": true,
+                    },
+                    {
+                        "name": "project_name",
+                        "type": "string",
+                        "in": "path",
+                        "required": true,
+                        "description": "The name can also be a part of a project name"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Team",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectsItems"
+                        },
+                    },
+                    "default": {
+                        "description": "Unexpected error"
+                    }
+                }
+            }
+        },
         "/api/v2/jobs/{id_job}/{password}/translation-issues": {
             "get": {
                 "tags": [
@@ -3032,6 +3067,19 @@ var spec = {
                 }
             }
         },
+
+        "ProjectsItems": {
+            "type": "object",
+            "properties": {
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    }
+                }
+            }
+        },
+
         "Project": {
             "type": "object",
             "properties": {
