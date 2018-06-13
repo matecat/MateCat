@@ -241,7 +241,7 @@ trait Translated {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPGET        => true,
-                CURLOPT_TIMEOUT        => 30,
+                CURLOPT_TIMEOUT        => 60,
                 CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 5
         ];

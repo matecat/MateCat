@@ -8,6 +8,7 @@ use Features\QaCheckGlossary;
 use Features\ReviewExtended;
 use Features\ReviewImproved;
 use Features\TranslationVersions;
+use Features\Mmt;
 use Klein\Klein;
 use Klein\Request;
 
@@ -38,6 +39,7 @@ class Features {
     const QACHECK_BLACKLIST    = QaCheckBlacklist::FEATURE_CODE;
     const DQF                  = Dqf::FEATURE_CODE;
     const REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE;
+    const MMT                  = Mmt::FEATURE_CODE;
 
     protected $VALID_CODES = [
             Features::PROJECT_COMPLETION,
@@ -46,7 +48,8 @@ class Features {
             Features::QACHECK_GLOSSARY,
             Features::QACHECK_BLACKLIST,
             Features::DQF,
-            Features::REVIEW_EXTENDED
+            Features::REVIEW_EXTENDED,
+            Features::MMT
     ];
 
     protected $PLUGIN_CLASSES = [];

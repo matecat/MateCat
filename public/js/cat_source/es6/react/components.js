@@ -57,6 +57,7 @@ window.OutsourceModal = require('./modals/OutsourceModal').default;
 window.SplitJobModal = require('./modals/SplitJob').default;
 window.DQFModal = require('./modals/DQFModal').default;
 window.ShortCutsModal = require('./modals/ShortCutsModal').default;
+window.CopySourceModal = require('./modals/CopySourceModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;

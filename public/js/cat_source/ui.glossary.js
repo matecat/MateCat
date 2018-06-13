@@ -260,7 +260,9 @@ if (true)
             tempCopyGlossPlaceholder.remove();
             SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         },
-
+        openSegmentGlossaryTab: function ( $segment ) {
+            $segment.find('.tab-switcher-gl').click();
+        }
 
     } );
 
