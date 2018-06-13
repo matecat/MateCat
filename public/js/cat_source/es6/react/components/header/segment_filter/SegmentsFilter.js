@@ -19,11 +19,13 @@ class SegmentsFilter extends React.Component {
         this.setFilter = this.setFilter.bind(this);
         this.moreFilterSelectChanged = this.moreFilterSelectChanged.bind(this);
         this.doSubmitFilter = this.doSubmitFilter.bind(this);
+        this.dropdownInitialized = false;
 
     }
 
     defaultState() {
-        let storedState = SegmentFilter.getStoredState();
+        // let storedState = SegmentFilter.getStoredState();
+        let storedState = {};
 
 
         if (storedState.reactState) {
@@ -41,15 +43,25 @@ class SegmentsFilter extends React.Component {
                 segmentsArray: [],
                 moreFilters: this.moreFilters,
                 filtersEnabled: true,
-                dataSampleEnabled: false
-
+                dataSampleEnabled: false,
             }
         }
     }
 
     resetState() {
-        this.setState(this.defaultState());
+        this.setState( this.defaultState() );
+    }
 
+    resetStatusFilter() {
+        $(this.statusDropdown).dropdown('restore defaults');
+    }
+
+    resetMoreFilter() {
+        $(this.filtersDropdown).dropdown('restore defaults');
+    }
+
+    resetDataSampleFilter() {
+        $(this.dataSampleDropDown).dropdown('restore defaults');
     }
 
     clearClick(e) {
@@ -69,7 +81,7 @@ class SegmentsFilter extends React.Component {
 
     doSubmitFilter(segmentToOpen = null) {
         let sample;
-
+        if ( this.applyFilters ) return; //updating the dropdown
         if (this.state.samplingType) {
             if (this.state.dataSampleEnabled) {
                 sample = {
@@ -83,16 +95,17 @@ class SegmentsFilter extends React.Component {
             }
 
         }
-
-        SegmentFilter.filterSubmit({
-            status: this.state.selectedStatus,
-            sample: sample,
-        }, segmentToOpen,{
-            samplingType: this.state.samplingType,
-            samplingSize:this.state.samplingSize,
-            selectedStatus: this.state.selectedStatus,
-            dataSampleEnabled: this.state.dataSampleEnabled,
-        });
+        if ( sample || this.state.selectedStatus !== "" ) {
+            SegmentFilter.filterSubmit({
+                status: this.state.selectedStatus,
+                sample: sample,
+            }, segmentToOpen,{
+                samplingType: this.state.samplingType,
+                samplingSize:this.state.samplingSize,
+                selectedStatus: this.state.selectedStatus,
+                dataSampleEnabled: this.state.dataSampleEnabled,
+            });
+        }
     }
 
     filterSelectChanged(value) {
@@ -123,19 +136,14 @@ class SegmentsFilter extends React.Component {
                 samplingType: value,
             });
         }
-        if ( value !== "" ) {
-            setTimeout( this.doSubmitFilter, 100 );
-        }
+        setTimeout( this.doSubmitFilter, 100 );
     }
 
     dataSampleChange(value) {
-        if ( value !== '' ) {
-            this.setState({
-                samplingType: value
-            });
-            setTimeout( this.doSubmitFilter, 100 );
-        }
-
+        this.setState({
+            samplingType: value
+        });
+        setTimeout( this.doSubmitFilter, 100 );
     }
 
     // humanSampleType() {
@@ -171,59 +179,89 @@ class SegmentsFilter extends React.Component {
         }
     }
 
-    setStatusClick(e) {
-        e.preventDefault();
+    selectAllSegments() {
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
-    setFilter(data) {
-        this.setState({
-            filteredCount: data.count,
-            filtering: true,
-            segmentsArray: data.segment_ids
-        });
+    setFilter(data, state) {
+        if ( _.isUndefined(state) ) {
+            this.setState({
+                filteredCount: data.count,
+                filtering: true,
+                segmentsArray: data.segment_ids
+            });
+        } else {
+            this.applyFilters = true;
+            state.filteredCount = data.count;
+            state.filtering = true;
+            state.segmentsArray = data.segment_ids;
+            this.setState(state);
+            setTimeout(this.updateObjects.bind(this));
+        }
+    }
+
+    initDropDown() {
+        if (this.props.active && !this.dropdownInitialized) {
+            this.dropdownInitialized = true;
+            let self = this;
+            $(this.statusDropdown).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.filterSelectChanged(value);
+                }
+            });
+            $(this.filtersDropdown).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.moreFilterSelectChanged(value);
+                }
+            });
+            $(this.dataSampleDropDown).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.dataSampleChange(value);
+                }
+            });
+            $(this.toggleFilters).checkbox({
+                onChecked: function() {
+                    $(self.filtersDropdown).dropdown('restore defaults');
+                    self.setState({
+                        filtersEnabled: false,
+                        dataSampleEnabled: true,
+                        samplingType: null,
+                    });
+                },
+                onUnchecked: function() {
+                    $(self.dataSampleDropDown).dropdown('restore defaults');
+                    self.setState({
+                        filtersEnabled: true,
+                        dataSampleEnabled: false,
+                        samplingType: null,
+                    });
+                }
+            });
+        }
+    }
+
+    updateObjects() {
+        if ( this.applyFilters ) {
+
+            $(this.statusDropdown).dropdown('set selected', this.state.selectedStatus);
+            if (!this.state.dataSampleEnabled) {
+                $(this.filtersDropdown).dropdown('set selected', this.state.samplingType);
+                $(this.toggleFilters).checkbox('set unchecked');
+            } else {
+                $(this.dataSampleDropDown).dropdown('set selected', this.state.samplingType);
+                $(this.toggleFilters).checkbox('set checked');
+            }
+            this.applyFilters = false;
+        }
     }
 
     componentDidMount() {
         CatToolStore.addListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
-        let storedState = SegmentFilter.getStoredState();
-        if (storedState.reactState) {
-            this.doSubmitFilter(storedState.lastSegmentId);
-        }
-        let self = this;
-        $(this.statusDropdown).dropdown({
-            onChange: function(value, text, $selectedItem) {
-                self.filterSelectChanged(value);
-            }
-        });
-        $(this.filtersDropdown).dropdown({
-            onChange: function(value, text, $selectedItem) {
-                self.moreFilterSelectChanged(value);
-            }
-        });
-        $(this.dataSampleDropDown).dropdown({
-            onChange: function(value, text, $selectedItem) {
-                self.dataSampleChange(value);
-            }
-        });
-        $(this.toggleFilters).checkbox({
-            onChecked: function() {
-                $(self.filtersDropdown).dropdown('restore defaults');
-                self.setState({
-                    filtersEnabled: false,
-                    dataSampleEnabled: true,
-                    samplingType: null,
-                });
-            },
-            onUnchecked: function() {
-                $(self.dataSampleDropDown).dropdown('restore defaults');
-                self.setState({
-                    filtersEnabled: true,
-                    dataSampleEnabled: false,
-                    samplingType: null,
-                });
-            }
-        });
+        this.initDropDown();
+    }
+
+    componentDidUpdate() {
+        this.initDropDown();
     }
 
     componentWillUnmount() {
@@ -250,48 +288,39 @@ class SegmentsFilter extends React.Component {
 
         let filterClassEnabled = (this.state.filtersEnabled) ? "" : "disabled";
         let dataSampleClassEnabled = (this.state.dataSampleEnabled) ? "" : "disabled";
+        let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "no-filtered";
+        filterClassEnabled = (!this.state.dataSampleEnabled && this.state.samplingType !== "") ? filterClassEnabled + " filtered" :
+            filterClassEnabled + " no-filtered";
+        dataSampleClassEnabled = (this.state.dataSampleEnabled && this.state.samplingType !== "") ? dataSampleClassEnabled + " filtered" :
+            dataSampleClassEnabled + " no-filtered";
 
-        return (true ? <div className="filter-wrapper">
+        return (this.props.active ? <div className="filter-wrapper">
             <div className="filter-container">
                 <div className="filter-container-inside">
+                    {this.state.filtering ? (
+                        <div className="">
+                            <div ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</div>
+                        </div>
+                    ) : (null)}
                     <div className="filter-list">
                         <div className="filter-dropdown">
-                            <div className="filter-status">
-                                <div className="ui top left pointing dropdown basic tiny button filtered" ref={(dropdown)=>this.statusDropdown=dropdown}>
+                            <div className={"filter-status " + statusFilterClass}>
+                                <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropdown=dropdown}>
                                     <div className="text">
                                         <div>Segment Status</div>
-                                        <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                     </div>
+                                    <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetStatusFilter.bind(this)}/></div>
                                     <div className="menu">
                                         {options}
-                                        {/*<div className="item">*/}
-                                            {/*<div className="ui gray empty circular label" />*/}
-                                            {/*New*/}
-                                        {/*</div>*/}
-                                        {/*<div className="item">*/}
-                                            {/*<div className="ui black empty circular label" />*/}
-                                            {/*Draft*/}
-                                        {/*</div>*/}
-                                        {/*<div className="item">*/}
-                                            {/*<div className="ui blue empty circular label" />*/}
-                                            {/*Translated*/}
-                                        {/*</div>*/}
-                                        {/*<div className="item">*/}
-                                            {/*<div className="ui green empty circular label" />*/}
-                                            {/*Approved*/}
-                                        {/*</div>*/}
-                                        {/*<div className="item">*/}
-                                            {/*<div className="ui red empty circular label" />*/}
-                                            {/*Rejected*/}
-                                        {/*</div>*/}
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div className="filter-dropdown">
-                            <div className="filter-activities">
-                                <div className={"ui top left pointing dropdown basic tiny button not-filtered " + filterClassEnabled } ref={(dropdown)=>this.filtersDropdown=dropdown}>
+                            <div className={"filter-activities " + filterClassEnabled} >
+                                <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.filtersDropdown=dropdown}>
                                     <div className="text">Filters</div>
+                                    <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetMoreFilter.bind(this)}/></div>
                                     <div className="menu">
                                         {moreOptions}
                                     </div>
@@ -299,8 +328,7 @@ class SegmentsFilter extends React.Component {
                             </div>
                         </div>
 
-                        {/*{config.isReview ? (*/}
-                        {true ? (
+                        {config.isReview ? (
 
                         <div className="filter-dropdown">
                             <div className="filter-toggle">
@@ -308,9 +336,10 @@ class SegmentsFilter extends React.Component {
                                     <input type="checkbox" name="public" />
                                 </div>
                             </div>
-                            <div className="filter-data-sample">
-                                <div className={"ui top left pointing dropdown basic tiny button " + dataSampleClassEnabled} ref={(checkbox)=>this.dataSampleDropDown=checkbox}>
+                            <div className={"filter-data-sample " + dataSampleClassEnabled}>
+                                <div className="ui top left pointing dropdown basic tiny button" ref={(checkbox)=>this.dataSampleDropDown=checkbox}>
                                     <div className="text">Data Sample</div>
+                                    <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetDataSampleFilter.bind(this)}/></div>
                                     <div className="menu">
                                         <div className="head-dropdown">
                                             <div className="ui mini input">
@@ -323,16 +352,16 @@ class SegmentsFilter extends React.Component {
                                             <div className="type-item">Edit distance</div>
                                             <div className="order-item">(A - Z)</div>
                                         </div>
-                                        <div className="item">
-                                            <div className="type-item" data-value="edit_distance_low_to_high">Edit distance</div>
+                                        <div className="item" data-value="edit_distance_low_to_high">
+                                            <div className="type-item" >Edit distance</div>
                                             <div className="order-item">(Z - A)</div>
                                         </div>
-                                        <div className="item">
-                                            <div className="type-item" data-value="segment_length_high_to_low">Segment length</div>
+                                        <div className="item" data-value="segment_length_high_to_low">
+                                            <div className="type-item">Segment length</div>
                                             <div className="order-item">(A - Z)</div>
                                         </div>
-                                        <div className="item">
-                                            <div className="type-item" data-value="segment_length_low_to_high">Segment length</div>
+                                        <div className="item" data-value="segment_length_low_to_high">
+                                            <div className="type-item">Segment length</div>
                                             <div className="order-item">(Z - A)</div>
                                         </div>
                                         <div className="item" data-value="regular_intervals">
@@ -373,204 +402,6 @@ class SegmentsFilter extends React.Component {
             </div>
         </div> : (null) )
     }
-
-    // render() {
-    //
-    //     let searchSettingsClass = classnames({
-    //         hide: !this.state.searchSettingsOpen,
-    //         'search-settings-panel': true
-    //     });
-    //
-    //     let options = config.searchable_statuses.map(function (item, index) {
-    //         return <option key={index} value={item.value}>{item.label}</option>;
-    //     });
-    //     let moreOptions = this.state.moreFilters.map(function (item, index) {
-    //         return <option key={index} value={item.value}>{item.label}</option>;
-    //     });
-    //
-    //     let fullOptions = [<option key="" value="">All</option>].concat(options),
-    //         fullMoreOptions = [<option key="" value="">All</option>].concat(moreOptions),
-    //         submitEnabled = this.submitEnabled(),
-    //         filteringInfo,
-    //         navigation,
-    //         currentSampleSettings,
-    //         buttonArrowsClass = 'qa-arrows-disabled';
-    //
-    //     if (this.state.filtering && this.state.filteredCount > 1) {
-    //         buttonArrowsClass = 'qa-arrows-enabled';
-    //     }
-    //
-    //     navigation = <div className="sf-segment-navigation-arrows">
-    //         <div className={'qa-arrows ' + buttonArrowsClass}>
-    //             <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
-    //                 <span className="icon-qa-left-arrow"/>
-    //             </div>
-    //             <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
-    //                 <span className="icon-qa-right-arrow"/>
-    //             </div>
-    //         </div>
-    //     </div>;
-    //
-    //
-    //     if (this.state.filtering) {
-    //         if (this.state.filteredCount > 0) {
-    //             filteringInfo =
-    //                 <div className="block filter-segments-count">{this.state.filteredCount} segments</div>;
-    //         }
-    //         else {
-    //             filteringInfo = <div className="block filter-segments-count">0 segments</div>;
-    //         }
-    //
-    //     }
-    //
-    //     if (this.state.samplingEnabled) {
-    //         currentSampleSettings = <div className="block">
-    //             <div className="search-settings-info">{this.state.samplingSize}% - {this.humanSampleType()}</div>
-    //             <a className="search-settings"
-    //                onClick={this.toggleSettings.bind(this)}>Settings</a>
-    //             <div className={searchSettingsClass}>
-    //
-    //                 <div>
-    //                     Select the sample size
-    //                     <input type="number" value={this.state.samplingSize} style={{width: '3em'}}
-    //                            onChange={this.samplingSizeChanged.bind(this)}
-    //                            className="advanced-sample-size"/>
-    //                 </div>
-    //
-    //                 <h4>Sample criteria</h4>
-    //
-    //                 <div className="block">
-    //                     <input onChange={this.samplingTypeChecked.bind(this)}
-    //                            id="sample-edit-distance-high-to-low"
-    //                            checked={this.state.samplingType == 'edit_distance_high_to_low'}
-    //                            value="edit_distance_high_to_low"
-    //                            name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-high-to-low">Edit
-    //                     distance (high to low)</label>
-    //                 </div>
-    //
-    //                 <div className="block">
-    //                     <input onChange={this.samplingTypeChecked.bind(this)}
-    //                            id="sample-edit-distance-low-to-high"
-    //                            checked={this.state.samplingType == 'edit_distance_low_to_high'}
-    //                            value="edit_distance_low_to_high"
-    //                            name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-low-to-high">Edit
-    //                     distance (low to high)</label>
-    //                 </div>
-    //
-    //                 <div className="block">
-    //                     <input
-    //                         id="sample-segment-length-high-to-low"
-    //                         onChange={this.samplingTypeChecked.bind(this)}
-    //                         checked={this.state.samplingType == 'segment_length_high_to_low'}
-    //                         value="segment_length_high_to_low"
-    //                         name="samplingType" type="radio"/><label htmlFor="sample-segment-length-high-to-low">Segment
-    //                     length (high to low)</label>
-    //                 </div>
-    //
-    //                 <div className="block">
-    //                     <input
-    //                         id="sample-segment-length-low-to-high"
-    //                         onChange={this.samplingTypeChecked.bind(this)}
-    //                         checked={this.state.samplingType == 'segment_length_low_to_high'}
-    //                         value="segment_length_low_to_high"
-    //                         name="samplingType" type="radio"/><label htmlFor="sample-segment-length-low-to-high">Segment
-    //                     length (low to high)</label>
-    //                 </div>
-    //
-    //                 <div className="block">
-    //                     <input
-    //                         id="sample-regular-intervals"
-    //                         onChange={this.samplingTypeChecked.bind(this)}
-    //                         checked={this.state.samplingType == 'regular_intervals'}
-    //                         value="regular_intervals"
-    //                         name="samplingType" type="radio"/><label htmlFor="sample-regular-intervals">Regular
-    //                     interval</label>
-    //                 </div>
-    //
-    //             </div>
-    //         </div>;
-    //
-    //     }
-    //
-    //     let controlsForSampling;
-    //
-    //     if (window.config.isReview) {
-    //         controlsForSampling = <div>
-    //             <div className="block data-sample-checkbox-container">
-    //                 <label htmlFor="data-sample-checkbox">Data sample</label>
-    //                 <input type="checkbox"
-    //                        id="data-sample-checkbox"
-    //                        onClick={this.samplingEnabledClick.bind(this)}
-    //                        checked={this.state.samplingEnabled}/>
-    //             </div>
-    //
-    //             {currentSampleSettings}
-    //
-    //
-    //         </div>;
-    //     }
-    //
-    //     return (this.props.active ? <div className="advanced-filter-searchbox searchbox">
-    //         <form>
-    //             <div className="block filter-status-container">
-    //                 <label htmlFor="search-projectname">segment status</label>
-    //                 <select
-    //                     onChange={this.filterSelectChanged.bind(this)}
-    //                     value={this.state.selectedStatus} className="search-select">
-    //                     {fullOptions}
-    //                 </select>
-    //             </div>
-    //
-    //             <div className="block filters-container">
-    //                 <label htmlFor="search-projectname">Filters</label>
-    //                 <select
-    //                     onChange={this.moreFilterSelectChanged.bind(this)}
-    //                     value={this.state.samplingType} className="search-select">
-    //                     {fullMoreOptions}
-    //                 </select>
-    //             </div>
-    //
-    //             {controlsForSampling}
-    //
-    //             <div className="block right">
-    //
-    //                 <input onClick={this.setStatusClick.bind(this)} id="setStatus-filter"
-    //                        type="button"
-    //                        className={
-    //                            classnames({
-    //                                btn: true,
-    //                                "select-all-filter": true
-    //                            })}
-    //                        disabled={!this.state.filtering}
-    //                        value="Select All"/>
-    //
-    //                 <input id="close-filter"
-    //                        type="button"
-    //                        onClick={this.closeClick.bind(this)}
-    //                        className={classnames({btn: true})}
-    //                        value="CLOSE"/>
-    //
-    //                 <input id="clear-filter"
-    //                        type="button"
-    //                        onClick={this.clearClick.bind(this)}
-    //                        className={classnames({btn: true})}
-    //                        disabled={!this.state.filtering}
-    //                        value="CLEAR"/>
-    //
-    //                 <input onClick={this.submitClick.bind(this)} id="exec-filter"
-    //                        type="submit"
-    //                        className={classnames({btn: true})}
-    //                        disabled={!submitEnabled}
-    //                        value="FILTER"/>
-    //             </div>
-    //
-    //         </form>
-    //
-    //         {navigation}
-    //         {filteringInfo}
-    //
-    //     </div> : (null));
-    // }
 }
 
 export default SegmentsFilter;

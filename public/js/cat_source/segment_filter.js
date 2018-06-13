@@ -142,7 +142,6 @@ if (SegmentFilter.enabled())
                         UI.scrollSegment(segment$, segmentToOpen);
                     }
                 } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
-                    segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
                     callbackForSegmentNotInSample( wantedSegment )  ;
                 } else {
                     segmentToOpen = wantedSegment ;
@@ -164,11 +163,12 @@ if (SegmentFilter.enabled())
          *
          */
         openFilter : function() {
-
             CatToolActions.openSegmentFilter();
             this.open = true;
-            if ( this.getStoredState().serverData ) {
+            var localStorageData = this.getStoredState();
+            if ( localStorageData.serverData ) {
                 SegmentActions.setMutedSegments(this.getStoredState().serverData.segment_ids);
+                CatToolActions.setSegmentFilter(localStorageData.serverData, localStorageData.reactState);
                 this.filteringSegments = true;
                 setTimeout( function() {
                     UI.createButtons();
@@ -181,7 +181,7 @@ if (SegmentFilter.enabled())
         clearFilter : function() {
             this.clearStoredData();
             this.filteringSegments = false;
-            // this.closeFilter() ;
+            SegmentActions.removeAllMutedSegments();
         },
 
         closeFilter : function() {
@@ -291,7 +291,6 @@ if (SegmentFilter.enabled())
             SegmentFilter.closeFilter();
             SegmentFilter.open = false;
         }
-        // SegmentFilter.openFilter();
     });
 
 
