@@ -554,7 +554,7 @@ class UploadHandler {
 
     protected function _isValidFileName( $fileUp ) {
 
-        if ( strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '..' ) !== false ) {
+        if ( strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '..' ) !== false || strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E' ) !== false ) {
             //Directory Traversal!
             return false;
         }
