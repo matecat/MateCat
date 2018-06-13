@@ -205,6 +205,9 @@ section.muted .segment-side-buttons {
                             border-radius: 40px;
                             transition: 0.3s ease;
                             box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                            .text {
+                                transition: 0.3s ease;
+                            }
                             .ui.cancel.label {
                                 position: absolute;
                                 padding: 4px;
@@ -212,7 +215,7 @@ section.muted .segment-side-buttons {
                                 border-radius: 15px;
                                 top: 8px;
                                 line-height: 0px;
-                                right: 6px;
+                                right: 0px;
                                 visibility: hidden;
                                 &:hover {
                                     background-color: #cccccc !important;
@@ -232,7 +235,10 @@ section.muted .segment-side-buttons {
                                 box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 color: #000000 !important;
                                 &:hover {
-                                    padding-right: 35px !important;
+                                    width: fit-content;
+                                    .text {
+                                        margin-right: 21px;
+                                    }
                                     .ui.cancel.label {
                                         visibility: unset;
                                     }
@@ -261,13 +267,6 @@ section.muted .segment-side-buttons {
                                     }
                                 }
                             }
-                            /*.checkbox.checked {
-                                label {
-                                    &:before {
-                                        background: #dcdfe4 !important;
-                                    }
-                                }
-                            }*/
                         }
                         .filter-data-sample {
                             .menu {
