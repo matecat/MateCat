@@ -181,7 +181,7 @@ if (SegmentFilter.enabled())
         clearFilter : function() {
             this.clearStoredData();
             this.filteringSegments = false;
-            this.closeFilter() ;
+            // this.closeFilter() ;
         },
 
         closeFilter : function() {

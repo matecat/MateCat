@@ -18,7 +18,7 @@ class SegmentsFilter extends React.Component {
         this.state = this.defaultState();
         this.setFilter = this.setFilter.bind(this);
         this.moreFilterSelectChanged = this.moreFilterSelectChanged.bind(this);
-
+        this.doSubmitFilter = this.doSubmitFilter.bind(this);
 
     }
 
@@ -33,15 +33,15 @@ class SegmentsFilter extends React.Component {
         }
         else {
             return {
-                searchSettingsOpen: false,
                 selectedStatus: '',
-                samplingEnabled: false,
                 samplingType: '',
-                samplingSize: null,
+                samplingSize: 5,
                 filtering: false,
                 filteredCount: 0,
                 segmentsArray: [],
-                moreFilters: this.moreFilters
+                moreFilters: this.moreFilters,
+                filtersEnabled: true,
+                dataSampleEnabled: false
 
             }
         }
@@ -49,18 +49,17 @@ class SegmentsFilter extends React.Component {
 
     resetState() {
         this.setState(this.defaultState());
-    }
 
-    toggleSettings() {
-        this.setState({
-            searchSettingsOpen: !this.state.searchSettingsOpen
-        });
     }
 
     clearClick(e) {
         e.preventDefault();
         SegmentFilter.clearFilter();
         this.resetState();
+        $(this.filtersDropdown).dropdown('restore defaults');
+        $(this.dataSampleDropDown).dropdown('restore defaults');
+        $(this.statusDropdown).dropdown('restore defaults');
+        $(this.toggleFilters).checkbox('set unchecked');
     }
 
     closeClick(e) {
@@ -68,16 +67,11 @@ class SegmentsFilter extends React.Component {
         SegmentFilter.closeFilter();
     }
 
-    submitClick(e) {
-        e.preventDefault();
-        this.doSubmitFilter();
-    }
-
     doSubmitFilter(segmentToOpen = null) {
         let sample;
 
         if (this.state.samplingType) {
-            if (this.state.samplingSize) {
+            if (this.state.dataSampleEnabled) {
                 sample = {
                     type: this.state.samplingType,
                     size: this.state.samplingSize,
@@ -97,93 +91,71 @@ class SegmentsFilter extends React.Component {
             samplingType: this.state.samplingType,
             samplingSize:this.state.samplingSize,
             selectedStatus: this.state.selectedStatus,
-            samplingEnabled: this.state.samplingEnabled,
-        });
-
-        this.setState({
-            searchSettingsOpen: false
+            dataSampleEnabled: this.state.dataSampleEnabled,
         });
     }
 
-    filterSelectChanged(e) {
-        let value = e.target.value;
+    filterSelectChanged(value) {
         if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
             config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
             this.setState({
-                selectedStatus: e.target.value,
-                samplingType: ""
+                selectedStatus: value,
+                samplingType: "",
             });
         } else  {
             this.setState({
-                selectedStatus: e.target.value
+                selectedStatus: value,
             });
         }
+        setTimeout(this.doSubmitFilter, 100);
 
     }
 
-    moreFilterSelectChanged(e) {
-        let value = e.target.value;
+    moreFilterSelectChanged(value) {
         if ( (!config.isReview && this.state.selectedStatus === "TRANSLATED" && value === "todo") ||
             config.isReview && this.state.selectedStatus === "APPROVED" && value === "todo" ) {
             this.setState({
-                samplingType: e.target.value,
+                samplingType: value,
                 selectedStatus: "",
-                samplingEnabled: false,
-                samplingSize: null
             });
         } else  {
             this.setState({
-                samplingType: e.target.value,
-                samplingEnabled: false,
-                samplingSize: null
+                samplingType: value,
             });
         }
-
-    }
-
-    submitEnabled() {
-        return this.state.samplingType !== '' || this.state.selectedStatus !== '';
-    }
-
-    samplingTypeChecked(e) {
-        this.setState({
-            samplingType: e.target.value
-        });
-    }
-
-    samplingEnabledClick(e) {
-        let samplingType = '',
-            samplingSize = null;
-
-        if (e.target.checked) {
-            samplingType = 'edit_distance_high_to_low';
-            samplingSize = '5';
+        if ( value !== "" ) {
+            setTimeout( this.doSubmitFilter, 100 );
         }
-        this.setState({
-            samplingEnabled: e.target.checked,
-            samplingType: samplingType,
-            samplingSize: samplingSize
-        });
     }
 
-    humanSampleType() {
-        let map = {
-            'segment_length_high_to_low': 'Segment length (high to low)',
-            'segment_length_low_to_high': 'Segment length (low to high)',
-            'regular_intervals': 'Regular intervals',
-            'edit_distance_high_to_low': 'Edit distance (high to low)',
-            'edit_distance_low_to_high': 'Edit distance (low to high)'
-        };
+    dataSampleChange(value) {
+        if ( value !== '' ) {
+            this.setState({
+                samplingType: value
+            });
+            setTimeout( this.doSubmitFilter, 100 );
+        }
 
-        return map[this.state.samplingType];
     }
 
-    samplingSizeChanged(e) {
-        let value = parseInt(e.target.value);
+    // humanSampleType() {
+    //     let map = {
+    //         'segment_length_high_to_low': 'Segment length (high to low)',
+    //         'segment_length_low_to_high': 'Segment length (low to high)',
+    //         'regular_intervals': 'Regular intervals',
+    //         'edit_distance_high_to_low': 'Edit distance (high to low)',
+    //         'edit_distance_low_to_high': 'Edit distance (low to high)'
+    //     };
+    //
+    //     return map[this.state.samplingType];
+    // }
+
+    samplingSizeChanged() {
+        let value = parseInt(this.sampleSizeInput.value);
         if (value > 100 || value < 1) return false;
 
         this.setState({
-            samplingSize: e.target.value,
+            samplingSize: value,
         });
     }
 
@@ -218,351 +190,387 @@ class SegmentsFilter extends React.Component {
         if (storedState.reactState) {
             this.doSubmitFilter(storedState.lastSegmentId);
         }
-        $('.ui.dropdown')
-            .dropdown()
-        ;
-        $('.ui.checkbox').checkbox(<i>toggle</i>);
+        let self = this;
+        $(this.statusDropdown).dropdown({
+            onChange: function(value, text, $selectedItem) {
+                self.filterSelectChanged(value);
+            }
+        });
+        $(this.filtersDropdown).dropdown({
+            onChange: function(value, text, $selectedItem) {
+                self.moreFilterSelectChanged(value);
+            }
+        });
+        $(this.dataSampleDropDown).dropdown({
+            onChange: function(value, text, $selectedItem) {
+                self.dataSampleChange(value);
+            }
+        });
+        $(this.toggleFilters).checkbox({
+            onChecked: function() {
+                $(self.filtersDropdown).dropdown('restore defaults');
+                self.setState({
+                    filtersEnabled: false,
+                    dataSampleEnabled: true,
+                    samplingType: null,
+                });
+            },
+            onUnchecked: function() {
+                $(self.dataSampleDropDown).dropdown('restore defaults');
+                self.setState({
+                    filtersEnabled: true,
+                    dataSampleEnabled: false,
+                    samplingType: null,
+                });
+            }
+        });
     }
 
     componentWillUnmount() {
         CatToolStore.removeListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
     }
 
-
-   /* render() {
-
-        let searchSettingsClass = classnames({
-            hide: !this.state.searchSettingsOpen,
-            'search-settings-panel': true
-        });
-
+    render () {
+        let buttonArrowsClass;
         let options = config.searchable_statuses.map(function (item, index) {
-            return <option key={index} value={item.value}>{item.label}</option>;
+            return <div className="item" key={index} data-value={item.value}>
+                        <div  className={"ui "+ item.label +" empty circular label"} />
+                            {item.label}
+                    </div>;
         });
         let moreOptions = this.state.moreFilters.map(function (item, index) {
-            return <option key={index} value={item.value}>{item.label}</option>;
+            return <div key={index} data-value={item.value} className="item">
+                {item.label}
+            </div>;
         });
-
-        let fullOptions = [<option key="" value="">All</option>].concat(options),
-            fullMoreOptions = [<option key="" value="">All</option>].concat(moreOptions),
-            submitEnabled = this.submitEnabled(),
-            filteringInfo,
-            navigation,
-            currentSampleSettings,
-            buttonArrowsClass = 'qa-arrows-disabled';
 
         if (this.state.filtering && this.state.filteredCount > 1) {
             buttonArrowsClass = 'qa-arrows-enabled';
         }
 
-        navigation = <div className="sf-segment-navigation-arrows">
-            <div className={'qa-arrows ' + buttonArrowsClass}>
-                <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
-                    <span className="icon-qa-left-arrow"/>
-                </div>
-                <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
-                    <span className="icon-qa-right-arrow"/>
-                </div>
-            </div>
-        </div>;
+        let filterClassEnabled = (this.state.filtersEnabled) ? "" : "disabled";
+        let dataSampleClassEnabled = (this.state.dataSampleEnabled) ? "" : "disabled";
 
-
-        if (this.state.filtering) {
-            if (this.state.filteredCount > 0) {
-                filteringInfo =
-                    <div className="block filter-segments-count">{this.state.filteredCount} segments</div>;
-            }
-            else {
-                filteringInfo = <div className="block filter-segments-count">0 segments</div>;
-            }
-
-        }
-
-        if (this.state.samplingEnabled) {
-            currentSampleSettings = <div className="block">
-                <div className="search-settings-info">{this.state.samplingSize}% - {this.humanSampleType()}</div>
-                <a className="search-settings"
-                   onClick={this.toggleSettings.bind(this)}>Settings</a>
-                <div className={searchSettingsClass}>
-
-                    <div>
-                        Select the sample size
-                        <input type="number" value={this.state.samplingSize} style={{width: '3em'}}
-                               onChange={this.samplingSizeChanged.bind(this)}
-                               className="advanced-sample-size"/>
-                    </div>
-
-                    <h4>Sample criteria</h4>
-
-                    <div className="block">
-                        <input onChange={this.samplingTypeChecked.bind(this)}
-                               id="sample-edit-distance-high-to-low"
-                               checked={this.state.samplingType == 'edit_distance_high_to_low'}
-                               value="edit_distance_high_to_low"
-                               name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-high-to-low">Edit
-                        distance (high to low)</label>
-                    </div>
-
-                    <div className="block">
-                        <input onChange={this.samplingTypeChecked.bind(this)}
-                               id="sample-edit-distance-low-to-high"
-                               checked={this.state.samplingType == 'edit_distance_low_to_high'}
-                               value="edit_distance_low_to_high"
-                               name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-low-to-high">Edit
-                        distance (low to high)</label>
-                    </div>
-
-                    <div className="block">
-                        <input
-                            id="sample-segment-length-high-to-low"
-                            onChange={this.samplingTypeChecked.bind(this)}
-                            checked={this.state.samplingType == 'segment_length_high_to_low'}
-                            value="segment_length_high_to_low"
-                            name="samplingType" type="radio"/><label htmlFor="sample-segment-length-high-to-low">Segment
-                        length (high to low)</label>
-                    </div>
-
-                    <div className="block">
-                        <input
-                            id="sample-segment-length-low-to-high"
-                            onChange={this.samplingTypeChecked.bind(this)}
-                            checked={this.state.samplingType == 'segment_length_low_to_high'}
-                            value="segment_length_low_to_high"
-                            name="samplingType" type="radio"/><label htmlFor="sample-segment-length-low-to-high">Segment
-                        length (low to high)</label>
-                    </div>
-
-                    <div className="block">
-                        <input
-                            id="sample-regular-intervals"
-                            onChange={this.samplingTypeChecked.bind(this)}
-                            checked={this.state.samplingType == 'regular_intervals'}
-                            value="regular_intervals"
-                            name="samplingType" type="radio"/><label htmlFor="sample-regular-intervals">Regular
-                        interval</label>
-                    </div>
-
-                </div>
-            </div>;
-
-        }
-
-        let controlsForSampling;
-
-        if (window.config.isReview) {
-            controlsForSampling = <div>
-                <div className="block data-sample-checkbox-container">
-                    <label htmlFor="data-sample-checkbox">Data sample</label>
-                    <input type="checkbox"
-                           id="data-sample-checkbox"
-                           onClick={this.samplingEnabledClick.bind(this)}
-                           checked={this.state.samplingEnabled}/>
-                </div>
-
-                {currentSampleSettings}
-
-
-            </div>;
-        }
-
-        return (this.props.active ? <div className="advanced-filter-searchbox searchbox">
-            <form>
-                <div className="block filter-status-container">
-                    <label htmlFor="search-projectname">segment status</label>
-                    <select
-                        onChange={this.filterSelectChanged.bind(this)}
-                        value={this.state.selectedStatus} className="search-select">
-                        {fullOptions}
-                    </select>
-                </div>
-
-                <div className="block filters-container">
-                    <label htmlFor="search-projectname">Filters</label>
-                    <select
-                        onChange={this.moreFilterSelectChanged.bind(this)}
-                        value={this.state.samplingType} className="search-select">
-                        {fullMoreOptions}
-                    </select>
-                </div>
-
-                {controlsForSampling}
-
-                <div className="block right">
-
-                    <input onClick={this.setStatusClick.bind(this)} id="setStatus-filter"
-                           type="button"
-                           className={
-                               classnames({
-                                   btn: true,
-                                   "select-all-filter": true
-                               })}
-                           disabled={!this.state.filtering}
-                           value="Select All"/>
-
-                    <input id="close-filter"
-                           type="button"
-                           onClick={this.closeClick.bind(this)}
-                           className={classnames({btn: true})}
-                           value="CLOSE"/>
-
-                    <input id="clear-filter"
-                           type="button"
-                           onClick={this.clearClick.bind(this)}
-                           className={classnames({btn: true})}
-                           disabled={!this.state.filtering}
-                           value="CLEAR"/>
-
-                    <input onClick={this.submitClick.bind(this)} id="exec-filter"
-                           type="submit"
-                           className={classnames({btn: true})}
-                           disabled={!submitEnabled}
-                           value="FILTER"/>
-                </div>
-
-            </form>
-
-            {navigation}
-            {filteringInfo}
-
-        </div> : (null));
-    }*/
-
-    render () {
-        return <div className="filter-wrapper">
+        return (true ? <div className="filter-wrapper">
             <div className="filter-container">
                 <div className="filter-container-inside">
                     <div className="filter-list">
                         <div className="filter-dropdown">
                             <div className="filter-status">
-                                <div className="ui top left pointing dropdown basic tiny button filtered">
+                                <div className="ui top left pointing dropdown basic tiny button filtered" ref={(dropdown)=>this.statusDropdown=dropdown}>
                                     <div className="text">
-                                        <div>Status Segment</div>
+                                        <div>Segment Status</div>
                                         <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                     </div>
                                     <div className="menu">
-                                        <div className="item">
-                                            <div className="ui gray empty circular label" />
-                                            New
-                                        </div>
-                                        <div className="item">
-                                            <div className="ui black empty circular label" />
-                                            Draft
-                                        </div>
-                                        <div className="item">
-                                            <div className="ui blue empty circular label" />
-                                            Translated
-                                        </div>
-                                        <div className="item">
-                                            <div className="ui green empty circular label" />
-                                            Approved
-                                        </div>
-                                        <div className="item">
-                                            <div className="ui red empty circular label" />
-                                            Rejected
-                                        </div>
+                                        {options}
+                                        {/*<div className="item">*/}
+                                            {/*<div className="ui gray empty circular label" />*/}
+                                            {/*New*/}
+                                        {/*</div>*/}
+                                        {/*<div className="item">*/}
+                                            {/*<div className="ui black empty circular label" />*/}
+                                            {/*Draft*/}
+                                        {/*</div>*/}
+                                        {/*<div className="item">*/}
+                                            {/*<div className="ui blue empty circular label" />*/}
+                                            {/*Translated*/}
+                                        {/*</div>*/}
+                                        {/*<div className="item">*/}
+                                            {/*<div className="ui green empty circular label" />*/}
+                                            {/*Approved*/}
+                                        {/*</div>*/}
+                                        {/*<div className="item">*/}
+                                            {/*<div className="ui red empty circular label" />*/}
+                                            {/*Rejected*/}
+                                        {/*</div>*/}
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div className="filter-dropdown">
                             <div className="filter-activities">
-                                <div className="ui top left pointing dropdown basic tiny button not-filtered disabled">
+                                <div className={"ui top left pointing dropdown basic tiny button not-filtered " + filterClassEnabled } ref={(dropdown)=>this.filtersDropdown=dropdown}>
                                     <div className="text">Filters</div>
                                     <div className="menu">
-                                        <div className="item">
-                                            Unlocked
-                                        </div>
-                                        <div className="item">
-                                            Repetitions
-                                        </div>
-                                        <div className="item">
-                                            MT
-                                        </div>
-                                        <div className="item">
-                                            100% Matches
-                                        </div>
-                                        <div className="item">
-                                            fuzzies_75_84
-                                        </div>
-                                        <div className="item">
-                                            fuzzies_85_94
-                                        </div>
-                                        <div className="item">
-                                            fuzzies_95_99
-                                        </div>
-                                        <div className="item">
-                                            To_Do
-                                        </div>
+                                        {moreOptions}
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        {/*{config.isReview ? (*/}
+                        {true ? (
+
                         <div className="filter-dropdown">
                             <div className="filter-toggle">
-                                <div className="ui toggle checkbox">
+                                <div className="ui toggle checkbox" ref={(checkbox)=>this.toggleFilters=checkbox}>
                                     <input type="checkbox" name="public" />
                                 </div>
                             </div>
                             <div className="filter-data-sample">
-                                <div className="ui top left pointing dropdown basic tiny button">
+                                <div className={"ui top left pointing dropdown basic tiny button " + dataSampleClassEnabled} ref={(checkbox)=>this.dataSampleDropDown=checkbox}>
                                     <div className="text">Data Sample</div>
                                     <div className="menu">
                                         <div className="head-dropdown">
                                             <div className="ui mini input">
                                                 <label>Sample size <b>(%)</b></label>
-                                                <input type="number" placeholder="percent value" value="5"/>
+                                                <input type="number" placeholder="percent value" value={this.state.samplingSize} onChange={this.samplingSizeChanged.bind(this)} ref={(input)=>this.sampleSizeInput=input}/>
                                             </div>
                                         </div>
                                         <div className="divider" />
-                                        <div className="item">
+                                        <div className="item" data-value="edit_distance_high_to_low">
                                             <div className="type-item">Edit distance</div>
                                             <div className="order-item">(A - Z)</div>
                                         </div>
                                         <div className="item">
-                                            <div className="type-item">Edit distance</div>
+                                            <div className="type-item" data-value="edit_distance_low_to_high">Edit distance</div>
                                             <div className="order-item">(Z - A)</div>
                                         </div>
                                         <div className="item">
-                                            <div className="type-item">Segment length</div>
+                                            <div className="type-item" data-value="segment_length_high_to_low">Segment length</div>
                                             <div className="order-item">(A - Z)</div>
                                         </div>
                                         <div className="item">
-                                            <div className="type-item">Segment length</div>
+                                            <div className="type-item" data-value="segment_length_low_to_high">Segment length</div>
                                             <div className="order-item">(Z - A)</div>
                                         </div>
-                                        <div className="item">
+                                        <div className="item" data-value="regular_intervals">
                                             Regular interval
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        ):(null)}
+
                         <div className="clear-filter-element">
                             <div className="clear-filter">
-                                <a href="#">Clear all</a>
+                                <a href="#" onClick={this.clearClick.bind(this)}>Clear all</a>
                             </div>
                         </div>
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
-                            <div className="filter-arrows filter-arrows-enabled">
-                                <div className="label-filters labl">Filtered segments</div>
-                                <button className="filter-move-up ui basic button">
+                            {this.state.filtering && this.state.filteredCount > 1 ? (
+                            <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
+                                <div className="label-filters label">Filtered segments</div>
+                                <button className="filter-move-up ui basic button" onClick={this.moveUp.bind(this)}>
                                     <i className="icon-chevron-left" />
                                 </button>
                                 <div className="info-navigation-filters">
-                                    <b>1</b> / 2
+                                    <b>1</b> / {this.state.filteredCount}
                                 </div>
-                                <button className="filter-move-up ui basic button">
+                                <button className="filter-move-up ui basic button" onClick={this.moveDown.bind(this)}>
                                     <i className="icon-chevron-right" />
                                 </button>
                             </div>
+                            ) : (null)}
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> : (null) )
     }
+
+    // render() {
+    //
+    //     let searchSettingsClass = classnames({
+    //         hide: !this.state.searchSettingsOpen,
+    //         'search-settings-panel': true
+    //     });
+    //
+    //     let options = config.searchable_statuses.map(function (item, index) {
+    //         return <option key={index} value={item.value}>{item.label}</option>;
+    //     });
+    //     let moreOptions = this.state.moreFilters.map(function (item, index) {
+    //         return <option key={index} value={item.value}>{item.label}</option>;
+    //     });
+    //
+    //     let fullOptions = [<option key="" value="">All</option>].concat(options),
+    //         fullMoreOptions = [<option key="" value="">All</option>].concat(moreOptions),
+    //         submitEnabled = this.submitEnabled(),
+    //         filteringInfo,
+    //         navigation,
+    //         currentSampleSettings,
+    //         buttonArrowsClass = 'qa-arrows-disabled';
+    //
+    //     if (this.state.filtering && this.state.filteredCount > 1) {
+    //         buttonArrowsClass = 'qa-arrows-enabled';
+    //     }
+    //
+    //     navigation = <div className="sf-segment-navigation-arrows">
+    //         <div className={'qa-arrows ' + buttonArrowsClass}>
+    //             <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
+    //                 <span className="icon-qa-left-arrow"/>
+    //             </div>
+    //             <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
+    //                 <span className="icon-qa-right-arrow"/>
+    //             </div>
+    //         </div>
+    //     </div>;
+    //
+    //
+    //     if (this.state.filtering) {
+    //         if (this.state.filteredCount > 0) {
+    //             filteringInfo =
+    //                 <div className="block filter-segments-count">{this.state.filteredCount} segments</div>;
+    //         }
+    //         else {
+    //             filteringInfo = <div className="block filter-segments-count">0 segments</div>;
+    //         }
+    //
+    //     }
+    //
+    //     if (this.state.samplingEnabled) {
+    //         currentSampleSettings = <div className="block">
+    //             <div className="search-settings-info">{this.state.samplingSize}% - {this.humanSampleType()}</div>
+    //             <a className="search-settings"
+    //                onClick={this.toggleSettings.bind(this)}>Settings</a>
+    //             <div className={searchSettingsClass}>
+    //
+    //                 <div>
+    //                     Select the sample size
+    //                     <input type="number" value={this.state.samplingSize} style={{width: '3em'}}
+    //                            onChange={this.samplingSizeChanged.bind(this)}
+    //                            className="advanced-sample-size"/>
+    //                 </div>
+    //
+    //                 <h4>Sample criteria</h4>
+    //
+    //                 <div className="block">
+    //                     <input onChange={this.samplingTypeChecked.bind(this)}
+    //                            id="sample-edit-distance-high-to-low"
+    //                            checked={this.state.samplingType == 'edit_distance_high_to_low'}
+    //                            value="edit_distance_high_to_low"
+    //                            name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-high-to-low">Edit
+    //                     distance (high to low)</label>
+    //                 </div>
+    //
+    //                 <div className="block">
+    //                     <input onChange={this.samplingTypeChecked.bind(this)}
+    //                            id="sample-edit-distance-low-to-high"
+    //                            checked={this.state.samplingType == 'edit_distance_low_to_high'}
+    //                            value="edit_distance_low_to_high"
+    //                            name="samplingType" type="radio"/><label htmlFor="sample-edit-distance-low-to-high">Edit
+    //                     distance (low to high)</label>
+    //                 </div>
+    //
+    //                 <div className="block">
+    //                     <input
+    //                         id="sample-segment-length-high-to-low"
+    //                         onChange={this.samplingTypeChecked.bind(this)}
+    //                         checked={this.state.samplingType == 'segment_length_high_to_low'}
+    //                         value="segment_length_high_to_low"
+    //                         name="samplingType" type="radio"/><label htmlFor="sample-segment-length-high-to-low">Segment
+    //                     length (high to low)</label>
+    //                 </div>
+    //
+    //                 <div className="block">
+    //                     <input
+    //                         id="sample-segment-length-low-to-high"
+    //                         onChange={this.samplingTypeChecked.bind(this)}
+    //                         checked={this.state.samplingType == 'segment_length_low_to_high'}
+    //                         value="segment_length_low_to_high"
+    //                         name="samplingType" type="radio"/><label htmlFor="sample-segment-length-low-to-high">Segment
+    //                     length (low to high)</label>
+    //                 </div>
+    //
+    //                 <div className="block">
+    //                     <input
+    //                         id="sample-regular-intervals"
+    //                         onChange={this.samplingTypeChecked.bind(this)}
+    //                         checked={this.state.samplingType == 'regular_intervals'}
+    //                         value="regular_intervals"
+    //                         name="samplingType" type="radio"/><label htmlFor="sample-regular-intervals">Regular
+    //                     interval</label>
+    //                 </div>
+    //
+    //             </div>
+    //         </div>;
+    //
+    //     }
+    //
+    //     let controlsForSampling;
+    //
+    //     if (window.config.isReview) {
+    //         controlsForSampling = <div>
+    //             <div className="block data-sample-checkbox-container">
+    //                 <label htmlFor="data-sample-checkbox">Data sample</label>
+    //                 <input type="checkbox"
+    //                        id="data-sample-checkbox"
+    //                        onClick={this.samplingEnabledClick.bind(this)}
+    //                        checked={this.state.samplingEnabled}/>
+    //             </div>
+    //
+    //             {currentSampleSettings}
+    //
+    //
+    //         </div>;
+    //     }
+    //
+    //     return (this.props.active ? <div className="advanced-filter-searchbox searchbox">
+    //         <form>
+    //             <div className="block filter-status-container">
+    //                 <label htmlFor="search-projectname">segment status</label>
+    //                 <select
+    //                     onChange={this.filterSelectChanged.bind(this)}
+    //                     value={this.state.selectedStatus} className="search-select">
+    //                     {fullOptions}
+    //                 </select>
+    //             </div>
+    //
+    //             <div className="block filters-container">
+    //                 <label htmlFor="search-projectname">Filters</label>
+    //                 <select
+    //                     onChange={this.moreFilterSelectChanged.bind(this)}
+    //                     value={this.state.samplingType} className="search-select">
+    //                     {fullMoreOptions}
+    //                 </select>
+    //             </div>
+    //
+    //             {controlsForSampling}
+    //
+    //             <div className="block right">
+    //
+    //                 <input onClick={this.setStatusClick.bind(this)} id="setStatus-filter"
+    //                        type="button"
+    //                        className={
+    //                            classnames({
+    //                                btn: true,
+    //                                "select-all-filter": true
+    //                            })}
+    //                        disabled={!this.state.filtering}
+    //                        value="Select All"/>
+    //
+    //                 <input id="close-filter"
+    //                        type="button"
+    //                        onClick={this.closeClick.bind(this)}
+    //                        className={classnames({btn: true})}
+    //                        value="CLOSE"/>
+    //
+    //                 <input id="clear-filter"
+    //                        type="button"
+    //                        onClick={this.clearClick.bind(this)}
+    //                        className={classnames({btn: true})}
+    //                        disabled={!this.state.filtering}
+    //                        value="CLEAR"/>
+    //
+    //                 <input onClick={this.submitClick.bind(this)} id="exec-filter"
+    //                        type="submit"
+    //                        className={classnames({btn: true})}
+    //                        disabled={!submitEnabled}
+    //                        value="FILTER"/>
+    //             </div>
+    //
+    //         </form>
+    //
+    //         {navigation}
+    //         {filteringInfo}
+    //
+    //     </div> : (null));
+    // }
 }
 
 export default SegmentsFilter;
