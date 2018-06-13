@@ -9,6 +9,7 @@
 namespace API\V2;
 
 
+use API\V2\Exceptions\NotFoundException;
 use API\V2\Json\Project;
 use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectExistsInTeamValidator;
@@ -17,10 +18,14 @@ use API\V2\Validators\TeamProjectValidator;
 use FeatureSet;
 use Projects\ProjectModel;
 use ManageUtils;
+use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {
 
     protected $project;
+
+    /** @var TeamStruct */
+    protected $team;
 
     public function update() {
 
@@ -59,12 +64,6 @@ class TeamsProjectsController extends KleinController {
         return $this;
     }
 
-    protected function _appendProjectTeamValidators($project){
-        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $project ) );
-        $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $project ) );
-        return $this;
-    }
-
     public function get(){
         $this->_appendSingleProjectTeamValidators()->validateRequest();
         $formatted     = new Project();
@@ -73,7 +72,7 @@ class TeamsProjectsController extends KleinController {
 
     public function getByName() {
         $start                 = 0;
-        $step                  = 1000;
+        $step                  = 25;
         $search_in_pname       = $this->request->project_name;
         $search_source         = null;
         $search_target         = null;
@@ -88,7 +87,11 @@ class TeamsProjectsController extends KleinController {
                 $search_source, $search_target, $search_status,
                 $search_only_completed, $project_id,
                 $this->team, $assignee,
-                $no_assignee);
+                $no_assignee );
+
+        if( empty( $projects ) ){
+            throw new NotFoundException( "Project not found", 404 );
+        }
 
         $this->response->json( [ 'projects' => $projects ] );
     }
