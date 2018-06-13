@@ -510,6 +510,8 @@ class Xliff_Parser {
             preg_match( $regexp, $domString, $temp );
             $tmpTag = $temp[ 1 ];
 
+            libxml_clear_errors();
+
         } elseif ( $tagList->length ) {
 
             foreach ( $tagList as $_tag ) {
