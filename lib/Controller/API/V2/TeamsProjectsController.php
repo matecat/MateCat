@@ -17,10 +17,14 @@ use API\V2\Validators\TeamProjectValidator;
 use FeatureSet;
 use Projects\ProjectModel;
 use ManageUtils;
+use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {
 
     protected $project;
+
+    /** @var TeamStruct */
+    protected $team;
 
     public function update() {
 
@@ -56,12 +60,6 @@ class TeamsProjectsController extends KleinController {
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
-        return $this;
-    }
-
-    protected function _appendProjectTeamValidators($project){
-        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $project ) );
-        $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $project ) );
         return $this;
     }
 
