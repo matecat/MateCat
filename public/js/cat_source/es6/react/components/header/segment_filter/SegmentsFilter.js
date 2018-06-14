@@ -373,12 +373,13 @@ class SegmentsFilter extends React.Component {
                         </div>
 
                         ):(null)}
-
-                        <div className="clear-filter-element">
-                            <div className="clear-filter">
-                                <a href="#" onClick={this.clearClick.bind(this)}>Clear all</a>
+                        {this.state.filtering ? (
+                            <div className="clear-filter-element">
+                                <div className="clear-filter">
+                                    <a href="#" onClick={this.clearClick.bind(this)}>Clear all</a>
+                                </div>
                             </div>
-                        </div>
+                        ) : (null)}
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
