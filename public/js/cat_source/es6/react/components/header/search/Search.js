@@ -24,7 +24,7 @@ class Search extends React.Component {
             currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
         };
-        this.state = this.defaultState;
+        this.state = _.cloneDeep(this.defaultState);
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancelClick = this.handleCancelClick.bind(this);
@@ -64,12 +64,6 @@ class Search extends React.Component {
         if (this.state.funcFindButton) {
             UI.execFind();
         }
-        // else {
-        //     if (!UI.goingToNext) {
-        //         UI.goingToNext = true;
-        //         UI.execNext();
-        //     }
-        // }
         this.setState({
             currentSourceSearch: this.state.search.searchSource,
             currentTargetSearch: this.state.search.searchTarget,
@@ -93,11 +87,9 @@ class Search extends React.Component {
 
     handleCancelClick(event) {
         event.preventDefault();
-        $("#filterSwitch").click();
+        CatToolActions.closeSubHeader();
         UI.body.removeClass('searchActive');
         UI.clearSearchMarkers();
-        UI.clearSearchFields();
-        $('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
         UI.enableTagMark();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             UI.gotoOpenSegment();
@@ -170,6 +162,39 @@ class Search extends React.Component {
         this.setState({
             search: search
         })
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.active){
+            $('body').addClass("search-open");
+            if(this.sourceEl && this.state.focus){
+                this.sourceEl.focus();
+                this.setState({
+                    focus: false
+                });
+            }
+        }else{
+            $('body').removeClass("search-open");
+            if(!this.state.focus){
+                this.setState({
+                    focus: true
+                });
+            }
+        }
+    }
+
+    escFunction(event){
+        if(event.keyCode === 27) {
+            event.stopPropagation();
+            event.preventDefault();
+            CatToolActions.closeSubHeader();
+        }
+    }
+    componentDidMount(){
+        document.addEventListener("keydown", this.escFunction, false);
+    }
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.escFunction, false);
     }
 
     render() {
