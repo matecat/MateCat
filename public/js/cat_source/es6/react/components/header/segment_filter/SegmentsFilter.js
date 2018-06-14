@@ -76,6 +76,7 @@ class SegmentsFilter extends React.Component {
 
     closeClick(e) {
         e.preventDefault();
+        this.dropdownInitialized = false;
         SegmentFilter.closeFilter();
     }
 
@@ -206,9 +207,9 @@ class SegmentsFilter extends React.Component {
     }
 
     initDropDown() {
+        let self = this;
         if (this.props.active && !this.dropdownInitialized) {
             this.dropdownInitialized = true;
-            let self = this;
             $(this.statusDropdown).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.filterSelectChanged(value);
@@ -242,7 +243,30 @@ class SegmentsFilter extends React.Component {
                     });
                 }
             });
+            $(this.toggleFilters).checkbox({
+                onChecked: function() {
+                    $(self.filtersDropdown).dropdown('restore defaults');
+                    self.setState({
+                        filtersEnabled: false,
+                        dataSampleEnabled: true,
+                        samplingType: '',
+                    });
+                },
+                onUnchecked: function() {
+                    $(self.dataSampleDropDown).dropdown('restore defaults');
+                    self.setState({
+                        filtersEnabled: true,
+                        dataSampleEnabled: false,
+                        samplingType: '',
+                    });
+                }
+            });
         }
+
+        if (!this.props.active) {
+            this.dropdownInitialized = false;
+        }
+
     }
 
     updateObjects() {
