@@ -2494,6 +2494,11 @@ $reference = array(
                         2 => 'xvml',
                         3 => 'xvm',
                 ),
+        'application/x-yaml'                                                        =>
+                array(
+                        0 => 'yaml',
+                        1 => 'yml',
+                ),
         'application/yang'                                                          =>
                 array(
                         0 => 'yang',
