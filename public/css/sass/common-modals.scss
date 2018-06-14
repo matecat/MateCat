@@ -1539,7 +1539,44 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     }
 }
 
-
+.copy-source-modal {
+    padding: 30px 25px 20px;
+    h3 {
+        font-size: 20px;
+    }
+    .buttons-popup-container {
+        padding: 25px 0 30px;
+        border-bottom: 1px solid #f2f4f7;
+        label {
+            font-size: 18px;
+            margin-right: 10px;
+            position: relative;
+            top: 2px;
+        }
+        .btn-cancel, .btn-ok {
+            padding: 10px 15px;
+        }
+        .btn-cancel {
+            margin-right: 16px;
+            font-weight: 100;
+        }
+        .notes-action {
+            padding-left: 196px;
+            position: relative;
+            top: 2px;
+            font-size: 12px;
+        }
+    }
+    .boxed {
+        padding: 15px 0 0;
+        text-align: right;
+        label {
+            position: relative;
+            top: 1px;
+            padding-right: 2px;
+        }
+    }
+}
 
 [data-name="confirmCopyAllSources"] {
     input, label {

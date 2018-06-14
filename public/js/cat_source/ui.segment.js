@@ -398,11 +398,15 @@
             var selector = UI.selectorForNextSegment() ;
             var prev = $('.editor').prevAll( selector ).first();
             if (prev.is('section')) {
-                $(UI.targetContainerSelector(), prev).click();
+                UI.scrollSegment(prev);
+                UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                // $(UI.targetContainerSelector(), prev).click();
             } else {
                 prev = $('.editor').parents('article').prevAll( selector ).first();
                 if (prev.length) {
-                    $(UI.targetContainerSelector() , prev).click();
+                    // $(UI.targetContainerSelector() , prev).click();
+                    UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                    UI.scrollSegment(prev);
                 }
             }
             if (prev.length)
@@ -668,7 +672,12 @@
                     segmentsArray.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        UI.setSegmentModified( UI.currentSegment, false ) ;
+                        let $segment = UI.getSegmentById(item);
+                        if ( $segment ) {
+                            UI.setSegmentModified( $segment, false ) ;
+                            UI.disableTPOnSegment( $segment )
+                        }
+
                     })
                 } else if (response.unchangeble_segments.length > 0) {
                     let arrayMapped = _.map(segmentsArray, function ( item ) {
@@ -678,7 +687,11 @@
                     array.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        UI.setSegmentModified( UI.currentSegment, false ) ;
+                        let $segment = UI.getSegmentById(item);
+                        if ( $segment ) {
+                            UI.setSegmentModified( $segment, false ) ;
+                            UI.disableTPOnSegment( $segment )
+                        }
                     });
                     UI.showApproveAllModalWarnirng();
                 }
@@ -690,7 +703,11 @@
                     segmentsArray.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        UI.setSegmentModified( UI.currentSegment, false ) ;
+                        let $segment = UI.getSegmentById(item);
+                        if ( $segment ) {
+                            UI.setSegmentModified( $segment, false ) ;
+                            UI.disableTPOnSegment( $segment )
+                        }
                     })
                 } else if (response.unchangeble_segments.length > 0) {
                     let arrayMapped = _.map(segmentsArray, function ( item ) {
@@ -700,7 +717,11 @@
                     array.forEach(function ( item ) {
                         let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        UI.setSegmentModified( UI.currentSegment, false ) ;
+                        let $segment = UI.getSegmentById(item);
+                        if ( $segment ) {
+                            UI.setSegmentModified( $segment, false ) ;
+                            UI.disableTPOnSegment( $segment )
+                        }
                     });
                     UI.showTranslateAllModalWarnirng();
                 }

@@ -22,6 +22,13 @@ let CatToolActions = {
             container: "segmentFilter"
         });
     },
+    setSegmentFilter: function ( segments, state ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_SEGMENT_FILTER,
+            data: segments,
+            state: state
+        });
+    },
     toggleQaIssues: function () {
         AppDispatcher.dispatch({
             actionType: CattolConstants.TOGGLE_CONTAINER,
@@ -69,13 +76,7 @@ let CatToolActions = {
             actionType: CattolConstants.QA_LEXIQA_ISSUES,
             data: issues
         });
-    },
-    setSegmentFilter: function ( segments ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.SET_SEGMENT_FILTER,
-            data: segments
-        });
-    },
+    }
 };
 
 module.exports = CatToolActions;
