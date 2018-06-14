@@ -280,7 +280,7 @@ section.muted .segment-side-buttons {
                             display: flex;
                             align-items: center;
                             .percent-item {
-                                margin-right: 5px;
+                                margin-left: 5px;
                             }
                             .menu {
                                 width: 220px;
@@ -300,13 +300,18 @@ section.muted .segment-side-buttons {
                                         margin-top: 10px;
                                     }
                                 }
-                                .item {
-                                    .type-item, .order-item {
-                                        display: inline-block;
-                                    }
-                                    .order-item {
-                                        float: right;
-                                    }
+                            }
+                            .item, .text {
+                                .type-item, .order-item {
+                                    display: inline-block;
+                                }
+                                .order-item {
+                                    float: right;
+                                }
+                            }
+                            .text {
+                                .order-item {
+                                    margin-left: 2px;
                                 }
                             }
                         }
