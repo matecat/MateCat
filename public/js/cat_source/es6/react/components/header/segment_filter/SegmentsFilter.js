@@ -105,6 +105,11 @@ class SegmentsFilter extends React.Component {
                 selectedStatus: this.state.selectedStatus,
                 dataSampleEnabled: this.state.dataSampleEnabled
             });
+        } else {
+            this.setState({
+                filtering: false,
+            });
+            SegmentFilter.clearFilter();
         }
     }
 
@@ -225,7 +230,7 @@ class SegmentsFilter extends React.Component {
                     self.setState({
                         filtersEnabled: false,
                         dataSampleEnabled: true,
-                        samplingType: null,
+                        samplingType: '',
                     });
                 },
                 onUnchecked: function() {
@@ -233,7 +238,7 @@ class SegmentsFilter extends React.Component {
                     self.setState({
                         filtersEnabled: true,
                         dataSampleEnabled: false,
-                        samplingType: null,
+                        samplingType: '',
                     });
                 }
             });
