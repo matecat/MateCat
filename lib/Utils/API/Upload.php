@@ -187,9 +187,22 @@ class Upload {
                 );
             }
 
-            //All Right!!! GO!!!
-            $mod_name = $this->fixFileName( $fileUp );
+            $mod_name = $this->fixFileName( $fileUp->name );
 
+            if( !$this->_isValidFileName( $mod_name ) ){
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) ."'" )
+                );
+            }
+
+            //Exit on Error
+            if( !empty( $fileUp->error ) ){
+                @unlink( $fileTmpName );
+                return $fileUp;
+            }
+
+            //All Right!!! GO!!!
             if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name )) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
@@ -229,30 +242,27 @@ class Upload {
      * @return string
      * @throws Exception
      */
-    public function fixFileName( $fileUp ) {
-        //Roberto: removed STRIP_HIGH flag. Non-latin filenames are supported.
-        $string = filter_var( $fileUp->name, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
+    public function fixFileName( $stringName ) {
 
         //Fix Bug: Zip files, file names with contiguous whitespaces ( replaced with only one _ and not found inside the zip on download )
-        $string = preg_replace( '/\p{Zs}/u', chr(0x1A), $string ); // substitute whitespaces
+        $string = preg_replace( '/\p{Zs}/u', chr(0x1A), $stringName ); // substitute whitespaces
         $string = preg_replace( '/[^#\pL0-9,\.\-\=_&()\'\"\+\x1A]/u', '', $string ); //strips odd chars and preserve preceding placeholder
         $string = preg_replace( '/' . chr(0x1A) . '/', '_', $string ); //strips whitespace and odd chars
+        $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
 
-        if( $this->_isValidFileName( $string ) ){
-            return $string;
-        } else {
-            $this->setObjectErrorOrThrowException(
-                    $fileUp,
-                    new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) ."'" )
-            );
-        }
+        return $string;
 
     }
 
     protected function _isValidFileName( $string ) {
 
-        if ( strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '..' ) !== false || strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2E%2E' ) !== false ) {
-            //Directory Traversal!
+        if (
+                strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '..' ) !== false ||
+                strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2E%2E' ) !== false ||
+                strpos( $string, '.' ) === 0 ||
+                strpos( $string, '%2E' ) === 0
+        ) {
+            //Directory Traversal! or Linux hidden file uploaded
             return false;
         }
 
