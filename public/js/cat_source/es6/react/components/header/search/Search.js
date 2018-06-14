@@ -14,10 +14,10 @@ class Search extends React.Component {
                 enableReplace: false,
                 matchCase: false,
                 exactMatch: false,
-                replaceTarget: null,
+                replaceTarget: "",
                 selectStatus: 'all',
-                searchTarget: null,
-                searchSource: null
+                searchTarget: "",
+                searchSource: ""
             },
             focus: true,
             currentTargetSearch: null,
@@ -34,29 +34,7 @@ class Search extends React.Component {
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
         this.componenDidMount = this;
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.active){
-            if(this.sourceEl && this.state.focus){
-                this.sourceEl.focus();
-                this.setState({
-                    focus: false
-                });
-            }
-        }else{
-            if(!this.state.focus){
-                this.setState({
-                    focus: true
-                });
-            }
-        }
-        $('.ui.checkbox')
-            .checkbox()
-        ;
-        $('.ui.dropdown')
-            .dropdown()
-        ;
+        this.dropdownInit = false;
     }
 
     handleSubmit(event) {
@@ -141,11 +119,19 @@ class Search extends React.Component {
         }
     }
 
-    handleInputChange(event) {
+    handleStatusChange(value) {
+        let search = this.state.search;
+        search['selectStatus'] = value;
+        this.setState({
+            search: search,
+            funcFindButton: true
+        });
+    }
+
+    handleInputChange(name, event) {
         //serch model
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
         let search = this.state.search;
         search[name] = value;
 
@@ -173,6 +159,15 @@ class Search extends React.Component {
                     focus: false
                 });
             }
+            let self = this;
+            if ( !this.dropdownInit ) {
+                this.dropdownInit = true;
+                $(this.statusDropDown).dropdown({
+                    onChange: function(value, text, $selectedItem) {
+                        self.handleStatusChange(value)
+                    }
+                });
+            }
         }else{
             $('body').removeClass("search-open");
             if(!this.state.focus){
@@ -181,8 +176,8 @@ class Search extends React.Component {
                 });
             }
         }
-    }
 
+    }
     escFunction(event){
         if(event.keyCode === 27) {
             event.stopPropagation();
@@ -200,7 +195,10 @@ class Search extends React.Component {
     render() {
 
         let options = config.searchable_statuses.map(function (item, index) {
-            return <option key={index} value={item.value}>{item.label}</option>;
+            return <div className="item" key={index} data-value={item.value}>
+                <div  className={"ui "+ item.label +" empty circular label"} />
+                {item.label}
+            </div>;
         });
         let findIsDisabled = false;
         if (!this.state.search.searchTarget && !this.state.search.searchSource) {
@@ -307,32 +305,32 @@ class Search extends React.Component {
                                 <div className="fields">
                                     <div className="field">
                                         <div>
-                                            <label>Source</label>
-                                            <input type="text" placeholder="Find in source" />
+                                            <label>Find in source</label>
+                                            <input type="text" value={this.state.search.searchSource} placeholder="Find in source" onChange={this.handleInputChange.bind(this, "searchSource")}/>
                                         </div>
                                         <div className="">
                                             <div>
-                                                <input type="checkbox"/>
+                                                <input type="checkbox" value={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}/>
                                                 <label>Match Case</label>
                                             </div>
                                             <div>
-                                                <input type="checkbox"/>
-                                                <label>Hole word</label>
+                                                <input type="checkbox" value={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
+                                                <label>Whole word</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="field">
                                         <div>
-                                            <label>Target</label>
-                                            <input type="text" placeholder="Find in target" />
+                                            <label>Find in target</label>
+                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}/>
                                             <div>
-                                                <input type="checkbox"/>
+                                                <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
                                                 <label>Replace with</label>
                                             </div>
                                         </div>
-                                        <div className="">
+                                        <div className="field">
                                             <div>
-                                                <input type="text" placeholder="Replace in target" />
+                                                <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
                                                 <button className="ui basic tiny button">Replace</button>
                                                 <button className="ui basic tiny button">Replace All</button>
                                             </div>
@@ -341,32 +339,13 @@ class Search extends React.Component {
                                     <div className="field">
                                         <label>Find for</label>
                                         <div className="find-dropdown">
-                                            <div className="ui top left pointing dropdown basic tiny button not-filtered">
+                                            <div className="ui top left pointing dropdown basic tiny button not-filtered" ref={(dropdown)=>this.statusDropDown=dropdown}>
                                                 <div className="text">
                                                     <div>Status Segment</div>
-                                                    <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                                 </div>
+                                                <div className="ui cancel label"><i className="icon-cancel3" /></div>
                                                 <div className="menu">
-                                                    <div className="item">
-                                                        <div className="ui gray empty circular label" />
-                                                        New
-                                                    </div>
-                                                    <div className="item">
-                                                        <div className="ui black empty circular label" />
-                                                        Draft
-                                                    </div>
-                                                    <div className="item">
-                                                        <div className="ui blue empty circular label" />
-                                                        Translated
-                                                    </div>
-                                                    <div className="item">
-                                                        <div className="ui green empty circular label" />
-                                                        Approved
-                                                    </div>
-                                                    <div className="item">
-                                                        <div className="ui red empty circular label" />
-                                                        Rejected
-                                                    </div>
+                                                    {options}
                                                 </div>
                                             </div>
                                         </div>
@@ -374,10 +353,10 @@ class Search extends React.Component {
 
                                 </div>
                             </div>
-                            {/*<div className="find-actions">
-                                <button type="button" className="ui button">Find</button>
+                            <div className="find-actions">
+                                <button type="button" className="ui button" onClick={this.handleSubmit.bind(this)}>Find</button>
                                 <button type="button" className="ui button">Clear</button>
-                            </div>*/}
+                            </div>
                         </div>
                     </div>
                 </div>
