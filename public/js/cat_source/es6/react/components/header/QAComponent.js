@@ -110,7 +110,7 @@ class QAComponent extends React.Component {
                     if (this.props.warnings.ERROR.Categories[key].length > 0) {
                         let activeClass = (this.state.currentPriority === 'ERROR' && this.state.currentCategory === key) ? ' mc-bg-gray' : '';
                         error.push(<button key={index} className={"ui button qa-issue" + activeClass}
-                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'WARNING', key)}>
+                                           onClick={this.setCurrentNavigationElements.bind(this, this.props.warnings.ERROR.Categories[key], 'ERROR', key)}>
                             <i className="icon-cancel-circle icon"></i>
                             {this.state.labels[key] ?
                                 this.state.labels[key] : key}
