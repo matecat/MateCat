@@ -1,44 +1,32 @@
-/*section.muted {
-    zoom: 0.8;
-    width: 94%;
-    margin: 0 3% !important;
-}*/
-section.muted {
+body section.muted {
+    background: #f2f4f7;
     width: 99%;
     margin: 0px 1% 0 0 !important;
-}
-
-section.muted .editarea:hover,
-section.muted .editarea {
-    border: none !important;
-}
-
-section.muted .status {
-    opacity: 0.2;
-}
-
-section.muted .text,
-section.muted .status,
-section.muted .editarea {
     cursor: not-allowed;
+    .sid{}
+    .body{
+        .text {
+            opacity: 0.5;
+            .wrap {
+                .source {}
+                .target {
+                    .editarea {
+                        border: none !important;
+                        &:hover {
+                            border: none !important;
+                        }
+                    }
+                }
+            }
+            .status-container {
+                .status {
+                    opacity: 0.2;
+                }
+            }
+        }
+    }
+    .segment-side-buttons {}
 }
-
-.search-settings-panel h4 {
-    text-transform: uppercase;
-    font-size: 13px;
-}
-
-.data-sample-segment .sid,
-.data-sample-segment .sid .txt,
-.data-sample-segment p.split-shortcut {
-    background: #BCBCBC !important;
-}
-
-/*
-section.muted .translation-issues-button {
-  display: none;
-}
-*/
 
 .search-settings-panel {
     background: #efefef;
@@ -47,20 +35,6 @@ section.muted .translation-issues-button {
     width: 205px;
     border: 1px solid #666;
     top: 48px;
-}
-
-.advanced-sample-size {
-    float: right;
-}
-
-.search-settings-panel .block {
-    float: none;
-}
-
-.search-settings-panel .block label {
-    text-transform: none !important;
-    font-size: 13px;
-    margin-left: 5px;
 }
 
 /* advanced filtering */
@@ -92,10 +66,10 @@ header .filter {
     display: block;
     height: 48px;
 }
-.searchbox form {
+/*.searchbox form {
     width: auto;
     padding: 11px 10px 0px 15px !important;
-}
+}*/
 
 /*  .searchbox .block {
     margin-top: 5px;
@@ -105,11 +79,11 @@ header .filter {
     z-index: 1 !important;
 }
 
-.searchbox .search-settings {
+/*.searchbox .search-settings {
     text-decoration: underline;
     float: left;
     cursor: pointer;
-}
+}*/
 
 body.cattool .filter,
 body.cattool .filter:hover {
@@ -207,6 +181,7 @@ section.muted .segment-side-buttons {
                             box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
                             .text {
                                 transition: 0.3s ease;
+                                display: flex;
                             }
                             .ui.cancel.label {
                                 position: absolute;
@@ -221,39 +196,72 @@ section.muted .segment-side-buttons {
                                     background-color: #cccccc !important;
                                 }
                             }
+                        }
+                        .filter-status, .filter-activities, .filter-data-sample {
                             &.not-filtered {
-                                &:hover {
-                                    box-shadow: 0px 0px 0px 1px #09beec inset;
-                                    color: #09beec !important;
+                                .ui.basic.button {
+                                    &:hover {
+                                        box-shadow: 0px 0px 0px 1px #09beec inset;
+                                        color: #09beec !important;
+                                    }
+                                    &.disabled {
+                                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                                        pointer-events: none;
+                                    }
                                 }
-                                &.disabled {
-                                     box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                                 }
                             }
                             &.filtered {
-                                background-color: #ffffff !important;
-                                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                color: #000000 !important;
-                                &:hover {
-                                    width: fit-content;
-                                    .text {
-                                        margin-right: 21px;
-                                    }
-                                    .ui.cancel.label {
-                                        visibility: unset;
+                                .ui.basic.button {
+                                    background-color: #ffffff !important;
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                    color: #000000 !important;
+                                    padding: 9px 20px;
+                                    &:hover {
+                                        width: fit-content;
+                                        .text {
+                                            margin-right: 15px;
+                                        }
+                                        .ui.cancel.label {
+                                            visibility: unset;
+                                            right: 5px;
+                                        }
                                     }
                                 }
+                            }
+                            &.disabled {
+                                background: unset;
+                                opacity: 0.5 !important;
+                                box-shadow: unset;
+                                border: none;
+                                pointer-events: none;
                             }
                         }
                         .filter-status {
-
+                            .circular.label {
+                                &.new-color {
+                                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                    background: #FFFFFF
+                                }
+                                &.draft-color {
+                                    background: #E8E8E8;;
+                                }
+                                &.translated-color {
+                                    background: #09beec;
+                                }
+                                &.approved-color {
+                                    background: #7cc576;
+                                }
+                                &.rejected-color {
+                                    background: #dc2e34;
+                                }
+                            }
                         }
                         .filter-activities {
 
                         }
                         .filter-toggle {
                             .checkbox {
-                                left: 6px;
+                                left: 5px;
                                 top: 4px;
                                 margin: 0 !important;
                                 float: none;
@@ -269,6 +277,11 @@ section.muted .segment-side-buttons {
                             }
                         }
                         .filter-data-sample {
+                            display: flex;
+                            align-items: center;
+                            .percent-item {
+                                margin-right: 5px;
+                            }
                             .menu {
                                 width: 220px;
                                 .head-dropdown {
@@ -301,13 +314,24 @@ section.muted .segment-side-buttons {
                     .clear-filter-element {
                         margin-left: 13px;
                         border-left: 1px solid #d6d6d7;
-                        padding-left: 15px;
+                        padding-left: 13px;
                         color: black;
-                        a {
-                            color: grey;
-                            text-decoration: underline;
-                            &:hover {
-                                text-decoration: none;
+                        display: flex;
+                        justify-content: space-around;
+                        width: 135px;
+                        .clear-filter, .select-all-filter {
+                            display: inline;
+                            button {
+                                background: none;
+                                color: grey;
+                                text-decoration: underline;
+                                cursor: pointer;
+                                border: none;
+                                padding: 0;
+                                outline: none;
+                                &:hover {
+                                    text-decoration: none;
+                                }
                             }
                         }
                     }

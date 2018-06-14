@@ -277,7 +277,7 @@ class SegmentsFilter extends React.Component {
         let buttonArrowsClass = 'qa-arrows-disbled';
         let options = config.searchable_statuses.map(function (item, index) {
             return <div className="item" key={index} data-value={item.value}>
-                        <div  className={"ui "+ item.label +" empty circular label"} />
+                        <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                             {item.label}
                     </div>;
         });
@@ -293,20 +293,16 @@ class SegmentsFilter extends React.Component {
 
         let filterClassEnabled = (this.state.filtersEnabled) ? "" : "disabled";
         let dataSampleClassEnabled = (this.state.dataSampleEnabled) ? "" : "disabled";
-        let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "no-filtered";
+        let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "not-filtered";
         filterClassEnabled = (!this.state.dataSampleEnabled && this.state.samplingType !== "") ? filterClassEnabled + " filtered" :
-            filterClassEnabled + " no-filtered";
+            filterClassEnabled + " not-filtered";
         dataSampleClassEnabled = (this.state.dataSampleEnabled && this.state.samplingType !== "") ? dataSampleClassEnabled + " filtered" :
-            dataSampleClassEnabled + " no-filtered";
+            dataSampleClassEnabled + " not-filtered";
 
         return (this.props.active ? <div className="filter-wrapper">
             <div className="filter-container">
                 <div className="filter-container-inside">
-                    {this.state.filtering ? (
-                        <div className="">
-                            <div ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</div>
-                        </div>
-                    ) : (null)}
+
                     <div className="filter-list">
                         <div className="filter-dropdown">
                             <div className={"filter-status " + statusFilterClass}>
@@ -342,6 +338,9 @@ class SegmentsFilter extends React.Component {
                                 </div>
                             </div>
                             <div className={"filter-data-sample " + dataSampleClassEnabled}>
+                                <div className="percent-item">
+                                    15%
+                                </div>
                                 <div className="ui top left pointing dropdown basic tiny button" ref={(checkbox)=>this.dataSampleDropDown=checkbox}>
                                     <div className="text">Data Sample</div>
                                     <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetDataSampleFilter.bind(this)}/></div>
@@ -349,25 +348,25 @@ class SegmentsFilter extends React.Component {
                                         <div className="head-dropdown">
                                             <div className="ui mini input">
                                                 <label>Sample size <b>(%)</b></label>
-                                                <input type="number" placeholder="percent value" value={this.state.samplingSize} onChange={this.samplingSizeChanged.bind(this)} ref={(input)=>this.sampleSizeInput=input}/>
+                                                <input type="number" placeholder="n°" value={this.state.samplingSize} onChange={this.samplingSizeChanged.bind(this)} ref={(input)=>this.sampleSizeInput=input}/>
                                             </div>
                                         </div>
                                         <div className="divider" />
                                         <div className="item" data-value="edit_distance_high_to_low">
-                                            <div className="type-item">Edit distance</div>
-                                            <div className="order-item">(A - Z)</div>
+                                            <div className="type-item">Edit distance </div>
+                                            <div className="order-item"> (A - Z)</div>
                                         </div>
                                         <div className="item" data-value="edit_distance_low_to_high">
                                             <div className="type-item" >Edit distance</div>
-                                            <div className="order-item">(Z - A)</div>
+                                            <div className="order-item"> (Z - A)</div>
                                         </div>
                                         <div className="item" data-value="segment_length_high_to_low">
                                             <div className="type-item">Segment length</div>
-                                            <div className="order-item">(A - Z)</div>
+                                            <div className="order-item"> (A - Z)</div>
                                         </div>
                                         <div className="item" data-value="segment_length_low_to_high">
                                             <div className="type-item">Segment length</div>
-                                            <div className="order-item">(Z - A)</div>
+                                            <div className="order-item"> (Z - A)</div>
                                         </div>
                                         <div className="item" data-value="regular_intervals">
                                             Regular interval
@@ -379,24 +378,25 @@ class SegmentsFilter extends React.Component {
 
                         ):(null)}
                         {this.state.filtering ? (
-                            <div className="clear-filter-element">
-                                <div className="clear-filter">
-                                    <a href="#" onClick={this.clearClick.bind(this)}>Clear all</a>
-                                </div>
+
+                        <div className="clear-filter-element">
+                            <div className="clear-filter">
+                                <button href="#" onClick={this.clearClick.bind(this)}>Clear all</button>
                             </div>
+                            <div className="select-all-filter">
+                                <button href="#" ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</button>
+                            </div>
+                        </div>
                         ) : (null)}
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
                             {this.state.filtering && this.state.filteredCount > 0 ? (
                             <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
-                                <div className="label-filters label"><b>{this.state.filteredCount}</b> Filtered segments</div>
+                                <div className="label-filters labl"><b>{this.state.filteredCount}</b> Filtered segments</div>
                                 <button className="filter-move-up ui basic button" onClick={this.moveUp.bind(this)}>
                                     <i className="icon-chevron-left" />
                                 </button>
-                                {/*<div className="info-navigation-filters">*/}
-                                     {/*/ */}
-                                {/*</div>*/}
                                 <button className="filter-move-up ui basic button" onClick={this.moveDown.bind(this)}>
                                     <i className="icon-chevron-right" />
                                 </button>
