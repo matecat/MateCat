@@ -33,8 +33,8 @@ class Search extends React.Component {
         this.handleReplaceAllClick = this.handleReplaceAllClick.bind(this);
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
+        this.componenDidMount = this;
     }
-
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.active){
@@ -51,6 +51,12 @@ class Search extends React.Component {
                 });
             }
         }
+        $('.ui.checkbox')
+            .checkbox()
+        ;
+        $('.ui.dropdown')
+            .dropdown()
+        ;
     }
 
     handleSubmit(event) {
@@ -175,7 +181,7 @@ class Search extends React.Component {
         if (!this.state.search.searchTarget && !this.state.search.searchSource) {
             findIsDisabled = true;
         }
-        return ( this.props.active ? <div className="searchbox">
+        /*return ( this.props.active ? <div className="searchbox">
             <form onSubmit={this.handleSubmit}>
                 <div className="search-inputs">
                     <div className="block">
@@ -266,8 +272,108 @@ class Search extends React.Component {
                     <div onClick={this.goToNext.bind(this)}>NEXT</div>
                 </div>
             </div>
-        </div> : (null) )
+        </div> : (null) )*/
+
+        return ( this.props.active ? <form className="ui tiny form">
+                <div className="find-wrapper">
+                    <div className="find-container">
+                        <div className="find-container-inside">
+                            <div className="find-list">
+                                <div className="fields">
+                                    <div className="field">
+                                        <div>
+                                            <label>Source</label>
+                                            <input type="text" placeholder="Find in source" />
+                                        </div>
+                                        <div className="">
+                                            <div>
+                                                <input type="checkbox"/>
+                                                <label>Match Case</label>
+                                            </div>
+                                            <div>
+                                                <input type="checkbox"/>
+                                                <label>Hole word</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="field">
+                                        <div>
+                                            <label>Target</label>
+                                            <input type="text" placeholder="Find in target" />
+                                            <div>
+                                                <input type="checkbox"/>
+                                                <label>Replace with</label>
+                                            </div>
+                                        </div>
+                                        <div className="">
+                                            <div>
+                                                <input type="text" placeholder="Replace in target" />
+                                                <button className="ui basic tiny button">Replace</button>
+                                                <button className="ui basic tiny button">Replace All</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="field">
+                                        <label>Find for</label>
+                                        <div className="find-dropdown">
+                                            <div className="ui top left pointing dropdown basic tiny button not-filtered">
+                                                <div className="text">
+                                                    <div>Status Segment</div>
+                                                    <div className="ui cancel label"><i className="icon-cancel3" /></div>
+                                                </div>
+                                                <div className="menu">
+                                                    <div className="item">
+                                                        <div className="ui gray empty circular label" />
+                                                        New
+                                                    </div>
+                                                    <div className="item">
+                                                        <div className="ui black empty circular label" />
+                                                        Draft
+                                                    </div>
+                                                    <div className="item">
+                                                        <div className="ui blue empty circular label" />
+                                                        Translated
+                                                    </div>
+                                                    <div className="item">
+                                                        <div className="ui green empty circular label" />
+                                                        Approved
+                                                    </div>
+                                                    <div className="item">
+                                                        <div className="ui red empty circular label" />
+                                                        Rejected
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            {/*<div className="find-actions">
+                                <button type="button" className="ui button">Find</button>
+                                <button type="button" className="ui button">Clear</button>
+                            </div>*/}
+                        </div>
+                    </div>
+                </div>
+        </form> : (null) )
     }
 }
 
 export default Search;
+
+
+
+{/*
+<div className="ui form">
+    <div className="two fields">
+        <div className="field">
+            <label>First name</label>
+            <input type="text" placeholder="First Name">
+        </div>
+        <div className="field">
+            <label>Middle name</label>
+            <input type="text" placeholder="Middle Name">
+        </div>
+    </div>
+</div>*/}

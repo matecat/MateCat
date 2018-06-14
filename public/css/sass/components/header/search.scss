@@ -126,3 +126,94 @@
 input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
     width: 95px;
 }
+
+
+
+/////////// New Find
+.ui.form {
+    box-sizing: border-box;
+    .find-wrapper {
+        /*position: relative;*/
+        width: 100%;
+        /*float: left;*/
+        margin-top: 1px;
+        .find-container {
+            background-color: #fff;
+            padding: 10px 0;
+            box-shadow: 0 1px 3px #666;
+            border-radius: 0 0 0px 0px;
+            display: block;
+            color: #4d4d4d;
+            .find-container-inside {
+                height: 100%;
+               /* display: flex;
+                flex-direction: row;*/
+                padding: 0 6.5% 0 5%;
+                text-align: left;
+                .find-list {
+                    .fields {
+                        .field {
+                            .primo {}
+                            .secondo {}
+                            .find-dropdown {
+                                display: flex;
+                                align-items: center;
+                                .ui.basic.button{
+                                    font-family: "calibri", Arial, Helvetica, sans-serif;
+                                    font-size: 16px !important;
+                                    padding: 10px 20px;
+                                    border-radius: 40px;
+                                    transition: 0.3s ease;
+                                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                    .text {
+                                        transition: 0.3s ease;
+                                    }
+                                    .ui.cancel.label {
+                                        position: absolute;
+                                        padding: 4px;
+                                        background-color: #d6d6d6;
+                                        border-radius: 15px;
+                                        top: 8px;
+                                        line-height: 0px;
+                                        right: 0px;
+                                        visibility: hidden;
+                                        &:hover {
+                                            background-color: #cccccc !important;
+                                        }
+                                    }
+                                    &.not-filtered {
+                                        &:hover {
+                                            box-shadow: 0px 0px 0px 1px #09beec inset;
+                                            color: #09beec !important;
+                                        }
+                                        &.disabled {
+                                            box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                                        }
+                                    }
+                                    &.filtered {
+                                        background-color: #ffffff !important;
+                                        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                        color: #000000 !important;
+                                        &:hover {
+                                            width: fit-content;
+                                            .text {
+                                                margin-right: 21px;
+                                            }
+                                            .ui.cancel.label {
+                                                visibility: unset;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+                .find-actions {
+
+                }
+            }
+        }
+    }
+}
