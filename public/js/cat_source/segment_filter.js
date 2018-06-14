@@ -98,10 +98,7 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        filterSubmit : function( data, wantedSegment,extendendLocalStorageValues) {
-            if (!wantedSegment) {
-                wantedSegment = null;
-            }
+        filterSubmit : function( data ,extendendLocalStorageValues) {
             if(!extendendLocalStorageValues){
                 extendendLocalStorageValues = {};
             }
@@ -132,23 +129,21 @@ if (SegmentFilter.enabled())
                 SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 
                 var segmentToOpen ;
-
-                if ( !wantedSegment ) {
+                var lastSegmentId = SegmentFilter.getStoredState().lastSegmentId;
+                if ( !lastSegmentId ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$.length) {
-                        UI.openSegment(segment$)
-                    } else {
-                        UI.scrollSegment(segment$, segmentToOpen);
+                        UI.scrollSegment( segment$, segmentToOpen );
+                        UI.openSegment( segment$ );
                     }
-                } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
-                    callbackForSegmentNotInSample( wantedSegment )  ;
+                } else if ( lastSegmentId && !segmentIsInSample( lastSegmentId, data[ 'segment_ids' ] ) ) {
+                    callbackForSegmentNotInSample( lastSegmentId )  ;
                 } else {
-                    segmentToOpen = wantedSegment ;
+                    segmentToOpen = lastSegmentId ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     if (segment$) {
                         UI.openSegment(segment$)
-                    } else {
                         UI.scrollSegment(segment$, segmentToOpen);
                     }
                 }

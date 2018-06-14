@@ -99,11 +99,11 @@ class SegmentsFilter extends React.Component {
             SegmentFilter.filterSubmit({
                 status: this.state.selectedStatus,
                 sample: sample,
-            }, segmentToOpen,{
+            },{
                 samplingType: this.state.samplingType,
                 samplingSize:this.state.samplingSize,
                 selectedStatus: this.state.selectedStatus,
-                dataSampleEnabled: this.state.dataSampleEnabled,
+                dataSampleEnabled: this.state.dataSampleEnabled
             });
         }
     }
@@ -269,7 +269,7 @@ class SegmentsFilter extends React.Component {
     }
 
     render () {
-        let buttonArrowsClass;
+        let buttonArrowsClass = 'qa-arrows-disbled';
         let options = config.searchable_statuses.map(function (item, index) {
             return <div className="item" key={index} data-value={item.value}>
                         <div  className={"ui "+ item.label +" empty circular label"} />
@@ -382,15 +382,15 @@ class SegmentsFilter extends React.Component {
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
-                            {this.state.filtering && this.state.filteredCount > 1 ? (
+                            {this.state.filtering && this.state.filteredCount > 0 ? (
                             <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
-                                <div className="label-filters label">Filtered segments</div>
+                                <div className="label-filters label"><b>{this.state.filteredCount}</b> Filtered segments</div>
                                 <button className="filter-move-up ui basic button" onClick={this.moveUp.bind(this)}>
                                     <i className="icon-chevron-left" />
                                 </button>
-                                <div className="info-navigation-filters">
-                                    <b>1</b> / {this.state.filteredCount}
-                                </div>
+                                {/*<div className="info-navigation-filters">*/}
+                                     {/*/ */}
+                                {/*</div>*/}
                                 <button className="filter-move-up ui basic button" onClick={this.moveDown.bind(this)}>
                                     <i className="icon-chevron-right" />
                                 </button>

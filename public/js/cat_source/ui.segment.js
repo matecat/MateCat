@@ -398,11 +398,15 @@
             var selector = UI.selectorForNextSegment() ;
             var prev = $('.editor').prevAll( selector ).first();
             if (prev.is('section')) {
-                $(UI.targetContainerSelector(), prev).click();
+                UI.scrollSegment(prev);
+                UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                // $(UI.targetContainerSelector(), prev).click();
             } else {
                 prev = $('.editor').parents('article').prevAll( selector ).first();
                 if (prev.length) {
-                    $(UI.targetContainerSelector() , prev).click();
+                    // $(UI.targetContainerSelector() , prev).click();
+                    UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                    UI.scrollSegment(prev);
                 }
             }
             if (prev.length)
