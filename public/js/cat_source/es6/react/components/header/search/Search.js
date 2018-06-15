@@ -20,8 +20,6 @@ class Search extends React.Component {
                 searchSource: ""
             },
             focus: true,
-            currentTargetSearch: null,
-            currentSourceSearch: null,
             funcFindButton: true  // true=find / false=next
         };
         this.state = _.cloneDeep(this.defaultState);
@@ -29,11 +27,9 @@ class Search extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancelClick = this.handleCancelClick.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-
         this.handleReplaceAllClick = this.handleReplaceAllClick.bind(this);
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
-        this.componenDidMount = this;
         this.dropdownInit = false;
     }
 
@@ -43,8 +39,6 @@ class Search extends React.Component {
             UI.execFind();
         }
         this.setState({
-            currentSourceSearch: this.state.search.searchSource,
-            currentTargetSearch: this.state.search.searchTarget,
             funcFindButton: false
         })
     }
@@ -175,11 +169,14 @@ class Search extends React.Component {
                     focus: true
                 });
             }
+            this.dropdownInit = false;
         }
+
 
     }
     escFunction(event){
         if(event.keyCode === 27) {
+            this.dropdownInit = false;
             event.stopPropagation();
             event.preventDefault();
             CatToolActions.closeSubHeader();
@@ -323,11 +320,14 @@ class Search extends React.Component {
                                         <div>
                                             <label>Find in target</label>
                                             <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}/>
+                                            {this.state.showReplaceOptionsInSearch ?
                                             <div>
                                                 <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
                                                 <label>Replace with</label>
                                             </div>
+                                            : (null)}
                                         </div>
+                                        {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
                                         <div className="field">
                                             <div>
                                                 <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
@@ -335,6 +335,7 @@ class Search extends React.Component {
                                                 <button className="ui basic tiny button">Replace All</button>
                                             </div>
                                         </div>
+                                        : (null)}
                                     </div>
                                     <div className="field">
                                         <label>Find for</label>
