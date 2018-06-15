@@ -315,7 +315,7 @@ class SegmentsFilter extends React.Component {
             buttonArrowsClass = 'qa-arrows-enabled';
         }
 
-        let filterClassEnabled = (this.state.filtersEnabled) ? "" : "disabled";
+        let filterClassEnabled = (!this.state.dataSampleEnabled) ? "" : "disabled";
         let dataSampleClassEnabled = (this.state.dataSampleEnabled) ? "" : "disabled";
         let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "not-filtered";
         filterClassEnabled = (!this.state.dataSampleEnabled && this.state.samplingType !== "") ? filterClassEnabled + " filtered" :
