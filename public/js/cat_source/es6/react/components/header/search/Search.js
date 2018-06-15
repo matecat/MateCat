@@ -57,8 +57,8 @@ class Search extends React.Component {
         }
     }
 
-    handleCancelClick(event) {
-        event.preventDefault();
+    handleCancelClick() {
+        this.dropdownInit = false;
         CatToolActions.closeSubHeader();
         UI.body.removeClass('searchActive');
         UI.clearSearchMarkers();
@@ -176,10 +176,7 @@ class Search extends React.Component {
     }
     escFunction(event){
         if(event.keyCode === 27) {
-            this.dropdownInit = false;
-            event.stopPropagation();
-            event.preventDefault();
-            CatToolActions.closeSubHeader();
+            this.handleCancelClick();
         }
     }
     componentDidMount(){
@@ -197,9 +194,9 @@ class Search extends React.Component {
                 {item.label}
             </div>;
         });
-        let findIsDisabled = false;
-        if (!this.state.search.searchTarget && !this.state.search.searchSource) {
-            findIsDisabled = true;
+        let findIsDisabled = true;
+        if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") {
+            findIsDisabled = false;
         }
         /*return ( this.props.active ? <div className="searchbox">
             <form onSubmit={this.handleSubmit}>
@@ -293,7 +290,7 @@ class Search extends React.Component {
                 </div>
             </div>
         </div> : (null) )*/
-
+        let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
         return ( this.props.active ? <form className="ui tiny form">
                 <div className="find-wrapper">
                     <div className="find-container">
@@ -319,7 +316,8 @@ class Search extends React.Component {
                                     <div className="field">
                                         <div>
                                             <label>Find in target</label>
-                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}/>
+                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
+                                            className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
                                             {this.state.showReplaceOptionsInSearch ?
                                             <div>
                                                 <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
@@ -355,8 +353,8 @@ class Search extends React.Component {
                                 </div>
                             </div>
                             <div className="find-actions">
-                                <button type="button" className="ui button" onClick={this.handleSubmit.bind(this)}>Find</button>
-                                <button type="button" className="ui button">Clear</button>
+                                <button type="button" className={"ui button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                <button type="button" className="ui button" onClick={this.handleCancelClick.bind(this)}>Close</button>
                             </div>
                         </div>
                     </div>
