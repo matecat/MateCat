@@ -134,6 +134,7 @@ class Job {
             $reviseIssues = [];
 
         } else{
+
             $reviseClass = new \Constants_Revise();
 
             $jobQA = new \Revise_JobQA(
@@ -142,17 +143,21 @@ class Job {
                     $jobStats->getTotal(),
                     $reviseClass
             );
+
             list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
                     $jStruct->password,
                     $jobStats->getTotal() );
 
+            /**
+             * @var $jobQA \Revise_JobQA
+             */
             $jobQA->retrieveJobErrorTotals();
             $jobQA->evalJobVote();
             $qa_data      = $jobQA->getQaData();
 
             $reviseIssues = [];
             foreach ( $qa_data as $issue ) {
-                $reviseIssues[ strtolower( $issue[ 'type' ] ) ] = [
+                $reviseIssues[ str_replace( " " , "_", strtolower( $issue[ 'type' ] ) ) ] = [
                         'allowed' => $issue[ 'allowed' ],
                         'found'   => $issue[ 'found' ]
                 ];
