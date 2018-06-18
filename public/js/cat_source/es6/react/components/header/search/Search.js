@@ -1,6 +1,9 @@
-var React = require('react');
-var SegmentConstants = require('../../../constants/SegmentConstants');
-var SegmentStore = require('../../../stores/SegmentStore');
+let React = require('react');
+let SegmentConstants = require('../../../constants/SegmentConstants');
+let CattolConstants = require('../../../constants/CatToolConstants');
+let SegmentStore = require('../../../stores/SegmentStore');
+let CatToolStore = require('../../../stores/CatToolStore');
+let SearchUtils = require('./ui.search');
 
 class Search extends React.Component {
 
@@ -20,7 +23,10 @@ class Search extends React.Component {
                 searchSource: ""
             },
             focus: true,
-            funcFindButton: true  // true=find / false=next
+            funcFindButton: true, // true=find / false=next
+            segments: [],
+            total: null,
+            searchReturn: false
         };
         this.state = _.cloneDeep(this.defaultState);
 
@@ -36,43 +42,58 @@ class Search extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
         if (this.state.funcFindButton) {
-            UI.execFind();
+            SearchUtils.execFind(this.state.search);
         }
         this.setState({
             funcFindButton: false
         })
     }
 
+    setResults(total, segments) {
+        this.setState({
+            total: parseInt(total),
+            segments: segments,
+            searchReturn: true
+        });
+    }
+
     goToNext() {
         if (!UI.goingToNext) {
             UI.goingToNext = true;
-            UI.execNext();
+            SearchUtils.execNext();
         }
     }
 
     goToPrev() {
         if (!UI.goingToNext) {
             UI.goingToNext = true;
-            UI.execPrev();
+            SearchUtils.execPrev();
         }
     }
 
     handleCancelClick() {
         this.dropdownInit = false;
-        CatToolActions.closeSubHeader();
-        UI.body.removeClass('searchActive');
-        UI.clearSearchMarkers();
-        UI.enableTagMark();
-        if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-            UI.gotoOpenSegment();
-        } else {
-            UI.render({
-                firstLoad: false,
-                segmentToOpen: UI.currentSegmentId
-            });
-        }
+        // CatToolActions.closeSubHeader();
+        // UI.body.removeClass('searchActive');
+        SearchUtils.clearSearchMarkers();
+        // UI.enableTagMark();
+        // if (UI.segmentIsLoaded(UI.currentSegmentId)) {
+        //     UI.gotoOpenSegment();
+        // } else {
+        //     UI.render({
+        //         firstLoad: false,
+        //         segmentToOpen: UI.currentSegmentId
+        //     });
+        // }
         UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
-        this.setState(this.defaultState);
+        this.resetStatusFilter();
+        setTimeout(() => {
+            this.setState(_.cloneDeep(this.defaultState));
+        });
+    }
+
+    resetStatusFilter() {
+        $(this.statusDropDown).dropdown('restore defaults');
     }
 
     handleReplaceAllClick(event) {
@@ -86,8 +107,7 @@ class Search extends React.Component {
         });
     }
 
-    handleReplaceClick(event) {
-        event.preventDefault();
+    handleReplaceClick() {
         if(this.state.search.searchTarget === this.state.search.replaceTarget){
             APP.alert({msg: 'Attention: you are replacing the same text!'});
             return false;
@@ -107,14 +127,14 @@ class Search extends React.Component {
                 caller: 'replace'
             });
 
-            UI.updateSearchDisplayCount(segment);
+            SearchUtils.updateSearchDisplayCount(segment);
 
-            if (UI.numSearchResultsSegments > 1) UI.gotoNextResultItem(true);
+            if (SearchUtils.numSearchResultsSegments > 1) SearchUtils.gotoNextResultItem(true);
         }
     }
 
     handleStatusChange(value) {
-        let search = this.state.search;
+        let search =  _.cloneDeep(this.state.search);
         search['selectStatus'] = value;
         this.setState({
             search: search,
@@ -158,6 +178,7 @@ class Search extends React.Component {
                 this.dropdownInit = true;
                 $(this.statusDropDown).dropdown({
                     onChange: function(value, text, $selectedItem) {
+                        value = (value === "") ? "all": value;
                         self.handleStatusChange(value)
                     }
                 });
@@ -174,16 +195,80 @@ class Search extends React.Component {
 
 
     }
+    getResultsHtml() {
+        var html = "";
+
+        //Waiting for results
+        if (!this.state.funcFindButton && !this.state.searchReturn) {
+            html = <div className="search-display">
+                    <p className="searching">Searching ...</p>
+                </div>;
+        } else if (!this.state.funcFindButton && this.state.searchReturn){
+
+            let query = [];
+            if (this.state.search.exactMatch)
+                query.push(' exactly');
+            if (this.state.search.searchSource)
+                query.push(<span className="query"><span className="param"> {htmlEncode(this.state.search.searchSource)} </span> in source </span>);
+            if (this.state.search.searchTarget)
+                query.push(<span className="query"><span className="param"> {htmlEncode(this.state.search.searchTarget)} </span> in target </span>);
+            if (this.state.search.selectStatus !== 'all') {
+                let statusLabel = <span> and status <span className="param"> {this.state.search.selectStatus} </span></span>;
+                query.push(statusLabel);
+            }
+            let caseLabel = ' (' + ((this.state.search.matchCase) ? 'case sensitive' : 'case insensitive') + ')';
+            query.push(caseLabel);
+            let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
+            let numbers = "";
+            if (searchMode === 'source&target') {
+                let total = this.state.segments.length ? this.state.segments.length : 0;
+                let label = (total === 1) ? 'segment' : 'segments';
+                numbers =  total > 0 ? (
+                    <span className="numbers">Found <span className="segments">{this.state.segments.length}</span> {label}</span>
+                ) : (
+                    <span className="numbers">No segments found</span>
+                    )
+            } else {
+                let total = this.state.total ? this.state.total : 0;
+                let label = (total === 1) ? 'result' : 'results';
+                let label2 = (total === 1) ? 'segment' : 'segments';
+                numbers =  total > 0 ? (
+                    <span className="numbers">Found <span className="results">{this.state.total}</span>{' ' + label + ' in '}<span className="segments">{this.state.segments.length}</span> {' ' + label2}</span>
+                ) : (
+                    <span className="numbers">No segments found</span>
+                )
+            }
+            html = <div className="search-display">
+                        <p className="found">
+                            {numbers}
+                            {' '}
+                            having
+                            {query}
+                        </p>
+                        {this.state.segments.length > 0 ? (
+                            <div className="search-result-buttons">
+                                <div onClick={this.goToPrev.bind(this)}>PREV</div>
+                                <div onClick={this.goToNext.bind(this)}>NEXT</div>
+                            </div>
+                        ) : (null) }
+
+                    </div>
+        }
+        return html;
+    }
     escFunction(event){
         if(event.keyCode === 27) {
             this.handleCancelClick();
         }
     }
     componentDidMount(){
-        document.addEventListener("keydown", this.escFunction, false);
+        document.addEventListener("keydown", this.escFunction, false);        
+        CatToolStore.addListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults.bind(this));
+
     }
     componentWillUnmount(){
         document.removeEventListener("keydown", this.escFunction, false);
+        CatToolStore.removeListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults);
     }
 
     render() {
@@ -198,100 +283,11 @@ class Search extends React.Component {
         if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") {
             findIsDisabled = false;
         }
-        /*return ( this.props.active ? <div className="searchbox">
-            <form onSubmit={this.handleSubmit}>
-                <div className="search-inputs">
-                    <div className="block">
-                        <label htmlFor="search-source">Find in source</label>
-                        <input id="search-source" className="search-input" type="text" name="searchSource"
-                               ref={(input) => { this.sourceEl = input; }}
-                               checked={this.state.search.searchSource}
-                               onChange={this.handleInputChange}/>
-                    </div>
-                    <div className="block">
-                        <div className="">
-                            <label htmlFor="search-target">Find in target</label>
-                            <input id="search-target"
-                                   className={"search-input " + (!this.state.search.searchTarget && this.state.search.replaceTarget ? 'warn' : null)}
-                                   type="text" name="searchTarget"
-                                   onChange={this.handleInputChange}
-                                   defaultValue={this.state.search.searchTarget}/>
-                        </div>
-
-                        {this.state.showReplaceOptionsInSearch ?
-                            <div className="">
-                                <input id="enable-replace" type="checkbox" name="enableReplace"
-                                       checked={this.state.search.enableReplace}
-                                       onChange={this.handleInputChange}/>
-                                <label htmlFor="enable-replace">Replace target with</label>
-
-                            </div>
-                            : null}
-
-                        {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
-                            <div className="">
-                                <input id="replace-target" className="search-input" type="text" name="replaceTarget"
-                                       onFocus={this.replaceTargetOnFocus}
-                                       onChange={this.handleInputChange}
-                                       defaultValue={this.state.search.replaceTarget}/>
-                                <button id="exec-replaceall" className="btn" onClick={this.handleReplaceAllClick}
-                                        disabled={!this.state.search.enableReplace || !this.state.search.searchTarget}>
-                                    Replace all
-                                </button>
-
-                                <button id="exec-replace" className="btn" onClick={this.handleReplaceClick}
-                                        disabled={!this.state.search.enableReplace || !this.state.search.searchTarget}>
-                                    Replace
-                                </button>
-                            </div>
-                            : null}
-                    </div>
-                    <div className="block">
-                        <label htmlFor="select-status">Status</label>
-                        <select id="select-status" className="search-select" name="selectStatus"
-                                onChange={this.handleInputChange}
-                                defaultValue={this.state.search.selectStatus}>
-                            <option value="all">All</option>
-                            {options}
-                        </select>
-                    </div>
-                    <div className="block right buttons">
-                        <div className="">
-                            <input id="exec-cancel" type="button" className="btn" onClick={this.handleCancelClick}
-                                   defaultValue="Cancel"/>
-                            <input id="exec-find" type="submit" className="btn" data-func="find"
-                                   defaultValue="FIND" disabled={!this.state.funcFindButton}/>
-                        </div>
-                    </div>
-                </div>
-                <div className="search-options">
-                    <div className="block">
-                        <input id="match-case" type="checkbox" name="matchCase"
-                               onChange={this.handleInputChange}
-                               defaultValue={this.state.search.matchCase}/>
-                        <label htmlFor="match-case">Match case</label>
-                    </div>
-                    <div className="block">
-                        <input id="exact-match" type="checkbox" name="exactMatch"
-                               onChange={this.handleInputChange}
-                               defaultValue={this.state.search.exactMatch}/>
-                        <label htmlFor="exact-match">Whole word</label>
-                    </div>
-                </div>
-            </form>
-            <div className="search-display">
-                <p className="searching">Searching ...</p>
-                <p className="found"><span className="numbers">Found <span
-                    className="results">...</span> results in <span
-                    className="segments">...</span> segments</span> having<span className="query">...</span></p>
-                <div className="search-result-buttons">
-                    <div onClick={this.goToPrev.bind(this)}>PREV</div>
-                    <div onClick={this.goToNext.bind(this)}>NEXT</div>
-                </div>
-            </div>
-        </div> : (null) )*/
         let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
-        return ( this.props.active ? <form className="ui tiny form">
+        let statusDropdownClass = (this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all") ? "filtered" : "no-filtered";
+        let replaceCheckboxClass = (this.state.search.searchTarget) ? "" : "disabled";
+        let replaceButtonsClass = (this.state.search.replaceTarget && !this.state.funcFindButton) ? "" : "disabled";
+        return ( this.props.active ? <form className="ui form">
                 <div className="find-wrapper">
                     <div className="find-container">
                         <div className="find-container-inside">
@@ -302,21 +298,23 @@ class Search extends React.Component {
                                     </div>
                                     <div className="find-exact-match">
                                         <div className="exact-match">
-                                            <input type="checkbox" value={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}/>
+                                            <input type="checkbox" checked={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}
+                                                   ref={(checkbox)=>this.matchCaseCheck=checkbox}/>
                                             <label> Match Case</label>
                                         </div>
                                         <div className="exact-match">
-                                            <input type="checkbox" value={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
+                                            <input type="checkbox" checked={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
                                             <label> Whole word</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="find-element">
                                     <div className="find-in-target">
-                                        <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}/>
+                                        <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
+                                               className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
                                         {this.state.showReplaceOptionsInSearch ?
                                         <div>
-                                            <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                            <input type="checkbox" className={replaceCheckboxClass} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
                                             <label> Replace with</label>
                                         </div>
                                         : (null)}
@@ -326,18 +324,18 @@ class Search extends React.Component {
                                 <div className="find-element">
                                     <div className="find-in-replace">
                                         <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
-                                        <button className="ui basic tiny button">Replace</button>
-                                        <button className="ui basic tiny button">Replace All</button>
+                                        <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
+                                        <button className={"ui basic tiny button " + replaceButtonsClass}>Replace All</button>
                                     </div>
                                 </div>
                                 : (null)}
                                 <div className="find-element find-dropdown-status">
-                                    <div className="find-dropdown">
-                                        <div className="ui top left pointing dropdown basic tiny button not-filtered" ref={(dropdown)=>this.statusDropDown=dropdown}>
+                                    <div className={"find-dropdown " + statusDropdownClass}>
+                                        <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropDown=dropdown}>
                                             <div className="text">
                                                 <div>Status Segment</div>
                                             </div>
-                                            <div className="ui cancel label"><i className="icon-cancel3" /></div>
+                                            <div className="ui cancel label" onClick={this.resetStatusFilter.bind(this)}><i className="icon-cancel3" /></div>
                                             <div className="menu">
                                                 {options}
                                             </div>
@@ -346,16 +344,19 @@ class Search extends React.Component {
                                 </div>
                                 <div className="find-element find-clear-all">
                                     <div className="find-clear">
-                                        <button type="button" className="">Clear</button>
+                                        <button type="button" className="" onClick={this.handleCancelClick.bind(this)}>Clear</button>
                                     </div>
                                 </div>
                             </div>
                             <div className="find-actions">
-                                <button type="button" className="ui basic button" onClick={this.handleSubmit.bind(this)}>Find</button>
+                                <button type="button" className={"ui basic " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
                             </div>
                         </div>
                     </div>
                 </div>
+                {this.getResultsHtml()}
+
+
         </form> : (null) )
     }
 }

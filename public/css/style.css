@@ -1894,24 +1894,11 @@ body.searchActive .search-display {
 
 .search-display p.found,
 .search-display .search-result-buttons {
-    display: none;
-}
-
-.search-display .no-results .search-result-buttons {
-    display: none;
-}
-
-.search-display.displaying p.found,
-.search-display.displaying .search-result-buttons {
     display: block;
 }
 
 .search-display p.searching {
     display: block;
-}
-
-.search-display.displaying p.searching {
-    display: none;
 }
 
 .search-display span.param {

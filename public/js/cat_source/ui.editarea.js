@@ -44,7 +44,7 @@ $.extend( UI, {
         if (UI.body.hasClass('searchActive')) {
             var el = this;
             setTimeout(function(){
-                UI.rebuildSearchSegmentMarkers(el);
+                SearchUtils.rebuildSearchSegmentMarkers(el);
             },100)
         }
 

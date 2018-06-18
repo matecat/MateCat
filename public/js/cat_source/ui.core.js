@@ -647,14 +647,14 @@ UI = {
     nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = this.getSegmentId($('section').last());
-		$.each(this.searchResultsSegments, function() {
+		$.each(SearchUtils.searchResultsSegments, function() {
 			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
 				found = parseInt(this);
 				return false;
 			}
 		});
 		if (found === '') {
-			found = this.searchResultsSegments[0];
+			found = SearchUtils.searchResultsSegments[0];
 		}
 		return found;
 	},
@@ -738,7 +738,7 @@ UI = {
 
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
-				this.markSearchResults({
+				SearchUtils.markSearchResults({
 					where: where,
 					seg: segLimit
 				});
@@ -834,8 +834,8 @@ UI = {
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
-				this.markSearchResults(options);
-				if (this.searchMode == 'normal') {
+				SearchUtils.markSearchResults(options);
+				if (SearchUtils.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
 				} else {
 					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
@@ -1229,7 +1229,7 @@ UI = {
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
-				this.addWarningToSearchDisplay();
+				SearchUtils.addWarningToSearchDisplay();
 			this.saveInUndoStack('copyalternative');
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
@@ -2580,6 +2580,13 @@ UI = {
             okTxt: 'Download anyway',
             msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
         });
+    },
+    /**
+     * Executes the replace all for segments if all the params are ok
+     * @returns {boolean}
+     */
+    execReplaceAll: function() {
+        SearchUtils.execReplaceAll();
     }
 };
 
