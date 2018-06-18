@@ -4,13 +4,13 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use DataAccess\LoudArray;
 use Exception;
 use Features\Dqf\Model\CachedAttributes\SegmentOrigin;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Utils\Functions;
 use INIT;
-use LoudArray;
 
 class TranslationChildProject extends AbstractChildProject {
 
