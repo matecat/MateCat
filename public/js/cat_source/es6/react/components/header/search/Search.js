@@ -57,8 +57,8 @@ class Search extends React.Component {
         }
     }
 
-    handleCancelClick(event) {
-        event.preventDefault();
+    handleCancelClick() {
+        this.dropdownInit = false;
         CatToolActions.closeSubHeader();
         UI.body.removeClass('searchActive');
         UI.clearSearchMarkers();
@@ -176,10 +176,7 @@ class Search extends React.Component {
     }
     escFunction(event){
         if(event.keyCode === 27) {
-            this.dropdownInit = false;
-            event.stopPropagation();
-            event.preventDefault();
-            CatToolActions.closeSubHeader();
+            this.handleCancelClick();
         }
     }
     componentDidMount(){
@@ -197,9 +194,9 @@ class Search extends React.Component {
                 {item.label}
             </div>;
         });
-        let findIsDisabled = false;
-        if (!this.state.search.searchTarget && !this.state.search.searchSource) {
-            findIsDisabled = true;
+        let findIsDisabled = true;
+        if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") {
+            findIsDisabled = false;
         }
         /*return ( this.props.active ? <div className="searchbox">
             <form onSubmit={this.handleSubmit}>
@@ -293,8 +290,8 @@ class Search extends React.Component {
                 </div>
             </div>
         </div> : (null) )*/
-
-        return ( this.props.active ? <form className="ui form">
+        let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
+        return ( this.props.active ? <form className="ui tiny form">
                 <div className="find-wrapper">
                     <div className="find-container">
                         <div className="find-container-inside">
