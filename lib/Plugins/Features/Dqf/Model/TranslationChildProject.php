@@ -119,7 +119,7 @@ class TranslationChildProject extends AbstractChildProject {
                             // TODO: the corect form of this key should be the following, to so to get back the
                             // id_job for multi-language projects.
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
-                            "targetSegment"     => $translation->translation_before,
+                            "targetSegment"     => ''. $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
                             "segmentOriginId"   => $segmentOriginId,
