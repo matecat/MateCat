@@ -209,7 +209,7 @@ class Search extends React.Component {
                                onChange={this.handleInputChange}/>
                     </div>
                     <div className="block">
-                        <div className="field">
+                        <div className="">
                             <label htmlFor="search-target">Find in target</label>
                             <input id="search-target"
                                    className={"search-input " + (!this.state.search.searchTarget && this.state.search.replaceTarget ? 'warn' : null)}
@@ -219,7 +219,7 @@ class Search extends React.Component {
                         </div>
 
                         {this.state.showReplaceOptionsInSearch ?
-                            <div className="field">
+                            <div className="">
                                 <input id="enable-replace" type="checkbox" name="enableReplace"
                                        checked={this.state.search.enableReplace}
                                        onChange={this.handleInputChange}/>
@@ -229,7 +229,7 @@ class Search extends React.Component {
                             : null}
 
                         {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
-                            <div className="field">
+                            <div className="">
                                 <input id="replace-target" className="search-input" type="text" name="replaceTarget"
                                        onFocus={this.replaceTargetOnFocus}
                                        onChange={this.handleInputChange}
@@ -256,7 +256,7 @@ class Search extends React.Component {
                         </select>
                     </div>
                     <div className="block right buttons">
-                        <div className="field">
+                        <div className="">
                             <input id="exec-cancel" type="button" className="btn" onClick={this.handleCancelClick}
                                    defaultValue="Cancel"/>
                             <input id="exec-find" type="submit" className="btn" data-func="find"
@@ -296,65 +296,62 @@ class Search extends React.Component {
                     <div className="find-container">
                         <div className="find-container-inside">
                             <div className="find-list">
-                                <div className="fields">
-                                    <div className="field">
-                                        <div>
-                                            <label>Find in source</label>
-                                            <input type="text" value={this.state.search.searchSource} placeholder="Find in source" onChange={this.handleInputChange.bind(this, "searchSource")}/>
+                                <div className="find-element">
+                                    <div className="find-in-source">
+                                        <input type="text" value={this.state.search.searchSource} placeholder="Find in source" onChange={this.handleInputChange.bind(this, "searchSource")}/>
+                                    </div>
+                                    <div className="find-exact-match">
+                                        <div className="exact-match">
+                                            <input type="checkbox" value={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}/>
+                                            <label> Match Case</label>
                                         </div>
-                                        <div className="">
-                                            <div>
-                                                <input type="checkbox" value={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}/>
-                                                <label>Match Case</label>
-                                            </div>
-                                            <div>
-                                                <input type="checkbox" value={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
-                                                <label>Whole word</label>
-                                            </div>
+                                        <div className="exact-match">
+                                            <input type="checkbox" value={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
+                                            <label> Whole word</label>
                                         </div>
                                     </div>
-                                    <div className="field">
+                                </div>
+                                <div className="find-element">
+                                    <div className="find-in-target">
+                                        <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}/>
+                                        {this.state.showReplaceOptionsInSearch ?
                                         <div>
-                                            <label>Find in target</label>
-                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
-                                            className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
-                                            {this.state.showReplaceOptionsInSearch ?
-                                            <div>
-                                                <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
-                                                <label>Replace with</label>
-                                            </div>
-                                            : (null)}
-                                        </div>
-                                        {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
-                                        <div className="field">
-                                            <div>
-                                                <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
-                                                <button className="ui basic tiny button">Replace</button>
-                                                <button className="ui basic tiny button">Replace All</button>
-                                            </div>
+                                            <input type="checkbox" value={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                            <label> Replace with</label>
                                         </div>
                                         : (null)}
                                     </div>
-                                    <div className="field">
-                                        <label>Find for</label>
-                                        <div className="find-dropdown">
-                                            <div className="ui top left pointing dropdown basic tiny button not-filtered" ref={(dropdown)=>this.statusDropDown=dropdown}>
-                                                <div className="text">
-                                                    <div>Status Segment</div>
-                                                </div>
-                                                <div className="ui cancel label"><i className="icon-cancel3" /></div>
-                                                <div className="menu">
-                                                    {options}
-                                                </div>
+                                </div>
+                                {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
+                                <div className="find-element">
+                                    <div className="find-in-replace">
+                                        <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
+                                        <button className="ui basic tiny button">Replace</button>
+                                        <button className="ui basic tiny button">Replace All</button>
+                                    </div>
+                                </div>
+                                : (null)}
+                                <div className="find-element find-dropdown-status">
+                                    <div className="find-dropdown">
+                                        <div className="ui top left pointing dropdown basic tiny button not-filtered" ref={(dropdown)=>this.statusDropDown=dropdown}>
+                                            <div className="text">
+                                                <div>Status Segment</div>
+                                            </div>
+                                            <div className="ui cancel label"><i className="icon-cancel3" /></div>
+                                            <div className="menu">
+                                                {options}
                                             </div>
                                         </div>
                                     </div>
-
+                                </div>
+                                <div className="find-element find-clear-all">
+                                    <div className="find-clear">
+                                        <button type="button" className="">Clear</button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="find-actions">
-                                <button type="button" className={"ui button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
-                                <button type="button" className="ui button" onClick={this.handleCancelClick.bind(this)}>Close</button>
+                                <button type="button" className="ui basic button" onClick={this.handleSubmit.bind(this)}>Find</button>
                             </div>
                         </div>
                     </div>
@@ -364,19 +361,3 @@ class Search extends React.Component {
 }
 
 export default Search;
-
-
-
-{/*
-<div className="ui form">
-    <div className="two fields">
-        <div className="field">
-            <label>First name</label>
-            <input type="text" placeholder="First Name">
-        </div>
-        <div className="field">
-            <label>Middle name</label>
-            <input type="text" placeholder="Middle Name">
-        </div>
-    </div>
-</div>*/}
