@@ -11,6 +11,8 @@ namespace Features\Outsource\Traits;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
+use Features\Outsource\Email\ConfirmedQuotationEmail;
+use Features\Outsource\Email\ErrorQuotationEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
@@ -27,13 +29,22 @@ use \INIT;
  */
 trait Translated {
 
+    /**
+     * @var ConfirmedQuotationEmail
+     */
     protected $successEmailObject;
+
+    /**
+     * @var ErrorQuotationEmail
+     */
     protected $failureEmailObject;
 
     protected $internal_project_id;
     protected $internal_job_id;
     protected $external_project_id;
     protected $project_words_count;
+
+    protected $external_parent_project_id;
 
     protected $config;
 
@@ -43,6 +54,13 @@ trait Translated {
 
     public function setFailureMailSender( AbstractEmail $emailObject ) {
         $this->failureEmailObject = $emailObject;
+    }
+
+    /**
+     * @param mixed $external_parent_project_id
+     */
+    public function setExternalParentProjectId( $external_parent_project_id ) {
+        $this->external_parent_project_id = $external_parent_project_id;
     }
 
     public function setInternalIdProject( $id ) {
@@ -143,7 +161,8 @@ trait Translated {
                         'subject'       => $job->subject,
                         'jt'            => 'T',
                         'fd'            => 0,
-                        'of'            => 'json'
+                        'of'            => 'json',
+                        'matecat_raw'   => $job->total_raw_wc
                 ], PHP_QUERY_RFC3986 );
 
         try {
@@ -172,7 +191,8 @@ trait Translated {
                         'pid'  => $quote_response->pid,
                         'c'    => 1,
                         'of'   => "json",
-                        'urls' => json_encode( $urls )
+                        'urls' => json_encode( $urls ),
+                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null )
                 ], PHP_QUERY_RFC3986 );
 
         try {
@@ -200,6 +220,9 @@ trait Translated {
         ] );
         $cDao               = new ConfirmationDao;
         $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
+
+        $cDao->destroyConfirmationCache( $job );
+
         return true;
 
     }

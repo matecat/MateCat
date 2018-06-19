@@ -93,6 +93,16 @@
     ,
         {
             "localized":[{
+                "en":"Austrian German"
+            }],
+            "isocode":"de",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"de-AT"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Azerbaijani"
             }],
             "isocode":"az",
@@ -452,6 +462,56 @@
     ,
         {
             "localized":[{
+                "en":"English Canada"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-CA"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"English India"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"English Ireland"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-IE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"English New Zealand"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-NZ"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"English Singapore"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-SG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Esperanto"
             }],
             "isocode":"eo",
@@ -550,6 +610,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"fr-CA"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"French Swiss"
+            }],
+            "isocode":"fr",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"fr-CH"
         }
     ,
         {
@@ -762,6 +832,17 @@
             "rtl":false,
             "top":"top5 top10 top20",
             "rfc3066code":"it-IT"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Italian Swiss"
+            }],
+            "isocode":"it",
+            "enabled":true,
+            "rtl":false,
+            "top":"top5 top10 top20",
+            "rfc3066code":"it-CH"
         }
     ,
         {
