@@ -363,11 +363,17 @@ class Search extends React.Component {
                                     ) : (null)}
                                 </div>
                             </div>
-                            <div className="find-actions">
-                                <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
-                                <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
-                                <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>Replace All</button>
-                            </div>
+                            {this.state.showReplaceOptionsInSearch ? (
+                                <div className="find-actions">
+                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                    <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
+                                    <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>Replace All</button>
+                                </div>
+                                ) : (
+                                <div className="find-actions">
+                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                </div>
+                                )}
                         </div>
                     </div>
                 </div>

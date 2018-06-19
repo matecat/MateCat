@@ -293,19 +293,21 @@ let SearchUtils = {
                     $(this).replaceWith(a);
                 });
             } else {
-                sid = $(seg).attr('id');
-                if (where == 'before') {
-                    $('section').each(function() {
-                        if ($(this).attr('id') < sid) {
-                            $(this).addClass('justAdded');
-                        }
-                    });
-                } else {
-                    $('section').each(function() {
-                        if ($(this).attr('id') > sid) {
-                            $(this).addClass('justAdded');
-                        }
-                    });
+                if ( seg.length > 0 ) {
+                    sid = $(seg).attr('id');
+                    if (where == 'before') {
+                        $('section').each(function() {
+                            if ($(this).attr('id') < sid) {
+                                $(this).addClass('justAdded');
+                            }
+                        });
+                    } else {
+                        $('section').each(function() {
+                            if ($(this).attr('id') > sid) {
+                                $(this).addClass('justAdded');
+                            }
+                        });
+                    }
                 }
                 this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
                 this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .targetarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
@@ -355,19 +357,21 @@ let SearchUtils = {
                 }
                 this.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
             } else {
-                sid = $(seg).attr('id');
-                if (where == 'before') {
-                    $('section').each(function() {
-                        if ($(this).attr('id') < sid) {
-                            $(this).addClass('justAdded');
-                        }
-                    });
-                } else {
-                    $('section').each(function() {
-                        if ($(this).attr('id') > sid) {
-                            $(this).addClass('justAdded');
-                        }
-                    });
+                if ( seg.length > 0 ) {
+                    sid = $(seg).attr('id');
+                    if (where == 'before') {
+                        $('section').each(function() {
+                            if ($(this).attr('id') < sid) {
+                                $(this).addClass('justAdded');
+                            }
+                        });
+                    } else {
+                        $('section').each(function() {
+                            if ($(this).attr('id') > sid) {
+                                $(this).addClass('justAdded');
+                            }
+                        });
+                    }
                 }
                 this.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase );
                 $('section.justAdded').removeClass('justAdded');
