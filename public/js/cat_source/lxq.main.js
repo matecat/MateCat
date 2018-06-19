@@ -700,7 +700,8 @@ LXQ.init  = function () {
         var buildPowertipDataForSegment = function (segment) {
             var sourceHighlihts = $('.source', segment).find('lxqwarning#lexiqahighlight');
             var targetHighlihts = $(UI.targetContainerSelector(), segment).find('lxqwarning#lexiqahighlight');
-
+            if ( !LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(UI.getSegmentId(segment)) )
+                return 0;
             $.each(sourceHighlihts, function(i, element) {
                var classlist = element.className.split(/\s+/);
                if ($(element).data('errors')!==undefined) {
