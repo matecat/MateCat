@@ -4,13 +4,13 @@ namespace Features\Dqf\Model ;
 
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use DataAccess\LoudArray;
 use Exception;
 use Features\Dqf\Model\CachedAttributes\SegmentOrigin;
 use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\TranslationBatchService;
 use Features\Dqf\Utils\Functions;
 use INIT;
-use LoudArray;
 
 class TranslationChildProject extends AbstractChildProject {
 
@@ -119,7 +119,7 @@ class TranslationChildProject extends AbstractChildProject {
                             // TODO: the corect form of this key should be the following, to so to get back the
                             // id_job for multi-language projects.
                             "clientId"          => $this->translationIdToDqf( $translation, $dqfChildProject ),
-                            "targetSegment"     => $translation->translation_before,
+                            "targetSegment"     => ''. $translation->translation_before,
                             "editedSegment"     => $translation->translation_after,
                             "time"              => $this->transaltionTimeWithTimeout( $translation->time ),
                             "segmentOriginId"   => $segmentOriginId,
