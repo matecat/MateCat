@@ -350,15 +350,11 @@
             var next = $('.editor').nextAll( selector  ).first();
 
             if (next.is('section')) {
-                UI.scrollSegment(next);
-                UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
-                // $(UI.targetContainerSelector(), next).trigger("click", "moving");
+                UI.editAreaClick($(UI.targetContainerSelector(), next));
             } else {
                 next = UI.currentFile.next().find( selector ).first();
                 if (next.length) {
-                    UI.scrollSegment(next);
-                    UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
-                    // $(UI.targetContainerSelector(), next).trigger("click", "moving");
+                    UI.editAreaClick($(UI.targetContainerSelector(), next));
                 } else {
                     UI.closeSegment(UI.currentSegment, 1, 'save');
                 }
