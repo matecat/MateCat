@@ -366,6 +366,7 @@ $.extend( UI, {
         removeSelectedText();
         insertNodeAtCursor(node);
         UI.handleEditAreaPaste(this, e);
+        UI.registerQACheck();
     },
     handleEditAreaPaste(elem, e) {
         var clonedElem = elem.cloneNode(true);
