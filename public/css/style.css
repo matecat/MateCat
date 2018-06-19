@@ -1302,7 +1302,6 @@ body .main-container {
     background-size: 30px 30px !important;
     float: left;
     position: relative;
-    bottom: 100px;
 }
 
 #outer.loading article .projectbar {
