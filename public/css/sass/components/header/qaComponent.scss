@@ -22,8 +22,6 @@
   justify-content: flex-start;
 }
 
-
-
 .qa-issues-container, .qa-lexiqa-container {
   width: 150px;
   height: 50px;
@@ -165,82 +163,86 @@
 
 /************************************************/
 
-
 .qa-container {
-    .qa-container-inside {
-        height: 100%;
+  .qa-container-inside {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 6.5% 0 5%;
+    align-items: center;
+    .label-issues {
+      font-weight: 700;
+      margin-right: 5px;
+      &.labl {
+        margin-left: 70px
+      }
+    }
+    .qa-issues-list {
+      display: flex;
+      flex-grow: 3;
+      align-items: center;
+      .qa-issue {
+      }
+      .icon-cancel-circle {
+        color: #E1565A;
+      }
+      .icon-warning2 {
+        color: #EA862C;
+      }
+      .ui.basic.buttons {
+        button {
+          font-size: 16px !important;
+          padding: 10px;
+          color: #000000 !important;
+          font-family: calibri;
+          &:hover {
+            background: #f2f4f7 !important;
+          }
+          &.mc-bg-gray {
+            background: #f2f4f7 !important;
+          }
+          i {
+            position: relative;
+            top: 2px;
+          }
+        }
+      }
+      .qa-lexiqa-info {
+        margin-left: 5px;
+        font-weight: 700;
+        a {
+          margin: 0 3px;
+          font-weight: 700;
+          text-decoration: underline;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
+    .qa-issues-navigator {
+      display: flex;
+      flex-grow: 1;
+      .qa-actions {
         display: flex;
+        flex-grow: 1;
         flex-direction: row;
-        justify-content: space-between;
-        padding: 0 6.5% 0 5%;
+        justify-content: flex-end;
         align-items: center;
-        .label-issues {
-            font-weight: 700;
-            margin-right: 5px;
-            &.labl {
-                margin-left: 70px
-            }
+        .info-navigation-issues {
+          display: inline-block;
+          margin: 0 15px 0 10px;
         }
-        .qa-issues-list{
-            display: flex;
-            flex-grow: 3;
-            align-items: center;
-            .qa-issue{
-            }
-            .icon-cancel-circle {
-                color: #E1565A;
-            }
-            .icon-warning2 {
-                color: #EA862C;
-            }
-            .ui.basic.buttons {
-                button {
-                    font-size: 16px !important;
-                    padding: 10px;
-                    color: #000000 !important;
-                    font-family: calibri;
-                    &:hover {
-                        background: #f2f4f7 !important;
-                    }
-                    &.mc-bg-gray {
-                        background: #f2f4f7 !important;
-                    }
-                }
-            }
-            .qa-lexiqa-info {
-                margin-left: 5px;
-                font-weight: 700;
-                a {
-                    margin: 0 3px;
-                    font-weight: 700;
-                    text-decoration: underline;
-                    &:hover {
-                        text-decoration: none;
-                    }
-                }
-            }
-        }
-        .qa-issues-navigator{
-            display: flex;
-            flex-grow: 1;
-            .qa-actions {
-                display: flex;
-                flex-grow: 1;
-                flex-direction: row;
-                justify-content: flex-end;
-                align-items: center;
-                .info-navigation-issues {
-                    display: inline-block;
-                    margin: 0 15px 0 10px;
-                }
-            }
-        }
+      }
     }
+  }
 }
+
 .qa-arrows {
-    .button {
-        padding: 10px 13px;
-        display: inline-block;
-        width: 11px;
-    }
+  .button {
+    padding: 10px 13px;
+    display: inline-block;
+    width: 11px;
+  }
 }
