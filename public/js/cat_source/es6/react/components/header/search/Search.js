@@ -98,13 +98,22 @@ class Search extends React.Component {
 
     handleReplaceAllClick(event) {
         event.preventDefault();
-        APP.confirm({
-            name: 'confirmReplaceAll',
-            cancelTxt: 'Cancel',
-            callback: 'execReplaceAll',
-            okTxt: 'Continue',
-            msg: "Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)"
-        });
+        let self = this;
+        let props = {
+            modalName: 'confirmReplace',
+            text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+            successText: "Continue",
+            successCallback: function () {
+                SearchUtils.execReplaceAll(self.state.search);
+                APP.ModalWindow.onCloseModal();
+            },
+            cancelText: "Cancel",
+            cancelCallback: function () {
+                APP.ModalWindow.onCloseModal();
+            }
+
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
     }
 
     handleReplaceClick() {
@@ -149,11 +158,16 @@ class Search extends React.Component {
         let search = this.state.search;
         search[name] = value;
 
-
-        this.setState({
-            search: search,
-            funcFindButton: true
-        });
+        if ( name !== "enableReplace" ) {
+            this.setState({
+                search: search,
+                funcFindButton: true
+            });
+        } else {
+            this.setState({
+                search: search
+            });
+        }
     }
 
     replaceTargetOnFocus() {
@@ -286,7 +300,8 @@ class Search extends React.Component {
         let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
         let statusDropdownClass = (this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all") ? "filtered" : "no-filtered";
         let replaceCheckboxClass = (this.state.search.searchTarget) ? "" : "disabled";
-        let replaceButtonsClass = (this.state.search.replaceTarget && !this.state.funcFindButton) ? "" : "disabled";
+        let replaceButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton) ? "" : "disabled";
+        let replaceAllButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget) ? "" : "disabled";
         return ( this.props.active ? <form className="ui form">
                 <div className="find-wrapper">
                     <div className="find-container">
@@ -324,8 +339,6 @@ class Search extends React.Component {
                                 <div className="find-element">
                                     <div className="find-in-replace">
                                         <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
-                                        <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
-                                        <button className={"ui basic tiny button " + replaceButtonsClass}>Replace All</button>
                                     </div>
                                 </div>
                                 : (null)}
@@ -343,13 +356,17 @@ class Search extends React.Component {
                                     </div>
                                 </div>
                                 <div className="find-element find-clear-all">
-                                    <div className="find-clear">
-                                        <button type="button" className="" onClick={this.handleCancelClick.bind(this)}>Clear</button>
-                                    </div>
+                                    { !this.state.funcFindButton ? (
+                                        <div className="find-clear">
+                                            <button type="button" className="" onClick={this.handleCancelClick.bind(this)}>Clear</button>
+                                        </div>
+                                    ) : (null)}
                                 </div>
                             </div>
                             <div className="find-actions">
-                                <button type="button" className={"ui basic " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
+                                <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>Replace All</button>
                             </div>
                         </div>
                     </div>

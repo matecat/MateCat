@@ -129,45 +129,6 @@ let SearchUtils = {
      * Displays the message under the search container that contains the number of results and segments found
      */
     updateSearchDisplay: function() {
-
-        // let res,resNumString,numbers;
-        //
-        // // if ((this.searchMode == 'onlyStatus')) {
-        // //     res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
-        // //     resNumString = (res == 1) ? '' : 's';
-        // //     numbers = (res) ? 'Found <span class="segments">...</span> segment' + resNumString : 'No segments found';
-        // //     $('.search-display .numbers').html(numbers);
-        // // } else
-        //     if ((this.searchMode == 'source&target')) {
-        //     res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
-        //     resNumString = (res == 1) ? '' : 's';
-        //     numbers = (res) ? 'Found <span class="segments">...</span> segment' + resNumString : 'No segments found';
-        //     $('.search-display .numbers').html(numbers);
-        // } else {
-        //     res = (this.numSearchResultsItem) ? this.numSearchResultsItem : 0;
-        //     resNumString = (res == 1) ? '' : 's';
-        //     numbers = (res) ? 'Found <span class="results">...</span> result' + resNumString + ' in <span class="segments">...</span> segment' + resNumString : 'No segments found';
-        //     $('.search-display .numbers').html(numbers);
-        //     $('.search-display .results').text(res);
-        // }
-        // $('.search-display .segments').text(this.numSearchResultsSegments);
-        //
-        // let query = '';
-        // if (this.searchParams['exact-match'])
-        //     query += ' exactly';
-        // if (this.searchParams.source)
-        //     query += ' <span class="param">' + htmlEncode(this.searchParams.source) + '</span> in source';
-        // if (this.searchParams.target)
-        //     query += ' <span class="param">' + htmlEncode(this.searchParams.target) + '</span> in target';
-        //
-        // if (this.searchParams.status)
-        //     query += (((this.searchParams.source) || (this.searchParams.target)) ? ' and' : '') + ' status <span class="param">' + this.searchParams.status + '</span>';
-        // query += ' (' + ((this.searchParams['match-case']) ? 'case sensitive' : 'case insensitive') + ')';
-        // $('.search-display .query').html(query);
-        // // $('.search-display').addClass('displaying');
-        // if (!this.numSearchResultsSegments) {
-        //     $('.search-display').addClass('no-results');
-        // }
         this.updateSearchItemsCount();
         if (UI.someSegmentToSave()) {
             this.addWarningToSearchDisplay();
@@ -205,38 +166,44 @@ let SearchUtils = {
      * Executes the replace all for segments if all the params are ok
      * @returns {boolean}
      */
-    execReplaceAll: function() {
+    execReplaceAll: function(params) {
         // $('.search-display .numbers').text('No segments found');
-        $('.targetarea mark.searchMarker').remove();
         this.applySearch();
 
-        let $searchTarget = $('#search-target');
-        if ($searchTarget.val() !== '' && $searchTarget.val() !== ' ' && $searchTarget.val() !== '\'' && $searchTarget.val() !== '"')  {
-            this.searchParams.target = $('#search-target').val();
+        let searchSource = params.searchSource;
+        if (searchSource !== '' && searchSource !== ' ' && searchSource !== '\'' && searchSource !== '"' ) {
+            this.searchParams.source = searchSource;
+        } else {
+            delete this.searchParams.source;
+        }
+
+        let searchTarget = params.searchTarget;
+        if (searchTarget !== '' && searchTarget !== ' ' && searchTarget !== '\'' && searchTarget !== '"')  {
+            this.searchParams.target = searchTarget;
         } else {
             APP.alert({msg: 'You must specify the Target value to replace.'});
             delete this.searchParams.target;
             return false;
         }
 
-        let $replaceTarget = $('#replace-target');
-        if ($replaceTarget.val() !== '' && $replaceTarget.val() !== ' ' && $replaceTarget.val() !== '\'' && $replaceTarget.val() !== '"')  {
-            this.searchParams.replace = $replaceTarget.val();
+        let replaceTarget =  params.replaceTarget;
+        if (replaceTarget !== '\'' && replaceTarget !== '"')  {
+            this.searchParams.replace = replaceTarget;
         } else {
             APP.alert({msg: 'You must specify the replacement value.'});
             delete this.searchParams.replace;
             return false;
         }
 
-        if ($('#select-status').val() !== '') {
-            this.searchParams.status = $('#select-status').val();
-            UI.body.attr('data-filter-status', $('#select-status').val());
+        if (params.selectStatus !== '' && params.selectStatus !== 'all') {
+            this.searchParams.status = params.selectStatus;
+            UI.body.attr('data-filter-status', params.selectStatus);
         } else {
             delete this.searchParams.status;
         }
 
-        this.searchParams['match-case'] = $('#match-case').is(':checked');
-        this.searchParams['exact-match'] = $('#exact-match').is(':checked');
+        this.searchParams['match-case'] = params.matchCase;
+        this.searchParams['exact-match'] = params.exactMatch;
 
         let p = this.searchParams;
         let source = (p.source) ? p.source : '';
@@ -466,7 +433,7 @@ let SearchUtils = {
      * @param testRegex
      */
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-        let searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
+        let searchMarker = (this.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
