@@ -381,6 +381,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             if ( !fid) {
                 fid = this._segmentsFiles.get(sid + "-1");
             }
+            if(!fid){
+                return true
+            }
             let index = this.getSegmentIndex(sid, fid);
             let segment = this._segments[fid].get(index);
             return segment.get('tagged');
