@@ -264,8 +264,8 @@ class Search extends React.Component {
                         </p>
                         {this.state.segments.length > 0 ? (
                             <div className="search-result-buttons">
-                                <div className="ui basic tiny button" onClick={this.goToPrev.bind(this)}>PREV</div>
-                                <div className="ui basic tiny button" onClick={this.goToNext.bind(this)}>NEXT</div>
+                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" /></button>
+                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right" /></button>
                             </div>
                         ) : (null) }
 
