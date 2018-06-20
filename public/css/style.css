@@ -1884,9 +1884,9 @@ body.searchActive .search-display {
 .search-display p.searching {
     display: block;
 }*/
-.search-result-buttons {
+/*.search-result-buttons {
     display: block;
-}
+}*/
 
 /*.search-display span.param {
     font-weight: bold;
@@ -2591,6 +2591,7 @@ section.highlighted2 .editarea
 
 section:not(.editor) .editarea.highlighted1 {
     border-color: #00C1E6;
+    background: rgba(0, 193, 230, 0.15);
 }
 section:not(.editor).editarea
 .highlighted2{

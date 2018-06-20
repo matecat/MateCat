@@ -188,7 +188,7 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                                 padding: 11px 20px;
                                 border-radius: 40px;
                                 transition: 0.3s ease;
-                                box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset;
                                 .text {
                                     transition: 0.3s ease;
                                     display: flex
@@ -242,9 +242,9 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                             &.disabled {
                                 background: unset;
                                 opacity: 0.5 !important;
-                                box-shadow: unset;
                                 border: none;
                                 pointer-events: none;
+                                box-shadow: inherit !important;
                             }
                             .circular.label {
                                 &.new-color {
@@ -358,6 +358,20 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                             margin: 0 3px;
                             padding: 3px 3px;
                             border-radius: 2px;
+                        }
+                    }
+                }
+                .search-result-buttons {
+                    display: flex;
+                    .ui.button {
+                        width: 36px;
+                        height: 36px;
+                        padding: 0;
+                        margin: 0;
+                        line-height: 36px;
+                        margin-left: 5px;
+                        &.disabled {
+                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
                         }
                     }
                 }
