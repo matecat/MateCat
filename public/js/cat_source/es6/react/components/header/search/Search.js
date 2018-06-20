@@ -307,7 +307,7 @@ class Search extends React.Component {
                     <div className="find-container">
                         <div className="find-container-inside">
                             <div className="find-list">
-                                <div className="find-element">
+                                <div className="find-element ui input">
                                     <div className="find-in-source">
                                         <input type="text" value={this.state.search.searchSource} placeholder="Find in source" onChange={this.handleInputChange.bind(this, "searchSource")}/>
                                     </div>
@@ -323,25 +323,27 @@ class Search extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="find-element">
-                                    <div className="find-in-target">
-                                        <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
-                                               className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
-                                        {this.state.showReplaceOptionsInSearch ?
-                                        <div>
-                                            <input type="checkbox" className={replaceCheckboxClass} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
-                                            <label> Replace with</label>
+                                <div className="find-element-container">
+                                    <div className="find-element ui input">
+                                        <div className="find-in-target">
+                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
+                                                   className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
+                                            {this.state.showReplaceOptionsInSearch ?
+                                            <div className="enable-replace-check disabled">
+                                                <input type="checkbox" className={replaceCheckboxClass} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                                <label> Replace with</label>
+                                            </div>
+                                            : (null)}
                                         </div>
-                                        : (null)}
                                     </div>
-                                </div>
-                                {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
-                                <div className="find-element">
-                                    <div className="find-in-replace">
-                                        <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
+                                    {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
+                                    <div className="find-element ui input">
+                                        <div className="find-in-replace">
+                                            <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
+                                        </div>
                                     </div>
+                                    : (null)}
                                 </div>
-                                : (null)}
                                 <div className="find-element find-dropdown-status">
                                     <div className={"find-dropdown " + statusDropdownClass}>
                                         <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropDown=dropdown}>
@@ -365,13 +367,13 @@ class Search extends React.Component {
                             </div>
                             {this.state.showReplaceOptionsInSearch ? (
                                 <div className="find-actions">
-                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
-                                    <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>Replace</button>
-                                    <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>Replace All</button>
+                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>FIND</button>
+                                    <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>REPLACE</button>
+                                    <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>REPLACE ALL</button>
                                 </div>
                                 ) : (
                                 <div className="find-actions">
-                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>Find</button>
+                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>FIND</button>
                                 </div>
                                 )}
                         </div>

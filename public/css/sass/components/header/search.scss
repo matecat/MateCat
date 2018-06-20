@@ -132,6 +132,9 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
 /////////// New Find
 .ui.form {
     box-sizing: border-box;
+    input {
+        box-shadow: inset 0 1px 3px #ddd;
+    }
     .find-wrapper {
         .find-container {
             background-color: #fff;
@@ -148,117 +151,132 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                 .find-list {
                     display: flex;
                     width: 100%;
-                    .find-element {
-                        display: inline-block;
-                        width: 22%;
-                        margin-right: 10px;
-                        &:first-child {
-                            margin-right: 20px;
+                }
+                .find-element {
+                    display: inline-block;
+                    width: 28%;
+                    margin-right: 10px;
+                    &.find-dropdown-status, &.find-clear-all {
+                        width: fit-content;
+                        margin-right: 0;
+                    }
+                    .find-in-source {
+                        margin-bottom: 5px;
+                    }
+                    .find-exact-match {
+                        display: flex;
+                        .exact-match {
+                            &:first-child {
+                                margin-right: 15px;
+                            }
                         }
-                        &.find-dropdown-status, &.find-clear-all {
-                            width: fit-content;
-                            margin-right: 0;
-                        }
-                        .find-in-source {
+                    }
+                    .find-in-target {
+                        input {
                             margin-bottom: 5px;
                         }
-                        .find-exact-match {
-                            display: flex;
-                            .exact-match {
-                                &:first-child {
-                                    margin-right: 15px;
-                                }
-                            }
+                        .enable-replace-check {
+                            pointer-events: none;
+                            background: none;
+                            border: none;
                         }
-                        .find-in-target {
-                            text-align: right;
-                            input {
-                                margin-bottom: 5px;
-                            }
+                    }
+                    .find-in-replace {
+                        input {
+                            margin-bottom: 5px;
                         }
-                        .find-in-replace {
-                            input {
-                                margin-bottom: 5px;
-                            }
-                            button {
-                                padding: 5px 10px;
-                            }
+                        button {
+                            padding: 5px 10px;
                         }
-                        .find-dropdown {
-                            display: flex;
-                            align-items: center;
-                            .ui.basic.button{
-                                font-family: "calibri", Arial, Helvetica, sans-serif;
-                                font-size: 16px !important;
-                                padding: 11px 20px;
-                                border-radius: 40px;
+                    }
+                    .find-dropdown {
+                        display: flex;
+                        align-items: center;
+                        .ui.basic.button{
+                            font-family: "calibri", Arial, Helvetica, sans-serif;
+                            font-size: 16px !important;
+                            padding: 11px 20px;
+                            border-radius: 40px;
+                            transition: 0.3s ease;
+                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                            .text {
                                 transition: 0.3s ease;
-                                box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                                .text {
-                                    transition: 0.3s ease;
-                                }
-                                .ui.cancel.label {
-                                    position: absolute;
-                                    padding: 4px;
-                                    background-color: #d6d6d6;
-                                    border-radius: 15px;
-                                    top: 8px;
-                                    line-height: 0px;
-                                    right: 0px;
-                                    visibility: hidden;
-                                    &:hover {
-                                        background-color: #cccccc !important;
-                                    }
-                                }
-                                &.not-filtered {
-                                    &:hover {
-                                        box-shadow: 0px 0px 0px 1px #09beec inset;
-                                        color: #09beec !important;
-                                    }
-                                    &.disabled {
-                                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                                    }
-                                }
-                                &.filtered {
-                                    background-color: #ffffff !important;
-                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                    color: #000000 !important;
-                                    &:hover {
-                                        width: fit-content;
-                                        .text {
-                                            margin-right: 21px;
-                                        }
-                                        .ui.cancel.label {
-                                            visibility: unset;
-                                        }
-                                    }
+                            }
+                            .ui.cancel.label {
+                                position: absolute;
+                                padding: 4px;
+                                background-color: #d6d6d6;
+                                border-radius: 15px;
+                                top: 8px;
+                                line-height: 0px;
+                                right: 0px;
+                                visibility: hidden;
+                                &:hover {
+                                    background-color: #cccccc !important;
                                 }
                             }
-                        }
-                        .find-clear {
-                            margin-left: 13px;
-                            border-left: 1px solid #d6d6d7;
-                            padding-left: 15px;
-                            position: relative;
-                            top: 9px;
-                            button {
-                                color: grey;
-                                text-decoration: underline;
-                                border: none;
-                                background: none;
-                                outline: none;
+                            &.not-filtered {
                                 &:hover {
-                                    text-decoration: none;
+                                    box-shadow: 0px 0px 0px 1px #09beec inset;
+                                    color: #09beec !important;
+                                }
+                                &.disabled {
+                                    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                                }
+                            }
+                            &.filtered {
+                                background-color: #ffffff !important;
+                                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                color: #000000 !important;
+                                &:hover {
+                                    width: fit-content;
+                                    .text {
+                                        margin-right: 21px;
+                                    }
+                                    .ui.cancel.label {
+                                        visibility: unset;
+                                    }
                                 }
                             }
                         }
                     }
-
+                    .find-clear {
+                        margin-left: 13px;
+                        border-left: 1px solid #d6d6d7;
+                        padding-left: 15px;
+                        position: relative;
+                        top: 9px;
+                        button {
+                            color: grey;
+                            text-decoration: underline;
+                            border: none;
+                            background: none;
+                            outline: none;
+                            &:hover {
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+                .find-element-container {
+                    display: inline-block;
+                    width: 28%;
+                    margin-left: 20px;
+                    .find-element {
+                        width: unset;
+                        display: block;
+                    }
                 }
                 .find-actions {
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-start;
+                    margin-top: 4px;
+                    button {
+                        &:last-child {
+                            width: max-content;
+                        }
+                    }
                 }
             }
         }
