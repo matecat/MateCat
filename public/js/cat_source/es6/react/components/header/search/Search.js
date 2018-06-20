@@ -223,11 +223,11 @@ class Search extends React.Component {
             if (this.state.search.exactMatch)
                 query.push(' exactly');
             if (this.state.search.searchSource)
-                query.push(<span className="query"><span className="param"> {htmlEncode(this.state.search.searchSource)} </span> in source </span>);
+                query.push(<span className="query"><span className="param">{htmlEncode(this.state.search.searchSource)}</span>in source </span>);
             if (this.state.search.searchTarget)
-                query.push(<span className="query"><span className="param"> {htmlEncode(this.state.search.searchTarget)} </span> in target </span>);
+                query.push(<span className="query"><span className="param">{htmlEncode(this.state.search.searchTarget)}</span>in target </span>);
             if (this.state.search.selectStatus !== 'all') {
-                let statusLabel = <span> and status <span className="param"> {this.state.search.selectStatus} </span></span>;
+                let statusLabel = <span> and status <span className="param">{this.state.search.selectStatus}</span></span>;
                 query.push(statusLabel);
             }
             let caseLabel = ' (' + ((this.state.search.matchCase) ? 'case sensitive' : 'case insensitive') + ')';
@@ -247,7 +247,10 @@ class Search extends React.Component {
                 let label = (total === 1) ? 'result' : 'results';
                 let label2 = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
-                    <span className="numbers">Found <span className="results">{this.state.total}</span>{' ' + label + ' in '}<span className="segments">{this.state.segments.length}</span> {' ' + label2}</span>
+                    <span className="numbers">Found
+                        <span className="results">{this.state.total}</span>{' ' + <span>{label}</span> + ' in '}
+                        <span className="segments">{this.state.segments.length}</span> {' ' + <span>{label2}</span>}
+                    </span>
                 ) : (
                     <span className="numbers">No segments found</span>
                 )
@@ -261,8 +264,8 @@ class Search extends React.Component {
                         </p>
                         {this.state.segments.length > 0 ? (
                             <div className="search-result-buttons">
-                                <div onClick={this.goToPrev.bind(this)}>PREV</div>
-                                <div onClick={this.goToNext.bind(this)}>NEXT</div>
+                                <div className="ui basic tiny button" onClick={this.goToPrev.bind(this)}>PREV</div>
+                                <div className="ui basic tiny button" onClick={this.goToNext.bind(this)}>NEXT</div>
                             </div>
                         ) : (null) }
 
