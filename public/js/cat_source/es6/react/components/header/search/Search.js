@@ -248,8 +248,8 @@ class Search extends React.Component {
                 let label2 = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
                     <span className="numbers">Found
-                        <span className="results">{this.state.total}</span>{' ' + <span>{label}</span> + ' in '}
-                        <span className="segments">{this.state.segments.length}</span> {' ' + <span>{label2}</span>}
+                        <span className="results">{' '+this.state.total}</span>{' '}<span>{label}</span>  in
+                        <span className="segments">{' '+this.state.segments.length}</span> {' '}<span>{label2}</span>
                     </span>
                 ) : (
                     <span className="numbers">No segments found</span>
