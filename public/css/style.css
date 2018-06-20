@@ -1871,17 +1871,6 @@ body .footer.showMatches .sub-editor.open {
     float: left;
 }
 
-.search-display {
-    float: left;
-    display: none;
-    width: 92%;
-    background: #a5a5a5;
-    color: #fff;
-    text-align: left;
-    padding: 5px 4%;
-    font-style: italic;
-    border-top: 1px solid #666;
-}
 
 body.searchActive .search-display {
     display: block;

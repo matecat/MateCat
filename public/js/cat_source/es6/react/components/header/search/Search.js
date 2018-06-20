@@ -289,7 +289,7 @@ class Search extends React.Component {
 
         let options = config.searchable_statuses.map(function (item, index) {
             return <div className="item" key={index} data-value={item.value}>
-                <div  className={"ui "+ item.label +" empty circular label"} />
+                <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                 {item.label}
             </div>;
         });
@@ -298,7 +298,8 @@ class Search extends React.Component {
             findIsDisabled = false;
         }
         let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
-        let statusDropdownClass = (this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all") ? "filtered" : "no-filtered";
+        let statusDropdownClass = (this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all") ? "filtered" : "not-filtered";
+        let statusDropdownDisabled = (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") ? "" : "disabled";
         let replaceCheckboxClass = (this.state.search.searchTarget) ? "" : "disabled";
         let replaceButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton) ? "" : "disabled";
         let replaceAllButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget) ? "" : "disabled";
@@ -329,8 +330,8 @@ class Search extends React.Component {
                                             <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
                                                    className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
                                             {this.state.showReplaceOptionsInSearch ?
-                                            <div className="enable-replace-check disabled">
-                                                <input type="checkbox" className={replaceCheckboxClass} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                            <div className={"enable-replace-check " + replaceCheckboxClass}>
+                                                <input type="checkbox" checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
                                                 <label> Replace with</label>
                                             </div>
                                             : (null)}
@@ -345,7 +346,7 @@ class Search extends React.Component {
                                     : (null)}
                                 </div>
                                 <div className="find-element find-dropdown-status">
-                                    <div className={"find-dropdown " + statusDropdownClass}>
+                                    <div className={"find-dropdown " + statusDropdownClass + " " + statusDropdownDisabled}>
                                         <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropDown=dropdown}>
                                             <div className="text">
                                                 <div>Status Segment</div>
@@ -377,9 +378,10 @@ class Search extends React.Component {
                                 </div>
                                 )}
                         </div>
+                        {this.getResultsHtml()}
                     </div>
                 </div>
-                {this.getResultsHtml()}
+
 
 
         </form> : (null) )
