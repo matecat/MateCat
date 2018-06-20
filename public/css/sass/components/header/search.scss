@@ -138,9 +138,10 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
     .find-wrapper {
         .find-container {
             background-color: #fff;
-            padding: 10px 0;
+            padding: 10px 0 0;
+            margin-bottom: 0;
             box-shadow: 0 1px 3px #666;
-            border-radius: 0 0 0px 0px;
+            border-radius: 0 0 0 0;
             display: block;
             color: #4d4d4d;
             .find-container-inside {
@@ -151,12 +152,103 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                 .find-list {
                     display: flex;
                     width: 100%;
+                    padding-bottom: 10px;
                 }
                 .find-element {
                     display: inline-block;
                     width: 28%;
                     margin-right: 10px;
-                    &.find-dropdown-status, &.find-clear-all {
+                    &.find-dropdown-status{
+                        width: fit-content;
+                        margin-right: 0;
+                        .find-dropdown {
+                            display: flex;
+                            align-items: center;
+                            .ui.basic.button {
+                                font-family: "calibri", Arial, Helvetica, sans-serif;
+                                font-size: 16px !important;
+                                padding: 11px 20px;
+                                border-radius: 40px;
+                                transition: 0.3s ease;
+                                box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                .text {
+                                    transition: 0.3s ease;
+                                    display: flex
+                                }
+                                .ui.cancel.label {
+                                    position: absolute;
+                                    padding: 4px;
+                                    background-color: #d6d6d6;
+                                    border-radius: 15px;
+                                    top: 8px;
+                                    line-height: 0px;
+                                    right: 0px;
+                                    visibility: hidden;
+                                    &:hover {
+                                        background-color: #cccccc !important;
+                                    }
+                                }
+                            }
+                            .ui.input input {
+                                box-shadow: inset 0 1px 3px #ddd;
+                            }
+                            &.not-filtered {
+                                .ui.basic.button {
+                                    &:hover {
+                                        box-shadow: 0px 0px 0px 1px #09beec inset;
+                                        color: #09beec !important;
+                                    }
+                                    &.disabled {
+                                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                                    }
+                                }
+                            }
+                            &.filtered {
+                                .ui.basic.button {
+                                    background-color: #ffffff !important;
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                    color: #000000 !important;
+                                    padding: 9px 20px;
+                                    &:hover {
+                                        width: fit-content;
+                                        .text {
+                                            margin-right: 15px;
+                                        }
+                                        .ui.cancel.label {
+                                            visibility: unset;
+                                            right: 5px;
+                                        }
+                                    }
+                                }
+                            }
+                            &.disabled {
+                                background: unset;
+                                opacity: 0.5 !important;
+                                box-shadow: unset;
+                                border: none;
+                                pointer-events: none;
+                            }
+                            .circular.label {
+                                &.new-color {
+                                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                    background: #FFFFFF
+                                }
+                                &.draft-color {
+                                    background: #E8E8E8;;
+                                }
+                                &.translated-color {
+                                    background: #09beec;
+                                }
+                                &.approved-color {
+                                    background: #7cc576;
+                                }
+                                &.rejected-color {
+                                    background: #dc2e34;
+                                }
+                            }
+                        }
+                    }
+                    &.find-clear-all {
                         width: fit-content;
                         margin-right: 0;
                     }
@@ -176,9 +268,7 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                             margin-bottom: 5px;
                         }
                         .enable-replace-check {
-                            pointer-events: none;
-                            background: none;
-                            border: none;
+                            opacity: .5;
                         }
                     }
                     .find-in-replace {
@@ -189,57 +279,7 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                             padding: 5px 10px;
                         }
                     }
-                    .find-dropdown {
-                        display: flex;
-                        align-items: center;
-                        .ui.basic.button{
-                            font-family: "calibri", Arial, Helvetica, sans-serif;
-                            font-size: 16px !important;
-                            padding: 11px 20px;
-                            border-radius: 40px;
-                            transition: 0.3s ease;
-                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                            .text {
-                                transition: 0.3s ease;
-                            }
-                            .ui.cancel.label {
-                                position: absolute;
-                                padding: 4px;
-                                background-color: #d6d6d6;
-                                border-radius: 15px;
-                                top: 8px;
-                                line-height: 0px;
-                                right: 0px;
-                                visibility: hidden;
-                                &:hover {
-                                    background-color: #cccccc !important;
-                                }
-                            }
-                            &.not-filtered {
-                                &:hover {
-                                    box-shadow: 0px 0px 0px 1px #09beec inset;
-                                    color: #09beec !important;
-                                }
-                                &.disabled {
-                                    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                                }
-                            }
-                            &.filtered {
-                                background-color: #ffffff !important;
-                                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                color: #000000 !important;
-                                &:hover {
-                                    width: fit-content;
-                                    .text {
-                                        margin-right: 21px;
-                                    }
-                                    .ui.cancel.label {
-                                        visibility: unset;
-                                    }
-                                }
-                            }
-                        }
-                    }
+
                     .find-clear {
                         margin-left: 13px;
                         border-left: 1px solid #d6d6d7;
@@ -278,6 +318,13 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                         }
                     }
                 }
+            }
+            .search-display {
+                height: 100%;
+                padding: 0 6.5% 0 5%;
+                text-align: left;
+                display: flex;
+                background: #a5a5a5;
             }
         }
     }
