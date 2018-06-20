@@ -335,6 +335,10 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                         &:last-child {
                             width: max-content;
                         }
+                        &.disabled {
+                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+
+                        }
                     }
                 }
             }
@@ -363,7 +367,7 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                 }
                 .search-result-buttons {
                     display: flex;
-                    .ui.button {
+                    .ui.basic.button {
                         width: 36px;
                         height: 36px;
                         padding: 0;
