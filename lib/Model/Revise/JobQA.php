@@ -101,6 +101,7 @@ class Revise_JobQA {
      * Get the QA value for the job in a client readable structure
      *
      * @return array
+     * @throws ReflectionException
      */
     public function getQaData() {
         if ( empty( $this->job_error_totals ) ) {
