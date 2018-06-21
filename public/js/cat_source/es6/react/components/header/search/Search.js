@@ -205,13 +205,16 @@ class Search extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.active){
-            $('body').addClass("search-open");
-            if(this.sourceEl && this.state.focus){
-                this.sourceEl.focus();
-                this.setState({
-                    focus: false
-                });
+            if ( !prevProps.active ) {
+                if(this.sourceEl && this.state.focus){
+                    this.sourceEl.focus();
+                    this.setState({
+                        focus: false
+                    });
+                }
             }
+            $('body').addClass("search-open");
+
             let self = this;
             if ( !this.dropdownInit ) {
                 this.dropdownInit = true;
@@ -344,7 +347,10 @@ class Search extends React.Component {
                             <div className="find-list">
                                 <div className="find-element ui input">
                                     <div className="find-in-source">
-                                        <input type="text" value={this.state.search.searchSource} placeholder="Find in source" onChange={this.handleInputChange.bind(this, "searchSource")}/>
+                                        <input type="text" value={this.state.search.searchSource} placeholder="Find in source"
+                                               onChange={this.handleInputChange.bind(this, "searchSource")}
+                                               ref={(input)=>this.sourceEl=input}
+                                        />
                                     </div>
                                     <div className="find-exact-match">
                                         <div className="exact-match">
