@@ -177,15 +177,16 @@ if (true)
             UI.endGlossaryMark = '</mark>';
             markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
             var sourceString = $( '.editor .source' ).html();
-
-            $.each( UI.intervalsUnion, function ( index ) {
-                if ( this === UI.lastIntervalUnionAnalysed ) return;
-                UI.lastIntervalUnionAnalysed = this;
-                added = markLength * index;
-                sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
-                sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
-                SegmentActions.replaceSourceText(UI.getSegmentId(UI.currentSegment) , UI.getSegmentFileId(UI.currentSegment), sourceString)
-            } );
+            if ( sourceString ) {
+                $.each( UI.intervalsUnion, function ( index ) {
+                    if ( this === UI.lastIntervalUnionAnalysed ) return;
+                    UI.lastIntervalUnionAnalysed = this;
+                    added = markLength * index;
+                    sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
+                    sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
+                    SegmentActions.replaceSourceText(UI.getSegmentId(UI.currentSegment) , UI.getSegmentFileId(UI.currentSegment), sourceString)
+                } );
+            }
             UI.lastIntervalUnionAnalysed = null;
             setTimeout(function () {
                 $( '.editor .source mark mark' ).each( function () {

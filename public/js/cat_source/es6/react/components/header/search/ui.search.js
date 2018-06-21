@@ -29,13 +29,13 @@ let SearchUtils = {
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
 		let searchSource = params.searchSource;
-		if (searchSource !== '' && searchSource !== ' ' && searchSource !== '\'' && searchSource !== '"' ) {
+		if (searchSource !== '' && searchSource !== ' ') {
 			this.searchParams.source = searchSource;
 		} else {
 			delete this.searchParams.source;
 		}
 		let searchTarget = params.searchTarget;
-		if (searchTarget !== '' && searchTarget !== ' ' && searchTarget !== '\'' && searchTarget !== '"')  {
+		if (searchTarget !== '' && searchTarget !== ' ')  {
 			this.searchParams.target = searchTarget;
 		} else {
 			delete this.searchParams.target;
@@ -439,23 +439,25 @@ let SearchUtils = {
 	execSearchResultsMarking: function(areas, regex, testRegex) {
         let searchMarker = (this.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
-
-			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
-				let tt = $(this).html();
-				if (LXQ.cleanUpHighLighting) {
-					tt = LXQ.cleanUpHighLighting(tt);
-				}
-				let spanArray = [];
-				tt = tt.replace(/(<[/]*span.*?>)/g, function ( match, text ) {
-                    spanArray.push(text);
-                    return "$&";
-                });
-				tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
-                tt = tt.replace(/(\$&)/g, function ( match, text ) {
-                    return spanArray.shift();
-                });
-                $(this).html(tt);
-			}
+		    let segId = UI.getSegmentId( $(this) );
+            if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
+                if (!testRegex || ($(this).text().match(testRegex) !== null)) {
+                    let tt = $(this).html();
+                    if (LXQ.cleanUpHighLighting) {
+                        tt = LXQ.cleanUpHighLighting(tt);
+                    }
+                    let spanArray = [];
+                    tt = tt.replace(/(<[/]*span.*?>)/g, function ( match, text ) {
+                        spanArray.push(text);
+                        return "$&";
+                    });
+                    tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
+                    tt = tt.replace(/(\$&)/g, function ( match, text ) {
+                        return spanArray.shift();
+                    });
+                    $(this).html(tt);
+                }
+            }
 		});
 	},
     /**

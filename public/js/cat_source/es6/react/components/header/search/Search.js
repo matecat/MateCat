@@ -99,7 +99,7 @@ class Search extends React.Component {
         // CatToolActions.closeSubHeader();
         // UI.body.removeClass('searchActive');
         SearchUtils.clearSearchMarkers();
-        SearchUtils.updateSearchItemsCount();
+
         // UI.enableTagMark();
         // if (UI.segmentIsLoaded(UI.currentSegmentId)) {
         //     UI.gotoOpenSegment();
@@ -113,7 +113,8 @@ class Search extends React.Component {
         this.resetStatusFilter();
         setTimeout(() => {
             this.setState(_.cloneDeep(this.defaultState));
-        });
+            SearchUtils.updateSearchItemsCount();
+    });
     }
 
     resetStatusFilter() {
@@ -301,8 +302,9 @@ class Search extends React.Component {
 
         if(event.keyCode === 27) {
             this.handleCancelClick();
-        } else if (event.keyCode === 13 && (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") ){
+        } else if (event.keyCode === 13 ){
             event.preventDefault();
+            if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" )
             this.handleSubmit();
         }
     }
