@@ -36,11 +36,11 @@ class Search extends React.Component {
         this.handleReplaceAllClick = this.handleReplaceAllClick.bind(this);
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
+        this.handelKeydownFunction = this.handelKeydownFunction.bind(this);
         this.dropdownInit = false;
     }
 
-    handleSubmit(event) {
-        event.preventDefault();
+    handleSubmit() {
         if (this.state.funcFindButton) {
             SearchUtils.execFind(this.state.search);
         }
@@ -71,11 +71,35 @@ class Search extends React.Component {
         }
     }
 
+
+
     handleCancelClick() {
+        this.dropdownInit = false;
+        CatToolActions.closeSubHeader();
+        UI.body.removeClass('searchActive');
+        SearchUtils.clearSearchMarkers();
+        UI.enableTagMark();
+        if (UI.segmentIsLoaded(UI.currentSegmentId)) {
+            UI.gotoOpenSegment();
+        } else {
+            UI.render({
+                firstLoad: false,
+                segmentToOpen: UI.currentSegmentId
+            });
+        }
+        UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
+        this.resetStatusFilter();
+        setTimeout(() => {
+            this.setState(_.cloneDeep(this.defaultState));
+        });
+    }
+
+    handleClearClick() {
         this.dropdownInit = false;
         // CatToolActions.closeSubHeader();
         // UI.body.removeClass('searchActive');
         SearchUtils.clearSearchMarkers();
+        SearchUtils.updateSearchItemsCount();
         // UI.enableTagMark();
         // if (UI.segmentIsLoaded(UI.currentSegmentId)) {
         //     UI.gotoOpenSegment();
@@ -243,7 +267,7 @@ class Search extends React.Component {
                     <span className="numbers">No segments found</span>
                     )
             } else {
-                let total = this.state.total ? this.state.total : 0;
+                let total = this.state.total ? parseInt(this.state.total) : 0;
                 let label = (total === 1) ? 'result' : 'results';
                 let label2 = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
@@ -273,18 +297,22 @@ class Search extends React.Component {
         }
         return html;
     }
-    escFunction(event){
+    handelKeydownFunction(event){
+
         if(event.keyCode === 27) {
             this.handleCancelClick();
+        } else if (event.keyCode === 13 && (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") ){
+            event.preventDefault();
+            this.handleSubmit();
         }
     }
     componentDidMount(){
-        document.addEventListener("keydown", this.escFunction, false);        
+        document.addEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.addListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults.bind(this));
 
     }
     componentWillUnmount(){
-        document.removeEventListener("keydown", this.escFunction, false);
+        document.removeEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.removeListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults);
     }
 
@@ -306,6 +334,7 @@ class Search extends React.Component {
         let replaceCheckboxClass = (this.state.search.searchTarget) ? "" : "disabled";
         let replaceButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton) ? "" : "disabled";
         let replaceAllButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget) ? "" : "disabled";
+        let clearVisible = (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" || this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all" );
         return ( this.props.active ? <form className="ui form">
                 <div className="find-wrapper">
                     <div className="find-container">
@@ -362,9 +391,9 @@ class Search extends React.Component {
                                     </div>
                                 </div>
                                 <div className="find-element find-clear-all">
-                                    { !this.state.funcFindButton ? (
+                                    { clearVisible ? (
                                         <div className="find-clear">
-                                            <button type="button" className="" onClick={this.handleCancelClick.bind(this)}>Clear</button>
+                                            <button type="button" className="" onClick={this.handleClearClick.bind(this)}>Clear</button>
                                         </div>
                                     ) : (null)}
                                 </div>
