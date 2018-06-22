@@ -2324,7 +2324,7 @@ UI = {
         }, 100);
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
+        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
