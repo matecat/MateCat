@@ -4496,6 +4496,23 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
     transform: rotate(0deg);
 }
 
+body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .locked,
+body.rtl-source.tagModes.tagmode-default-extended .source .locked,
+body.rtl-target.tagModes.tagmode-default-extended .editarea .locked,
+body.rtl-target.tagModes.tagmode-default-extended .spliArea .locked,
+body.rtl-target.tagModes.tagmode-default-extended .translation .locked {
+    direction: ltr;
+    display: inline-block;
+}
+
+body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .monad.marker,
+body.rtl-source.tagModes.tagmode-default-extended .source .monad.marker,
+body.rtl-target.tagModes.tagmode-default-extended .editarea .monad.marker,
+body.rtl-target.tagModes.tagmode-default-extended .spliArea .monad.marker,
+body.rtl-target.tagModes.tagmode-default-extended .translation .monad.marker {
+    direction: ltr;
+}
+
 .tagModeToggle,
 .autofillTag {
     padding: 4px 2px 0px 2px;
