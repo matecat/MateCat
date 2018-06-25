@@ -300,7 +300,7 @@ $.extend( UI, {
                 }
             }
         }
-
+        UI.saveInUndoStack();
         UI.checkTagProximity();
 
 

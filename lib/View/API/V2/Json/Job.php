@@ -123,17 +123,13 @@ class Job {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-
-
-
-
-
         $featureSet->loadForProject($jStruct->getJob()->getProject());
 
         if(in_array(ReviewImproved::FEATURE_CODE, $featureSet->getCodes()) || in_array(ReviewExtended::FEATURE_CODE, $featureSet->getCodes())){
             $reviseIssues = [];
 
         } else{
+
             $reviseClass = new \Constants_Revise();
 
             $jobQA = new \Revise_JobQA(
@@ -142,17 +138,21 @@ class Job {
                     $jobStats->getTotal(),
                     $reviseClass
             );
+
             list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
                     $jStruct->password,
                     $jobStats->getTotal() );
 
+            /**
+             * @var $jobQA \Revise_JobQA
+             */
             $jobQA->retrieveJobErrorTotals();
             $jobQA->evalJobVote();
             $qa_data      = $jobQA->getQaData();
 
             $reviseIssues = [];
             foreach ( $qa_data as $issue ) {
-                $reviseIssues[ strtolower( $issue[ 'type' ] ) ] = [
+                $reviseIssues[ str_replace( " " , "_", strtolower( $issue[ 'type' ] ) ) ] = [
                         'allowed' => $issue[ 'allowed' ],
                         'found'   => $issue[ 'found' ]
                 ];

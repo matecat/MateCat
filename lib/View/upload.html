@@ -43,6 +43,13 @@
     <script type="text/javascript" src="${basepath}public/js/build/upload.js"></script>
     <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    
+    <!-- add web component support for older browsers -->
+    <SCRIPT src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.22/webcomponents.js"></SCRIPT>
+    <!-- Tilde MT system selection web component manages system selection and configuration by source-target language
+    pair. The system configuration is returned in JSON. The web components documentation can be found at
+    http://www.tilde.com/mt/tools/api -->
+    <link id="tildemt_link" rel="import" href="https://www.letsmt.eu/ws/tildemt-selector.html"/>
 
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 

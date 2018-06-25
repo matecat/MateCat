@@ -42,16 +42,7 @@ class Engines_LetsMT extends Engines_AbstractEngine {
             if ( !empty( $parsed[ 'translation' ] ) ) {
                 // this is a response from a translate request
 
-                if ( $this->use_qe && floatval( $parsed[ 'qualityEstimate' ] ) < $this->minimum_qe ) {
-                    $mt_result = array(
-                            'error' => array(
-                                    'code'    => -3001,
-                                    'message' => 'Translation QE score below treshold'
-                            )
-                    );
-
-                    return $mt_result;
-                }
+                $qe_score = floatval( $parsed[ 'qualityEstimate' ] );
 
                 $decoded = array(
                         'data' => array(
@@ -81,75 +72,10 @@ class Engines_LetsMT extends Engines_AbstractEngine {
                 $mt_res                          = $mt_match_res->get_as_array();
                 $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
-                return $mt_res;
-            }
-            elseif ( !empty( $parsed[ 'System' ] ) ) {
-                // this is a response from a getSystemList request
-
-                $decoded = array();
-                foreach ( $parsed[ 'System' ] as $systemData ) {
-                    $statusName = "";
-                    $status     = "";
-                    foreach ( $systemData[ 'ProjectMetadata' ] as $value ) {
-                        if ( $value[ 'Key' ] === 'status' ) {
-                            $status = $value[ 'Value' ];
-                            switch ( $status ) {
-                                case "running":
-                                    $statusName = "Running";
-                                    break;
-                                case "queuingtransl":
-                                    $statusName = "Queuing";
-                                    break;
-                                case "notstarted":
-                                    $statusName = "Not Started";
-                                    break;
-                                case "nottrained":
-                                    $statusName = "Not Trained";
-                                    break;
-                                case "error":
-                                    $statusName = "Not Trained";
-                                    break;
-                                case "training":
-                                    $statusName = "Training";
-                                    break;
-                                case "standby":
-                                    $statusName = "Standby";
-                                    break;
-                                default:
-                                    $statusName = $value[ 'Value' ];
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                    $systemName                     = sprintf( '%s (%s)',
-                            $systemData[ 'Title' ][ 'Text' ],
-                            $statusName );
-                    $systemMetadata                 = array(
-                            'source-language-code' => $systemData[ 'SourceLanguage' ][ 'Code' ],
-                            'target-language-code' => $systemData[ 'TargetLanguage' ][ 'Code' ],
-                            'source-language-name' => $systemData[ 'SourceLanguage' ][ 'Name' ][ 'Text' ],
-                            'target-language-name' => $systemData[ 'TargetLanguage' ][ 'Name' ][ 'Text' ],
-                            'status'               => $status
-                    );
-                    $decoded[ $systemData[ 'ID' ] ] = array(
-                            'name'     => $systemName,
-                            'metadata' => $systemMetadata
-                    );
-                }
-                asort( $decoded );
-
-                return $decoded;
-            }
-            elseif ( !empty( $parsed[ 0 ] ) && !empty( $parsed[ 0 ][ 'CorpusId' ] ) ) {
-                // this is a response from getSystemTermCorpora request
-
-                $decoded = array();
-                foreach ( $parsed as $termData ) {
-                    if ( $termData[ 'Status' ] == 'Ready' ) {
-                        $decoded[ $termData[ 'CorpusId' ] ] = $termData[ 'Title' ];
-                    }
-                }
+                $retObj = new stdClass();
+                $retObj->mtResult = $mt_res;
+                $retObj->qeScore = $qe_score;
+                return $retObj;
             }
         }
         else {
@@ -191,8 +117,10 @@ class Engines_LetsMT extends Engines_AbstractEngine {
 
         }
 
-        return $decoded;
-
+        
+        $retObj = new stdClass();
+        $retObj->errorResult = $decoded;
+        return $retObj;
     }
 
     public function get( $_config ) {
@@ -200,29 +128,39 @@ class Engines_LetsMT extends Engines_AbstractEngine {
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
-
-        // if any of the engine languages is not set, continue, else check if engine and document languages match
-        if ( $this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
-                ( $this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ] )
-        ) {
+        $src = $_config [ 'source' ];
+        $trg = $_config [ 'target' ];
+        
+        $plugin_config = json_decode($this->config_json, TRUE);
+        $lang_key = $src . '-' . $trg;
+        if (!isset($plugin_config[ 'systems' ][ $lang_key ])){
             return array(
-                    'error' => array(
-                            'code' => -3002, 'message' => 'Engine and document languages do not match'
-                    )
+                'error' => array(
+                    'code' => -3002, 'message' => "The MT engine doesn't support the document's language"
+                )
             );
         }
-
-        $parameters               = array();
+        $lang_config = $plugin_config[ 'systems' ][ $lang_key ];
+        $parameters = $lang_config[ 'params' ];
+        
         $parameters[ 'text' ]     = $_config[ 'segment' ];
-        $parameters[ 'appID' ]    = $this->app_id;
-        $parameters[ 'systemID' ] = $this->system_id;
-        $parameters[ 'clientID' ] = $this->client_id;
-        $qeParam                  = $this->use_qe ? ",qe" : "";
-        $parameters[ 'options' ]  = "termCorpusId=" . $this->terms_id . $qeParam;
+        $parameters[ 'clientID' ] = $plugin_config[ 'client-id' ];
 
         $this->call( "translate_relative_url", $parameters );
 
-        return $this->result;
+        if (isset($this->result->errorResult)){
+            return $this->result->errorResult;
+        }
+
+        $qe_threshold = $lang_config[ 'qeThreshold' ];
+        if (isset($qe_threshold)
+                && $this->result->qeScore != null
+                && floatval( $qe_threshold ) > $this->result->qeScore){
+            $mt_result = null;
+        } else {
+            $mt_result = $this->result->mtResult;
+        }
+        return $mt_result;
 
     }
 
@@ -236,25 +174,24 @@ class Engines_LetsMT extends Engines_AbstractEngine {
 
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-
-        // if any of the engine languages is not set, continue, else check if engine and document languages match
-        if ( $this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
-                ( $this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ] )
-        ) {
+        $src = $_config [ 'source' ];
+        $trg = $_config [ 'target' ];
+        
+        $plugin_config = json_decode($this->config_json, TRUE);
+        $lang_key = $src . '-' . $trg;
+        if (!isset($plugin_config[ 'systems' ][ $lang_key ])){
             return array(
-                    'error' => array(
-                            'code' => -3002, 'message' => 'Engine and document languages do not match'
-                    )
+                'error' => array(
+                    'code' => -3002, 'message' => "The MT engine doesn't support the document's language"
+                )
             );
         }
-
-        $parameters                  = array();
-        $parameters[ 'text' ]        = $_config[ 'segment' ];
-        $parameters[ 'appID' ]       = $this->app_id;
-        $parameters[ 'systemID' ]    = $this->system_id;
-        $parameters[ 'clientID' ]    = $this->client_id;
-        $parameters[ 'options' ]     = "termCorpusId=" . $this->terms_id;
+        $lang_config = $plugin_config[ 'systems' ][ $lang_key ];
+        $parameters = $lang_config[ 'params' ];
+        
+        $parameters[ 'text' ]     = $_config[ 'segment' ];
         $parameters[ 'translation' ] = $_config[ 'translation' ];
+        $parameters[ 'clientID' ] = $plugin_config[ 'client-id' ];
 
         $this->call( "contribute_relative_url", $parameters );
 
@@ -277,48 +214,15 @@ class Engines_LetsMT extends Engines_AbstractEngine {
         }
     }
 
-    public function getSystemList( $_config ) {
-
-        $parameters               = array();
-        $parameters[ 'appID' ]    = $this->app_id;
-        $parameters[ 'clientID' ] = $this->client_id;
-
-        $this->call( 'system_list_relative_url', $parameters );
-
-        if ( isset( $this->result[ 'error' ][ 'code' ] ) ) {
-            return $this->result;
-        }
-        $systemList = $this->result;
-
-        return $systemList;
-
-    }
-
-    public function getTermList() {
-
-        $parameters               = array();
-        $parameters[ 'appID' ]    = $this->app_id;
-        $parameters[ 'clientID' ] = $this->client_id;
-        $parameters[ 'systemID' ] = $this->system_id;
-
-        $this->call( 'term_list_relative_url', $parameters );
-
-        $termList = $this->result;
-        if ( isset( $termList[ 'error' ][ 'code' ] ) ) {
-            return array( 'error' => $termList[ 'error' ] );
-        }
-
-        return array( 'terms' => $termList );
-    }
-
-    public function wakeUp() {
-        $_config              = $this->getConfigStruct();
-        $_config[ 'segment' ] = 'wakeup';
-
-        $this->_setAdditionalCurlParams( array(
-                CURLOPT_TIMEOUT => 1
-        ) );
-
-        $this->get( $_config );
-    }
+    // TODO: implement something similar
+//    public function wakeUp() {
+//        $_config              = $this->getConfigStruct();
+//        $_config[ 'segment' ] = 'wakeup';
+//
+//        $this->_setAdditionalCurlParams( array(
+//                CURLOPT_TIMEOUT => 1
+//        ) );
+//
+//        $this->get( $_config );
+//    }
 }

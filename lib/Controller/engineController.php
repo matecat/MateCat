@@ -18,7 +18,7 @@ class engineController extends ajaxController {
             'add', 'delete', 'execute'
     ];
     private static $allowed_execute_functions = [
-            'letsmt' => [ 'getTermList' ]
+            // 'letsmt' => [ 'getTermList' ] // letsmt no longer requires this function. it's left as an example
     ];
 
     public function __construct() {
@@ -208,36 +208,7 @@ class engineController extends ajaxController {
                 $newEngineStruct->name                            = $this->name;
                 $newEngineStruct->uid                             = $this->user->uid;
                 $newEngineStruct->type                            = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
-                $newEngineStruct->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
-                // return the newly added system's id or the list of available systems
-                // for the user to choose from. the check happens later on
-                $newEngineStruct->extra_parameters[ 'terms_id' ]    = $this->engineData[ 'terms_id' ];
-                $newEngineStruct->extra_parameters[ 'use_qe' ]      = $this->engineData[ 'use_qe' ];
-                $newEngineStruct->extra_parameters[ 'source_lang' ] = $this->engineData[ 'source_lang' ];
-                $newEngineStruct->extra_parameters[ 'target_lang' ] = $this->engineData[ 'target_lang' ];
-
-                if ( $newEngineStruct->extra_parameters[ 'use_qe' ] ) {
-                    $minQEString = $this->engineData[ 'minimum_qe' ];
-                    if ( !is_numeric( $minQEString ) ) {
-                        $this->result[ 'errors' ][] = [
-                                'code'    => -13,
-                                'message' => "Minimum QE score should be a number between 0 and 1."
-                        ];
-
-                        return;
-                    }
-                    $minimumQEScore = floatval( $minQEString );
-                    if ( $minimumQEScore < 0 || $minimumQEScore > 1 ) {
-                        $this->result[ 'errors' ][] = [
-                                'code'    => -13,
-                                'message' => "Minimum QE score should be a number between 0 and 1."
-                        ];
-
-                        return;
-                    }
-                    $newEngineStruct->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
-                }
+                $newEngineStruct->extra_parameters[ 'config_json' ] = $this->engineData[ 'tildemt_config' ];
 
                 break;
 
@@ -357,42 +328,12 @@ class engineController extends ajaxController {
 
                 return;
             }
-
-        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct && empty( $this->engineData[ 'system_id' ] ) ) {
-            // the user has not selected a translation system. only the User ID and the engine's name has been entered
-            // get the list of available systems and return it to the user
-
-            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-            $config           = $newTestCreatedMT->getConfigStruct();
-            $systemList       = $newTestCreatedMT->getSystemList( $config );
-
-            $engineDAO->delete( $newCreatedDbRowStruct ); // delete the newly added engine. this is the first time in engineController::add()
-            // and the user has not yet selected a translation system
-            if ( isset( $systemList[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $systemList[ 'error' ];
-
-                return;
-            }
-
-            $uiConfig = [
-                    'client_id' => [ 'value' => $this->engineData[ 'client_id' ] ],
-                    'system_id' => [],
-                    'terms_id'  => []
-            ];
-            foreach ( $systemList as $systemID => $systemInfo ) {
-                $uiConfig[ 'system_id' ][ $systemID ] = [
-                        'value' => $systemInfo[ 'name' ],
-                        'data'  => $systemInfo[ 'metadata' ]
-                ];
-            }
-
-            $this->result[ 'name' ]             = $this->name;
-            $this->result[ 'data' ][ 'config' ] = $uiConfig;
+            
         } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct ) {
-            // The user has added and configured the Tilde MT engine (the System ID has been set)
-            // Do a simple translation request so that the system wakes up by the time the user needs it for translating
-            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-            $newTestCreatedMT->wakeUp();
+            // TODO: Do a simple translation request so that the system wakes up by the time the user needs it for translating
+            // TODO: Tilde MT engine allows to select multiple translation systems. Should we wake up all of them?
+            //$newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+            //$newTestCreatedMT->wakeUp(); // ????
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
 
             $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );

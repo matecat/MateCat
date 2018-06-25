@@ -2321,10 +2321,10 @@ UI = {
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
             $('.undoCursorPlaceholder').remove();
-        }, 100);
+        });
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
+        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
@@ -2362,23 +2362,6 @@ UI = {
             if ( (tt.length) && (!ss) )
                 return;
         }
-        // var diff = 'null';
-        //
-        // if( typeof currentItem != 'undefined'){
-        //     diff = this.dmp.diff_main( currentItem, this.editarea.html() );
-        //
-        //     // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
-        //     // for that we chooiff[0] as a fallback
-        //     if(typeof diff[1] != 'undefined') {
-        //         diff = diff[1][1];
-        //     }
-        //     else {
-        //         diff = diff[0][1];
-        //     }
-        // }
-        //
-        // if ( diff == ' selected' )
-        //     return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {

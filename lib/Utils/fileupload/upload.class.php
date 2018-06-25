@@ -1,15 +1,5 @@
 <?php
 
-/*
- * jQuery File Upload Plugin PHP Class 5.11.2
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
- */
 define( "DIRSEP", "//" );
 
 class UploadHandler {
@@ -187,15 +177,8 @@ class UploadHandler {
      */
     protected function trim_file_name( $name, $type, $index ) {
         $name = stripslashes( $name );
-        //echo "name01 $name\n";
+
         $file_name = trim( $this->my_basename( $name ), ".\x00..\x20" );
-        //echo "name1 $file_name\n";
-        // Add missing file extension for known image types:
-        if ( strpos( $file_name, '.' ) === false &&
-                preg_match( '/^image\/(gif|jpe?g|png)/', $type, $matches )
-        ) {
-            $file_name .= '.' . $matches[ 1 ];
-        }
 
         //remove spaces
         $file_name = str_replace( [ " ", " " ], "_", $file_name );
@@ -300,40 +283,42 @@ class UploadHandler {
     }
 
     public function post() {
+
         if ( isset( $_REQUEST[ '_method' ] ) && $_REQUEST[ '_method' ] === 'DELETE' ) {
             return $this->delete();
         }
 
-        $upload = isset( $_FILES[ $this->options[ 'param_name' ] ] ) ?
-                $_FILES[ $this->options[ 'param_name' ] ] : null;
-        $info   = [];
+        $upload = isset( $_FILES[ $this->options[ 'param_name' ] ] ) ? $_FILES[ $this->options[ 'param_name' ] ] : null;
+
+        $info = [];
         if ( $upload && is_array( $upload[ 'tmp_name' ] ) ) {
             // param_name is an array identifier like "files[]",
             // $_FILES is a multi-dimensional array:
             foreach ( $upload[ 'tmp_name' ] as $index => $value ) {
                 $info[] = $this->handle_file_upload(
-                        $upload[ 'tmp_name' ][ $index ], isset( $_SERVER[ 'HTTP_X_FILE_NAME' ] ) ?
-                        $_SERVER[ 'HTTP_X_FILE_NAME' ] : $upload[ 'name' ][ $index ], isset( $_SERVER[ 'HTTP_X_FILE_SIZE' ] ) ?
-                        $_SERVER[ 'HTTP_X_FILE_SIZE' ] : $upload[ 'size' ][ $index ], isset( $_SERVER[ 'HTTP_X_FILE_TYPE' ] ) ?
-                        $_SERVER[ 'HTTP_X_FILE_TYPE' ] : $upload[ 'type' ][ $index ], $upload[ 'error' ][ $index ], $index
+                        $upload[ 'tmp_name' ][ $index ],
+                        $upload[ 'name' ][ $index ],
+                        $upload[ 'size' ][ $index ],
+                        $upload[ 'type' ][ $index ],
+                        $upload[ 'error' ][ $index ],
+                        $index
                 );
             }
         } elseif ( $upload || isset( $_SERVER[ 'HTTP_X_FILE_NAME' ] ) ) {
             // param_name is a single object identifier like "file",
             // $_FILES is a one-dimensional array:
             $info[] = $this->handle_file_upload(
-                    isset( $upload[ 'tmp_name' ] ) ? $upload[ 'tmp_name' ] : null, isset( $_SERVER[ 'HTTP_X_FILE_NAME' ] ) ?
-                    $_SERVER[ 'HTTP_X_FILE_NAME' ] : ( isset( $upload[ 'name' ] ) ?
-                            $upload[ 'name' ] : null ), isset( $_SERVER[ 'HTTP_X_FILE_SIZE' ] ) ?
-                    $_SERVER[ 'HTTP_X_FILE_SIZE' ] : ( isset( $upload[ 'size' ] ) ?
-                            $upload[ 'size' ] : null ), isset( $_SERVER[ 'HTTP_X_FILE_TYPE' ] ) ?
-                    $_SERVER[ 'HTTP_X_FILE_TYPE' ] : ( isset( $upload[ 'type' ] ) ?
-                            $upload[ 'type' ] : null ), isset( $upload[ 'error' ] ) ? $upload[ 'error' ] : null
+                    isset( $upload[ 'tmp_name' ] ) ? $upload[ 'tmp_name' ] : null,
+                    isset( $upload[ 'name' ] ) ? $upload[ 'name' ] : null,
+                    isset( $upload[ 'size' ] ) ? $upload[ 'size' ] : null,
+                    isset( $upload[ 'type' ] ) ? $upload[ 'type' ] : null,
+                    isset( $upload[ 'error' ] ) ? $upload[ 'error' ] : null
             );
         }
 
         //check for server misconfiguration
         $uploadParams = ServerCheck::getInstance()->getUploadParams();
+
         if ( $_SERVER[ 'CONTENT_LENGTH' ] >= $uploadParams->getPostMaxSize() ) {
 
             $fp = fopen( "php://input", "r" );
@@ -371,18 +356,18 @@ class UploadHandler {
         $json     = json_encode( $info );
         $redirect = isset( $_REQUEST[ 'redirect' ] ) ?
                 stripslashes( $_REQUEST[ 'redirect' ] ) : null;
+
         if ( $redirect ) {
             header( 'Location: ' . sprintf( $redirect, rawurlencode( $json ) ) );
-
             return;
         }
-        if ( isset( $_SERVER[ 'HTTP_ACCEPT' ] ) &&
-                ( strpos( $_SERVER[ 'HTTP_ACCEPT' ], 'application/json' ) !== false )
-        ) {
+
+        if ( isset( $_SERVER[ 'HTTP_ACCEPT' ] ) && ( strpos( $_SERVER[ 'HTTP_ACCEPT' ], 'application/json' ) !== false ) ) {
             header( 'Content-type: application/json' );
         } else {
             header( 'Content-type: text/plain' );
         }
+
         echo $json;
     }
 
@@ -554,7 +539,12 @@ class UploadHandler {
 
     protected function _isValidFileName( $fileUp ) {
 
-        if ( strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '..' ) !== false || strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E' ) !== false ) {
+        if (
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '..' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E' ) !== false ||
+                strpos( $fileUp->name, '.' ) === 0 ||
+                strpos( $fileUp->name, '%2E' ) === 0
+        ) {
             //Directory Traversal!
             return false;
         }
