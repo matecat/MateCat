@@ -72,3 +72,4 @@ window.SegmentsContainer = require('./components/segments/SegmentsContainer').de
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
 
+window.SearchUtils = require('./components/header/search/ui.search');

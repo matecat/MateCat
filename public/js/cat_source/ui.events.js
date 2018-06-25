@@ -20,7 +20,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
             UI.openLanguageResourcesPanel();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+            if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.redoInSegment(UI.currentSegment);
@@ -199,7 +199,7 @@ $.extend(UI, {
 		};
 
 		$("#filterSwitch").bind('click', function(e) {
-			UI.toggleSearch(e);
+            SearchUtils.toggleSearch(e);
 		});
 		$("#advancedOptions").bind('click', function(e) {
 			e.preventDefault();
@@ -281,7 +281,8 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') &&
-					!$("body").hasClass("side-popup" ) ) {
+					!UI.body.hasClass("side-popup" ) &&
+                    !UI.body.hasClass('search-open')) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }

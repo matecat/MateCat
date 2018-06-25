@@ -126,3 +126,266 @@
 input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
     width: 95px;
 }
+
+
+
+/////////// New Find
+.ui.form {
+    box-sizing: border-box;
+    //TODO: Transform in SCSS Component for all INPUT TYPES
+    input {
+        border-radius: 2px !important;
+        border: 1px solid rgba(34, 36, 38, 0.15) !important;
+        box-shadow: inset 0 1px 3px #ddd !important;
+        font-size: 1.2em !important;
+        padding: 8px 16px 7px !important;
+        &::-webkit-input-placeholder {
+            color: #929292;
+        }
+        &:hover {
+            border-color: rgba(34, 36, 38, 0.35) !important;
+        }
+        &:focus {
+            border-color: #85B7D9 !important;
+            background: #FFFFFF !important;
+            color: rgba(0, 0, 0, 0.8) !important;
+            /*outline: none;*/
+        }
+    }
+    .find-wrapper {
+        .find-container {
+            background-color: #fff;
+            padding: 10px 0 0;
+            margin-bottom: 0;
+            box-shadow: 0 1px 3px #666;
+            border-radius: 0 0 0 0;
+            display: block;
+            color: #4d4d4d;
+            .find-container-inside {
+                height: 100%;
+                padding: 0 6.5% 0 5%;
+                text-align: left;
+                display: flex;
+                .find-list {
+                    display: flex;
+                    width: 100%;
+                    padding-bottom: 10px;
+                }
+                .find-element {
+                    display: inline-block;
+                    width: 29%;
+                    margin-right: 10px;
+                    &.find-dropdown-status{
+                        width: fit-content;
+                        margin-right: 0;
+                        //TODO: Transform in SCSS Component for all DROPDOWN BUTTON
+                        .find-dropdown {
+                            display: flex;
+                            align-items: center;
+                            .ui.basic.button {
+                                font-family: "calibri", Arial, Helvetica, sans-serif;
+                                font-size: 16px !important;
+                                padding: 11px 20px;
+                                border-radius: 40px;
+                                transition: 0.3s ease;
+                                box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset;
+                                .text {
+                                    transition: 0.3s ease;
+                                    display: flex
+                                }
+                                .ui.cancel.label {
+                                    position: absolute;
+                                    padding: 4px;
+                                    background-color: #d6d6d6;
+                                    border-radius: 15px;
+                                    top: 8px;
+                                    line-height: 0px;
+                                    right: 0px;
+                                    visibility: hidden;
+                                    &:hover {
+                                        background-color: #cccccc !important;
+                                    }
+                                }
+                            }
+                            .ui.input input {
+                                box-shadow: inset 0 1px 3px #ddd;
+                            }
+                            &.not-filtered {
+                                .ui.basic.button {
+                                    &:hover {
+                                        box-shadow: 0px 0px 0px 1px #09beec inset;
+                                        color: #09beec !important;
+                                    }
+                                    &.disabled {
+                                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                                    }
+                                }
+                            }
+                            &.filtered {
+                                .ui.basic.button {
+                                    background-color: #ffffff !important;
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                    color: #000000 !important;
+                                    padding: 9px 20px;
+                                    &:hover {
+                                        width: fit-content;
+                                        .text {
+                                            margin-right: 15px;
+                                        }
+                                        .ui.cancel.label {
+                                            visibility: unset;
+                                            right: 5px;
+                                        }
+                                    }
+                                }
+                            }
+                            &.disabled {
+                                background: unset;
+                                opacity: 0.5 !important;
+                                border: none;
+                                pointer-events: none;
+                                box-shadow: inherit !important;
+                                .active .menu.transition {
+                                    visibility: hidden !important;
+                                    &:after {
+                                        display: none;
+                                    }
+                                }
+                            }
+                            .circular.label {
+                                &.new-color {
+                                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                                    background: #FFFFFF
+                                }
+                                &.draft-color {
+                                    background: #E8E8E8;;
+                                }
+                                &.translated-color {
+                                    background: #09beec;
+                                }
+                                &.approved-color {
+                                    background: #7cc576;
+                                }
+                                &.rejected-color {
+                                    background: #dc2e34;
+                                }
+                            }
+                        }
+                    }
+                    &.find-clear-all {
+                        width: fit-content;
+                        margin-right: 0;
+                    }
+                    .find-in-source {
+                        margin-bottom: 5px;
+                    }
+                    .find-exact-match {
+                        display: flex;
+                        .exact-match {
+                            &:first-child {
+                                margin-right: 13px;
+                            }
+                        }
+                    }
+                    .find-in-target {
+                        input {
+                            margin-bottom: 5px;
+                        }
+                        .enable-replace-check.disable {
+                            opacity: .5;
+                        }
+                    }
+                    .find-in-replace {
+                        input {
+                            margin-bottom: 5px;
+                        }
+                        button {
+                            padding: 5px 10px;
+                        }
+                    }
+
+                    .find-clear {
+                        margin-left: 13px;
+                        border-left: 1px solid #d6d6d7;
+                        padding-left: 15px;
+                        position: relative;
+                        top: 9px;
+                        button {
+                            color: grey;
+                            text-decoration: underline;
+                            border: none;
+                            background: none;
+                            outline: none;
+                            &:hover {
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+                .find-element-container {
+                    display: inline-block;
+                    width: 29%;
+                    margin-left: 15px;
+                    margin-right: 10px;
+                    .find-element {
+                        width: unset;
+                        display: block;
+                    }
+                }
+                .find-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: flex-start;
+                    margin-top: 4px;
+                    button {
+                        &:last-child {
+                            width: max-content;
+                        }
+                        &.disabled {
+                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+
+                        }
+                    }
+                }
+            }
+            .search-display {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 100%;
+                font-size: 1.2em;
+                padding: 10px 6.5% 10px 5%;
+                text-align: left;
+                background: #f2f4f7;
+                .found {
+                    margin: 0;
+                    margin-right: 20px;
+                    span {
+                        .param {
+                            font-weight: 700;
+                            color: black;
+                            background: yellow;
+                            margin: 0 3px;
+                            padding: 3px 3px;
+                            border-radius: 2px;
+                        }
+                    }
+                }
+                .search-result-buttons {
+                    display: flex;
+                    .ui.basic.button {
+                        width: 36px;
+                        height: 36px;
+                        padding: 0;
+                        margin: 0;
+                        line-height: 36px;
+                        margin-left: 5px;
+                        &.disabled {
+                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

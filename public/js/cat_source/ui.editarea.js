@@ -44,7 +44,7 @@ $.extend( UI, {
         if (UI.body.hasClass('searchActive')) {
             var el = this;
             setTimeout(function(){
-                UI.rebuildSearchSegmentMarkers(el);
+                SearchUtils.rebuildSearchSegmentMarkers(el);
             },100)
         }
 
@@ -237,11 +237,6 @@ $.extend( UI, {
             UI.saveInUndoStack('arrow');
         }
 
-        // if (!((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8) || (code == 46) || (code == 91))) { // not arrows, backspace, canc or cmd
-        //     if (UI.body.hasClass('searchActive')) {
-        //         UI.resetSearch();
-        //     }
-        // }
         if (code == 32) { // space
             setTimeout(function() {
                 UI.saveInUndoStack('space');

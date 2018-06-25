@@ -34,6 +34,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_SEGMENT_FILTER:
             CatToolStore.emitChange(CatToolConstants.SET_SEGMENT_FILTER, action.data, action.state);
             break;
+        case CatToolConstants.SET_SEARCH_RESULTS:
+            CatToolStore.emitChange(CatToolConstants.SET_SEARCH_RESULTS, action.total, action.segments);
+            break;
         default:
             CatToolStore.emitChange(action.actionType, action.data);
     }
