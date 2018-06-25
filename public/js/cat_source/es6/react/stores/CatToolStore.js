@@ -31,6 +31,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.TOGGLE_CONTAINER:
             CatToolStore.emitChange(CatToolConstants.TOGGLE_CONTAINER, action.container);
             break;
+        case CatToolConstants.SET_SEGMENT_FILTER:
+            CatToolStore.emitChange(CatToolConstants.SET_SEGMENT_FILTER, action.data, action.state);
+            break;
         default:
             CatToolStore.emitChange(action.actionType, action.data);
     }

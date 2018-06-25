@@ -1414,14 +1414,14 @@ section.editor .body > .text {
     clear: both
 }
 
-.disabled, .disabled:hover, .disabled:active {
+/*.disabled, .disabled:hover, .disabled:active {
     background: #d6d6d6;
     opacity: 0.5 !important;
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     border: 1px solid #666
-}
+}*/
 
 .sub-editor .set-glossary.disabled {
     background: none !important;
