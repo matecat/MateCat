@@ -121,14 +121,14 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
             if ( $this->__isFirstTranslation( $row ) ) {
                 if ( $this->__isPreTranslated( $row ) ) {
-                    $data['translation_before'] = $this->__getOriginalVersion( $row ) ;
+                    $data['translation_before'] = '' . $this->__getOriginalVersion( $row ) ;
                 }
                 else {
-                    $data['translation_before'] = $row['suggestion'];
+                    $data['translation_before'] = '' . $row['suggestion'];
                 }
             }
             else {
-                $data['translation_before'] = $row['versioned_translation'];
+                $data['translation_before'] = '' . $row['versioned_translation'];
             }
 
             $data = $this->__setSegmentOrigin( $data, $row );

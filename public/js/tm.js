@@ -90,6 +90,13 @@
                     $(".step3").show();
                     $("#add-mt-provider-confirm").removeClass('hide');
                 }
+                if (provider === 'letsmt') {
+                    // Tilde MT (letsmt) uses a standalone web component
+                    // we'll hide the button because it's easier to use the webcomponent's builtin buttons
+                    $("#add-mt-provider-confirm").addClass('hide');
+                    // when done, we'll want to simulate clicking the original button. for this it must be enabled
+                    $("#add-mt-provider-confirm").removeClass('disabled');
+                }
             });
             $(".add-mt-engine").click(function() {
                 if ($(this).hasClass("disabled")) {
