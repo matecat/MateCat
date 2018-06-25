@@ -188,6 +188,7 @@
             <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
         </tal:block>
 
+
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>

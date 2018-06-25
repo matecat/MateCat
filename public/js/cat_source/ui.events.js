@@ -172,11 +172,11 @@ $.extend(UI, {
 			 on a glossary item to paste the text in the correct position
 			 */
 
-            if(!$('.editor .rangySelectionBoundary.focusOut').length) {
+            if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
                 saveSelection();
             }
 
-            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
 
             $('.editor .search-source .rangySelectionBoundary.focusOut,' +
                 '.editor .search-target .rangySelectionBoundary.focusOut'

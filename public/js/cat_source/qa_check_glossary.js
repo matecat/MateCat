@@ -14,11 +14,11 @@ if ( QaCheckGlossary.enabled() )
 
     /**
      * We wait for getWarning local event to notify for Glossary warnings,
-     * so to provide a consistent feelint go the user.
+     * so to provide a consistent feeling go the user.
      */
-    // $(document).on('getWarning:local:success', function( e, data ) {
-    //     startLocalUnusedGlossaryHighlight( data.segment );
-    // });
+    $(document).on('getWarning:local:success', function( e, data ) {
+        startLocalUnusedGlossaryHighlight( data.segment );
+    });
 
     $(document).on('getWarning:global:success', function(e, data) {
         updateGlobalWarnings(data.resp.data.glossary) ;

@@ -8,14 +8,14 @@
  */
 class ZipArchiveExtended extends ZipArchive {
 
-    const REFERENCE_FOLDER = '__reference'  ;
-    const META_FOLDER = '__meta' ;
-    const PREVIEWS_FOLDER = '__previews' ;
+    const REFERENCE_FOLDER = '__reference';
+    const META_FOLDER      = '__meta';
+    const PREVIEWS_FOLDER  = '__previews';
 
-    const MAX_VISITED_DEPTH = 5;
+    const MAX_VISITED_DEPTH             = 5;
     const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
-    const MAX_FOLDERS = 100;
-    const INTERNAL_SEPARATOR = "___SEP___";
+    const MAX_FOLDERS                   = 100;
+    const INTERNAL_SEPARATOR            = "___SEP___";
 
     const ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
@@ -114,27 +114,40 @@ class ZipArchiveExtended extends ZipArchive {
 
         self::$MAX_FILES = INIT::$MAX_NUM_FILES;
 
-        $Tree              = array();
-        $path2numOfFolders = array();
-        $filePaths         = array();
+        $Tree              = [];
+        $path2numOfFolders = [];
+        $filePaths         = [];
 
         $numOfFolders = 0;
         $numOfFiles   = 0;
 
         for ( $i = 0; $i < $this->numFiles; $i++ ) {
 
-            $path = $this->getNameIndex( $i ) ;
+            $path = $this->getNameIndex( $i );
 
             $pathBySlash = array_values( explode( '/', $path ) );
 
-            if( $pathBySlash[ 0 ] == '__MACOSX' ) continue;
-            if( $pathBySlash[ 0 ] == self::REFERENCE_FOLDER ) continue ;
-            if( $pathBySlash[ 0 ] == self::META_FOLDER ) continue;
-            if( $pathBySlash[ 0 ] == self::PREVIEWS_FOLDER ) continue;
+            if ( $pathBySlash[ 0 ] == '__MACOSX' ) {
+                continue;
+            }
 
-            if( end($pathBySlash) == '.DS_Store' ) continue;
+            if ( $pathBySlash[ 0 ] == self::REFERENCE_FOLDER ) {
+                continue;
+            }
 
-            $pathBySlash = array_map( array( 'ZipArchiveExtended', 'treeKey' ), $pathBySlash );
+            if ( $pathBySlash[ 0 ] == self::META_FOLDER ) {
+                continue;
+            }
+
+            if ( $pathBySlash[ 0 ] == self::PREVIEWS_FOLDER ) {
+                continue;
+            }
+
+            if ( end( $pathBySlash ) == '.DS_Store' ) {
+                continue;
+            }
+
+            $pathBySlash = array_map( [ 'ZipArchiveExtended', 'treeKey' ], $pathBySlash );
 
             $pathWithoutFile = $pathBySlash;
             $fileName        = array_pop( $pathWithoutFile );
@@ -187,14 +200,14 @@ class ZipArchiveExtended extends ZipArchive {
                 if ( isset( $temp[ $originalKey ] ) ) {
                     $temp = &$temp[ $originalKey ];
                 } else {
-                    $temp[ $originalKey ] = array();
+                    $temp[ $originalKey ] = [];
                     $temp                 = &$temp[ $originalKey ];
                 }
             }
 
             $last_originalKey = str_replace( self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $c - 1 ], $count );
             if ( $this->isDir( $path ) ) {
-                $temp[ $last_originalKey ] = array();
+                $temp[ $last_originalKey ] = [];
             } else {
                 $temp[] = $last_originalKey;
             }
@@ -203,18 +216,24 @@ class ZipArchiveExtended extends ZipArchive {
         $this->tree     = $Tree;
         $this->treeList = array_unique( $filePaths );
         $this->treeList = str_replace( DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $this->treeList );
-        $this->treeList = array_map( array( 'ZipArchiveExtended', 'prependZipFileName' ), $this->treeList );
+        $this->treeList = array_map( [ 'ZipArchiveExtended', 'prependZipFileName' ], $this->treeList );
+
     }
 
     public function extractFilesInTmp( $tmp_folder ) {
-        $fileErrors = array();
+
+        $filesArray = [];
+        $fileErrors = [];
 
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ( $this->treeList as $filePath ) {
+
             $realPath = str_replace(
-                    array( self::INTERNAL_SEPARATOR, FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ),
-                    array( DIRECTORY_SEPARATOR, "" ),
-                    $filePath );
+                    [ self::INTERNAL_SEPARATOR, FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
+                    [ DIRECTORY_SEPARATOR, "" ],
+                    $filePath
+            );
+
             $realPath = ltrim( $realPath, "/" );
 
             $fp = $this->getStream( $realPath );
@@ -244,9 +263,21 @@ class ZipArchiveExtended extends ZipArchive {
 
             fclose( $fp );
             fclose( $tmpFp );
+
+            $filesArray[ $filePath ] = [
+                    'name'     => $filePath,
+                    'tmp_name' => $tmp_folder . $filePath,
+            ];
+
         }
 
-        return $fileErrors;
+        foreach ( $filesArray as $filePath => &$objectFile ) {
+            $objectFile[ 'error' ] = $fileErrors[ $filePath ];
+            $objectFile[ 'type' ]  = @mime_content_type( $tmp_folder . $filePath );
+        }
+
+        return $filesArray;
+
     }
 
     private function treeKey( $key ) {
@@ -280,13 +311,13 @@ class ZipArchiveExtended extends ZipArchive {
         $filename     = implode( ".", $filenameInfo );
         $dirname      = implode( DIRECTORY_SEPARATOR, $path );
 
-        $pathInfo = array(
+        $pathInfo = [
                 'dirname'     => $dirname,
                 'basename'    => $basename,
                 'extension'   => $extension,
                 'filename'    => $filename,
                 'zipfilename' => $zipFile
-        );
+        ];
 
         return $pathInfo;
     }
@@ -312,7 +343,6 @@ class ZipArchiveExtended extends ZipArchive {
 
         return implode( self::INTERNAL_SEPARATOR, $path );
     }
-
 
 
 }
