@@ -193,7 +193,8 @@ trait Translated {
                         'c'             => 1,
                         'of'            => "json",
                         'urls'          => json_encode( $urls ),
-                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null )
+                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null ),
+                        'matecat_host'  => parse_url( INIT::$HTTPHOST, PHP_URL_HOST )
                 ], PHP_QUERY_RFC3986 );
 
         try {
