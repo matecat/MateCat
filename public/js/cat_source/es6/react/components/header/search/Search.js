@@ -305,10 +305,11 @@ class Search extends React.Component {
 
         if(event.keyCode === 27) {
             this.handleCancelClick();
-        } else if (event.keyCode === 13 ){
-            event.preventDefault();
-            if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" )
-            this.handleSubmit();
+        } else if (event.keyCode === 13 && $(event.target).closest(".find-container").length > 0){
+            if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" )  {
+                event.preventDefault();
+                this.handleSubmit();
+            }
         }
     }
     componentDidMount(){

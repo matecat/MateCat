@@ -9,7 +9,6 @@ let SegmentStore = require('../../stores/SegmentStore');
 let SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
 let SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 let SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
-let SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 let SegmentTabRevise = require('./SegmentFooterTabRevise').default;
 class SegmentFooter extends React.Component {
 
