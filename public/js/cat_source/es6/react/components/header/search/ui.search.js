@@ -158,9 +158,12 @@ let SearchUtils = {
      */
 	toggleSearch: function(e) {
 		if (!this.searchEnabled) return;
-		e.preventDefault();
-		CatToolActions.toggleSearch();
-        // this.fixHeaderHeightChange();
+        if (UI.body.hasClass('searchActive')) {
+            CatToolActions.closeSearch();
+        } else {
+            CatToolActions.toggleSearch();
+            // this.fixHeaderHeightChange();
+        }
 	},
     /**
      * Executes the replace all for segments if all the params are ok

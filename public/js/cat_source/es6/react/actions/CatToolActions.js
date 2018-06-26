@@ -59,6 +59,11 @@ let CatToolActions = {
         AppDispatcher.dispatch({
             actionType: CattolConstants.CLOSE_SUBHEADER
         });
+    },
+    closeSearch: function (  ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.CLOSE_SEARCH
+        });
     }
 };
 

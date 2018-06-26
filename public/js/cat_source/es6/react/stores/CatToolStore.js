@@ -28,6 +28,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.CLOSE_SUBHEADER:
             CatToolStore.emitChange(CatToolConstants.CLOSE_SUBHEADER);
             break;
+        case CatToolConstants.CLOSE_SEARCH:
+            CatToolStore.emitChange(CatToolConstants.CLOSE_SEARCH);
+            break;
         case CatToolConstants.TOGGLE_CONTAINER:
             CatToolStore.emitChange(CatToolConstants.TOGGLE_CONTAINER, action.container);
             break;

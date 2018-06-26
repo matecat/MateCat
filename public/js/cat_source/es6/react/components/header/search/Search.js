@@ -75,10 +75,8 @@ class Search extends React.Component {
 
     handleCancelClick() {
         this.dropdownInit = false;
-        CatToolActions.closeSubHeader();
         UI.body.removeClass('searchActive');
-        SearchUtils.clearSearchMarkers();
-        UI.enableTagMark();
+        this.handleClearClick()
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             UI.gotoOpenSegment();
         } else {
@@ -87,34 +85,23 @@ class Search extends React.Component {
                 segmentToOpen: UI.currentSegmentId
             });
         }
-        UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
+
         this.resetStatusFilter();
         setTimeout(() => {
+            CatToolActions.closeSubHeader();
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
             this.setState(_.cloneDeep(this.defaultState));
         });
     }
 
     handleClearClick() {
         this.dropdownInit = false;
-        // CatToolActions.closeSubHeader();
-        // UI.body.removeClass('searchActive');
         SearchUtils.clearSearchMarkers();
-
-        // UI.enableTagMark();
-        // if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-        //     UI.gotoOpenSegment();
-        // } else {
-        //     UI.render({
-        //         firstLoad: false,
-        //         segmentToOpen: UI.currentSegmentId
-        //     });
-        // }
-        UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
         this.resetStatusFilter();
         setTimeout(() => {
             this.setState(_.cloneDeep(this.defaultState));
             SearchUtils.updateSearchItemsCount();
-    });
+        });
     }
 
     resetStatusFilter() {
@@ -315,11 +302,13 @@ class Search extends React.Component {
     componentDidMount(){
         document.addEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.addListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults.bind(this));
+        CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
 
     }
     componentWillUnmount(){
         document.removeEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.removeListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults);
+        CatToolStore.removeListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
     }
 
     render() {
