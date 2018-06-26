@@ -7,7 +7,7 @@
  *
  */
 
-namespace Plugins\Features\Outsource\Constants;
+namespace Features\Outsource\Constants;
 
 
 class ServiceTypes {

@@ -11,13 +11,13 @@ namespace Features\Outsource\Traits;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
+use Features\Outsource\Constants\ServiceTypes;
 use Features\Outsource\Email\ConfirmedQuotationEmail;
 use Features\Outsource\Email\ErrorQuotationEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
 use \Exception;
-use Plugins\Features\Outsource\Constants\ServiceTypes;
 use Utils;
 use \INIT;
 
