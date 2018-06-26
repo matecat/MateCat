@@ -647,14 +647,14 @@ UI = {
     nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = this.getSegmentId($('section').last());
-		$.each(this.searchResultsSegments, function() {
+		$.each(SearchUtils.searchResultsSegments, function() {
 			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
 				found = parseInt(this);
 				return false;
 			}
 		});
 		if (found === '') {
-			found = this.searchResultsSegments[0];
+			found = SearchUtils.searchResultsSegments[0];
 		}
 		return found;
 	},
@@ -738,7 +738,7 @@ UI = {
 
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
-				this.markSearchResults({
+				SearchUtils.markSearchResults({
 					where: where,
 					seg: segLimit
 				});
@@ -834,8 +834,8 @@ UI = {
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
-				this.markSearchResults(options);
-				if (this.searchMode == 'normal') {
+				SearchUtils.markSearchResults(options);
+				if (SearchUtils.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
 				} else {
 					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
@@ -1229,7 +1229,7 @@ UI = {
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
-				this.addWarningToSearchDisplay();
+				SearchUtils.addWarningToSearchDisplay();
 			this.saveInUndoStack('copyalternative');
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
@@ -1557,6 +1557,25 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
+        const mock = {
+            ERRORS: {
+                categories: {
+                    'TAG': ['23853','23854','23855','23856','23857'],
+                }
+            },
+            WARNINGS: {
+                categories: {
+                    'TAG': ['23857','23858','23859'],
+                    'GLOSSARY': ['23860','23863','23864','23866',],
+                    'MISMATCH': ['23860','23863','23864','23866',]
+                }
+            },
+            INFO: {
+                categories: {
+                }
+            }
+        };
+
         APP.doRequest({
             data: dataMix,
             error: function() {
@@ -1566,14 +1585,12 @@ UI = {
             success: function(data) {//console.log('check warnings success');
                 UI.startWarning();
 
-                UI.translationMismatches = data.translation_mismatches;
                 UI.globalWarnings = data.details;
                 //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
-                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
 
                 //check for errors
-                if (UI.globalWarnings) {
-                    UI.updateQAPanel();
+                if(data.details){
+                    SegmentActions.updateGlobalWarnings(data.details);
                 }
 
                 // check for messages
@@ -1589,18 +1606,6 @@ UI = {
             }
         });
 	},
-    updateQAPanel: function () {
-        if ( !_.isUndefined(UI.globalWarnings.tag_issues) ) {
-            CatToolActions.qaComponentSetTagIssues(UI.globalWarnings.tag_issues)
-        }
-
-        if ( !_.isUndefined( UI.globalWarnings.glossary_issues ) ) {
-            CatToolActions.qaComponentSetGlossaryIssues(UI.globalWarnings.glossary_issues)
-        }
-        if ( !_.isUndefined( UI.globalWarnings.translation_mismatches ) ) {
-            CatToolActions.qaComponentsetTranslationConflitcts(UI.globalWarnings.translation_mismatches);
-        }
-    },
 	displayMessage: function(messages) {
         var self = this;
 		if($('body').hasClass('incomingMsg')) return false;
@@ -1693,21 +1698,11 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-				if (segment.el.hasClass('waiting_for_check_result')) {
-                    // TODO: define d.total more explicitly
-					if ( !d.total ) {
-						$('p.warnings', segment.el).empty();
-						$('span.locked.mismatch', segment.el).removeClass('mismatch');
-                        $('.editor .editarea .order-error').removeClass('order-error');
-
-					}
-                    else {
-                        UI.fillCurrentSegmentWarnings(segment.el, d.details, false); // update warnings
-                        UI.markTagMismatch(d.details);
-                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-                        SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-                    }
-				}
+			    if(d.details){
+                    SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
+                }else{
+                    SegmentActions.setSegmentWarnings(segment.id,{});
+                }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');
@@ -2321,10 +2316,10 @@ UI = {
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
             $('.undoCursorPlaceholder').remove();
-        }, 100);
+        });
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
+        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
@@ -2362,23 +2357,6 @@ UI = {
             if ( (tt.length) && (!ss) )
                 return;
         }
-        // var diff = 'null';
-        //
-        // if( typeof currentItem != 'undefined'){
-        //     diff = this.dmp.diff_main( currentItem, this.editarea.html() );
-        //
-        //     // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
-        //     // for that we chooiff[0] as a fallback
-        //     if(typeof diff[1] != 'undefined') {
-        //         diff = diff[1][1];
-        //     }
-        //     else {
-        //         diff = diff[0][1];
-        //     }
-        // }
-        //
-        // if ( diff == ' selected' )
-        //     return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -2580,6 +2558,13 @@ UI = {
             okTxt: 'Download anyway',
             msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
         });
+    },
+    /**
+     * Executes the replace all for segments if all the params are ok
+     * @returns {boolean}
+     */
+    execReplaceAll: function() {
+        SearchUtils.execReplaceAll();
     }
 };
 

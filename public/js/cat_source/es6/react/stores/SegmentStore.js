@@ -41,48 +41,67 @@ EventEmitter.prototype.setMaxListeners(0);
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
-    _segments : {},
-    segmentsInBulk : [],
+    _segments: {},
+    _segmentsFiles: Immutable.fromJS({}),
+    _globalWarnings: {
+        lexiqa: [],
+        matecat: {
+            ERROR: {
+                Categories: []
+            },
+            WARNING: {
+                Categories: []
+            },
+            INFO: {
+                Categories: []
+            }
+        }
+    },
+    segmentsInBulk: [],
     /**
      * Update all
      */
-    updateAll: function(segments, fid, where) {
-        console.time("Time: updateAll segments"+fid);
-        if ( this._segments[fid] && where === "before" ) {
+    updateAll: function (segments, fid, where) {
+        console.time("Time: updateAll segments" + fid);
+        if (this._segments[fid] && where === "before") {
             this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
-        } else if( this._segments[fid] && where === "after" ) {
+        } else if (this._segments[fid] && where === "after") {
             this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
             this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
 
-        if (this.segmentsInBulk.length > 0 ) {
+        this.buildSegmentsFiles(fid, segments);
+        console.log(this._segmentsFiles);
+
+        if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
-    normalizeSplittedSegments: function(segments) {
-        var newSegments = [];
+    normalizeSplittedSegments: function (segments) {
+        let newSegments = [];
+        let self = this;
         $.each(segments, function (index) {
-            var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
-            var segment = this;
-            if(splittedSourceAr.length > 1) {
+            let splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+            let segment = this;
+            if (splittedSourceAr.length > 1) {
                 var splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
                     splitGroup.push(segment.sid + '-' + (i + 1));
                 });
 
                 $.each(splittedSourceAr, function (i) {
-                    var translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-                    var status = segment.target_chunk_lengths.statuses[i];
-                    var segData = {
+                    let translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+                    let status = segment.target_chunk_lengths.statuses[i];
+                    let segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-                        decoded_source:  UI.decodeText(segment, splittedSourceAr[i]),
+                        decoded_source: UI.decodeText(segment, splittedSourceAr[i]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
@@ -90,26 +109,50 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         status: status,
                         time_to_edit: "0",
                         translation: translation,
-                        decoded_translation:  UI.decodeText(segment, translation),
+                        decoded_translation: UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
-                        tagged: false,
+                        warnings: {},
+                        tagged: !self.hasSegmentTagProjectionEnabled(segment),
                         unlocked: false
                     };
                     newSegments.push(segData);
                     segData = null;
                 });
             } else {
-                segment.decoded_translation =  UI.decodeText(segment, segment.translation);
-                segment.decoded_source =  UI.decodeText(segment, segment.segment);
+                segment.decoded_translation = UI.decodeText(segment, segment.translation);
+                segment.decoded_source = UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
-                segment.tagged = false;
+                segment.warnings = {};
+                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 newSegments.push(this);
             }
 
         });
         return newSegments;
     },
+    hasSegmentTagProjectionEnabled: function ( segment ) {
+        if (UI.enableTagProjection) {
+            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
+                return true;
+            }
+        }
+        return false;
+    },
+    buildSegmentsFiles: function (fid, segments) {
+        segments.map(segment => {
+            var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
+            if (splittedSourceAr.length > 1) {
+                let self = this;
+                $.each(splittedSourceAr, function (i) {
+                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), fid);
+                });
+            } else {
+                this._segmentsFiles = this._segmentsFiles.set(segment.sid, fid);
+            }
+        });
+    },
+
     getSegmentById(sid, fid) {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
@@ -121,10 +164,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
 
     },
-    // getSegmentIndexNoFid(sid) {
-    //     this._segments
-    //
-    // },
+
     splitSegment(oldSid, newSegments, fid, splitGroup) {
         var index = this._segments[fid].findIndex(function (segment, index) {
             return (segment.get('sid') == oldSid);
@@ -133,8 +173,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
             newSegments.forEach(function (element) {
                 element.split_group = splitGroup;
-                element.decoded_translation =  UI.decodeText(element, element.translation);
-                element.decoded_source =  UI.decodeText(element, element.segment);
+                element.decoded_translation = UI.decodeText(element, element.translation);
+                element.decoded_source = UI.decodeText(element, element.segment);
             });
 
             newSegments = Immutable.fromJS(newSegments);
@@ -150,14 +190,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         newSegments.forEach(function (element) {
             element.split_group = splitGroup;
-            element.decoded_translation =  UI.decodeText(element, element.translation);
-            element.decoded_source =  UI.decodeText(element, element.segment);
+            element.decoded_translation = UI.decodeText(element, element.translation);
+            element.decoded_source = UI.decodeText(element, element.segment);
         });
 
         newSegments = Immutable.fromJS(newSegments);
         var indexes = [];
         this._segments[fid].map(function (segment, index) {
-            if (segment.get('sid').split('-').length && segment.get('sid').split('-')[0] == oldSid){
+            if (segment.get('sid').split('-').length && segment.get('sid').split('-')[0] == oldSid) {
                 elementsToRemove.push(segment);
                 indexes.push(index);
                 return index;
@@ -203,9 +243,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
         return source;
     },
-    decodeSegmentsText: function (  ) {
+    decodeSegmentsText: function () {
         let self = this;
-        _.forEach(this._segments, function ( item, index ) {
+        _.forEach(this._segments, function (item, index) {
             self._segments[index] = self._segments[index].map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
             self._segments[index] = self._segments[index].map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
         });
@@ -227,7 +267,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     addSegmentVersions(fid, sid, versions) {
 
         let index = this.getSegmentIndex(sid, fid);
-        if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "")  {
+        if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
             this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
             return this._segments[fid].get(index);
@@ -246,7 +286,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         return this._segments[fid].get(index);
     },
-
     getSegmentByIdToJS(sid, fid) {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
@@ -256,14 +295,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     getAllSegments: function () {
         var result = [];
-        $.each(this._segments, function(key, value) {
+        $.each(this._segments, function (key, value) {
             result = result.concat(value.toJS());
         });
         return result;
     },
-    setToggleBulkOption: function (sid,fid) {
+    setToggleBulkOption: function (sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
-        if (this._segments[fid].getIn([index,'inBulk'])) {
+        if (this._segments[fid].getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
             this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], false);
@@ -274,21 +313,21 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     removeBulkOption: function () {
         let self = this;
-        _.forEach(this._segments, function ( item, index ) {
+        _.forEach(this._segments, function (item, index) {
             self._segments[index] = self._segments[index].map(segment => segment.set('inBulk', false));
         });
         this.segmentsInBulk = [];
     },
-    setBulkSelectionInterval: function ( from, to, fid) {
+    setBulkSelectionInterval: function (from, to, fid) {
         let index = this.getSegmentIndex(from, fid);
         if (index > -1 &&
             this._segments[fid].get(index).get("readonly") == "false" &&  //not readonly
-                (this._segments[fid].get(index).get("ice_locked") === "0" ||  //not ice_locked
-                    (this._segments[fid].get(index).get("ice_locked") === "1" && this._segments[fid].get(index).get("unlocked"))  //unlocked
-                )
+            (this._segments[fid].get(index).get("ice_locked") === "0" ||  //not ice_locked
+                (this._segments[fid].get(index).get("ice_locked") === "1" && this._segments[fid].get(index).get("unlocked"))  //unlocked
+            )
         ) {
             this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
-            if ( this.segmentsInBulk.indexOf(from.toString()) === -1) {
+            if (this.segmentsInBulk.indexOf(from.toString()) === -1) {
                 this.segmentsInBulk.push(from.toString());
             }
         }
@@ -296,13 +335,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this.setBulkSelectionInterval(from + 1, to, fid);
         }
     },
-    setBulkSelectionSegments: function ( segmentsArray ) {
+    setBulkSelectionSegments: function (segmentsArray) {
         let self = this;
         this.segmentsInBulk = segmentsArray;
-        _.forEach(this._segments, function ( item, index ) {
-            self._segments[index] = self._segments[index].map(function ( segment ) {
-                if ( segmentsArray.indexOf(segment.get('sid')) > -1 ) {
-                    if ( segment.get('ice_locked') == "1" && !segment.get('unlocked') ) {
+        _.forEach(this._segments, function (item, index) {
+            self._segments[index] = self._segments[index].map(function (segment) {
+                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
+                    if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
                         let index = segmentsArray.indexOf(segment.get('sid'));
                         self.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
                     } else {
@@ -313,20 +352,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             });
         });
     },
-    setMutedSegments: function ( segmentsArray ) {
+    setMutedSegments: function (segmentsArray) {
         let self = this;
-        _.forEach(this._segments, function ( item, index ) {
-            self._segments[index] = self._segments[index].map(function ( segment ) {
-                if ( segmentsArray.indexOf(segment.get('sid')) === -1 ) {
+        _.forEach(this._segments, function (item, index) {
+            self._segments[index] = self._segments[index].map(function (segment) {
+                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
                     return segment.set('muted', true);
                 }
                 return segment;
             });
         });
     },
-    removeAllMutedSegments: function (  ) {
+    removeAllMutedSegments: function () {
         let self = this;
-        _.forEach(this._segments, function ( item, index ) {
+        _.forEach(this._segments, function (item, index) {
             self._segments[index] = self._segments[index].map(segment => segment.set('muted', false));
         });
     },
@@ -335,16 +374,50 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
-    emitChange: function(event, args) {
+    filterGlobalWarning: function (type, sid) {
+        if (type === "TAGS") {
+
+            let fid = this._segmentsFiles.get(sid);
+            if ( !fid) {
+                fid = this._segmentsFiles.get(sid + "-1");
+            }
+            if(!fid){
+                return true
+            }
+            let index = this.getSegmentIndex(sid, fid);
+            let segment = this._segments[fid].get(index);
+            return segment.get('tagged');
+        }
+
+        return sid > -1
+    },
+    // Local warnings
+    setSegmentWarnings(sid, warning) {
+        const fid = this._segmentsFiles.get(sid);
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'warnings'], Immutable.fromJS(warning));
+    },
+    updateGlobalWarnings: function (warnings) {
+        Object.keys(warnings).map(key => {
+            Object.keys(warnings[key].Categories).map(key2 => {
+                warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(this.filterGlobalWarning.bind(this, key2));
+            });
+        });
+        this._globalWarnings.matecat = warnings;
+    },
+    updateLexiqaWarnings: function(warnings){
+        this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
+    },
+    emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     }
 });
 
 
 // Register callback to handle all updates
-AppDispatcher.register(function(action) {
+AppDispatcher.register(function (action) {
 
-    switch(action.actionType) {
+    switch (action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.fid);
             SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.fid);
@@ -453,7 +526,7 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
             SegmentStore.removeBulkOption();
             SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, []);
-            _.forEach(SegmentStore._segments, function ( item, index ) {
+            _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             break;
@@ -464,7 +537,7 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_BULK_SELECTION_SEGMENTS:
             SegmentStore.setBulkSelectionSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function ( item, index ) {
+            _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
@@ -475,24 +548,37 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_MUTED_SEGMENTS:
             SegmentStore.setMutedSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function ( item, index ) {
+            _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             break;
         case SegmentConstants.REMOVE_MUTED_SEGMENTS:
             SegmentStore.removeAllMutedSegments();
-            _.forEach(SegmentStore._segments, function ( item, index ) {
+            _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             break;
         case SegmentConstants.DISABLE_TAG_LOCK:
         case SegmentConstants.ENABLE_TAG_LOCK:
             SegmentStore.decodeSegmentsText();
-            _.forEach(SegmentStore._segments, function ( item, index ) {
+            _.forEach(SegmentStore._segments, function (item, index) {
                 SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
             });
             // Todo remove this
             SegmentStore.emitChange(action.actionType);
+            break;
+        case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
+            SegmentStore.setSegmentWarnings(action.sid, action.warnings);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[SegmentStore._segmentsFiles.get(action.sid)], SegmentStore._segmentsFiles.get(action.sid));
+            break;
+        case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
+            SegmentStore.updateGlobalWarnings(action.warnings);
+            SegmentStore.emitChange(action.actionType, SegmentStore._globalWarnings);
+            break;
+
+        case SegmentConstants.QA_LEXIQA_ISSUES:
+            SegmentStore.updateLexiqaWarnings(action.warnings);
+            SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

@@ -22,7 +22,7 @@ $.extend(UI, {
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
-				this.addWarningToSearchDisplay();
+				SearchUtils.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
 
@@ -236,7 +236,7 @@ $.extend(UI, {
                 }
 
                 if (UI.body.hasClass('searchActive')) {
-                    UI.addWarningToSearchDisplay();
+                    SearchUtils.addWarningToSearchDisplay();
                 }
 
             }

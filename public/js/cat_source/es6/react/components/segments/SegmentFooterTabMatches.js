@@ -143,14 +143,12 @@ class SegmentFooterTabMatches extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        console.log("Mount SegmentFooterMatches" + this.props.id_segment);
         SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.addListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
     componentWillUnmount() {
         this._isMounted = false;
-        console.log("Unmount SegmentFooterMatches" + this.props.id_segment);
         SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }

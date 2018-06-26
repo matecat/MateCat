@@ -22,6 +22,13 @@ let CatToolActions = {
             container: "segmentFilter"
         });
     },
+    setSegmentFilter: function ( segments, state ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_SEGMENT_FILTER,
+            data: segments,
+            state: state
+        });
+    },
     toggleQaIssues: function () {
         AppDispatcher.dispatch({
             actionType: CattolConstants.TOGGLE_CONTAINER,
@@ -32,6 +39,13 @@ let CatToolActions = {
         AppDispatcher.dispatch({
             actionType: CattolConstants.TOGGLE_CONTAINER,
             container: "search"
+        });
+    },
+    setSearchResults: function ( data ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_SEARCH_RESULTS,
+            total: data.total,
+            segments: data.segments
         });
     },
     toggleSegmentFilter: function () {
@@ -46,36 +60,11 @@ let CatToolActions = {
             actionType: CattolConstants.CLOSE_SUBHEADER
         });
     },
-    qaComponentSetTagIssues: function ( issues ) {
+    closeSearch: function (  ) {
         AppDispatcher.dispatch({
-            actionType: CattolConstants.QA_SET_TAG_ISSUES,
-            data: issues
+            actionType: CattolConstants.CLOSE_SEARCH
         });
-    },
-    qaComponentSetGlossaryIssues: function ( issues ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.QA_SET_GLOSSARY_ISSUES,
-            data: issues
-        });
-    },
-    qaComponentsetTranslationConflitcts: function ( issues ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.QA_SET_TRANSLATION_CONFLICTS,
-            data: issues
-        });
-    },
-    qaComponentsetLxqIssues: function ( issues ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.QA_LEXIQA_ISSUES,
-            data: issues
-        });
-    },
-    setSegmentFilter: function ( segments ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.SET_SEGMENT_FILTER,
-            data: segments
-        });
-    },
+    }
 };
 
 module.exports = CatToolActions;

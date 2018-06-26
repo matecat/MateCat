@@ -124,8 +124,9 @@
      * @param speed
      * @returns Deferred
      */
-    var animateScroll = function( segment, speed ) {
+    var animateScroll = function( element, speed ) {
         var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+        var segment = element.closest('section');
         var pos = 0;
         var prev = segment.prev('section') ;
         var segmentOpen = $('section.editor');

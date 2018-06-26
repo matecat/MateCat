@@ -31,7 +31,7 @@ var LXQ = {
                 if (!LXQ.initialized) {
                     LXQ.init();
                 } else {
-                    CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+                    SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
                 }
                 UI.render();
             });
@@ -60,7 +60,7 @@ var LXQ = {
                 }
                 $('#lexiqabox').css('display', 'none');
                 UI.render();
-                CatToolActions.qaComponentsetLxqIssues([])
+                SegmentActions.qaComponentsetLxqIssues([])
             });
         }
     },
@@ -1536,7 +1536,7 @@ LXQ.init  = function () {
         },
         updateWarningsUI: function () {
             LXQ.lexiqaData.segments.sort();
-            CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+            SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
 
         },
         removeSegmentWarning: function (idSegment) {
@@ -1544,7 +1544,7 @@ LXQ.init  = function () {
                 LXQ.lexiqaData.segments.splice(ind,1);
                 delete LXQ.lexiqaData.lexiqaWarnings[idSegment];
                 LXQ.lexiqaData.segments.sort();
-                CatToolActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+                SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
             }
         }
     });

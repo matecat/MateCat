@@ -24,7 +24,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
         },
 
         openIssuesPanel : function(data) {
-            UI.closeSearch();
+            SearchUtils.closeSearch();
 
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));

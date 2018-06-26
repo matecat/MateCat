@@ -137,26 +137,37 @@
 <div metal:define-macro="template-letsmt">
     <!-- sakam letsmt bloku -->
     <template id="mt-provider-letsmt-fields">
-        <style>
-            .clientid-link {
-                float: right;
-                margin-top: 20px;
-            }
-        </style>
-        <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <div class="mt-error-key">Error message</div>
-        <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" />
+        <tildemt-selector id="tildemt"></tildemt-selector>
+        <input type="hidden" id="new-engine-name" />
         <div class="provider-data">
-            <div class="provider-field">
-                <label>Client ID<sup>*</sup></label>
-                <input class="required" data-field-name="client_id" />
-            </div>
-            <a href="https://readymt.tilde.com/Account/LoginApp?Client=matecat" target="_blank" class="clientid-link">Get my Client ID</a>
-            <br class="clear" />
+             <div class="provider-field">
+                 <input type="hidden" id="tildemt-config" data-field-name="tildemt_config" />
+             </div>
         </div>
+
         <script>
-            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Continue');
+            // Patch some letsmt-selector web components styles.
+            // I'd use css mixins instead but they're not supported in any of the browsers yet
+            var style = document.createElement( 'style' );
+            style.innerHTML =
+                   '#add_button, .ok-button, .cancel-button  { \
+                    background-color: #09beec !important; \
+                    font-size: 18px !important; \
+                    border: 1px solid #797979 !important; \
+                    border-radius: 2px !important; \
+                    font-weight: bold !important; } \
+                    .cancel-button { background-color: #f26522 !important; }';
+            document.getElementById("tildemt").shadowRoot.appendChild( style );
+            
+            var tildemtConfig = {};
+            document.getElementById("tildemt").addEventListener("save", function(details){
+                //console.log(details.detail);
+                tildemtConfig = details.detail;
+                $("#tildemt-config").val(JSON.stringify(tildemtConfig));
+                $("#new-engine-name").val(tildemtConfig['engineName']);
+                $('#add-mt-provider-confirm').trigger('click');
+            });
         </script>
     </template>
     <template id="mt-provider-letsmt-msg">
@@ -192,190 +203,6 @@
         </div>
     </template>
     <template id="mt-provider-letsmt-config-fields">
-        <script>
-            <![CDATA[
-            // The first template set this text to "Continue". Set it back now.
-            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Confirm');
-
-            // for some reason the javascript gets escaped without the CDATA tag. TODO: find out why
-            function fetchTerms() {
-                var termsFieldSelector = '.insert-tm .provider-data .provider-field [data-field-name="terms_id"]';
-                $(termsFieldSelector).html("");
-
-                var providerData = {};
-                $('.insert-tm .provider-data .provider-field').each(function () {
-                    var field = $(this).find('input, select').first();
-                    if (field.prop('type') === 'checkbox') {
-                        providerData[field.attr('data-field-name')] = field.prop('checked');
-                    } else {
-                        providerData[field.attr('data-field-name')] = field.val();
-                    }
-                });
-
-                if (!providerData['system_id']) {
-                    return;
-                }
-
-                providerData['function'] = 'getTermList';
-
-                var provider = 'letsmt';
-                var name = 'temp engine';
-                var providerName = 'Tilde MT';
-                data = {
-                    action: 'engine',
-                    exec: 'execute',
-                    name: name,
-                    provider: provider,
-                    data: JSON.stringify(providerData)
-                };
-                context = data;
-                context.providerName = providerName;
-
-                APP.doRequest({
-                    data: data,
-                    context: context,
-                    error: function() {
-                        console.log('error');
-                    },
-                    success: function(d) {
-                        console.log('AJAX response received.');
-                        if(d.errors.length) {
-                            console.log('error');
-                            $('#mt-provider-details .error').text(d.errors[0].message);
-                        } else {
-                            $('#mt-provider-details .error').text("");
-                            if(d.data.result && d.data.result.terms && Object.keys(d.data.result.terms).length) {
-                                $(termsFieldSelector).append("<option value=''>--</option>");
-                                $terms = d.data.result.terms;
-                                console.log('success');
-                                for (var key in $terms){
-                                    $(termsFieldSelector).append("<option value='" + key + "'>" + $terms[key] + "</option>");
-                                }
-                            }
-                        }
-
-                    }
-                });
-            }
-
-            function toggleQEEnabled(checkbox) {
-                var disabled = !checkbox.checked;
-                $('#minimum_qe_field input').prop('disabled', disabled);
-                if (disabled) {
-                    $('#minimum_qe_field').addClass('disabled');
-                } else {
-                    $('#minimum_qe_field').removeClass('disabled');
-                }
-            }
-
-            function createFilters() {
-                var sourceSelect = $('#source_lang_field select');
-                var targetSelect = $('#target_lang_field select');
-                var systemSelect = $('#system_field select');
-                var systemOptions = $('#system_field select option');
-                var sourceLangIdInput = $('#source-lang-id');
-                var targetLangIdInput = $('#target-lang-id');
-                var showOnlyRunningCheckbox = $('#filter_running_field input');
-                var showOnlyRunning = showOnlyRunningCheckbox.prop('checked');
-                var runningStatuses = { running: true, standby: true };
-                sourceSelect.empty();
-
-                // a mapping from available source languages to respective target languages
-                var directions = [];
-                systemOptions.each(function (){
-                    var systemStatus = $(this).data('status');
-                    if(!(systemStatus in runningStatuses) && showOnlyRunning) {
-                        return;
-                    }
-                    var sourceCode = $(this).data('source-language-code');
-                    var targetCode = $(this).data('target-language-code');
-                    var sourceName = $(this).data('source-language-name');
-                    var targetName = $(this).data('target-language-name');
-
-                    if(!(sourceCode in directions)){
-                        directions[sourceCode] = {};
-                        directions[sourceCode].name = sourceName;
-                        directions[sourceCode].target = {};
-                    }
-                    directions[sourceCode].target[targetCode] = targetName;
-                });
-
-                var sortedSourceCodes = [];
-                for (var sourceCode in directions) {
-                    sortedSourceCodes.push(sourceCode);
-                }
-                sortedSourceCodes.sort();
-
-                for (var i=0; i<sortedSourceCodes.length; i++) {
-                    var sourceCode = sortedSourceCodes[i];
-                    var option = $('<option value="' + sourceCode + '">' + directions[sourceCode].name + '</option>');
-                    sourceSelect.append(option);
-                }
-
-                var filterSystems = function() {
-                    var selectedSourceCode = sourceSelect.val();
-                    var selectedTargetCode = targetSelect.val();
-
-                    systemOptions.each(function () {
-                        var systemSourceCode = $(this).data('source-language-code');
-                        var systemTargetCode = $(this).data('target-language-code');
-                        var systemStatus = $(this).data('status');
-
-                        if (systemSourceCode == selectedSourceCode
-                                && systemTargetCode == selectedTargetCode
-                                &&((systemStatus in runningStatuses) || !showOnlyRunning)) {
-                            $(this).show();
-                        } else {
-                            $(this).hide();
-                        }
-                    });
-
-                    var firstAvailableTargetCode = $(systemSelect.find('option').not(function() { return $(this).css("display") == "none" })[0]).val();
-                    systemSelect.val(firstAvailableTargetCode).change();
-                }
-
-                var fillTargetLanguages = function () {
-                    targetSelect.empty();
-                    var selectedSourceCode = sourceSelect.val();
-                    var targetChoices = directions[selectedSourceCode].target
-
-                    var sortedTargetCodes = [];
-                    for (var targetCode in targetChoices) {
-                        sortedTargetCodes.push(targetCode);
-                    }
-                    sortedTargetCodes.sort();
-
-                    for (var i=0; i<sortedTargetCodes.length; i++) {
-                        var targetCode = sortedTargetCodes[i];
-                        var option = $('<option value="' + targetCode + '">' + targetChoices[targetCode] + '</option>');
-                        targetSelect.append(option);
-                    }
-
-                    targetSelect.val(targetSelect.find("option:first").val()).change();
-                }
-
-                var setLanguageCodes = function () {
-                    var systemSourceCode = $("option:selected", this).data('source-language-code');
-                    var systemTargetCode = $("option:selected", this).data('target-language-code');
-
-                    sourceLangIdInput.val(systemSourceCode);
-                    targetLangIdInput.val(systemTargetCode);
-                }
-
-                // this method can get called multiple times. remove previously added event handlers
-                sourceSelect.off('change');
-                targetSelect.off('change');
-                sourceSelect.change(fillTargetLanguages);
-                targetSelect.change(filterSystems);
-                systemSelect.change(setLanguageCodes);
-                sourceSelect.val(sourceSelect.find("option:first").val()).change();
-            }
-
-            function renderMTConfigCallback () {
-                createFilters();
-            }
-            ]]>
-        </script>
         <style>
             .insert-tm select {
                 width: 324px!important;

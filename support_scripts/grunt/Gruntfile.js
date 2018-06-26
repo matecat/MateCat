@@ -218,7 +218,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.tags.js',
                     basePath + 'cat_source/ui.concordance.js',
                     basePath + 'cat_source/ui.glossary.js',
-                    basePath + 'cat_source/ui.search.js',
 
                     basePath + 'cat_source/qa_check_glossary.js',
                     basePath + 'cat_source/qa_check_blacklist.js',

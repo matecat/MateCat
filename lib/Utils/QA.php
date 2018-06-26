@@ -472,6 +472,7 @@ class QA {
             case self::ERR_TAB_MISMATCH :
             case self::ERR_STARSIGN_MISMATCH :
             case self::ERR_SPECIAL_ENTITY_MISMATCH :
+            case self::ERR_SYMBOL_MISMATCH :
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_SYMBOL_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
