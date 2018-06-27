@@ -187,8 +187,9 @@ class ChildProjectService {
     }
 
     public function createRevisionChild( DqfProjectMapStruct $parent, $remoteFiles ) {
-        $projectStruct            = new ChildProjectRequestStruct() ;
-        $projectStruct->type      = self::REVIEW ;
+        $projectStruct                  = new ChildProjectRequestStruct() ;
+        $projectStruct->type            = self::REVIEW ;
+        $projectStruct->reviewSettingId = $this->chunk->getProject()->getMetadataValue('dqf_review_settings_id');
 
         return $this->createChild( $parent, $remoteFiles, $projectStruct );
     }
