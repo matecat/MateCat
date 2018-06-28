@@ -324,7 +324,7 @@ section.opened .warnings {
     float: left;
     border: 0;
     margin-top: 10px;
-    background: url(../../img/logo.png) 0px 2px no-repeat;
+    /*background: url(../../img/logo.png) 0px 2px no-repeat;*/
     width: 132px;
     height: 31px;
     background-size: 130px 26px;
@@ -1302,7 +1302,6 @@ body .main-container {
     background-size: 30px 30px !important;
     float: left;
     position: relative;
-    bottom: 100px;
 }
 
 #outer.loading article .projectbar {
