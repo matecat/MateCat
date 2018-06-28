@@ -140,7 +140,7 @@ class SubHeaderContainer extends React.Component {
     receiveGlobalWarnings(warnings) {
         let totalWarnings = [];
         if (warnings.lexiqa && warnings.lexiqa.length > 0) {
-            warnings.matecat.INFO.Categories['lexiqa'] = warnings.lexiqa;
+            warnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings.lexiqa);
         }
         Object.keys(warnings.matecat).map(key => {
             let totalCategoryWarnings = [];
