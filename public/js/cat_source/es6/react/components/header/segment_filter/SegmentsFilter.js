@@ -10,9 +10,9 @@ class SegmentsFilter extends React.Component {
             {value: 'mt', label: 'MT'},
             {value: 'matches', label: '100% Matches'},
             // {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
-            {value: 'fuzzies_75_84', label: 'fuzzies_75_84'},
-            {value: 'fuzzies_85_94', label: 'fuzzies_85_94'},
-            {value: 'fuzzies_95_99', label: 'fuzzies_95_99'},
+            {value: 'fuzzies_75_84', label: 'Fuzzies 75-84'},
+            {value: 'fuzzies_85_94', label: 'Fuzzies 85-94'},
+            {value: 'fuzzies_95_99', label: 'Fuzzies 95-99'},
             {value: 'todo', label: 'Todo'}
         ];
         this.state = this.defaultState();
@@ -426,6 +426,11 @@ class SegmentsFilter extends React.Component {
                                 <button className="filter-move-up ui basic button" onClick={this.moveDown.bind(this)}>
                                     <i className="icon-chevron-right" />
                                 </button>
+                            </div>
+                            ) : (null)}
+                            {this.state.filtering && this.state.filteredCount === 0 ? (
+                            <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
+                                <div className="label-filters labl">No segments found</div>
                             </div>
                             ) : (null)}
                         </div>
