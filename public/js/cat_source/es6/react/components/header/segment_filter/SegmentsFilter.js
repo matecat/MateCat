@@ -44,6 +44,7 @@ class SegmentsFilter extends React.Component {
                 moreFilters: this.moreFilters,
                 filtersEnabled: true,
                 dataSampleEnabled: false,
+                filterSubmitted: false
             }
         }
     }
@@ -105,6 +106,9 @@ class SegmentsFilter extends React.Component {
                 samplingSize:this.state.samplingSize,
                 selectedStatus: this.state.selectedStatus,
                 dataSampleEnabled: this.state.dataSampleEnabled
+            });
+            this.setState({
+                filterSubmitted: true,
             });
         } else {
             this.setState({
@@ -194,13 +198,15 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filteredCount: data.count,
                 filtering: true,
-                segmentsArray: data.segment_ids
+                segmentsArray: data.segment_ids,
+                filterSubmitted: false
             });
         } else {
             this.applyFilters = true;
             state.filteredCount = data.count;
             state.filtering = true;
             state.segmentsArray = data.segment_ids;
+            state.filterSubmitted = false;
             this.setState(state);
             setTimeout(this.updateObjects.bind(this));
         }
@@ -409,15 +415,17 @@ class SegmentsFilter extends React.Component {
                             <div className="clear-filter">
                                 <button href="#" onClick={this.clearClick.bind(this)}>Clear all</button>
                             </div>
+                            {this.state.filteredCount > 0 ? (
                             <div className="select-all-filter">
                                 <button href="#" ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</button>
                             </div>
+                            ): (null)}
                         </div>
                         ) : (null)}
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
-                            {this.state.filtering && this.state.filteredCount > 0 ? (
+                            {this.state.filtering && this.state.filteredCount && !this.state.filterSubmitted > 0 ? (
                             <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
                                 <div className="label-filters labl"><b>{this.state.filteredCount}</b> Filtered segments</div>
                                 <button className="filter-move-up ui basic button" onClick={this.moveUp.bind(this)}>
@@ -428,11 +436,16 @@ class SegmentsFilter extends React.Component {
                                 </button>
                             </div>
                             ) : (null)}
-                            {this.state.filtering && this.state.filteredCount === 0 ? (
+                            {this.state.filtering && !this.state.filterSubmitted && this.state.filteredCount  === 0 ? (
                             <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
                                 <div className="label-filters labl">No segments found</div>
                             </div>
                             ) : (null)}
+                            {this.state.filterSubmitted ? (
+                                <div className="label-filters labl">Applying filter
+                                    <div className="loader"></div>
+                                </div>
+                            ) : (null) }
                         </div>
                     </div>
                 </div>

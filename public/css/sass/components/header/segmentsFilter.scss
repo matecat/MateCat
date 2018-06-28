@@ -379,6 +379,17 @@ section.muted .segment-side-buttons {
                             display: inline-block;
                             &.labl {
                                 margin-right: 10px;
+                                position: relative;
+                            }
+                            .loader {
+                                width: 20px;
+                                height: 20px;
+                                background: url(../../img/loading.gif) 0 0 no-repeat !important;
+                                position: absolute;
+                                bottom: 0px;
+                                display: block;
+                                left: 85px;
+                                background-size: 20px 20px !important;
                             }
                         }
                     }
