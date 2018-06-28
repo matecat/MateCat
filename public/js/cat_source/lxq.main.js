@@ -700,7 +700,8 @@ LXQ.init  = function () {
         var buildPowertipDataForSegment = function (segment) {
             var sourceHighlihts = $('.source', segment).find('lxqwarning#lexiqahighlight');
             var targetHighlihts = $(UI.targetContainerSelector(), segment).find('lxqwarning#lexiqahighlight');
-
+            if ( !LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(UI.getSegmentId(segment)) )
+                return 0;
             $.each(sourceHighlihts, function(i, element) {
                var classlist = element.className.split(/\s+/);
                if ($(element).data('errors')!==undefined) {
@@ -736,14 +737,14 @@ LXQ.init  = function () {
                $.each(classlist,function(j,cl) {
                    isSpelling = false;
                    var txt = getWarningForModule(cl,false);
-                   if (cl === 'g3g') {
+                   if (cl === 'g3g' && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
                        //need to modify message with word.
                        var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
                        var word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
 
-                   if (txt!==null) {
+                   if (txt!==null && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
                         var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
                         var warningData = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]];
                         if (!warningData) return;
