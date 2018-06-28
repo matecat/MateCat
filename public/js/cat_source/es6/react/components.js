@@ -73,4 +73,4 @@ window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatche
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
 
-window.SearchUtils = require('./components/header/search/ui.search');
+window.SearchUtils = require('./components/header/search/searchUtils');

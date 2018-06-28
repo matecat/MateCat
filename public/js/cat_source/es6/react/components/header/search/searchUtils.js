@@ -161,6 +161,7 @@ let SearchUtils = {
         if (UI.body.hasClass('searchActive')) {
             CatToolActions.closeSearch();
         } else {
+            e.preventDefault();
             CatToolActions.toggleSearch();
             // this.fixHeaderHeightChange();
         }
