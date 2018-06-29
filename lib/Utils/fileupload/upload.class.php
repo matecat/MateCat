@@ -509,6 +509,8 @@ class UploadHandler {
 
     protected function _isRightMime( $fileUp ) {
 
+        $fileUp->type = mime_content_type( $fileUp->tmp_name );
+
         //Mime White List, take them from ProjectManager.php
         foreach ( INIT::$MIME_TYPES as $key => $value ) {
             if ( strpos( $key, $fileUp->type ) !== false ) {
