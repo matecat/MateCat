@@ -3,7 +3,7 @@ let SegmentConstants = require('../../../constants/SegmentConstants');
 let CattolConstants = require('../../../constants/CatToolConstants');
 let SegmentStore = require('../../../stores/SegmentStore');
 let CatToolStore = require('../../../stores/CatToolStore');
-let SearchUtils = require('./ui.search');
+let SearchUtils = require('./searchUtils');
 
 class Search extends React.Component {
 

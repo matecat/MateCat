@@ -10,9 +10,9 @@ class SegmentsFilter extends React.Component {
             {value: 'mt', label: 'MT'},
             {value: 'matches', label: '100% Matches'},
             // {value: 'fuzzies_50_74', label: 'fuzzies_50_74'},
-            {value: 'fuzzies_75_84', label: 'fuzzies_75_84'},
-            {value: 'fuzzies_85_94', label: 'fuzzies_85_94'},
-            {value: 'fuzzies_95_99', label: 'fuzzies_95_99'},
+            {value: 'fuzzies_75_84', label: 'Fuzzies 75-84'},
+            {value: 'fuzzies_85_94', label: 'Fuzzies 85-94'},
+            {value: 'fuzzies_95_99', label: 'Fuzzies 95-99'},
             {value: 'todo', label: 'Todo'}
         ];
         this.state = this.defaultState();
@@ -44,6 +44,7 @@ class SegmentsFilter extends React.Component {
                 moreFilters: this.moreFilters,
                 filtersEnabled: true,
                 dataSampleEnabled: false,
+                filterSubmitted: false
             }
         }
     }
@@ -106,6 +107,9 @@ class SegmentsFilter extends React.Component {
                 selectedStatus: this.state.selectedStatus,
                 dataSampleEnabled: this.state.dataSampleEnabled
             });
+            this.setState({
+                filterSubmitted: true,
+            });
         } else {
             this.setState({
                 filtering: false,
@@ -117,6 +121,9 @@ class SegmentsFilter extends React.Component {
     filterSelectChanged(value) {
         if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
             config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
+            setTimeout(()=>{
+                this.resetMoreFilter();
+            });
             this.setState({
                 selectedStatus: value,
                 samplingType: "",
@@ -133,6 +140,9 @@ class SegmentsFilter extends React.Component {
     moreFilterSelectChanged(value) {
         if ( (!config.isReview && this.state.selectedStatus === "TRANSLATED" && value === "todo") ||
             config.isReview && this.state.selectedStatus === "APPROVED" && value === "todo" ) {
+            setTimeout(()=>{
+                this.resetStatusFilter();
+            });
             this.setState({
                 samplingType: value,
                 selectedStatus: "",
@@ -194,13 +204,15 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filteredCount: data.count,
                 filtering: true,
-                segmentsArray: data.segment_ids
+                segmentsArray: data.segment_ids,
+                filterSubmitted: false
             });
         } else {
             this.applyFilters = true;
             state.filteredCount = data.count;
             state.filtering = true;
             state.segmentsArray = data.segment_ids;
+            state.filterSubmitted = false;
             this.setState(state);
             setTimeout(this.updateObjects.bind(this));
         }
@@ -409,15 +421,17 @@ class SegmentsFilter extends React.Component {
                             <div className="clear-filter">
                                 <button href="#" onClick={this.clearClick.bind(this)}>Clear all</button>
                             </div>
+                            {this.state.filteredCount > 0 ? (
                             <div className="select-all-filter">
                                 <button href="#" ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</button>
                             </div>
+                            ): (null)}
                         </div>
                         ) : (null)}
                     </div>
                     <div className="filter-navigator">
                         <div className="filter-actions">
-                            {this.state.filtering && this.state.filteredCount > 0 ? (
+                            {this.state.filtering && this.state.filteredCount && !this.state.filterSubmitted > 0 ? (
                             <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
                                 <div className="label-filters labl"><b>{this.state.filteredCount}</b> Filtered segments</div>
                                 <button className="filter-move-up ui basic button" onClick={this.moveUp.bind(this)}>
@@ -428,6 +442,16 @@ class SegmentsFilter extends React.Component {
                                 </button>
                             </div>
                             ) : (null)}
+                            {this.state.filtering && !this.state.filterSubmitted && this.state.filteredCount  === 0 ? (
+                            <div className={"filter-arrows filter-arrows-enabled " + buttonArrowsClass}>
+                                <div className="label-filters labl">No segments found</div>
+                            </div>
+                            ) : (null)}
+                            {this.state.filterSubmitted ? (
+                                <div className="label-filters labl">Applying filter
+                                    <div className="loader"></div>
+                                </div>
+                            ) : (null) }
                         </div>
                     </div>
                 </div>

@@ -453,12 +453,12 @@
         },
 
         saveSegment: function(segment) {
-            this.setTranslation({
+            SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
+            return this.setTranslation({
                 id_segment: this.getSegmentId(segment),
                 status: this.getStatusForAutoSave( segment ) ,
                 caller: 'autosave'
             });
-            SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'saved');
         },
         setCurrentSegment: function(closed) {
             var reqArguments = arguments;

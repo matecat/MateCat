@@ -82,26 +82,28 @@ let SearchUtils = {
 		};
 		UI.body.addClass('searchActive');
 		//Save the current segment to not lose the translation
-		UI.saveSegment(UI.currentSegment);
-		let dd = new Date();
-		APP.doRequest({
-			data: {
-				action: 'getSearch',
-				function: 'find',
-				job: config.id_job,
-				token: dd.getTime(),
-				password: config.password,
-				source: source,
-				target: target,
-				status: this.searchParams.status,
-				matchcase: this.searchParams['match-case'],
-				exactmatch: this.searchParams['exact-match'],
-				replace: replace
-			},
-			success: function(d) {
-				SearchUtils.execFind_success(d);
-			}
-		});
+		UI.saveSegment(UI.currentSegment).then(() => {
+            let dd = new Date();
+            APP.doRequest({
+                data: {
+                    action: 'getSearch',
+                    function: 'find',
+                    job: config.id_job,
+                    token: dd.getTime(),
+                    password: config.password,
+                    source: source,
+                    target: target,
+                    status: this.searchParams.status,
+                    matchcase: this.searchParams['match-case'],
+                    exactmatch: this.searchParams['exact-match'],
+                    replace: replace
+                },
+                success: function(d) {
+                    SearchUtils.execFind_success(d);
+                }
+            });
+        });
+
 
 	},
     /**
@@ -130,11 +132,11 @@ let SearchUtils = {
      */
     updateSearchDisplay: function() {
         this.updateSearchItemsCount();
-        if (UI.someSegmentToSave()) {
-            this.addWarningToSearchDisplay();
-        } else {
-            this.removeWarningFromSearchDisplay();
-        }
+        // if (UI.someSegmentToSave()) {
+        //     this.addWarningToSearchDisplay();
+        // } else {
+        //     this.removeWarningFromSearchDisplay();
+        // }
     },
     /**
      * Update the results counter in the search container
@@ -161,6 +163,7 @@ let SearchUtils = {
         if (UI.body.hasClass('searchActive')) {
             CatToolActions.closeSearch();
         } else {
+            e.preventDefault();
             CatToolActions.toggleSearch();
             // this.fixHeaderHeightChange();
         }
@@ -297,16 +300,16 @@ let SearchUtils = {
                 });
             } else {
                 if ( seg.length > 0 ) {
-                    sid = $(seg).attr('id');
+                    var sid = parseInt(UI.getSegmentId(seg));
                     if (where == 'before') {
                         $('section').each(function() {
-                            if ($(this).attr('id') < sid) {
+                            if (parseInt(UI.getSegmentId($(this))) < sid) {
                                 $(this).addClass('justAdded');
                             }
                         });
                     } else {
                         $('section').each(function() {
-                            if ($(this).attr('id') > sid) {
+                            if (parseInt(UI.getSegmentId($(this))) > sid) {
                                 $(this).addClass('justAdded');
                             }
                         });
@@ -361,16 +364,16 @@ let SearchUtils = {
                 this.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
             } else {
                 if ( seg.length > 0 ) {
-                    sid = $(seg).attr('id');
+                    var sid = parseInt(UI.getSegmentId(seg));
                     if (where == 'before') {
                         $('section').each(function() {
-                            if ($(this).attr('id') < sid) {
+                            if (parseInt(UI.getSegmentId($(this))) < sid) {
                                 $(this).addClass('justAdded');
                             }
                         });
                     } else {
                         $('section').each(function() {
-                            if ($(this).attr('id') > sid) {
+                            if (parseInt(UI.getSegmentId($(this))) > sid) {
                                 $(this).addClass('justAdded');
                             }
                         });
@@ -401,11 +404,11 @@ let SearchUtils = {
     /**
      * Displays the warning message that appears when there is an unsaved segment.
      */
-    addWarningToSearchDisplay: function() {
-        if (!$('.search-display .found .warning').length)
-            $('.search-display .found').append('<span class="warning"></span>');
-        $('.search-display .found .warning').text(' (maybe some results in segments modified but not saved)');
-    },
+    // addWarningToSearchDisplay: function() {
+    //     if (!$('.search-display .found .warning').length)
+    //         $('.search-display .found').append('<span class="warning"></span>');
+    //     $('.search-display .found .warning').text(' (maybe some results in segments modified but not saved)');
+    // },
     /**
      * Removes the warning message that appears when there is an unsaved segment
      */
