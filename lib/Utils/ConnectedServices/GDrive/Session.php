@@ -434,63 +434,44 @@ class Session {
         try {
             $service = $this->getService();
 
-            $file = $service->files->get( $fileId );
-            $mime = RemoteFileService::officeMimeFromGoogle( $file->mimeType );
-            $links = $file->getExportLinks() ;
-
-            $downloadUrl = '';
-
-            if($links != null) {
-                $downloadUrl = $links[ $mime ];
-            } else {
-                $downloadUrl = $file->getDownloadUrl();
+            $file = $service->files->get($fileId);
+            $export_mime = RemoteFileService::officeMimeFromGoogle($file->mimeType);
+            if ($export_mime == RemoteFileService::MIME_DOCX) {
+                $export_mime = RemoteFileService::MIME_RTF;
             }
 
-            if ($downloadUrl) {
+            $content = $service->files->export($fileId, $export_mime)->getBody()->__toString();
 
-                $fileName = $this->sanetizeFileName( $file->getTitle() );
-                $file_extension = RemoteFileService::officeExtensionFromMime( $file->mimeType );
+            $fileName = $this->sanetizeFileName($file->getName());
+            $file_extension = RemoteFileService::officeExtensionFromMime($export_mime);
 
-                if ( substr( $fileName, -5 ) !== $file_extension ) {
-                    $fileName .= $file_extension;
-                }
-
-                $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
-                $httpRequest = $service
-                    ->getClient()
-                    ->getAuth()
-                    ->authenticatedRequest( $request );
-
-                if ( $httpRequest->getResponseHttpCode() == 200 ) {
-                    $body = $httpRequest->getResponseBody();
-                    $directory = Utils::uploadDirFromSessionCookie( $this->guid );
-
-                    if( !is_dir( $directory ) ) {
-                        mkdir( $directory, 0755, true );
-                    }
-
-                    $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
-                    $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );
-
-                    if ( $saved !== FALSE ) {
-                        $fileHash = sha1_file( $filePath );
-
-                        $this->addFiles( $fileId, $fileName, $fileHash );
-
-                        $this->doConversion( $fileName );
-                    } else {
-                        throw new Exception( 'Error when saving file.' );
-                    }
-                } else {
-                    throw new Exception( 'Error when downloading file.' );
-                }
-            } else {
-                throw new Exception( 'Unable to get the file URL.' );
+            if (substr($fileName, -5) !== $file_extension) {
+                $fileName .= $file_extension;
             }
+
+            $directory = Utils::uploadDirFromSessionCookie($this->guid);
+
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $filePath = Utils::uploadDirFromSessionCookie($this->guid, $fileName);
+            $saved = file_put_contents($filePath, $content);
+
+            if ($saved !== FALSE) {
+                $fileHash = sha1_file($filePath);
+
+                $this->addFiles($fileId, $fileName, $fileHash);
+
+                $this->doConversion($fileName);
+            } else {
+                throw new Exception('Error when saving file.');
+            }
+
         } catch (Exception $e) {
-            \Log::doLog( $e->getMessage() );
+            \Log::doLog($e->getMessage());
 
-            return false ;
+            return false;
         }
     }
 

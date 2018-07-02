@@ -151,10 +151,9 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function doReplaceAll(){
-        $this->queryParams['trg'] =  $this->target;
-
-        $this->queryParams['trg'] =  CatUtils::view2rawxliff( $this->target );
-        $this->queryParams['replacement'] =  CatUtils::view2rawxliff( $this->replace ) ;
+        $this->queryParams[ 'trg' ]         = CatUtils::view2rawxliff( $this->target );
+        $this->queryParams[ 'src' ]         = CatUtils::view2rawxliff( $this->source );
+        $this->queryParams[ 'replacement' ] = CatUtils::view2rawxliff( $this->replace );
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent

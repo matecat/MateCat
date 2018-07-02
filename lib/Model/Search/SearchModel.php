@@ -372,7 +372,8 @@ class SearchModel {
         $sql = "
         SELECT id_segment, id_job, translation
             FROM segment_translations st
-            JOIN jobs ON st.id_job = id AND password = '{$this->queryParams->password}' AND id = {$this->queryParams->job}
+            JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
+            JOIN segments as s ON st.id_segment = s.id 
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
@@ -381,6 +382,11 @@ class SearchModel {
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
             {$this->queryParams->where_status}
         ";
+
+        if ( !empty( $this->queryParams->regexpEscapedSrc ) ) {
+            $sql .= " AND s.segment REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
+		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}' ";
+        }
 
         return $sql;
 
