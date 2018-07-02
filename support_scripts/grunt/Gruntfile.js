@@ -153,6 +153,20 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'qa-report-improved.js'
             },
+            qualityReport: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react/components/quality_report/*.js',
+                ],
+                dest: buildPath + 'qa-report.js'
+            },
             test: {
                 options: {
                     external: [
@@ -585,6 +599,7 @@ module.exports = function(grunt) {
         'browserify:libs',
         'browserify:components',
         'browserify:qaReportsVersions',
+        'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',
         'concat:semantic',
