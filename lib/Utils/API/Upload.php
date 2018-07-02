@@ -281,7 +281,7 @@ class Upload {
 
         //Mime White List, take them from ProjectManager.php
         foreach ( INIT::$MIME_TYPES as $key => $value ) {
-            if ( strpos( $key, $mimeType ) !== false ) {
+            if ( strpos( $key, $fileUp->type ) !== false ) {
                 return true;
             }
         }
