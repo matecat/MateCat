@@ -121,6 +121,9 @@ class SegmentsFilter extends React.Component {
     filterSelectChanged(value) {
         if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
             config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
+            setTimeout(()=>{
+                this.resetMoreFilter();
+            });
             this.setState({
                 selectedStatus: value,
                 samplingType: "",
@@ -137,6 +140,9 @@ class SegmentsFilter extends React.Component {
     moreFilterSelectChanged(value) {
         if ( (!config.isReview && this.state.selectedStatus === "TRANSLATED" && value === "todo") ||
             config.isReview && this.state.selectedStatus === "APPROVED" && value === "todo" ) {
+            setTimeout(()=>{
+                this.resetStatusFilter();
+            });
             this.setState({
                 samplingType: value,
                 selectedStatus: "",
