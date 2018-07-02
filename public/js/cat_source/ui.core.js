@@ -1228,8 +1228,7 @@ UI = {
     },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
-			if (this.body.hasClass('searchActive'))
-				SearchUtils.addWarningToSearchDisplay();
+
 			this.saveInUndoStack('copyalternative');
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
