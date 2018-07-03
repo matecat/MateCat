@@ -289,8 +289,10 @@ let SearchUtils = {
             let trgHasTags = (txtTrg.match(/<.*?\>/gi) !== null) ? true : false;
 
             if (typeof where == 'undefined') {
-                this.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
-                this.doMarkSearchResults(trgHasTags, $(q + " .targetarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
+                let elemsSource = this.getSegmentsResult('.source');
+                let elemsTarget = this.getSegmentsResult('.targetarea');
+                this.doMarkSearchResults(srcHasTags, elemsSource, regSource, q, txtSrc, ignoreCase);
+                this.doMarkSearchResults(trgHasTags, elemsTarget, regTarget, q, txtTrg, ignoreCase);
 
                 $('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
 
@@ -315,8 +317,10 @@ let SearchUtils = {
                         });
                     }
                 }
-                this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
-                this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .targetarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+                let elemsSource = this.getSegmentsResult('.source');
+                let elemsTarget = this.getSegmentsResult('.targetarea');
+                this.execSearchResultsMarking(this.filterExactMatch(elemsSource, txtSrc), regSource, false);
+                this.execSearchResultsMarking(this.filterExactMatch(elemsTarget, txtTrg), regTarget, false);
 
                 $('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
                 $('mark.searchPreMarker').removeClass('searchPreMarker');
@@ -354,12 +358,9 @@ let SearchUtils = {
             }
 
             if ((typeof where == 'undefined') || (where == 'no')) {
-                let elems;
+                let elems = this.getSegmentsResult();
                 if (txt == "  ") {
-                    elems = $(q).filter(function(index){ return $(this).text().indexOf('  ')  });
                     reg1 = new RegExp(/( &nbsp;)/, 'gi');
-                } else {
-                    elems = $(q + ":" + containsFunc + "('" + txt + "')");
                 }
                 this.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
             } else {
@@ -379,7 +380,8 @@ let SearchUtils = {
                         });
                     }
                 }
-                this.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase );
+                let elems = this.getSegmentsResult();
+                this.doMarkSearchResults(hasTags, elems, reg, q, txt, ignoreCase );
                 $('section.justAdded').removeClass('justAdded');
             }
         }
@@ -447,7 +449,9 @@ let SearchUtils = {
 		$(areas).each(function() {
 		    let segId = UI.getSegmentId( $(this) );
             if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
-                if (!testRegex || ($(this).text().match(testRegex) !== null)) {
+                let isCurrent = $(this).find('.currSearchItem').length > 0;
+                let isTagged = $(this).find('.searchMarker').length > 0;
+                if ( (!testRegex || ($(this).text().match(testRegex) !== null) ) && !isCurrent && !isTagged) {
                     let tt = $(this).html();
                     if (LXQ.cleanUpHighLighting) {
                         tt = LXQ.cleanUpHighLighting(tt);
@@ -473,7 +477,7 @@ let SearchUtils = {
      * @returns the list of items
      */
     filterExactMatch: function(items, txt) {
-        let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}\']/g, '\\$&');
         let searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         let self = this;
         return (this.searchParams['exact-match']) ? items.filter(function() {
@@ -687,6 +691,18 @@ let SearchUtils = {
                 }
             }
         }
+    },
+    getSegmentsResult: function ( className ) {
+        let $objects = [];
+        className = (className) ? className : '.source'
+        _.each(this.searchResultsSegments, function ( item ) {
+            let $obj = UI.getSegmentById(item);
+            if ($obj.length) {
+                $obj = $obj.find(className);
+                $objects.push($obj);
+            }
+        });
+        return $objects;
     },
     nextUnloadedResultSegment: function() {
         let found = '';
