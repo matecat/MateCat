@@ -4,24 +4,36 @@ class CurlTest {
   public $path;
   public $headers;
   public $method;
-  public $params = array();
+  public $params ;
   public $files = array();
+  
+  public $cookies ; 
+
+  public $enable_xdebug = true ;
+
+  public $referer ;
 
   private $url ;
 
   private $response_header ;
   private $response_body ;
   private $response_code ;
-
+  
   private $result ;
 
   function __construct( $options=array() ) {
+    // TODO change this and implement
+    $this->params = array();
+
     $this->path    = @$options['path'];
     $this->headers = @$options['headers'];
-    $this->params  = @$options['params'];
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
+    $this->referer = @$options['referer'];
 
+    if ( array_key_exists('params', $options )) {
+      $this->params  = $options['params']  ;
+    }
   }
 
   function run() {
@@ -43,6 +55,11 @@ class CurlTest {
       curl_setopt($ch, CURLOPT_POST, 1);
     }
 
+    if ( $this->method == 'PUT' ) {
+        curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'PUT') ;
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $this->params ) ) ;
+    }
+
     if ($this->method == 'POST' && empty($this->files)) {
       curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($this->params));
     } else if (! empty($this->files)) {
@@ -55,6 +72,27 @@ class CurlTest {
 
     if ($this->method == 'GET' and $this->params) {
       $this->url .= "?" . http_build_query( $this->params );
+    }
+
+    if ( $this->referer != null ) {
+        \Log::doLog('referer: ' .  $this->referer );
+        curl_setopt($ch, CURLOPT_REFERER, $this->referer )  ;
+    }
+
+    if ( $this->enable_xdebug ) {
+      $this->cookies[] = array( "XDEBUG_SESSION", "MATECAT_TEST" ); 
+    }
+    
+    if ( !empty($this->cookies) ) { 
+      $cookieString = "Cookie: "; 
+      
+      foreach( $this->cookies as $cookie ) {
+        $cookieString .= $cookie[0] . '=' . $cookie[1]; 
+        $cookieString .= ';' ; 
+      }
+      
+      $this->headers[] = $cookieString ; 
+      
     }
 
     $this->setHeaders($ch) ;
@@ -86,8 +124,19 @@ class CurlTest {
     return $this->result ;
   }
 
+  public function getCookies() {
+      preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->response_header, $matches);
+      $cookies = array();
+      foreach($matches[1] as $item) {
+          parse_str($item, $cookie);
+          $cookies = array_merge($cookies, $cookie);
+      }
+      return $cookies ;
+  }
+
   public function getResponse() {
     if ( $this->run() ) {
+
       return array(
         'header' => $this->response_header,
         'body' => $this->response_body,

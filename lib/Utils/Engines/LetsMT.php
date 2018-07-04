@@ -12,7 +12,7 @@
  * @property string client_id
  * @property string client_secret
  */
-class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_LetsMT extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,
@@ -26,15 +26,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         if ( $this->engineRecord->type != "MT" ) {
             throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
-    }
-
-    protected function _fixLangCode( $lang ) {
-
-        $lang = strtolower( trim( $lang ) );
-        $l    = explode( "-", $lang );
-
-        return $l[ 0 ];
-
     }
 
     /**
@@ -99,7 +90,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 foreach ( $parsed[ 'System' ] as $systemData ) {
                     $statusName = "";
                     $status     = "";
-                    foreach ( $systemData[ 'Metadata' ] as $value ) {
+                    foreach ( $systemData[ 'ProjectMetadata' ] as $value ) {
                         if ( $value[ 'Key' ] === 'status' ) {
                             $status = $value[ 'Value' ];
                             switch ( $status ) {

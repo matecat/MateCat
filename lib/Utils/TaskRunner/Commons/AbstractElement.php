@@ -12,8 +12,20 @@ use \ArrayAccess;
 use \DomainException;
 use \stdClass;
 
+/**
+ * Class AbstractElement
+ *
+ * Generic class for an element queue
+ *
+ * @package TaskRunner\Commons
+ */
 abstract class AbstractElement extends stdClass implements ArrayAccess {
 
+    /**
+     * AbstractElement constructor.
+     *
+     * @param array $array_params
+     */
     public function __construct( Array $array_params = array() ) {
         if ( $array_params != null ) {
             foreach ( $array_params as $property => $value ) {
@@ -35,23 +47,52 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
         throw new DomainException( 'Unknown property ' . $name );
     }
 
+    /**
+     * Object to Array conversion method
+     * @return array
+     */
     public function toArray(){
         return (array)$this;
     }
 
+    /**
+     * ArrayAccess interface implementation
+     *
+     * @param mixed $offset
+     *
+     * @return bool
+     */
     public function offsetExists( $offset ) {
         return property_exists( $this, $offset );
     }
 
+    /**
+     * ArrayAccess interface implementation
+     *
+     * @param mixed $offset
+     *
+     * @return null
+     */
     public function offsetGet( $offset ) {
         if( $this->offsetExists( $offset ) ) return $this->$offset;
         return null;
     }
 
+    /**
+     * ArrayAccess interface implementation
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     */
     public function offsetSet( $offset, $value ) {
         if( $this->offsetExists( $offset ) ) $this->$offset = $value;
     }
 
+    /**
+     * ArrayAccess interface implementation
+     *
+     * @param mixed $offset
+     */
     public function offsetUnset( $offset ) {
         if( $this->offsetExists( $offset ) ) $this->$offset = null;
     }

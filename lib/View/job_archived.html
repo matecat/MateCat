@@ -4,9 +4,9 @@
     <title>Job Archived</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="icon" href="${basepath}public/img/favicon.ico"/>
-    <link href="${basepath}public/css/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
-    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script src="${basepath}public/js/lib/jquery-3.3.1.min.js"></script>
     <script type="text/javascript">
         /*<![CDATA[*/
         var config = {
@@ -16,16 +16,6 @@
         };
         /*]]>*/
     </script>
-
-    <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-    <tal:block tal:condition="true:use_compiled_assets" >
-        <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
-    </tal:block>
-
-    <tal:block tal:condition="not:use_compiled_assets" >
-        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
-    </tal:block>
-
 </head>
 <body>
 
@@ -33,11 +23,26 @@
     <script>
         $( "body" ).on( 'click', '#reactivate-job', function ( e ) {
             e.preventDefault();
-            UI.reactivateJob();
+            $.post(
+                    "/",
+                {
+                    action:         "changeJobsStatus",
+                    new_status:     "active",
+                    res:            "job",
+                    id:             config.job_id,
+                    password:      config.password
+                })
+                .done(function(d){
+                    if(d.data == 'OK') {
+                        setTimeout(function() {
+                            location.reload(true);
+                        }, 300);
+                    }
+                });
         } );
+
     </script>
     <a href="${basepath}" class="logoblack"></a><br/>
-
 
     <strong style="font-size:160%">This job has been archived.</strong><br/><br/>
     <img src="/public/img/jobarchived.png"/><br/>
@@ -48,7 +53,7 @@
     </p>
     <p tal:condition="not:jobOwnerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a>
         to reactivate it<br/>
-        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+        If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
 </div>
 
 </body>

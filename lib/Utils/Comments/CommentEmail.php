@@ -1,6 +1,7 @@
 <?php
 
-include_once @INIT::$UTILS_ROOT . '/phpmailer/class.phpmailer.php';
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\QueueElement;
 
 class Comments_CommentEmail {
 
@@ -16,32 +17,26 @@ class Comments_CommentEmail {
     }
 
     public function deliver() {
-        $mail = new PHPMailer();
 
-        $mail->IsSMTP();
-        $mail->Host       = INIT::$SMTP_HOST ;
-        $mail->Port       = INIT::$SMTP_PORT ;
-        $mail->Sender     = INIT::$SMTP_SENDER ;
-        $mail->Hostname   = INIT::$SMTP_HOSTNAME ;
+        $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
+        $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
+        $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
+        $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
+        $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
+        $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
+        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        $mail->From       = INIT::$SMTP_SENDER ;
-        $mail->FromName   = INIT::$MAILER_FROM_NAME ;
-        $mail->ReturnPath = INIT::$MAILER_RETURN_PATH ;
+        $mailConf[ 'address' ]  = array( $this->user->email, $this->user->first_name );
+        $mailConf[ 'subject' ]  = $this->buildSubject();
+        $mailConf[ 'htmlBody' ] = $this->buildHTMLMessage();
+        $mailConf[ 'altBody' ]  = $this->buildTextMessage();
 
-        $mail->AddReplyTo( $mail->ReturnPath, $mail->FromName );
+        WorkerClient::init( new AMQHandler() );
+        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\MailWorker', $mailConf, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
-        $mail->Subject = $this->buildSubject();
-        $mail->Body = $this->buildHTMLMessage();
-        $mail->AltBody = $this->buildTextMessage();
+        Log::doLog( 'Message has been sent' );
+        return true;
 
-        $mail->MsgHTML($mail->Body);
-
-        $mail->XMailer  = 'Translated Mailer';
-		$mail->CharSet = 'UTF-8';
-		$mail->IsHTML();
-        $mail->AddAddress( $this->user->email, $this->user->first_name );
-        $mail->Send();
-        Log::doLog('email sent');
     }
 
     private function buildHTMLMessage() {

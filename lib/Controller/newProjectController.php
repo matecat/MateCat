@@ -1,80 +1,154 @@
 <?php
 
+
+use ConnectedServices\GDrive;
+
+use LexiQA\LexiQADecorator;
+
 class newProjectController extends viewController {
 
     private $guid = '';
     private $mt_engines;
-    private $tms_engines;
     private $lang_handler;
 
-    private $sourceLangArray = array();
-    private $targetLangArray = array();
-    private $subjectArray = array();
+    private $sourceLangArray = [];
+    private $targetLangArray = [];
+    private $subjectArray    = [];
 
-    private $project_name='';
-    private $private_tm_key='';
+    private $project_name = '';
 
-    /**
-     * @var string The actual URL
-     */
-    private $incomingUrl;
+    private $keyList = [];
 
-    private $keyList = array();
+    protected  $subject_handler ;
 
     public function __construct() {
 
-        parent::__construct( false );
+        parent::__construct();
         parent::makeTemplate( "upload.html" );
 
+        $filterArgs = [
+                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+        ];
 
-        $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING ),
-                'private_tm_key' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-        );
+        $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
+        $this->project_name = $__postInput[ "project_name" ];
 
-        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
-        $this->project_name      = $__postInput[ "project_name" ];
-        $this->private_tm_key = $__postInput[ "private_tm_key" ];
-
-        $this->guid            = Utils::create_guid();
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
+
     }
 
     public function doAction() {
-        //Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            setcookie( "upload_session", $this->guid, time() + 86400 );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+
+        $this->setOrGetGuid();
+
+        try {
+            $this->evalSourceLangHistory();
+        } catch ( Lang_InvalidLanguageException $e ) {
+            Log::doLog( $e->getMessage() );
+            $this->template->noSourceLangHistory = true;
         }
 
-        if ( isset ( $_COOKIE[ "sourceLang" ] ) and $_COOKIE[ "sourceLang" ] == "_EMPTY_" ) {
+        try {
+            $this->evalTragetLangHistory();
+        } catch ( Lang_InvalidLanguageException $e ) {
+            Log::doLog( $e->getMessage() );
+            $this->template->noTargetLangHistory = true;
+        }
+
+        $this->initUploadDir();
+
+        $engine            = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineQuery       = new EnginesModel_EngineStruct();
+        $engineQuery->type = 'MT';
+
+        $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
+
+        $engineQuery->active = 1;
+        $this->mt_engines    = $engine->read( $engineQuery );
+
+        if ( $this->isLoggedIn() ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email );
+
+            try {
+
+                $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
+
+                $keyList = $_keyList->read( $dh );
+                foreach ( $keyList as $memKey ) {
+                    //all keys are available in this condition ( we are creating a project
+                    $this->keyList[] = $memKey->tm_key;
+                }
+
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
+            }
+        }
+    }
+
+    /**
+     * Here we want to be explicit about the team the user is currently working on.
+     * Even if a user is included in more teams, we'd prefer to have the team bound
+     * to the given session.
+     *
+     * @param     $arr
+     * @param     $col
+     * @param int $dir
+     */
+    private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
+        $sort_col = [];
+        foreach ( $arr as $key => $row ) {
+            $sort_col[ $key ] = $row[ $col ];
+        }
+
+        array_multisort( $sort_col, $dir, $arr );
+    }
+
+    private function getCurrentSourceLang() {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
+            $ckSourceLang = filter_input( INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG );
+
+            if ( $ckSourceLang != Constants::EMPTY_VAL ) {
+                $sourceLangHistory = $ckSourceLang;
+                $sourceLangAr      = explode( '||', urldecode( $sourceLangHistory ) );
+
+                if ( count( $sourceLangAr ) > 0 ) {
+                    return $sourceLangAr[ 0 ];
+                }
+            }
+        }
+
+        return Constants::DEFAULT_TARGET_LANG;
+    }
+
+    private function evalSourceLangHistory() {
+        if ( isset ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noSourceLangHistory = true;
         } else {
 
-            if ( !isset( $_COOKIE[ 'sourceLang' ] ) ) {
-                setcookie( "sourceLang", "_EMPTY_", time() + ( 86400 * 365 ) );
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
                 $this->noSourceLangHistory = true;
             } else {
 
-                if ( $_COOKIE[ "sourceLang" ] != "_EMPTY_" ) {
+                if ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] != \Constants::EMPTY_VAL ) {
                     $this->noSourceLangHistory = false;
-                    $this->sourceLangHistory   = $_COOKIE[ "sourceLang" ];
+                    $this->sourceLangHistory   = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
                     $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
-                    $tmpSourceAr               = array();
-                    $tmpSourceArAs             = array();
+                    $tmpSourceAr               = [];
+                    $tmpSourceArAs             = [];
                     foreach ( $this->sourceLangAr as $key => $lang ) {
                         if ( $lang != '' ) {
                             $tmpSourceAr[ $lang ] = $this->lang_handler->getLocalizedName( $lang );
 
-                            $ar               = array();
-                            $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
-                            $ar[ 'code' ]     = $lang;
-                            $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
-                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
+                            $ar                = [];
+                            $ar[ 'name' ]      = $this->lang_handler->getLocalizedName( $lang );
+                            $ar[ 'code' ]      = $lang;
+                            $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
+                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
@@ -87,108 +161,18 @@ class newProjectController extends viewController {
                 }
             }
         }
+    }
 
-        if ( isset( $_COOKIE[ "targetLang" ] ) and $_COOKIE[ "targetLang" ] == "_EMPTY_" ) {
-            $this->noTargetLangHistory = true;
+    private function setOrGetGuid() {
+        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
+        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
+            $this->guid = Utils::create_guid();
+            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
         } else {
-            if ( !isset( $_COOKIE[ 'targetLang' ] ) ) {
-                setcookie( "targetLang", "_EMPTY_", time() + ( 86400 * 365 ) );
-                $this->noTargetLangHistory = true;
-            } else {
-                if ( $_COOKIE[ "targetLang" ] != "_EMPTY_" ) {
-                    $this->noTargetLangHistory = false;
-                    $this->targetLangHistory   = $_COOKIE[ "targetLang" ];
-                    $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
-
-                    $tmpTargetAr   = array();
-                    $tmpTargetArAs = array();
-
-                    foreach ( $this->targetLangAr as $key => $lang ) {
-                        if ( $lang != '' ) {
-                            $prova = explode( ',', urldecode( $lang ) );
-
-                            $cl = "";
-                            foreach ( $prova as $ll ) {
-                                $cl .= $this->lang_handler->getLocalizedName( $ll ) . ',';
-                            }
-                            $cl = substr_replace( $cl, "", -1 );
-
-
-                            $tmpTargetAr[ $lang ] = $cl;
-                            //					$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
-
-                            $ar               = array();
-                            $ar[ 'name' ]     = $cl;
-                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
-                            $ar[ 'code' ]     = $lang;
-                            $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
-                            array_push( $tmpTargetArAs, $ar );
-                        }
-                    }
-                    $this->targetLangAr = $tmpTargetAr;
-                    asort( $this->targetLangAr );
-
-                    $this->array_sort_by_column( $tmpTargetArAs, 'name' );
-                    $this->targetLangArray = $tmpTargetArAs;
-
-                }
-            }
-        }
-
-        $intDir = INIT::$UPLOAD_REPOSITORY . '/' . $this->guid . '/';
-        if ( !is_dir( $intDir ) ) {
-            mkdir( $intDir, 0775, true );
-        }
-
-        // check if user is logged and generate authURL for logging in
-        $this->doAuth();
-
-        $this->generateAuthURL();
-
-        list( $uid, $cid ) = $this->getLoginUserParams();
-        $engine = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'MT';
-
-        if ( @(bool)$_GET[ 'amt' ] == true ) {
-            $engineQuery->uid    = 'all';
-        } else {
-            $engineQuery->uid    = ( $uid == null ? -1 : $uid );
-        }
-
-        $engineQuery->active = 1;
-        $this->mt_engines = $engine->read( $engineQuery );
-
-        if ( $this->isLoggedIn() ) {
-
-            try {
-
-                $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => @$_SESSION[ 'uid' ] ) );
-
-                $keyList = $_keyList->read( $dh );
-                foreach ( $keyList as $memKey ) {
-                    //all keys are available in this condition ( we are creating a project
-                    $this->keyList[ ] = $memKey->tm_key;
-                }
-
-            } catch ( Exception $e ) {
-                Log::doLog( $e->getMessage() );
-            }
-
+            $this->guid = $_COOKIE[ 'upload_session' ];
         }
 
     }
-
-    public function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
-        $sort_col = array();
-        foreach ( $arr as $key => $row ) {
-            $sort_col[ $key ] = $row[ $col ];
-        }
-
-        array_multisort( $sort_col, $dir, $arr );
-    }
-
 
     private function isUploadTMXAllowed( $default = false ) {
         if ( $default ) {
@@ -197,16 +181,12 @@ class newProjectController extends viewController {
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $k => $v ) {
             foreach ( $v as $kk => $vv ) {
                 if ( $kk == 'tmx' ) {
-                    //	echo "true";
-                    //	exit;
                     return true;
                 }
             }
         }
 
-        //echo "false";exit;
         return false;
-
     }
 
     private function getExtensions( $default = false ) {
@@ -227,12 +207,12 @@ class newProjectController extends viewController {
     }
 
     private function getExtensionsUnsupported() {
-        $ext_ret = array();
+        $ext_ret = [];
         foreach ( INIT::$UNSUPPORTED_FILE_TYPES as $kk => $vv ) {
             if ( !isset( $vv[ 1 ] ) or empty( $vv[ 1 ] ) ) {
                 continue;
             }
-            $ext_ret[ ] = array( "format" => "$kk", "message" => "$vv[1]" );
+            $ext_ret[] = [ "format" => "$kk", "message" => "$vv[1]" ];
         }
         $json = json_encode( $ext_ret );
 
@@ -249,16 +229,16 @@ class newProjectController extends viewController {
     }
 
     private function getCategories( $output = "array" ) {
-        $ret = array();
+        $ret = [];
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
-            $val         = array();
-            foreach ($value as $ext => $info) {
-                $val[] = array(
+            $val = [];
+            foreach ( $value as $ext => $info ) {
+                $val[] = [
                         'ext'   => $ext,
-                        'class' => $info[2]
-                );
+                        'class' => $info[ 2 ]
+                ];
             }
-            $val = array_chunk($val, 12 );
+            $val = array_chunk( $val, 12 );
 
             $ret[ $key ] = $val;
         }
@@ -269,43 +249,25 @@ class newProjectController extends viewController {
         return $ret;
     }
 
-    private function doAuth() {
-
-        //if no login set and login is required
-        if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $this->incomingUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
-        }
-
-    }
-
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-//        foreach ( $target_languages as $k => $v ) {
-//            if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
-//            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
-//                unset ( $target_languages[ $k ] );
-//            }
-//        }
 
-        $this->template->project_name=$this->project_name;
-        $this->template->private_tm_key=$this->private_tm_key;
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+        $this->template->subject_array = $this->subjectArray;
 
-        $this->template->page = 'home';
+        $this->template->project_name = $this->project_name;
+
+        $this->template->page             = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
-        $this->template->subjects = $this->subjectArray;
-
-        $this->template->upload_session_id = $this->guid;
+        $this->template->subjects         = $this->subjectArray;
 
         $this->template->mt_engines         = $this->mt_engines;
-//        $this->template->tms_engines        = $this->tms_engines;
-        $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
+        $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );
 
         $this->template->isUploadTMXAllowed = false;
-        if ( INIT::$CONVERSION_ENABLED ) {
+        if ( !empty( INIT::$FILTERS_ADDRESS ) ) {
             $this->template->allowed_file_types = $this->getExtensions( "" );
             $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
         } else {
@@ -320,23 +282,118 @@ class newProjectController extends viewController {
         $this->template->targetLangHistory          = $this->targetLangArray;
         $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
         $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
-        $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
+        $this->template->extended_user              = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user                = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->userMail                   = $this->user->email;
 
-        $this->template->incomingURL = $this->incomingUrl;
-        $this->template->authURL     = $this->authURL;
+        $this->template->build_number   = INIT::$BUILD_NUMBER;
+        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->template->maxNumberFiles = INIT::$MAX_NUM_FILES;
 
-        $this->template->user_keys = $this->keyList;
+        //this can be overridden by plugins to enable/disable the default flag on MyMemory lookup
+        $this->template->get_public_matches = true;
 
-        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
-        $this->template->DQF_enabled = INIT::$DQF_ENABLED;
+        $this->template->user_keys     = $this->keyList;
+        $this->template->user_keys_obj = json_encode( array_map( function ( $tmKeyStruct ) {
+            return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
+        }, $this->keyList ) );
+
+        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
+        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
+
+        $this->template->currentTargetLang = $this->getCurrentTargetLang();
+        $this->template->currentSourceLang = $this->getCurrentSourceLang();
+
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
+        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
+
+        $this->template->additional_input_params_base_path = \INIT::$TEMPLATE_ROOT;
+
+        //Enable tag projection at instance level
+        $this->template->show_tag_projection = true;
+        $this->template->tag_projection_enabled = true;
+        $this->template->tag_projection_default = true;
+
+        $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
+
+        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
+
+        if ( $this->isLoggedIn() ) {
+            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
+        }
 
     }
 
-}
+    private function getCurrentTargetLang() {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+            $ckTargetLang = filter_input( INPUT_COOKIE, Constants::COOKIE_TARGET_LANG );
 
+            if ( $ckTargetLang != Constants::EMPTY_VAL ) {
+                $targetLangHistory = $ckTargetLang;
+                $targetLangAr      = explode( '||', urldecode( $targetLangHistory ) );
+
+                if ( count( $targetLangAr ) > 0 ) {
+                    return $targetLangAr[ 0 ];
+                }
+            }
+        }
+
+        return Constants::DEFAULT_SOURCE_LANG;
+    }
+
+    private function evalTragetLangHistory() {
+        if ( isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] == \Constants::EMPTY_VAL ) {
+            $this->noTargetLangHistory = true;
+        } else {
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
+                $this->noTargetLangHistory = true;
+            } else {
+                if ( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] != \Constants::EMPTY_VAL ) {
+                    $this->noTargetLangHistory = false;
+                    $this->targetLangHistory   = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
+                    $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
+
+                    $tmpTargetAr   = [];
+                    $tmpTargetArAs = [];
+
+                    foreach ( $this->targetLangAr as $key => $lang ) {
+                        if ( $lang != '' ) {
+                            $langs = explode( ',', urldecode( $lang ) );
+
+                            $cl = "";
+                            foreach ( $langs as $ll ) {
+                                $cl .= $this->lang_handler->getLocalizedName( $ll ) . ',';
+                            }
+                            $cl = substr_replace( $cl, "", -1 );
+
+                            $tmpTargetAr[ $lang ] = $cl;
+
+                            $ar                = [];
+                            $ar[ 'name' ]      = $cl;
+                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
+                            $ar[ 'code' ]      = $lang;
+                            $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
+                            array_push( $tmpTargetArAs, $ar );
+                        }
+                    }
+                    $this->targetLangAr = $tmpTargetAr;
+                    asort( $this->targetLangAr );
+
+                    $this->array_sort_by_column( $tmpTargetArAs, 'name' );
+                    $this->targetLangArray = $tmpTargetArAs;
+
+                }
+            }
+        }
+    }
+
+    private function initUploadDir() {
+        $intDir = INIT::$UPLOAD_REPOSITORY . '/' . $this->guid . '/';
+        if ( !is_dir( $intDir ) ) {
+            mkdir( $intDir, 0775, true );
+        }
+    }
+
+}

@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Created by PhpStorm.
@@ -16,6 +18,8 @@ class exportTMXController extends downloadController {
     private $fileName;
 
     protected $errors;
+
+    public $jobInfo;
 
     public function __construct() {
         $filterArgs = array(
@@ -59,6 +63,7 @@ class exportTMXController extends downloadController {
      * @return mixed
      */
     function doAction() {
+
         if ( count( $this->errors ) > 0 ) {
             return null;
         }
@@ -66,7 +71,7 @@ class exportTMXController extends downloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = getJobData( $this->jobID, $this->jobPass );
+        $jobData = $this->jobInfo = Jobs_JobDao::getByIdAndPassword( $this->jobID, $this->jobPass );
 
         $pCheck = new AjaxPasswordCheck();
 
@@ -102,6 +107,26 @@ class exportTMXController extends downloadController {
                 $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
                 break;
         }
+
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        /**
+         * Retrieve user information
+         */
+        $this->readLoginInfo();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jobID;
+        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->action     = ActivityLogStruct::DOWNLOAD_JOB_TMX;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->user->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 

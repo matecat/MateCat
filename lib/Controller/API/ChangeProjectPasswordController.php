@@ -1,4 +1,6 @@
 <?php
+use Exceptions\NotFoundError;
+
 /**
  * Created by PhpStorm.
  * User: domenico
@@ -12,6 +14,9 @@ class ChangeProjectPasswordController  extends ajaxController {
     protected $api_output = array(
             'status' => 'FAIL'
     );
+    private $id_project;
+    private $new_password;
+    private $old_password;
 
     public function __construct() {
 
@@ -29,20 +34,32 @@ class ChangeProjectPasswordController  extends ajaxController {
         $this->new_password = $__postInput[ 'new_pass' ];
         $this->old_password = $__postInput[ 'old_pass' ];
 
+        Log::doLog("ChangeProjectPasswordController params: id_project=$this->id_project new_pass=$this->new_password old_pass=$this->old_password");
     }
 
     public function doAction() {
 
-        $changePass = changePassword( 'prj', $this->id_project, $this->old_password, $this->new_password );
+        $pDao = new Projects_ProjectDao();
+        try {
+            $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->id_project, $this->old_password );
+        } catch ( NotFoundError $e ) {
+            $this->api_output[ 'message' ] = 'Wrong id or pass';
+            Log::doLog( "ChangeProjectPasswordController error: " . $this->api_output[ 'message' ] );
 
-        if( $changePass <= 0 ){
-            $this->api_output[ 'message' ]       = 'Wrong id or pass';
             return -1; //FAIL
         }
+
+        $pDao->changePassword( $pStruct, $this->new_password );
+        $pDao->destroyCacheById( $this->id_project ) ;
+        ( new Jobs_JobDao() )->destroyCacheByProjectId( $this->id_project );
+
+        $pStruct->getFeatures()->run('project_password_changed', $pStruct, $this->old_password );
 
         $this->api_output[ 'status' ]       = 'OK';
         $this->api_output[ 'id_project' ]   = $this->id_project;
         $this->api_output[ 'project_pass' ] = $this->new_password;
+
+        Log::doLog( "ChangeProjectPasswordController result: " . $this->api_output[ 'status' ] );
 
     }
 

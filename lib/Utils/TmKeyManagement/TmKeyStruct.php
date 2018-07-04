@@ -94,6 +94,21 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     public $target;
 
     /**
+     * User Structs of key owners
+     *
+     * @var Users_UserStruct[]
+     */
+    protected $in_users;
+
+    /**
+     * Coupled with $in_users
+     *  if the key is shared:
+     *      $in_users > 1 and $is_shared == true
+     * @var bool
+     */
+    protected $is_shared = false;
+
+    /**
      * @var int How much readable chars for hashed keys
      */
     protected $readable_chars = 5;
@@ -109,6 +124,10 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
 
         return substr( $this->key, 0, $keyLength - $this->readable_chars ) ==  str_repeat("*", $keyLength - $this->readable_chars );
 
+    }
+
+    public function isShared(){
+        return $this->is_shared;
     }
 
     /**
@@ -173,4 +192,20 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
 
     }
 
-} 
+    /**
+     * @return Users_UserStruct[]
+     */
+    public function getInUsers() {
+
+        if( is_string( $this->in_users ) ){
+            $userDao = new Users_UserDao( Database::obtain() );
+            $users = $userDao->getByUids( explode( ",", $this->in_users ) );
+            $this->in_users = $users;
+        } elseif( $this->in_users == null ){
+            throw new UnexpectedValueException( "Wrong DataType, you can not get the users to which the key belongs because this key comes from Job Table. Load the key from the KeyRing." );
+        }
+
+        return $this->in_users;
+    }
+
+}

@@ -2,21 +2,27 @@
 .settings
 .idea
 .project
+nbproject/
+
 
 # Configuration files
 .num_processes
-inc/login_secret.dat
+inc/*.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
 inc/config.test.ini
 inc/config.development.ini
-lib/Utils/Analysis/.num_processes
 inc/.globalmessage.ini
+inc/oauth-token-key.txt
+.passwd.ini
 
 # Ignore artifacts
-public/css/app.css
+public/css/build/app.css
+public/css/build/app.css.map
+public/css/build/*-build.css
 public/js/build
+public/css/build
 
 # NodeJs stuff
 nodejs/*.log
@@ -34,6 +40,8 @@ internal_scripts
 local_storage
 lib/Utils/fileupload/thumbnails/*
 
+task_manager_config.ini
+
 # advised local folder for test files
 test-storage
 
@@ -44,4 +52,9 @@ vendor
 .env
 
 phinx.yml
+plugins/*
+.lastjobprocessed_jpeer
+.maxJobToProcess_jpeer
 
+inc/dqf/dqf_test_secret.ini
+package-lock.json

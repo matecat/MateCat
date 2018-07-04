@@ -1,45 +1,29 @@
 <?php
 
-class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Chunks_ChunkStruct extends Jobs_JobStruct {
 
-    public $id;
-    public $password;
-    public $id_project ;
-    public $create_date ;
-    public $job_first_segment;
-    public $job_last_segment ;
-    public $last_opened_segment ;
-    public $owner ;
-    public $last_update ;
-    public $source ;
-    public $target ;
-    public $tm_keys ;
-
+    /** @return Segments_SegmentStruct[]
+     *
+     */
     public function getSegments() {
         $dao = new Segments_SegmentDao( Database::obtain() );
+
         return $dao->getByChunkId( $this->id, $this->password );
     }
 
-    public function isMarkedComplete() {
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
+    public function isMarkedComplete( $params ) {
+        $params = \Utils::ensure_keys( $params, array( 'is_review' ) );
+
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array( 'is_review' => $params[ 'is_review' ] ) );
     }
 
+    /**
+     * @return Translations_SegmentTranslationStruct[]
+     */
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
         return $dao->getByJobId( $this->id );
-    }
-
-    public function findLatestTranslation() {
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-        return $dao->lastTranslationByJobOrChunk( $this );
-    }
-
-    public function getProject() {
-        return $this->getJob()->getProject();
-    }
-
-    public function isFeatureEnabled( $feature_code ) {
-        return $this->getJob()->isFeatureEnabled( $feature_code );
     }
 
     /**
@@ -49,7 +33,34 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         // I'm doing this to keep the concepts of Chunk and Job as
         // separated as possible even though they share the same
         // database table.
-        return new Jobs_JobStruct( $this->toArray() );
+        return new Jobs_JobStruct( $this->attributes() );
     }
 
+    public function getIdentifier() {
+        return $this->id . '-' . $this->password ;
+    }
+
+    public function getQualityOverall() {
+        return CatUtils::getQualityOverallFromJobStruct( $this ) ;
+    }
+
+    public function getQualityInfo(){
+        $qClass = CatUtils::getQualityInfoFromJobStruct( $this );
+
+        if ( 'LQA\ChunkReviewStruct' === get_class( $qClass ) ) {
+            return null ;
+        }
+        else {
+            return ( isset( $qClass[ 'equivalent_class' ] ) ? $qClass[ 'equivalent_class' ] : null );
+        }
+    }
+
+    public function getErrorsCount() {
+        $dao = new \Translations\WarningDao() ;
+        return $dao->getErrorsByChunk( $this );
+    }
+
+    public function hasSiblings() {
+        return count( $this->getJob()->getChunks() ) > 1 ;
+    }
 }

@@ -21,7 +21,7 @@ class ZipContentObject extends stdClass {
                 $this->document_content = file_get_contents( $this->input_filename );
 
             } else {
-                throw new Exception( "Error while retrieving input_filename content" );
+                throw new Exception( "Error while retrieving input_filename content: " . $this->input_filename  );
 
             }
 

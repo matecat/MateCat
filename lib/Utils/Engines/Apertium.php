@@ -6,10 +6,10 @@
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
- * 
+ *
  */
 
-class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_Apertium extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,
@@ -41,32 +41,32 @@ class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineI
      * @return array
      */
     protected function _decode( $rawValue ){
-        $all_args =  func_get_args();	
+        $all_args =  func_get_args();
 
         if( is_string( $rawValue ) ) {
-	  $original = json_decode( $all_args[1]["data"] , true );
-	  $decoded = json_decode( $rawValue, true ); 
-          $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )
-                                )
-                        )
-                );        
-        } else {          
-          $decoded = $rawValue; // already decoded in case of error
+            $original = json_decode( $all_args[1]["data"] , true );
+            $decoded = json_decode( $rawValue, true );
+            $decoded = array(
+                    'data' => array(
+                            "translations" => array(
+                                    array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )
+                            )
+                    )
+            );
+        } else {
+            $decoded = $rawValue; // already decoded in case of error
         }
-        
+
         $mt_result = new Engines_Results_MT( $decoded );
 
         if ( $mt_result->error->code < 0 ) {
             $mt_result = $mt_result->get_as_array();
             $mt_result['error'] = (array)$mt_result['error'];
             return $mt_result;
-        }        
+        }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-		$this->_preserveSpecialStrings( $original["text"]),
+                $this->_preserveSpecialStrings( $original["text"]),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -81,18 +81,18 @@ class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineI
 
     public function get( $_config ) {
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        
+
         $param_data = json_encode(array(
-        "mtsystem" => "apertium", 
-        "src" => $_config[ 'source' ], 
-        "trg" => $_config[ 'target' ], 
-        "text" => $_config[ 'segment' ]
-	));
+                "mtsystem" => "apertium",
+                "src" => $_config[ 'source' ],
+                "trg" => $_config[ 'target' ],
+                "text" => $_config[ 'segment' ]
+        ));
 
         $parameters = array();
         if (  $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
-        }        
+        }
         $parameters['func'] = "translate";
         $parameters['data'] = $param_data;
 
@@ -102,7 +102,7 @@ class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineI
                 )
         );
         $this->call( "translate_relative_url", $parameters, false);
-        
+
         return $this->result;
 
     }

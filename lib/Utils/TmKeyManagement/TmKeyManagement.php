@@ -96,6 +96,14 @@ class TmKeyManagement_TmKeyManagement {
      * @return int|null Returns null if all is ok, otherwise it returns the error code of the mysql Query
      */
     public static function setJobTmKeys( $id_job, $job_pass, $tm_keys ) {
+        /**
+         * The setContribution is async and the jobs metadata are cached.
+         * Destroy the cache so the async processes can reload the new key data
+         * @see \AsyncTasks\Workers\SetContributionWorker
+         * @see \Contribution\ContributionStruct
+         */
+        $jobDao = new \Jobs_JobDao( Database::obtain() );
+        $jobDao->destroyCache( new \Jobs_JobStruct( array( 'id' => $id_job, 'password' => $job_pass ) ) );
         return setJobTmKeys( $id_job, $job_pass, json_encode( $tm_keys ) );
     }
 

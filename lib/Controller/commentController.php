@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
+
 class commentController extends ajaxController {
 
     protected $id_segment;
@@ -44,7 +46,7 @@ class commentController extends ajaxController {
         $this->job = getJobData( $this->__postInput[ 'id_job' ],
             $this->__postInput['password'] );
 
-        $this->checkLogin() ;
+        $this->readLoginInfo() ;
         if ( $this->userIsLogged ) {
             $this->loadUser();
         }
@@ -158,9 +160,13 @@ class commentController extends ajaxController {
 
     private function projectData() {
         if ( $this->project_data == null ) {
-            // FIXME: this is not optimal, should make use of DAO and
-            // return just one record, not an array of records.
-            $this->project_data = getProjectData( $this->job[ 'id_project' ] );
+
+            // FIXME: this is not optimal, should return just one record, not an array of records.
+            /**
+             * @var $projectData ShapelessConcreteStruct[]
+             */
+            $this->project_data = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->job[ 'id_project' ] );
+
         }
 
         return $this->project_data ;
@@ -174,22 +180,32 @@ class commentController extends ajaxController {
         $users = $userDao->getByUids( $result );
         $owner = $userDao->getProjectOwner( $this->job['id'] );
 
-        if ( !empty($owner) ) {
-            array_push($users, $owner[0]);
+        if ( !empty( $owner->uid ) && !empty( $owner->email ) ) {
+            array_push( $users, $owner );
         }
 
-        $users = array_filter($users, function($item) {
-            if ( $this->userIsLogged && $this->current_user->uid == $item->uid ) {
+        $assignee = $userDao->getProjectAssignee( $this->job[ 'id_project' ] );
+        if ( !empty( $assignee->uid ) && !empty( $assignee->email ) ) {
+            array_push( $users, $assignee );
+        }
+
+        $userIsLogged = $this->userIsLogged ;
+        $current_uid = $this->current_user->uid ;
+
+        // find deep duplicates
+        $uidSentList = array();
+        $users = array_filter($users, function($item) use ( $userIsLogged, $current_uid, &$uidSentList ) {
+            if ( $userIsLogged && $current_uid == $item->uid ) {
                 return false;
             }
 
-            // FIXME: unoptimal way to find deep duplicates
-            foreach( $users as $k => $v ) {
-                if ( $item->uid == $v->uid ) {
-                    return false;
-                }
+            // find deep duplicates
+            if ( array_search( $item->uid, $uidSentList ) !== false ) {
+                return false;
             }
+            $uidSentList[] = $item->uid;
             return true ;
+
         });
 
         return $users;
@@ -218,7 +234,7 @@ class commentController extends ajaxController {
 
     private function loadUser() {
         $userStruct = new Users_UserStruct();
-        $userStruct->uid = $this->uid;
+        $userStruct->uid = $this->user->uid;
 
         $userDao = new Users_UserDao( Database::obtain() ) ;
         $result = $userDao->read( $userStruct );

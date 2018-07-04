@@ -1,0 +1,167 @@
+.sub-head {
+	color: white;
+	 .ui.container.equal.width.grid {
+        width: 1335px !important;
+    }
+	.projects-state {
+		width: 40px !important;
+	}
+	.assigned-list {
+		margin-right: 8px;
+		margin-top: 1px;
+		.switch {
+			margin-top: 12px;
+		}
+	}
+	.ws-settings {
+		padding: 0px;
+		width: 38px;
+		height: 38px;
+		margin: 0px;
+		line-height: 19px;
+		vertical-align: top;
+		margin-left: 10px;
+		i {
+			line-height: 25px;
+		}
+	}
+	.users-filter {
+		display: flex;
+		margin-top: 7px;
+		float: right;
+		.input-field {
+			margin-left: 10px;
+			margin-top: -2px;
+		}
+		.list-team{
+			.ui.dropdown {
+				.all {
+					padding: 0px;
+					width: 24px;
+					height: 24px;
+					line-height: 24px;
+					border-radius: 50%;
+					text-align: center;
+					font-size: 12px;
+					font-weight: 600;
+				}
+                .ui.icon.input input {
+                    box-shadow: inset 0 1px 3px #ddd;
+                }
+				.text {
+					text-decoration: underline;
+					transition: 0.3s ease;
+					&:hover {
+						text-decoration: none;
+					}
+                    img {
+                        width: 24px;
+                        height: 24px;
+                    }
+                    .box-number-project {
+                        position: absolute ;
+                        width: 35px;
+                        height: 22px;
+                        line-height: 22px;
+                        border-radius: 2px;
+                        right: -40px;
+                        background-color: #676666;
+                        color: #bdbdbd;
+                        font-size: 12px;
+                        padding-left: 1px;
+                        text-align: center;
+                        display: inline-block;
+                    }
+				}
+                i {
+                    margin-left: 5px;
+                }
+                .scrolling.menu {
+                    .item{
+                        img {
+                            width: 24px;
+                            height: 24px;
+                        }
+                        .user-name-filter {
+                            top: 2px;
+                            position: relative;
+                        }
+						.box-number-project {
+                            position: absolute;
+							width: 35px;
+							height: 22px;
+							line-height: 22px;
+							border-radius: 2px;
+							top: 12px;
+							right: 10px;
+							background-color: #d8d8d8;
+							color: #636363;
+							font-size: 12px;
+							padding-left: 1px;
+							text-align: center;
+						}
+                    }
+                }
+			}
+		}
+	}
+	.search-state-filters {
+		input.search-projects {
+			font-size: 14px !important;
+			background-color: #616161 !important;
+			box-shadow: none !important;
+            transition: 0.3s ease;
+            color: #ffffff;
+			border-radius: 2px 0 0 2px;
+
+			&:hover {
+				background-color: #676767 !important;
+			}
+			&:focus {
+				background-color: #676767 !important;
+				color: #ffffff;
+                border-right: #676767 !important;
+			}
+		}
+		.ui.dropdown {
+            background-color: #848484;
+			border-left: 1px solid #4d4d4d;
+			transition: 0.3s ease;
+			color: #ffffff;
+			font-weight: 100;
+			padding: 0 15px;
+			line-height: 35px;
+			border-radius: 0px 2px 2px 0px;
+            &:hover {
+                background-color: #8c8c8c;
+            }
+            &:active {
+                background-color: #b1b1b1;
+            }
+            &:focus {
+                background-color: #b1b1b1
+            }
+		}
+
+	}
+}
+
+/*.cta-create-team {
+    margin-top: 10px;
+    float: left;
+}*/
+
+// New Style for the Search Bar Example
+
+/*
+.ui.fluid.input > input {
+	background-color: #6f6f6f;
+	box-shadow: none;
+}
+
+.ui.labeled.input > .label {
+	background: #6f6f6f;
+	border-left: 1px solid #4d4d4d;
+	color: white;
+	font-weight: 100;
+}*/

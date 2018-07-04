@@ -66,8 +66,6 @@ class StatusTest extends IntegrationTest {
             }
         }
 
-        // iterate all segments and setTranslations
-
         $request = $this->makeRequest() ;
         $response = json_decode ( $request['body'] ) ;
 

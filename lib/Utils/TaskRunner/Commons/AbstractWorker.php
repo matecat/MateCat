@@ -10,7 +10,14 @@
 namespace TaskRunner\Commons;
 use \SplObserver;
 use \SplSubject;
+use \AMQHandler;
+use \Database, \PDOException ;
+use TaskRunner\Exceptions\EndQueueException ;
 
+/**
+ * Class AbstractWorker
+ * @package TaskRunner\Commons
+ */
 abstract class AbstractWorker implements SplSubject {
 
     const ERR_REQUEUE_END      = 1;
@@ -18,11 +25,15 @@ abstract class AbstractWorker implements SplSubject {
     const ERR_EMPTY_ELEMENT    = 3;
 
     /**
+     * Observers container
+     *
      * @var SplObserver[]
      */
     protected $_observer;
 
     /**
+     * The last log message
+     *
      * @var string
      */
     protected $_logMsg;
@@ -30,9 +41,38 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * This process ID
      *
+     * @var string
+     */
+    protected $_workerPid = '0';
+
+    /**
+     * The context object.
+     * It stores the configuration for the worker
+     *
+     * @var Context
+     */
+    protected $_myContext;
+
+    /**
+     * @var AMQHandler
+     */
+    protected $_queueHandler;
+
+    /**
+     * Number of times the worker must be retried in case of error
+     *
      * @var int
      */
-    protected $_workerPid = 0;
+    protected $maxRequeueNum = 100;
+
+    /**
+     * TMAnalysisWorker constructor.
+     *
+     * @param AMQHandler $queueHandler
+     */
+    public function __construct( AMQHandler $queueHandler ) {
+        $this->_queueHandler = $queueHandler;
+    }
 
     /**
      * Set the caller pid. Needed to log the process Id.
@@ -44,15 +84,37 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * @param Context $context
+     */
+    public function setContext( Context $context ){
+        $this->_myContext = $context;
+    }
+
+    /**
+     * @return Context
+     */
+    public function getContext(){
+        return $this->_myContext;
+    }
+
+    /**
+     * Override this method in the concrete worker if you need the worker to log in a file
+     * different than the one in context object
+     *
+     * @return string
+     */
+    public function getLoggerName(){
+        return $this->_myContext->loggerName;
+    }
+
+    /**
      * Execution method
      *
      * @param $queueElement AbstractElement
-     * @param $queueContext Context
      *
      * @return mixed
      */
-    abstract public function process( AbstractElement $queueElement, Context $queueContext );
-
+    abstract public function process( AbstractElement $queueElement );
 
     /**
      * Attach an SplObserver
@@ -97,6 +159,7 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * Method used by the Observer to get the logging message
      * @return string
      */
     public function getLogMsg(){
@@ -104,11 +167,57 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * Method to be called when a concrete worker must log
      * @param $msg string
      */
     protected function _doLog( $msg ){
         $this->_logMsg = get_class( $this ) . " - " . print_r( $msg, true );
         $this->notify();
+    }
+
+    /**
+     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     *
+     * @param QueueElement $queueElement
+     *
+     * @return void
+     * @throws EndQueueException
+     */
+    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
+        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
+            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+
+        } elseif ( isset( $queueElement->reQueueNum ) ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+        }
+    }
+
+
+    /**
+     * Check the connection.
+     * MySql timeout close the socket and throws Exception in the nex read/write access
+     *
+     * <code>
+     * By default, the server closes the connection after eight hours if nothing has happened.
+     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
+     * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
+     * </code>
+     *
+     */
+    protected function _checkDatabaseConnection(){
+
+        $db = Database::obtain();
+        try {
+            $db->ping();
+        } catch ( PDOException $e ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
+            $db->close();
+            //reconnect
+            $db->getConnection();
+        }
+
     }
 
 }

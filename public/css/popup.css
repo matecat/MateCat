@@ -1,13 +1,105 @@
 /*popup*/
-#popupWrapper{display:none;}
-.popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999999999999;opacity:0.6;}
-.popup{overflow:hidden;line-height:30px;border-radius: 7px;-webkit-box-shadow: 0 1px 20px #000;box-shadow: 0 1px 20px #000;width:500px;background:#fff;margin:-200px 0 0 -250px; padding:0 0px 20px 0px;position:fixed;top:50%;left:46%;z-index:999999999999999999999999999;}
-.popup p{font-size:18px}
-.popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
-.popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
+.popup-outer{
+    background:#000;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:12;
+    opacity:0.4;
+}
 
-.popup a.anonymous{font-size:12px;}
-.popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
+.modal .popup{
+    overflow:hidden;
+    line-height:30px;
+    border-radius: 0 0 4px 4px;
+    -webkit-box-shadow: 0 1px 20px #000;
+    box-shadow: 0 1px 20px #000;
+    min-width:600px;
+    background:#fff;
+    margin:-200px 0 0 -250px;
+    padding:0 0px 20px 0px;
+    position:fixed;
+    left:46%;
+    z-index:999999999;
+}
+
+.modal .popup p.text-container-top {
+    font-size: 18px;
+    margin-top: 20px;
+    padding: 0 30px;
+    text-align: left;
+}
+
+p.button-aligned-right {
+    text-align: right !important;
+}
+
+.popup h1 {
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    padding: 10px 10px 7px 58px;
+    border-bottom: 1px solid #000;
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
+}
+
+.popup h2 {
+    font-weight: normal;
+    font-size: 16px;
+    color: black;
+    display: block;
+    margin: 20px 0 20px 0;
+}
+
+.popup a.anonymous {
+    font-size: 12px;
+}
+
+.popup a.anonymous:visited, .popup a.anonymous:active {
+    color: black;
+}
+
+.popup h1 {
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+    padding: 10px 10px 7px 58px;
+    background-size: 35px;
+    /* border-bottom: 1px solid #000; */
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
+    font-family: "calibri", Arial, Helvetica, sans-serif;
+}
+
+.popup .x-popup {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    height: 30px;
+    font-size: 20px;
+    padding-top: 10px;
+    float: right;
+    margin: 0 10px 0 0;
+    background-size: 22px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.x-popup:before {
+    content: "\f057";
+}
 
 .outer {
     background: url(../img/bg_login_button.gif) 0 0 repeat;
@@ -25,46 +117,44 @@
     {
     width: 45px;
     border-right: 1px solid #003366;
-    background: transparent url(../img/g.png) 0 5px no-repeat;
     border-radius: 0 0 0 6px;
     }
 
-.login-button
-    {
-    width: 330px;
-    font-weight: normal;
-    padding: 8px 0 8px 45px;
-    text-align: center;
-    color: #fff;
-    font-size: 16px !important;
-    text-shadow: 0 -1px 0 #003366;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    }
-
-
-.login-google .outer{
+.login-google .outer,
+.login-google-drive .outer{
     margin-top: 10px;
 }
 
-.login-google .popup-box{
+.login-google .popup-box,
+.login-google-drive .popup-box{
     width: 100%;
     min-height: 100px;
 }
 
+/* SPLIT JOB POPUP */
+
+/*.modal .popup-confirm,*/
+/*.modal .popup-alert {*/
+    /*margin:-200px 0 0 -250px;*/
+    /*position:fixed;*/
+/*}*/
 
 
-.btn-ok, .btn-cancel {color:#fff;background:#09beec;border:1px solid #848689;font-weight:bold;text-decoration:none;padding:8px 18px;border-radius: 2px;border-radius: 2px;font-size:18px;
 
-background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-	background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	background: linear-gradient(top,  #09beec,  #119ec4);
-
+.btn-ok, .btn-cancel {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #797979;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 2px;
+    font-size: 18px;
+    margin-right: 3px;
 }
 .btn-cancel {color:#333;background:#f6f6f6;
 
-background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
+    background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
 	background: -moz-linear-gradient(top,  #f6f6f6,  #e2e3e5);
 	background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 
@@ -73,13 +163,16 @@ background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e
 
 
 
-.btn-ok:hover, .btn-cancel:hover{
+.btn-cancel:hover{
 cursor:pointer;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #000;
 }
 
+.btn-ok:hover{
+    cursor:pointer;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #000; color: #ffffff;
+}
 
 
-.btn-ok::active, .btn-cancel:active{
+.btn-ok:active, .btn-cancel:active{
 -moz-box-shadow: inset 0 0 1px 1px #888;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;
@@ -88,23 +181,32 @@ box-shadow: inset 0 0 1px 1px #888;
 /* outsource popup */
 
 .outsource.modal .popup {
-    width: 950px;
-    margin: -170px 0 0 -425px;
+    width: 100%;
+    margin: 0 !important;
     padding-bottom: 10px;
+    box-sizing: content-box;
+    top: 25%;
+    left: 50%;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    position: static !important;
 }
 
 .outsource.modal .popup-box {
     text-align: left;
     padding: 0 20px;
     margin: 0 auto;
+    width: auto!important;
     overflow: hidden;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
-.outsource.modal .out-link {
+.outsource.modal .out-email,
+.outsource.modal .out-date {
     padding: .7em .6em;
     display: inline-block;
     border: 1px solid #ccc;
     box-shadow: inset 0 1px 3px #ddd;
-    border-radius: 4px;
+    border-radius: 2px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -113,6 +215,70 @@ box-shadow: inset 0 0 1px 1px #888;
     color: #333;
     width: 70%;
     margin: 2%;
+}
+
+.outsource.modal .out-email:focus,
+.outsource.modal .out-date:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 2px;
+    outline: none;
+}
+
+.modal select:focus {
+    border-color: #85B7D9 !important;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+.modal select:active {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+.outsource.modal .out-link {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #777;
+    width: 70%;
+    margin: 2%;
+    background-color: #f1f1f1;
+}
+
+.outsource.modal .out-link.from-manage {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #333;
+    width: 95.4%;
+    margin: 2%;
+    background-color: #f1f1f1;
+    box-shadow: inset 0 1px 3px #ddd;
+}
+
+.outsource.modal .out-email,
+.outsource.modal .out-date {
+    width: 33%;
+    float: left;
 }
 
 .outsource.modal p {
@@ -146,6 +312,7 @@ p.translator_name {
     font-weight: bold;
     padding: 0;
     margin: 15px 0;
+    font-family: "calibri", Arial, Helvetica, sans-serif;
 }
 
 .onyourown h2,
@@ -158,6 +325,8 @@ p.translator_name {
     margin: 2% 2.5% 2% 2%!important;
     width: 160px;
 }
+
+
 
 .outsource.modal.loading .delivery
 {
@@ -252,13 +421,9 @@ p.translator_name {
 
 
 body.showingOutsourceTo {
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
-
-body.showingOutsourceTo .SnapABug_Button {
-        z-index: 10000000000;
-}
 
 .split-box3 .total:hover {
     border: none;
@@ -333,6 +498,7 @@ body.showingOutsourceTo .SnapABug_Button {
 .guaranteed_by p {
    font-size: 14px!important;
    line-height: 22px;
+    padding: 0;
 }
 
 .pricebox .outsourceto .guaranteed_by img {
@@ -353,7 +519,12 @@ body.showingOutsourceTo .SnapABug_Button {
 }
 
 .modal.outsource a:hover {
-    text-decoration: none!important;
+    text-decoration: none !important;
+    /*color: red;*/
+}
+
+.contact_box h3 {
+    font-size: 18px;
 }
 
 .contact_box p {
@@ -373,7 +544,7 @@ body.showingOutsourceTo .SnapABug_Button {
     font-weight: bold;
 }
 
-div#forceDeliveryContainer .x-popup2 {
+div.modal-outsource-datepicker .x-popup2 {
     color: #666;
     position: absolute;
     right: 8px;
@@ -381,7 +552,7 @@ div#forceDeliveryContainer .x-popup2 {
     text-decoration: none;
 }
 
-div#forceDeliveryContainer .x-popup2:hover {
+div.modal-outsource-datepicker .x-popup2:hover {
     color: red;
 }
 
@@ -412,7 +583,7 @@ span.revision_delivery {
     width: 100%;
     border-top: 1px solid #ccc;
     text-align: center;
-    margin-top: 30px!important;
+    margin-top: 15px!important;
 }
 
 .pricebox .tprice,
@@ -472,9 +643,16 @@ span.revision_delivery {
     overflow: hidden;
 }
 
+.onyourown.opened-send-translator {
+    border-radius: 3px 3px 0px 0px;
+}
+
 .outsource .heading h3 {
     float: left;
     font-size: 20px;
+    margin-bottom: 0;
+    line-height: 30px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .onyourown h2,
@@ -487,6 +665,7 @@ span.revision_delivery {
 .contact_box h3 {
     float: left;
     margin-right: 10px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 
@@ -505,7 +684,7 @@ span.revision_delivery {
 .translator_info a,
 .delivery a,
 .contact_box p a {
-    color:#0d8fb2;
+    color:#0d8fb2!important;
     text-decoration: underline;
     cursor: pointer;
 }
@@ -515,6 +694,7 @@ span.revision_delivery {
     text-decoration: none;
     cursor: pointer;
     font-weight: normal!important;
+    float: right;
 }
 
 .guaranteed_by a.more span {
@@ -646,6 +826,7 @@ a.hide_translator {
 
 .addrevision h4 {
     opacity: 0.6;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .addrevision.noopacity {
@@ -773,6 +954,11 @@ span.subjects, span.experience, span.translated_words, span.score_number {
    display: block;
 }
 
+.tprice span.displaypriceperword .price_p_word {
+    font-size: 15px ;
+    font-weight: normal;
+}
+
 
 .addrevision {
     float: left;
@@ -797,9 +983,16 @@ span.zone2 {
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice, .pricebox delivery {line-height:30px;}
 
-.viewvendors h3 {
-    float: left;
-    margin: 2% 2.5% 2% 2%!important;
+.tprice.compress .delivery_container {
+    display: block;
+}
+
+.tprice .delivery_container {
+    display: none;
+}
+
+.compress .offer > .delivery_container {
+    display: none;
 }
 
 .showpricesloading {
@@ -807,7 +1000,7 @@ span.zone2 {
     width: 160px;
     height: 23px;
     margin: 2% 2.5% 2% 2%!important;
-    padding: 5px 10px !Important;
+    padding: 5px 10px !important;
 }
 
 .uploadbtn.showprices  
@@ -858,7 +1051,8 @@ select#changeTimezone,
     margin-right: 1%;
     border: 1px solid #ccc;
     height: 30px;
-    font-size: 10px;
+    font-size: 13px;
+    font-family: Arial;
 }
 
 select#changeTimezone {
@@ -996,10 +1190,10 @@ cursor: pointer;
  .outsource.modal .popup  {
     zoom: 0.8;
     top: 2%;
-    margin: 0 0 0 -400px;   
+    /*margin: 0 0 0 -400px;   */
 }
 
-#forceDeliveryContainer {
+#forceDeliveryContainer  {
     top: 425px!important;
 }
 
@@ -1017,6 +1211,7 @@ cursor: pointer;
 .outsource.modal .popup p {
     background-size: 200px;
     background-position: 300px 35px;
+    padding: 0 !important;
 }
 .pricebox .total {
     margin-top:-40px;
@@ -1032,7 +1227,7 @@ cursor: pointer;
     position: fixed;
     z-index: 10000000000000;
     top: 0;
-    right: 0;
+    right: -1100px;
     background: #fff;
     box-shadow: -2px 5px 7px #7B7B7B;
 }
@@ -1074,8 +1269,8 @@ a.tooltip.gray span:after {
 
 /* force delivery */
 
-#forceDeliveryContainer {
-    height: 185px;
+.modal-outsource-datepicker {
+    height: 215px;
     width: 520px;
     background: #FFFFFF;
     border: 5px solid #F4F4F4;
@@ -1084,7 +1279,7 @@ a.tooltip.gray span:after {
     z-index: 10001;
     color: #fff;
     padding: 20px;
-    top: 424px;
+    top: 120px;
     left: 435px;
     zoom: 0.9;
     z-index: 99999999999999999999;    
@@ -1093,7 +1288,12 @@ a.tooltip.gray span:after {
     -webkit-box-shadow: 0 0px 11px #888;
 }
 
-#forceDeliveryContainer .title {
+#forceDeliveryContainer {
+    top: 385px;
+    left: 465px;
+}
+
+.modal-outsource-datepicker .title {
     font-size:220%;
     margin:0px 0 10px 0px;
     color:#002f65;
@@ -1108,7 +1308,7 @@ a.tooltip.gray span:after {
     z-index: 100000000000000000000000000000000!important;
 }
 
-#forceDeliveryContainer .delivery-auto {
+.modal-outsource-datepicker .delivery-auto {
     width: 635px;
     height: auto;
     padding: 10px;
@@ -1119,27 +1319,27 @@ a.tooltip.gray span:after {
     color: #999;
 }
 
-#forceDeliveryContainer tbody:nth-child(3) tr td:not(.empty) {
+.modal-outsource-datepicker tbody:nth-child(3) tr td:not(.empty) {
     border-top:0!important;
 }
 
-#forceDeliveryContainer .delivery-auto h2 {
+.modal-outsource-datepicker .delivery-auto h2 {
     font-size: 24px;
     margin: 0 0 10px 0;
     color: #002F65;
 }
 
-#forceDeliveryContainer .delivery-auto h2 label {
+.modal-outsource-datepicker .delivery-auto h2 label {
     cursor: pointer;
 }
 
 
-#forceDeliveryContainer .delivery-auto p {
+.modal-outsource-datepicker .delivery-auto p {
     font-size: 16px;
     margin: -5px 0 0 10px;
 }
 
-#forceDeliveryContainer .delivery-manual {
+.modal-outsource-datepicker .delivery-manual {
 
     vertical-align: baseline;
     line-height: 1;
@@ -1147,28 +1347,28 @@ a.tooltip.gray span:after {
 
 }
 
-#forceDeliveryContainer .delivery-manual br {
+.modal-outsource-datepicker .delivery-manual br {
     line-height: 1.15;
 }
 
-#forceDeliveryContainer .delivery-manual h2 {
+.modal-outsource-datepicker .delivery-manual h2 {
     font-size: 24px;
     margin: 0 0 10px 0;
     color: #002F65;
 }
 
-#forceDeliveryContainer .delivery-manual h2 label {
+.modal-outsource-datepicker .delivery-manual h2 label {
     cursor: pointer;
 }
 
 
-#forceDeliveryContainer .delivery-manual-date {
+.modal-outsource-datepicker .delivery-manual-date {
     float: left;
     width: 240px;
     height: 200px;
 }
 
-#forceDeliveryContainer .delivery-manual-date h3 {
+.modal-outsource-datepicker .delivery-manual-date h3 {
     text-align: left;
     margin-left: 20px;
     font-size: 19px;
@@ -1177,31 +1377,33 @@ a.tooltip.gray span:after {
     line-height: 100%;
 }
 
-#forceDeliveryContainer .delivery-manual-time {
+.modal-outsource-datepicker .delivery-manual-time {
     float: left;
     width: 255px;
     height: 200px;
     margin: 0px 10px 0px 0;
 }
 
-#forceDeliveryContainer .delivery-manual-time h3 {
+.modal-outsource-datepicker .delivery-manual-time h3 {
     text-align: left;
     margin-left: 20px;
     font-size: 17px;
     font-weight: normal;
     margin: 0px 0 6px 12px;
     line-height: 100%;
+    color: #333;
 }
 
-#forceDeliveryContainer .delivery-manual-time select {
+.modal-outsource-datepicker .delivery-manual-time select {
     width: 250px;
     margin-left: 12px;
+    color: #333;
 }
 
 
-#forceDeliveryContainer #delivery_manual_error,
-#forceDeliveryContainer #delivery_not_available,
-#forceDeliveryContainer #delivery_before_time {
+.modal-outsource-datepicker .delivery_manual_error,
+.modal-outsource-datepicker .delivery_not_available,
+.modal-outsource-datepicker .delivery_before_time {
     opacity: 0.87;
     color: red;
     margin-left: 12px;
@@ -1214,9 +1416,9 @@ a.tooltip.gray span:after {
     z-index: 100000;
 }
 
-#forceDeliveryContainer #delivery_manual_error div,
-#forceDeliveryContainer #delivery_not_available div
-#forceDeliveryContainer #delivery_before_time div {
+.modal-outsource-datepicker .delivery_manual_error div,
+.modal-outsource-datepicker .delivery_not_available div
+.modal-outsource-datepicker .delivery_before_time div {
     width: 225px;
     text-align: left;
     font-size: 13px;
@@ -1224,34 +1426,45 @@ a.tooltip.gray span:after {
     border-radius: 6px;
 }
 
-#forceDeliveryContainer #delivery_before_time {
+.modal-outsource-datepicker #delivery_before_time {
     color:green;
 }
 
-#forceDeliveryContainer select {
+.modal-outsource-datepicker select {
         border: 1px solid #ccc;
     height: 30px;
-    font-size: 10px;
+    font-size: 12px;
+    font-family: Arial;
 }
 
-#forceDeliveryContainer .clear {
+.modal-outsource-datepicker .clear {
     clear: both;
 }
 
-#forceDeliveryContainer input[type="button"], 
-#forceDeliveryContainer .btn-cancel {
+.modal-outsource-datepicker input[type="button"],
+.modal-outsource-datepicker .btn-cancel {
     width: auto!important;
-    float: right;
+    float: right!important;
     margin-top: 25px!important;
     margin-right: 35px;
 }
 
-#forceDeliveryContainer .delivery-selected {
+a.btn-cancel.in-popup.cancelForceDelivery {
+    margin-right: 40px !important;
+    height: 15px;
+}
+
+a.btn-cancel.in-popup.cancelForceDelivery:hover {
+    margin-right: 40px !important;
+    color: #333333;
+}
+
+.modal-outsource-datepicker .delivery-selected {
     color: #000 !important;
 }
 
 
-#forceDeliveryContainer .tprice {
+.modal-outsource-datepicker .tprice {
     width: 250px;
     box-shadow: none;
 }
@@ -1273,32 +1486,32 @@ a.tooltip.gray span:after {
 }
 
 
-#forceDeliveryContainer .datepickerMonths,
-#forceDeliveryContainer .datepickerYears {
+.modal-outsource-datepicker .datepickerMonths,
+.modal-outsource-datepicker .datepickerYears {
     display: none;
 }
 
-#forceDeliveryContainer td.datepickerSpecial a {
+.modal-outsource-datepicker td.datepickerSpecial a {
     border: 1px solid;
     color: #09beec;
     background-color: #F3F3F3!important;
 }
 
-#forceDeliveryContainer .datepickerDoW th {
+.modal-outsource-datepicker .datepickerDoW th {
     padding: 5px 0;
 }
 
-#forceDeliveryContainer .datepickerDoW th:first-child,
-#forceDeliveryContainer th.datepickerWeek {
+.modal-outsource-datepicker .datepickerDoW th:first-child,
+.modal-outsource-datepicker th.datepickerWeek {
     display: none;
 }
 
-#forceDeliveryContainer .datepickerNotInMonth {
+.modal-outsource-datepicker .datepickerNotInMonth {
     visibility: hidden;
 }
 
 
-#forceDeliveryContainer .datepicker table {
+.modal-outsource-datepicker .datepicker table {
     background-color: transparent;
     border: none;
     font-size: 16px;
@@ -1307,36 +1520,36 @@ a.tooltip.gray span:after {
         border-collapse: collapse;
 }
 
-#forceDeliveryContainer .datepicker table tr td a {
+.modal-outsource-datepicker .datepicker table tr td a {
     background-color: #E1E1E1;
     text-decoration: none;
 }
 
-#forceDeliveryContainer .datepicker table td.datepickerDisabled a,
-#forceDeliveryContainer .datepicker table a.datepickerDisabled,
-#forceDeliveryContainer .datepickerGoPrev a,
-#forceDeliveryContainer .datepickerGoNext a {
+.modal-outsource-datepicker .datepicker table td.datepickerDisabled a,
+.modal-outsource-datepicker .datepicker table a.datepickerDisabled,
+.modal-outsource-datepicker .datepickerGoPrev a,
+.modal-outsource-datepicker .datepickerGoNext a {
     background-color: transparent;
     color: #333;
 }
 
-#forceDeliveryContainer .datepickerGoPrev a,
-#forceDeliveryContainer .datepickerGoNext a {
+.modal-outsource-datepicker .datepickerGoPrev a,
+.modal-outsource-datepicker .datepickerGoNext a {
     font-size: 13px;
     background-color: transparent !important;
 }
 
-#forceDeliveryContainer .datepickerDisabled a {
+.modal-outsource-datepicker .datepickerDisabled a {
     color: #666 !important;
     font-weight: normal;
     cursor: default;
 }
 
-#forceDeliveryContainer .datepicker table .datepickerDoW {
+.modal-outsource-datepicker .datepicker table .datepickerDoW {
     font-size: 12px;
 }
 
-#forceDeliveryContainer .datepicker a {
+.modal-outsource-datepicker .datepicker a {
   text-decoration: none;
   padding: 4px;
   outline: none;
@@ -1344,7 +1557,7 @@ a.tooltip.gray span:after {
   color: #333;
 }
 
-#forceDeliveryContainer .datepickerDays a {
+.modal-outsource-datepicker .datepickerDays a {
   line-height: 20px;
   height: 16px;
   margin: 1px;
@@ -1353,32 +1566,32 @@ a.tooltip.gray span:after {
 }
 
 
-#forceDeliveryContainer .datepickerDays a:hover {
+.modal-outsource-datepicker .datepickerDays a:hover {
     background-color: #09beec;
     color:#fff;
 }
 
-#forceDeliveryContainer td.datepickerSpecial a:hover {
+.modal-outsource-datepicker td.datepickerSpecial a:hover {
     background-color: #09beec!important;
     color: #fff;
 }
 
-#forceDeliveryContainer .datepickerWeek a {
+.modal-outsource-datepicker .datepickerWeek a {
     font-weight: normal;
 }
 
-#forceDeliveryContainer .datepickerMonth a,
-#forceDeliveryContainer .datepickerDoW span {
+.modal-outsource-datepicker .datepickerMonth a,
+.modal-outsource-datepicker .datepickerDoW span {
     text-decoration: none;
     font-weight: normal;
     text-align: center;
 }
 
-#forceDeliveryContainer .datepicker table td.datepickerDisabled a {
+.modal-outsource-datepicker .datepicker table td.datepickerDisabled a {
     opacity: 0.5;
 }
 
-#forceDeliveryContainer .datepickerSelected a {
+.modal-outsource-datepicker .datepickerSelected a {
     background-color: #7eaf3e !important;
     color:#fff;
 }
@@ -1403,8 +1616,8 @@ a.tooltip.gray span:after {
 }
 
 
-td.datepickerSaturday:not(.datepickerDisabled) a, 
-td.datepickerSunday:not(.datepickerDisabled) a {
+#forceDeliveryContainer td.datepickerSaturday:not(.datepickerDisabled) a,
+#forceDeliveryContainer td.datepickerSunday:not(.datepickerDisabled) a {
        cursor: not-allowed!important;
     background-color: #E7E7E7!important;
     color: #C2C2C2!important;
@@ -1510,4 +1723,219 @@ td.datepickerSunday:not(.datepickerDisabled) a {
     padding: 0.5% 2% 4% 2%;
 }
 
+/******** Outsource Modal *******/
+.modal.outsource .uploadbtn.in-popup,
+.modal.outsource .continuebtn,
+.modal.outsource .standardbtn,
+.modal.outsource .send-to-translator-btn.in-popup {
+    background: #09beec;
+    font-weight: bold;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    font-size: 20px !important;
+    cursor: pointer;
+    color: #fff;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #666;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    text-decoration: none;
+    opacity: 0.9;
+    text-align: center;
+    padding: 5px 10px !important;
+    float: right;
+    margin: 2% 2.5% 2% 2%;
+    width: 160px;
+}
 
+.modal.outsource .send-to-translator-btn.in-popup {
+    margin-left:30px
+}
+
+.modal.outsource .uploadbtn:hover,
+.modal.outsource .continuebtn:hover,
+.modal.outsource .standardbtn:hover,
+.modal.outsource .send-to-translator-btn.in-popup:hover {
+    -moz-box-shadow: 0 1px 2px #666;
+    -webkit-box-shadow: 0 1px 2px #666;
+    box-shadow: 0 1px 2px #666;
+    background: #12b4df;
+}
+.modal.outsource .continuebtn {
+    clear: both;
+    float: none;
+    width: 160px;
+    margin: 10px auto 0 auto!important;
+    overflow: hidden;
+    background: #7eaf3e;
+    display: block;
+}
+
+.modal.outsource .continuebtn:hover {
+    background: #7eaf3e;
+}
+
+.modal.outsource  .more:before {
+    content: "\f196";
+    margin-right: 7px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+.modal.outsource .trustbox2 a {
+    text-decoration: underline;
+}
+
+.modal.outsource .tooltip {
+    cursor: help;
+    position: absolute;
+    border: 1px solid #717171;
+    border-radius: 20px;
+    width: 13px !important;
+    font-size: 13px;
+    height: 11px;
+    font-weight: bold;
+    padding-left: 0px;
+    padding-top: 2px;
+    margin-top: -3px;
+    line-height: 11px;
+    margin-left: 5px;
+    color: #717171;
+    box-shadow: 1px 1px 1px #999;
+}
+
+.modal.outsource .tooltip span {
+    width: 200px;
+    height: auto;
+    line-height: 22px;
+    color: #333;
+    padding: 10px;
+    left: -98px;
+    font-weight: 400;
+    font-size: 15px;
+    text-align: center;
+    border: 1px solid #727272;
+    text-indent: 0px;
+    border-radius: 5px;
+    position: absolute;
+    pointer-events: none;
+    top: -110px;
+    opacity: 0;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -moz-box-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000000000000000;
+}
+
+.modal.outsource .tooltip:hover span {
+    opacity: 1;
+    top: -165px;
+}
+.modal.outsource .tooltip span:after {
+    bottom: -10px;
+    margin-left: -1px;
+    border-top: 10px solid #EEE;
+}
+.modal.outsource .tooltip span:before, .tooltip span:after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 43%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #727272;
+}
+
+.modal.outsource .disabled {
+    cursor: default;
+    opacity: 0.45 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+
+.modal.outsource input.error {
+    border: 1px solid red !important;
+}
+
+div#open-translator {
+    float: right;
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 52px;
+    color: #0d8fb2;
+}
+
+div#open-translator:hover {
+    text-decoration: none;
+}
+
+.modal.outsource .send-to-translator {
+    border: 1px solid #ccc;
+    border-radius: 0px 0px 3px 3px;
+    margin: 0 auto;
+    overflow: hidden;
+    margin-top: -2px;
+    background: #f8f8f8;
+}
+
+.modal.outsource .outsource-divider {
+    width: 230px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 15px;
+}
+
+.modal.outsource .divider-line {
+    height: 2px;
+    width: 100px;
+    background-color: #c5c5c5;
+    margin-top: 10px;
+    display: block;
+    float: left;
+}
+
+.modal.outsource .outsource-divider span {
+    float: left;
+    width: 30px;
+}
+
+span.title-source {
+    margin-left: 5px;
+}
+
+
+.popup.popup-confirm.confirm_checkbox,
+.popup.popup-alert {
+    text-align: right;
+}
+
+.popup.popup-confirm.confirm_checkbox p.text-container-top,
+.popup.popup-alert p.text-container-top {
+    text-align: left;
+    padding: 20px;
+}
+
+.popup.popup-confirm.confirm_checkbox .btn-ok,
+.popup.popup-alert .btn-ok {
+    margin-right: 20px;
+}

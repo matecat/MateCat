@@ -1,4 +1,7 @@
 <?php
+
+die();
+
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setContributionMTController extends ajaxController {

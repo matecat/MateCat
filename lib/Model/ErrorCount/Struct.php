@@ -6,7 +6,7 @@
  * Date: 28/01/15
  * Time: 14.44
  */
-class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class ErrorCount_Struct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     /**
      * @var int
@@ -21,52 +21,52 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
     /**
      * @var int
      */
-    protected $typing_min;
+    public $typing_min;
 
     /**
      * @var int
      */
-    protected $translation_min;
+    public $translation_min;
 
     /**
      * @var int
      */
-    protected $terminology_min;
+    public $terminology_min;
 
     /**
      * @var int
      */
-    protected $language_min;
+    public $language_min;
 
     /**
      * @var int
      */
-    protected $style_min;
+    public $style_min;
 
     /**
      * @var int
      */
-    protected $typing_maj;
+    public $typing_maj;
 
     /**
      * @var int
      */
-    protected $translation_maj;
+    public $translation_maj;
 
     /**
      * @var int
      */
-    protected $terminology_maj;
+    public $terminology_maj;
 
     /**
      * @var int
      */
-    protected $language_maj;
+    public $language_maj;
 
     /**
      * @var int
      */
-    protected $style_maj;
+    public $style_maj;
     
     
     /**
@@ -272,14 +272,12 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
         return $this;
     }
 
-
-
-//    private function __checkResult( $res ) {
-//        if ( $res < 0 ) {
-//            Log::doLog( __METHOD__ . "-> Bad call: result is less than zero." );
-//            throw new BadMethodCallException( "Bad call: result is less than zero." );
-//        }
-//    }
-
+    public function thereAreDifferences(){
+        $err = false;
+        foreach ( $this->toArray() as $errName => $errValue ){
+            $err |= (bool)$errValue;
+        }
+        return $err;
+    }
 
 }

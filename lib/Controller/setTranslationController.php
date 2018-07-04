@@ -1,134 +1,204 @@
 <?php
 
+use \Contribution\ContributionStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
 
 class setTranslationController extends ajaxController {
 
     protected $__postInput = array();
 
-    protected $propagate = false;
+    /**
+     * Set as true the propagation default
+     * @var bool
+     */
+    protected $propagate = true;
+
     protected $id_job = false;
     protected $password = false;
 
     protected $id_translator;
     protected $time_to_edit;
     protected $translation;
+
+    /**
+     * @var string
+     */
+    protected $_segment; // this comes from UI but is not used at moment
+
+    /**
+     * @var Segments_SegmentStruct
+     */
+    protected $segment;  // this comes from DAO
+
     protected $split_chunk_lengths;
     protected $chosen_suggestion_index;
     protected $status;
     protected $split_statuses;
 
-    protected $jobData = array();
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $jobData;
+
+
+
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    protected $chunk ;
 
     protected $client_target_version;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project ;
+    protected $id_segment;
+
+    protected $context_before;
+
+    protected $context_after;
+
+    /**
+     * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
+     */
+    private $VersionsHandler ;
 
     public function __construct() {
 
         parent::__construct();
 
-        $filterArgs = array(
-                'id_job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password'                => array(
+        $filterArgs = [
+                'id_job'                  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'                => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'propagate'               => array(
+                ],
+                'propagate'               => [
                         'filter' => FILTER_VALIDATE_BOOLEAN, 'flags' => FILTER_NULL_ON_FAILURE
-                ),
-                'id_segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'time_to_edit'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'id_translator'           => array(
+                ],
+                'id_segment'              => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'time_to_edit'            => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_translator'           => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'version'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'status'                  => array(
+                ],
+                'translation'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'segment'                 => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'version'                 => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'chosen_suggestion_index' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'status'                  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'splitStatuses'           => array(
+                ],
+                'splitStatuses'           => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+                'context_before'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'context_after'           => [ 'filter' => FILTER_UNSAFE_RAW ],
+        ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         $this->id_job                = $this->__postInput[ 'id_job' ];
         $this->password              = $this->__postInput[ 'password' ];
-        $this->propagate             = $this->__postInput[ 'propagate' ]; //not used here but used in child class setAutoPropagationController
+
+        /*
+         * set by the client, mandatory
+         * check propagation flag, if it is null the client not sent it, leave default true, otherwise set the value
+         */
+        !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */ ;
+
+        $this->propagate             = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
         $this->id_segment            = $this->__postInput[ 'id_segment' ];
         $this->time_to_edit          = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator         = $this->__postInput[ 'id_translator' ];
         $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
 
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
+        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
+
+        $this->context_before = CatUtils::view2rawxliff( $this->__postInput[ 'context_before' ] );
+        $this->context_after = CatUtils::view2rawxliff( $this->__postInput[ 'context_after' ] );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
+
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
 
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
-
-        if ( is_null( $this->propagate ) || !isset( $this->propagate ) ) {
-            $this->propagate = true;
-        }
         Log::doLog( $this->__postInput );
 
     }
 
-    protected function _checkData( $logName = 'log.txt' ) {
+    /**
+     * @return bool
+     */
+    private function isSplittedSegment() {
+        //strtoupper transforms null to "" so check for the first element to be an empty string
+        return !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num );
+    }
 
-        //change Log file
-        Log::$fileName = $logName;
+    /**
+     * setStatusForSplittedSegment
+     *
+     * If splitted segments have different statuses, we reset status
+     * to draft.
+     */
+    private function setStatusForSplittedSegment() {
+        if ( count( array_unique( $this->split_statuses ) ) == 1 ) {
+            // IF ALL translation chunks are in the same status,
+            // we take the status for the entire segment
+            $this->status = $this->split_statuses[ 0 ];
+        } else {
+            $this->status = Constants_TranslationStatus::STATUS_DRAFT;
+        }
+    }
 
+    protected function _checkData() {
         $this->parseIDSegment();
+
         if ( empty( $this->id_segment ) ) {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
-        //strtoupper transforms null to "" so check for the first element to be an empty string
-        if ( !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num ) ) {
-
-            if ( count( array_unique( $this->split_statuses ) ) == 1 ) {
-                //IF ALL translation chunks are in the same status, we take the status for the entire segment
-                $this->status = $this->split_statuses[ 0 ];
-            } else {
-                $this->status = Constants_TranslationStatus::STATUS_DRAFT;
-            }
-
-            foreach ( $this->split_statuses as $pos => $value ) {
-                $this->_checkForStatus( $value );
-            }
-
-        } else {
-
-            $this->_checkForStatus( $this->status );
-
+        if ( $this->isSplittedSegment() ) {
+            $this->setStatusForSplittedSegment();
         }
+
+        $this->checkStatus( $this->status );
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
-            $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
-            if ( empty( $job_data ) ) {
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+
+            if ( empty( $this->jobData ) ) {
                 $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
             }
 
             //add check for job status archived.
-            if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( strtolower( $this->jobData[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
             }
 
             //check for Password correctness ( remove segment split )
             $pCheck = new AjaxPasswordCheck();
-            if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
+            if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password, $this->id_segment ) ) {
                 $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
+
+            /**
+             * Here we instantiate new objects in order to migrate towards
+             * a more object oriented approach.
+             */
+            $this->project    = Projects_ProjectDao::findByJobId( $this->id_job );
+            $this->chunk      = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
+
+            $this->featureSet->loadForProject( $this->project ) ;
 
         }
 
@@ -147,7 +217,13 @@ class setTranslationController extends ajaxController {
 
     }
 
-    protected function _checkForStatus( $status ) {
+    /**
+     * Throws exception if status is not valid.
+     *
+     * @param $status
+     * @throws Exception
+     */
+    protected function checkStatus( $status ) {
 
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:
@@ -155,7 +231,10 @@ class setTranslationController extends ajaxController {
             case Constants_TranslationStatus::STATUS_REJECTED:
             case Constants_TranslationStatus::STATUS_DRAFT:
             case Constants_TranslationStatus::STATUS_NEW:
+            case Constants_TranslationStatus::STATUS_FIXED:
+            case Constants_TranslationStatus::STATUS_REBUTTED:
                 break;
+
             default:
                 //NO debug and NO-actions for un-mapped status
                 $this->result[ 'code' ] = 1;
@@ -169,7 +248,6 @@ class setTranslationController extends ajaxController {
     }
 
     public function doAction() {
-
         try {
 
             $this->_checkData();
@@ -186,14 +264,18 @@ class setTranslationController extends ajaxController {
 
         }
 
+        $this->readLoginInfo();
+        $this->initVersionHandler();
+
         //check tag mismatch
         //get original source segment, first
-        $segment = getSegment( $this->id_segment );
+        $dao = new \Segments_SegmentDao( \Database::obtain() );
+        $this->segment = $dao->getById( $this->id_segment );
 
         //compare segment-translation and get results
-        $check = new QA( $segment[ 'segment' ], $this->translation );
+        // QA here stands for Quality Assurance
+        $check = new QA( $this->segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
-
 
         if ( $check->thereAreWarnings() ) {
 
@@ -202,7 +284,6 @@ class setTranslationController extends ajaxController {
         } else {
             $err_json    = '';
             $translation = $check->getTrgNormalized();
-
         }
 
         /*
@@ -229,20 +310,19 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'id_segment' ]             = (int)$this->id_segment;
             $_Translation[ 'id_job' ]                 = (int)$this->id_job;
             $_Translation[ 'status' ]                 = Constants_TranslationStatus::STATUS_NEW;
-            $_Translation[ 'segment_hash' ]           = $segment[ 'segment_hash' ];
-            $_Translation[ 'translation' ]            = $segment[ 'segment' ];
-            $_Translation[ 'standard_word_count' ]    = $segment[ 'raw_word_count' ];
+            $_Translation[ 'segment_hash' ]           = $this->segment[ 'segment_hash' ];
+            $_Translation[ 'translation' ]            = $this->segment[ 'segment' ];
+            $_Translation[ 'standard_word_count' ]    = $this->segment[ 'raw_word_count' ];
             $_Translation[ 'serialized_errors_list' ] = '';
             $_Translation[ 'suggestion_position' ]    = 0;
             $_Translation[ 'warning' ]                = false;
             $_Translation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
-            $res                                      = addTranslation( $_Translation );
 
-            if ( $res < 0 ) {
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+            CatUtils::addSegmentTranslation( $_Translation, $this->result[ 'errors' ] );
+
+            if ( !empty( $this->result[ 'errors' ] ) ) {
                 $db->rollback();
-
-                return $res;
+                return -1;
             }
 
             /*
@@ -258,7 +338,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'id_job' ]                 = $this->id_job;
         $_Translation[ 'status' ]                 = $this->status;
         $_Translation[ 'time_to_edit' ]           = $this->time_to_edit;
-        $_Translation[ 'translation' ]            = preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $translation );
+        $_Translation[ 'translation' ]            = preg_replace( '/[\0]+$/u', '', $translation );
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
@@ -276,24 +356,39 @@ class setTranslationController extends ajaxController {
          * - get $_jobTotalPEE
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
+
         $this->updateJobPEE( $old_translation, $_Translation );
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
+
+
+        // TODO: move this into a feature callback
+        $this->evaluateVersionSave( $_Translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
          * must be removed
          */
-        if ( $_Translation[ 'translation' ] != $old_translation[ 'translation' ] || $this->status == Constants_TranslationStatus::STATUS_TRANSLATED || $this->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        if ( $_Translation[ 'translation' ] != $old_translation[ 'translation' ] ||
+            $this->status == Constants_TranslationStatus::STATUS_TRANSLATED ||
+            $this->status == Constants_TranslationStatus::STATUS_APPROVED ) {
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
 
-        $res = CatUtils::addSegmentTranslation( $_Translation );
+        $this->featureSet->run('preAddSegmentTranslation', array(
+            'new_translation' => $_Translation,
+            'old_translation' => $old_translation
+        ));
 
-        if ( !empty( $res[ 'errors' ] ) ) {
-            $this->result[ 'errors' ] = $res[ 'errors' ];
+        /**
+         * Translation is inserted here.
+         *
+         */
+        CatUtils::addSegmentTranslation( $_Translation, $this->result[ 'errors' ] );
 
-            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+        if ( !empty( $this->result[ 'errors' ] ) ) {
+            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
+                var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
             $db->rollback();
@@ -301,75 +396,48 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
-        if ( INIT::$DQF_ENABLED && !empty( $this->jobData[ 'dqf_key' ] ) &&
-                $_Translation[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED
-        ) {
-            $dqfSegmentStruct = DQF_DqfSegmentStruct::getStruct();
-
-            if ( $old_translation[ 'suggestion' ] == null ) {
-                $dqfSegmentStruct->target_segment = "";
-                $dqfSegmentStruct->tm_match       = 0;
-            } else {
-                $dqfSegmentStruct->target_segment = $old_translation[ 'suggestion' ];
-                $dqfSegmentStruct->tm_match       = $old_translation[ 'suggestion_match' ];
-            }
-
-            $dqfSegmentStruct->task_id            = $this->id_job;
-            $dqfSegmentStruct->segment_id         = $this->id_segment;
-            $dqfSegmentStruct->source_segment     = $segment[ 'segment' ];
-            $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
-
-            $dqfSegmentStruct->time = $_Translation[ 'time_to_edit' ];
-//            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
-            $dqfSegmentStruct->mt_engine_version = 1;
-
-            try {
-                $dqfQueueHandler = new DqfQueueHandler();
-                $dqfQueueHandler->createSegment( $dqfSegmentStruct );
-            } catch ( Exception $exn ) {
-                $msg = $exn->getMessage() . "\n\n" . $exn->getTraceAsString();
-                Log::doLog( $msg );
-                Utils::sendErrMailReport( $msg );
-            }
-        }
-
-        $propagateToTranslated = true;
-
-        //for the moment, this is set explicitely
-        if ( $this->propagate == false ) {
-            $propagateToTranslated = false;
-        }
+        $this->featureSet->run('postAddSegmentTranslation', array(
+            'chunk'       =>  $this->chunk,
+            'is_review'   =>  $this->isRevision(),
+            'logged_user' =>  $this->user
+        ));
 
         //propagate translations
-        $TPropagation = array();
+        $TPropagation     = [];
+        $propagationTotal = [
+                'propagated_ids' => []
+        ];
 
-        //Warning: this value will NOT be used to update values,
-        //but to exclude current segment from auto-propagation
-        $_idSegment = $this->id_segment;
-
-        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
-        ;
-
-        $TPropagation[ 'id_job' ]                 = $this->id_job;
-        $TPropagation[ 'translation' ]            = $translation;
-        $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
-        $TPropagation[ 'serialized_errors_list' ] = $err_json;
-
-
-        $TPropagation[ 'warning' ] = $check->thereAreWarnings();
-//        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
-        $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
-
-        $propagationTotal = array();
-        if ( $propagateToTranslated && in_array( $this->status, array(
-                        Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
-                        Constants_TranslationStatus::STATUS_REJECTED
-                ) )
+        if ( $this->propagate && in_array( $this->status, array(
+            Constants_TranslationStatus::STATUS_TRANSLATED,
+            Constants_TranslationStatus::STATUS_APPROVED,
+            Constants_TranslationStatus::STATUS_REJECTED
+            ) )
         ) {
 
-            try {
+            $TPropagation[ 'status' ]                 = $this->status;
+            $TPropagation[ 'id_job' ]                 = $this->id_job;
+            $TPropagation[ 'translation' ]            = $translation;
+            $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
+            $TPropagation[ 'serialized_errors_list' ] = $err_json;
+            $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
+            $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
-                $propagationTotal = propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
+            try {
+                if ( $this->VersionsHandler != null ) {
+                    $this->VersionsHandler->savePropagation( array(
+                            'propagation'             => $TPropagation,
+                            'old_translation'         => $old_translation,
+                            'job_data'                => $this->jobData
+                    ));
+                }
+
+                $propagationTotal = propagateTranslation(
+                    $TPropagation,
+                        $this->jobData,
+                        $this->id_segment,
+                        $this->project
+                );
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -385,15 +453,19 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
-        //redundant because the update is made only where status = old status
-        if ( $this->status != $old_translation[ 'status' ] ) {
+        /*
+         * Seems redundant because the update inside the Word_Count object is made only where received_status != old_status
+         *
+         * But for ICE matches, we need perform the counter update even if TRANSLATED == TRANSLATED
+         * because the ICE matches are already set translated by default
+         */
+        if ( $this->status != $old_translation[ 'status' ] || $old_translation[ 'match_type' ] == 'ICE' ) {
 
-            //cambiato status, sposta i conteggi
-            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ? $old_translation[ 'eq_word_count' ] : $segment[ 'raw_word_count' ] );
+            $old_status = $this->statusOrDefault( $old_translation );
+            $old_count = $this->getOldCount( $this->segment, $old_translation );
 
-            //if there is not a row in segment_translations because volume analysis is disabled
-            //search for a just created row
-            $old_status = ( !empty( $old_translation[ 'status' ] ) ? $old_translation[ 'status' ] : Constants_TranslationStatus::STATUS_NEW );
+            // if there is not a row in segment_translations because volume analysis is disabled
+            // search for a just created row
 
             $counter = new WordCount_Counter( $old_wStruct );
             $counter->setOldStatus( $old_status );
@@ -402,7 +474,7 @@ class setTranslationController extends ajaxController {
             $newValues   = array();
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            foreach ( $propagationTotal as $__pos => $old_value ) {
+            foreach ( $propagationTotal['totals'] as $__pos => $old_value ) {
                 $counter->setOldStatus( $old_value[ 'status' ] );
                 $counter->setNewStatus( $this->status );
                 $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
@@ -410,6 +482,7 @@ class setTranslationController extends ajaxController {
 
             try {
                 $newTotals = $counter->updateDB( $newValues );
+
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
                 Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
@@ -428,8 +501,6 @@ class setTranslationController extends ajaxController {
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
             Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
-//                $x1 = explode( "\n" , var_export( $old_translation, true) );
-//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
             $db->rollback();
 
             return $e->getCode();
@@ -440,8 +511,8 @@ class setTranslationController extends ajaxController {
         $project   = array_pop( $project );
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+            $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+            $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -451,6 +522,8 @@ class setTranslationController extends ajaxController {
         $this->result[ 'code' ]       = 1;
         $this->result[ 'data' ]       = "OK";
         $this->result[ 'version' ]    = date_create( $_Translation[ 'translation_date' ] )->getTimestamp();
+
+        $this->result[ 'translation' ] = $this->getTranslationObject( $_Translation );
 
         /* FIXME: added for code compatibility with front-end. Remove. */
         $_warn   = $check->getWarnings();
@@ -480,7 +553,44 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $db->commit();
+        //COMMIT THE TRANSACTION
+        try {
+            $db->commit();
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = array( "code" => -101, "message" => $e->getMessage() );
+            Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+            $db->rollback();
+
+            return $e->getCode();
+        }
+
+        try {
+
+            $this->featureSet->run('setTranslationCommitted', [
+                    'translation'      => $_Translation,
+                    'old_translation'  => $old_translation,
+                    'propagated_ids'   => $propagationTotal['propagated_ids'],
+                    'chunk'            => $this->chunk,
+                    'segment'          => $this->segment,
+                    'user'             => $this->user,
+                    'source_page_code' => $this->_getSourcePageCode()
+            ] );
+
+        } catch ( Exception $e ){
+            Log::doLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+        }
+
+        try {
+            $this->result = $this->featureSet->filter('filterSetTranslationResult', $this->result, array(
+                    'translation'     => $_Translation,
+                    'old_translation' => $old_translation,
+                    'propagated_ids'  => $propagationTotal['propagated_ids'],
+                    'chunk'           => $this->chunk,
+                    'segment'         => $this->segment
+            ));
+        } catch ( Exception $e ){
+            Log::doLog( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+        }
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
@@ -498,6 +608,32 @@ class setTranslationController extends ajaxController {
             }
         }
 
+        $this->evalSetContribution( $_Translation, $old_translation );
+
+        $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
+
+    }
+
+    /**
+     * This method returns a representation of the saved translation which
+     * should be as much as possible compliant with the future API v2.
+     *
+     */
+    private function getTranslationObject( $saved_translation ) {
+        $translation = array(
+                'version_number' => @$saved_translation['version_number'],
+                'sid'            => $saved_translation['id_segment'],
+                'translation'    => \CatUtils::rawxliff2view( $saved_translation['translation'] ),
+                'status'         => $saved_translation['status']
+        );
+        return $translation ;
+    }
+
+    private function _getSourcePageCode() {
+        $code = $this->isRevision() ? Constants::SOURCE_PAGE_REVISION :
+                Constants::SOURCE_PAGE_TRANSLATE ;
+
+        return $this->featureSet->filter('filterSourcePageCode', $code ) ;
     }
 
     private function recountJobTotals( $old_status ) {
@@ -521,10 +657,8 @@ class setTranslationController extends ajaxController {
 
     //TODO: put this method into Job model and use Segnent object
     private function updateJobPEE( Array $old_translation, Array $new_translation ) {
-        $segmentDao       = new Segments_SegmentDao( Database::obtain() );
-        $segment_original = $segmentDao->getById( $this->id_segment );
 
-        $segmentRawWordCount = $segment_original->raw_word_count;
+        $segmentRawWordCount = $this->segment->raw_word_count;
         $segment             = new EditLog_EditLogSegmentClientStruct(
                 array(
                         'suggestion'     => $old_translation[ 'suggestion' ],
@@ -537,13 +671,13 @@ class setTranslationController extends ajaxController {
         $oldSegment               = clone $segment;
         $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
 
-        $oldPEE          = $segment->getPeePerc();
+        $oldPEE          = $segment->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
         $segment->translation    = $new_translation[ 'translation' ];
         $segment->pe_effort_perc = null;
 
-        $newPEE          = $segment->getPeePerc();
+        $newPEE          = $segment->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
 
         if ( $segment->isValidForEditLog() ) {
@@ -586,9 +720,157 @@ class setTranslationController extends ajaxController {
                     )
             );
         }
+    }
 
+    private function initVersionHandler() {
+        if ($this->project->isFeatureEnabled('translation_versions')) {
+            $this->VersionsHandler = new \Features\TranslationVersions\SegmentTranslationVersionHandler(
+                    $this->id_job,
+                    $this->id_segment,
+                    $this->user->uid,
+                    $this->jobData['id_project'],
+                    $this->isRevision()
+            );
+        }
+    }
 
+    private function evaluateVersionSave( &$_Translation, &$old_translation ) {
+        if ( $this->VersionsHandler == null ) {
+            return;
+        }
+
+        /**
+         * Translation version handler: save old translation.
+         * TODO: move this in an model observer for segment translation.
+         * TODO: really, this is not good.
+         */
+
+        $version_saved = $this->VersionsHandler->saveVersion( $_Translation, $old_translation );
+
+        if ( $version_saved ) {
+            $_Translation['version_number'] = $old_translation['version_number'] + 1;
+        } else {
+            $_Translation['version_number'] = $old_translation['version_number'];
+        }
+
+        if ( $_Translation['version_number'] == null ) {
+            $_Translation['version_number'] = 0 ;
+        }
+    }
+
+    /**
+     * @param $old_translation
+     *
+     * @return string
+     */
+    private function statusOrDefault( $old_translation ) {
+        if ( empty( $old_translation['status'] ) ) {
+            return Constants_TranslationStatus::STATUS_NEW ;
+        } else {
+            return $old_translation[ 'status' ] ;
+        }
     }
 
 
+    /**
+     * Returns the old_count to pass to WordCounter, based on project
+     * configuration, picking from either eq_word_count or raw_word_count
+     *
+     * @param $segment
+     * @param $old_translation
+     *
+     * @return mixed
+     */
+    private function getOldCount($segment, $old_translation ) {
+        $word_count_type = $this->project->getWordCountType();
+
+        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $old_count = $segment['raw_word_count'];
+        } else {
+            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation[ 'match_type' ] == 'ICE' ) {
+                $old_count = $segment[ 'raw_word_count' ] ;
+            } else {
+                $old_count = $old_translation[ 'eq_word_count' ] ;
+            }
+        }
+        return $old_count ;
+    }
+
+    private function logForTagProjection($msg) {
+        $logfile = \Log::$fileName;  //Todo: check why is null
+
+        \Log::$fileName = 'tagProjection.log';
+        \Log::doLog( $msg );
+        \Log::$fileName = $logfile;
+    }
+
+    /**
+     * @param $_Translation
+     * @param $old_translation
+     *
+     * @throws Exception
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     */
+    private function evalSetContribution( $_Translation, $old_translation ) {
+        if ( in_array( $this->status, array(
+                Constants_TranslationStatus::STATUS_DRAFT,
+                Constants_TranslationStatus::STATUS_NEW
+        ) ) ) {
+            return;
+        }
+
+        $skip_set_contribution = false ;
+        $skip_set_contribution = $this->featureSet->filter('filter_skip_set_contribution',
+                $skip_set_contribution, $_Translation, $old_translation
+        );
+
+        if ( $skip_set_contribution ) {
+            return ;
+        }
+        
+        /**
+         * Set the new contribution in queue
+         */
+        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_job               = $this->id_job;
+        $contributionStruct->job_password         = $this->password;
+        $contributionStruct->id_segment           = $this->id_segment;
+        $contributionStruct->segment              = $this->segment[ 'segment' ];
+        $contributionStruct->translation          = $_Translation[ 'translation' ];
+        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = $this->user->uid;
+        $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
+        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
+        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
+        $contributionStruct->propagationRequest   = $this->propagate;
+        $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
+
+        $contributionStruct->context_after        = $this->context_after;
+        $contributionStruct->context_before       = $this->context_before;
+
+        $contributionStruct = $this->featureSet->filter(
+                'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
+
+        /** TODO Remove , is only for debug purposes */
+        try {
+            $element            = new \TaskRunner\Commons\QueueElement();
+            $element->params    = $contributionStruct;
+            $element->__toString();
+            \Utils::raiseJsonExceptionError( true );
+        } catch ( Exception $e ){
+            Log::doLog( $contributionStruct );
+        }
+        /** TODO Remove */
+
+        //assert there is not an exception by following the flow
+        WorkerClient::init( new AMQHandler() );
+        Set::contribution( $contributionStruct );
+
+        $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project ) ;
+        Set::contributionMT( $contributionStruct );
+
+    }
 }

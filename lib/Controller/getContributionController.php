@@ -1,7 +1,12 @@
 <?php
 
+use Constants\Ices;
+
 class getContributionController extends ajaxController {
 
+    protected $id_segment;
+    private $concordance_search;
+    private $switch_languages;
     private $id_job;
     private $num_results;
     private $text;
@@ -13,6 +18,12 @@ class getContributionController extends ajaxController {
     private $password;
     private $tm_keys;
 
+    protected $context_before;
+    protected $context_after;
+
+    /**
+     * @var Jobs_JobStruct
+     */
     private $jobData;
 
     private $__postInput = array();
@@ -21,16 +32,18 @@ class getContributionController extends ajaxController {
 
         parent::__construct();
 
-        $filterArgs = array(
-            'id_segment'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'num_results'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'text'           => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'is_concordance' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'from_target'    => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-        );
+        $filterArgs = [
+                'id_segment'     => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_job'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'num_results'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'text'           => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_translator'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'password'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'is_concordance' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'from_target'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'context_before' => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'context_after'  => [ 'filter' => FILTER_UNSAFE_RAW ],
+        ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -50,6 +63,7 @@ class getContributionController extends ajaxController {
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
         }
+
     }
 
     public function doAction() {
@@ -79,8 +93,8 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
-        //get Job Infos, we need only a row of jobs ( split )
-        $this->jobData = getJobData( $this->id_job, $this->password );
+        //get Job Info, we need only a row of jobs ( split )
+        $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
@@ -90,15 +104,20 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
+
         /*
          * string manipulation strategy
          *
          */
         if ( !$this->concordance_search ) {
             //
-            $this->text   = CatUtils::view2rawxliff( $this->text );
-            $this->source = $this->jobData[ 'source' ];
-            $this->target = $this->jobData[ 'target' ];
+            $this->text           = CatUtils::view2rawxliff( $this->text );
+            $this->context_before = CatUtils::view2rawxliff( $this->__postInput[ 'context_before' ] );
+            $this->context_after  = CatUtils::view2rawxliff( $this->__postInput[ 'context_after' ] );
+
+            $this->source         = $this->jobData[ 'source' ];
+            $this->target         = $this->jobData[ 'target' ];
         } else {
 
             $regularExpressions = $this->tokenizeSourceSearch();
@@ -145,6 +164,10 @@ class getContributionController extends ajaxController {
                 $config[ 'get_mt' ] = false;
             }
 
+            if( $this->jobData->only_private_tm ){
+                $config[ 'onlyprivate' ] = true;
+            }
+
             $_TMS = $this->id_tms;
         } else if ( $this->id_tms == 0 && $this->id_mt_engine == 1 ) {
 
@@ -179,9 +202,13 @@ class getContributionController extends ajaxController {
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
 
+            if ( !$this->concordance_search ) {
+                $config[ 'context_before' ] = $this->context_before;
+                $config[ 'context_after' ]  = $this->context_after;
+            }
 
             //get job's TM keys
-            $this->checkLogin();
+            $this->readLoginInfo();
 
             try{
 
@@ -189,7 +216,7 @@ class getContributionController extends ajaxController {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 
-                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->user->uid, $this->userRole );
 
                 if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                     foreach ( $tm_keys as $tm_key ) {
@@ -197,10 +224,10 @@ class getContributionController extends ajaxController {
                     }
                 }
 
-            }
-            catch(Exception $e){
-                $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+            } catch ( Exception $e ) {
+                $this->result[ 'errors' ][] = [ "code" => -11, "message" => "Cannot retrieve TM keys info." ];
                 Log::doLog( $e->getMessage() );
+
                 return;
             }
 
@@ -211,18 +238,21 @@ class getContributionController extends ajaxController {
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
             /**
-             * @var $mt Engines_Moses
+             * @var $mt_engine Engines_MMT
              */
-            $mt        = Engine::getInstance( $this->id_mt_engine );
+            $mt_engine        = Engine::getInstance( $this->id_mt_engine );
+            $config = $mt_engine->getConfigStruct();
 
-            $config = $mt->getConfigStruct();
+            //if a callback is not set only the first argument is returned, get the config params from the callback
+            $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
             $config[ 'target' ]  = $this->target;
-            $config[ 'id_user' ] = INIT::$MYMEMORY_API_KEY;
+            $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
             $config[ 'segid' ]   = $this->id_segment;
 
-            $mt_result = $mt->get( $config );
+            $mt_result = $mt_engine->get( $config );
 
             if ( isset( $mt_result['error']['code'] ) ) {
                 $mt_result['error']['created_by_type'] = 'MT';
@@ -313,11 +343,27 @@ class getContributionController extends ajaxController {
                     Log::doLog( $QA->getErrors() );
                 }
             }
+            
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+            } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
+                $match[ 'created_by' ] = 'MT'; //For now do not show differences
             } else {
-                $match[ 'created_by' ] = $this->__changeSuggestionSource( $match );
+
+                $uid = null;
+                $this->readLoginInfo();
+                if($this->userIsLogged){
+                    $uid = $this->user->uid;
+                }
+                $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                        $match,
+                        $this->jobData['tm_keys'],
+                        $this->jobData['owner'],
+                        $uid
+                );
             }
+
+            $match = $this->_matchRewrite( $match );
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
                 $match[ 'sentence_confidence' ] = round( $match[ 'sentence_confidence' ], 0 ) . "%";
@@ -337,6 +383,24 @@ class getContributionController extends ajaxController {
         $this->result[ 'data' ][ 'matches' ] = $matches;
     }
 
+    protected function _matchRewrite( $match ){
+
+        //Rewrite ICE matches as 101%
+        if( $match[ 'match' ] == '100%' ){
+            list( $lang, ) = explode( '-', $this->jobData[ 'target' ] );
+            if( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ){
+                $match[ 'match' ] = '101%';
+            }
+            //else do not rewrite the match value
+        }
+
+        //Allow the plugins to customize matches
+        $match = $this->featureSet->filter( 'matchRewriteForContribution', $match );
+
+        return $match;
+
+    }
+
     private function setSuggestionReport( $matches ) {
         if ( count( $matches ) > 0 ) {
 
@@ -346,7 +410,17 @@ class getContributionController extends ajaxController {
                 if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
                 } else {
-                    $matches[ $k ][ 'created_by' ] = $this->__changeSuggestionSource( $m );
+                    $uid = null;
+                    $this->readLoginInfo();
+                    if($this->userIsLogged){
+                        $uid = $this->user->uid;
+                    }
+                    $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                            $m,
+                            $this->jobData['tm_keys'],
+                            $this->jobData['owner'],
+                            $uid
+                    );
                 }
 
             }
@@ -359,10 +433,18 @@ class getContributionController extends ajaxController {
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
+            $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
+            $statuses = $this->featureSet->filter('filterSetSuggestionReportStatuses', $statuses );
+
+            $statuses_condition = implode(' OR ', array_map( function($status) {
+                return " status = '$status' " ;
+            }, $statuses ) ) ;
+
+            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " AND ( $statuses_condition ) ";
 
             $db = Database::obtain();
 
@@ -459,105 +541,5 @@ class getContributionController extends ajaxController {
 
         return $regularExpressions;
     }
-
-    /**
-     * if the description is empty, get cascading default descriptions
-     *
-     * First get the job key description, if empty, get the job owner email
-     *
-     * @param $key
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    private function __getDefaultDescription( $key ){
-
-        $description = null;
-
-        $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $this->jobData[ 'tm_keys' ] ) );
-
-        //search the current key
-        $currentKey = null;
-        for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-            if ( $ownerKeys[ $i ]->key == $key ) {
-                $description = $ownerKeys[ $i ]->name;
-            }
-        }
-
-        //return if something was found, avoid other computations
-        if ( !empty( $description ) ) return $description;
-
-        return $this->jobData[ 'owner' ];
-    }
-
-    /**
-     *
-     * Get the right su
-     *
-     * @param $match
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    private function __changeSuggestionSource( $match ) {
-
-        $sug_source = $match[ 'created_by' ];
-        $key        = $match[ 'memory_key' ];
-
-        //suggestion is coming from a public TM
-        if ( $sug_source == 'Matecat' ) {
-
-            $description = "Public TM";
-
-        } elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-
-             $description = $sug_source;
-
-        } elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-
-            //MyMemory returns the key of the match
-
-            //Session Enabled
-            $this->checkLogin();
-            //Session Disabled
-
-            if ( $this->userIsLogged ) {
-
-                //check if the user can see the key.
-                $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
-                $memoryKey->uid         = $this->uid;
-                $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
-                $memoryKey->tm_key->key = $key;
-
-                $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-
-                if ( count( $currentUserMemoryKey ) > 0 ) {
-
-                    //the current user owns the key: show its description
-                    $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-                    $description          = $currentUserMemoryKey->tm_key->name;
-
-                }
-
-            }
-
-        }
-
-        /**
-         * if the description is empty, get cascading default descriptions
-         */
-        if ( empty( $description ) ) {
-            $description = $this->__getDefaultDescription( $key );
-        }
-
-        if ( empty( $description ) ) {
-            $description = "No description available"; //this should never be
-        }
-
-        return $description;
-
-    }
-
 }
 

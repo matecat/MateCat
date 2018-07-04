@@ -9,59 +9,12 @@
 
 class MyMemory {
 
-    public static function TMS_MATCH( $seg1, $seg2, $penalty_id = 0, $for_semantix = false ) {
-        $seg1 = trim( $seg1 );
-        $seg2 = trim( $seg2 );
+    public static function TMS_MATCH( $seg1, $seg2, $language = false ) {
 
-
-        $ts1 = $seg1;
-        $ts2 = $seg2;
+        $originalSeg1 = $seg1;
+        $originalSeg2 = $seg2;
 
         $penalty = 0;
-        switch ( $penalty_id ) {
-            case "1": //mt!
-                $penalty = 0.15;
-                break;
-
-            case "2": //webalign!
-                $penalty = 0.05;
-                break;
-
-            case "3": //align!
-                $penalty = 0.5;
-                break;
-
-            case "4": //mtfixed!
-                $penalty = 0.05;
-                break;
-
-            case "11": // 1 star (low quality)
-                $penalty = 0.50;
-                break;
-
-            case "12": // 1 star (low quality)
-                $penalty = 0.30;
-                break;
-
-            case "13": // 1 star (average low quality)
-                $penalty = 0.10;
-                break;
-
-            case "14": // 1 star (average high quality)
-                $penalty = 0.00;
-                break;
-
-            case "15": // high quality
-                $penalty = -0.01;
-                break;
-
-            default:
-                $penalty = 0;
-                break;
-        }
-
-        //BUG: dovrò inserire livelli di astrazione sui segmenti e calcolare la media
-        //per ora porto tutto a lowercase:
 
         $seg1 = mb_strtolower( $seg1, "UTF-8" );
         $seg2 = mb_strtolower( $seg2, "UTF-8" );
@@ -71,70 +24,76 @@ class MyMemory {
         $seg2 = str_replace( '&apos;', "'", $seg2 );
 
         // Tag Penalties
-        preg_match_all( '/<.*?' . '>/s', $seg1, $temp1 );
-        preg_match_all( '/<.*?' . '>/s', $seg2, $temp2 );
+        preg_match_all( '/<.*?>/s', $seg1, $temp1 );
+        preg_match_all( '/<.*?>/s', $seg2, $temp2 );
         $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
-        $seg1 = preg_replace( '/<.*?' . '>/s', ' ', $seg1 );
-        $seg2 = preg_replace( '/<.*?' . '>/s', ' ', $seg2 );
+        $seg1 = preg_replace( '/<.*?>/s', ' ', $seg1 );
+        $seg2 = preg_replace( '/<.*?>/s', ' ', $seg2 );
 
         $penalty += 0.01 * $c;
 
-
-        $c = 0;
         // Penalty for different numbers
         $temp1 = '';
         $temp2 = '';
-        preg_match_all( '/[0-9,\.]+/', $seg1, $temp1 );
-        preg_match_all( '/[0-9,\.]+/', $seg2, $temp2 );
+        preg_match_all( '/(0-9|,|\.)+/u', $seg1, $temp1 );
+        preg_match_all( '/(0-9|,|\.)+/u', $seg2, $temp2 );
         $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
-        $seg1 = preg_replace( '/[[0-9,\.]+/', ' ', $seg1 );
-        $seg2 = preg_replace( '/[[0-9,\.]+/', ' ', $seg2 );
+        $seg1 = preg_replace( '/(0-9|,|\.)+/u', ' ', $seg1 );
+        $seg2 = preg_replace( '/(0-9|,|\.)+/u', ' ', $seg2 );
 
         $penalty_placeable = 0.01 * $c;
 
         // Penalties Punctuation
         // Differs from numbers because if A has punt and B does not, it's not that bad as if a number is missing.
-        $c     = 0;
         $temp1 = '';
         $temp2 = '';
-        preg_match_all( '/[[:punct:]]+/', $seg1, $temp1 );
-        preg_match_all( '/[[:punct:]]+/', $seg2, $temp2 );
-        $c    = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
-        $seg1 = preg_replace( '/[[:punct:]]+/', ' ', $seg1 );
-        $seg2 = preg_replace( '/[[:punct:]]+/', ' ', $seg2 );
-        $penalty_placeable += 0.02 * $c;
+        preg_match_all( '/(\p{P}|\p{S}|\x{00a0})+/u', $seg1, $temp1 );
+        preg_match_all( '/(\p{P}|\p{S}|\x{00a0})+/u', $seg2, $temp2 );
+        $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
+        $seg1 = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1 );
+        $seg2 = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2 );
+        $penalty_placeable += 0.02 * $c;
 
         // penalty per case sensitive / formatting
         $penalty_formatting = 0.00;
-        if ( mb_strtolower( $ts1, "UTF-8" ) == mb_strtolower( $ts2, "UTF-8" ) and $ts1 != $ts2 ) {
+
+        // I remove all double spaces I introduced
+        $seg1 = preg_replace( '/[ ]+/u', ' ', $seg1 );
+        $seg2 = preg_replace( '/[ ]+/u', ' ', $seg2 );
+
+        if ( $language !== FALSE && CatUtils::isCJK( $language ) ) {
+            $a = self::CJK_tokenizer( $seg1 );
+            $b = self::CJK_tokenizer( $seg2 );
+        } else {
+            $a = explode( ' ', ( $seg1 ) );
+            $b = explode( ' ', ( $seg2 ) );
+        }
+        $a = array_filter( $a, 'trim' );
+        $b = array_filter( $b, 'trim' );
+
+        $a_lower = array_map( 'mb_strtolower', $a, array_fill( 0, count( $a ), 'UTF-8' ) );
+        $b_lower = array_map( 'mb_strtolower', $b, array_fill( 0, count( $b ), 'UTF-8' ) );
+        if ( $a_lower === $b_lower && $a !== $b ) {
             $penalty_formatting = 0.02;
         }
 
-
-        // End of penalties ------------------------------------------------
-        // I remove all double spaces I introduced
-        $seg1 = preg_replace( '/[ ]+/', ' ', $seg1 );
-        $seg2 = preg_replace( '/[ ]+/', ' ', $seg2 );
-
-        $a = explode( ' ', ( $seg1 ) );
-        $b = explode( ' ', ( $seg2 ) );
-
-        $a = array_filter( $a, "trim" );
-        $b = array_filter( $b, "trim" );
-
-
-        $tms_match = self::TMS_ARRAY_MATCH( $a, $b, $for_semantix );
+        $tms_match = self::TMS_ARRAY_MATCH( $a_lower, $b_lower );
         // if ($tms_match > 0 ) is true, the following member is considered, otherwise it is multiplied by 0 ( = false)
         // This is useful to skip penalty in case that one of the 2 strings is empty;
-        $result = $tms_match - ($tms_match > 0 ) * ( $penalty + $penalty_formatting + $penalty_placeable );
+        $result = $tms_match - ( $penalty + $penalty_formatting + $penalty_placeable );
+        if ( trim( $originalSeg1 ) != trim( $originalSeg2 ) && $result == 1 ) {
+            $result -= 0.01;
+        }
+
+        $result = min( 1, max( 0, $result ) );
 
         return $result;
     }
 
-    public static function TMS_ARRAY_MATCH( $array1, $array2, $for_semantix = false ) {
+    public static function TMS_ARRAY_MATCH( $array1, $array2 ) {
 
         // No Longer symmetric
         // Important:
@@ -142,33 +101,30 @@ class MyMemory {
         // Array2 is the suggestion
         // es. control panel -> panel = lev match 75%
         $min_words_norm = 4;
-        $max_words_norm = 12;
-        $bonus          = 1;
 
         $aliases = array_flip( array_values( array_unique( array_merge( $array1, $array2 ) ) ) );
+
+        // Is the string is longer than 254 words (does not make sense) I cannot use levenshtein of oliver.
+        if ( ( count( $aliases ) > 254 ) OR ( count( $aliases ) > 254 ) ) {
+            return -1;
+        }
 
         $stringA = '';
         $stringB = '';
 
         foreach ( $array1 as $entry ) {
-            $stringA .= self::unichr( $aliases[ $entry ] );
-            if ( strlen( $entry ) > 4 ) {
-                $stringA .= self::unichr( $aliases[ $entry ] );
+            $stringA .= CatUtils::unicode2chr( $aliases[ $entry ] );
+            if ( mb_strlen( $entry ) > 4 ) {
+                $stringA .= chr( $aliases[ $entry ] );
             }
         }
 
         foreach ( $array2 as $entry ) {
-            $stringB .= self::unichr( $aliases[ $entry ] );
-            if ( strlen( $entry ) > 4 ) {
-                $stringB .= self::unichr( $aliases[ $entry ] );
+            $stringB .= CatUtils::unicode2chr( $aliases[ $entry ] );
+            if ( mb_strlen( $entry ) > 4 ) {
+                $stringB .= chr( $aliases[ $entry ] );
             }
         }
-
-        // Is the string is longer than 254 words (does not make sense) I cannot use levenstein of oliver.
-        if ( ( strlen( $stringA ) > 254 ) OR ( strlen( $stringB ) > 254 ) ) {
-            return -1;
-        }
-
 
         similar_text( $stringA, $stringB, $p );
 
@@ -176,15 +132,44 @@ class MyMemory {
         $lb   = strlen( $stringB );
         $lmax = max( $la, $lb );
 
+        return ( $p > 0 ? ( 1 - $lmax / max( $lmax, $min_words_norm ) * ( 1 - $p / 100 ) ) : 0 );
 
-        if ( $for_semantix ) {
-            $lmax           = $la;
-            $min_words_norm = 1;
+    }
+
+    protected static function CJK_tokenizer( $text ) {
+        $words = explode( ' ', ( $text ) );
+        //$words = preg_split("/\\p{Z}+/", ($text));
+        //If characters are not latin then use bigram
+        if ( preg_match( '/[^\\p{Common}\\p{Latin}]/u', $text ) ) {
+            $number_of_words = count( $words );
+            $tokens          = [];
+            for ( $i = 0; $i < $number_of_words; $i++ ) {
+                if ( preg_match( '/[^\\p{Common}\\p{Latin}]/u', $words[ $i ] ) ) {
+                    $tokens = array_merge( $tokens, self::compute_bigram( $words[ $i ] ) );
+                } else {
+                    $tokens[] = $words[ $i ];
+                }
+            }
+        } else {
+            $tokens = $words;
         }
 
-        $result = 1 - $lmax / max( $lmax, $min_words_norm ) * ( 1 - $p / 100 );
+        return $tokens;
+    }
 
-        return $result;
+    protected static function compute_bigram( $text ) {
+        $chrArray = preg_split( '//u', $text, -1, PREG_SPLIT_NO_EMPTY );
+        $length   = count( $chrArray );
+        if ( $length <= 1 ) {
+            return $chrArray;
+        } else {
+            for ( $i = 0; $i < $length - 1; $i++ ) {
+                $chrArray[ $i ] = $chrArray[ $i ] . $chrArray[ $i + 1 ];
+            }
+            array_pop( $chrArray );
+
+            return $chrArray;
+        }
     }
 
     // I expect this to be in PHP in the future...
@@ -195,17 +180,14 @@ class MyMemory {
         return array_diff( $union_array, $intersect_array );
     }
 
-    public static function unichr( $u ) {
-        return mb_convert_encoding( '&#' . intval( $u ) . ';', 'UTF-8', 'HTML-ENTITIES' );
-    }
-
     public static function diff( $old, $new ) {
+
         $maxlen = 0;
+
         foreach ( $old as $oindex => $ovalue ) {
             $nkeys = array_keys( $new, $ovalue );
             foreach ( $nkeys as $nindex ) {
-                $matrix[ $oindex ][ $nindex ] = isset( $matrix[ $oindex - 1 ][ $nindex - 1 ] ) ?
-                        $matrix[ $oindex - 1 ][ $nindex - 1 ] + 1 : 1;
+                $matrix[ $oindex ][ $nindex ] = isset( $matrix[ $oindex - 1 ][ $nindex - 1 ] ) ? $matrix[ $oindex - 1 ][ $nindex - 1 ] + 1 : 1;
                 if ( $matrix[ $oindex ][ $nindex ] > $maxlen ) {
                     $maxlen = $matrix[ $oindex ][ $nindex ];
                     $omax   = $oindex + 1 - $maxlen;
@@ -213,51 +195,18 @@ class MyMemory {
                 }
             }
         }
+
         if ( $maxlen == 0 ) {
-            return array( array( 'd' => $old, 'i' => $new ) );
+            return [ [ 'd' => $old, 'i' => $new ] ];
         }
 
         return array_merge(
-                self::diff( array_slice( $old, 0, $omax ), array_slice( $new, 0, $nmax ) ), array_slice( $new, $nmax, $maxlen ), self::diff( array_slice( $old, $omax + $maxlen ), array_slice( $new, $nmax + $maxlen ) ) );
-    }
+                self::diff( array_slice( $old, 0, $omax ), array_slice( $new, 0, $nmax ) ),
+                array_slice( $new, $nmax, $maxlen ),
+                self::diff( array_slice( $old, $omax + $maxlen ),
+                array_slice( $new, $nmax + $maxlen ) )
+        );
 
-    public static function diff_tercpp( $old, $new, $lang = 'en' ) {
-        //$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
-        //$res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  --HTER -rSent \"$new\" -hSent \"$old\" 2>&1");
-
-        $new_escape = escapeshellarg( $new );
-        $old_escape = escapeshellarg( $old );
-        $res        = shell_exec( INIT::$ROOT . "/third_party/TER/ComputeDiffView $lang $new_escape $old_escape 2>&1" );
-
-//                Log::doLog( $old );
-//                Log::doLog( $new );
-        Log::doLog( $res );
-//                Log::doLog( INIT::$ROOT."/third_party/TER/ComputeDiffView $lang $new_escape $old_escape 2>&1" );
-
-        // typical result
-//                DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab
-//                HTER: 0.157895 (3/19)
-        $res_explode = explode( "\n", $res );
-        if ( empty( $res_explode ) ) {
-            return null;
-        }
-        //EXPECTED  AFTER EXPLODE
-        // Array
-//                (
-//                [0] => DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab
-//                [1] => HTER: 0.157895 (3/19)
-//                [2] =>
-//                )
-        $view = str_replace( 'DiffView:  ', '', $res_explode[ 0 ] );
-        $hter = str_replace( 'HTER:', '', $res_explode[ 1 ] );
-        $hter = preg_replace( "/(\(.*?\))/", "", $hter );
-        $hter = floatval( $hter );
-
-//                echo "old is $old\n\nnew is $new\n\n";
-//                echo "res is $res";
-//                exit;
-        //      print_r (array($view,$hter)); exit;
-        return array( $view, $hter );
     }
 
     public static function diff_html( $old, $new, $by_word = true ) {
@@ -278,18 +227,12 @@ class MyMemory {
 
         if ( $by_word == true ) {
             $sep = ' ';
-            // $old_array = mb_split('[^\w]+',$old);
             $old_array = explode( ' ', $old );
             $new_array = explode( ' ', $new );
-            // $new_array = mb_split('[^\w]+',$new);
         } else {
             $sep = '';
-            for ( $i = 0; $i < strlen( $old ); $i++ ) {
-                $old_array[ ] = $old[ $i ];
-            }
-            for ( $i = 0; $i < strlen( $new ); $i++ ) {
-                $new_array[ ] = $new[ $i ];
-            }
+            $old_array = preg_split( '//u', $old, -1, PREG_SPLIT_NO_EMPTY );
+            $new_array = preg_split( '//u', $new, -1, PREG_SPLIT_NO_EMPTY );
         }
 
         $diff = self::diff( $old_array, $new_array );

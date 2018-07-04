@@ -94,9 +94,9 @@ class PostProcess extends QA {
 
         //normalize the target first space according to the source type
         if ( $srcHasHeadNBSP != $trgHasHeadNBSP && $srcHasHeadNBSP ) {
-            $_trgNodeContent = preg_replace( '/^\x{20}{1}/u', Utils::unicode2chr( 0Xa0 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/^\x{20}{1}/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
         } elseif ( $srcHasHeadNBSP != $trgHasHeadNBSP && $trgHasHeadNBSP ) {
-            $_trgNodeContent = preg_replace( '/^\x{a0}{1}/u', Utils::unicode2chr( 0X20 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/^\x{a0}{1}/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
         }
 
         if ( ( $headSrcWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces ) {
@@ -130,9 +130,9 @@ class PostProcess extends QA {
 
         //normalize the target first space according to the source type
         if ( $srcHasTailNBSP != $trgHasTailNBSP && $srcHasTailNBSP ) {
-            $_trgNodeContent = preg_replace( '/\x{20}{1}$/u', Utils::unicode2chr( 0Xa0 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/\x{20}{1}$/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
         } elseif ( $srcHasTailNBSP != $trgHasTailNBSP && $trgHasTailNBSP ) {
-            $_trgNodeContent = preg_replace( '/\x{a0}{1}$/u', Utils::unicode2chr( 0X20 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/\x{a0}{1}$/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
         }
 
         if ( $trailingSrcChar == " " && $trailingSrcChar != $trailingTrgChar ) {

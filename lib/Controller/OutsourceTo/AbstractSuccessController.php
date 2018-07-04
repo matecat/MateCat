@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+use Outsource\ConfirmationStruct;
 
 /**
  * Class OutsourceTo_AbstractSuccessController
@@ -56,6 +57,21 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
     protected $data_key_content;
 
     /**
+     * @var Shop_Cart
+     */
+    protected $shop_cart ;
+
+    /**
+     * @var int
+     */
+    protected $id_vendor = ConfirmationStruct::VENDOR_ID;
+
+    /**
+     * @var string
+     */
+    protected $vendor_name = ConfirmationStruct::VENDOR_NAME;
+
+    /**
      * Class Constructor
      *
      * @throws LogicException
@@ -69,6 +85,14 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         if( empty( $this->tokenName ) ){
             throw new LogicException( "Property 'tokenName' can not be EMPTY" );
+        }
+
+        if( empty( $this->id_vendor ) ){
+            throw new LogicException( "Property 'id_vendor' can not be EMPTY" );
+        }
+
+        if( empty( $this->vendor_name ) ){
+            throw new LogicException( "Property 'vendor_name' can not be EMPTY" );
         }
 
         //SESSION ENABLED
@@ -104,18 +128,11 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
      *
      * @return mixed|void
      */
-    public function doAction() {}
+    public function doAction() {
 
-    /**
-     * Set the template vars to the redirect Page
-     *
-     * @return mixed|void
-     */
-    public function setTemplateVars() {
+        $this->shop_cart = Shop_Cart::getInstance('outsource_to_external');
 
-        $shop_cart = Shop_Cart::getInstance('outsource_to_external');
-
-        if ( !$shop_cart->countItems() ){
+        if ( !$this->shop_cart->countItems() ){
             /**
              * redirectFailurePage is a white page with an error for session expired
              *
@@ -131,17 +148,45 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
              */
             parent::makeTemplate("redirectSuccessPage.html");
         }
+    }
+
+    /**
+     * Set the template vars to the redirect Page
+     *
+     * @return mixed|void
+     */
+    public function setTemplateVars() {
 
         //we need a list not an hashmap
         $item_list = array();
-        foreach( array( $shop_cart->getItem( $this->data_key_content ) ) as $item ){
+        $confirm_tokens = [];
+        foreach( array( $this->shop_cart->getItem( $this->data_key_content ) ) as $item ){
             $item_list[ ] = $item;
+
+            list( $id_job, $password,  ) = explode( "-", $item[ 'id' ] );
+
+            $payload                    = [];
+            $payload[ 'id_vendor' ]     = $this->id_vendor;
+            $payload[ 'vendor_name' ]   = $this->vendor_name;
+            $payload[ 'id_job' ]        = (int)$id_job;
+            $payload[ 'password' ]      = $password;
+            $payload[ 'currency' ]      = $item[ 'currency' ];
+            $payload[ 'price' ]         = round( $item[ 'price' ], PHP_ROUND_HALF_UP );
+            $payload[ 'delivery_date' ] = $item[ 'delivery' ];
+            $payload[ 'quote_pid' ]     = $item[ 'quote_pid' ];
+
+            $JWT = new SimpleJWT( $payload );
+            $JWT->setTimeToLive( 60 * 20 ); //20 minutes to complete the order
+
+            $confirm_tokens[ $item[ 'id' ] ] = $JWT->jsonSerialize();
+
         }
 
         $this->template->tokenAuth = $this->tokenAuth;
         $this->template->data = json_encode( $item_list );
         $this->template->redirect_url = $this->review_order_page;
         $this->template->data_key = $this->data_key_content;
+        $this->template->confirm_tokens = $confirm_tokens;
 
         //clear the cart after redirection
         //$shop_cart->emptyCart();

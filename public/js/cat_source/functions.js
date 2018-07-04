@@ -1,91 +1,4 @@
-/*
-	Component: functions
- */
 
-function htmlEncode(value) {
-	if (value) {
-		return jQuery('<div />').text(value).html();
-	} else {
-		return '';
-	}
-}
-
-function htmlDecode(value) {
-	if (value) {
-		return $('<div />').html(value).text();
-	} else {
-		return '';
-	}
-}
-
-function utf8_to_b64(str) { // currently unused
-	return window.btoa(unescape(encodeURIComponent(str)));
-}
-
-function b64_to_utf8(str) { // currently unused
-	return decodeURIComponent(escape(window.atob(str)));
-}
-
-
-// START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
-function handlepaste(elem, e) {
-	var savedcontent = elem.innerHTML;
-
-	if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-		if (/text\/html/.test(e.clipboardData.types)) {
-			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
-			elem.innerHTML = txt;
-		}
-		else if (/text\/plain/.test(e.clipboardData.types)) {
-			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
-			elem.innerHTML = txt;
-		}
-		else {
-			elem.innerHTML = "";
-		}
-		waitforpastedata(elem, savedcontent);
-		if (e.preventDefault) {
-			e.stopPropagation();
-			e.preventDefault();
-		}
-		return false;
-	}
-	else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
-		elem.innerHTML = "";
-		waitforpastedata(elem, savedcontent);
-		return true;
-	}
-}
-
-function waitforpastedata(elem, savedcontent) {
-
-	if (elem.childNodes && elem.childNodes.length > 0) {
-		processpaste(elem, savedcontent);
-	}
-	else {
-		that = {
-			e: elem,
-			s: savedcontent
-		};
-		that.callself = function() {
-			waitforpastedata(that.e, that.s);
-		};
-		setTimeout(that.callself, 20);
-	}
-}
-
-function processpaste(elem, savedcontent) {
-	pasteddata = elem.innerHTML;
-
-	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
-	elem.innerHTML = savedcontent;
-
-	// Do whatever with gathered data;
-	$('#placeHolder').before(pasteddata);
-	focusOnPlaceholder();
-	$('#placeHolder').remove();
-}
-// END Get clipboard data at paste event
 
 function focusOnPlaceholder() {
 	var placeholder = document.getElementById('placeHolder');
@@ -118,19 +31,22 @@ function truncate_filename(n, len) {
 }
 
 function insertNodeAtCursor(node) {
-	var range, html;
-	if (window.getSelection && window.getSelection().getRangeAt) {
-		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
-			range = window.getSelection().getRangeAt(0);
-			range.insertNode(node);
-			setCursorAfterNode(range, node);
-		} else {
-		}
-	} else if (document.selection && document.selection.createRange) {
-		range = document.selection.createRange();
-		html = (node.nodeType == 3) ? node.data : node.outerHTML;
-		range.pasteHTML(html);
-	}
+    try {
+        var range, html;
+        if (window.getSelection && window.getSelection().getRangeAt) {
+            if ((window.getSelection().type == 'Caret') || (UI.isFirefox)) {
+                range = window.getSelection().getRangeAt(0);
+                range.insertNode(node);
+                setCursorAfterNode(range, node);
+            }
+        } else if (document.selection && document.selection.createRange) {
+            range = document.selection.createRange();
+            html = (node.nodeType == 3) ? node.data : node.outerHTML;
+            range.pasteHTML(html);
+        }
+    } catch (e) {
+        console.error("Fail to insert node at cursor", e);
+    }
 }
 
 function setCursorAfterNode(range, node) {
@@ -140,13 +56,27 @@ function setCursorAfterNode(range, node) {
 	window.getSelection().addRange(range);
 }
 
+function __ignoreSelection( range ) {
+	if (
+		range.startContainer == range.endContainer &&
+		range.startContainer == document
+	) {
+		return true ;
+	}
+}
+
 function pasteHtmlAtCaret(html, selectPastedContent) {
     var sel, range;
+
     if (window.getSelection) {
         // IE9 and non-IE
         sel = window.getSelection();
+
         if (sel.getRangeAt && sel.rangeCount) {
             range = sel.getRangeAt(0);
+
+			if ( __ignoreSelection( range ) ) return ;
+
             range.deleteContents();
 
             // Range.createContextualFragment() would be useful here but is
@@ -188,115 +118,56 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
 }
 
 function setCursorPosition(el, pos) {
-	pos = pos || 0;
-	var range = document.createRange();
-	var sel = window.getSelection();
-	range.setStart(el, pos);
-	if(pos == 'end') range.setStartAfter(el);
-	range.collapse(true);
-	sel.removeAllRanges();
-	sel.addRange(range);
-	if(typeof el[0] != 'undefined') el.focus();
-}
+	var isDetatched = $(el).parents('body').length == 0 ;
+	if ( isDetatched ) return ;
 
-function removeSelectedText() {
-	if (window.getSelection || document.getSelection) {
-		var oSelection = (window.getSelection ? window : document).getSelection();
-		if (oSelection.type == 'Caret') {
-			if (oSelection.extentOffset != oSelection.baseOffset)
-				oSelection.deleteFromDocument();
-		} else if (oSelection.type == 'Range') {
-			var ss = $(oSelection.baseNode).parent()[0];
-			if ($(ss).hasClass('selected')) {
-				$(ss).remove();
-			} else {
-				oSelection.deleteFromDocument();
-			}
-		}
+	pos = pos || 0;
+
+	var range = document.createRange();
+
+	var sel = window.getSelection();
+
+	if (pos == 'end') {
+		range.setStartAfter(el);
 	} else {
-		document.selection.clear();
+		console.debug('setCursorPosition setting start at pos', el, pos);
+		range.setStart(el, pos);
+	}
+
+	range.collapse(true);
+
+	sel.removeAllRanges();
+
+	sel.addRange(range);
+
+	if(typeof el[0] != 'undefined') {
+		console.debug('setCursorPosition setting focus');
+		el.focus();
 	}
 }
 
-// addTM with iFrame
+function removeSelectedText() {
+    if (window.getSelection || document.getSelection) {
+        var oSelection = (window.getSelection ? window : document).getSelection();
+        if (oSelection.type == 'Caret' && (oSelection.extentOffset != oSelection.baseOffset)) {
+            oSelection.deleteFromDocument();
+        } else if (oSelection.type == 'Range') {
+            var ss = $(oSelection.baseNode).parent()[0];
+            var ssParentTag = $(oSelection.baseNode).closest('.locked.selfClosingTag')[0];
+            if ($(ss).hasClass('selected')) {
+                $(ss).remove();
+            } else if (ssParentTag) {
+                $(ssParentTag).remove();
+            } else {
+                oSelection.deleteFromDocument();
+                oSelection.collapseToStart();
+            }
 
-function fileUpload(form, action_url, div_id) {
-    console.log('div_id: ', div_id);
-    // Create the iframe...
-    var iframe = document.createElement("iframe");
-    iframe.setAttribute("id", "upload_iframe");
-    iframe.setAttribute("name", "upload_iframe");
-    iframe.setAttribute("width", "0");
-    iframe.setAttribute("height", "0");
-    iframe.setAttribute("border", "0");
-    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
-
-    // Add to document...
-    form.parentNode.appendChild(iframe);
-    window.frames['upload_iframe'].name = "upload_iframe";
-
-    iframeId = document.getElementById("upload_iframe");
-
-    // Add event...
-    var eventHandler = function () {
-
-        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
-        else iframeId.removeEventListener("load", eventHandler, false);
-
-        // Message from server...
-        if (iframeId.contentDocument) {
-            content = iframeId.contentDocument.body.innerHTML;
-        } else if (iframeId.contentWindow) {
-            content = iframeId.contentWindow.document.body.innerHTML;
-        } else if (iframeId.document) {
-            content = iframeId.document.body.innerHTML;
         }
-
-        document.getElementById(div_id).innerHTML = content;
-
-        // Del the iframe...
-        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
-    };
-
-    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
-    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
-
-    // Set properties of form...
-    form.setAttribute("target", "upload_iframe");
-    form.setAttribute("action", action_url);
-    form.setAttribute("method", "post");
-    form.setAttribute("enctype", "multipart/form-data");
-    form.setAttribute("encoding", "multipart/form-data");
-    $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
-        .append('<input type="hidden" name="exec" value="newTM" />')
-        .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
-        .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
-        .append('<input type="hidden" name="name" value="' + $('#uploadTMX').text() + '" />')
-        .append('<input type="hidden" name="r" value="1" />')
-        .append('<input type="hidden" name="w" value="1" />');
-
-    // Submit the form...
-    form.submit();
-
-//    document.getElementById(div_id).innerHTML = "Uploading...";
-    $('.popup-addtm-tr .x-popup').click();
-    UI.showMessage({
-        msg: 'Uploading your TM...'
-    });
-    $('#messageBar .msg').after('<span class="progress"></span>');
-    TMKey = $('#addtm-tr-key').val();
-    TMName = $('#uploadTMX').text();
-console.log('TMKey 1: ', TMKey);
-    console.log('TMName 1: ', TMName);
-//    UI.pollForUploadProgress(TMKey, TMName);
-
-    //delay because server can take some time to process large file
-    setTimeout(function() {
-        UI.pollForUploadCallback(TMKey, TMName);
-    }, 3000);
-
+    } else {
+        document.selection.clear();
+    }
 }
-
 function stripHTML(dirtyString) {
     var container = document.createElement('div');
     container.innerHTML = dirtyString;
@@ -307,39 +178,6 @@ function stackTrace() {
     var err = new Error();
     return err.stack;
 }
-// addTM webworker
-/*
-function werror(e) {
-    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
-}
-
-function handleFileSelect(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-
-    var files = evt.dataTransfer.files||evt.target.files;
-    // FileList object.
-
-    worker.postMessage({
-        'files' : files
-    });
-    //Sending File list to worker
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
-    }
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-}
-
-function handleDragOver(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = 'copy';
-    // Explicitly show this is a copy.
-}
-*/
-
 
 /* FORMATTING FUNCTION  TO TEST */
 
@@ -416,21 +254,11 @@ function rawxliff2rawview(segment) { // currently unused
 }
 
 function saveSelection() {
-//	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
-	var editarea = UI.editarea;
 	if (UI.savedSel) {
 		rangy.removeMarkers(UI.savedSel);
 	}
+
 	UI.savedSel = rangy.saveSelection();
-	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	try {
-        //we need this try because when we are in revision
-		// and we open a draft segment from a link we have not a editarea.html()
-		//so javascript crash
-//        editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	} catch(e){
-	 /* create and empty div */ UI.editarea = $('<div>');
-    }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -462,22 +290,28 @@ function selectText(element) {
 }
 
 function runDownload() {
+    var continueDownloadFunction ;
+
     if( $('#downloadProject').hasClass('disabled') ) return false;
 
+    if ( config.isGDriveProject ) {
+        continueDownloadFunction = 'continueDownloadWithGoogleDrive';
+    }
+    else  {
+        continueDownloadFunction = 'continueDownload';
+    }
+
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-    if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
-        APP.confirm({
-            name: 'confirmDownload',
-            cancelTxt: 'Fix errors',
-            onCancel: 'goToFirstError',
-            callback: 'continueDownload',
-            okTxt: 'Continue',
-            msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
-        });
+    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length ) {
+        UI.showFixWarningsOnDownload(continueDownloadFunction);
     } else {
-        UI.continueDownload();
+        UI[ continueDownloadFunction ]();
     }
 }
+
+/**
+ * Returns the translation status evaluating the job stats
+ */
 
 function translationStatus(stats) {
     var t = 'approved';
@@ -485,12 +319,11 @@ function translationStatus(stats) {
     var tra = parseFloat(stats.TRANSLATED);
     var dra = parseFloat(stats.DRAFT);
     var rej = parseFloat(stats.REJECTED);
-    if (tra)
-    t = 'translated';
-    if (dra)
-    t = 'draft';
-    if (rej)
-    t = 'draft';
+
+    if (tra) t = 'translated';
+    if (dra) t = 'draft';
+    if (rej) t = 'draft';
+
     if( !tra && !dra && !rej && !app ){
         t = 'draft';
     }
@@ -522,7 +355,7 @@ function insertHtmlAfterSelection(html) {
         sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
             range = window.getSelection().getRangeAt(0);
-            range.collapse(false);
+            // range.collapse(false);
 
             // Range.createContextualFragment() would be useful here but is
             // non-standard and not supported in all browsers (IE9, for one)
@@ -540,6 +373,31 @@ function insertHtmlAfterSelection(html) {
         range.pasteHTML(html);
     }
 }
+
+(function(undefined) {
+    SegmentActivator = {};
+    SegmentActivator.registry = [];
+    SegmentActivator.activate = function( sid ) {
+        if ( typeof sid === 'undefined' ) {
+            console.debug( 'sid is undefined', sid);
+            return ;
+        }
+
+        for (var i = 0; i < this.registry.length ; ++i) {
+            var callback = this.registry[i];
+             callback( sid );
+        }
+    };
+})();
+
+// This activation function is only valid if the editarea is present
+// in ReviewImproved the editara class is not present so we need to
+// register a different activation function.
+// The function is defined in review_improved module.
+SegmentActivator.registry.push(function( sid ) {
+    var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
+    $(el).click();
+});
 
 function ParsedHash( hash ) {
     var split ;
@@ -604,7 +462,7 @@ function ParsedHash( hash ) {
     this.onlyActionRemoved = function( hash ) {
         var current = new ParsedHash( hash );
         var diff = this.toString().split( current.toString() );
-        return diff[1] == actionSep + MBC.const.commentAction ;
+        return MBC.enabled() && (diff[1] == actionSep + MBC.const.commentAction) ;
     }
 
     this.hashCleanupRequired = function() {
@@ -690,6 +548,95 @@ function goodbye(e) {
     }
 
 }
+
+function cleanupHTMLCharsForDiff( string ) {
+	return replacePlaceholder(string.replace(/&nbsp;/g, ''));
+}
+
+function replacePlaceholder(string) {
+   return  string
+       .replace( config.lfPlaceholderRegex, "softReturnMonad")
+        .replace( config.crPlaceholderRegex, "crPlaceholder" )
+        .replace( config.crlfPlaceholderRegex, "brMarker" )
+        .replace( config.tabPlaceholderRegex, "tabMarkerMonad" )
+        .replace( config.nbspPlaceholderRegex, "nbspPlMark" )
+}
+
+function restorePlaceholders(string) {
+    return string
+        .replace(/softReturnMonad/g , config.lfPlaceholder)
+        .replace(/crPlaceholder/g,  config.crPlaceholder)
+        .replace(/brMarker/g,  config.crlfPlaceholder )
+        .replace(/tabMarkerMonad/g, config.tabPlaceholder)
+        .replace(/nbspPlMark/g, config.nbspPlaceholder)
+}
+
+function trackChangesHTML(source, target) {
+    var diff   = UI.dmp.diff_main(
+		cleanupHTMLCharsForDiff( source ),
+		cleanupHTMLCharsForDiff( target )
+	);
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
+
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt) ;
+}
+
+function getDiffPatch(source, target) {
+    var diff   = UI.dmp.diff_main(
+        cleanupHTMLCharsForDiff( source ),
+        cleanupHTMLCharsForDiff( target )
+    );
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
+    return diff;
+}
+
+function trackChangesHTMLFromDiffArray(diff) {
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( htmlDecode(this[1]) );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    console.log("Diff:" + diffTxt);
+    return restorePlaceholders(diffTxt);
+}
+
+
 
 $.fn.isOnScreen = function() {
 
@@ -839,16 +786,15 @@ function replaceSelectedText(replacementText) {
 function replaceSelectedHtml(replacementHtml) {
     var sel, range;
     if (window.getSelection) {
-        console.log('UI.editarea.html() 0: ', UI.editarea.html());
         sel = window.getSelection();
-        console.log('sel: ', sel);
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
             console.log('range: ', range);
             console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
             console.log('UI.editarea.html() 2: ', UI.editarea.html());
-//            pasteHtmlAtCaret(replacementHtml);
+            pasteHtmlAtCaret(replacementHtml);
+//            range.pasteHtml(replacementHtml);
         }
     } else if (document.selection && document.selection.createRange) {
         range = document.selection.createRange();
@@ -861,8 +807,9 @@ function capitaliseFirstLetter(string)
 }
 function toTitleCase(str)
 {
-    return str.replace(/[\wÀ-ÿ]\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-//    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    return str.replace(/[\wwÀ-ÿЀ-џ]\S*/g, function(txt){
+    	return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
 }
 
 function getRangeObject(selectionObject) {
@@ -897,4 +844,50 @@ function isTranslated(section) {
         section.hasClass('status-new') ||
         section.hasClass('status-draft')
     );
+}
+
+// function template( name, data ) {
+//     return $( MateCat.Templates[ name ]( data ) );
+// }
+
+function eventFromReact(e) {
+    return e.target.hasAttribute('data-reactid');
+}
+
+function hackIntercomButton(on ) {
+    var button = $( document ).find( '.intercom-button' );
+    if ( on ) {
+        button.data( 'mbc-zindex', button.css( 'z-index' ) );
+        button.css( 'z-index', -1 );
+    } else {
+        button.css( 'z-index', button.data( 'mbc-zindex' ) );
+    }
+}
+
+function cleanupSplitMarker( string ) {
+	return string.split( UI.splittedTranslationPlaceholder ).join();
+}
+
+function absoluteId( id ) {
+	return id.split('-')[0]; 
+}
+
+/**
+ * Returns a clickable link with mailto support.
+ */
+function linkedSupportEmail() {
+	return sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail );
+}
+
+/**
+ * A generic error message to show in modal window.
+ *
+ * @returns {*}
+ */
+function genericErrorAlertMessage() {
+	return APP.alert({
+		msg: sprintf('There was an error while saving data to server, please try again. ' +
+			'If the problem persists please contact %s reporting the web address of the current browser tab.',
+			linkedSupportEmail() )
+	});
 }

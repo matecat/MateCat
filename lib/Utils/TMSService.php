@@ -135,8 +135,9 @@ class TMSService {
 
                 //check for errors during the import
                 switch ( $importStatus->responseStatus ) {
+                    case "503" :
                     case "400" :
-                        throw new Exception( "Can't load TMX files right now, try later", -15 );
+                        throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
                         break;
                     case "403" :
                         throw new Exception( "Invalid key provided", -15 );
@@ -204,8 +205,8 @@ class TMSService {
     }
 
     /**
-     * Poll this function to know the status of a TMX upload
-     *
+     * @return array
+     * @throws Exception
      */
     public function tmxUploadStatus() {
 
@@ -249,7 +250,8 @@ class TMSService {
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ]
+                        "target_lang" => $current_tm[ "target_lang" ],
+                        'completed'   => false
                 );
                 $result[ 'completed' ] = false;
                 break;
@@ -260,7 +262,8 @@ class TMSService {
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ]
+                        "target_lang" => $current_tm[ "target_lang" ],
+                        'completed'   => true
                 );
                 $result[ 'completed' ] = true;
                 break;
@@ -311,18 +314,24 @@ class TMSService {
         return $this;
     }
 
+    public function getTMKey(){
+        return $this->tm_key;
+    }
+
     /**
-     * Send a request for download
+     * Set a cyclic barrier to get response about status succes to call the download
      *
-     * First basic implementation
-     * TODO  in the future we would send a mail with link for direct prepared download
+     * @return resource
+     * @throws Exception
      */
     public function downloadTMX() {
 
         /**
          * @var $result Engines_Results_MyMemory_ExportResponse
          */
-        $result = $this->mymemory_engine->createExport( $this->tm_key );
+        $result = $this->mymemory_engine->createExport(
+                $this->tm_key
+        );
 
         if ( $result->responseDetails == 'QUEUED' &&
                 $result->responseStatus == 202
@@ -365,17 +374,55 @@ class TMSService {
     }
 
     /**
+     * Send a mail with link for direct prepared download
+     *
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     */
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ){
+
+        $response = $this->mymemory_engine->emailExport(
+                $this->tm_key,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
+        );
+
+        return $response;
+
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function downloadGlossary(){
+        $fileName = "/tmp/GLOSS_" . $this->tm_key;
+        $fHandle = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
+        fclose( $fHandle ); //flush data and close
+        return $fileName;
+    }
+
+    /**
      * Export Job as Tmx File
      *
-     * @param $jid
-     * @param $jPassword
-     * @param $sourceLang
-     * @param $targetLang
+     * @param          $jid
+     * @param          $jPassword
+     * @param          $sourceLang
+     * @param          $targetLang
+     *
+     * @param int|null $uid
      *
      * @return SplTempFileObject $tmpFile
      *
+     * @throws Exception
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
@@ -392,15 +439,23 @@ class TMSService {
             srclang="' . $sourceLang . '"/>
     <body>' );
 
+        /*
+         * This is a feature for Xbench compatibility
+         * in case of mt and tm ( OmegaT set this flg to false )
+         */
+        $hideUnconfirmedRows = true;
+
         switch ( $this->output_type ) {
 
             case 'translation':
                 $result = getTranslationsForTMXExport( $jid, $jPassword );
                 break;
             case 'mt' :
+                $hideUnconfirmedRows = false;
                 $result = getMTForTMXExport( $jid, $jPassword );
                 break;
             case 'tm' :
+                $hideUnconfirmedRows = false;
                 $result = getTMForTMXExport( $jid, $jPassword );
                 break;
             default:
@@ -408,22 +463,71 @@ class TMSService {
                 break;
         }
 
+        /**
+         * @var $chunks Chunks_ChunkStruct[]
+         */
+        $chunks = Chunks_ChunkDao::getByJobID($jid);
 
         foreach ( $result as $k => $row ) {
 
+            /**
+             * evaluate the incremental chunk index.
+             * If there's more than 1 chunk, add a 'id_chunk' prop to the segment
+             */
+            $idChunk = 1;
+            $chunkPropString = '';
+            if(count($chunks) > 1) {
+                foreach ( $chunks as $i => $chunk ) {
+                    if ( $row[ 'id_segment' ] >= $chunk->job_first_segment &&
+                            $row[ 'id_segment' ] <= $chunk->job_last_segment
+                    ) {
+                        $idChunk = $i + 1;
+                        break;
+                    }
+                }
+                $chunkPropString = '<prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>';
+            }
             $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
+
+            $tmOrigin = "";
+            if ( strpos( $this->output_type, 'tm' ) !== false ) {
+                $suggestionsArray = json_decode( $row[ 'suggestions_array' ], true );
+                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $row[ 'id_customer' ], $uid );
+                $tmOrigin         = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
+                if ( preg_match( "/[a-f0-9]{8,}/", $suggestionsArray[ 0 ][ 'memory_key' ] ) ) {
+                    $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[ 0 ][ 'memory_key' ] . "</prop>";
+                }
+            }
 
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . $row[ 'filename' ] . '</prop>
+        <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
+        <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+        '. $chunkPropString . '
+        '. $tmOrigin .'
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
-        </tuv>
+            <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
+        </tuv>';
+
+            //if segment is confirmed or we want show all segments
+            if( array_search( $row[ 'status' ],
+                            array(
+                                    Constants_TranslationStatus::STATUS_TRANSLATED,
+                                    Constants_TranslationStatus::STATUS_APPROVED,
+                                    Constants_TranslationStatus::STATUS_FIXED
+                            )
+                    ) !== false || !$hideUnconfirmedRows ){
+
+                $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . htmlspecialchars( $row[ 'translation' ] ) . '</seg>
-        </tuv>
+            <seg>' . CatUtils::rawxliff2rawview( $row[ 'translation' ] ) . '</seg>
+        </tuv>';
+
+            }
+
+            $tmx .= '
     </tu>
 ';
 

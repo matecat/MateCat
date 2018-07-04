@@ -1,0 +1,51 @@
+
+$approved-color: #639d5e;
+$translated-color: #0798bc;
+$rejected-color: #b02429;
+$disabled-color: #ebebeb;
+$disabled-border-color: #b3b3b3;
+
+
+/******* Notifications ***********/
+
+$notifications-width: 400px;
+
+$notificationShadowOpacity: 0.9;
+
+$notification-success: #5ea400;
+$notification-error: #ec3d3d;
+$notification-warning: #ebad1a;
+$notification-info: #369cc7;
+
+@mixin box-sizing($boxsizing) {
+  -webkit-box-sizing: $boxsizing;
+  -moz-box-sizing: $boxsizing;
+  box-sizing: $boxsizing;
+}
+
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  -ms-border-radius: $radius;
+  border-radius: $radius;
+}
+
+@mixin transition($args...) {
+  -webkit-transition: $args;
+  -moz-transition: $args;
+  -ms-transition: $args;
+  -o-transition: $args;
+  transition: $args;
+}
+
+@mixin box-shadow($top, $left, $blur, $color, $inset:"") {
+  -webkit-box-shadow:$top $left $blur $color #{$inset};
+  -moz-box-shadow:$top $left $blur $color #{$inset};
+  box-shadow:$top $left $blur $color #{$inset};
+}
+
+
+
+
+
+/*********************************/

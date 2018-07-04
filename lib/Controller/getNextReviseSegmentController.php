@@ -52,12 +52,15 @@ class getNextReviseSegmentController extends ajaxController {
 		//get all segments with translated and approved status different from this segment
 		$segmentList = getNextSegment( $this->id_segment, $this->id_job, $this->password, true );
 
+		$segmentStatus = Constants_TranslationStatus::STATUS_TRANSLATED;
 		$nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
 		if ( !$nextSegmentId ) {
-			$nextSegmentId = fetchStatus( $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+			$nextSegmentId = fetchStatus($this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+			$segmentStatus = Constants_TranslationStatus::STATUS_APPROVED;
 		}
 
 		$this->result[ 'nextId' ] = $nextSegmentId;
+		$this->result[ 'nextStatus' ] = $segmentStatus;
 		$this->result[ 'code' ]   = 1;
 		$this->result[ 'data' ]   = "OK";
 

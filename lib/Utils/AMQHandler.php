@@ -7,7 +7,7 @@
  * 
  */
 
-use \Analysis\Queue\QueueInfo,
+use \TaskRunner\Commons\Context,
     \Analysis\Queue\RedisKeys;
 
 use \Stomp,
@@ -82,7 +82,7 @@ class AMQHandler extends Stomp {
         }
 
         if( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ){
-            throw new Exception( "This client is a $this->clientType. A client can only publisher or subscriber, not both." );
+            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
         } elseif( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
             //already connected, we want to change the queue
             $this->queueName = $queueName;
@@ -93,7 +93,7 @@ class AMQHandler extends Stomp {
         $this->connect();
         $this->setReadTimeout( 5, 0 );
         $this->queueName = $queueName;
-        return parent::subscribe( '/queue/' . $queueName );
+        return parent::subscribe( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $queueName );
 
     }
 
@@ -115,7 +115,7 @@ class AMQHandler extends Stomp {
         }
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
-        return parent::send( '/queue/' . $destination, $msg, $properties, $sync );
+        return parent::send( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $destination, $msg, $properties, $sync );
 
     }
 
@@ -137,7 +137,7 @@ class AMQHandler extends Stomp {
             throw new \Exception( 'No queue name provided.' );
         }
 
-        $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/QueueSize";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int) INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
 
         $mHandler = new MultiCurlHandler();
 
@@ -151,7 +151,7 @@ class AMQHandler extends Stomp {
                 CURLOPT_HTTPHEADER => array( 'Authorization: Basic '. base64_encode("admin:admin") )
         );
 
-        $resource = $mHandler->createResource( $queue_inteface_url, $options );
+        $resource = $mHandler->createResource( $queue_interface_url, $options );
         $mHandler->multiExec();
         $result = $mHandler->getSingleContent( $resource );
         $mHandler->multiCurlCloseAll();
@@ -180,7 +180,7 @@ class AMQHandler extends Stomp {
             throw new \Exception( 'No queue name provided.' );
         }
 
-        $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/ConsumerCount";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int) INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
 
         $mHandler = new MultiCurlHandler();
 
@@ -194,7 +194,7 @@ class AMQHandler extends Stomp {
                 CURLOPT_HTTPHEADER => array( 'Authorization: Basic '. base64_encode("admin:admin") )
         );
 
-        $resource = $mHandler->createResource( $queue_inteface_url, $options );
+        $resource = $mHandler->createResource( $queue_interface_url, $options );
         $mHandler->multiExec();
         $result = $mHandler->getSingleContent( $resource );
         $mHandler->multiCurlCloseAll();
@@ -216,7 +216,7 @@ class AMQHandler extends Stomp {
     public function getActualForQID( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not get values without a Queue ID. \Analysis\QueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not get values without a Queue ID. Use \AMQHandler::setQueueID or pass a queue id to this method' );
         }
 
         if( !empty( $qid ) ){
@@ -239,7 +239,7 @@ class AMQHandler extends Stomp {
         return $this;
     }
 
-    public function reQueue( $failed_segment, QueueInfo $queueInfo ){
+    public function reQueue( $failed_segment, Context $queueInfo ){
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );

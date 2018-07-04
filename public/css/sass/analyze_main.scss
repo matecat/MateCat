@@ -1,0 +1,25 @@
+@import "vendor_mc/semantic/matecat_semantic";
+
+@import "commons/matecat_fonts";
+@import "commons/filter-teams";
+@import "commons/nav-bar";
+@import "commons/icons";
+@import "commons/shadows";
+@import "commons/project";
+@import "commons/divider";
+@import "commons/progress-mc-bar";
+@import "commons/buttons";
+
+//libs: move it?
+@import '../libs/calendar.css';
+
+@import 'common-modals';
+@import 'modals/split_modal';
+@import "notifications";
+
+@import "commons/sub-header";
+@import "commons/team-member";
+
+@import "commons/analyze";
+@import "commons/outsource";
+@import "commons/date-picker-translator";

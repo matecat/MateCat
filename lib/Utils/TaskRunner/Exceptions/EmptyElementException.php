@@ -9,7 +9,10 @@
 
 namespace TaskRunner\Exceptions;
 
-
+/**
+ * Class EmptyElementException
+ * @package TaskRunner\Exceptions
+ */
 class EmptyElementException extends \Exception {
 
 }

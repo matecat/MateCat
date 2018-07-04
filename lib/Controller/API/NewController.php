@@ -1,6 +1,12 @@
 <?php
 
-set_time_limit( 180 );
+use API\V2\Exceptions\AuthenticationError;
+use Exceptions\ValidationError;
+use ProjectQueue\Queue;
+use Teams\MembershipDao;
+
+//limit execution time to 300 seconds
+set_time_limit( 300 );
 
 /**
  *
@@ -18,6 +24,20 @@ set_time_limit( 180 );
  */
 class NewController extends ajaxController {
 
+    /**
+     * @var boolean
+     */
+    private $only_private;
+
+    /**
+     * @var int
+     */
+    private $pretranslate_100;
+
+    /**
+     * @var Langs_Languages
+     */
+    private $lang_handler;
     /**
      * @var string
      */
@@ -54,53 +74,108 @@ class NewController extends ajaxController {
     private $private_tm_user = null;
     private $private_tm_pass = null;
 
-    private $new_keys = array();
+    protected $new_keys = [];
+
+    private $owner = "";
+
+    private $lexiqa             = false;
+    private $speech2text        = false;
+    private $tag_projection     = false;
+    private $project_completion = false;
+
+    /**
+     * @var BasicFeatureStruct[]
+     */
+    private $projectFeatures = [];
+
+    private $metadata = [];
 
     const MAX_NUM_KEYS = 5;
 
-    private static $allowed_seg_rules = array(
+    private static $allowed_seg_rules = [
             'standard', 'patent', ''
-    );
+    ];
 
-    protected $api_output = array(
+    protected $api_output = [
             'status'  => 'FAIL',
             'message' => 'Untraceable error (sorry, not mapped)'
-    );
+    ];
 
+    /**
+     * @var \Teams\TeamStruct
+     */
+    protected $team;
+
+    protected $id_team;
+
+    protected $projectStructure;
+
+    /**
+     * @var ProjectManager
+     */
+    protected $projectManager;
+
+    protected $postInput;
+
+    private $due_date;
 
     public function __construct() {
-
-        //limit execution time to 300 seconds
-        set_time_limit( 300 );
 
         parent::__construct();
 
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'source_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'target_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'        => array(
+        if ( !$this->validateAuthHeader() ) {
+            header( 'HTTP/1.0 401 Unauthorized' );
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ] = 'Authentication failed';
+            $this->finalize ();
+            die();
+        }
+
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email );
+        }
+
+        $filterArgs = [
+                'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tms_engine'         => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'mt_engine'         => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'mt_engine'          => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'private_tm_key'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'subject'           => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'subject'            => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'segmentation_rule' => array(
+                ],
+                'segmentation_rule'  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'owner_email'       => array(
+                ],
+                'owner_email'        => [
                         'filter' => FILTER_VALIDATE_EMAIL
-                )
-        );
+                ],
+                'metadata'           => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'pretranslate_100'   => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT ],
+                'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+        ];
+
+        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -111,10 +186,12 @@ class NewController extends ajaxController {
             $__postInput[ 'mt_engine' ] = 1;
         }
 
+        //default get all public matches from TM
+        $this->only_private = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
+
         foreach ( $__postInput as $key => $val ) {
             $__postInput[ $key ] = urldecode( $val );
         }
-
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
@@ -123,58 +200,58 @@ class NewController extends ajaxController {
         $this->project_name = $__postInput[ 'project_name' ];
         $this->source_lang  = $__postInput[ 'source_lang' ];
         $this->target_lang  = $__postInput[ 'target_lang' ];
-        $this->tms_engine   = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
-        $this->mt_engine    = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->seg_rule     = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
-        $this->subject      = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
-        $this->owner        = $__postInput[ 'owner_email' ];
 
-        try {
-            $this->private_tm_key = array_map(
-                    'self::parseTmKeyInput',
-                    explode( ",", $__postInput[ 'private_tm_key' ] )
-            );
-        } catch ( Exception $e ) {
-            $this->api_output[ 'message' ] = $e->getMessage();
-            $this->api_output[ 'debug' ]   = $e->getMessage();
-            Log::doLog( $e->getMessage() );
+        $this->tms_engine = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
+        $this->mt_engine  = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
+        $this->seg_rule   = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject    = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner      = $__postInput[ 'owner_email' ];
+        $this->id_team    = $__postInput[ 'id_team' ];
+        $this->due_date = ( empty($__postInput[ 'due_date' ]) ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
 
-            return -6;
-        }
+        // Force pretranslate_100 to be 0 or 1
+        $this->pretranslate_100 = (int)!!$__postInput[ 'pretranslate_100' ];
 
         if ( $this->owner === false ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Email is not valid";
             Log::doLog( "Email is not valid" );
-
             return -5;
-        } else if ( !is_null( $this->owner ) && !empty( $this->owner ) ) {
-            $domain = explode( "@", $this->owner );
-            $domain = $domain[ 1 ];
-            if ( !checkdnsrr( $domain ) ) {
-                $this->api_output[ 'message' ] = "Project Creation Failure";
-                $this->api_output[ 'debug' ]   = "Email is not valid";
-                Log::doLog( "Email is not valid" );
-
-                return -5;
+        } else {
+            if ( !is_null( $this->owner ) && !empty( $this->owner ) ) {
+                $domain = explode( "@", $this->owner );
+                $domain = $domain[ 1 ];
+                if ( !checkdnsrr( $domain ) ) {
+                    $this->api_output[ 'message' ] = "Project Creation Failure";
+                    $this->api_output[ 'debug' ]   = "Email is not valid";
+                    Log::doLog( "Email is not valid" );
+                    return -5;
+                }
             }
+        }
+
+        try {
+            $this->lexiqa             = $__postInput[ 'lexiqa' ];
+            $this->speech2text        = $__postInput[ 'speech2text' ];
+            $this->tag_projection     = $__postInput[ 'tag_projection' ];
+            $this->project_completion = $__postInput[ 'project_completion' ];
+
+            $this->validateMetadataParam( $__postInput );
+
+        } catch ( Exception $ex ) {
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ] = 'Error evaluating metadata param';
+            Log::doLog( $ex->getMessage() );
+            return -1;
         }
 
         try {
             $this->validateEngines();
         } catch ( Exception $ex ) {
-            $this->api_output[ 'message' ] = $ex->getMessage();
-            Log::doLog( $ex->getMessage() );
-
-            return -1;
-        }
-
-        if ( count( $this->private_tm_key ) > self::MAX_NUM_KEYS ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
-            $this->api_output[ 'debug' ]   = "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS;
-            Log::doLog( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS );
-
-            return -2;
+            $this->api_output[ 'debug' ] = $ex->getMessage();
+            Log::doLog( $ex->getMessage() );
+            return $ex->getCode();
         }
 
         $langDomains = Langs_LanguageDomains::getInstance();
@@ -189,17 +266,12 @@ class NewController extends ajaxController {
         }
 
         //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        if ( !function_exists( 'array_column' ) ) {
-            $subjectList = Utils::array_column( $subjectList, 'key' );
-        } else {
-            $subjectList = array_column( $subjectList, 'key' );
-        }
+        $subjectList = Utils::array_column( $subjectList, 'key' );
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Subject not allowed: " . $this->subject;
             Log::doLog( "Subject not allowed: " . $this->subject );
-
             return -3;
         }
 
@@ -207,7 +279,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Segmentation rule not allowed: " . $this->seg_rule;
             Log::doLog( "Segmentation rule not allowed: " . $this->seg_rule );
-
             return -4;
         }
 
@@ -217,86 +288,56 @@ class NewController extends ajaxController {
         }
 
         if ( empty( $_FILES ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Missing file. Not Sent." );
-
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
             return -1;
         }
 
-        $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
-
-        //If a TMX file has been uploaded and no key was provided, create a new key.
-        if ( empty( $this->private_tm_key ) ) {
-            foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
-                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
-                    $this->private_tm_key[] = 'new';
-                    break;
-                }
-            }
+        try {
+            $this->validateTmAndKeys( $__postInput );
+        } catch ( Exception $e ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = $e->getMessage();
+            Log::doLog( "Error: " . $e->getCode() . " - " . $e->getMessage() );
+            return -$e->getCode();
         }
 
-        //remove all empty entries
-        foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
-            //from api a key is sent and the value is 'new'
-            if ( $tm_key[ 'key' ] == 'new' ) {
+        $this->postInput = $__postInput;
 
-                try {
+    }
 
-                    $APIKeySrv = new TMSService();
-
-                    $newUser = $APIKeySrv->createMyMemoryKey();
-
-                    //TODO: i need to store an array of these
-                    $this->private_tm_user = $newUser->id;
-                    $this->private_tm_pass = $newUser->pass;
-
-                    $this->private_tm_key[ $__key_idx ] =
-                            array(
-                                    'key'  => $newUser->key,
-                                    'name' => null,
-                                    'r'    => $tm_key[ 'r' ],
-                                    'w'    => $tm_key[ 'w' ]
-
-                            );
-                    $this->new_keys[]                   = $newUser->key;
-
-                } catch ( Exception $e ) {
-
-                    $this->api_output[ 'message' ] = 'Project Creation Failure';
-                    $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
-
-                    return -1;
-                }
-
-            } //if a string is sent, transform it into a valid array
-            else if ( !empty( $tm_key ) ) {
-                $this->private_tm_key[ $__key_idx ] =
-                        array(
-                                'key'  => $tm_key[ 'key' ],
-                                'name' => null,
-                                'r'    => $tm_key['r'],
-                                'w'    => $tm_key['w']
-
-                        );
-            }
-
-            $this->private_tm_key[ $__key_idx ] = array_filter(
-                    $this->private_tm_key[ $__key_idx ],
-                    array( "self", "sanitizeTmKeyArr" )
-            );
+    private function setProjectFeatures() {
+        if ( $this->postInput[ 'project_completion' ] ) {
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = 'project_completion';
+            $this->projectFeatures[] = $feature;
         }
+
+        $this->projectFeatures = $this->featureSet->filter(
+                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput, $this->userIsLogged
+        );
+
     }
 
     /**
      * @throws Exception
      */
     private function validateEngines() {
+
         if ( $this->tms_engine != 0 ) {
             Engine::getInstance( $this->tms_engine );
         }
+
         if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-            Engine::getInstance( $this->mt_engine );
+            if( !$this->userIsLogged ){
+                throw new Exception( "Invalid MT Engine.", -2 );
+            } else {
+                $testEngine = Engine::getInstance( $this->mt_engine );
+                if( $testEngine->getEngineRow()->uid != $this->getUser()->uid ){
+                    throw new Exception( "Invalid MT Engine.", -21 );
+                }
+            }
         }
+
     }
 
     public function finalize() {
@@ -304,17 +345,25 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
-
     public function doAction() {
-        if ( !$this->validateAuthHeader() ) {
-            header( 'HTTP/1.0 401 Unauthorized' );
-            $this->api_output[ 'message' ] = 'Authentication failed';
+        try {
+            $this->setProjectFeatures();
+        } catch ( ValidationError $e ) {
+            $this->api_output = [ 'status' => 'FAIL', 'message' => $e->getMessage() ];
+            return -1;
+        }
+
+        try {
+            $this->__validateTeam();
+        } catch ( Exception $ex ) {
+            $this->api_output[ 'message' ] = $ex->getMessage();
+            Log::doLog( $ex->getMessage() );
 
             return -1;
         }
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
-            return;
+            return -1;
         }
 
         $uploadFile = new Upload();
@@ -322,16 +371,17 @@ class NewController extends ajaxController {
         try {
             $stdResult = $uploadFile->uploadFiles( $_FILES );
         } catch ( Exception $e ) {
-            $stdResult                     = array();
-            $this->result                  = array(
-                    'errors' => array(
-                            array( "code" => -1, "message" => $e->getMessage() )
-                    )
-            );
+            $stdResult                     = [];
+            $this->result                  = [
+                    'errors' => [
+                            [ "code" => -1, "message" => $e->getMessage() ]
+                    ]
+            ];
             $this->api_output[ 'message' ] = $e->getMessage();
         }
 
-        $arFiles = array();
+        $arFiles = [];
+
         foreach ( $stdResult as $input_name => $input_value ) {
             $arFiles[] = $input_value->name;
         }
@@ -346,15 +396,9 @@ class NewController extends ajaxController {
             $this->project_name = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        if ( empty( $this->source_lang ) ) {
-            $this->api_output[ 'message' ] = "Missing source language.";
-            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
-        }
-
-        if ( empty( $this->target_lang ) ) {
-            $this->api_output[ 'message' ] = "Missing target language.";
-            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
-        }
+        $this->lang_handler = Langs_Languages::getInstance();
+        $this->validateSourceLang();
+        $this->validateTargetLangs();
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         //for now we sent to api output only the LAST error message, but we log all
@@ -366,10 +410,9 @@ class NewController extends ajaxController {
             return -1; //exit code
         }
 
-        $cookieDir      = $uploadFile->getDirUploadToken();
-        $intDir         = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir         = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
-        $response_stack = array();
+        $cookieDir = $uploadFile->getDirUploadToken();
+        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
+        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
         foreach ( $arFiles as $file_name ) {
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
@@ -382,14 +425,19 @@ class NewController extends ajaxController {
             $conversionHandler->setCookieDir( $cookieDir );
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
+            $conversionHandler->setFeatures( $this->featureSet );
+            $conversionHandler->setUserIsLogged( $this->userIsLogged );
 
-            $status = array();
+            $status = [];
 
             if ( $ext == "zip" ) {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
                 $conversionHandler->setStopOnFileException( false );
 
                 $fileObjects = $conversionHandler->extractZipFile();
+
+                \Log::doLog( 'fileObjets', $fileObjects );
+
                 //call convertFileWrapper and start conversions for each file
 
                 if ( $conversionHandler->uploadError ) {
@@ -411,18 +459,18 @@ class NewController extends ajaxController {
                          * In this case, we raise warnings, hence the return code must be a new code
                          */
                         $this->result[ 'code' ]                      = 2;
-                        $this->result[ 'errors' ][ $brokenFileName ] = array(
+                        $this->result[ 'errors' ][ $brokenFileName ] = [
                                 'code'    => $fileError->error[ 'code' ],
                                 'message' => $fileError->error[ 'message' ],
                                 'debug'   => $brokenFileName
-                        );
+                        ];
                     }
 
                 }
 
                 $realFileObjectInfo  = $fileObjects;
                 $realFileObjectNames = array_map(
-                        array( 'ZipArchiveExtended', 'getFileName' ),
+                        [ 'ZipArchiveExtended', 'getFileName' ],
                         $fileObjects
                 );
 
@@ -431,16 +479,16 @@ class NewController extends ajaxController {
                     $__realFileName = $realFileObjectInfo[ $i ];
                     $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
 
-                    $fileObject               = array(
+                    $fileObject               = [
                             'name' => $__fileName,
                             'size' => $filesize
-                    );
+                    ];
                     $realFileObjectInfo[ $i ] = $fileObject;
                 }
 
                 $this->result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
 
-                $stdFileObjects = array();
+                $stdFileObjects = [];
 
                 if ( $fileObjects !== null ) {
                     foreach ( $fileObjects as $fName ) {
@@ -459,7 +507,7 @@ class NewController extends ajaxController {
                     }
                 } else {
                     $errors = $conversionHandler->getResult();
-                    $errors = array_map( array( 'Upload', 'formatExceptionMessage' ), $errors[ 'errors' ] );
+                    $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
 
                     $this->result[ 'errors' ]      = array_merge( $this->result[ 'errors' ], $errors );
                     $this->api_output[ 'message' ] = "Zip Error";
@@ -475,6 +523,8 @@ class NewController extends ajaxController {
                 $converter->cookieDir   = $cookieDir;
                 $converter->source_lang = $this->source_lang;
                 $converter->target_lang = $this->target_lang;
+                $converter->featureSet  = $this->featureSet;
+                $converter->setUser( $this->user );
                 $converter->doAction();
 
                 $status = $errors = $converter->checkResult();
@@ -485,11 +535,11 @@ class NewController extends ajaxController {
                         $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
                         if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
-                            $this->result[ 'errors' ][ $brokenFileName ] = array(
+                            $this->result[ 'errors' ][ $brokenFileName ] = [
                                     'code'    => $__err[ 'code' ],
                                     'message' => $__err[ 'message' ],
                                     'debug'   => $brokenFileName
-                            );
+                            ];
                         }
                     }
                 }
@@ -499,7 +549,7 @@ class NewController extends ajaxController {
                 $this->result = $conversionHandler->getResult();
 
                 if ( $this->result[ 'code' ] > 0 ) {
-                    $this->result = array();
+                    $this->result = [];
                 }
 
             }
@@ -527,7 +577,7 @@ class NewController extends ajaxController {
             }
         }
 
-        $newArFiles = array();
+        $newArFiles = [];
         $linkFiles  = scandir( $intDir );
 
         foreach ( $arFiles as $__fName ) {
@@ -561,13 +611,14 @@ class NewController extends ajaxController {
 
         $arFiles = $newArFiles;
 
-        $projectManager   = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
+        $this->projectManager = new ProjectManager();
+        $projectStructure     = $this->projectManager->getProjectStructure();
+
+        $projectStructure[ 'sanitize_project_options' ] = false;
 
         $projectStructure[ 'project_name' ] = $this->project_name;
         $projectStructure[ 'job_subject' ]  = $this->subject;
 
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -580,58 +631,148 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
+        $projectStructure[ 'metadata' ]             = $this->metadata;
+        $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+        $projectStructure[ 'only_private' ]         = $this->only_private;
 
-        if ( $this->current_user != null ) {
-            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
+        $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
+        $projectStructure[ 'due_date' ]  = $this->due_date;
+
+        if ( $this->user ) {
+            $projectStructure[ 'userIsLogged' ] = true;
+            $projectStructure[ 'uid' ]          = $this->user->getUid();
+            $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
+            $projectStructure[ 'owner' ]        = $this->user->getEmail();
+            $this->projectManager->setTeam( $this->team );
         }
 
-        if ( $this->current_user != null ) {
-            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
-        }
+        //set features override
+        $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
-        $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->createProject();
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
-        $this->result = $projectStructure[ 'result' ];
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $this->projectManager->generatePassword();
 
-        if ( !empty( $projectStructure[ 'result' ][ 'errors' ] ) ) {
-            //errors already logged
-            $this->api_output[ 'message' ] = 'Project Creation Failure';
-            $this->api_output[ 'debug' ]   = array_values( $projectStructure[ 'result' ][ 'errors' ] );
+        $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $this->postInput );
 
-        } else {
+        $this->projectStructure = $projectStructure;
 
-            //everything ok
-            $this->api_output[ 'status' ]       = 'OK';
-            $this->api_output[ 'message' ]      = 'Success';
-            $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
-            $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
+        $this->projectManager->sanitizeProjectStructure();
 
-            $this->api_output[ 'new_keys' ] = $this->new_keys;
+        Queue::sendProject( $projectStructure );
 
-            $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
-                    $projectStructure[ 'project_name' ] . "/" .
-                    $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-                    $projectStructure[ 'result' ][ 'ppassword' ];
-        }
+        $this->_pollForCreationResult();
 
+        $this->_outputResult();
     }
 
-    private function validateAuthHeader() {
-        if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
-            return true;
-        }
+    protected function _outputResult() {
+        if ( $this->result == null ) {
+            $this->api_output[ 'status' ]  = 504;
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ]   = 'Execution timeout';
+        } elseif ( !empty( $this->result[ 'errors' ] ) ) {
+            //errors already logged
+            $this->api_output[ 'status' ]  = 500;
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ]   = array_values( $this->result[ 'errors' ] );
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
-        if ( $key && $key->validSecret( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ) {
-            Log::doLog( $key );
-
-            $this->current_user = $key->getUser();
-
-            return true;
         } else {
-            return false;
+            //everything ok
+            $this->_outputForSuccess();
         }
+    }
+
+    protected function _outputForSuccess() {
+        $this->api_output[ 'status' ]       = 'OK';
+        $this->api_output[ 'message' ]      = 'Success';
+        $this->api_output[ 'id_project' ]   = $this->projectStructure[ 'id_project' ];
+        $this->api_output[ 'project_pass' ] = $this->projectStructure[ 'ppassword' ];
+        $this->api_output[ 'new_keys' ]     = $this->new_keys;
+        $this->api_output[ 'analyze_url' ]  = $this->projectManager->getAnalyzeURL();
+    }
+
+    protected function _pollForCreationResult() {
+        $time = time();
+        do {
+            $this->result = Queue::getPublishedResults( $this->projectStructure[ 'id_project' ] ); //LOOP for 290 seconds **** UGLY **** Deprecate in API V2
+            if ( $this->result != null ) {
+                break;
+            }
+            sleep( 2 );
+        } while ( time() - $time <= 290 );
+    }
+
+    private function validateSourceLang() {
+        try {
+            $this->lang_handler->validateLanguage( $this->source_lang );
+        } catch ( Exception $e ) {
+            $this->api_output[ 'message' ] = $e->getMessage();
+            $this->result[ 'errors' ][]    = [ "code" => -3, "message" => $e->getMessage() ];
+        }
+    }
+
+    private function validateTargetLangs() {
+        $targets = explode( ',', $this->target_lang );
+        $targets = array_map( 'trim', $targets );
+        $targets = array_unique( $targets );
+
+        if ( empty( $targets ) ) {
+            $this->api_output[ 'message' ] = "Missing target language.";
+            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => "Missing target language." ];
+        }
+
+        try {
+
+            foreach ( $targets as $target ) {
+                $this->lang_handler->validateLanguage( $target );
+            }
+
+        } catch ( Exception $e ) {
+            $this->api_output[ 'message' ] = $e->getMessage();
+            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
+        }
+
+        $this->target_lang = implode( ',', $targets );
+    }
+
+    /**
+     * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
+     *
+     * @return bool
+     */
+    private function validateAuthHeader() {
+
+        $api_key    = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
+        $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
+
+        if ( false !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
+            list( $api_key, $api_secret ) = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
+        }
+
+        if ( $api_key && $api_secret ) {
+            $key = \ApiKeys_ApiKeyDao::findByKey( $api_key );
+
+            if ( !$key || !$key->validSecret( $api_secret ) ) {
+                return false;
+            }
+
+            Log::doLog( $key );
+            $this->user = $key->getUser();
+
+            $this->userIsLogged = (
+                    !empty( $this->user->uid ) &&
+                    !empty( $this->user->email ) &&
+                    !empty( $this->user->first_name ) &&
+                    !empty( $this->user->last_name )
+            );
+
+        }
+
+        return true;
     }
 
     /**
@@ -647,46 +788,203 @@ class NewController extends ajaxController {
 
     }
 
+    /**
+     * Expects the metadata param to be a json formatted string and tries to convert it
+     * in array.
+     * Json string is expected to be flat key value, this is enforced padding 1 to json
+     * conversion depth param.
+     *
+     * @param $__postInput
+     *
+     * @throws Exception
+     */
+    private function validateMetadataParam( $__postInput ) {
+
+        if ( !empty( $__postInput[ 'metadata' ] ) ) {
+            if ( strlen( $__postInput[ 'metadata' ] ) > 2048 ) {
+                throw new Exception( 'metadata string is too long' );
+            }
+            $depth                     = 2; // only converts key value structures
+            $assoc                     = true;
+            $__postInput[ 'metadata' ] = html_entity_decode( $__postInput[ 'metadata' ] );
+            $this->metadata            = json_decode( $__postInput[ 'metadata' ], $assoc, $depth );
+            Log::doLog( "Passed parameter metadata as json string." );
+        }
+
+        //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )
+        if ( !empty( $this->lexiqa ) ) {
+            $this->metadata[ 'lexiqa' ] = $this->lexiqa;
+        }
+
+        if ( !empty( $this->speech2text ) ) {
+            $this->metadata[ 'speech2text' ] = $this->speech2text;
+        }
+
+        if ( !empty( $this->tag_projection ) ) {
+            $this->metadata[ 'tag_projection' ] = $this->tag_projection;
+        }
+
+        if ( !empty( $this->project_completion ) ) {
+            $this->metadata[ 'project_completion' ] = $this->project_completion;
+        }
+
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
+
+    }
+
     private static function parseTmKeyInput( $tmKeyString ) {
         $tmKeyInfo = explode( ":", $tmKeyString );
         $read      = true;
         $write     = true;
 
-        $permissionString = $tmKeyInfo[ 1 ];
+        $permissionString = @$tmKeyInfo[ 1 ];
+
         //if the key is not set, return null. It will be filtered in the next lines.
         if ( empty( $tmKeyInfo[ 0 ] ) ) {
             return null;
         } //if permissions are set, check if they are allowed or not and eventually set permissions
-        elseif ( isset( $tmKeyInfo[ 1 ] ) ) {
+
+        //permission string check
+        switch ( $permissionString ) {
+            case 'r':
+                $write = false;
+                break;
+            case 'w':
+                $read = false;
+                break;
+            case 'rw':
+            case ''  :
+            case null:
+                break;
             //permission string not allowed
-            if ( !empty( $permissionString ) &&
-                    !in_array( $permissionString, Constants_TmKeyPermissions::$_accepted_grants ) ) {
+            default:
                 $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
                 throw new Exception( "Permission modifier string not allowed. Allowed: <empty>, $allowed_permissions" );
-            } else {
-                switch ( $permissionString ) {
-                    case 'r':
-                        $write = false;
-                        break;
-                    case 'w':
-                        $read = false;
-                        break;
-                    case 'rw':
-                    case ''  :
-                        break;
-                    //this should never be triggered
-                    default:
-                        $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
-                        throw new Exception( "Permission modifier string not allowed. Allowed: <empty>, $allowed_permissions" );
-                        break;
+                break;
+        }
+
+        return [
+                'key' => $tmKeyInfo[ 0 ],
+                'r'   => $read,
+                'w'   => $write,
+        ];
+    }
+
+    protected function validateTmAndKeys( $__postInput ) {
+
+        try {
+            $this->private_tm_key = array_map(
+                    'self::parseTmKeyInput',
+                    explode( ",", $__postInput[ 'private_tm_key' ] )
+            );
+        } catch ( Exception $e ) {
+            throw new Exception( $e->getMessage(), -6 );
+        }
+
+        if ( count( $this->private_tm_key ) > self::MAX_NUM_KEYS ) {
+            throw new Exception( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS, -2 );
+        }
+
+        $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
+
+        //If a TMX file has been uploaded and no key was provided, create a new key.
+        if ( empty( $this->private_tm_key ) ) {
+            foreach ( $_FILES as $_fileinfo ) {
+                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
+                    $this->private_tm_key[] = [ 'key' => 'new' ];
+                    break;
                 }
             }
         }
 
-        return array(
-                'key' => $tmKeyInfo[ 0 ],
-                'r'   => $read,
-                'w'   => $write,
-        );
+        //remove all empty entries
+        foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
+            //from api a key is sent and the value is 'new'
+            if ( $tm_key[ 'key' ] == 'new' ) {
+
+                try {
+
+                    $APIKeySrv = new TMSService();
+
+                    $newUser = $APIKeySrv->createMyMemoryKey();
+
+                    //TODO: i need to store an array of these
+                    $this->private_tm_user = $newUser->id;
+                    $this->private_tm_pass = $newUser->pass;
+
+                    $this->private_tm_key[ $__key_idx ] =
+                            [
+                                    'key'  => $newUser->key,
+                                    'name' => null,
+                                    'r'    => $tm_key[ 'r' ],
+                                    'w'    => $tm_key[ 'w' ]
+
+                            ];
+                    $this->new_keys[]                   = $newUser->key;
+
+                } catch ( Exception $e ) {
+                    throw new Exception( $e->getMessage(), -1 );
+                }
+
+            } //if a string is sent, transform it into a valid array
+            elseif ( !empty( $tm_key ) ) {
+
+                $uid = $this->user->uid;
+
+                $this_tm_key = [
+                        'key'  => $tm_key[ 'key' ],
+                        'name' => null,
+                        'r'    => $tm_key[ 'r' ],
+                        'w'    => $tm_key[ 'w' ]
+                ];
+
+                /**
+                 * Get the key description/name from the user keyring
+                 */
+                if ( $uid ) {
+                    $mkDao = new TmKeyManagement_MemoryKeyDao();
+
+                    /**
+                     * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
+                     */
+                    $keyRing = $mkDao->read(
+                            ( new TmKeyManagement_MemoryKeyStruct( [
+                                    'uid'    => $uid,
+                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                            ] )
+                        )
+                    );
+
+                    if ( count( $keyRing ) > 0 ) {
+                        $this_tm_key[ 'name' ] = $keyRing[ 0 ]->tm_key->name;
+                    }
+                }
+
+                $this->private_tm_key[ $__key_idx ] = $this_tm_key;
+            }
+
+            $this->private_tm_key[ $__key_idx ] = self::sanitizeTmKeyArr( $this->private_tm_key[ $__key_idx ] );
+
+        }
+
+    }
+
+
+    private function __validateTeam() {
+        if ( $this->user && !empty( $this->id_team ) ) {
+            $dao = new MembershipDao();
+            $org = $dao->findTeamByIdAndUser( $this->id_team, $this->user );
+
+            if ( !$org ) {
+                throw new Exception( 'Team and user membership does not match' );
+            } else {
+                $this->team = $org;
+            }
+        } else {
+            if ( $this->user ) {
+                $this->team = $this->user->getPersonalTeam();
+            }
+        }
     }
 }

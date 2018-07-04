@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Description of catController
@@ -20,6 +22,8 @@ class reviseSummaryController extends viewController {
     private $qa_overall_avg;
     private $qa_equivalent_class;
     private $totalJobWords;
+    private $password;
+    private $reviseClass;
 
     public function __construct() {
 		parent::__construct();
@@ -39,8 +43,6 @@ class reviseSummaryController extends viewController {
     }
 
 	public function doAction() {
-
-        $this->generateAuthURL();
 
         //pay a little query to avoid to fetch 5000 rows
         $this->data = $jobData = getJobData( $this->jid, $this->password );
@@ -71,11 +73,23 @@ class reviseSummaryController extends viewController {
          * @see setRevisionController
          */
 
+
+
+        $this->reviseClass = new Constants_Revise();
+
         $jobQA = new Revise_JobQA(
                 $this->jid,
                 $this->password,
-                $wStruct->getTotal()
+                $wStruct->getTotal(),
+                $this->reviseClass
         );
+
+        $this->featureSet->loadFromUserEmail( $this->user->getEmail() );
+
+        list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $this->jid,
+                $this->password,
+                $wStruct->getTotal() );
+
 
         $jobQA->retrieveJobErrorTotals();
         $jobVote                   = $jobQA->evalJobVote();
@@ -85,8 +99,23 @@ class reviseSummaryController extends viewController {
         $this->qa_overall_avg      = $jobVote[ 'avg' ];
         $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
 
+        $this->_saveActivity();
+
 	}
 
+    protected function _saveActivity(){
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->data[ 'id_project' ];
+        $activity->action     = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->user->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
+    }
+    
 	public function setTemplateVars() {
 
         $this->template->job_archived = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
@@ -108,28 +137,27 @@ class reviseSummaryController extends viewController {
 
 
         $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->logged_user   = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
-        $this->template->authURL       = $this->authURL;
-
+        $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
 
         //set the labels
         $error_info = array(
-                Constants_Revise::ERR_TYPING      => 'Tag issues (mismatches, whitespaces)',
-                Constants_Revise::ERR_TRANSLATION => 'Translation errors (mistranslation, additions/omissions)',
-                Constants_Revise::ERR_TERMINOLOGY => 'Terminology and translation consistency',
-                Constants_Revise::ERR_LANGUAGE    => 'Language quality (grammar, punctuation, spelling)',
-                Constants_Revise::ERR_STYLE       => 'Style (readability, consistent style and tone)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => 'Tag issues (mismatches, whitespaces)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions/omissions)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => 'Terminology and translation consistency',
+                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => 'Language quality (grammar, punctuation, spelling)',
+                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => 'Style (readability, consistent style and tone)',
         );
 
         $error_max_thresholds = array(
-                Constants_Revise::ERR_TYPING      => Constants_Revise::MAX_TYPING,
-                Constants_Revise::ERR_TRANSLATION => Constants_Revise::MAX_TRANSLATION,
-                Constants_Revise::ERR_TERMINOLOGY => Constants_Revise::MAX_TERMINOLOGY,
-                Constants_Revise::ERR_LANGUAGE    => Constants_Revise::MAX_QUALITY,
-                Constants_Revise::ERR_STYLE       => Constants_Revise::MAX_STYLE
+                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => constant( get_class( $this->reviseClass ) . "::MAX_TYPING" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => constant( get_class( $this->reviseClass ) . "::MAX_TRANSLATION" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => constant( get_class( $this->reviseClass ) . "::MAX_TERMINOLOGY" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => constant( get_class( $this->reviseClass ) . "::MAX_QUALITY" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
         );
+
+        $this->template->reviseClass = $this->reviseClass;
 
 
 
@@ -147,7 +175,7 @@ class reviseSummaryController extends viewController {
         $this->template->qa_equivalent_class   = $this->qa_equivalent_class;
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
         $this->template->error_max_thresholds = $error_max_thresholds;
-//        $this->template->word_interval = $nrFormatter->format( Constants_Revise::WORD_INTERVAL );
+//        $this->template->word_interval = $nrFormatter->format( constant( get_class( $this->reviseClass ) . "::WORD_INTERVAL" ) );
 	}
 }
 

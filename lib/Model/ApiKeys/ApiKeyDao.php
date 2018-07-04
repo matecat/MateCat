@@ -2,6 +2,11 @@
 
 class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $key
+     * @param array $options
+     * @return ApiKeys_ApiKeyStruct
+     */
   static function findByKey( $key, $options=array() ) {
     $conn = Database::obtain()->getConnection();
     $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = :key ");
@@ -25,11 +30,18 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
     $values = array_diff_key( $obj->toArray(), array('id' => null) );
 
+    $this->con->begin();
     $stmt->execute( $values );
     $result = $this->getById( $conn->lastInsertId() ) ;
+    $this->con->commit();
+
     return $result[0];
   }
 
+    /**
+     * @param $id
+     * @return ApiKeys_ApiKeyStruct[]
+     */
   public function getById( $id ) {
     $conn = $this->con->getConnection();
 
@@ -38,7 +50,4 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
     return $stmt->fetchAll( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct');
   }
 
-  protected function _buildResult( $array_result ) {
-
-  }
 }

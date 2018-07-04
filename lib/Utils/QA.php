@@ -216,6 +216,8 @@ class QA {
 
     const ERR_SPACE_MISMATCH = 1100;
 
+    const ERR_SPACE_MISMATCH_TEXT = 1101;
+
     const ERR_SYMBOL_MISMATCH = 1200;
     /**
      * Human Readable error map.
@@ -294,6 +296,7 @@ class QA {
              */
             1100 => 'More/fewer whitespaces found next to the tags.',
 
+            1101 => 'More/fewer whitespaces found in the text.',
             /*
              * grouping 
              * 17 => 'Dollar sign mismatch',
@@ -380,6 +383,12 @@ class QA {
      */
     protected $warningList = array();
 
+    protected function _getTipValue( $errorID ){
+        if( array_key_exists( $errorID, $this->_tipMap ) ){
+            return $this->_tipMap[ $errorID ];
+        }
+    }
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -401,38 +410,54 @@ class QA {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
+            case self::ERR_TAG_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => self::ERR_TAG_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_TAG_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
                 ) );
                 break;
             case self::ERR_TAG_ID:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => self::ERR_TAG_ID,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
-                        'tip'     => $this->_tipMap [ self::ERR_TAG_ID ]
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ) );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
-                        'tip'     => $this->_tipMap [ $errCode ]
+                        'tip'     => $this->_getTipValue( $errCode )
                 ) );
                 break;
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
+            $this->exceptionList[ self::INFO ][] = errObject::get( array(
+                    'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
+                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
+                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
+            ) );
+            break;
+
+
             case self::ERR_TAB_HEAD:
             case self::ERR_TAB_TAIL:
+            $this->exceptionList[ self::INFO ][] = errObject::get( array(
+                    'outcome' => self::ERR_TAB_MISMATCH,
+                    'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
+                    'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
+            ) );
+            break;
+
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_SPACE_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
                 ) );
                 break;
 
@@ -450,7 +475,7 @@ class QA {
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_SYMBOL_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_SYMBOL_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
                 ) );
                 break;
 
@@ -458,7 +483,7 @@ class QA {
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_NEWLINE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_NEWLINE_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
                 ) );
                 break;
 
@@ -467,7 +492,7 @@ class QA {
                 $this->exceptionList[ self::WARNING ][] = errObject::get( array(
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
-                        'tip'     => $this->_tipMap [ $errCode ]
+                        'tip'     => $this->_getTipValue( $errCode )
                 ) );
                 break;
         }
@@ -552,6 +577,22 @@ class QA {
      */
     public function getWarningsJSON() {
         return json_encode( $this->checkErrorNone( self::WARNING, true ) );
+    }
+
+    /**
+     * Get an error list in JSON string format and returns an instance of a mock QA with filled errors
+     *
+     * @param $jsonString
+     *
+     * @return array
+     */
+    public static function JSONtoExceptionList( $jsonString ){
+        $that = new static( null, null );
+        $jsonValue = json_decode( $jsonString, true );
+        array_walk( $jsonValue, function( $errArray, $key ) use ( $that ){
+            $that->_addError( $errArray[ 'outcome' ] );
+        });
+        return $that->exceptionList;
     }
 
     /**
@@ -1020,9 +1061,9 @@ class QA {
 //        Log::doLog( $this->source_seg );
 //        Log::doLog( $this->target_seg );
 
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
 //        Log::doLog( $malformedXmlSrcStruct );
@@ -1065,10 +1106,17 @@ class QA {
             }
         }
 
-        $totalResult = array(
-                'source' => array_merge( $clonedSrc, $clonedClosingSrc ),
-                'target' => array_merge( $clonedTrg, $clonedClosingTrg ),
-        );
+        $totalResult     = [ 'source' => [], 'target' => [] ];
+        $source_segments = array_merge( $clonedSrc, $clonedClosingSrc );
+        foreach ( $source_segments as $source_segment ) {
+            $totalResult[ 'source' ][] = CatUtils::restore_xliff_tags_for_view( $source_segment );
+        }
+
+        $target_segments = array_merge( $clonedTrg, $clonedClosingTrg );
+        foreach ( $target_segments as $target_segment ) {
+            $totalResult[ 'target' ][] = CatUtils::restore_xliff_tags_for_view( $target_segment );
+        }
+
 
 //        Log::doLog($totalResult);
 
@@ -1181,7 +1229,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( trim( $open_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1190,7 +1238,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( trim( $closing_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1199,14 +1247,14 @@ class QA {
         /*
          * Check for corresponding self closing tags like <g id="pt673"/>
          */
-        preg_match_all( '#<([^>]+)/>#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#<([^>]+)/>#', $this->target_seg, $selfClosingTags_trg );
+        preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ) {
-                $this->_addError( self::ERR_TAG_MISMATCH );
-                $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
+                $this->_addError( self::ERR_TAG_ORDER );
+                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $selfClosingTags_trg[ $pos ] );
 
                 return;
             }
@@ -1237,8 +1285,8 @@ class QA {
         //</g> ...
         // <g ... >
         // <x ... />
-        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim( $this->source_seg ), $source_tags );
-        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim( $this->target_seg ), $target_tags );
+        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->source_seg ), $source_tags );
+        preg_match_all( '#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:(?:x|ph)[^>]+|[^/>]+)>#u', rtrim( $this->target_seg ), $target_tags );
 //        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->source_seg), $source_tags);
 //        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
         $source_tags = $source_tags[ 0 ];
@@ -1251,6 +1299,28 @@ class QA {
 //            Log::hexDump($this->target_seg);
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
+            }
+        }
+
+        //get all special chars ( and spaces ) after a tag x or ph
+        //</x> ...
+        //</ph> ...
+        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n]#u', $this->source_seg, $source_tags );
+        preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n]#u', $this->target_seg, $target_tags );
+        $source_tags = $source_tags[ 0 ];
+        $target_tags = $target_tags[ 0 ];
+        if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
+            $num = abs( count( $source_tags ) - count( $target_tags ) );
+
+//            Log::doLog($this->source_seg);
+//            Log::doLog($this->target_seg);
+//            Log::hexDump($this->source_seg);
+//            Log::hexDump($this->target_seg);
+//            Log::doLog($source_tags);
+//            Log::doLog($target_tags);
+
+            for ( $i = 0; $i < $num; $i++ ) {
+                $this->_addError( self::ERR_BOUNDARY_TAIL );
             }
         }
 
@@ -1276,21 +1346,20 @@ class QA {
         }
 
         //get All special chars after LAST tag at the end of line if there are
-        preg_match_all( '/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->source_seg, $source_tags );
-        preg_match_all( '/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->target_seg, $target_tags );
-        $source_tags = $source_tags[ 0 ];
-        $target_tags = $target_tags[ 0 ];
+        preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->source_seg, $source_tags );
+        preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->target_seg, $target_tags );
 
         //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
-        if ( ( count( $source_tags ) != count( $target_tags ) ) && !empty( $source_tags ) ) {
+        if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             //Append a space to target for normalization.
-            $this->target_seg .= " ";
+            $this->target_seg = rtrim( $this->target_seg );
+            $this->target_seg .= $source_tags[ 1 ][ 0 ];
 
             //Suppress Warning
             //$this->_addError(self::ERR_BOUNDARY_TAIL);
 
-        } else {
+        } elseif( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && empty( $source_tags[ 0 ] ) ) {
             $this->target_seg = rtrim( $this->target_seg );
         }
 
@@ -1403,11 +1472,13 @@ class QA {
             $deepDiffTagG = $this->_checkTagCountMismatch( count( @$this->srcDomMap[ 'g' ] ), count( @$this->trgDomMap[ 'g' ] ) );
         }
 
-        //check for Tag ID MISMATCH
-        $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
-        if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
-            $this->_addError( self::ERR_TAG_ID );
+        if( $targetNumDiff == 0 ){
+            //check for Tag ID MISMATCH
+            $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
+            if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
+                $this->_addError( self::ERR_TAG_ID );
 //            Log::doLog($diffArray);
+            }
         }
 
     }
@@ -1433,7 +1504,7 @@ class QA {
 
         foreach ( $this->srcDomMap[ 'DOMElement' ] as $srcTagReference ) {
 
-            if( $srcTagReference['name'] == 'x' || $srcTagReference['name'] == 'bx' || $srcTagReference['name'] == 'ex' ){
+            if( $srcTagReference['name'] == 'x' || $srcTagReference['name'] == 'bx' || $srcTagReference['name'] == 'ex' || $srcTagReference['name'] == 'ph' ){
                 continue;
             }
 
@@ -1608,9 +1679,9 @@ class QA {
 //            }
 //
 //            if( $srcHasHeadNBSP ) {
-//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", CatUtils::unicode2chr(0Xa0), $_trgNodeContent );
 //            } else {
-//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", CatUtils::unicode2chr(0X20), $_trgNodeContent );
 //            }
 //            $_nodeNormalized->nodeValue = $_trgNodeContent;
 //
@@ -1685,9 +1756,9 @@ class QA {
 //            }
 //
 //    		if( $srcHasTailNBSP ) {
-//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", CatUtils::unicode2chr(0Xa0), $_trgNodeContent );
 //    		} else {
-//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", CatUtils::unicode2chr(0X20), $_trgNodeContent );
 //    		}
 //
 //            $_nodeNormalized->nodeValue = $_trgNodeContent;
@@ -1916,27 +1987,6 @@ class QA {
             }
         }
 
-    }
-
-    public function performGlossaryCheck( $glossaryList ) {
-
-        $targetSeg = strip_tags( $this->target_seg );
-        $targetSeg = preg_split( '/\s+/', $targetSeg );
-
-        foreach ( $glossaryList as $glossaryWord ) {
-            $found = false;
-            foreach ( $targetSeg as $token ) {
-                if ( strtolower( $token ) == strtolower( $glossaryWord ) ) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            if ( !$found ) {
-                $this->_addError( self::ERR_GLOSSARY_MISMATCH );
-            }
-
-        }
     }
 
 }

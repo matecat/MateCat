@@ -1,14 +1,14 @@
 {
     "langs": [
-    {
-        "localized":[{
-            "en":"Afrikaans"
-        }],
+        {
+            "localized":[{
+                "en":"Afrikaans"
+            }],
             "isocode":"af",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"af-ZA"
-    }
+        }
     ,
         {
             "localized":[{
@@ -25,7 +25,7 @@
                 "en":"Amharic"
             }],
             "isocode":"am",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"am-AM"
         }
@@ -53,6 +53,16 @@
     ,
         {
             "localized":[{
+                "en":"Aragonese"
+            }],
+            "isocode":"an",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"an-ES"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Armenian"
             }],
             "isocode":"hy",
@@ -63,13 +73,33 @@
     ,
         {
             "localized":[{
+                "en":"Assamese"
+            }],
+            "isocode":"asm",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"asm-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Asturian"
+            }],
+            "isocode":"ast",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ast-ES"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Azerbaijani"
             }],
             "isocode":"az",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"az-AZ",
-                    "languageRegionCode":"az-Latn-AZ"
+            "languageRegionCode":"az-Latn-AZ"
         }
     ,
         {
@@ -104,6 +134,16 @@
     ,
         {
             "localized":[{
+                "en":"Bashkir"
+            }],
+            "isocode":"ba",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ba-RU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Basque"
             }],
             "isocode":"eu",
@@ -134,7 +174,7 @@
     ,
         {
             "localized":[{
-                "en":"Belarus"
+                "en":"Belarusian"
             }],
             "isocode":"be",
             "enabled":true,
@@ -215,6 +255,16 @@
     ,
         {
             "localized":[{
+                "en":"Catalan Valencian"
+            }],
+            "isocode":"cav",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"cav-ES"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Cebuano"
             }],
             "isocode":"cb",
@@ -254,6 +304,17 @@
             "rtl":false,
             "top":"top20",
             "rfc3066code":"zh-TW"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Chinese Trad. (Hong Kong)"
+            }],
+            "isocode":"zh",
+            "enabled":true,
+            "rtl":false,
+            "top":"top20",
+            "rfc3066code":"zh-HK"
         }
     ,
         {
@@ -329,6 +390,16 @@
     ,
         {
             "localized":[{
+                "en":"Dari"
+            }],
+            "isocode":"fa",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"fa-PRS"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Dutch"
             }],
             "isocode":"nl",
@@ -371,10 +442,20 @@
     ,
         {
             "localized":[{
+                "en":"English Australia"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-AU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Esperanto"
             }],
             "isocode":"eo",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"eo-XN"
         }
@@ -407,6 +488,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"fo-FO"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Fula"
+            }],
+            "isocode":"ff",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ff-FUL"
         }
     ,
         {
@@ -451,15 +542,15 @@
             "rfc3066code":"fr-FR"
         }
     ,
-          {
-                        "localized":[{
-                                "en":"French Canada"
-                        }],
-                        "isocode":"fr",
-                        "enabled":true,
-                        "rtl":false,
-                        "rfc3066code":"fr-CA"
-                }
+        {
+            "localized":[{
+                "en":"French Canada"
+            }],
+            "isocode":"fr",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"fr-CA"
+        }
     ,
         {
             "localized":[{
@@ -469,6 +560,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"gl-ES"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Garo"
+            }],
+            "isocode":"grt",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"grt-IN"
         }
     ,
         {
@@ -537,7 +638,7 @@
                 "en":"Haitian Creole French"
             }],
             "isocode":"ht",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"ht-HT"
         }
@@ -547,19 +648,19 @@
                 "en":"Hausa"
             }],
             "isocode":"ha",
-            "enabled":false,
-            "rtl":false,
-            "rfc3066code":"ha-HA"
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ha-HAU"
         }
     ,
         {
             "localized":[{
                 "en":"Hawaiian"
             }],
-            "isocode":"XNA",
-            "enabled":false,
+            "isocode":"HAW",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"XN-US"
+            "rfc3066code":"US-HI"
         }
     ,
         {
@@ -574,12 +675,32 @@
     ,
         {
             "localized":[{
+                "en":"Hill Mari"
+            }],
+            "isocode":"mrj",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mrj-RU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Hindi"
             }],
             "isocode":"hi",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"hi-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Hmong"
+            }],
+            "isocode":"hmn",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"hmn-CN"
         }
     ,
         {
@@ -668,10 +789,10 @@
             "localized":[{
                 "en":"Javanese"
             }],
-            "isocode":"jw",
-            "enabled":false,
+            "isocode":"jv",
+            "enabled":true,
             "rtl":true,
-            "rfc3066code":"jw-ID"
+            "rfc3066code":"jv-ID"
         }
     ,
         {
@@ -699,9 +820,29 @@
                 "en":"Kannada"
             }],
             "isocode":"kn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ka-IN"
+            "rfc3066code":"kn-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kanuri"
+            }],
+            "isocode":"kn",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"kr-KAU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Karen"
+            }],
+            "isocode":"kar",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kar-MM"
         }
     ,
         {
@@ -712,6 +853,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"kk-KZ"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Khasi"
+            }],
+            "isocode":"kha",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kha-IN"
         }
     ,
         {
@@ -729,9 +880,9 @@
                 "en":"Kinyarwanda"
             }],
             "isocode":"rw",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"rw-RW"
+            "rfc3066code":"rw-KIN"
         }
     ,
         {
@@ -756,12 +907,12 @@
     ,
         {
             "localized":[{
-                "en":"Kurdish"
+                "en":"Kurdish Kurmanji"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-KMR"
         }
     ,
         {
@@ -769,9 +920,9 @@
                 "en":"Kurdish Sorani"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-CKB"
         }
     ,
         {
@@ -779,9 +930,9 @@
                 "en":"Kyrgyz"
             }],
             "isocode":"ky",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ky-KY"
+            "rfc3066code":"ky-KG"
         }
     ,
         {
@@ -789,9 +940,9 @@
                 "en":"Lao"
             }],
             "isocode":"lo",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"lo-LO"
+            "rfc3066code":"lo-LA"
         }
     ,
         {
@@ -799,7 +950,7 @@
                 "en":"Latin"
             }],
             "isocode":"la",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"la-XN"
         }
@@ -812,6 +963,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"lv-LV"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Lingala"
+            }],
+            "isocode":"ln",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ln-LIN"
         }
     ,
         {
@@ -829,9 +990,9 @@
                 "en":"Luxembourgish"
             }],
             "isocode":"lb",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"lb-LB"
+            "rfc3066code":"lb-LU"
         }
     ,
         {
@@ -849,9 +1010,9 @@
                 "en":"Malagasy"
             }],
             "isocode":"mg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"mg-MG"
+            "rfc3066code":"mg-MLG"
         }
     ,
         {
@@ -896,12 +1057,32 @@
     ,
         {
             "localized":[{
+                "en":"Manipuri"
+            }],
+            "isocode":"mni",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mni-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Manx Gaelic"
             }],
             "isocode":"gv",
             "enabled":false,
             "rtl":false,
             "rfc3066code":"gv-IM"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Mari"
+            }],
+            "isocode":"mhr",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mhr-RU"
         }
     ,
         {
@@ -919,7 +1100,7 @@
                 "en":"Marathi"
             }],
             "isocode":"mr",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"mr-IN"
         }
@@ -942,6 +1123,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"men-MEN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Mizo"
+            }],
+            "isocode":"lus",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"lus-IN"
         }
     ,
         {
@@ -1043,12 +1234,41 @@
                 "en":"Nyanja"
             }],
             "isocode":"ny",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ny-NY"
+            "rfc3066code":"ny-NYA"
         }
     ,
-
+        {
+            "localized":[{
+                "en":"Occitan"
+            }],
+            "isocode":"oc",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"oc-FR"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Occitan Aran"
+            }],
+            "isocode":"oc",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"oc-ES"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Odia"
+            }],
+            "isocode":"ory",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ory-IN"
+        }
+    ,
         {
             "localized":[{
                 "en":"Palauan"
@@ -1061,10 +1281,10 @@
     ,
         {
             "localized":[{
-                "en":"Panjabi"
+                "en":"Punjabi"
             }],
             "isocode":"pa",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"pa-IN"
         }
@@ -1073,10 +1293,10 @@
             "localized":[{
                 "en":"Papiamentu"
             }],
-            "isocode":"x1",
-            "enabled":false,
+            "isocode":"pap",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"pap-PAP"
+            "rfc3066code":"pap-CW"
         }
     ,
         {
@@ -1165,12 +1385,42 @@
     ,
         {
             "localized":[{
+                "en":"Rohingya"
+            }],
+            "isocode":"rhg",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"rhg-MM"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Rohingyalish"
+            }],
+            "isocode":"rhl",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"rhl-MM"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Romanian"
             }],
             "isocode":"ro",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"ro-RO"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Rundi"
+            }],
+            "isocode":"run",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"run-BI"
         }
     ,
         {
@@ -1219,7 +1469,7 @@
                 "en":"Scots Gaelic"
             }],
             "isocode":"gd",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"gd-GB"
         }
@@ -1290,7 +1540,7 @@
                 "en":"Sinhala"
             }],
             "isocode":"si",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"si-LK"
         }
@@ -1320,8 +1570,8 @@
                 "en":"Somali"
             }],
             "isocode":"so",
-            "enabled":false,
-            "rtl":true,
+            "enabled":true,
+            "rtl":false,
             "rfc3066code":"so-SO"
         }
     ,
@@ -1359,12 +1609,33 @@
     ,
         {
             "localized":[{
+                "en":"Spanish Colombia"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "top":"top20",
+            "rfc3066code":"es-CO"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Sranan Tongo"
             }],
             "isocode":"srn",
             "enabled":false,
             "rtl":false,
             "rfc3066code":"srn-SRN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Sundanese"
+            }],
+            "isocode":"su",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"su-ID"
         }
     ,
         {
@@ -1404,7 +1675,7 @@
                 "en":"Syriac (Aramaic)"
             }],
             "isocode":"syc",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"syc-TR"
         }
@@ -1425,7 +1696,7 @@
                 "en":"Tajik"
             }],
             "isocode":"tg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"tg-TJ"
         }
@@ -1435,7 +1706,7 @@
                 "en":"Tamashek (Tuareg)"
             }],
             "isocode":"tmh",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"tmh-DZ"
         }
@@ -1459,6 +1730,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"te-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Tatar"
+            }],
+            "isocode":"tt",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"tt-RU"
         }
     ,
         {
@@ -1496,9 +1777,9 @@
                 "en":"Tigrinya"
             }],
             "isocode":"ti",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ti-TI"
+            "rfc3066code":"ti-TIR"
         }
     ,
         {
@@ -1583,6 +1864,16 @@
     ,
         {
             "localized":[{
+                "en":"Udmurt"
+            }],
+            "isocode":"udm",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"udm-RU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Ukrainian"
             }],
             "isocode":"uk",
@@ -1602,13 +1893,13 @@
         }
     ,
         {
-          "localized": [{
-              "en": "Urdu"
+            "localized": [{
+                "en": "Urdu"
             }],
-          "isocode": "ur",
-          "enabled": true,
-          "rtl": true,
-          "rfc3066code": "ur-PK"
+            "isocode": "ur",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ur-PK"
         },
         {
             "localized":[{
@@ -1696,9 +1987,19 @@
                 "en":"Yiddish"
             }],
             "isocode":"yi",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"yi-YD"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Yoruba"
+            }],
+            "isocode":"yo",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"yo-NG"
         }
     ,
         {
@@ -1707,7 +2008,7 @@
             }],
             "isocode":"zu",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"zu-ZA"
         }
     ]

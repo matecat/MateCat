@@ -1,0 +1,135 @@
+@import '_mixins';
+
+body.cattool {
+    background: #f2f4f7;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    overflow-y: hidden !important;
+    padding: unset;
+    .editing {
+        background: #f2f4f7;
+    }
+
+    /*header*/
+    header {
+        top: 0;
+        left: 0;
+        width: 100%;
+        position: relative;
+        z-index: 12;
+        padding: 0;
+        transition: margin-top 200ms ease-out;
+        -webkit-transition: margin-top 200ms ease-out;
+        box-sizing: content-box;
+        min-width: 1024px;
+    }
+    .main-container {
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        overflow: hidden;
+    }
+    footer {
+        background: #6d6e71;
+        height: 27px;
+        text-align: right;
+        border-top: 1px solid #333;
+        color: #fff;
+        width: 100%;
+        z-index: 2;
+        position: relative;
+    }
+}
+
+/*
+This file contains styles that are specific to the Cattool page.
+Styles from other css files should be ported over time.
+*/
+.statusmenu li a {
+    text-transform: uppercase;
+    cursor: pointer ;
+}
+
+.segment-side-buttons {
+    /* styles based on .sid line 376 style.css */
+    color: #999;
+    cursor: default;
+    display: block;
+    font-size: 12px;
+    height: inherit;
+    padding-bottom: 1px;
+    position: absolute;
+    text-align: center;
+    text-decoration: none;
+    right: -8%;
+    width: 8%;
+    top: 0;
+}
+
+
+.segmentButton, .toolbar a {
+    height: 20px;
+    zoom: 0.8;
+    min-width: 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 2px;
+    border: 1px solid #C6C6C6;
+    /*@include box-shadow(0 1px 1px rgba(0,0,0,.1));
+    @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);*/
+
+    &:hover {
+        color: #000000;
+    }
+
+    &:active {
+        background-color: #fff;
+        background-image: -webkit-linear-gradient(top, #fff, #f4f4f4);
+    }
+}
+
+
+section:hover .segment-side-buttons {
+    /* styles based on .sid line 460 style.css */
+    color: #6d6e71
+}
+
+.position-sing-in {
+    position: relative;
+    top: 5px;
+}
+
+.btn-confirm-medium {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 2px;
+    font-size: 18px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 0px 0px 0px 0px;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+}
+
+//ICE MATCH
+.ice-locked,
+.readonly {
+    .footer,
+    .buttons,
+    .copy,
+    .loader,
+    .warnings,
+    .toolbar {
+        display: none !important;
+    }
+}
+
+
+

@@ -37,6 +37,7 @@ class loadTMXController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
+        parent::readLoginInfo();
 
         $filterArgs = array(
                 'name'   => array(
@@ -57,7 +58,18 @@ class loadTMXController extends ajaxController {
         $this->exec     = $postInput->exec;
 
         if ( !isset( $this->tm_key ) || is_null( $this->tm_key ) || empty( $this->tm_key ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Please specify a TM key." );
+
+            if( empty( INIT::$DEFAULT_TM_KEY ) ){
+                $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Please specify a TM key." );
+                return;
+            }
+
+            /*
+             * Added the default Key.
+             * This means if no private key are provided the TMX will be loaded in the default MyMemory key
+             */
+            $this->tm_key = INIT::$DEFAULT_TM_KEY;
+
         }
 
         if ( empty( $this->exec ) || !in_array( $this->exec, self::$acceptedActions ) ) {
@@ -97,8 +109,36 @@ class loadTMXController extends ajaxController {
 
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->addTmxInMyMemory();
-                }
 
+                    $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );
+
+                    /*
+                     * We update the KeyRing only if this is NOT the Default MyMemory Key
+                     *
+                     * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
+                     */
+                    if( $this->tm_key != INIT::$DEFAULT_TM_KEY ){
+
+                        /*
+                         * Update a memory key with the name of th TMX if the key name is empty
+                         */
+                        $mkDao                   = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                        $searchMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+                        $key                     = new TmKeyManagement_TmKeyStruct();
+                        $key->key                = $this->tm_key;
+
+                        $searchMemoryKey->uid    = $this->user->uid;
+                        $searchMemoryKey->tm_key = $key;
+                        $userMemoryKey           = $mkDao->read( $searchMemoryKey );
+
+                        if ( empty( $userMemoryKey[0]->tm_key->name ) && !empty( $userMemoryKey ) ) {
+                            $userMemoryKey[0]->tm_key->name = $fileInfo->name;
+                            $mkDao->updateList( $userMemoryKey );
+                        }
+
+                    }
+
+                }
 
             } else {
 

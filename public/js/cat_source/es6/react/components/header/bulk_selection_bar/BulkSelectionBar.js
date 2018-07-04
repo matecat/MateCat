@@ -1,0 +1,128 @@
+var React = require('react');
+var SegmentConstants = require('../../../constants/SegmentConstants');
+var SegmentStore = require('../../../stores/SegmentStore');
+
+class BulkSelectionBar extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            count: 0,
+            segmentsArray: []
+        };
+
+        this.countInBulkElements = this.countInBulkElements.bind(this);
+        this.setSegmentsinBulk = this.setSegmentsinBulk.bind(this);
+        this.toggleSegment = this.toggleSegment.bind(this);
+        this.removeAll = this.removeAll.bind(this);
+        this.onClickBulk = this.onClickBulk.bind(this);
+        this.onClickBack = this.onClickBack.bind(this);
+    }
+
+    countInBulkElements(segments) {
+        let segmentsArray = this.state.segmentsArray;
+        if (segments && segments.size > 0) {
+
+            segments.map(function (segment) {
+                let index = segmentsArray.indexOf(segment.get('sid'));
+                if ( segment.get('inBulk') && index === -1 ){
+                    segmentsArray.push(segment.get('sid'));
+                } else if (!segment.get('inBulk') && index > -1) {
+                    segmentsArray.splice(index, 1);
+                }
+            });
+        }
+        this.setState({
+            count: segmentsArray.length,
+            segmentsArray: segmentsArray
+        })
+    }
+    setSegmentsinBulk(segments) {
+        let segmentsArray = segments;
+
+        this.setState({
+            count: segmentsArray.length,
+            segmentsArray: segmentsArray
+        });
+    }
+    removeAll() {
+        this.setState({
+            count: 0,
+            segmentsArray: []
+        })
+    }
+    toggleSegment(sid) {
+        let index = this.state.segmentsArray.indexOf(sid);
+        let array = this.state.segmentsArray.slice(0);
+        if (index > -1) {
+            array.splice(index, 1);
+        } else {
+            array.push(sid);
+        }
+        this.setState({
+            count: array.length,
+            segmentsArray: array
+        })
+    }
+    onClickBack(){
+        SegmentActions.removeSegmentsOnBulk();
+    }
+
+    onClickBulk(){
+        if(this.props.isReview){
+            UI.approveFilteredSegments(this.state.segmentsArray).done(response =>{
+                this.onClickBack();
+            });
+        }else{
+            UI.translateFilteredSegments(this.state.segmentsArray).done(response =>{
+                this.onClickBack();
+            });
+        }
+        UI.closeSegment(UI.currentSegment, 1);
+    }
+
+    componentDidMount() {
+        // SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
+        SegmentStore.addListener(SegmentConstants.TOGGLE_SEGMENT_ON_BULK, this.toggleSegment);
+        SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, this.removeAll);
+        SegmentStore.addListener(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, this.setSegmentsinBulk);
+    }
+
+    componentWillUnmount() {
+        // SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
+        SegmentStore.removeListener(SegmentConstants.TOGGLE_SEGMENT_ON_BULK, this.toggleSegment);
+        SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, this.removeAll);
+        SegmentStore.removeListener(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, this.setSegmentsinBulk);
+    }
+
+    render() {
+        let buttonClass = classnames({
+            "ui button approve-all-segments": true,
+            "translated-all-bulked": !this.props.isReview,
+            "approved-all-bulked": this.props.isReview
+        });
+        return( this.state.count > 0 ? <div className="bulk-approve-bar">
+
+            <div className="bulk-back-info">
+                <div className="bulk-back">
+                    <button className="ui button back-bulk" onClick={this.onClickBack}> <i className="icon-arrow-left2 icon" /> back</button>
+                </div>
+                {this.state.count === 1 ? (
+                    <div className="bulk-info">
+                        <b>{this.state.count} Segment selected</b>
+                    </div>
+                ) : (
+                    <div className="bulk-info">
+                        <b>{this.state.count} Segments selected</b>
+                    </div>
+                )}
+
+            </div>
+            <div className="bulk-activity-icons">
+                <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}</button>
+            </div>
+        </div> : null)
+    }
+}
+
+export default BulkSelectionBar;

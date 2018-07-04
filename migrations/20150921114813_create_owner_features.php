@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateOwnerFeatures extends AbstractMigration
+class CreateOwnerFeatures extends AbstractMatecatMigration
 {
 
     public $sql_up = <<<EOF
@@ -21,11 +19,4 @@ EOF;
 
     public $sql_down = 'DROP TABLE `owner_features`';
 
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 }

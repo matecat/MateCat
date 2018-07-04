@@ -18,8 +18,8 @@ UI = null;
 UI = {
     init: function () {
         this.conversionBlocked = false;
-        this.RTLAlertSent = false;
-        this.skipLangDetectArr = {}
+        this.RTLCheckDone = false;
+        this.skipLangDetectArr = {};
 
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
@@ -27,17 +27,15 @@ UI = {
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
-        this.initTM();
-        console.log( $.cookie( 'tmpanel-open' ) );
-        if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
+        if (this.initTM) {
+            this.initTM();
+        }
+        if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
-        //var ext = " B";
-        //
-        //if(filesizeInBytes > 1024){
+
         filesizeInBytes = filesizeInBytes / 1024;
         ext = " KB";
-        //}
 
         if ( filesizeInBytes > 1024 ) {
             filesizeInBytes = filesizeInBytes / 1024;
@@ -50,20 +48,13 @@ UI = {
     enableAnalyze: function () {
         enableAnalyze();
     },
-    checkRTL: function () {
-        if(!this.RTLAlertSent) {
-            sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
-            targetDirection = $('#target-lang option[value="' + $('#target-lang').val() + '"]').attr('data-direction');
-            if((sourceDirection == 'rtl') || (targetDirection == 'rtl')) {
-                APP.alert("Support for RTL languages is in beta. <br />Before starting your translation, download the Preview from the Translate page and check the target file.");
-                this.RTLAlertSent = true;
-            }
-        }
+    disableAnalyze: function () {
+        disableAnalyze();
     },
     checkMultilangRTL: function () {
         var direction = "ltr";
         $('.popup-languages li.on input').each(function(){
-            if($('#target-lang option[value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
+            if($('#target-lang div[data-value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
         });
         return direction;
     },
@@ -89,6 +80,9 @@ UI = {
     },
     confirmRestartConversions: function () {
         UI.restartConversions();
+    },
+    confirmGDriveRestartConversions: function () {
+        APP.restartGDriveConversions();
     },
     errorsFileSize: function ( file ) {
 
@@ -143,10 +137,6 @@ UI = {
                 var filerow = $( this );
                 var filename = $( '.name', filerow ).text();
                 var filesize = ($( '.size span', filerow ).length) ? parseFloat( $( '.size span', filerow ).text().split( ' ' )[0] ) * 1000000 : 0;
-//        		console.log(filename);
-
-//        		var filerow = data.context;
-//        		var filesize = 0;
                 var currentSession = $( filerow ).data( 'session' );
                 $.each( UI.conversionRequests, function () {
                     if ( this.session == currentSession ) {
@@ -169,62 +159,30 @@ UI = {
         return checkAnalyzability();
     },
 
-    checkDQFKey: function () {
-        setTimeout(function() {
-            $('.error-message').text('').hide();
-
-            $('#dqf_key').removeClass('error valid').addClass('disabled').attr('disabled', 'disabled');
-
-            APP.doRequest({
-                data: {
-                    action				: "checkTausPMKey",
-                    DQF_PMANAGER_KEY  : $('#dqf_key' ).val()
-                },
-                success: function(d){
-                    console.log('d: ', d);
-                    $('#dqf_key').removeClass('disabled').removeAttr('disabled');
-                    if (d.errors.length) {
-                        $('.error-message').text(d.errors[0].message).show();
-                        $('#dqf_key').addClass('error');
-                    } else {
-                        $('#dqf_key').addClass('valid');
-                    }
-                    if ( checkAnalyzability( 'checkDQF' ) ) {
-                        enableAnalyze();
-                    } else {
-                        disableAnalyze();
-                    }
-                },
-                error: function(d) {
-                    $('#dqf_key').addClass('error').removeClass('disabled').removeAttr('disabled');
-                    $('.error-message').text(d.errors[0].message).show();
-                    disableAnalyze();
-                }
-            });
-
-        }, 100);
-    },
-
     TMXloaded: function () {
-        console.log( 'ecco: ', $( '#private-tm-key' ).val() );
-        $( '#disable_tms_engine' ).trigger( 'click' );
+        // $( '#disable_tms_engine' ).trigger( 'click' );
         this.createKeyByTMX();
     },
 
-    createKeyByTMX: function () {
+    createKeyByTMX: function (extension) {
         if ( !isTMXAllowed() ) return false;
-        if ( $( '#create_private_tm_btn' ).hasClass( 'disabled' ) ) return false; //ajax call already running
-        if ( $( '#create_private_tm_btn[data-key]' ).length || $( '#private-tm-key' ).val().length ) { // a key has already been created
-            if ( $( '#private-tm-key' ).val() == '' ) {
-                $( '#private-tm-key' ).val( $( '#create_private_tm_btn' ).attr( 'data-key' ) );
-            }
-        } else {
-            if ( !$( ".more" ).hasClass( 'minus' ) ) $( ".more" ).trigger( 'click' );
-            $( '#create_private_tm_btn' ).trigger( 'click' );
-            $( '.warning-message' ).html( '<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>' ).show();
-//		   $('#private-tm-key').addClass('selected');			 
-//		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
+        if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
+        if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
+
+        APP.createTMKey().done(function (  ) {
+            UI.checkTMKeysUpdateChecks();
+        });
+        var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
+        if (extension && extension === "g") {
+            textToDisplay = '<span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
         }
+
+
+        $( '.warning-message' ).html( textToDisplay ).show();
+        $('.warning-message .translation-memory-option-panel').off('click').on('click', function() {
+            APP.openOptionsPanel("tm");
+        } );
+
     },
 
     checkFailedConversionsNumber: function () {
@@ -265,7 +223,7 @@ UI = {
         }
     },
     uploadingTMX: function () {
-        return $( '.mgmt-tm td.uploadfile' ).length;
+        return $( '.mgmt-tm td.uploadfile.uploading' ).length;
     }
 
 };
@@ -301,10 +259,7 @@ $( function () {
                 singleFileUploads: true,
                 overlayClose: true,
                 maxFileSize: config.maxFileSize, // 30MB
-//	        maxChunkSize: 1000000,
-//	        multipart: false,
                 fileInput: $( '#fileupload .multiple-button, .btncontinue .multiple-button' ),
-//	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff|xlf)$/i
                 acceptFileTypes: config.allowedFileTypes,
                 dataType: config.blueimp_dataType
             }
@@ -314,42 +269,11 @@ $( function () {
         dropzone.show();
     } ).bind( 'fileuploadadd', function ( e, data ) {
 
-        console.log( 'FIRE fileuploadadd' );
-//        console.log($('.upload-table tr'));
-        console.log( data );
-        console.log( data.files[0].size );
-        console.log( config.maxFileSize );
-        console.log( data.files[0].type );
-        console.log( data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1] );
-        var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
-        if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-            var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
-            if ( tmDisabled ) {
-                APP.alert( {
-                    msg: 'The TM was disabled. It will now be enabled.',
-                    callback: 'TMXloaded'
-                } );
-            } else {
-                UI.createKeyByTMX();
-            }
-
-//			 return false;
-        }
-
-//        if(!isValidFileExtension(data.files[0].name)) {
-//            alert($('.upload-table tr').length);
-//			jqXHR = data.submit();
-//			jqXHR.abort();
-//        }
-        if ( data.files[0].size > config.maxFileSize ) {
-//            jqXHR = data.submit();
-//            jqXHR.abort();            
-        }
         $( 'body' ).addClass( 'initialized' );
 
         if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
             console.log( 'adding more than config.maxNumberFiles' );
-            jqXHR = data.submit();
+            var jqXHR = data.submit();
             jqXHR.abort();
         }
 
@@ -364,12 +288,8 @@ $( function () {
         console.log( data.loaded );
     } ).bind( 'fileuploadstart', function ( e ) {
         console.log( 'FIRE fileuploadstart' );
-//		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
     } ).bind( 'fileuploaddone', function ( e, data ) {
-//		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
 
-//		console.log($(data.context[0]));
-//		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
     } ).bind( 'fileuploaddrop', function ( e ) {
         $( '.upload-files' ).addClass( 'uploaded' );
         $( '.upload-files' ).removeClass( 'dragging dnd-hover' );
@@ -379,33 +299,38 @@ $( function () {
     } ).bind( 'fileuploadadded fileuploaddestroyed', function ( e, data ) {
         if ( $( '.upload-table tr' ).length ) {
             $( '.upload-files' ).addClass( 'uploaded' );
+            if (APP.hideGDLink)
+                APP.hideGDLink();
         } else {
             $( '.upload-files' ).removeClass( 'uploaded' );
+            if (APP.showGDLink)
+                APP.showGDLink();
         }
     } ).bind( 'fileuploadfail', function ( e ) {
         if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploadchange', function ( e ) {
+        $( '.upload-files' ).addClass( 'uploaded' );
         console.log( 'FIRE fileuploadchange' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploaddestroyed', function ( e, data ) {
-//		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
-        console.log( 'file deleted' );
 
         var deletedFileName = data.url.match( /file=[^&]*/g );
-        deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
+        if (deletedFileName) {
+            deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
 
-        console.log( UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ) );
-
-        if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
-            console.log( UI.skipLangDetectArr );
-            delete(UI.skipLangDetectArr[deletedFileName]);
+            if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
+                delete(UI.skipLangDetectArr[deletedFileName]);
+            }
         }
 
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -413,33 +338,27 @@ $( function () {
 
         }
         UI.checkFailedConversionsNumber();
-//		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
-//		console.log('checkAnalyzability(): ' + checkAnalyzability());
+
         if ( $( '.upload-table tr:not(.failed)' ).length ) {
+
             if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
                 enableAnalyze();
             }
-//			if(typeof err == 'undefined') enableAnalyze();
+
         } else {
             disableAnalyze();
         }
-        /*
-         }).bind('fileuploadcompleted fileuploaddestroyed', function (e,data) {
-         //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
-         if($('.upload-table tr').length) {
-         enableAnalyze();
-         //			if(typeof err == 'undefined') enableAnalyze();
-         } else {
-         disableAnalyze();
-         }
-         */
+
     } ).on( 'click', '.template-upload .cancel button', function ( e, data ) {
-//		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
+
         console.log( 'file canceled' );
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
             if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-                $( '.wrapper-upload .error-message' ).empty().hide();
+
+                $( '.error-message' ).find('p').text('');
+                $( '.error-message' ).hide();
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                 $( '#add-files' ).removeClass( 'disabled' );
                 $( '#add-files input' ).removeAttr( 'disabled' );
@@ -449,49 +368,33 @@ $( function () {
         setTimeout( function () {
             UI.checkFailedConversionsNumber();
         }, 500 );
-//		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
-//		console.log('checkAnalyzability(): ' + checkAnalyzability());
+
         if ( $( '.upload-table tr:not(.failed)' ).length ) {
+
             if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
                 enableAnalyze();
             }
-//			if(typeof err == 'undefined') enableAnalyze();
+
         } else {
             disableAnalyze();
         }
+
     } ).bind( 'fileuploadcompleted', function ( e, data ) {
         console.log( 'FIRE fileuploadcompleted' );
         if ( !$( 'body' ).hasClass( 'initialized' ) ) {
-            console.log( $( '#clear-all-files' ).length );
             $( '#clear-all-files' ).click();
-//             $('.upload-table tr').remove();
         }
         var maxnum = config.maxNumberFiles;
         if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
             console.log( '10 files loaded' );
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
+            $( '.wrapper-upload .error-message' ).show()
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
 
-//			jqXHR = data.submit();
-//			jqXHR.abort();
-        } else {
-            /*
-             $('.error-message').empty().hide();
-             console.log('else');
-             $('#fileupload').fileupload('option', 'dropZone', $('.drag'));
-             */
         }
-        /*
-         console.log('completed:');
-         console.log($('.template-download'));
-         console.log(data.files[0]);
-         */
-//		console.log($('.template-download .name').text());
-//		console.log(data.context);
-//		console.log(data.context.attr('class'));
-//		console.log(data.files[0].name);
+
         $( 'body' ).addClass( 'initialized' );
         /*
          * BUG FIXED: UTF16 / UTF8 File name conversion
@@ -501,22 +404,22 @@ $( function () {
          *      fname: data.result[0].name,
          *
          **/
-        var fileSpecs = {
-            fname: data.result[0].name,
-            filesize: data.result[0].size,
-            filerow: data.context,
-            extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
-            error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
-            enforceConversion: data.result[0].convert
-        };
+        var fileSpecs;
+        if (data.result[0]) {
 
-        //check for specific xlf file type, someone needs forced conversion /** @see upload.class.php */
-//		if( ( fileSpecs.extension=='xliff' || fileSpecs.extension=='sdlxliff' || fileSpecs.extension=='xlf' ) && !fileSpecs.enforceConversion ) {
-////			console.log('checkAnalyzability(): '+checkAnalyzability());
-//			if(checkAnalyzability('file upload completed')) {
-//				enableAnalyze();
-//			}
-//		}
+            fileSpecs = {
+                fname: data.result[0].name,
+                filesize: data.result[0].size,
+                filerow: data.context,
+                extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
+                error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
+                enforceConversion: data.result[0].convert
+            };
+        } else {
+            fileSpecs = {
+                error: ( typeof data.result.errors !== 'undefined' ? data.result.errors[0] : false ),
+            };
+        }
 
         if ( !fileSpecs.enforceConversion ) {
             if ( checkAnalyzability( 'file upload completed' ) ) {
@@ -532,8 +435,6 @@ $( function () {
         }
         $( 'body' ).removeClass( 'started' );
 
-        //console.log(data.data);
-
         $( '.name', fileSpecs.filerow ).text( fileSpecs.fname );
 
         if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
@@ -543,8 +444,6 @@ $( function () {
 
             if ( config.conversionEnabled ) {
 
-//				console.log('fileuploadcompleted');
-//				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
                 if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
                     //console.log( filerow );
                     console.log( 'ACTION: bind fileuploadcompleted' );
@@ -555,9 +454,18 @@ $( function () {
                 enableAnalyze();
             }
 
+            /**
+             * Check for TMX file type, we must trigger the creation of a new TM key
+             */
+            var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
+            if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
+                UI.createKeyByTMX(extension);
+            }
+
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
+            $( '.wrapper-upload .error-message' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -574,32 +482,6 @@ $( function () {
     $( '.upload-files' ).bind( 'dragleave', function ( e ) {
         $( this ).removeClass( 'dragging' );
     } );
-
-    /*
-     $('[draggable="true"]').on('dragstart', function() {
-     console.log('start');
-     //        dropzone.show();
-     })
-     */
-    /*
-     $('[draggable="true"]').on('dragstart', function() {
-     console.log('start');
-     dropzone.show();
-     }).on('dragend', function() {
-     console.log('stop');
-     dropzone.hide();
-     });
-     */
-    /*
-     dropzone.on('dragenter', function(event) {
-     $('.upload-files').addClass('dnd-hover');
-     });
-
-     dropzone.on('dragleave', function(event) {
-     $('.upload-files').removeClass('dnd-hover');
-     });
-     */
-
 
     $( '[draggable="true"]' ).on( 'dragend', function () {
         dropzone.hide();
@@ -625,55 +507,16 @@ $( function () {
         $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ).click();
     } );
 
-    if ( window.location.hostname === 'blueimp.github.com' ) {
-        // Demo settings:
-        $( '#fileupload' ).fileupload( 'option', {
-            url: '//jquery-file-upload.appspot.com/',
-            maxFileSize: 5000000,
-            acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
-            process: [
-                {
-                    action: 'load',
-                    fileTypes: /^image\/(gif|jpeg|png)$/,
-                    maxFileSize: 20000000 // 20MB
-                },
-                {
-                    action: 'resize',
-                    maxWidth: 1440,
-                    maxHeight: 900
-                },
-                {
-                    action: 'save'
-                }
-            ]
+    // Load existing files:
+    $( '#fileupload' ).each( function () {
+        var that = this;
+        $.getJSON( this.action, function ( result ) {
+            if ( result && result.length ) {
+                $( that ).fileupload( 'option', 'done' )
+                        .call( that, null, {result: result} );
+            }
         } );
-        // Upload server status check for browsers with CORS support:
-        if ( $.support.cors ) {
-            $.ajax( {
-                url: '//jquery-file-upload.appspot.com/',
-                type: 'HEAD'
-            } ).fail( function () {
-                $( '<span class="alert alert-error"/>' )
-                        .text( 'Upload server currently unavailable - ' +
-                        new Date() )
-                        .appendTo( '#fileupload' );
-            } );
-        }
-    } else {
-        // Load existing files:
-        $( '#fileupload' ).each( function () {
-            var that = this;
-            $.getJSON( this.action, function ( result ) {
-                if ( result && result.length ) {
-                    $( that ).fileupload( 'option', 'done' )
-                            .call( that, null, {result: result} );
-                }
-            } );
-        } );
-    }
-
-    // Initialize the Image Gallery widget:
-//    $('#fileupload .files').imagegallery();
+    } );
 
     // Initialize the theme switcher:
     $( '#theme-switcher' ).change( function () {
@@ -697,19 +540,14 @@ progressBar = function ( filerow, start, filesize ) {
     var ob = $( '.ui-progressbar-value', filerow );
     if ( ob.hasClass( 'completed' ) ) return;
 
-//	console.log('file size: ' + filesize);
-//	var step = filesize/100000;
-//	console.log('step: ' + step);
     ob.css( 'width', start + '%' );
     if ( start > 90 ) {
-//		$('.operation',filerow).remove();
-//		$('.progress',filerow).remove();
         return;
     }
+
     if ( !UI.conversionBlocked ) {
         setTimeout( function () {
             progressBar( filerow, start + 1, filesize );
-            //        console.log()
         }, 200 );
     } else {
         UI.conversionBlocked = false;
@@ -721,12 +559,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
     firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
-//    console.log(firstEnforceConversion);
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
-
-//	filerow = data.context;
-//	var fname = data.files[0].name;
-//	var extension = fname.split('.')[fname.split('.').length-1];
 
     if ( enforceConversion === false ) {
         filerow.addClass( 'ready' );
@@ -742,7 +575,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
     var ses = new Date();
     var session = ses.getTime();
-//	console.log(session.getTime());	 
+
     filerow.removeClass( 'ready' ).addClass( 'converting' ).data( 'session', session );
 
     var request = $.ajax( {
@@ -750,8 +583,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         data: {
             action: 'convertFile',
             file_name: fname,
-            source_lang: $( '#source-lang' ).val(),
-            target_lang: $( '#target-lang' ).val(),
+            source_lang: $( '#source-lang' ).dropdown('get value'),
+            target_lang: $( '#target-lang' ).dropdown('get value'),
             segmentation_rule: $( '#segm_rule' ).val()
         },
         type: 'POST',
@@ -769,7 +602,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                 $( '.progress', filerow ).remove();
                 $( '.operation', filerow ).remove();
             }, 50 );
-//       		$('.progress',filerow).remove();
+
             $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).append( '<span class="label label-important">Error: </span>Server error, try again.' );
             $( filerow ).addClass( 'has-errors' );
             UI.checkFailedConversionsNumber();
@@ -777,13 +610,13 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         },
         success: function ( d ) {
 
-//			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
             falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
             filerow.removeClass( 'converting' );
             filerow.addClass( 'ready' );
             if ( d.code == 1 || d.code == 2 ) {
+
                 $( '.ui-progressbar-value', filerow ).addClass( 'completed' ).css( 'width', '100%' );
-//				console.log('checkAnalyzability(): '+checkAnalyzability());
+
                 if ( checkAnalyzability( 'convertfile on success' ) ) {
                     enableAnalyze();
                 }
@@ -820,11 +653,11 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         $( rowClone ).find( '.name' ).first()
                                 .data( "zipfile", zipFile )
                                 .attr( "data-zipfile", zipFile )
-                                .html( "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
+                                .html( "<i class='icon-make-group icon'/>" + "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
 
                         $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
 
-                        var oldDataUrl = $( 'button[role="button"]', rowClone ).data( "url" );
+                        var oldDataUrl = $( 'button[data-url]', rowClone ).data( "url" );
 
                         var newExtClass = getIconClass( fileExt );
                         $( rowClone ).find( '.preview span' ).first().attr( "class", newExtClass );
@@ -834,12 +667,10 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         var newDataUrl = oldDataUrl.replace( /file=[^&]+/g, "file=" + encodeURI( file['name'] ) );
 
-                        $( 'button[role="button"]', rowClone )
+                        $( 'button[data-url]', rowClone )
                                 .data( "url", newDataUrl )
                                 .attr( "data-url", newDataUrl )
                                 .removeClass( 'zip_row' );
-
-                        //$( rowParent ).append( rowClone );
 
                         for ( var k = 0; k < d.errors.length; k++ ) {
 
@@ -874,7 +705,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         $( filerow ).after( rowClone );
 
-                        $( 'button[role="button"]', filerow ).addClass( "zip_row" );
+                        $( 'button[data-url]', filerow ).addClass( "zip_row" );
 
 
                     } );
@@ -886,9 +717,23 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     }
                     //END editing by Roberto Tucci <roberto@translated.net>
 
+                    var notTranslationFileCount = 0;
+                    $( ".name" ).each( function () {
+                        var currSplitLength = $( this ).text().split( "." ).length - 1;
+                        if ( $( this ).text().split( "." )[currSplitLength] == "tmx" ||
+                                $( this ).text().split( "." )[currSplitLength - 1] == "tmx" ||
+                                $( this ).text().split( "." )[currSplitLength] == "g" ||
+                                $( this ).text().split( "." )[currSplitLength - 1] == "g" ||
+                                $( this ).text().split( "." )[currSplitLength] == "zip" ) {
+                            notTranslationFileCount++;
+                        }
+                    } );
+                    if ( notTranslationFileCount == $( ".name" ).length ) {
+                        disableAnalyze();
+                    }
                 }
 
-            } else if ( d.code <= 0 ) {
+            } else if ( d.code <= 0 || d.errors.length > 0 ) {
 
                 console.log( d.errors[0].message );
 
@@ -899,7 +744,12 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     $( '.operation', filerow ).remove();
                 }, 50 );
                 UI.checkFailedConversionsNumber();
-                return false;
+
+                //filters ocr warning
+                if ( d.code == -20 ){
+                        enableAnalyze();
+                }
+
             } else {
 
             }
@@ -912,12 +762,10 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
     UI.conversionRequests.push( r );
 
     $( '.size', filerow ).next().append( '<div class="operation">Importing</div><div class="converting progress progress-success progress-striped active ui-progressbar ui-widget ui-widget-content ui-corner-all" aria-valuenow="0" aria-valuemax="100" aria-valuemin="0" role="progressbar"><div class="ui-progressbar-value ui-widget-header ui-corner-left" style="width: 0%;"></div></div>' );
-//	console.log('filesize: ' + filesize);
-
 
     testProgress( filerow, filesize, session, 0 );
-//	progressBar(filerow,0,filesize);
-}
+
+};
 
 testProgress = function(filerow,filesize,session,progress) {
     if(session != $(filerow).data('session')) return;
@@ -943,16 +791,7 @@ testProgress = function(filerow,filesize,session,progress) {
 checkInit = function () {
     setTimeout( function () {
         if ( $( 'body' ).hasClass( 'initialized' ) ) {
-            $( '.template-upload' ).each( function () {
-                console.log( $( this ).hasClass( 'has-errors' ) );
-                console.log( $( '.name', $( this ) ).text() );
-//                sizeTxt = $('.size',$(this)).text();
-//                console.log($(this).text());
-//                size = parseFloat(sizeTxt.split(' ')[0]);
-//                multiplier = (sizeTxt.split(' ')[1] == 'KB')? 1000 : 1000000;
-//                if((size*multiplier) > config.maxFileSize) {
-//                }
-            } );
+
             UI.checkFailedConversionsNumber();
 
             checkConversions();
@@ -965,9 +804,7 @@ checkInit = function () {
 };
 
 checkAnalyzability = function ( who ) {
-//	console.log(who);
-//	console.log($('.upload-table tr:not(.failed)').length);
-//	console.log($('.upload-table tr').length);
+
     if ( $( '.upload-table tr:not(.failed)' ).length ) {
         var res = true;
         $( '.upload-table tr:not(.failed)' ).each( function () {
@@ -981,9 +818,7 @@ checkAnalyzability = function ( who ) {
             if ( filename.split( '.' )[filename.split( '.' ).length - 1].toLowerCase() == 'tmx' ) {
                 $( this ).addClass( 'tmx' );
             }
-//			if((filename.split('.')[filename.split('.').length -1].toLowerCase() == 'tmx')&&($('.upload-table tr:not(.failed)').length == 1)) {
-//				res = false;				
-//			};
+
         } );
         if ( !$( '.upload-table tr:not(.failed, .tmx)' ).length ) {
             return false;
@@ -991,14 +826,6 @@ checkAnalyzability = function ( who ) {
         if ( $( '.upload-table tr.failed' ).length ) res = false;
         if ( UI.uploadingTMX() ) {
             res = false;
-//            console.log('una tmx in caricamento');
-        }
-        if($('#dqf_key').length) {
-            if($('#dqf_key').val().length) {
-                if(!$('#dqf_key').hasClass('valid')) {
-                    res = false;
-                }
-            }
         }
         return res;
     } else {
@@ -1008,25 +835,11 @@ checkAnalyzability = function ( who ) {
 }
 
 isValidFileExtension = function ( filename ) {
-//    res = false;
+
     console.log( 'filename: ' + filename );
     ext = filename.split( '.' )[filename.split( '.' ).length - 1];
     res = (!filename.match( config.allowedFileTypes )) ? false : true;
 
-    /*
-     console.log(filename.match(config.allowedFileTypes) == 'null')? false : true;
-     console.log(filename.match(config.allowedFileTypes));
-
-     console.log(filename.match(config.allowedFileTypes));
-     console.log(filename.match(!config.allowedFileTypes));
-     console.log(filename.match(config.allowedFileTypes).length);
-     */
-//    console.log(typeof filename.match(config.allowedFileTypes));
-//    console.log(typeof filename.match(config.allowedFileTypes) == 'null')? false : true;
-//    $.each(config.allowedFileTypes.split('|'), function(item) {
-//        console.log(this + ' - ' + ext);
-//        if(this == ext) res = true;
-//    });
     console.log( res );
     return res;
 }
@@ -1061,9 +874,6 @@ checkConversions = function () {
         var name = $( '.name', this ).text();
         var extension = name.split( '.' )[name.split( '.' ).length - 1];
 
-//		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
-//			return;
-//		} else {
         $.ajax( {
             url: '?action=checkFileConversion',
             data: {
@@ -1093,15 +903,13 @@ checkConversions = function () {
             }
         } );
 
-//		}
     } )
-}
+};
 
 unsupported = function () {
     var jj = $( '<div/>' ).html( config.unsupportedFileTypes ).text();
-    var pf = $.parseJSON( jj );
-    return pf;
-}
+    return $.parseJSON( jj );
+};
 
 function goodbye( e ) {
     if ( $( '.popup-tm .notify' ).length ) {

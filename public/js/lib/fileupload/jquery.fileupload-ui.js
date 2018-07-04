@@ -59,9 +59,11 @@
             // The maximum file size of images that are to be displayed as preview:
             previewSourceMaxFileSize: 5000000, // 5MB
             // The maximum width of the preview images:
-            previewMaxWidth: 80,
+            // Ostico: we do not want canvas and preview, set to 1 pixel
+            previewMaxWidth: 1,
             // The maximum height of the preview images:
-            previewMaxHeight: 80,
+            // Ostico: we do not want canvas and preview, set to 1 pixel
+            previewMaxHeight: 1,
             // By default, preview images are displayed as canvas elements
             // if supported by the browser. Set the following option to false
             // to always display preview images as img elements:
@@ -84,7 +86,7 @@
             // widget (via file input selection, drag & drop or add API call).
             // See the basic file upload widget for more information:
             add: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         options = that.options,
                         files = data.files;
                 $( this ).fileupload( 'process', data ).done( function () {
@@ -127,7 +129,7 @@
             },
             // Callback for the start of each file upload request:
             send: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( !data.isValidated ) {
                     if ( !data.isAdjusted ) {
                         that._adjustMaxNumberOfFiles( -data.files.length );
@@ -155,7 +157,7 @@
             },
             // Callback for successful uploads:
             done: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 if ( data.context ) {
                     data.context.each( function ( index ) {
@@ -193,7 +195,7 @@
             },
             // Callback for failed (abort or error) uploads:
             fail: function ( e, data ) {
-                var that = $( this ).data( 'fileupload' ),
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload'),
                         template;
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
@@ -260,9 +262,10 @@
                         globalProgressNode = $this.find( '.fileupload-progress' ),
                         extendedProgressNode = globalProgressNode
                                 .find( '.progress-extended' );
+                var fileupload = $this.data( 'fileupload' ) || $this.data('blueimpJUIFileupload');
                 if ( extendedProgressNode.length ) {
                     extendedProgressNode.html(
-                            $this.data( 'fileupload' )._renderExtendedProgress( data )
+                        fileupload._renderExtendedProgress( data )
                     );
                 }
                 globalProgressNode
@@ -275,7 +278,7 @@
             },
             // Callback for uploads start, equivalent to the global ajaxStart event:
             start: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             that._trigger( 'started', e );
@@ -284,7 +287,7 @@
             },
             // Callback for uploads stop, equivalent to the global ajaxStop event:
             stop: function ( e ) {
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 that._transition( $( this ).find( '.fileupload-progress' ) ).done(
                         function () {
                             $( this ).find( '.progress' )
@@ -298,7 +301,7 @@
             // Callback for file deletion:
             destroy: function ( e, data ) {
 
-                var that = $( this ).data( 'fileupload' );
+                var that = $( this ).data( 'fileupload' ) || $( this ).data('blueimpJUIFileupload');
                 if ( data.url ) {
                     $.ajax( data );
                     that._adjustMaxNumberOfFiles( 1 );
@@ -309,10 +312,6 @@
                 var regex = /file=([^&]*)/;
                 var match = regex.exec( data.url ); // take the file name from url to be deleted
 
-                if ( !match ) {
-                    console.log( error );
-                    return false;
-                }
 
                 var _deleteRow = function( rowToBeDeleted ){
 
@@ -324,6 +323,13 @@
                     );
 
                 };
+
+                if ( !match ) {
+                    //console.log( error );
+                    _deleteRow( data.context );
+                    _deleteRow($('.error-message'));
+                    return false;
+                }
 
                 match[1] = decodeURIComponent( match[1] ); //decode the requested filename ( taken from url )
 
@@ -458,13 +464,7 @@
             if ( this.options.maxNumberOfFiles < 0 ) {
                 return 'maxNumberOfFiles';
             }
-            // Files are accepted if either the file type or the file name
-            // matches against the acceptFileTypes regular expression, as
-            // only browsers with support for the File API report the type:
-            if ( !(this.options.acceptFileTypes.test( file.type ) ||
-                    this.options.acceptFileTypes.test( file.name )) ) {
-                return 'acceptFileTypes';
-            }
+
             if ( this.options.maxFileSize &&
                     file.size > this.options.maxFileSize ) {
                 return 'maxFileSize';

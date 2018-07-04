@@ -9,18 +9,17 @@
 class EditLog_EditLogModel {
     //number of percentage point under which the post editing effor evaluation is still accepted;
     const PEE_THRESHOLD = 1;
-    const MAX_SEGMENTS_PER_PAGE = 50;
     const CACHETIME = 108000;
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;
 
-    private static $segments_per_page = 10;
+    private static $segments_per_page = 50;
     private static $start_id = -1;
     private static $sort_by = "sid";
 
     private $jid = "";
     private $password = "";
-    private $project_status = "";
+    private $project_info = [];
     private $job_archived = false;
 
     private $job_owner_email;
@@ -29,9 +28,20 @@ class EditLog_EditLogModel {
     private $jobEmpty = false;
     private $stats;
     private $data;
-    private $pagination;
     private $languageStatsData;
     private $db;
+
+    private $pagination = [
+                    'first'        => PHP_INT_MAX,
+                    'prev'         => -1,
+                    'current'      => -1,
+                    'next'         => 0,
+                    'last'         => -2147483648,  //PHP_INT_MIN
+                    'page_index'   => null,
+                    'current_page' => 1,
+                    'last_page'    => -1
+    ];
+
 
     public function __construct( $jid, $password ) {
         $this->db       = Database::obtain();
@@ -55,7 +65,10 @@ class EditLog_EditLogModel {
         }
 
         //TODO: portare dentro il codice
+        $proj = getProject( $this->jobData[ 'id_project' ] );
+
         try {
+
             $tmp = $this->getEditLogData();
 
             $this->data       = $tmp[ 0 ];
@@ -70,22 +83,19 @@ class EditLog_EditLogModel {
 
             $this->stats = $tmp[ 1 ];
 
-            $proj                 = getProject( $this->jobData[ 'id_project' ] );
-            $this->project_status = $proj[ 0 ];
+            $this->project_info = $proj[ 0 ];
 
-            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-            $maxDate        = $__langStatsDao->getLastDate();
+            $this->loadLanguageStats();
 
-            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-            $languageSearchObj->date   = $maxDate;
-            $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-            $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
-
-            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
         } catch ( Exception $exn ) {
             if ( $exn->getCode() == -1 ) {
                 $this->jobEmpty = true;
+                //set JobData anyway to fill the template for the goBack button
+                $this->data[] = array(
+                        'proj_name'  => $proj[ 0 ][ 'name' ],
+                        'job_source' => $this->jobData[ 'source' ],
+                        'job_target' => $this->jobData[ 'target' ]
+                );
             }
         }
     }
@@ -121,9 +131,14 @@ class EditLog_EditLogModel {
         return CatUtils::getFastStatsForJob( $wStruct );
     }
 
-    private function getEditLogData( $use_ter_diff = false ) {
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getEditLogData() {
+
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
-        $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
+        $data       = $editLogDao->setNumSegs( self::$segments_per_page )->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
 
         //get translation mismatches and convert the array in a hashmap
         $translationMismatchList = $editLogDao->getTranslationMismatches( $this->getJid() );
@@ -147,7 +162,6 @@ class EditLog_EditLogModel {
         $stat_rwc                    = array();
         $stat_valid_tte              = array();
         $stat_pee                    = array();
-        $stat_ter                    = array();
 
         $output_data = array();
         foreach ( $data as $seg ) {
@@ -168,7 +182,10 @@ class EditLog_EditLogModel {
                     $seg->toArray()
             );
 
-            $displaySeg->suggestion_match .= "%";
+            if( !empty( $displaySeg->suggestion_match ) ){
+                $displaySeg->suggestion_match .= "%";
+            }
+
             $displaySeg->job_id               = $this->jid;
             $tte                              = CatUtils::parse_time_to_edit( $displaySeg->time_to_edit );
             $displaySeg->display_time_to_edit = "$tte[1]m:$tte[2]s";
@@ -179,8 +196,8 @@ class EditLog_EditLogModel {
             if ( $seg->raw_word_count < 1 ) {
                 $displaySeg->raw_word_count = 1;
             }
+
             $displaySeg->raw_word_count = round($displaySeg->raw_word_count);
-            //todo: remove this
             $displaySeg->secs_per_word = $seg->getSecsPerWord();
 
             if ( ( $displaySeg->secs_per_word < self::EDIT_TIME_SLOW_CUT ) &&
@@ -206,48 +223,16 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc = $displaySeg->getPEE();
 
-            if ( $displaySeg->pe_effort_perc < 0 ) {
-                $displaySeg->pe_effort_perc = 0;
-            }
-            if ( $displaySeg->pe_effort_perc > 100 ) {
-                $displaySeg->pe_effort_perc = 100;
-            }
-
             $stat_pee[] = $displaySeg->pe_effort_perc * $seg->raw_word_count;
 
             $displaySeg->pe_effort_perc .= "%";
 
-            $lh   = Langs_Languages::getInstance();
-            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg->job_target ) );
-
             $sug_for_diff = CatUtils::placehold_xliff_tags( $seg->suggestion );
             $tra_for_diff = CatUtils::placehold_xliff_tags( $seg->translation );
 
-            //with this patch we have warnings when accessing indexes
-            if ( $use_ter_diff ) {
-                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-            } else {
-                $ter = array();
-            }
-
-            $displaySeg->ter = @$ter[ 1 ] * 100;
-            $stat_ter[]      = $displaySeg->ter * $seg->raw_word_count;
-            $displaySeg->ter = round( @$ter[ 1 ] * 100 ) . "%";
-            $diff_ter        = @$ter[ 0 ];
-
             if ( $seg->suggestion <> $seg->translation ) {
-
-                //force use of third party ter diff
-                if ( $use_ter_diff ) {
-                    $displaySeg->diff = $diff_ter;
-                } else {
-                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
-                    // we will use diff_PE until ter_diff will not work properly
-                    $displaySeg->diff = $diff_PE;
-                }
-
-                //$seg[ 'diff_ter' ] = $diff_ter;
-
+                // we will use diff_PE until ter_diff will not work properly
+                $displaySeg->diff = MyMemory::diff_html( $sug_for_diff, $tra_for_diff, !CatUtils::isCJK( $seg->job_target ) );
             } else {
                 $displaySeg->diff = '';
             }
@@ -258,11 +243,15 @@ class EditLog_EditLogModel {
             if ( ( $displaySeg->suggestion_match == "85%" ) || ( $displaySeg->suggestion_match == "86%" ) ) {
                 $displaySeg->suggestion_source = 'Machine Translation';
                 $stat_mt[]                     = $seg->raw_word_count;
+            } elseif( $displaySeg->match_type == 'NO_MATCH' ) {
+                $displaySeg->suggestion_source = 'NO_MATCH';
+            } elseif( $displaySeg->isICE() ) {
+                $displaySeg->suggestion_source = $displaySeg->match_type;
+                $displaySeg->suggestion_match = "101%";
             } else {
                 $displaySeg->suggestion_source = 'TM';
             }
-
-
+            
             $array_patterns = array(
                     rtrim( CatUtils::lfPlaceholderRegex, 'g' ),
                     rtrim( CatUtils::crPlaceholderRegex, 'g' ),
@@ -276,11 +265,11 @@ class EditLog_EditLogModel {
                     '\r',
                     '\r\n',
                     '\t',
-                    Utils::unicode2chr( 0Xa0 ),
+                    CatUtils::unicode2chr( 0Xa0 ),
             );
             $displaySeg->source_csv      = preg_replace( $array_patterns, $array_replacements_csv, $seg->source );
             $displaySeg->translation_csv = preg_replace( $array_patterns, $array_replacements_csv, $seg->translation );
-            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->suggestion_view );
+            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $seg->suggestion );
             $displaySeg->diff_csv        = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->diff );
 
 
@@ -293,14 +282,14 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source          = preg_replace( $array_patterns, $array_replacements, $seg->source );
             $displaySeg->translation     = preg_replace( $array_patterns, $array_replacements, $seg->translation );
-            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->suggestion_view );
+            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $seg->suggestion );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
 
             $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
             $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
             $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
 
-
+            //NOT USED //TODO REMOVE FROM Dao, Struct, MyMemory-Match, and Re-USE the field in database for raw_word_count ?!?
             if ( $seg->mt_qe == 0 ) {
                 $displaySeg->mt_qe = 'N/A';
             }
@@ -316,13 +305,13 @@ class EditLog_EditLogModel {
 
         $stats[ 'valid-word-count' ] = round($globalStats[ 'raw_words' ]);
 
-        //TODO: this will not work anymore
+        //TODO: this will not work anymore, this is calculated on 50 segments
+        //FIXME: [ BUG ] this is calculated on 50 segments, slow and fast segments are only related to the 50 selected segments,
+        //FIXME:    sould be moved it in global stats, but this requires an additional maybe heavy query ( depending on how big is the job )
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
         if ( $stats[ 'edited-word-count' ] > 0 ) {
             $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
-            $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
-            $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
 
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
@@ -333,7 +322,11 @@ class EditLog_EditLogModel {
         // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
         // Weighted
         $stats[ 'avg-secs-per-word' ] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
-        $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
+
+        $stats[ 'est-words-per-day' ] = 0;
+        if( !empty( $stats[ 'avg-secs-per-word' ] ) ) {
+            $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
+        }
 
         // Last minute formatting (after calculations)
         $temp                       = CatUtils::parse_time_to_edit( round( $stats[ 'total-valid-tte' ] ) );
@@ -350,16 +343,10 @@ class EditLog_EditLogModel {
     private function evaluatePagination( $prev_id, $next_id ) {
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
         $editLogDao->setCacheTTL( self::CACHETIME );
-        $pagination = array(
-                'first'        => PHP_INT_MAX,
-                'prev'         => $prev_id,
-                'current'      => self::$start_id,
-                'next'         => $next_id,
-                'last'         => -2147483648,  //PHP_INT_MIN
-                'page_index'   => null,
-                'current_page' => 1,
-                'last_page'    => -1
-        );
+        $pagination = $this->pagination;
+        $pagination[ 'prev' ]    = $prev_id;
+        $pagination[ 'next' ]    = $next_id;
+        $pagination[ 'current' ] = self::$start_id;
 
         $pagination[ 'last' ]  = $editLogDao->getLastPage_firstID( $this->getJid(), $this->getPassword() );
         $pagination[ 'first' ] = $editLogDao->getFirstPage_firstID( $this->getJid(), $this->getPassword() );
@@ -434,9 +421,9 @@ class EditLog_EditLogModel {
      */
     public function evaluateOverallTTE() {
         $this->loadLanguageStats();
-
+        if( empty( $this->languageStatsData ) ) return 0;
         return round(
-                $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_wordcount ),
+                $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_word_count ),
                 2
         );
     }
@@ -446,9 +433,9 @@ class EditLog_EditLogModel {
      */
     public function evaluateOverallPEE() {
         $this->loadLanguageStats();
-
+        if( empty( $this->languageStatsData ) ) return 0;
         return round(
-                $this->languageStatsData->total_postediting_effort / ( $this->languageStatsData->job_count ),
+                $this->languageStatsData->total_post_editing_effort / ( $this->languageStatsData->job_count ),
                 2
         );
     }
@@ -472,7 +459,7 @@ class EditLog_EditLogModel {
             $languageSearchObj->target = $this->jobData[ 'target' ];
 
             $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
+            $this->languageStatsData = @$this->languageStatsData[ 0 ];
         }
     }
 
@@ -547,8 +534,8 @@ class EditLog_EditLogModel {
     /**
      * @return string
      */
-    public function getProjectStatus() {
-        return $this->project_status;
+    public function getProjectInfo() {
+        return $this->project_info;
     }
 
     /**
@@ -615,7 +602,106 @@ class EditLog_EditLogModel {
     }
 
     public function getProjectId(){
-        return $this->data[ 'id_project' ];
+        return $this->jobData[ 'id_project' ];
+    }
+
+    public function genCSVTmpFile() {
+        $this->setStartId( $this->jobData[ 'job_first_segment' ] );
+        $this->setSegmentsPerPage( PHP_INT_MAX );
+        list( $data, , ) = $this->getEditLogData();
+        $filePath = tempnam("/tmp", "EditLog_");
+        $csvHandler = new \SplFileObject($filePath, "w");
+        $csvHandler->setCsvControl( ';' );
+
+        $csv_fields = [
+                "Project Name",
+                "Source",
+                "Target",
+                "Job ID",
+                "Segment ID",
+                "Suggestion Source",
+                "Words",
+                "Match percentage",
+                "Time-to-edit",
+                "Post-editing effort",
+                "Segment",
+                "Suggestion",
+                "Translation",
+                "Suggestion1-source",
+                "Suggestion1-translation",
+                "Suggestion1-match",
+                "Suggestion1-origin",
+                "Suggestion2-source",
+                "Suggestion2-translation",
+                "Suggestion2-match",
+                "Suggestion2-origin",
+                "Suggestion3-source",
+                "Suggestion3-translation",
+                "Suggestion3-match",
+                "Suggestion3-origin",
+                "Chosen-Suggestion",
+                "Statistically relevant",
+                "Trans-Unit-ID",
+                "User ID",
+                "User Email"
+        ];
+
+        $csvHandler->fputcsv( $csv_fields );
+
+        /** @var EditLog_EditLogSegmentStruct $d */
+        foreach ( $data as $d ) {
+
+            $combined = array_combine( $csv_fields, array_fill( 0, count( $csv_fields ), '' ) );
+
+            $combined[ "Project Name" ]           = $d->proj_name;
+            $combined[ "Source" ]                 = $d->job_source;
+            $combined[ "Target" ]                 = $d->job_target;
+            $combined[ "Job ID" ]                 = $this->id_job;
+            $combined[ "Segment ID" ]             = $d->id;
+            $combined[ "Suggestion Source" ]      = $d->suggestion_source;
+            $combined[ "Words" ]                  = $d->raw_word_count;
+            $combined[ "Match percentage" ]       = $d->suggestion_match;
+            $combined[ "Time-to-edit" ]           = $d->time_to_edit;
+            $combined[ "Post-editing effort" ]    = $d->pe_effort_perc;
+            $combined[ "Segment" ]                = $d->source_csv;
+            $combined[ "Suggestion" ]             = $d->sug_csv;
+            $combined[ "Translation" ]            = $d->translation_csv;
+            $combined[ "Chosen-Suggestion" ]      = $d->suggestion_position;
+            $combined[ "Statistically relevant" ] = ( $d->stats_valid ? 1 : 0 );
+            $combined[ "Trans-Unit-ID" ]          = $d->internal_id;
+            $combined[ "User ID" ]                = $d->uid ;
+            $combined[ "User Email" ]             = $d->email ;
+
+            if ( !empty( $d->suggestions_array ) ) {
+
+                $sar = json_decode( $d->suggestions_array );
+
+                $combined[ "Suggestion1-source" ]      = $sar[ 0 ]->segment;
+                $combined[ "Suggestion1-translation" ] = $sar[ 0 ]->translation;
+                $combined[ "Suggestion1-match" ]       = $sar[ 0 ]->match;
+                $combined[ "Suggestion1-origin" ]      = ( substr( $sar[ 0 ]->created_by, 0, 2 ) == 'MT' ) ? 'MT' : 'TM';
+
+                if ( isset ( $sar[ 1 ] ) ) {
+                    $combined[ "Suggestion2-source" ]      = $sar[ 1 ]->segment;
+                    $combined[ "Suggestion2-translation" ] = $sar[ 1 ]->translation;
+                    $combined[ "Suggestion2-match" ]       = $sar[ 1 ]->match;
+                    $combined[ "Suggestion2-origin" ]      = ( substr( $sar[ 1 ]->created_by, 0, 2 ) == 'MT' ) ? 'MT' : 'TM';
+                }
+
+                if ( isset ( $sar[ 2 ] ) ) {
+                    $combined[ "Suggestion3-source" ]      = $sar[ 2 ]->segment;
+                    $combined[ "Suggestion3-translation" ] = $sar[ 2 ]->translation;
+                    $combined[ "Suggestion3-match" ]       = $sar[ 2 ]->match;
+                    $combined[ "Suggestion3-origin" ]      = ( substr( $sar[ 2 ]->created_by, 0, 2 ) == 'MT' ) ? 'MT' : 'TM';
+                }
+
+            }
+
+            $csvHandler->fputcsv( $combined );
+
+        }
+
+        return $filePath;
     }
 
 }

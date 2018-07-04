@@ -7,8 +7,9 @@ class Engines_Results_ErrorMatches {
 
     public function __construct( $result = array() ) {
         if ( !empty( $result ) ) {
-            $this->code    = $result[ 'code' ];
-            $this->message = $result[ 'message' ];
+            $this->http_code = $result[ 'message' ];
+            $this->code      = $result[ 'code' ];
+            $this->message   = $result[ 'message' ];
         }
     }
 

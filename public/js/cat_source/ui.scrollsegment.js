@@ -2,14 +2,24 @@
 
     var segment ;
 
-    var tryToRenderAgain = function() {
-        $('#outer').empty();
+    UI.scrollSelector = "#outer";
 
-        UI.render({
-            firstLoad: false,
-            segmentToScroll: segment.selector.split('-')[1],
-            highlight: highlight
-        });
+    var tryToRenderAgain = function( idSegment, highlight, open ) {
+        UI.unmountSegments();
+        if (open) {
+            UI.render({
+                firstLoad: false,
+                segmentToOpen: idSegment,
+                highlight : highlight
+            });
+        } else {
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: idSegment,
+                highlight : highlight
+            });
+        }
+
     }
 
     var someOpenSegmentOnPage = function() {
@@ -60,57 +70,91 @@
 
         return destinationTop ;
     }
+    
+    var doDirectScroll = function( segment, highlight, quick ) {
+        var pointSpeed = (quick)? 0 : 500;
 
-    var scrollSegment = function(inputSegment, highlight, quick) {
-        segment = $(inputSegment);
-
-        if ( !segment.length ) {
-            // TODO: check for this condition to be actually needed
-            // to limit responsiblity of this function we must enforce
-            // the segment to be present, raise otherwise.
-            tryToRenderAgain() ;
-            return ;
+        var scrollPromise = UI.animateScroll( segment, pointSpeed ) ;
+        scrollPromise.done( function() {
+            UI.goingToNext = false;
+        });
+        
+        if ( highlight ) { 
+            scrollPromise.done( function() {
+                SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
+            }); 
         }
+        
+        return scrollPromise ; 
+    }
+
+    var scrollSegment = function(inputSegment, idSegment, highlight, quick) {
+        var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
 
         quick = quick || false;
         highlight = highlight || false;
-
-        var pointSpeed = (quick)? 0 : 500;
-
-        $("html,body").stop();
-
-        // if ( config.isReview ) {
-        if ( true ) {
-            // FIXME: experimentally keep the `review` behaviour the default
-            // for translate page too. We are not sure what the other block
-            // of code actually does, so we need to keep this code around for
-            // a while and do some user testing to be sure it is safe to
-            // remove it.
-            setTimeoutForReview() ;
+        
+        if ( segment.length ) {
+            return doDirectScroll( segment, highlight, quick ) ; 
+        } else if( $(segment.selector + '-1').length ) {
+            return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
+        }
+        else if ( idSegment ){
+            return tryToRenderAgain( idSegment, highlight, true ) ;
         } else {
-            scrollToDestination( getDestinationTop(), pointSpeed ) ;
+            console.error("Segment not found in the UI");
         }
 
-        // TODO check if this timeout can be avoided in some way
-        setTimeout(function() { UI.goingToNext = false; }, pointSpeed);
+
+
     }
 
-    var setTimeoutForReview = function() {
-        setTimeout(function() {
-            $("html,body").animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, 500);
-        }, 300);
-    }
+    /**
+     * This function takes a segment as argument and the speed to apply to scroll.
+     *
+     * If a previous segment is found, then we scroll to the previous segment, so to keep
+     * a sufficient amount of space to read the previous segment.
+     *
+     * If a previous segment is not found, then we assume the segment is the first of a file.
+     *
+     * This function returns a Deferred, so to make the it chainable with other functions to be triggered
+     * when scroll animation is completed.
+     *
+     * @param segment
+     * @param speed
+     * @returns Deferred
+     */
+    var animateScroll = function( segment, speed ) {
+        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+        var pos = 0;
+        var prev = segment.prev('section') ;
+        var segmentOpen = $('section.editor');
+        var article = segment.closest('article');
 
-    var scrollToDestination = function( destinationTop, pointSpeed ) {
-        $("html,body").animate({
-            scrollTop: destinationTop - 20
-        }, pointSpeed);
-    }
+        if ( prev.length ) {
+            pos = prev.offset().top ; // to show also the segment before
+        } else {
+            pos = segment.offset().top ;
+        }
+        pos = pos - segment.offsetParent('#outer').offset().top;
+
+        if (article.prevAll('article').length > 0) {
+            _.forEach(article.prevAll('article'), function ( item ) {
+                pos = pos + $(item).outerHeight() + 140;
+            });
+        }
+
+        scrollAnimation.animate({
+            scrollTop: pos
+        }, speed);
+
+
+        return scrollAnimation.promise() ;
+    };
 
     $.extend(UI, {
         scrollSegment : scrollSegment,
+        animateScroll: animateScroll
     });
 
 })(window, $, UI, undefined);

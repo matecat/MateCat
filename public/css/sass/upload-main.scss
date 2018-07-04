@@ -1,0 +1,356 @@
+@import "vendor_mc/semantic/matecat_semantic";
+
+@import 'variables';
+
+@import "commons/buttons";
+@import "commons/filter-teams";
+@import "commons/icons";
+@import "commons/nav-bar";
+@import "commons/team-member";
+
+@import 'common-main';
+@import '../popup';
+@import 'commons/tooltip';
+
+@import 'upload-page';
+.translate-box {
+    h2 {
+        margin-left: 11px;
+    }
+}
+
+
+
+.translate-box.target,
+.translate-box.source,
+.translate-box.tmx-select,
+.translate-box.project-subject {
+    .dropdown {
+        height: 37px;
+        padding: 4px;
+        padding-left: 10px;
+        font-size: 16px;
+        margin: 0 0 5px 0;
+        border-radius: 2px;
+        min-height: initial;
+        cursor: pointer !important;
+    }
+    .dropdown.icon {
+        padding: 8px;
+        border: none;
+    }
+    input.search {
+        padding: inherit !important;
+        font-family: system-ui, Calibri, Arial, Helvetica, sans-serif;
+        font-size: 16px;
+    }
+}
+
+.translate-box.tmx-select,
+.translate-box.source,
+.translate-box.target,
+.translate-box.project-subject {
+
+    #project-subject,
+    #source-lang,
+    #target-lang {
+        width: 210px ;
+    }
+    #target-lang {
+        .multiple-none-text {
+            width: fit-content;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .multiple-text {
+            width: fit-content;
+            display: inline-block;
+        }
+    }
+    #tmx-select {
+        width: 200px;
+        &:hover {
+            box-shadow: none !important;
+        }
+    }
+    .menu-dropdown {
+        max-height: none !important;
+        overflow: hidden !important;
+    }
+    div#add-tmx-option:hover ,
+    div#add-multiple-lang:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+    div#add-tmx-option ,
+    div#add-multiple-lang {
+        cursor: pointer;
+        color: #39699a;
+        font-size: 14px;
+        margin: 0;
+        padding: 15px;
+        .icon {
+            float: right;
+            font-size: 24px;
+            margin-top: -3px;
+            margin-right: 1px;
+            color: #39699a;
+        }
+    }
+    div.item {
+        width: 100%;
+        min-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 10px !important;
+        span.item-key-id {
+            color: #757575;
+            clear: both;
+        }
+        span {
+            line-height: 17px;
+        }
+        .no-descr {
+            font-style: italic ;
+        }
+    }
+    .dropdown > span.text {
+        margin-top: 0 !important;
+        pointer-events: none;
+        line-height: 28px !important;
+        max-width: 180px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        .item-key-id {
+            margin-top: 0px;
+            float: none;
+        }
+        .item-key-name {
+            color: initial;
+            margin-top: 0px;
+            margin-right: 5px;
+            float: none;
+        }
+    }
+    .divider {
+        margin: 0 !important;
+    }
+
+}
+
+.translate-box.tmx-select {
+    span.text {
+        margin: 0 !important;
+        line-height: 28px !important;
+        max-width: 237px !important;
+        font-size: 16px !important;
+        i.icon-checkmark2.icon {
+            display: none;
+        }
+    }
+    .item {
+        i.icon-checkmark2.icon {
+            color: rgba(117, 117, 117, 0.7);;
+            font-size: 20px;
+            position: absolute;
+            right: 7px;
+            display: none;
+        }
+        &.active {
+            background-color: rgba(0, 0, 0, 0.03) !important;
+            i.icon-checkmark2.icon {
+                display: block;
+            }
+        }
+
+    }
+    .item-key-id {
+        color: #757575;
+    }
+    .item-key-name {
+        color: initial;
+        max-width: 145px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .text .multiple-tm {
+        display: block;
+    }
+    .menu .multiple-tm {
+        display: none;
+    }
+    .multiple-tm-num {
+        margin-top: 0 !important;
+        margin-right: 4px;
+    }
+    .icon-info {
+        font-size: 19px;
+        margin-top: 5px;
+        margin-left: 5px;
+        color: rgba(117, 117, 117, 0.7);
+    }
+    .tm-tooltip {
+        text-align: left;
+    }
+    .tm-info-icon {
+        float: left;   
+    }
+    .tm-info-title {
+        line-height: 19px;
+    }
+    h2 {
+        float: left;
+    }
+
+}
+
+@media only screen and (max-width: 1320px) {
+    .translate-box.tmx-select,
+    .translate-box.source,
+    .translate-box.target,
+    .translate-box.project-subject {
+
+        #project-subject,
+        #source-lang,
+        #target-lang {
+            width: 155px ;
+            .ui.icon.search.input {
+                min-width: unset;
+            }
+        }
+        #target-lang {
+            .multiple-none-text {
+                display: none;
+            }
+        }
+        #tmx-select {
+            width: 170px;
+            &:hover {
+                box-shadow: none !important;
+            }
+            .ui.multiple.search.dropdown > .text {
+                width: 150px;
+            }
+        }
+        .menu-dropdown {
+            max-height: none !important;
+            overflow: hidden !important;
+        }
+        div#add-tmx-option:hover ,
+        div#add-multiple-lang:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        div#add-tmx-option ,
+        div#add-multiple-lang {
+            cursor: pointer;
+            color: #39699a;
+            font-size: 14px;
+            margin: 0;
+            padding: 15px;
+            .icon {
+                float: right;
+                font-size: 24px;
+                margin-top: -3px;
+                margin-right: 1px;
+                color: #39699a;
+            }
+        }
+        div.item {
+            width: 100%;
+            min-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px !important;
+            span.item-key-id {
+                color: #757575;
+                clear: both;
+            }
+            span {
+                line-height: 17px;
+            }
+            .no-descr {
+                font-style: italic ;
+            }
+        }
+        .dropdown > span.text {
+            margin-top: 0 !important;
+            pointer-events: none;
+            line-height: 28px !important;
+            max-width: 115px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            .item-key-id {
+                margin-top: 0px;
+                float: none;
+            }
+            .item-key-name {
+                color: initial;
+                margin-top: 0px;
+                margin-right: 5px;
+                float: none;
+            }
+        }
+        .divider {
+            margin: 0 !important;
+        }
+    }
+    .translate-box.project-name {
+        width: 160px;
+        .upload-input {
+            width: 160px;
+        }
+    }
+    .translate-box.settings {
+        .more-options {
+            margin: 0;
+        }
+    }
+    .translate-box.tmx-select {
+        margin-right: 0;
+    }
+}
+
+
+/*@media only screen and (min-width: 1200px) {
+    .translate-box.target {
+        #target-lang {
+            .multiple-none-text {
+                display: none;
+            }
+        }
+    }
+}*/
+
+/*@media only screen and (min-width: 1380px) {
+    .translate-box.target {
+        #target-lang {
+            .multiple-none-text {
+                display: none;
+            }
+        }
+    }
+}*/
+
+@media only screen and (max-width: 1199px) and (min-width: 992px) {
+    .translate-box.target {
+        #target-lang {
+            .multiple-none-text {
+                display: none;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 991px) and (min-width: 768px) {
+    .translate-box.target {
+        #target-lang {
+            .multiple-none-text {
+                display: none;
+            }
+        }
+    }
+}

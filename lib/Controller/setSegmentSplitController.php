@@ -14,7 +14,7 @@ class setSegmentSplitController extends ajaxController {
         parent::__construct();
 
         //Session Enabled
-        $this->checkLogin();
+        $this->readLoginInfo();
         //Session Disabled
 
         $filterArgs = array(

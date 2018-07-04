@@ -42,11 +42,21 @@
 
 class Xliff_Parser {
 
-	// This var wants to be like a "static final" in Java, but this is PHP...
-	// It's used by fix_non_well_formed_xml() to speed up things.
-	private static $find_xliff_tags_reg = null;
+    /**
+     * @var FeatureSet
+     */
+    protected $features;
 
-	public static function Xliff2Array($file_content) {
+    public function __construct( FeatureSet $features = null ) {
+        $this->features = $features;
+    }
+
+    private static $find_xliff_tags_reg = null;
+
+	public function Xliff2Array($file_content) {
+
+	    $xliff = [];
+
 		// Pre-Processing.
 		// Fixing non UTF-8 encoding (often I get Unicode UTF-16)
 		$enc = mb_detect_encoding($file_content);
@@ -65,7 +75,6 @@ class Xliff_Parser {
 			$xliff['parser-errors'][] = "Cannot import XLIFF version $tmp[1]. We only support XLIFF (version 1.0, 1.1, 1.2).";
 			return $xliff;
 		}
-
 
 		// Getting the Files
 
@@ -106,10 +115,18 @@ class Xliff_Parser {
 					$xliff['files'][$i]['attr']['datatype'] = "txt";
 				}
 				// Target-language
-				unset($temp);
-				preg_match('|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp);
-				if (isset($temp[1]))
-					$xliff['files'][$i]['attr']['target-language'] = $temp[1];
+                unset( $temp );
+                preg_match( '|target-language\s?=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'target-language' ] = $temp[ 1 ];
+                }
+
+                //Custom MateCat x-Attribute
+                unset( $temp );
+                preg_match( '|x-(.*?)=\s?["\'](.*?)["\']|si', $file_short, $temp );
+                if ( isset( $temp[ 1 ] ) ) {
+                    $xliff[ 'files' ][ $i ][ 'attr' ][ 'custom' ][ $temp[ 1 ] ] = $temp[ 2 ];
+                }
 
                 /*
                  * PHP 5.2 BUG/INCONSISTENCY vs PHP > 5.2 IN preg_match_all
@@ -144,15 +161,23 @@ class Xliff_Parser {
 				// Getting Trans-units
 				$trans_units = preg_split('|<trans-unit[\s>]|si', $file, -1, PREG_SPLIT_NO_EMPTY);
 				$j = 0;
+				$trans_unit_id_array_for_uniqueness_check = [];
 				foreach ($trans_units as $trans_unit) {
 
 					// First element in the XLIFF split is the header, not the first file
 					if ($j > 0) {
 						// Getting Trans-unit attributes
 						// ID
-						unset($temp);
-						preg_match('|id\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
-						$xliff['files'][$i]['trans-units'][$j]['attr']['id'] = $temp[1];
+                        unset( $temp );
+                        preg_match( '|id\s?=\s?(["\'])(.*?)\1|si', $trans_unit, $temp );
+
+                        if ( trim( $temp[ 2 ] ) == "" ) {
+                            throw new DomainException( "Invalid trans-unit id found. EMPTY value", 400 );
+                        } else {
+                            $trans_unit_id_array_for_uniqueness_check[] = trim( $temp[ 2 ] );
+                        }
+
+                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'id' ] = $temp[ 2 ];
 
 						// Translate
 						unset($temp);
@@ -160,98 +185,120 @@ class Xliff_Parser {
 						if (isset($temp[1]))
 							$xliff['files'][$i]['trans-units'][$j]['attr']['translate'] = $temp[1];
 
+                        /**
+                         * Approved
+                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#approved
+                         */
+                        unset($temp);
+                        preg_match('|approved\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
+                        if (isset($temp[1]))
+                            $xliff['files'][$i]['trans-units'][$j]['attr']['approved'] = filter_var( $temp[1], FILTER_VALIDATE_BOOLEAN );
 
-						// Getting Source and Target raw content
-						unset($temp);
+                        unset($temp);
 
-						preg_match('|<source.*?>(.*?)</source>|si', $trans_unit, $temp);
-						// just in case of a <source />
-						if (!isset($temp[1])) {
-							$temp[1] = '';
-						}
-						$temp[1] = self::fix_non_well_formed_xml($temp[1]);
-						$xliff['files'][$i]['trans-units'][$j]['source']['raw-content'] = $temp[1];
+                        /**
+                         * Rebuild the trans-unit tag integrity after preg_split
+                         */
+                        $trans_unit = '<trans-unit ' . explode( '</trans-unit>', $trans_unit )[ 0 ] . '</trans-unit>';
 
+                        // Getting Source and Target raw content
+                        $this->getSource( $xliff, $i, $j, $trans_unit );
+						$this->getTarget( $xliff, $i, $j, $trans_unit );
+						$this->getAltTrans( $xliff, $i, $j, $trans_unit );
+						$this->getSDLStatus( $xliff, $i, $j, $trans_unit );
 
-						unset($temp);
-						preg_match('|<target.*?>(.+?)</target>|si', $trans_unit, $temp);
-						if (isset($temp[1])) {
-							$temp[1] = self::fix_non_well_formed_xml($temp[1]);
-							$xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] = $temp[1];
-						}
-
-                        self::evalNotes($xliff, $i, $j, $trans_unit);
+                        $this->evalNotes($xliff, $i, $j, $trans_unit);
 
 						// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 
-						unset($temp);
-						preg_match('|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp);
-						if (isset($temp[1])) {
-							$markers = $temp[1];
-							unset($temp);
-							$markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $markers, -1, PREG_SPLIT_DELIM_CAPTURE);
+                        unset( $temp );
+
+                        //TODO improve with DOM
+                        preg_match( '|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp );
+                        if ( isset( $temp[ 1 ] ) ) {
+
+                            $markers = $temp[ 1 ];
+
+                            unset( $temp );
+
+                            $markers = preg_split( '#<mrk\s#si', $markers, -1 );
 
                             //same markers are in the target tag if it is present with pre-translations, because seg-target does not exists
                             //in XLIFF standard definition
-                            //so, we split for the same markers and use same positional indexes
-                            if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
-                                $target_markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'], -1, PREG_SPLIT_DELIM_CAPTURE);
+                            //so, we split for the same markers and use same positional indexes, by the way,
+                            // there can be empty markers in translation ( <mrk ... /> ) and not in seg-source
+                            // the regular expressions must be different
+                            if ( isset( $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] ) ) {
+                                $target_markers = preg_split( '#<mrk\s#si', $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ], -1 );
                             }
 
-							$mi = 0;
-							$k = 0;
-							while (isset($markers[$mi + 1])) {
-								unset($mid);
-								preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $markers[$mi + 1], $mid);
+                            $mi = 0;
+                            $k  = 0;
+                            while ( isset( $markers[ $mi + 1 ] ) ) {
+                                unset( $mid );
 
-								// For not loosing info I attach the last external tag to the last seg marker.
-								if (!isset($markers[$mi + 5])) {
-									$last_ext_tags = $markers[$mi + 3];
-								} else {
-									$last_ext_tags = '';
-								}
+                                preg_match( '|mid\s?=\s?["\'](.*?)["\']|si', $markers[ $mi + 1 ], $mid );
 
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['mid'] = $mid[1];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-prec-tags'] = $markers[$mi];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['raw-content'] = $markers[$mi + 2];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-succ-tags'] = $last_ext_tags;
+                                //re-build the mrk tag after the split
+                                $originalMark = trim( '<mrk ' . $markers[ $mi + 1 ] );
 
-								// Different from source and target content, I expect that if you used seg-source it is a a well done tool so I don't try to fix.
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'mid' ]           = $mid[ 1 ];
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-prec-tags' ] = ( $mi == 0 ? $markers[ 0 ] : "" ); //put the first tags of seg-source structure
+
+                                $mark_string = preg_replace( '#^<mrk\s[^>]+>(.*)#', '$1', $originalMark ); // at this point we have: ---> 'Test </mrk> </g>>'
+                                $mark_content = preg_split( '#</mrk>#si', $mark_string );
+
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'raw-content' ]   = $mark_content[0];
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
+
+								// Different from source and target content, I expect that if you used seg-source it is a well done tool, so I don't try to fix.
                                 if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) && !empty( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
 
                                     unset($mt_id);
 
                                     //if mark tags are present in target ( target segmentation )
-                                    if( isset( $target_markers[$mi + 1] ) ){
+                                    if ( isset( $target_markers[ $mi + 1 ] ) ) {
+
+                                        $originalTransMark = trim( '<mrk ' . $target_markers[ $mi + 1 ] );
 
                                         //target and seg-source can have different mark id, so i store the target mid
                                         //with same rules
-                                        preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[$mi + 1], $mt_id);
-
-                                        // For not loosing info I attach the last external tag to the last seg marker.
-                                        if (!isset($target_markers[$mi + 5])) {
-                                            $last_ext_tags = $target_markers[$mi + 3];
-                                        } else {
-                                            $last_ext_tags = '';
-                                        }
+                                        preg_match( '|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[ $mi + 1 ], $mt_id );
 
                                         //use seg-target to store segmented translations and use the same positional indexes in source
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['mid'] = $mt_id[1];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-prec-tags'] = $target_markers[$mi];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['raw-content'] = $target_markers[$mi + 2];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-succ-tags'] = $last_ext_tags;
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'mid' ]           = $mt_id[ 1 ];
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-prec-tags' ] = ( $mi == 0 ? $target_markers[ 0 ] : "" ); //put the first tags of seg-source structure
+
+                                        $mark_string = preg_replace( '#^<mrk\s[^>]+>(.*)#', '$1', $originalTransMark );
+                                        $mark_content = preg_split( '#</mrk>#si', $mark_string );
+
+                                        if( isset( $mark_content[ 1 ] ) ){
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = $mark_content[0];
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
+                                        } else {
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = "";
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[0];
+                                        }
 
                                     }
 
                                 }
 
-                                $mi = $mi + 3;
+                                $mi++;
 								$k++;
+
 							}
 						}
 					}
-					$j++;
+
+						$j++;
+
 				} // End of trans-units
+                $total_trans_units_id = count( $trans_unit_id_array_for_uniqueness_check );
+				$trans_units_unique_id = count( array_unique( $trans_unit_id_array_for_uniqueness_check ) );
+				if( $total_trans_units_id != $trans_units_unique_id ){
+                    throw new DomainException( "Invalid trans-unit id, duplicate found.", 400 );
+                }
 			} // End of files
 
 			$i++;
@@ -261,21 +308,25 @@ class Xliff_Parser {
 	}
 
 
-	/**
-	This function exists because many developers started adding html tags directly into the XLIFF source since:
-	1) XLIFF tag remapping is too complex for them
-	2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tollerant to html tags in <source>
-
-	in short people typed:
-	<source>The <b>red</d> house</source> or worst <source>5 > 3</source>
-	instead of
-	<source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
-
-	This function will do the following
-	<g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
-	<g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
-	 */
-	public static function fix_non_well_formed_xml($content) {
+    /**
+     * This function exists because many developers started adding html tags directly into the XLIFF source since:
+     * 1) XLIFF tag remapping is too complex for them
+     * 2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tolerant to html tags in <source>
+     *
+     * in short people typed:
+     * <source>The <b>red</d> house</source> or worst <source>5 > 3</source>
+     * instead of
+     * <source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
+     *
+     * This function will do the following
+     * <g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
+     * <g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
+     *
+     * @param $content string
+     *
+     * @return mixed|string
+     */
+	public static function fix_non_well_formed_xml( $content ) {
 
 		if (self::$find_xliff_tags_reg === null) {
 			// List of the tags that we don't want to escape
@@ -318,7 +369,7 @@ class Xliff_Parser {
 		}
 
 		// Escape the string with the remaining non-XLIFF tags
-		$content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8', false);
+		$content = htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8', false);
 
 		// Put again in place the original XLIFF tags replacing placeholders
 		foreach ($tags_placeholders as $tag => $placeholder) {
@@ -326,52 +377,196 @@ class Xliff_Parser {
 		}
 
 		return $content;
-
-		/*
-        I wrote a sort of unit-test to test the function. Obviously, it passes.
-        TODO: move this code to a real unit-test ASAP.
-
-        $tests = array(
-            '' => '',
-            'just text' => 'just text',
-        	'<gap>Hey</gap>' => '&lt;gap&gt;Hey&lt;/gap&gt;',
-            '<mrk>Hey</mrk>' => '<mrk>Hey</mrk>',
-            '<g >Hey</g >' => '<g >Hey</g >',
-            '<g    >Hey</g   >' => '<g    >Hey</g   >',
-            '<g id="99">Hey</g>' => '<g id="99">Hey</g>',
-            'Hey<x/>' => 'Hey<x/>',
-            'Hey<x />' => 'Hey<x />',
-            'Hey<x   />' => 'Hey<x   />',
-            'Hey<x id="15"/>' => 'Hey<x id="15"/>',
-            'Hey<bx id="1"/>' => 'Hey<bx id="1"/>',
-            'Hey<ex id="1"/>' => 'Hey<ex id="1"/>',
-            '<bpt id="1">Hey</bpt>' => '<bpt id="1">Hey</bpt>',
-            '<ept id="1">Hey</ept>' => '<ept id="1">Hey</ept>',
-            '<ph id="1">Hey</ph>' => '<ph id="1">Hey</ph>',
-            '<it id="1">Hey</it>' => '<it id="1">Hey</it>',
-            '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/><b id="dunno">Hey man & hey girl!</b></mrk>' => '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/>&lt;b id=&quot;dunno&quot;&gt;Hey man &amp; hey girl!&lt;/b&gt;</mrk>',
-        );
-
-        foreach ($tests as $in => $expected) {
-            $out = fix_non_well_formed_xml($in);
-            if (strcmp($out, $expected) !== 0) {
-                echo "ERROR!\nInput:    $in\nOutput:   $out\nExpected: $expected\n";
-            }
-        }
-        */
+		
 	}
 
-    private static function evalNotes(&$xliff, $i, $j, $trans_unit) {
+    private function evalNotes( &$xliff, $i, $j, $trans_unit ) {
         $temp = null;
-        preg_match_all('|<note>(.+?)</note>|si', $trans_unit, $temp);
-        $matches = array_values( $temp[1] );
-        if ( count($matches) > 0 ) {
-            foreach($matches as $match) {
-                $note = array(
-                    'raw-content' => self::fix_non_well_formed_xml($match)
-                );
-                $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
+        preg_match_all( '|<note.*?>(.+?)</note>|si', $trans_unit, $temp );
+        $matches = array_values( $temp[ 1 ] );
+        if ( count( $matches ) > 0 ) {
+            foreach ( $matches as $match ) {
+
+                $note = [];
+                if ( $this->isJSON( $match ) ) {
+                    $note[ 'json' ] = $this->cleanCDATA( $match );
+                } else {
+                    $note[ 'raw-content' ] = $this->fix_non_well_formed_xml( $match );
+                }
+
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'notes' ][] = $note;
+
             }
+        }
+    }
+
+    private function isJSON( $noteField ){
+        try {
+            $noteField = $this->cleanCDATA( $noteField );
+            if( empty( $noteField ) ) throw new Exception();
+            json_decode( $noteField );
+            Utils::raiseJsonExceptionError();
+        } catch ( Exception $exception ){
+            return false;
+        }
+        return true;
+    }
+
+    private function cleanCDATA( $testString ){
+        $cleanXMLContent = new SimpleXMLElement( '<rootNoteNode>' . $testString . '</rootNoteNode>', LIBXML_NOCDATA );
+        return $cleanXMLContent->__toString();
+    }
+
+    /**
+     * @param $xliff
+     * @param $i
+     * @param $j
+     * @param $trans_unit
+     */
+    private function getSource( &$xliff, $i, $j, $trans_unit ) {
+        try {
+            $tagArray = $this->_getTagContent( 'source', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Source Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    /**
+     * @param $xliff
+     * @param $i
+     * @param $j
+     * @param $trans_unit
+     */
+    private function getTarget( &$xliff, $i, $j, $trans_unit ) {
+        try {
+            $tagArray = $this->_getTagContent( 'target', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attributes' ];
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Target Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    private function getAltTrans(  &$xliff, $i, $j, $trans_unit  ){
+        try {
+
+            $tagArray = $this->_getTagContent( 'alt-trans', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'attr' ] = $tagArray[ 'attributes' ];
+
+            try{
+                $sourceArray = $this->_getTagContent( 'source', $tagArray[ 'content' ], 'root' );
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'source' ] = self::fix_non_well_formed_xml( $sourceArray[ 'content' ] );
+            } catch( UnexpectedValueException $e ){
+                //Found Empty Target Tag
+                Log::doLog( $e->getMessage() );
+            }
+
+            $targetArray = $this->_getTagContent( 'target', $tagArray[ 'content' ], 'root' );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][ 'target' ] = self::fix_non_well_formed_xml( $targetArray[ 'content' ] );
+
+
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Target Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    /**
+     * Extract tag content using DOM ( fallback to old implementation on failure )
+     *
+     * @param string $tagName
+     * @param string $domString
+     * @param string $parentNodeName
+     *
+     * @return array
+     */
+    private function _getTagContent( $tagName, $domString, $parentNodeName = 'trans-unit' ) {
+
+        libxml_use_internal_errors( true );
+        $dDoc          = new DOMDocument();
+        $trg_xml_valid = @$dDoc->loadXML( "<root>$domString</root>", LIBXML_NOENT | LIBXML_COMPACT | LIBXML_NOEMPTYTAG );
+
+        /**
+         * Get all tags by their name
+         */
+        $tagList = $dDoc->getElementsByTagName( $tagName );
+
+        $tmpTag = null;
+        $tagAttributes = [];
+
+        if ( $trg_xml_valid === false ) {
+
+            $errorList = libxml_get_errors();
+            Log::doLog( "Invalid target found, fallback to old implementation to get the content by regular expression" );
+            Log::doLog( "$domString" );
+            Log::doLog( $errorList );
+
+            //fallback to old regexp wrong implementation
+            $regexp = "|<{$tagName}[^>]*?>(.*?)</{$tagName}>|si";
+
+            preg_match( $regexp, $domString, $temp );
+            $tmpTag = $temp[ 1 ];
+
+            libxml_clear_errors();
+
+        } elseif ( $tagList->length ) {
+
+            foreach ( $tagList as $_tag ) {
+
+                /**
+                 * Extract Attributes if they are present
+                 *
+                 * Ex:
+                 * <p align=center style="font-size: 12px;">some text</p>
+                 *
+                 * $attr->nodeName == 'align' :: $attr->nodeValue == 'center'
+                 * $attr->nodeName == 'style' :: $attr->nodeValue == 'font-size: 12px;'
+                 *
+                 * @var $_tag DOMNode
+                 */
+                if ( $_tag->hasAttributes() ) {
+                    foreach ( $_tag->attributes as $attr ) {
+                        $tagAttributes[ $attr->nodeName ] = $attr->nodeValue;
+                    }
+                }
+
+                /** @var $_tag DOMElement|DOMNode */
+                $childNodes = $_tag->hasChildNodes();
+
+                //<alt-trans> has also <source> and <target> tags inside, we want only tags which have <trans-unit> as root element
+                //if not specified
+                if ( $_tag->parentNode->nodeName == $parentNodeName && !empty( $childNodes ) ) {
+
+                    //Loop on the child nodes, saveXML concatenation
+                    foreach ( $_tag->childNodes as $node ) {
+                        $tmpTag .= $dDoc->saveXML( $node );
+                    }
+
+                }
+            }
+
+        }
+
+        if ( empty( $tmpTag ) ) {
+            throw new UnexpectedValueException( "The content of the tag $tagName is empty." );
+        }
+
+        return [
+                'content' => $tmpTag,
+                'attributes' => $tagAttributes
+        ];
+
+    }
+
+    private function getSDLStatus( &$xliff, $i, $j, $trans_unit ){
+        //['attr']['translate']
+        //<sdl:seg id="4" locked="true"
+        preg_match( '|<sdl:seg.*?(locked).*?>.+?</sdl:seg>|si', $trans_unit, $temp );
+        if ( isset( $temp[ 1 ] ) ) {
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'locked' ] = true;
         }
     }
 

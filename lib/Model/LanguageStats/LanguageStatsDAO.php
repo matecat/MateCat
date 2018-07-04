@@ -1,4 +1,5 @@
 <?php
+use DataAccess\ShapelessConcreteStruct;
 
 /**
  * Created by PhpStorm.
@@ -14,30 +15,111 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
 
     public function getLastDate(){
-        $arr_result = $this->con->fetch_array(  "select max(date) as date from " . self::TABLE );
 
-        //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
-            return $arr_result[0]['date'];
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( "select max( date ) as date from " . self::TABLE );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute();
+        return @$stmt->fetch()[ 'date' ];
+
+    }
+
+    public function getLanguageStats( DateTime $filterDate = null ) {
+
+
+        if( !$filterDate ){
+            $filterDate = $this->setCacheTTL( 24 * 60 * 60 )->_fetch_array( "SELECT MAX( date ) as date FROM " . self::TABLE )[ 0 ][ 'date' ];
+        } else {
+            $filterDate = $filterDate->format( 'Y-m-d H:i:s' );
         }
 
-        return null;
+         $query = "
+          SELECT source, target, date, total_post_editing_effort, job_count, total_word_count, fuzzy_band
+                FROM " . self::TABLE . "
+                WHERE date = :filterDate
+                AND job_count > 50 
+                ;
+          ";
+
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( $query );
+
+        return $this->_fetchObject( $stmt, new LanguageStats_LanguageStatsStruct(), [
+                'filterDate' => $filterDate
+        ] );
+
+    }
+
+    public function getSnapshotDates(){
+
+        $query = "
+                SELECT distinct DATE_FORMAT( date,'%Y-%m-%d' ) AS date_format , date
+                FROM " . self::TABLE;
+
+        $con = $this->con->getConnection();
+        $stmt = $con->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute();
+        return $stmt->fetchAll();
+
+    }
+
+    public function getGraphData( ShapelessConcreteStruct $filters ){
+
+        $query = "
+                  SELECT source, target, fuzzy_band, total_post_editing_effort, DATE_FORMAT( date, '%Y-%m' ) as date
+                  FROM " . self::TABLE . "
+                  WHERE 
+                    date BETWEEN ? AND ?
+                  AND
+                    source IN( " . str_repeat( '?,', count( $filters->sources ) - 1) . '?' . " )
+                  AND 
+                    target IN( " . str_repeat( '?,', count( $filters->targets ) - 1) . '?' . " )
+                  AND 
+                    fuzzy_band IN( " . str_repeat( '?,', count( $filters->fuzzy_band ) - 1) . '?' . " )
+                  ORDER BY 5 ASC
+                  ;";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        $values = array_merge(
+                [
+                    $filters->date_start,
+                    $filters->date_end
+                ],
+                $filters->sources,
+                $filters->targets,
+                $filters->fuzzy_band
+        );
+
+        /**
+         * @var $resultSet ShapelessConcreteStruct[]
+         */
+        $resultSet = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
+
+        return $resultSet;
+
     }
 
     /**
-     * @param LanguageStats_LanguageStatsStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
      * @return LanguageStats_LanguageStatsStruct|null The inserted object on success, null otherwise
      * @throws Exception
      */
-    public function create( LanguageStats_LanguageStatsStruct $obj ) {
+    public function create( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj LanguageStats_LanguageStatsStruct
+         */
         $obj = $this->sanitize( $obj );
 
         $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (date, source, target, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
-                VALUES ( '%s', '%s', '%s', %f, %f, %f, %u )
+                " (date, source, target, fuzzy_band, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
+                VALUES ( '%s', '%s', '%s', '%s', %f, %f, %f, %u )
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
@@ -48,8 +130,9 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 $obj->date,
                 $obj->source,
                 $obj->target,
-                $obj->total_wordcount,
-                $obj->total_postediting_effort,
+                $obj->fuzzy_band,
+                $obj->total_word_count,
+                $obj->total_post_editing_effort,
                 $obj->total_time_to_edit,
                 (int)$obj->job_count
         );
@@ -65,12 +148,15 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param LanguageStats_LanguageStatsStruct $obj
-     *
-     * @return array|void
+     * @param DataAccess_IDaoStruct $obj
+     * @return array
      * @throws Exception
      */
-    public function read( LanguageStats_LanguageStatsStruct $obj ) {
+    public function read( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj LanguageStats_LanguageStatsStruct
+         */
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -98,6 +184,11 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
         }
 
+        if ( $obj->fuzzy_band !== null ) {
+            $condition          = "fuzzy_band = '%s'";
+            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
+        }
+
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
         } else {
@@ -106,9 +197,11 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $where_string );
 
-        $arr_result = $this->con->fetch_array( $query );
-
-        return $this->_buildResult( $arr_result );
+        
+        $stmt = $this->con->getConnection()->prepare( $query );
+        $stmt->execute();
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        return $stmt->fetchAll();
     }
 
     /**
@@ -118,23 +211,25 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function createList( Array $obj_arr ) {
+
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (date, source, target, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
+                " (date, source, target, fuzzy_band, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
                 VALUES %s
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count )";;
+                          job_count = values( job_count )";
 
-        $tuple_template = "( '%s', '%s', '%s', %f, %f, %f, %u )";
+        $tuple_template = "( '%s', '%s', '%s', '%s', %f, %f, %f, %u )";
 
         $values = array();
 
         //chunk array using MAX_INSERT_NUMBER
-        $objects = array_chunk( $obj_arr, self::MAX_INSERT_NUMBER );
+        $objects = array_chunk( $obj_arr, 20 );
 
+        $allInsertPerformed = true;
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
             foreach ( $chunk as $obj ) {
@@ -145,8 +240,9 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                         $obj->date,
                         $obj->source,
                         $obj->target,
-                        $obj->total_wordcount,
-                        $obj->total_postediting_effort,
+                        $obj->fuzzy_band,
+                        $obj->total_word_count,
+                        $obj->total_post_editing_effort,
                         $obj->total_time_to_edit,
                         (int)$obj->job_count
                 );
@@ -157,12 +253,19 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                     implode( ", ", $values )
             );
 
-            $this->con->query( $insert_query );
+
+            $stmt = $this->con->getConnection()->prepare( $insert_query );
+            $stmt->execute();
+
+            if($stmt->errorCode() > 0 ){
+                $allInsertPerformed = false;
+                break;
+            }
 
             $values = array();
         }
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $allInsertPerformed ) {
             return $obj_arr;
         }
 
@@ -175,7 +278,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      *
      * @param LanguageStats_LanguageStatsStruct $input
      *
-     * @return LanguageStats_LanguageStatsStruct
+     * @return DataAccess_IDaoStruct|LanguageStats_LanguageStatsStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
@@ -190,52 +293,26 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function sanitizeArray( Array $input ) {
+    public static function sanitizeArray( $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
-    /**
-     * See in DataAccess_AbstractDao::validatePrimaryKey
-     * @see DataAccess_AbstractDao::_validatePrimaryKey
-     *
-     * @param LanguageStats_LanguageStatsStruct $obj
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function _validatePrimaryKey( LanguageStats_LanguageStatsStruct $obj ) {
-
-        /**
-         * @var $obj LanguageStats_LanguageStatsStruct
-         */
-        if ( is_null( $obj->date ) || empty( $obj->date ) ) {
-            throw new Exception( "Invalid date" );
-        }
-
-        if ( is_null( $obj->source ) || empty( $obj->source ) ) {
-            throw new Exception( "Invalid source" );
-        }
-
-        if ( is_null( $obj->target ) || empty( $obj->target ) ) {
-            throw new Exception( "Invalid target" );
-        }
-
-    }
 
     /**
      * See in DataAccess_AbstractDao::validateNotNullFields
      * @see DataAccess_AbstractDao::_validateNotNullFields
      *
-     * @param LanguageStats_LanguageStatsStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
-     * @return null
+     * @return void
      * @throws Exception
      */
-    protected function _validateNotNullFields( LanguageStats_LanguageStatsStruct $obj ) {
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+
         /**
          * @var $obj LanguageStats_LanguageStatsStruct
          */
-        if ( is_null( $obj->total_postediting_effort ) || empty( $obj->total_postediting_effort ) ) {
+        if ( is_null( $obj->total_post_editing_effort ) || empty( $obj->total_post_editing_effort ) ) {
             throw new Exception( "Total postediting effort cannot be null" );
         }
 
@@ -248,41 +325,14 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             throw new Exception( "Job count cannot be null" );
         }
 
-        if ( is_null( $obj->total_wordcount ) ) {
+        if ( is_null( $obj->total_word_count ) ) {
             throw new Exception( "Total wordcount cannot be null" );
         }
 
-    }
-
-    /**
-     * Builds an array with a result set according to the data structure it handles.
-     *
-     * @param $array_result array A result array obtained by a MySql query
-     *
-     * @return LanguageStats_LanguageStatsStruct[] An array containing LanguageStats_LanguageStatsStruct objects
-     */
-    protected function _buildResult( $array_result ) {
-        $result = array();
-
-        foreach ( $array_result as $item ) {
-
-            $build_arr = array(
-                    'date'                     => $item[ 'date' ],
-                    'source'                   => $item[ 'source' ],
-                    'target'                   => $item[ 'target' ],
-                    'total_wordcount'          => $item[ 'total_word_count' ],
-                    'total_postediting_effort' => $item[ 'total_post_editing_effort' ],
-                    'total_time_to_edit'       => $item[ 'total_time_to_edit' ],
-                    'job_count'                => $item[ 'job_count' ],
-            );
-
-            $obj = new LanguageStats_LanguageStatsStruct( $build_arr );
-
-            $result[] = $obj;
+        if ( is_null( $obj->fuzzy_band ) ) {
+            throw new Exception( "Fuzzy band cannot be null" );
         }
 
-        return $result;
     }
-
 
 }

@@ -1,17 +1,20 @@
 <html>
 <head>
-<script type="text/JavaScript" language="javascript">
-function doload(url){
-        if( url != '/' ) {
-            window.opener.location.href = url;
-        } else {
-            window.opener.location.reload();
-        }
-        self.close();
-}
+<script type="text/javascript" language="javascript">
+    /*<![CDATA[*/
+    var config = {
+        wanted_url : '${wanted_url | string: }'
+    };
+
+    if ( config.wanted_url ) {
+        window.localStorage.setItem( 'wanted_url', config.wanted_url ) ;
+    }
+
+    window.close();
+
+    /*]]>*/
 </script>
 </head>
-<body tal:attributes="onload javascript_loader" >
-<p id="loader" style="display:none; margin:130px auto 0 auto;text-align:center"><img src="http://www.translated.net/it/pub/images/loading.gif"/></p>
+<body>
 </body>
 </html>

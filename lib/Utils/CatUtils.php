@@ -32,6 +32,10 @@ class CatUtils {
 
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
+    public static function isCJK( $langCode ){
+        return array_key_exists( explode( '-', $langCode )[0], self::$cjk ) ;
+    }
+
     // ----------------------------------------------------------------
 
     public static function placeholdamp($s) {
@@ -41,7 +45,7 @@ class CatUtils {
 
     public static function restoreamp($s) {
         $pattern = "#" . AMPPLACEHOLDER . "#";
-        $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
+        $s = preg_replace($pattern, self::unicode2chr("&"), $s);
         return $s;
     }
 
@@ -51,6 +55,13 @@ class CatUtils {
         }
 
         $usec = $ms % 1000;
+
+        if ( !is_numeric( $ms ) ) {
+            throw new InvalidArgumentException("Wrong DataType provided: " . var_export( $ms, true ) . "\n Expected integer.");
+        }
+
+        $ms = (int)$ms;
+
         $ms = floor($ms / 1000);
 
         $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
@@ -72,6 +83,11 @@ class CatUtils {
         return $dosString;
     }
 
+    /**
+     * @param $segment
+     * @return mixed
+     * @deprecated
+     */
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
         $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
@@ -128,7 +144,8 @@ class CatUtils {
 
         if( !function_exists( 'callback_decode' ) ){
             function callback_decode( $matches ) {
-                return LTPLACEHOLDER . base64_decode( $matches[1] ) . GTPLACEHOLDER;
+                $_match =  base64_decode( $matches[1] );
+                return LTPLACEHOLDER . $_match . GTPLACEHOLDER;
             }
         }
 
@@ -141,6 +158,12 @@ class CatUtils {
 
     private static function restore_xliff_tags($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/[\'"]base64:(.+)[\'"]/U', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/[\'"]base64:(.+)[\'"]/U', '"' . base64_decode( $tag_attribute[ 1 ] ) . '"', $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(GTPLACEHOLDER, ">", $segment);
         return $segment;
@@ -148,6 +171,13 @@ class CatUtils {
 
     public static function restore_xliff_tags_for_view($segment) {
         $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/equiv-text\s*?=\s*?"(.*?)"|equiv-text\s*?=\s*?\'(.*?)\'/', $segment, $html, PREG_SET_ORDER );
+        foreach( $html as $tag_attribute ){
+            //replace subsequent elements excluding already encoded
+            $segment = preg_replace( '/equiv-text\s*?=\'(?!base64:)(.*?)\'|equiv-text\s*?="(?!base64:)(.*?)"/', 'equiv-text="base64:' . base64_encode( $tag_attribute[ 1 ] ) . "\"", $segment, 1 );
+        }
+
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
@@ -212,7 +242,7 @@ class CatUtils {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
 
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -287,6 +317,14 @@ class CatUtils {
 
     public static function view2rawxliff($segment) {
 
+        //normal control characters should not be sent by the client
+        $segment = str_replace(
+                array(
+                        "\r", "\n", "\t",
+                        "&#0A;", "&#0D;", "&#09;"
+                ), "", $segment
+        );
+
         //Replace br placeholders
         $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
         $segment = str_replace( self::lfPlaceholder,"\n", $segment );
@@ -306,10 +344,10 @@ class CatUtils {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
 
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( self::nbspPlaceholder, Utils::unicode2chr(0Xa0) , $segment );
+        $segment = str_replace( self::nbspPlaceholder, self::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -324,7 +362,8 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/[[:blank:]]{2}/', " &nbsp;", $segment);
+        $segment = preg_replace('/[ ]{2}/', "&nbsp; ", $segment);
+        $segment = preg_replace('/[ ]$/', "&nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
@@ -340,13 +379,12 @@ class CatUtils {
         $segment = str_replace("\n", self::lfPlaceholder, $segment );
         $segment = str_replace("\r", self::crPlaceholder, $segment ); //x0D character
         $segment = str_replace("\t", self::tabPlaceholder, $segment ); //x09 character
-        $segment = preg_replace( '/\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
+        $segment = preg_replace( '/[\x{c2}]{0,1}\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 
     /**
-     * No more used
-     * @deprecated
+     * Used to export Database XML string into TMX files as valid XML
      *
      * @param $segment
      *
@@ -355,295 +393,22 @@ class CatUtils {
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        $segment = htmlspecialchars( $segment, ENT_XML1 | ENT_QUOTES, 'UTF-8', false );
         $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
     }
 
-    //TODO: used only by editLogDownloadController. Move it to editLogModel
-    public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
+    public static function addSegmentTranslation( array $_Translation, array &$errors ) {
 
-        $data = getEditLog($jid, $password);
-
-        $slow_cut = 30;
-        $fast_cut = 0.25;
-
-        $stat_too_slow = array();
-        $stat_too_fast = array();
-
-
-        if (!$data) {
-            return false;
+        try {
+            //if needed here can be placed a check for affected_rows == 0 //( $updateRes )
+            $updateRes = addTranslation( $_Translation );
+        } catch ( Exception $e ){
+            $errors[] = array( "code" => -101, "message" => $e->getMessage() );
         }
 
-        $stats['total-word-count'] = 0;
-        $stat_mt = array();
+        return $errors;
 
-
-        foreach ($data as &$seg) {
-
-            $seg['sm'].="%";
-            $seg['jid'] = $jid;
-            $tte = self::parse_time_to_edit($seg['tte']);
-            $seg['time_to_edit'] = "$tte[1]m:$tte[2]s";
-
-            $stat_rwc[] = $seg['rwc'];
-
-            // by definition we cannot have a 0 word sentence. It is probably a - or a tag, so we want to consider at least a word.
-            if ($seg['rwc'] < 1) {
-                $seg['rwc'] = 1;
-            }
-
-            $seg['secs-per-word'] = round($seg['tte'] / 1000 / $seg['rwc'], 1);
-
-            if (($seg['secs-per-word'] < $slow_cut) AND ($seg['secs-per-word'] > $fast_cut)) {
-                $seg['stats-valid'] = 'Yes';
-                $seg['stats-valid-color'] = '';
-                $seg['stats-valid-style'] = '';
-
-                $stat_valid_rwc[] = $seg['rwc'];
-                $stat_valid_tte[] = $seg['tte'];
-                $stat_spw[] = $seg['secs-per-word'];
-            } else {
-                $seg['stats-valid'] = 'No';
-                $seg['stats-valid-color'] = '#ee6633';
-                $seg['stats-valid-style'] = 'border:2px solid #EE6633';
-            }
-
-
-            // Stats
-            if ($seg['secs-per-word'] >= $slow_cut) {
-                $stat_too_slow[] = $seg['rwc'];
-            }
-            if ($seg['secs-per-word'] <= $fast_cut) {
-                $stat_too_fast[] = $seg['rwc'];
-            }
-
-
-            $seg['pe_effort_perc'] = round((1 - MyMemory::TMS_MATCH($seg['sug'], $seg['translation'])) * 100);
-
-
-            if ($seg['pe_effort_perc'] < 0) {
-                $seg['pe_effort_perc'] = 0;
-            }
-            if ($seg['pe_effort_perc'] > 100) {
-                $seg['pe_effort_perc'] = 100;
-            }
-
-            $stat_pee[] = $seg['pe_effort_perc'] * $seg['rwc'];
-
-            $seg['pe_effort_perc'] .= "%";
-
-            $lh = Langs_Languages::getInstance();
-            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
-
-            $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );
-            $tra_for_diff = self::placehold_xliff_tags( $seg[ 'translation' ] );
-
-//            possible patch
-//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
-//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
-
-            //with this patch we have warnings when accessing indexes
-            if( $use_ter_diff  ){
-                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-            } else {
-                $ter = array();
-            }
-
-//            Log::doLog( $sug_for_diff );
-//            Log::doLog( $tra_for_diff );
-//            Log::doLog( $ter );
-
-            $seg[ 'ter' ] = @$ter[ 1 ] * 100;
-            $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
-            $seg[ 'ter' ] = round( @$ter[ 1 ] * 100 ) . "%";
-            $diff_ter     = @$ter[ 0 ];
-
-            if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
-
-                //force use of third party ter diff
-                if( $use_ter_diff ){
-                    $seg[ 'diff' ] = $diff_ter;
-                } else {
-                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
-                    // we will use diff_PE until ter_diff will not work properly
-                    $seg[ 'diff' ]     = $diff_PE;
-                }
-
-                //$seg[ 'diff_ter' ] = $diff_ter;
-
-            } else {
-                $seg[ 'diff' ]     = '';
-                //$seg[ 'diff_ter' ] = '';
-            }
-
-            $seg['diff']     = self::restore_xliff_tags_for_view($seg['diff']);
-            //$seg['diff_ter'] = self::restore_xliff_tags_for_view($seg['diff_ter']);
-
-            // BUG: While suggestions source is not correctly set
-            if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
-                $seg['ss'] = 'Machine Translation';
-                $stat_mt[] = $seg['rwc'];
-            } else {
-                $seg['ss'] = 'Translation Memory';
-            }
-
-            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
-            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
-            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
-
-            $array_patterns     = array(
-                    rtrim( self::lfPlaceholderRegex, 'g' ) ,
-                    rtrim( self::crPlaceholderRegex, 'g' ),
-                    rtrim( self::crlfPlaceholderRegex, 'g' ),
-                    rtrim( self::tabPlaceholderRegex, 'g' ),
-                    rtrim( self::nbspPlaceholderRegex, 'g' ),
-            );
-
-
-            $array_replacements_csv = array(
-                    '\n',
-                    '\r',
-                    '\r\n',
-                    '\t',
-                    Utils::unicode2chr(0Xa0),
-            );
-            $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
-            $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
-            $seg['sug_csv'] =  preg_replace( $array_patterns, $array_replacements_csv, $seg['sug_view'] );
-            $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
-
-
-            $array_replacements = array(
-                    '<span class="_0A"></span><br />',
-                    '<span class="_0D"></span><br />',
-                    '<span class="_0D0A"></span><br />',
-                    '<span class="_tab">&#9;</span>',
-                    '<span class="_nbsp">&nbsp;</span>',
-            );
-            $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
-            $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
-            $seg['sug_view'] =  preg_replace( $array_patterns, $array_replacements, $seg['sug_view'] );
-            $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
-
-            if( $seg['mt_qe'] == 0 ){
-                $seg['mt_qe'] = 'N/A';
-            }
-
-        }
-
-        $stats['edited-word-count'] = array_sum($stat_rwc);
-        $stats['valid-word-count'] = array_sum($stat_valid_rwc);
-
-        if ($stats['edited-word-count'] > 0) {
-            $stats['too-slow-words'] = round(array_sum($stat_too_slow) / $stats['edited-word-count'], 2) * 100;
-            $stats['too-fast-words'] = round(array_sum($stat_too_fast) / $stats['edited-word-count'], 2) * 100;
-            $stats['avg-pee'] = round(array_sum($stat_pee) / array_sum($stat_rwc)) . "%";
-            $stats['avg-ter'] = round(array_sum($stat_ter) / array_sum($stat_rwc)) . "%";
-        }
-//        echo array_sum($stat_ter);
-//        echo "@@@";
-//        echo array_sum($stat_rwc);
-//        exit;
-
-        $stats['mt-words'] = round(array_sum($stat_mt) / $stats['edited-word-count'], 2) * 100;
-        $stats['tm-words'] = 100 - $stats['mt-words'];
-        $stats['total-valid-tte'] = round(array_sum($stat_valid_tte) / 1000);
-
-        // Non weighted...
-        // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
-        // Weighted
-        $stats['avg-secs-per-word'] = round($stats['total-valid-tte'] / $stats['valid-word-count'], 1);
-        $stats['est-words-per-day'] = number_format(round(3600 * 8 / $stats['avg-secs-per-word']), 0, '.', ',');
-
-        // Last minute formatting (after calculations)
-        $temp = self::parse_time_to_edit(round(array_sum($stat_valid_tte)));
-        $stats['total-valid-tte'] = "$temp[0]h:$temp[1]m:$temp[2]s";
-
-        $stats['total-tte-seconds'] = $temp[0] * 3600 + $temp[1] * 60 + $temp[2];
-
-        return array($data, $stats);
-    }
-
-    public static function addSegmentTranslation( array $_Translation ) {
-
-        $updateRes = addTranslation( $_Translation );
-
-        if ($updateRes < 0) {
-            $result['errors'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
-            return $result;
-        }
-
-        return 0;
-
-    }
-
-    /**
-     * No More used
-     *
-     * @deprecated
-     *
-     * @param        $id_segment
-     * @param        $id_job
-     * @param string $suggestions_json_array
-     * @param string $suggestion
-     * @param string $suggestion_match
-     * @param string $suggestion_source
-     * @param string $match_type
-     * @param int    $eq_words
-     * @param int    $standard_words
-     * @param string $translation
-     * @param string $tm_status_analysis
-     * @param int    $warning
-     * @param string $err_json
-     * @param int    $mt_qe
-     * @param int    $pretranslate_100
-     *
-     * @return int
-     */
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0, $pretranslate_100 = 0) {
-        if (!empty($suggestion_source)) {
-            if (strpos($suggestion_source, "MT") === false) {
-                $suggestion_source = 'TM';
-            } else {
-                $suggestion_source = 'MT';
-            }
-        }
-
-        /**
-         * For future refactory, with this SQL construct we halve the number of insert/update queries
-         *
-         * mysql support this:
-         *
-         *  INSERT INTO example (id,suggestions_array) VALUES (1,'["key":"we don\'t want this update because of tm_analysis_status is not DONE"]')
-         *      ON DUPLICATE KEY UPDATE
-         *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
-         *
-         */
-
-        $segment_status = 'NEW';
-        //controllare il valore di suggestion_match
-        if($suggestion_match == "100%" && $pretranslate_100){
-            $segment_status = 'TRANSLATED';
-        }
-
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe, $segment_status);
-        if ($insertRes < 0 and $insertRes != -1062) {
-            $result['errors'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
-            return $result;
-        }
-        if ($insertRes == -1062) {
-            // the translaion for this segment still exists : update it
-            if($segment_status !== 'TRANSLATED') $segment_status = null;
-
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe, $segment_status);
-            if ($updateRes < 0) {
-                $result['errors'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
-                return $result;
-            }
-        }
-        return 0;
     }
 
     /**
@@ -672,7 +437,7 @@ class CatUtils {
                 // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
                 // 1 h 32 m
                 // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-                $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )* 3600 - 3600);
+                $job_stats['ESTIMATED_COMPLETION'] = date("z\d G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED'])*3600 / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )-3600);
             }
         }
 
@@ -747,8 +512,10 @@ class CatUtils {
         $todo = $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
         if( $todo < 1 && $todo > 0 ){
             $job_stats[ 'TODO_FORMATTED' ] = 1;
+            $job_stats[ 'TODO' ] = 1;
         } else {
             $job_stats[ 'TODO_FORMATTED' ] = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+            $job_stats[ 'TODO' ] = (float)number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "" );
         }
 
         $t = 'approved';
@@ -798,7 +565,7 @@ class CatUtils {
         $job_stats = getStatsForJob($jid, $fid, $jPassword);
         $job_stats = $job_stats[0];
 
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -808,7 +575,7 @@ class CatUtils {
      *
      * @return array
      */
-    public static function getFastStatsForJob( WordCount_Struct $wCount ){
+    public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ){
 
         $job_stats = array();
         $job_stats[ 'id' ]         = $wCount->getIdJob();
@@ -826,7 +593,12 @@ class CatUtils {
         //avoid division by zero warning
         $total = $wCount->getTotal();
         $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
+
+        if( !$performanceEstimation ){
+            return $job_stats;
+        }
+
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -846,10 +618,19 @@ class CatUtils {
         return $file_stats;
     }
 
-    public static function clean_raw_string4fast_word_count( $string, $source_lang = 'en-US' ){
+    /**
+     * Remove Tags and treat numbers as one word
+     *
+     * @param        $string
+     * @param string $source_lang
+     *
+     * @return mixed|string
+     */
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US' ){
 
-        $app = trim( $string );
-        if ( $app == "" ) {
+        //return empty on string composed only by spaces
+        //do nothing
+        if ( preg_replace( '#[\p{Z}]+#u', '', $string ) == '' ) {
             return '';
         }
 
@@ -859,56 +640,28 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        $string = preg_replace( "#<.*?" . ">#si", "", $string );
-        $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
+        $string = preg_replace( '#<.*?>#si', ' ', $string );
+        $string = preg_replace( '#<\/.*?>#si', ' ', $string );
 
-        /*
-         * Remove Unicode:
-         * P -> Punctuation
-         * Z -> Separator ( but not spaces )
-         * C -> Other
+        //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
+        $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
+
+        /**
+         * Count numbers as One Word
          */
-        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', "", $string );
-
-        //these could be superfluous
-        $string = str_replace( ":", "", $string );
-        $string = str_replace( ";", "", $string );
-        $string = str_replace( "[", "", $string );
-        $string = str_replace( "]", "", $string );
-        $string = str_replace( "?", "", $string );
-        $string = str_replace( "!", "", $string );
-        $string = str_replace( "{", "", $string );
-        $string = str_replace( "}", "", $string );
-        $string = str_replace( "(", "", $string );
-        $string = str_replace( ")", "", $string );
-        $string = str_replace( "/", "", $string );
-        $string = str_replace( "\\", "", $string );
-        $string = str_replace( "|", "", $string );
-        $string = str_replace( "£", "", $string );
-        $string = str_replace( "$", "", $string );
-        $string = str_replace( "%", "", $string );
-        $string = str_replace( "-", "", $string );
-        $string = str_replace( "_", "", $string );
-        $string = str_replace( "#", "", $string );
-        $string = str_replace( "§", "", $string );
-        $string = str_replace( "^", "", $string );
-        $string = str_replace( "â€???", "", $string );
-        $string = str_replace( "&", "", $string );
-
-
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
 
             // 17/01/2014
             // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
             // in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "N", $string );
+            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'N', $string );
 
         } else {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "TRANSLATED_NUMBER", $string );
+            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'TRANSLATED_NUMBER', $string );
 
         }
 
@@ -916,58 +669,65 @@ class CatUtils {
 
     }
 
-    //CONTA LE PAROLE IN UNA STRINGA
+    /**
+     * Count words in a string
+     *
+     * @param        $string
+     * @param string $source_lang
+     *
+     * @return float|int
+     */
     public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
 
-		if(strpos($source_lang,'-')!==FALSE){
-			$tmp_lang=explode('-',$source_lang);
-			$source_lang=$tmp_lang[0];
-			unset($tmp_lang);
-		}
+        $string = self::clean_raw_string_4_word_count( $string, $source_lang );
+        
+        /**
+         * Escape dash and underscore and replace them with Macro and Cedilla characters!
+         *
+         * Dash and underscore must not be treated as separated words
+         * Macro and Cedilla characters are not replaced by unicode regular expressions below
+         */
+        $string = str_replace( array( '-', '_' ), array( "¯", '¸' ), $string );
 
-        $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
+        /**
+         * Remove Unicode:
+         * @see http://php.net/manual/en/regexp.reference.unicode.php
+         * P -> Punctuation
+         * Z -> Separator ( but not spaces )
+         * C -> Other
+         */
+        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
+
+        /**
+         * Now reset chars
+         */
+        $string = str_replace( array( "¯", '¸' ), array( '-', '_' ), $string );
+
 
         //check for a string made of spaces only, after the string was cleaned
-        if ( preg_replace( '#[\p{Z}]+#u', "", $string ) == "" ) {
+        $string_with_no_spaces = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $string );
+        if ( $string_with_no_spaces == "" ) {
             return 0;
         }
 
-        if ( array_key_exists( $source_lang, self::$cjk ) ) {
+        //first two letter of code lang
+        $source_lang_two_letter = explode( "-" , $source_lang )[0];
+        if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
 
-            $res = mb_strlen( $string, 'UTF-8' ) / self::$cjk[ $source_lang ];
+            $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
 
         } else {
 
             $string = str_replace( " ", "<sep>", $string );
-            $string = str_replace( "  ", "<sep>", $string ); //Non breaking space
+            $string = str_replace( " ", "<sep>", $string ); //use breaking spaces also
 
-            $string = str_replace( "„", "<sep>", $string );
-            $string = str_replace( "‚", "<sep>", $string ); //single low quotation mark
-            $string = str_replace( "‘", "<sep>", $string );
-            $string = str_replace( "’", "<sep>", $string );
-            $string = str_replace( "“", "<sep>", $string );
-            $string = str_replace( "”", "<sep>", $string );
-            $string = str_replace( "·", "<sep>", $string ); //Middle dot - Georgian comma
-            $string = str_replace( "«", "<sep>", $string );
-            $string = str_replace( "»", "<sep>", $string );
+            $words_array = explode( "<sep>", $string );
+            $words_array = array_filter( $words_array, function ( $word ) {
+                return trim( $word ) != "";
+            } );
 
-            $string = str_replace( ", ", "<sep>", $string );
-            $string = str_replace( ". ", "<sep>", $string );
-            $string = str_replace( "' ", "<sep>", $string );
-            $string = str_replace( ".", "<sep>", $string );
-            $string = str_replace( "\"", "<sep>", $string );
-            $string = str_replace( '\'', "<sep>", $string );
+            $res = @count( $words_array );
 
-            $app = explode( "<sep>", $string );
-            foreach ( $app as $a ) {
-                $a = trim( $a );
-                if ( $a != "" ) {
-                    //voglio contare anche i numeri:
-                    $temp[ ] = $a;
-                }
-            }
-
-            $res = @count( $temp );
         }
 
         return $res;
@@ -980,6 +740,9 @@ class CatUtils {
      *
      * Minimum Password Length 12 Characters
      *
+     * @param int $length
+     *
+     * @return bool|string
      */
     public static function generate_password( $length = 12 ) {
 
@@ -1042,39 +805,11 @@ class CatUtils {
     /**
      * Get the char code from a multi byte char
      *
-     * 2 times faster than the old implementation
-     *
-     * @param $c string Unicode Multibyte Char String
-     * @return int
-     *
-     * @deprecated Too slow
-     */
-    public static function unicode2ord($c) {
-        if (ord($c{0}) >= 0 && ord($c{0}) <= 127)
-            return ord($c{0});
-        if (ord($c{0}) >= 192 && ord($c{0}) <= 223)
-            return (ord($c{0}) - 192) * 64 + (ord($c{1}) - 128);
-        if (ord($c{0}) >= 224 && ord($c{0}) <= 239)
-            return (ord($c{0}) - 224) * 4096 + (ord($c{1}) - 128) * 64 + (ord($c{2}) - 128);
-        if (ord($c{0}) >= 240 && ord($c{0}) <= 247)
-            return (ord($c{0}) - 240) * 262144 + (ord($c{1}) - 128) * 4096 + (ord($c{2}) - 128) * 64 + (ord($c{3}) - 128);
-        if (ord($c{0}) >= 248 && ord($c{0}) <= 251)
-            return (ord($c{0}) - 248) * 16777216 + (ord($c{1}) - 128) * 262144 + (ord($c{2}) - 128) * 4096 + (ord($c{3}) - 128) * 64 + (ord($c{4}) - 128);
-        if (ord($c{0}) >= 252 && ord($c{0}) <= 253)
-            return (ord($c{0}) - 252) * 1073741824 + (ord($c{1}) - 128) * 16777216 + (ord($c{2}) - 128) * 262144 + (ord($c{3}) - 128) * 4096 + (ord($c{4}) - 128) * 64 + (ord($c{5}) - 128);
-        if (ord($c{0}) >= 254 && ord($c{0}) <= 255)    //  error
-            return FALSE;
-        return 0;
-    }
-
-    /**
-     * Get the char code from a multi byte char
-     *
      * 2/3 times faster than the old implementation
      *
      * @param $mb_char string Unicode Multibyte Char String
      *
-*@return int
+     * @return int
      *
      */
     public static function fastUnicode2ord( $mb_char ){
@@ -1104,42 +839,132 @@ class CatUtils {
         return "&#" . self::fastUnicode2ord( $str[1] ) . ";";
     }
 
-    public static function getTMProps( $job_data ){
+    // multibyte string manipulation functions
+    // source : http://stackoverflow.com/questions/9361303/can-i-get-the-unicode-value-of-a-character-or-vise-versa-with-php
+    // original source : PHPExcel libary (http://phpexcel.codeplex.com/)
+    // get the char from unicode code
+    public static function unicode2chr( $o ) {
+        if ( function_exists( 'mb_convert_encoding' ) ) {
+            return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
+        } else {
+            return chr( intval( $o ) );
+        }
+    }
 
-        try {
-            $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-            $redisHandler->get(1); //ping established connection
-        } catch ( Exception $e ) {
-            $redisHandler = null;
-            Log::doLog( $e->getMessage() );
-            Log::doLog( "No Redis server(s) available." );
+    /**
+     * @param $job
+     * @return WordCount_Struct
+     */
+    public static function getWStructFromJobArray( $job ) {
+        $job = Utils::ensure_keys($job, array(
+            'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
+            'status_analysis', 'jid', 'jpassword'
+        ));
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $job['jid'] ) ;
+        $wStruct->setJobPassword($job['jpassword']);
+        $wStruct->setNewWords($job['new_words']);
+        $wStruct->setDraftWords($job['draft_words']);
+        $wStruct->setTranslatedWords($job['translated_words']);
+        $wStruct->setApprovedWords($job['approved_words']);
+        $wStruct->setRejectedWords($job['rejected_words']);
+
+        // For projects created with No tm analysis enabled
+        if ($wStruct->getTotal() == 0 && ($job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE || $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
+            $wCounter = new WordCount_Counter();
+            $wStruct = $wCounter->initializeJobWordCount($job['jid'], $job['jpassword'] );
+            Log::doLog("BackWard compatibility set Counter.");
+            return $wStruct;
+        }
+        return $wStruct;
+    }
+
+    /**
+     * Returns the string representing the overall quality for a job,
+     * taking into account both old revision and new revision.
+     *
+     * @param $job
+     * @return string
+     */
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
+
+        $values = self::getQualityInfoFromJobStruct( $job );
+
+        $result = null ;
+
+        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+            $result = @$values->is_pass ? 'excellent' : 'fail' ;
+        } else {
+            $result = strtolower( $values['minText'] ) ;
         }
 
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $_existingResult = $redisHandler->get( "project_data_for_job_id:" . $job_data['id'] );
-            if ( !empty( $_existingResult ) ) {
-                return unserialize( $_existingResult );
-            }
-        }
+        return $result ;
+    }
 
-        $projectData = getProjectJobData( $job_data['id_project'] );
+    /**
+     * @param Jobs_JobStruct $job
+     *
+     * @return array|\LQA\ChunkReviewStruct|null
+     *
+     */
+    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job ){
 
-        $result = array(
-                'project_id'   => $projectData[ 0 ][ 'pid' ],
-                'project_name' => $projectData[ 0 ][ 'pname' ],
-                'job_id'       => $job_data[ 'id' ],
-        );
+        $result = null ;
 
-        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
-            $redisHandler->setex(
-                    "project_data_for_job_id:" . $job_data['id'],
-                    60 * 60 * 24 * 15, /* 15 days of lifetime */
-                    serialize( $result )
+        $project = $job->getProject();
+        $featureSet = $project->getFeatures();
+
+        if ( in_array( Features::REVIEW_IMPROVED, $featureSet->getCodes() ) ) {
+            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
+            $result = $review;
+        } else {
+            $struct = CatUtils::getWStructFromJobStruct( $job, $project->status_analysis ) ;
+
+            $reviseClass = new Constants_Revise;
+
+            $jobQA = new Revise_JobQA(
+                    $job->id, $job->password, $struct->getTotal()
+                    , $reviseClass
             );
+
+
+            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
+            $jobQA->retrieveJobErrorTotals();
+            $result = $jobQA->evalJobVote();
         }
 
-        return $result;
+        return $result ;
 
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     * @param                $analysis_status
+     *
+     * @return WordCount_Struct
+     */
+    public static function getWStructFromJobStruct( Jobs_JobStruct $job, $analysis_status ) {
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $job->id ) ;
+        $wStruct->setJobPassword( $job->password );
+        $wStruct->setNewWords($job->new_words );
+        $wStruct->setDraftWords($job->draft_words );
+        $wStruct->setTranslatedWords( $job->translated_words );
+        $wStruct->setApprovedWords( $job->approved_words );
+        $wStruct->setRejectedWords( $job->rejected_words );
+
+        // For projects created with No tm analysis enabled
+        if ($wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
+            $wCounter = new WordCount_Counter();
+            $wStruct = $wCounter->initializeJobWordCount( $job->id, $job->password );
+            Log::doLog("BackWard compatibility set Counter.");
+            return $wStruct;
+        }
+        return $wStruct;
     }
 
 }

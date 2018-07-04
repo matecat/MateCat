@@ -35,6 +35,13 @@ class MultiCurlHandler {
     protected $curl_headers_requests = array();
 
     /**
+     * Array to store the options passed when creating the resource, for debug purpose
+     *
+     * @var array
+     */
+    protected $curl_options_requests = array();
+
+    /**
      * Container for the curl results
      *
      * @var array
@@ -48,16 +55,17 @@ class MultiCurlHandler {
      */
     protected $multi_curl_info = array();
 
+    public $verbose = false ;
+
     /**
      * Class Constructor, init the multi curl handler
      *
      */
     public function __construct() {
-
         $this->multi_handler = curl_multi_init();
 
         Utils::getPHPVersion();
-        if ( PHP_MINOR_VERSION >= 5 ) {
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
 //          curl_multi_setopt only for (PHP 5 >= 5.5.0) Default 10
 
             curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
@@ -131,11 +139,13 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]                 = curl_getinfo( $curl_resource, CURLINFO_SIZE_UPLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]                 = curl_getinfo( $curl_resource, CURLINFO_HEADER_SIZE );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_out' ]                  = curl_getinfo( $curl_resource, CURLINFO_HEADER_OUT );
             $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                            = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
+            $this->multi_curl_info[ $tokenHash ][ 'primary_ip' ]                           = curl_getinfo( $curl_resource, CURLINFO_PRIMARY_IP );
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
             //TIMING
             $timing = array(
@@ -149,7 +159,7 @@ class MultiCurlHandler {
                                             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_starttransfer_transfer_time' ]
                                     ) * 1000000 ) ) . "μs"
             );
-            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
+            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = $timing;
 
             //HEADERS
             if ( isset( $this->curl_headers_requests[ $tokenHash ] ) ) {
@@ -162,10 +172,18 @@ class MultiCurlHandler {
                 $this->curl_headers_requests[ $tokenHash ] = $header;
             }
 
-            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
+            Log::doLog( "$tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
 
+            if ( $this->verbose ) {
+
+                Log::doLog("$tokenHash options: " . var_export( @$this->curl_options_requests[ $tokenHash ], true ) ) ;
+
+                if ( $this->hasError( $tokenHash ) ) {
+                    Log::doLog("$tokenHash error: " . var_export( $this->getError($tokenHash), true ) ) ;
+                    Log::doLog("$tokenHash body: "  . var_export( $this->getSingleContent($tokenHash), true ) ) ;
+                }
+            }
         }
-
     }
 
     /**
@@ -215,14 +233,16 @@ class MultiCurlHandler {
      */
     public function createResource( $url, $options, $tokenHash = null ) {
 
-        if ( empty( $tokenHash ) ) {
+        if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( "", true ) );
         }
 
         $curl_resource = curl_init();
 
         curl_setopt( $curl_resource, CURLOPT_URL, $url );
-        curl_setopt_array( $curl_resource, $options );
+        @curl_setopt_array( $curl_resource, $options );
+
+        $this->curl_options_requests[ $tokenHash ] = $options ;
 
         return $this->addResource( $curl_resource, $tokenHash );
 
@@ -239,7 +259,7 @@ class MultiCurlHandler {
      */
     public function addResource( $curl_resource, $tokenHash = null ) {
 
-        if ( $tokenHash == null ) {
+        if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( '', true ) );
         }
 
@@ -325,6 +345,21 @@ class MultiCurlHandler {
      */
     public function hasError( $tokenHash ) {
         return ( !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0 ) || (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ] >= 400;
+    }
+
+    /**
+     * Returns an array with errors on each resource. Returns empty array in case of no errors.
+     *
+     * @return array
+     */
+    public function getErrors() {
+        $map = array_map( function( $tokenHash ) {
+            if ( $this->hasError( $tokenHash ) ) {
+                return $this->getError( $tokenHash );
+            }
+        }, array_keys( $this->multi_curl_info ) ) ;
+
+        return array_filter( $map );  // <- remove null array entries
     }
 
 } 

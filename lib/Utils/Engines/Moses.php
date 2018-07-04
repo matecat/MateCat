@@ -9,7 +9,7 @@
  * 
  */
 
-class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInterface {
+class Engines_Moses extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,
@@ -25,14 +25,6 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
         if ( $this->engineRecord->type != "MT" ) {
             throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
-    }
-
-    protected function _fixLangCode( $lang ) {
-
-        $lang = strtolower( trim( $lang ) );
-        $l = explode( "-", $lang );
-        return $l[0];
-
     }
 
     /**

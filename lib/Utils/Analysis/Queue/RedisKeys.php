@@ -1,7 +1,4 @@
 <?php
-
-namespace Analysis\Queue;
-
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,7 +6,21 @@ namespace Analysis\Queue;
  * Time: 13.37
  *
  */
+
+namespace Analysis\Queue;
+
+/**
+ * Class RedisKeys
+ * @package Analysis\Queue
+ *
+ * This class contains the constant strings used by the analysis to set/get values on Redis
+ */
 class RedisKeys {
+
+    /**
+     * FallBack for bugs on key name to not loose messages
+     */
+    const DEFAULT_QUEUE_NAME = " unknown_queue";
 
     /**
      * Key that holds the number of segments to wait before this job executed
@@ -45,7 +56,7 @@ class RedisKeys {
     /**
      * Key that holds the process ids of all fast analyses
      */
-    const FAST_PID_LIST = 'fast_pid_list';
+    const FAST_PID_SET = 'fast_pid_set';
 
     /**
      * Key that holds the lock for the first analysis demon child

@@ -7,7 +7,7 @@
  * Time: 11.59
  *
  */
-abstract class Engines_AbstractEngine {
+abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @var EnginesModel_EngineStruct
@@ -16,7 +16,7 @@ abstract class Engines_AbstractEngine {
 
     protected $className;
     protected $_config = array();
-    protected $result;
+    protected $result = [];
     protected $error = array();
 
     protected $curl_additional_params = array();
@@ -25,6 +25,11 @@ abstract class Engines_AbstractEngine {
     protected $_patterns_found = array();
 
     public $doLog = true;
+
+    protected $_isAnalysis   = false;
+    protected $_skipAnalysis = false;
+
+    protected $featureSet ;
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
@@ -39,6 +44,30 @@ abstract class Engines_AbstractEngine {
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
+        $this->featureSet = new FeatureSet() ;
+    }
+
+    /**
+     * @param bool $bool
+     *
+     * @return $this
+     */
+    public function setAnalysis( $bool = true ){
+        $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
+        return $this;
+    }
+
+    /**
+     * Override when some string languages are different
+     *
+     * @param $lang
+     *
+     * @return mixed
+     */
+    protected function _fixLangCode( $lang ){
+        $l = explode( "-", strtolower( trim( $lang ) ) );
+
+        return $l[ 0 ];
     }
 
     /**
@@ -48,7 +77,7 @@ abstract class Engines_AbstractEngine {
      *
      * @return string
      */
-    protected function _preserveSpecialStrings( $_string ) {
+    public function _preserveSpecialStrings( $_string ) {
 
         preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
         $matches = $matches[ 0 ];
@@ -71,7 +100,7 @@ abstract class Engines_AbstractEngine {
         return $_string;
     }
 
-    protected function _resetSpecialStrings( $_string ) {
+    public function _resetSpecialStrings( $_string ) {
 
         if( ! is_array( $this->_patterns_found ) ) return $_string;
 
@@ -118,7 +147,7 @@ abstract class Engines_AbstractEngine {
 
     abstract protected function _decode( $rawValue );
 
-    protected function _call( $url, Array $curl_options = array() ) {
+    public function _call( $url, Array $curl_options = array() ) {
 
         $mh       = new MultiCurlHandler();
         $uniq_uid = uniqid( '', true );
@@ -141,10 +170,11 @@ abstract class Engines_AbstractEngine {
             $responseRawValue = $mh->getSingleContent( $resourceHash );
             $rawValue = array(
                     'error' => array(
-                            'code'    => -$curl_error[ 'errno' ],
-                            'message' => " {$curl_error[ 'error' ]}. Server Not Available (http status " . $curl_error[ 'http_code' ] .")",
-                            'response' => $responseRawValue // Some useful info might still be contained in the response body
-                    )
+                            'code'      => -$curl_error[ 'errno' ],
+                            'message'   => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] .")",
+                            'response'  => $responseRawValue // Some useful info might still be contained in the response body
+                    ),
+                    'responseStatus'    => $curl_error[ 'http_code' ]
             ); //return negative number
         } else {
             $rawValue = $mh->getSingleContent( $resourceHash );
@@ -153,6 +183,10 @@ abstract class Engines_AbstractEngine {
         $mh->multiCurlCloseAll();
 
         if( $this->doLog ){
+            $curl_parameters = $this->curl_additional_params + $curl_options;
+            if( isset( $curl_parameters[ CURLOPT_POSTFIELDS ] ) ){
+                Log::doLog( $uniq_uid . " ... Post Parameters ... \n" . var_export( $curl_parameters[ CURLOPT_POSTFIELDS ], true ) );
+            }
             Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
         }
 
@@ -160,7 +194,12 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    public function call( $function, Array $parameters = array(), $isPostRequest = false ) {
+    public function call( $function, Array $parameters = array(), $isPostRequest = false, $isJsonRequest = false ) {
+
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            $this->result = [];
+            return;
+        }
 
         $this->error = array(); // reset last error
         if ( !$this->$function ) {
@@ -168,7 +207,7 @@ abstract class Engines_AbstractEngine {
             $this->result = array(
                     'error' => array(
                             'code'    => -43,
-                            'message' => " Bad Method Call. Requested method ' . $function . ' not Found."
+                            'message' => " Bad Method Call. Requested method '$function' not Found."
                     )
             ); //return negative number
             return;
@@ -178,7 +217,8 @@ abstract class Engines_AbstractEngine {
             $function = strtolower( trim( $function ) );
             $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
-                    CURLOPT_POSTFIELDS => $parameters,
+                    CURLOPT_POSTFIELDS => ( !$isJsonRequest ? $parameters : json_encode( $parameters ) ),
+                    CURLINFO_HEADER_OUT => true,
                     CURLOPT_TIMEOUT    => 120
             );
         } else {
@@ -204,16 +244,20 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
+    public function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
 
         /*
          * Append array elements from the second array
          * to the first array while not overwriting the elements from
          * the first array and not re-indexing
          *
-         * Use the + array union operator
+         * In this case we CAN NOT use the + array union operator because if there is a file handler in the $curlOptParams
+         * the resource is duplicated and the reference to the first one is lost with + operator, in this way the CURLOPT_FILE does not works
          */
-        $this->curl_additional_params = $curlOptParams + $this->curl_additional_params;
+        foreach( $curlOptParams as $key => $value ){
+            $this->curl_additional_params[ $key ] = $value;
+        }
+
     }
 
     public function getConfigStruct() {
@@ -226,6 +270,15 @@ abstract class Engines_AbstractEngine {
 
     public function getName() {
         return $this->engineRecord->name;
+    }
+
+    /**
+     * Read Only
+     *
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRow(){
+        return clone $this->engineRecord;
     }
 
 }

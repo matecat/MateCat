@@ -11,42 +11,162 @@ class Users_UserDao extends DataAccess_AbstractDao {
     const TABLE = "users";
     const STRUCT_TYPE = "Users_UserStruct";
 
-    public function createUser( $obj ){
+    protected static $auto_increment_fields = array('uid');
+    protected static $primary_keys = array('uid');
+
+    protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
+    protected static $_query_user_by_email = " SELECT * FROM users WHERE email = :email ";
+    protected static $_query_assignee_by_project_id = "SELECT * FROM users 
+        INNER JOIN projects ON projects.id_assignee = users.uid 
+        WHERE projects.id = :id_project
+        LIMIT 1 " ;
+
+    protected static $_query_owner_by_job_id = "SELECT * FROM users 
+        INNER JOIN jobs ON jobs.owner = users.email
+        WHERE jobs.id = :job_id
+        LIMIT 1 ";
+
+    public function getByUids( $uids_array ) {
+        $sanitized_array = array();
+        foreach ( $uids_array as $k => $v ) {
+            if ( !is_numeric( $v ) ) {
+                array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
+            } else {
+                array_push( $sanitized_array, ( (int)$v ) );
+            }
+        }
+
+        if ( empty( $sanitized_array ) ) {
+            return array();
+        }
+
+        $query = "SELECT * FROM " . self::TABLE .
+                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1) . '?' . " ) ";
+
+        $stmt = $this->setCacheTTL( 60 * 10 )->_getStatementForCache( $query );
+
+        return $this->_fetchObject(
+                $stmt,
+                new Users_UserStruct(),
+                $sanitized_array
+        );
+    }
+
+    /**
+     * @param $token
+     * @return Users_UserStruct
+     */
+    public function getByConfirmationToken( $token ) {
         $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?");
+        $stmt->execute( array($token )) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
+        return $stmt->fetch();
+    }
+
+    public function createUser( Users_UserStruct $obj ){
+        $conn = $this->con->getConnection();
+        \Database::obtain()->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
 
         $stmt = $conn->prepare("INSERT INTO users " .
-            " ( uid, email, salt, pass, create_date, first_name, last_name, api_key ) " .
+            " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
             " VALUES " .
             " ( " .
             " :uid, :email, :salt, :pass, :create_date, " .
-            " :first_name, :last_name, :api_key " .
+            " :first_name, :last_name, :confirmation_token " .
             " )"
-        ) ;
-        $stmt->execute( $obj->toArray() );
+        );
 
-        return $this->getByUid( $conn->lastInsertId() );
-    }
+        $stmt->execute( $obj->toArray( array(
+                'uid', 'email',
+                'salt', 'pass',
+                'create_date', 'first_name',
+                'last_name', 'confirmation_token'
+                ))
+        );
 
-    public function getByUid( $id ) {
-        $conn = $this->con->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM users WHERE uid = ?");
-        $stmt->execute( array($id )) ;
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Users_UserStruct');
-        return $stmt->fetch();
+        $record = $this->getByUid( $conn->lastInsertId() );
+        $conn->commit() ;
+
+        return $record ;
     }
 
     /**
-     * @param Users_UserStruct $obj
+     * @param $id
      *
-     * @return Users_UserStruct|Users_UserStruct[]
+     * @return Users_UserStruct
+     */
+    public function getByUid( $id ) {
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $userQuery = new Users_UserStruct();
+        $userQuery->uid = $id;
+        return @$this->_fetchObject( $stmt,
+                $userQuery,
+                array(
+                        'uid' => $userQuery->uid,
+                )
+        )[ 0 ];
+    }
+
+    public function destroyCacheByUid( $id ){
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $userQuery = new Users_UserStruct();
+        $userQuery->uid = $id;
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'uid' => $userQuery->uid = $id,
+                )
+        );
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return Users_UserStruct
+     */
+    public function getByEmail( $email ) {
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
+        $UserQuery = new Users_UserStruct();
+        $UserQuery->email = $email;
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                [ 'email' => $UserQuery->email ]
+        )[ 0 ];
+    }
+
+    /**
+     * @param $email
+     *
+     * @return bool|int
+     */
+    public function destroyCacheByEmail( $email ){
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
+        $userQuery = new Users_UserStruct();
+        $userQuery->email = $email;
+        return $this->_destroyObjectCache( $stmt, [ 'email' => $userQuery->email ] );
+    }
+
+
+    /**
+     *
+     * This method is not static and used also to cache at Redis level the values for this Job
+     *
+     * Use when only the metadata are needed
+     *
+     * @param Users_UserStruct|DataAccess_IDaoStruct $UserQuery
+     *
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      * @throws Exception
      */
-    public function read( Users_UserStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    public function read( DataAccess_IDaoStruct $UserQuery ) {
+
+        $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = array();
+        $where_parameters = array();
+
         $query            = "SELECT uid,
                                     email,
                                     create_date,
@@ -54,60 +174,83 @@ class Users_UserDao extends DataAccess_AbstractDao {
                                     last_name
                              FROM " . self::TABLE . " WHERE %s";
 
-        if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . $obj->uid;
+        if ( $UserQuery->uid !== null ) {
+            $where_conditions[] = "uid = :uid";
+            $where_parameters[ 'uid' ] = $UserQuery->uid;
         }
 
-        if ( $obj->email !== null ) {
-            $where_conditions[ ] = "email = '" . $obj->email . "'";
+        if ( $UserQuery->email !== null ) {
+            $where_conditions[] = "email = :email";
+            $where_parameters[ 'email' ] = $UserQuery->email;
         }
 
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
-        }
-        else {
+        } else {
             throw new Exception( "Where condition needed." );
         }
 
         $query = sprintf( $query, $where_string );
+        $stmt = $this->_getStatementForCache( $query );
 
-        $arr_result = $this->con->fetch_array( $query );
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                $where_parameters
+        );
 
-        return $this->_buildResult( $arr_result );
     }
 
+    protected function _getStatementForCache( $query ) {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        return $stmt;
+    }
+
+
+    /***
+     * @param $job_id
+     *
+     * @return Users_UserStruct[]
+     */
     public function getProjectOwner( $job_id ) {
         $job_id = (int) $job_id ;
 
-        $query = "SELECT * FROM users " .
-            " INNER JOIN jobs ON jobs.owner = users.email "  .
-            " WHERE jobs.id = $job_id " .
-            " LIMIT 1 " ;
-
-        Log::doLog($query);
-
-        $arr_result = $this->_fetch_array( $query );
-
-        return $this->_buildResult( $arr_result );
+        $stmt = $this->_getStatementForCache( self::$_query_owner_by_job_id );
+        return $this->_fetchObject( $stmt,
+            new Users_UserStruct(),
+            [ 'job_id' => $job_id ]
+        )[ 0 ];
     }
 
-    public function getByUids( $uids_array ) {
-        $sanitized_array = array();
-        foreach($uids_array as $k => $v) {
-            array_push($sanitized_array, ( (int) $v['uid']) );
+    public function getProjectAssignee( $project_id ) {
+        $project_id = (int) $project_id ;
+
+        $stmt = $this->_getStatementForCache( self::$_query_assignee_by_project_id );
+        return $this->_fetchObject( $stmt,
+            new Users_UserStruct(),
+            [ 'id_project' => $project_id ]
+        )[ 0 ];
+
+    }
+
+    /**
+     * @param string[] $email_list
+     *
+     * @return Users_UserStruct[]
+     */
+    public function getByEmails( $email_list ) {
+        $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE email IN ( " . str_repeat( '?,', count( $email_list ) - 1) . '?' . " ) ");
+        $stmt->execute( $email_list ) ;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users_UserStruct' );
+        $res = $stmt->fetchAll();
+        $userMap = [];
+        foreach ( $res as $user ){
+            $userMap[ $user->email ] = $user;
         }
-
-        if (empty($sanitized_array)) {
-            return array();
-        }
-
-        $query = "SELECT * FROM " . self::TABLE .
-            " WHERE uid IN ( " . implode(', ', $sanitized_array) . " ) " ;
-
-        Log::doLog($query);
-        $arr_result = $this->con->fetch_array( $query );
-
-        return $this->_buildResult( $arr_result );
+        return $userMap;
     }
 
     /**
@@ -129,11 +272,10 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $input;
     }
 
-
     /**
      * @param $array_result array
      *
-     * @return Users_UserStruct|Users_UserStruct[]
+     * @return Users_UserStruct[]
      */
     protected function _buildResult( $array_result ) {
         $result = array();

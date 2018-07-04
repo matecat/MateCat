@@ -6,13 +6,53 @@
  *
  */
 
+use AbstractControllers\IController;
+
 /**
  * Abstract Class controller
  */
-abstract class controller {
+abstract class controller implements IController {
 
     protected $model;
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
+    /**
+     * @var Users_UserStruct
+     */
+    protected $user;
+
+    protected $uid;
+    protected $userIsLogged = false;
+
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatureSet() {
+        return $this->featureSet;
+    }
+
+    /**
+     * @param FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featuresSet ) {
+        $this->featureSet = $featuresSet;
+
+        return $this;
+    }
+
+    /**
+     * @return Users_UserStruct
+     */
+    public function getUser() {
+        return $this->user;
+    }
 
     /**
      * Controllers Factory
@@ -32,11 +72,8 @@ abstract class controller {
             }
 
             $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
+            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', function ( $c ) { return strtoupper( $c[ 1 ] ); }, $_REQUEST[ 'action' ] );
 
-            //PHP 5.2 compatibility, don't use a lambda function
-            $func                 = create_function( '$c', 'return strtoupper($c[1]);' );
-
-            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', $func, $_REQUEST[ 'action' ] );
             $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
 
             //set the log to the API Log
@@ -52,18 +89,6 @@ abstract class controller {
         require_once INIT::$MODEL_ROOT . '/queries.php';
 
         return new $className();
-
-    }
-
-	/**
-	 *
-	 * @return bool true if version is up to date, false otherwise
-	 */
-
-    public static function isRightVersion() {
-
-//		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
-        return Bootstrap::$_INI_VERSION == INIT::$BUILD_NUMBER;
 
     }
 
@@ -93,21 +118,6 @@ abstract class controller {
         header("Pragma: no-cache");
     }
 
-    /**
-     * Get the values from GET OR POST global Vars
-     *
-     * @deprecated
-     *
-     * @param $varname
-     *
-     * @return null
-     */
-    protected function get_from_get_post($varname) {
-        $ret = null;
-        $ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
-        return $ret;
-    }
-
     public function sessionStart(){
         Bootstrap::sessionStart();
     }
@@ -128,6 +138,65 @@ abstract class controller {
     public function getModel()
     {
         return $this->model;
+    }
+
+    public function setUserCredentials() {
+
+        $this->user        = new Users_UserStruct();
+        $this->user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+
+        try {
+
+            $userDao    = new Users_UserDao( Database::obtain() );
+            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
+            $this->userIsLogged = (
+                    !empty( $loggedUser->uid ) &&
+                    !empty( $loggedUser->email ) &&
+                    !empty( $loggedUser->first_name ) &&
+                    !empty( $loggedUser->last_name )
+            );
+
+        } catch ( Exception $e ) {
+            Log::doLog( 'User not logged.' );
+        }
+        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
+
+    }
+
+    /**
+     *  Try to get user name from cookie if it is not present and put it in session.
+     *
+     */
+    protected function _setUserFromAuthCookie() {
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+            $username_from_cookie = AuthCookie::getCredentials();
+            if ( $username_from_cookie ) {
+                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
+                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
+            }
+        }
+    }
+
+    public function readLoginInfo( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        self::sessionStart();
+        $this->_setUserFromAuthCookie();
+        $this->setUserCredentials();
+
+        if ( $close ) {
+            self::disableSessions();
+        }
+
+    }
+
+    /**
+     * isLoggedIn
+     *
+     * @return bool
+     */
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
 }

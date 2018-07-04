@@ -5,10 +5,11 @@ class changePasswordController extends ajaxController {
 	protected $res_id;
 	protected $password;
 	protected $undo;
+    protected $old_password;
 
-	public function __construct() {
+    public function __construct() {
 
-        parent::checkLogin();
+        parent::readLoginInfo( false ); //need to write to the sessions
 		parent::__construct();
 
         $filterArgs = array(
@@ -43,12 +44,36 @@ class changePasswordController extends ajaxController {
             $actual_pwd = $this->password;
         }
 
-        changePassword( $this->res_type, $this->res_id, $actual_pwd, $new_pwd );
+        $this->changePassword( $actual_pwd, $new_pwd );
+
         $this->result[ 'password' ] = $new_pwd;
         $this->result[ 'undo' ]     = $this->password;
 
 	}
 
-}
+	protected function changePassword( $actual_pwd, $new_password ){
 
-?>
+        if ( $this->res_type == "prj" ) {
+
+            $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->res_id, $actual_pwd );
+            $pDao = new Projects_ProjectDao();
+            $pDao->changePassword( $pStruct, $new_password );
+            $pDao->destroyCacheById( $this->res_id );
+
+            $pStruct->getFeatures()
+                    ->run('project_password_changed', $pStruct, $actual_pwd );
+
+        } else {
+
+            $jStruct = Jobs_JobDao::getByIdAndPassword( $this->res_id, $actual_pwd );
+            $jDao = new Jobs_JobDao();
+            $jDao->changePassword( $jStruct, $new_password );
+
+            $jStruct->getProject()
+                    ->getFeatures()
+                    ->run('job_password_changed', $jStruct, $actual_pwd );
+        }
+
+    }
+
+}

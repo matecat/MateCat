@@ -14,11 +14,6 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $display_time_to_edit;
 
     /**
-     * @var float
-     */
-    public $secs_per_word;
-
-    /**
      * @var string
      */
     public $stats_valid;
@@ -37,11 +32,6 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
      * @var float
      */
     public $pe_effort_perc;
-
-    /**
-     * @var string
-     */
-    public $ter;
 
     /**
      * @var string
@@ -79,23 +69,22 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $num_translation_mismatch;
 
     /**
+     * @var bool
+     */
+    public $ice_modified = false;
+
+    /**
+     * @var bool
+     */
+    public $locked = false;
+
+    /**
      * @return float|string
      */
-    public function getPeePerc() {
+    public function getPEE() {
+
         if ( is_null( $this->pe_effort_perc ) ) {
-            $this->pe_effort_perc = $this->getPEE();
-        }
-
-        if ( $this->pe_effort_perc < 0 ) {
-            $this->pe_effort_perc = 0;
-        } else if ( $this->pe_effort_perc > 100 ) {
-            $this->pe_effort_perc = 100;
-        }
-
-        if ( $this->pe_effort_perc < 0 ) {
-            $this->pe_effort_perc = 0;
-        } else if ( $this->pe_effort_perc > 100 ) {
-            $this->pe_effort_perc = 100;
+            $this->pe_effort_perc = parent::getPEE();
         }
 
         return $this->pe_effort_perc;
@@ -113,6 +102,19 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
             );
         }
 
+        if( $this->isICEModified() ){
+            $this->ice_modified = true;
+        }
+
         $this->warnings = implode( ", ", $this->warnings );
     }
+
+    public function isICEModified(){
+        return ( $this->getPEE() != 0 && $this->isICE() );
+    }
+
+    public function isICE(){
+        return ( $this->match_type == 'ICE' && $this->locked );
+    }
+
 }

@@ -1,10 +1,17 @@
 <?php
 
+
+use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ProjectCompletion\Model\EventModel;
+
 class Features_ProjectCompletion_SetChunkCompletedController extends ajaxController {
 
     private $id_job;
     private $password ;
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
     private $chunk ;
 
     public function __construct() {
@@ -20,7 +27,6 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     public function doAction() {
-        // ensure the record exists
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
             $this->__postInput['id_job'],
             $this->__postInput['password']
@@ -36,23 +42,26 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function processInsert() {
-        $params = array(
-            'uid' => $this->getUid(),
+        $struct = new CompletionEventStruct([
+            'uid'               => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER
-        );
+            'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review'         => $this->isRevision()
+        ]);
 
-        $event = Chunks_ChunkCompletionEventDao::createFromChunk(
-            $this->chunk, $params
-        );
+        $model = new EventModel( $this->chunk, $struct ) ;
+        $model->save();
 
-        $this->result[ 'data' ] = $this->chunk->toArray() ;
+        $this->result[ 'data' ] = ['event' => [
+                'id' => (int) $model->getChunkCompletionEventId()
+            ]
+        ];
     }
 
     private function getUid() {
-        $this->checkLogin();
+        $this->readLoginInfo();
         if ( $this->userIsLogged ) {
-            return $this->uid ;
+            return $this->user->uid ;
         } else {
             return null;
         }

@@ -59,7 +59,7 @@ class Json_RevisionData_Segments {
 
             if ( $any_comment ) {
                 $comment_data[] = array(
-                    'createdAt'  => $v['comment_date'],
+                    'created_at'  => $v['comment_date'],
                     'username'   => $v['username'],
                     'email'      => $v['email'],
                     'message'    => $v['comment_message'],

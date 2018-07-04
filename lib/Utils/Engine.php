@@ -12,12 +12,12 @@ class Engine {
     /**
      * @param $id
      *
-     * @return Engines_EngineInterface
+     * @return Engines_AbstractEngine
      * @throws Exception
      */
     public static function getInstance( $id ) {
 
-        if ( is_null( $id ) || $id == '' ) {
+        if ( !is_numeric( $id ) ) {
             throw new Exception( "Missing id engineRecord", -1 );
         }
 
@@ -38,13 +38,17 @@ class Engine {
 
         $className = 'Engines_' . $engineRecord->class_load;
         if( !class_exists( $className, true ) ){
-            throw new \Exception( "Engine Class $className not Found" );
+            throw new Exception( "Engine Class $className not Found" );
         }
 
         return new $className( $engineRecord );
 
     }
-    
+
+    /**
+     * @param EnginesModel_EngineStruct $engineRecord
+     * @return mixed
+     */
     public static function createTempInstance( $engineRecord ) {
         $className = 'Engines_' . $engineRecord->class_load;
         return new $className( $engineRecord );

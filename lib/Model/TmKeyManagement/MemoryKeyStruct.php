@@ -24,9 +24,12 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
 
     /**
      * Converts the current object into an associative array
+     *
+     * @param $mask array|null
      * @return array
+     * @see DataAccess_AbstractDaoObjectStruct::toArray
      */
-    public function toArray() {
+    public function toArray( $mask = null ) {
         $result = (array)$this;
 
         if ( $this->tm_key !== null ) {

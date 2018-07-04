@@ -2,18 +2,17 @@
     <!-- inizio blocco microsoft -->
     <template id="mt-provider-microsofthub-fields">
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <div class="provider-data">
             <div class="provider-field">
-                <label>ClientID<sup>*</sup></label>
-                <input class="required" data-field-name="client_id" placeholder="here" />
+                <label>KeyId<sup>*</sup></label>
+                <input class="required" data-field-name="client_id"/>
             </div>
             <div class="provider-field">
-                <label>Client Secret<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <label>Category</label>
+                <input data-field-name="category"/>
             </div>
         </div>
     </template>
@@ -31,15 +30,14 @@
     <template id="mt-provider-iptranslator-fields">
         <p>Fill out the form with the parameters provided by Iconic Translation Machines to connect to IPTranslator.</p>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>Key<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" />
                 <br class="clear" />
             </div>
         </div>
@@ -53,36 +51,25 @@
     <!-- fine blocco iptranslator -->
 </div>
 
-<div metal:define-macro="template-deeplingo">
-    <!-- inizio blocco deeplingo -->
-    <template id="mt-provider-deeplingo-fields">
-        <p>Fill out the form with the data to connect to your DeepLingo MT system.</p>
-        <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
-        <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
-        <br class="clear" />
+<div metal:define-macro="template-mmt">
+    <!-- inizio blocco MMT -->
+    <template id="mt-provider-mmt-fields">
         <div class="provider-data">
             <div class="provider-field">
-                <label>URL<sup>*</sup></label>
-                <input class="required" data-field-name="url" placeholder="here" />
+                <label>ModernMT License</label>
+                <input class="required" data-field-name="secret" placeholder="Enter your license" />
                 <br class="clear" />
             </div>
-            <div class="provider-field">
-                <label>Client Secret<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
-                <br class="clear" />
-            </div>
+            <div class="mt-error-key">Error message</div>
         </div>
     </template>
-    <template id="mt-provider-deeplingo-msg">
-        <p><strong>DeepLingo</strong> provides fully customized models for statistical machine translation engines. The models are adapted to your needs by our experts: they include your technical terms, respect the domain-specific expressions and are adapted to the context.</p>
-        <p><strong>Warning</strong>: If running on a single machine, DeepLingo can only serve few requests per second and the analysis in MateCat may be slow.</p>
-        <p>Contact DeepLingo to build your own machine translation system.</p>
-        <a href="http://www.deeplingo.com" class="continuebtn btn-ok">Contact Deeplingo</a>
+    <template id="mt-provider-mmt-msg">
+        <p><strong>ModernMT</strong> is an Adaptive Neural Machine Translation. </p>
+        <p>It learns from your TMs and corrections in real time and provides the best suggestions based on the content type and on your style and terminology.</p>
+        <p><strong>ONLY PAY FOR WHAT YOU USE</strong><br /><strong>4€</strong> every <strong>1,000 words</strong>, monthly billing</p>
+        <a href="https://www.modernmt.eu/license/buy" class="continuebtn btn-ok" target="_blank">Buy Online</a>
     </template>
-    <!-- fine blocco deeplingo -->
+    <!-- fine blocco moses -->
 </div>
 
 <div metal:define-macro="template-moses">
@@ -90,21 +77,20 @@
     <template id="mt-provider-moses-fields">
         <p>Fill out the form with the connection data to your own Moses MT system.</p>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <br class="clear" />
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>URL<sup>*</sup></label>
-                <input class="required" data-field-name="url" placeholder="here" />
+                <input class="required" data-field-name="url" />
                 <br class="clear" />
             </div>
             <div class="provider-field">
                 <label>API key<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" />
                 <br class="clear" />
             </div>
         </div>
@@ -122,21 +108,20 @@
     <template id="mt-provider-tauyou-fields">
         <p>Fill out the form with the connection data to your own Tauyou MT system.</p>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <br class="clear" />
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>URL<sup>*</sup></label>
-                <input class="required" data-field-name="url" placeholder="here" />
+                <input class="required" data-field-name="url" />
                 <br class="clear" />
             </div>
             <div class="provider-field">
                 <label>API key<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" />
                 <br class="clear" />
             </div>
         </div>
@@ -155,18 +140,17 @@
         <style>
             .clientid-link {
                 float: right;
-                margin-top: -10px;
+                margin-top: 20px;
             }
         </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>Client ID<sup>*</sup></label>
-                <input class="required" data-field-name="client_id" placeholder="here" />
+                <input class="required" data-field-name="client_id" />
             </div>
             <a href="https://readymt.tilde.com/Account/LoginApp?Client=matecat" target="_blank" class="clientid-link">Get my Client ID</a>
             <br class="clear" />
@@ -178,7 +162,7 @@
     <template id="mt-provider-letsmt-msg">
         <style>
             .msg-button-container .continuebtn {
-                width: 122px!important;
+                width: 100%!important;
                 display: inline-block!important;
             }
             .msg-button-container {
@@ -435,14 +419,13 @@
             }
         </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
-        <input class="required hide" id="new-engine-name" placeholder="here" />
+        <div class="mt-error-key">Error message</div>
+        <input class="required hide" id="new-engine-name" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field hide">
                 <label>Client ID<sup>*</sup></label>
-                <input class="required" data-field-name="client_id" placeholder="here" />
+                <input class="required" data-field-name="client_id" />
             </div>
             <div id="source_lang_field" class="pull-left">
                 <label>From</label>
@@ -499,14 +482,13 @@
     <template id="mt-provider-apertium-fields">
         <p>Fill out the form with the connection data to your own Apertium MT system.</p>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>Key<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" />
             </div>
         </div>
     </template>
@@ -534,14 +516,13 @@
     <template id="mt-provider-altlang-fields">
         <p>Fill out the form with the connection data to your own AltLang MT system.</p>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
-        <br class="clear" />
-        <span class="mt-error-key">Error message</span>
+        <div class="mt-error-key">Error message</div>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
-        <input class="required" id="new-engine-name" placeholder="here" />
+        <input class="required" id="new-engine-name" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>Key<sup>*</sup></label>
-                <input class="required" data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" />
             </div>
         </div>
     </template>
@@ -564,4 +545,77 @@
         <a href="mailto:info@altlang.net" class="continuebtn btn-ok">Contact AltLang</a>
     </template>
     <!-- fine blocco altlang -->
+</div>
+
+<div metal:define-macro="template-smartmate">
+    <!-- inizio blocco altlang -->
+    <template id="mt-provider-smartmate-fields">
+        <p>Fill out the form with the connection data to your own SmartMATE system.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label for="user-name">User<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" id="user-name" />
+            </div>
+            <div class="provider-field">
+                <label>Key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-smartmate-msg">
+        <p><strong>SmartMATE</strong> is the software toolkit created by Capita TI that creates, manages and hosts MT engines,
+            solutions and services. Finely tuned on our client’s data, SmartMATE engines can be used as an additional
+            productivity tool in the localization process, as well as used to produce a fully automated translation
+            used for gisting purposes.</p>
+        <p>Based on the MOSES statistical machine translation model, <strong>SmartMATE</strong> has been developed as a secure environment,
+            offering customers a viable and cost-effective alternative to publicly available machine translation solutions.</p>
+        <p>More info on <a href="https://www.smartmate.co/"
+                           title="SmartMATE">https://www.smartmate.co/</a></p>
+        <a href="mailto:enquiries@smartmate.co" class="continuebtn btn-ok">Contact SmartMATE</a>
+    </template>
+    <!-- fine blocco altlang -->
+</div>
+
+<div metal:define-macro="template-yandextranslate">
+    <template id="mt-provider-yandextranslate-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>API-key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" />
+            </div>
+        </div>
+    </template>
+    <template id="mt-provider-yandextranslate-msg">
+        <p>Yandex.Translate is a modern statistical MT system available as an online public service, an application for major mobile platforms and a commercial API. The service currently supports more than 90 languages and this number is continuously growing. Yandex.Translate API processes billions of translations daily for its customers ranging from LSPs and language learning applications to worldwide media monitoring companies. Customer data security is a key priority for Yandex.Translate API - it uses secure connections and carefully handles sensitive data.</p>
+        <a href="https://translate.yandex.com/developers" target="_blank" class="continuebtn btn-ok">Find out more</a>
+    </template>
+</div>
+
+
+<div metal:define-macro="template-googletranslate">
+    <template id="mt-provider-googletranslate-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>API-key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" placeholder="here" />
+            </div>
+        </div>
+    </template>
+    <template id="mt-provider-googletranslate-msg">
+        <p>Google Translate is a free multilingual machine translation service developed by Google, to translate text from one language into another. It offers a website interface, mobile apps for Android and iOS, and an API that helps developers build browser extensions and software applications. Google Translate supports over 100 languages at various levels and as of May 2017, serves over 500 million people daily.</p>
+        <a href="https://cloud.google.com/translate/" target="_blank" class="continuebtn btn-ok">Find out more</a>
+    </template>
 </div>

@@ -7,7 +7,7 @@ class Factory_OwnerFeature extends Factory_Base {
             'uid' => 1,
             'feature_code' => 'project_completion',
             'options' => '{}',
-            'enabled' => true
+            'enabled' => true,
         ), $values );
 
         $dao = new OwnerFeatures_OwnerFeatureDao( Database::obtain() );

@@ -3,21 +3,43 @@
 
 class INIT {
 
+    public static $MANDATORY_KEYS      = array(
+            'ENV',
+            'CHECK_FS',
+            'DB_SERVER',
+            'DB_DATABASE',
+            'DB_USER',
+            'DB_PASS'
+    );
+
+    /**
+     * @var $ENV
+     *
+     * General server environment settings to define the the usage of hard links rather than copy php method
+     * must be one of these:
+     *
+     * - production
+     * - development
+     * - test
+     *
+     * @see EnvWrap
+     *
+     */
     public static $ENV ;
+
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
     public static $DEBUG               = true;
-    public static $EXCEPTION_DEBUG     = false;
+    public static $PRINT_ERRORS        = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $MEMCACHE_SERVERS    = array();
+    public static $INSTANCE_ID         = 0;
     public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
-    public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $USE_COMPILED_ASSETS = false;
 
@@ -31,11 +53,6 @@ class INIT {
     public static $TRACKING_CODES_VIEW_PATH = "";
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
-    //This queue will be used for dqf project creation
-    public static $DQF_PROJECTS_TASKS_QUEUE_NAME = "matecat_dqf_project_task_queue";
-    //This queue will be used for dqf project creation
-    public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
-
     public static $COMMENTS_ENABLED = true ;
     public static $SSE_COMMENTS_QUEUE_NAME = "matecat_sse_comments";
     public static $SSE_BASE_URL;
@@ -55,6 +72,8 @@ class INIT {
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
+    public static $ANALYSIS_FILES_REPOSITORY;
+    public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
@@ -71,20 +90,63 @@ class INIT {
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
-    public static $DQF_ENABLED = false;
 
     public static $FORCE_XLIFF_CONVERSION    = false;
+    public static $FILTERS_OCR_CHECK         = true;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME = 'matecat_login_v2';
-    public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
+    public static $AUTHCOOKIENAME = 'matecat_login_v4';
+    public static $SUPPORT_MAIL = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
+
+    /**
+     * DQF configuration
+     *
+     */
+    public static $DQF_BASE_URL;
+    public static $DQF_ID_PREFIX = '' ;
+    public static $DQF_API_KEY;
+    public static $DQF_ENCRYPTION_KEY;
+    public static $DQF_ENCRYPTION_IV ;
+
+    public static $DQF_GENERIC_USERNAME ;
+    public static $DQF_GENERIC_PASSWORD ;
+
+    /**
+     * We proose that lxq_server is in a configuration file
+     * lxq_license: ${lxq_license},
+     *
+     * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+     * @see http://www.lexiqa.net
+     *
+     */
+    public static $LXQ_LICENSE = false;
+    public static $LXQ_SERVER  = "https://backend.lexiqa.net";
+    /**
+     * Your partnerid will be provided along with your
+     * @see http://www.lexiqa.net
+     *
+     */
+    public static $LXQ_PARTNERID  = false;
+    /**
+     * Time zone string that should match the one set in the database.
+     * @var string
+     */
+    public static $TIME_ZONE = 'Europe/Rome';
+
+    /**
+     * Use this settings to indicate the upperbuond memory limit you want to
+     * apply to fast analysis. You may want to set this to allow analysis of
+     * big files.
+     * @var string memory limit. Example "2048M"
+     */
+    public static $FAST_ANALYSIS_MEMORY_LIMIT;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
 
@@ -108,7 +170,8 @@ class INIT {
     const JOB_ARCHIVABILITY_THRESHOLD = 90;
 
     /**
-     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
+     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
+     * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
      * For each translation outsourced to Translated.net (the main Matecat developer),
      * Matecat gets more development budget and bugs fixes and new features get implemented faster.
@@ -118,23 +181,18 @@ class INIT {
     public static $ENABLE_OUTSOURCE = true;
 
     /**
-     * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
-     * ( xliff produced by SDL Trados )
-     *
-     * We are not including the file converters into the Matecat code because we haven't find any open source
-     * library that satisfy the required quality and licensing.
-     *
-     * Here you have two options
-     *  a) Keep $CONVERSION_ENABLED to false, manually convert your files into xliff using SDL Trados, Okapi or similar
-     *  b) Set $CONVERSION_ENABLED to true and implement your own converter
-     *
+     * MateCat Filters configuration
      */
-    public static $CONVERSION_ENABLED = false;
-    public static $USE_ONLY_STABLE_CONVERTERS = true;
+    public static $FILTERS_USER_AGENT = "MateCat Community Instance";
+    public static $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.mashape.com";
+    public static $FILTERS_MASHAPE_KEY = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
+    public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
+    public static $FILTERS_EMAIL_FAILURES = false;
 
     /**
      * The MateCat Version
      */
+    //TODO: Rename variable to MATECAT_VERSION
     public static $BUILD_NUMBER;
 
     /**
@@ -148,6 +206,12 @@ class INIT {
      * @var string
      */
     public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com' ;
+
+    /**
+     * Default key used to call the TM Server on Import TMX panel
+     * @var string
+     */
+    public static $DEFAULT_TM_KEY = '' ;
 
 
     public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
@@ -171,13 +235,22 @@ class INIT {
      * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
      * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
      * - click "Create client ID"
-     * Your client ID and client secret are now available.
+     * - Still in Credentials page, click "Create credentials" and select "API key"
+     * - Click "Browser key"
+     * - under Name, insert the name of your Browser API key
+     * - under "Accept requests from these HTTP referrers (web sites)", insert "<domain>/*",
+     *   where <domain> is the same that you specified in the previous steps.
+     * - In the sidebar select Overview and search for Google Picker
+     * - Click on the "Google Picker API" link, and then click on Enable button
+     *
+     * Your client ID, client secret and Browser API key are now available.
      *
      * Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
      * set:
      * OAUTH_CLIENT_ID with your client ID
      * OAUTH_CLIENT_SECRET with your client secret
      * OAUTH_CLIENT_APP_NAME with your custom app name, if you want, or leave Matecat
+     * OAUTH_BROWSER_API_KEY with your browser API key, required to open Google Picker
      *
      * save and rename to oauth_config.ini file.
      *
@@ -189,32 +262,32 @@ class INIT {
     public static $OAUTH_CLIENT_APP_NAME;
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
+    public static $OAUTH_BROWSER_API_KEY;
 
-    public static $LEGACY_CONVERSION = false;
+    public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
+
+    public static $SKIP_SQL_CACHE = false ;
 
     public function __construct(){
 
-        self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
-        self::$OAUTH_CLIENT_SECRET   = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
-        self::$OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
+        self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
+        self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
+        self::$OAUTH_CLIENT_APP_NAME = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
+        self::$OAUTH_BROWSER_API_KEY = @INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
+
         self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile'
+                'https://www.googleapis.com/auth/userinfo.profile',
+                'profile'
         );
-
-        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
-            self::$LEGACY_CONVERSION = true;
-        }
-
-        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
-            self::$UNLOCKABLE_TAGS = true;
-        }
+        self::$MIME_TYPES = include( 'Mime2Extension.php' );
 
     }
+
+
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
@@ -239,7 +312,7 @@ class INIT {
                     'xltm' => array( '', '', 'extxls' ),
                     'ods'  => array( '', '', 'extxls' ),
                     'ots'  => array( '', '', 'extxls' ),
-                    'csv'  => array( '', '', 'extxls' ),
+                    //'csv'  => array( '', '', 'extxls' ),
                     'tsv'  => array( '', '', 'extxls' ),
                     'ppt'  => array( '', '', 'extppt' ),
                     'pps'  => array( '', '', 'extppt' ),
@@ -263,14 +336,16 @@ class INIT {
                     'dtd'   => array( '', '', 'extxml' ),
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => array( '', '', 'extxml'),
-                    'yaml'   => array( '', '', 'extxml' )
+                    'yaml'  => array( '', '', 'extxml' ),
+                    'yml'   => array( '', '', 'extxml' )
             ),
             'Scanned Files'                 => array(
                     'pdf'   => array( '', '', 'extpdf' ),
                     'bmp'   => array( '', '', 'extimg' ),
                     'png'   => array( '', '', 'extimg' ),
                     'gif'   => array( '', '', 'extimg' ),
-                    'jpeg'   => array( '', '', 'extimg' ),
+                    'jpeg'  => array( '', '', 'extimg' ),
+                    'jpg'   => array( '', '', 'extimg' ),
                     'tiff'  => array( '', '', 'extimg' )
             ),
             "Interchange Formats" => array(
@@ -299,18 +374,20 @@ class INIT {
                     'srt'         => array( '', '', 'extsrt' ),
                     'wix'         => array( '', '', 'extwix' ),
                     'po'          => array( '', '', 'extpo'  ),
-                    'g'           => array( '', '', 'extg' )
+                    'g'           => array( '', '', 'extg' ),
+                    'ts'          => array( '', '', 'exts' ),
             )
     );
+
+    public static $MIME_TYPES = array();
+
 
     public static $UNSUPPORTED_FILE_TYPES = array(
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
     );
 
-    public static $LEGACY_CONVERSION_SUPPORT = array(
-            'sxml'
-    );
+    public static $DEPRECATE_LEGACY_XLIFFS = true;
 
     /*
      * The maximum filename length accepted.
@@ -321,6 +398,22 @@ class INIT {
     public static $MAX_FILENAME_LENGTH = 210;
 
     public static $PLUGIN_LOAD_PATHS = array();
+
+    /**
+     * @deprecated use AUTOLOAD_PLUGINS
+     * @var array
+     */
+    public static $MANDATORY_PLUGINS = array();
+
+    public static $AUTOLOAD_PLUGINS = [] ;
+
+    /**
+     * Definitions for the asynchronous task runner
+     * @var array
+     */
+    public static $TASK_RUNNER_CONFIG = null;
+
+    public static $SEND_ERR_MAIL_REPORT = true ;
 
     /**
      * Initialize the Class Instance

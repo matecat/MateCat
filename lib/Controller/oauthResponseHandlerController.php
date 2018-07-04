@@ -1,27 +1,23 @@
 <?php
+
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
 class oauthResponseHandlerController extends viewController{
 
-	private $redirectUrl;
-	private $userData=array();
+    private $code ;
+    private $error ;
 
-	private $user_logged;
+    /**
+     * @var Google_Service_Oauth2_Userinfoplus
+     */
+    private $remoteUser ;
 
 	public function __construct(){
-
-        //SESSION ENABLED
         parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("oauth_response_handler.html");
-
-		$this->user_logged = true;
-
-		$this->client = OauthClient::getInstance()->getClient();
-
-		$plus = new Google_Service_Oauth2($this->client);
 
 		$filterArgs = array(
 			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
@@ -30,73 +26,57 @@ class oauthResponseHandlerController extends viewController{
 
 		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
-		$code         = $__postInput[ 'code' ];
-		$error        = $__postInput[ 'error' ];
-
-		if(isset($code) && $code){
-			$this->client->authenticate($code);
-
-			$_SESSION['access_token'] = $this->client->getAccessToken();
-			$user = $plus->userinfo->get();
-
-			//get response from third-party
-			$this->userData['email']        = $user['email'];
-			$this->userData['first_name']   = $user['givenName'];
-			$this->userData['last_name']    = $user['familyName'];
-		}
-		else if (isset($error)){
-			$this->user_logged = false;
-		}
-
-		//get url to redirect to
-		//add default if not set
-		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';
-		}
-
-		$this->redirectUrl = $_SESSION['incomingUrl'];
-
-		//remove no more used var
-		unset($_SESSION['incomingUrl']);
+		$this->code  = $__postInput[ 'code' ];
+		$this->error = $__postInput[ 'error' ];
 	}
 
-	public function doAction(){
+    public function doAction() {
+        if (isset($this->code) && $this->code) {
+            $this->_processSuccessfulOAuth() ;
+        }
+        elseif ( $this->error ) {
+            $this->_respondWithError();
+        }
+    }
 
-		if($this->user_logged && !empty($this->userData)){
-			//user has been validated, data was by Google
-			//check if user exists in db; if not, create
-			$result=tryInsertUserFromOAuth($this->userData);
+    public function setTemplateVars()
+    {
+        // TODO: Implement setTemplateVars() method.
+        if ( isset( $_SESSION['wanted_url'] ) ) {
+            $this->template->wanted_url = $_SESSION['wanted_url'] ;
+        }
+    }
 
-			if(false==$result){
-				die("error in insert");
-			}
+    protected function _processSuccessfulOAuth() {
+        $this->_initRemoteUser() ;
 
-			//set stuff
-			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
-			//$_SESSION['cid'] = $this->userdata['email'];
+        $model = new OAuthSignInModel(
+                $this->remoteUser->givenName,
+                $this->remoteUser->familyName, $this->remoteUser->email
+        ) ;
 
-			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
-			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+        $model->setProfilePicture( $this->remoteUser->picture );
+        $model->setAccessToken( $this->client->getAccessToken() );
 
-			if( $_theresAnonymousProject && $_incomingFromNewProject ){
-				//update anonymous project with user credentials
-				$result = updateProjectOwner( $this->userData['email'], $_SESSION['_anonym_pid'] );
-			}
-		}
+        $model->signIn() ;
+    }
 
-		//destroy session info of last anonymous project
-		unset($_SESSION['_anonym_pid']);
-		unset($_SESSION['_newProject']);
-	}
+    protected function _initRemoteUser() {
+        $this->client = OauthClient::getInstance()->getClient();
+        $this->client->setAccessType( "offline" );
 
-	public function setTemplateVars() {
-		$this->template->javascript_loader="javascript:doload('".$this->redirectUrl."');";
-	}
+        $plus = new Google_Service_Oauth2($this->client);
+        $this->client->authenticate($this->code);
+        $this->remoteUser = $plus->userinfo->get();
+    }
 
-	private function sendNotifyMail($data){
-		$message="Dear ".$data['firstname']."\n\nA Matecat account has been automatically created for you with the following name: ".$data['mail'];
-		$mail_res=mailer('Matecat Team','noreply@'.INIT::$HTTPHOST,$data['name'],$data['mail'],'Welcome to Matecat!',$message);
-	}
+    protected function _respondWithError() {
+        // TODO
+    }
+
+    protected function collectFlashMessages()
+    {
+        // prevent this controller to collect flash messages, leave
+        // them to the next rendering.
+    }
 }
-
-?>

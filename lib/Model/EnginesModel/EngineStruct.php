@@ -50,6 +50,11 @@ class EnginesModel_EngineStruct
     /**
      * @var string
      */
+    public $update_relative_url;
+
+    /**
+     * @var string
+     */
     public $delete_relative_url;
 
     /**

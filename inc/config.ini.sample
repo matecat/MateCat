@@ -10,22 +10,14 @@ ENV = "production"    ; set to "production" for production environment
 ;If you don't need this check set the defined CHECK_FS to false
 CHECK_FS = no
 
-
-; Update this number every time you get a new Matecat Version according to the new version.
-; Check in new config.ini.sample:
-; There could be new params to configure.
-;----------------------------------------
-BUILD_NUMBER = "0.6.6"
-
-;----------------------------------------
 [development]
+CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
 DB_PASS = "matecat_user"
 
-MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
-REDIS_SERVERS = "tcp://localhost:6379"
+REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
@@ -36,15 +28,39 @@ SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
+
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
+
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false
+LXQ_PARTNERID = false
+
+
+DQF_ENABLED = yes
+DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
+DQF_API_KEY = api-key
+DQF_ID_PREFIX = devinstance
+DQF_ENCRYPTION_KEY = encryption-key
+DQF_ENCRYPTION_IV = encryption-iv
+DQF_GENERIC_USERNAME = "matecatGeneric@taus.net"
+DQF_GENERIC_PASSWORD = "generic-user-password"
+
+; Segments partition rule, leave unset to write to `segments` table.
+; Format of configuration string is: "{id_project}:{table_name};...".
+; Project ids must be sorted in ascecnding order. Match on `id_project` is "less than" ( < ).
+; SEGMENTS_PARTITION_RULE="71:segments;9999999999999:segments2"
 
 ;----------------------------------------
 [staging]
+CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
 DB_PASS = "matecat_user"
 
-MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
@@ -57,19 +73,25 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
-; Converter Server Configuration
-CONVERTER_SERVER_ADDRESS = 'localhost'
-CONVERTER_SERVER_PORT = '8082';
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
+
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false
+LXQ_PARTNERID = false
+
 
 
 ;----------------------------------------
 [production]
+CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat"
 DB_PASS = "matecat01"
 
-MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
@@ -82,8 +104,11 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
-; Converter Server Configuration
-CONVERTER_SERVER_ADDRESS = 'localhost'
-CONVERTER_SERVER_PORT = '8082';
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
 
-;----------------------------------------
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false
+LXQ_PARTNERID = false

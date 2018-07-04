@@ -26,10 +26,10 @@ class OauthClient {
 		$this->client->setClientSecret(INIT::$OAUTH_CLIENT_SECRET);
 		$this->client->setRedirectUri(INIT::$OAUTH_REDIRECT_URL);
 		$this->client->setScopes(INIT::$OAUTH_SCOPES);
-		$this->client->setAccessType("offline");
 	}
 
 	public function getClient(){
 		return $this->client;
 	}
-} 
+
+}

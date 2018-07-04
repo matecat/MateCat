@@ -9,9 +9,17 @@
 
 namespace TaskRunner\Commons;
 
+/**
+ * Class Params
+ * Generic parameters container
+ *
+ * @package TaskRunner\Commons
+ */
 class Params extends AbstractElement {
 
     /**
+     * Magic to string method
+     *
      * @return string
      */
     public function __toString() {

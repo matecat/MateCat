@@ -1,15 +1,17 @@
 <?php
 
-class OwnerFeatures_OwnerFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class OwnerFeatures_OwnerFeatureStruct extends BasicFeatureStruct {
 
-  public $id;
-  public $uid ;
-  public $feature_code ;
-  public $options ;
-  public $last_update ;
-  public $create_date ;
-  public $enabled ;
+    public $id;
+    public $uid ;
+    public $id_team ;
+    public $options ;
+    public $last_update ;
+    public $create_date ;
+    public $enabled ;
 
-
+    public function getOptions() {
+        return json_decode( $this->options, true );
+    }
 
 }

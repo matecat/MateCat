@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "name": "MT"
+    },
+    {
+        "id": 2,
+        "name": "TM"
+    },
+    {
+        "id": 3,
+        "name": "Termbase"
+    },
+    {
+        "id": 4,
+        "name": "Other"
+    },
+    {
+        "id": 5,
+        "name": "HT"
+    }
+]

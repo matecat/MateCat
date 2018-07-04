@@ -7,10 +7,10 @@ RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
 
 #RewriteRule ^offline\.html$ /lib/View/offline.html [L]
-#RewriteCond %{REQUEST_URI} !/offline.html$
-#RewriteCond %{REQUEST_URI} !/public/css/common.css$
-#RewriteCond %{REQUEST_URI} !/public/img/logo.png$
-#RewriteCond %{REQUEST_URI} !/public/img/offline.png
+#RewriteCond %{REQUEST_URI} !/offline.html [NC]
+#RewriteCond %{REQUEST_URI} !/public/css/build/common.css [NC]
+#RewriteCond %{REQUEST_URI} !/public/img/logo.png [NC]
+#RewriteCond %{REQUEST_URI} !/public/img/offline.png [NC]
 #RewriteRule $ /offline.html [R=307,L]
 RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
@@ -22,42 +22,49 @@ RewriteRule ^$ /support [QSA,L]
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
-RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
+RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
 
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
-RewriteRule ^(revise)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
+RewriteRule ^(revise)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
 
-RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
-RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=catnew&jid=$4&password=$5&step=$6 [L]
+RewriteRule ^(analyze-old)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyzeOld&pid=$3&password=$4 [L]
+RewriteRule ^(jobanalysis-old)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyzeOld&pid=$2&jid=$3&password=$4 [L]
 
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
-RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
-RewriteRule ^(ajaxLogout)[/]?$ index.php?action=formLogout [L,QSA]
-
-RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
-RewriteRule ^(configMissing)[/]?$ lib/View/configMissing.html [L]
 
 RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
-RewriteRule ^(manage)[/]?$ /manage/1 [R]
-RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
+RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
+RewriteRule ^(manageNew)[/]?$ index.php?action=manageNew [QSA,L]
 
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [QSA,L]
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
 
+RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activityLog&id_project=$1&password=$2&download=$3 [QSA,L]
+
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
+
+RewriteRule ^api/v1/new$ index.php?api=true&action=newDetatched [QSA,L]
+
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
+RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
+RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
+
+RewriteRule ^utils/pee$ router.php [L]
+
+
 
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
 RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
+RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
-
+RedirectMatch 404 /\.git
 </IfModule>
 
 ErrorDocument 404 /support/404.php
@@ -97,11 +104,13 @@ BrowserMatch ^Mozilla/4 gzip-only-text/html
 BrowserMatch ^Mozilla/4\.0[678] no-gzip
 BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
-Header append Vary User-Agent env=!dont-vary
 </IfModule>
 
 <IfModule mod_headers.c>
 Header append Vary User-Agent env=!dont-vary
+Header always append X-Frame-Options SAMEORIGIN
+Header always append X-Content-Type-Options nosniff
+Header always append X-XSS-Protection "1; mode=block"
 </IfModule>
 Header set Access-Control-Allow-Origin "*"
 php_value display_errors 0

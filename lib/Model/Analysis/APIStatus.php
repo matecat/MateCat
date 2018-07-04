@@ -23,6 +23,7 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
                 "PRICE_PER_WORD"    => 0.00, "DISCOUNT" => 0.00
             )
     );
+    private $reviseClass;
 
     public function getResult(){
 
@@ -46,7 +47,12 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
                 break;
         }
 
-        $this->result[ 'analyze' ] = "/analyze/" . $this->_project_data[ 0 ][ 'pname' ] . "/" . $this->_project_data[ 0 ][ 'pid' ] . "-" . $this->_project_data[ 0 ][ 'ppassword' ];
+        $this->result['analyze'] = Routes::analyze(array(
+            'project_name' => $this->_project_data[0]['pname'],
+            'id_project' => $this->_project_data[0]['pid'],
+            'password' => $this->_project_data[0]['ppassword']
+        ));
+
         $this->result[ 'jobs' ]    = array();
 
         foreach ( $this->_project_data as $job ) {
@@ -54,12 +60,19 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
             $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
             $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
 
-            //set the total for the job
+
+            $this->reviseClass = new Constants_Revise;
+
             $jobQA = new Revise_JobQA(
-                $job[ 'jid' ],
-                $job[ 'jpassword' ],
-                $this->result[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ]
+                    $job[ 'jid' ],
+                    $job[ 'jpassword' ],
+                    $this->result[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ],
+                    $this->reviseClass
             );
+
+            list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $job[ 'jid' ],
+                    $job[ 'jpassword' ],
+                    $this->result[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ] );
 
             $jobQA->retrieveJobErrorTotals();
             $jobVote = $jobQA->evalJobVote();

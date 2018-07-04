@@ -1,123 +1,144 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+use Exceptions\NotFoundError;
+use TmKeyManagement\UserKeysModel;
 
 
 /**
  * Description of catController
  *
+ * @property CatDecorator decorator
  * @author antonio
  */
 class catController extends viewController {
 
-    private $data = array();
     private $cid = "";
     private $jid = "";
-    private $tid = "";
     private $password = "";
-    private $source = "";
-    private $pname = "";
     private $create_date = "";
-    private $project_status = 'NEW';
-    private $start_from = 0;
-    private $page = 0;
+
     private $start_time = 0.00;
-    private $downloadFileName;
+
     private $job_stats = array();
-    private $source_rtl = false;
-    private $target_rtl = false;
     private $job_owner = "";
 
     private $job_not_found = false;
     private $job_archived = false;
     private $job_cancelled = false;
 
+    private $first_job_segment = 0;
     private $firstSegmentOfFiles = '[]';
     private $fileCounter = '[]';
 
-    private $first_job_segment;
-    private $last_job_segment;
-    private $last_opened_segment;
-
     private $qa_data = '[]';
+
     private $qa_overall = '';
 
-    private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
-
-    private $job ;
+    public $target_code;
+    public $source_code;
 
     /**
-     * @var string
+     * @var Chunks_ChunkStruct
      */
-    private $thisUrl;
+    private $chunk ;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    public $project ;
+
     private $translation_engines;
 
     private $mt_id;
 
+    /**
+     * @var string
+     * Review password generally corresponds to job password.
+     * Translate and revise pages share the same password, exception
+     * made for scenarios in which the review page must be protected
+     * by second layer of authorization. In such cases, this variable
+     * holds a different password than the job's password.
+     */
+    private $review_password = "";
+
+    /**
+     * @var WordCount_Struct
+     */
+    private $wStruct ;
+
+    protected $templateName = "index.html";
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
-        parent::__construct( false );
+        parent::__construct();
 
-        parent::makeTemplate( "index.html" );
+        parent::makeTemplate( $this->templateName );
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'start'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'page'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+                )
         );
+
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid        = $getInput->jid;
         $this->password   = $getInput->password;
-        $this->start_from = $getInput->start;
-        $this->page       = $getInput->page;
 
-        if ( isset( $_GET[ 'step' ] ) ) {
-            $this->step = $_GET[ 'step' ];
-        } else {
-            $this->step = 1000;
-        };
+        $this->review_password = $getInput->password;
 
-        if ( is_null( $this->page ) ) {
-            $this->page = 1;
-        }
-        if ( is_null( $this->start_from ) ) {
-            $this->start_from = ( $this->page - 1 ) * $this->step;
-        }
+        $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
-        if ( isset( $_GET[ 'filter' ] ) ) {
-            $this->filter_enabled = true;
-        } else {
-            $this->filter_enabled = false;
-        };
+        /*
+         * avoid Exception
+         *
+         * Argument 1 passed to loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
+         */
+        ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->downloadFileName = "";
-
-        $this->doAuth();
-
-        $this->generateAuthURL();
+        $this->featureSet->loadForProject( $this->project ) ;
 
     }
 
-    private function doAuth() {
+    /**
+     * findJobByIdAndPassword
+     *
+     * Finds the current chunk by job id and password. if in revision then
+     * pass the control to a filter, to allow plugin to interact with the
+     * authorization process.
+     *
+     * Filters may restore the password to the actual password contained in
+     * `jobs` table, while the request may have come with a different password
+     * for the purpose of access control.
+     *
+     * This is done to avoid the rewrite of preexisting implementations.
+     */
+    private function findJobByIdAndPassword() {
+        if ( self::isRevision() ) {
+            $this->password = $this->featureSet->filter(
+                'filter_review_password_to_job_password',
+                $this->password,
+                $this->jid
+            );
 
-        //if no login set and login is required
-        if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
         }
 
+        $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
     }
 
     public function doAction() {
-        $files_found  = array();
-        $lang_handler = Langs_Languages::getInstance();
+
+        $this->featureSet->run('beginDoAction', $this);
 
         try {
-            $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-        } catch( \Exception $e ){
+            // TODO: why is this check here and not in constructor? At least it should be moved in a specific
+            // function and not-found handled via exception.
+            $this->findJobByIdAndPassword();
+            $this->featureSet->run('handleProjectType', $this);
+        } catch( NotFoundError $e ){
             $this->job_not_found = true;
             return;
         }
@@ -125,7 +146,7 @@ class catController extends viewController {
         $data = getSegmentsInfo( $this->jid, $this->password );
 
         //retrieve job owner. It will be useful also if the job is archived or cancelled
-        $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : "support@matecat.com";
+        $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : INIT::$MAILER_RETURN_PATH;
 
         if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
@@ -160,127 +181,25 @@ class catController extends viewController {
             if ( $lastTranslationInJob < $oneMonthAgo ) {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
-                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                //FIXME use Dao
+                updateJobsStatus( $res, $this->jid, $new_status, $this->password );
                 $this->job_archived = true;
             }
 
         }
 
-        foreach ( $data as $i => $job ) {
-
-            $this->project_status = $job; // get one row values for the project are the same for every row
-
-            if ( empty( $this->pname ) ) {
-                $this->pname            = $job[ 'pname' ];
-                $this->downloadFileName = $job[ 'pname' ] . ".zip"; // will be overwritten below in case of one file job
-            }
-
-            if ( empty( $this->last_opened_segment ) ) {
-                $this->last_opened_segment = $job[ 'last_opened_segment' ];
-            }
-
-            if ( empty( $this->cid ) ) {
-                $this->cid = $job[ 'cid' ];
-            }
-
-            if ( empty( $this->pid ) ) {
-                $this->pid = $job[ 'pid' ];
-            }
-
-            if ( empty( $this->create_date ) ) {
-                $this->create_date = $job[ 'create_date' ];
-            }
-
-            if ( empty( $this->source_code ) ) {
-                $this->source_code = $job[ 'source' ];
-            }
-
-            if ( empty( $this->target_code ) ) {
-                $this->target_code = $job[ 'target' ];
-            }
-
-            if ( empty( $this->source ) ) {
-                $s                = explode( "-", $job[ 'source' ] );
-                $source           = strtoupper( $s[ 0 ] );
-                $this->source     = $source;
-                $this->source_rtl = ( $lang_handler->isRTL( strtolower( $this->source ) ) ) ? ' rtl-source' : '';
-            }
-
-            if ( empty( $this->target ) ) {
-                $t                = explode( "-", $job[ 'target' ] );
-                $target           = strtoupper( $t[ 0 ] );
-                $this->target     = $target;
-                $this->target_rtl = ( $lang_handler->isRTL( strtolower( $this->target ) ) ) ? ' rtl-target' : '';
-            }
-            //check if language belongs to supported right-to-left languages
-
-
-            if ( $job[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->job_archived = true;
-                $this->job_owner    = $data[ 0 ][ 'job_owner' ];
-            }
-
-            $id_file = $job[ 'id_file' ];
-
-            if ( !isset( $this->data[ "$id_file" ] ) ) {
-                $files_found[ ] = $job[ 'filename' ];
-            }
-
-            $wStruct = new WordCount_Struct();
-
-            $wStruct->setIdJob( $this->jid );
-            $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $job[ 'new_words' ] );
-            $wStruct->setDraftWords( $job[ 'draft_words' ] );
-            $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
-            $wStruct->setApprovedWords( $job[ 'approved_words' ] );
-            $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
-
-            unset( $job[ 'id_file' ] );
-            unset( $job[ 'source' ] );
-            unset( $job[ 'target' ] );
-            unset( $job[ 'source_code' ] );
-            unset( $job[ 'target_code' ] );
-            unset( $job[ 'mime_type' ] );
-            unset( $job[ 'filename' ] );
-            unset( $job[ 'jid' ] );
-            unset( $job[ 'pid' ] );
-            unset( $job[ 'cid' ] );
-            unset( $job[ 'tid' ] );
-            unset( $job[ 'pname' ] );
-            unset( $job[ 'create_date' ] );
-            unset( $job[ 'owner' ] );
-
-            unset( $job[ 'last_opened_segment' ] );
-
-            unset( $job[ 'new_words' ] );
-            unset( $job[ 'draft_words' ] );
-            unset( $job[ 'translated_words' ] );
-            unset( $job[ 'approved_words' ] );
-            unset( $job[ 'rejected_words' ] );
-
-            //For projects created with No tm analysis enabled
-            if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-                $wCounter = new WordCount_Counter();
-                $wStruct  = $wCounter->initializeJobWordCount( $this->jid, $this->password );
-                Log::doLog( "BackWard compatibility set Counter." );
-            }
-
-            $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
-
+        $this->pid = $data[0][ 'pid' ];
+        $this->cid = $data[0][ 'cid' ];
+        $this->source_code = $data[0][ 'source' ];
+        $this->target_code = $data[0][ 'target' ];
+        $this->create_date = $data[0][ 'create_date' ];
+        if ( $data[0][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
+            $this->job_archived = true;
+            $this->job_owner    = $data[ 0 ][ 'job_owner' ];
         }
 
-        //Needed because a just created job has last_opened segment NULL
-        if ( empty( $this->last_opened_segment ) ) {
-            $this->last_opened_segment = getFirstSegmentId( $this->jid, $this->password );
-        }
-
-        $this->first_job_segment = $this->project_status[ 'job_first_segment' ];
-        $this->last_job_segment  = $this->project_status[ 'job_last_segment' ];
-
-        if ( count( $files_found ) == 1 ) {
-            $this->downloadFileName = $files_found[ 0 ];
-        }
+        $this->wStruct = CatUtils::getWStructFromJobArray( $data[0] );
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
         /**
          * get first segment of every file
@@ -295,127 +214,16 @@ class catController extends viewController {
         $this->firstSegmentOfFiles = json_encode( $fileInfo );
         $this->fileCounter         = json_encode( $TotalPayable );
 
-
-        list( $uid, $user_email ) = $this->getLoginUserParams();
-
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
+        } elseif ( $this->user->email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
-        /*
-         * Take the keys of the user
-         */
-        try {
-            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
-
-            $keyList = $_keyList->read( $dh );
-
-        } catch ( Exception $e ) {
-            $keyList = array();
-            Log::doLog( $e->getMessage() );
-        }
-
-        $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );
-        /**
-         * Set these keys as editable for the client
-         *
-         * @var $keyList TmKeyManagement_MemoryKeyStruct[]
-         */
-        foreach ( $keyList as $_j => $key ) {
-
-            /**
-             * @var $_client_tm_key TmKeyManagement_TmKeyStruct
-             */
-
-            //create a reverse lookup
-            $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
-            $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
-
-            $this->_keyList[ 'totals' ][ $_j ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
-
-        }
-
-        /*
-         * Now take the JOB keys
-         */
-        $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
-
-        $this->tid = count( $job_keyList ) > 0;
-
-        /**
-         * Start this N^2 cycle from keys of the job,
-         * these should be statistically lesser than the keys of the user
-         *
-         * @var $keyList array
-         */
-        foreach ( $job_keyList as $jobKey ) {
-
-            $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
-
-            if ( $this->isLoggedIn() && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
-
-                /*
-                 * If user has some personal keys, check for the job keys if they are present, and obfuscate
-                 * when they are not
-                 */
-                $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
-                if ( $_index_position !== false ) {
-
-                    //i found a key in the job that is present in my database
-                    //i'm owner?? and the key is an owner type key?
-                    if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                        $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
-                        $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
-                        $jobKey    = $jobKey->hideKey( $uid );
-                    } else {
-                        if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                            // I'm not the job owner, but i know the key because it is in my keyring
-                            // so, i can upload and download TMX, but i don't want it to be removed from job
-                            // in tm.html relaxed the control to "key.edit" to enable buttons
-//                            $jobKey = $jobKey->hideKey( $uid ); // enable editing
-
-                        } else {
-                            if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
-                                //do Nothing
-                            }
-                        }
-                    }
-
-                    unset( $this->_keyList[ 'totals' ][ $_index_position ] );
-
-                } else {
-
-                    /*
-                     * This is not a key of that user, set right and obfuscate
-                     */
-                    $jobKey->r = true;
-                    $jobKey->w = true;
-                    $jobKey    = $jobKey->hideKey( -1 );
-
-                }
-
-                $this->_keyList[ 'job_keys' ][] = $jobKey;
-
-            } else {
-                /*
-                 * This user is anonymous or it has no keys in its keyring, obfuscate all
-                 */
-                $jobKey->r                      = true;
-                $jobKey->w                      = true;
-                $this->_keyList[ 'job_keys' ][] = $jobKey->hideKey( -1 );
-
-            }
-
-        }
-
-        //clean unordered keys
-        $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
-
+        $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
+        $this->template->user_keys = $userKeys->getKeys( $data[ 0 ] [ 'tm_keys' ] ) ;
 
         /**
          * Retrieve information about job errors
@@ -423,15 +231,23 @@ class catController extends viewController {
          * @see setRevisionController
          */
 
+        $reviseClass = new Constants_Revise;
+
         $jobQA = new Revise_JobQA(
                 $this->jid,
                 $this->password,
-                $wStruct->getTotal()
+                $this->wStruct->getTotal(),
+                $reviseClass
         );
 
+        list( $jobQA, $reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $this->jid, $this->password, $this->wStruct->getTotal() );
+
+
         $jobQA->retrieveJobErrorTotals();
-        $jobVote          = $jobQA->evalJobVote();
-        $this->qa_data    = json_encode( $jobQA->getQaData() );
+
+        $this->qa_data = json_encode( $jobQA->getQaData() );
+
+        $jobVote = $jobQA->evalJobVote();
         $this->qa_overall = $jobVote[ 'minText' ];
 
 
@@ -441,7 +257,7 @@ class catController extends viewController {
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
-            $engineQuery->uid    = $uid;
+            $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
@@ -456,7 +272,7 @@ class catController extends viewController {
 
         //this gets MT engine active for the job
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->id     = $this->project_status[ 'id_mt_engine' ];
+        $engineQuery->id     = $this->chunk->id_mt_engine ;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
@@ -468,12 +284,35 @@ class catController extends viewController {
          */
         $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
 
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        if( $this->isRevision() ){
+            $action = ActivityLogStruct::ACCESS_REVISE_PAGE;
+        } else {
+            $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
+        }
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->pid;
+        $activity->action     = $action;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->user->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
     }
 
     public function setTemplateVars() {
 
         if ( $this->job_not_found ) {
             parent::makeTemplate( 'job_not_found.html' );
+            $this->template->support_mail = INIT::$SUPPORT_MAIL;
+            header( "HTTP/1.0 404 Not Found" );
             return;
         }
 
@@ -486,109 +325,110 @@ class catController extends viewController {
         if( $this->job_cancelled || $this->job_archived ) {
 
             $this->template->pid                 = null;
-            $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
             $this->template->fileCounter         = 0;
-            $this->template->owner_email         = $this->job_owner;
-            $this->template->jobOwnerIsMe        = ( $this->logged_user->email == $this->job_owner );
+
+            $this->template->jobOwnerIsMe        = false;
+            $this->template->support_mail        = INIT::$SUPPORT_MAIL;
+            $this->template->owner_email         = INIT::$SUPPORT_MAIL;
+
+            $team = $this->project->getTeam();
+
+            if( !empty( $team ) ){
+                $teamModel = new TeamModel( $team );
+                $teamModel->updateMembersProjectsCount();
+                $membersIdList = [];
+                $ownerMail = null;
+                if( $team->type == Constants_Teams::PERSONAL ){
+                    $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
+                } else {
+
+                    $ownerMail = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee )->getEmail();
+                    $membersIdList = array_map( function( $memberStruct ){
+                        /**
+                         * @var $memberStruct \Teams\MembershipStruct
+                         */
+                        return $memberStruct->uid;
+                    }, $team->getMembers() );
+
+                }
+                $this->template->owner_email = $ownerMail;
+
+                if( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ){
+                    $this->template->jobOwnerIsMe        = true;
+                } else {
+                    $this->template->jobOwnerIsMe        = false;
+                }
+
+            }
+
             $this->template->job_not_found       = $this->job_not_found;
             $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
             $this->template->job_cancelled       = $this->job_cancelled;
-            $this->template->logged_user         = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-            $this->template->extended_user       = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-            $this->template->incomingUrl         = '/login?incomingUrl=' . $this->thisUrl;
+            $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+            $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
 
             return;
 
         } else {
             $this->template->pid                 = $this->pid;
-            $this->template->target              = $this->target;
             $this->template->source_code         = $this->source_code;
             $this->template->target_code         = $this->target_code;
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
 
-        $this->template->owner_email   = $this->job_owner;
-        $this->template->jobOwnerIsMe  = ( $this->logged_user->email == $this->job_owner );
-        $this->template->job_not_found = $this->job_not_found;
-        $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
-        $this->template->job_cancelled = $this->job_cancelled;
-        $this->template->logged_user   = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
+        $this->template->owner_email        = $this->job_owner;
+        $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
+        $this->template->get_public_matches = ( !$this->chunk->only_private_tm );
+        $this->template->job_not_found      = $this->job_not_found;
+        $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_cancelled      = $this->job_cancelled;
 
         $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
-        $this->template->pname       = $this->pname;
-        $this->template->tid         = var_export( $this->tid, true );
-        $this->template->source      = $this->source;
-        $this->template->source_rtl  = $this->source_rtl;
-        $this->template->target_rtl  = $this->target_rtl;
-
-        $this->template->authURL = $this->authURL;
+        $this->template->pname       = $this->project->name;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->mt_id      = $this->project_status[ 'id_mt_engine' ];
+        $this->template->mt_id      = $this->chunk->id_mt_engine ;
 
-        $this->template->first_job_segment   = $this->first_job_segment;
-        $this->template->last_job_segment    = $this->last_job_segment;
-        $this->template->last_opened_segment = $this->last_opened_segment;
+        $this->template->first_job_segment   = $this->chunk->job_first_segment ;
+        $this->template->last_job_segment    = $this->chunk->job_last_segment ;
+
         $this->template->owner_email         = $this->job_owner;
 
-        $this->template->isLogged        = $this->isLoggedIn(); // used in template
-        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );  // used by the client
 
-        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->user_keys             = $this->_keyList;
+        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
+
         $this->template->job_stats             = $this->job_stats;
         $this->template->stat_quality          = $this->qa_data;
-        $this->template->overall_quality       = $this->qa_overall;
-        $this->template->overall_quality_class = strtolower( str_replace( ' ', '', $this->qa_overall ) );
+
+        $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
 
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
-        $this->template->tms_enabled = var_export( (bool)$this->project_status[ 'id_tms' ], true );
-        $this->template->mt_enabled  = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
 
-        $this->template->downloadFileName       = urlencode( $this->downloadFileName );
+        $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
+        $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-        $this->template->filtered               = $this->filter_enabled;
-        $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
-        $this->template->isReview         = var_export( self::isRevision(), true );
-        $this->template->reviewClass      = ( self::isRevision() ? ' review' : '' );
-        $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
+        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->editLogClass         = $this->getEditLogClass();
+        //FIXME: temporarily disabled
+        $this->template->editLogClass         = ""; //$this->getEditLogClass();
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
-
-        //check if it is a composite language, for cjk check that accepts only ISO 639 code
-        if ( strpos( $this->target_code, '-' ) !== false ) {
-            //pick only first part
-            $tmp_lang               = explode( '-', $this->target_code );
-            $target_code_no_country = $tmp_lang[ 0 ];
-            unset( $tmp_lang );
-        } else {
-            //not a RFC code, it's fine
-            $target_code_no_country = $this->target_code;
-        }
-
-        //check if cjk
-        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-//            $this->template->taglockEnabled = 0;
-        }
 
         /*
          * Line Feed PlaceHolding System
@@ -621,9 +461,21 @@ class catController extends viewController {
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
 
+        $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
+
+        $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
+
+        //Maybe some plugin want disable the Split from the config
+        $this->template->splitSegmentEnabled = var_export(true, true);
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
+        $this->featureSet->appendDecorators(
+            'CatDecorator',
+            $this,
+            $this->template
+        );
     }
 
     public function getJobStats() {
@@ -631,10 +483,24 @@ class catController extends viewController {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return Chunks_ChunkStruct
      */
-    public function getJob() {
-      return $this->job ;
+    public function getChunk() {
+      return $this->chunk ;
+    }
+
+    /**
+     * @return string
+     */
+
+    public function getReviewPassword() {
+        return $this->review_password ;
+    }
+
+
+    public function getQaOverall() {
+        // TODO: is this str_replace really required?
+        return str_replace( ' ', '', $this->qa_overall );
     }
 
     /**
@@ -655,6 +521,10 @@ class catController extends viewController {
         }
 
         return $return;
+    }
+
+    public function isCurrentProjectGDrive() {
+        return \Projects_ProjectDao::isGDriveProject($this->chunk->id_project);
     }
 
 }

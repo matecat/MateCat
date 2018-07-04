@@ -2,11 +2,12 @@
  Component: ui.offline
  */
 
-UI.offlineCacheSize = 30;
+UI.offlineCacheSize = 20;
 UI.offlineCacheRemaining = UI.offlineCacheSize;
 UI.checkingConnection = false;
 
 UI.currentConnectionCountdown = null;
+UI._backupEvents = null;
 
 $.extend(UI, {
     startOfflineMode: function(){
@@ -15,9 +16,18 @@ $.extend(UI, {
 
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
-            UI.showMessage({
-                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!'
-            });
+
+            this.removeOldConnectionNotification();
+            var notification = {
+                title: '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+                text: 'You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!',
+                type: 'warning',
+                position: "bl",
+                autoDismiss: false,
+                allowHtml: true,
+                timer: 7000
+            };
+            this.offlineNotification = APP.addNotification(notification);
 
             UI.checkingConnection = setInterval( function() {
                 UI.checkConnection( 'Recursive Check authorized' );
@@ -27,16 +37,20 @@ $.extend(UI, {
     },
     endOfflineMode: function () {
         if ( UI.offline ) {
-
             UI.offline = false;
-
-            UI.showMessage( {
-                msg: "Connection is back. We are saving translated segments in the database."
-            } );
-
-            setTimeout( function () {
-                $( '#messageBar .close' ).click();
-            }, 10000 );
+            UI.removeOldConnectionNotification();
+            var notification = {
+                title: 'Connection is back',
+                text: 'We are saving translated segments in the database.',
+                type: 'success',
+                position: "bl",
+                autoDismiss: true,
+                timer: 10000,
+                openCallback: function () {
+                    UI.removeOldConnectionNotification();
+                }
+            };
+            UI.offlineNotification = APP.addNotification(notification);
 
             clearInterval( UI.currentConnectionCountdown );
             clearInterval( UI.checkingConnection );
@@ -50,6 +64,10 @@ $.extend(UI, {
                 $('.noConnection').addClass('reConnection');
                 setTimeout(function() {
                     $('.noConnection, .noConnectionMsg').remove();
+                    if (UI._backupEvents) {
+                        $._data($("body")[0]).events = UI._backupEvents;
+                        UI._backupEvents = null;
+                    }
                 }, 500);
             }, 3000);
 
@@ -75,6 +93,16 @@ $.extend(UI, {
         }
 
         $( '.noConnectionMsg' ).html( '<div class="noConnectionMsg">' + message + '<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>' );
+
+        //remove focus from the edit area
+        setTimeout( function(){
+            UI.editarea.blur();
+            $('#checkConnection').focus();
+            UI._backupEvents = $._data( $("body")[0] ).events;
+            $._data( $("body")[0] ).events = {}
+        }, 300 );
+
+        UI.removeOldConnectionNotification();
 
         //clear previous Interval and set a new one
         UI.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( function () {
@@ -112,74 +140,15 @@ $.extend(UI, {
                     UI.restoringAbortedOperations = false;
                     UI.executingSetTranslation = false;
                     UI.execSetTranslationTail();
-                    UI.execSetContributionTail();
 
+                    //reset counter
+                    UI.offlineCacheRemaining = UI.offlineCacheSize;
                 }
 
             }
         });
     },
 
-    /**
-     * NOT USED
-     * @deprecated
-     * @param operation
-     * @param job
-     * @returns {Array|*}
-     */
-    extractLocalStoredItems: function (operation, job) {
-        job = job || false;
-        items = [];
-        $.each(localStorage, function(k,v) {
-            op = k.substring(0, operation.length);
-            if(op === operation) {
-                kAr = k.split('-');
-                if(job) {
-                    if(kAr[1] === job) {
-                        console.log(kAr[1]);
-                        return true;
-                    }
-                }
-                items.push({
-                    'operation': op,
-                    'job': kAr[1],
-                    'sid': kAr[2],
-                    'value': JSON.parse(v)
-                });
-//                    items.push(JSON.parse(v));
-            }
-        });
-        return items;
-
-    },
-    /**
-     * NOT USED
-     * @deprecated
-     *
-     * @param reqArguments
-     * @param operation
-     */
-    failover: function(reqArguments, operation) {
-//            console.log('failover on ' + operation);
-        if(operation != 'getWarning') {
-            var pendingConnection = {
-                operation: operation,
-                args: reqArguments
-            };
-//			console.log('pendingConnection: ', pendingConnection);
-            var dd = new Date();
-            if(pendingConnection.args) {
-                UI.addInStorage('pending-' + dd.getTime(), JSON.stringify(pendingConnection), 'contribution');
-//                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-            }
-            if(!UI.checkConnectionTimeout) {
-                UI.checkConnectionTimeout = setTimeout(function() {
-                    UI.checkConnection();
-                    UI.checkConnectionTimeout = false;
-                }, 5000);
-            }
-        }
-    },
     /**
      * If there are some callback to be executed after the function call pass it as callback
      *
@@ -198,45 +167,64 @@ $.extend(UI, {
     execAbortedOperations: function( callback_to_execute ) {
 
         callback_to_execute = callback_to_execute || {};
-
+        callback_to_execute.call();
 		//console.log(UI.abortedOperations);
         $.each(UI.abortedOperations, function() {
-            args = this.args;
-            operation = this.operation;
-            if(operation == 'setTranslation') {
-                UI[operation](args[0], args[1], args[2], UI.incrementOfflineCacheRemaining );
-            } else if(operation == 'updateContribution') {
-                UI[operation](args[0], args[1]);
-            } else if(operation == 'setContributionMT') {
-                UI[operation](args[0], args[1], args[2]);
-            } else if(operation == 'setCurrentSegment') {
-                UI[operation](args[0]);
-            } else if(operation == 'getSegments') {
+            var args = this.args;
+            var operation = this.operation;
+            if(operation == 'getSegments') {
                 UI.reloadWarning();
             } else if( operation == 'setRevision' ){
                 UI[operation](args);
             }
         });
         UI.abortedOperations = [];
-
-        callback_to_execute.call();
-
     },
     checkOfflineCacheSize: function () {
-        if ( !UI.offlineCacheRemaining ) {
+        if ( UI.offlineCacheRemaining <= 0 ) {
             UI.activateOfflineCountdown( 'No connection available.' );
-            //console.log( 'la cache è piena, andate in pace' );
         }
     },
     decrementOfflineCacheRemaining: function () {
-        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
+        if (typeof this.offlineNotification != 'undefined') {
+            APP.removeNotification(this.offlineNotification);
+        }
+        var notification = {
+            title: '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+            text: 'You can still translate <span class="remainingSegments">' + --this.offlineCacheRemaining + '</span> segments in offline mode. Do not refresh or you lose the segments!',
+            type: 'warning',
+            position: "bl",
+            autoDismiss: false,
+            allowHtml: true,
+            timer: 7000
+        };
+        this.offlineNotification = APP.addNotification(notification);
+
         UI.checkOfflineCacheSize();
     },
     incrementOfflineCacheRemaining: function(){
         // reset counter by 1
         UI.offlineCacheRemaining += 1;
         //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
-    }
+    },
+    removeOldConnectionNotification: function () {
+        if (typeof UI.offlineNotification != 'undefined') {
+            APP.removeNotification(this.offlineNotification);
+        }
+    },
+    changeStatusOffline: function (sid) {
+        if($('#segment-' + sid + ' .editarea').text() != '') {
+
+            SegmentActions.removeClassToSegment(sid, 'status-draft');
+            SegmentActions.removeClassToSegment(sid, 'status-approved');
+            SegmentActions.removeClassToSegment(sid, 'status-new');
+            SegmentActions.removeClassToSegment(sid, 'status-rejected');
+            SegmentActions.removeClassToSegment(sid, 'status-fixed');
+            SegmentActions.removeClassToSegment(sid, 'status-rebutted');
+
+            SegmentActions.addClassToSegment(sid, 'status-translated');
+        }
+    },
 });
 
 $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {

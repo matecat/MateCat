@@ -14,14 +14,20 @@ class glossaryController extends ajaxController {
     private $id_job;
     private $password;
     private $segment;
+    private $newsegment;
     private $translation;
+    private $newtranslation;
     private $comment;
     private $automatic;
     /**
      * @var Engines_MyMemory
      */
     private $_TMS;
-    private $job_info;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $jobData;
 
     public function __construct() {
 
@@ -32,7 +38,9 @@ class glossaryController extends ajaxController {
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'newsegment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'newtranslation' => array( 'filter' => FILTER_UNSAFE_RAW ),
             'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'automatic'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
@@ -46,14 +54,18 @@ class glossaryController extends ajaxController {
         $this->id_job      = $__postInput[ 'id_job' ];
         $this->password    = $__postInput[ 'password' ];
         $this->segment     = $__postInput[ 'segment' ];
+        $this->newsegment     = $__postInput[ 'newsegment' ];
         $this->translation = $__postInput[ 'translation' ];
+        $this->newtranslation = $__postInput[ 'newtranslation' ];
         $this->comment     = $__postInput[ 'comment' ];
         $this->automatic   = $__postInput[ 'automatic' ];
     }
 
     public function doAction() {
 
-        $this->job_info = getJobData( $this->id_job, $this->password );
+        //get Job Info, we need only a row of jobs ( split )
+        $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+        $this->featureSet->loadForProject( $this->jobData->getProject() );
 
         /**
          * For future reminder
@@ -63,22 +75,31 @@ class glossaryController extends ajaxController {
          */
         $this->_TMS = Engine::getInstance( 1 );
 
-        $this->checkLogin();
+        $this->readLoginInfo();
 
         try {
 
             $config = $this->_TMS->getConfigStruct();
 
+            // segment related
             $config[ 'segment' ]     = $this->segment;
             $config[ 'translation' ] = $this->translation;
             $config[ 'tnote' ]       = $this->comment;
-            $config[ 'source' ]      = $this->job_info[ 'source' ];
-            $config[ 'target' ]      = $this->job_info[ 'target' ];
-            $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
-            $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
+
+            // job related
+            $config[ 'id_user' ]     = array() ; 
+            $config[ 'source' ]      = $this->jobData[ 'source' ];
+            $config[ 'target' ]      = $this->jobData[ 'target' ];
+
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
+            $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
             $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
+            
+            if ( $this->newsegment && $this->newtranslation ) {
+                $config[ 'newsegment' ]     = $this->newsegment;
+                $config[ 'newtranslation' ] = $this->newtranslation;
+            }
 
             switch ( $this->exec ) {
 
@@ -92,7 +113,7 @@ class glossaryController extends ajaxController {
                      * MyMemory should not be the only Glossary provider
                      *
                      */
-                    if ( $this->job_info[ 'id_tms' ] == 0 ) {
+                    if ( $this->jobData[ 'id_tms' ] == 0 ) {
                         throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
                     }
                     $this->_set( $config );
@@ -114,14 +135,14 @@ class glossaryController extends ajaxController {
 
     protected function _get( $config ){
 
-        $tm_keys = $this->job_info['tm_keys'];
+        $tm_keys = $this->jobData['tm_keys'];
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $this->uid, $this->userRole );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $this->user->uid, $this->userRole );
 
         if ( count( $tm_keys ) ) {
             $config[ 'id_user' ] = array();
@@ -151,22 +172,41 @@ class glossaryController extends ajaxController {
          *
          */
         if ( $this->automatic ) {
-            $tmp_Result = array();
+            $tmp_result = array();
             foreach ( $TMS_RESULT as $k => $val ) {
-                if ( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ) {
+                // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+                if ( ( $res = mb_stripos( $this->segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
                     unset( $TMS_RESULT[ $k ] );
                 } else {
-                    $tmp_Result[ $k ] = $res;
+                    $tmp_result[ $k ] = $res;
                 }
             }
-            asort( $tmp_Result );
-            $tmp_Result = array_keys( $tmp_Result );
+            asort( $tmp_result );
+            $tmp_result = array_keys( $tmp_result );
 
             $ordered_Result = array();
-            foreach ( $tmp_Result as $glossary_matches ) {
-                $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+            foreach ( $tmp_result as $glossary_matches ) {
+                $_k = preg_replace( '/\xE2\x80\x8B$/', '', $glossary_matches ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+                $ordered_Result[ $_k ] = $TMS_RESULT[ $glossary_matches ];
             }
             $TMS_RESULT = $ordered_Result;
+        }
+
+        //check if user is logged. If so, get the uid.
+        $uid = null;
+        if($this->userIsLogged){
+            $uid = $this->user->uid;
+        }
+
+        foreach($TMS_RESULT as $k => $glossaryMatch){
+
+            $TMS_RESULT[$k][0]['last_updated_by'] = Utils::changeMemorySuggestionSource(
+                    $glossaryMatch[0],
+                    $this->jobData['tm_keys'],
+                    $this->jobData['owner'],
+                    $uid);
+
+            $TMS_RESULT[$k][0]['created_by'] = $TMS_RESULT[$k][0]['last_updated_by'];
         }
         $this->result[ 'data' ][ 'matches' ] = $TMS_RESULT;
 
@@ -176,22 +216,19 @@ class glossaryController extends ajaxController {
 
         $this->result[ 'errors' ] = array();
 
-        $tm_keys = $this->job_info['tm_keys'];
+        $tm_keys = $this->jobData['tm_keys'];
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
         if ( empty( $tm_keys ) ) {
 
             $APIKeySrv = new TMSService();
             $newUser   = (object)$APIKeySrv->createMyMemoryKey(); //throws exception
-
-            //TODO take only for hystorical reason
-            updateTranslatorJob( $this->id_job, $newUser );
 
             //fallback
             $config[ 'id_user' ] = $newUser->id;
@@ -200,7 +237,7 @@ class glossaryController extends ajaxController {
             $new_key->tm    = 1;
             $new_key->glos  = 1;
             $new_key->key   = $newUser->key;
-            $new_key->owner = ( $this->userMail == $this->job_info['owner'] );
+            $new_key->owner = ( $this->user->email == $this->jobData['owner'] );
 
             if( !$new_key->owner ){
                 $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]} = 1;
@@ -213,9 +250,9 @@ class glossaryController extends ajaxController {
             if( $new_key->owner ){
                 //do nothing, this is a greedy if
             } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                $new_key->uid_transl = $this->uid;
+                $new_key->uid_transl = $this->user->uid;
             } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
-                $new_key->uid_rev = $this->uid;
+                $new_key->uid_rev = $this->user->uid;
             }
 
             //create an empty array
@@ -231,7 +268,7 @@ class glossaryController extends ajaxController {
 
                 $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
                 $newMemoryKey->tm_key = $new_key;
-                $newMemoryKey->uid    = $this->uid;
+                $newMemoryKey->uid    = $this->user->uid;
 
                 $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
 
@@ -243,7 +280,10 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
-        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
+
+        $config[ 'prop' ]        = $this->jobData->getTMProps();
+        $this->featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $this->user );
+        $config[ 'prop' ]        = json_encode( $config[ 'prop' ] );
 
         //prepare the error report
         $set_code = array();
@@ -296,19 +336,26 @@ class glossaryController extends ajaxController {
 
     protected function _update( $config ){
 
-        $tm_keys = $this->job_info['tm_keys'];
+        $tm_keys = $this->jobData['tm_keys'];
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
-        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
+        $config[ 'prop' ]        = $this->jobData->getTMProps();
+        $this->featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $this->user );
+        $config[ 'prop' ]        = json_encode( $config[ 'prop' ] );
+
+        if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
+            $config[ 'newsegment' ]     = CatUtils::view2rawxliff( $config[ 'newsegment' ] );
+            $config[ 'newtranslation' ] = CatUtils::view2rawxliff( $config[ 'newtranslation' ] );
+        }
         //prepare the error report
         $set_code = array();
         //set the glossary entry for each key with write grants
@@ -319,7 +366,7 @@ class glossaryController extends ajaxController {
              */
             foreach ( $tm_keys as $tm_key ) {
                 $config[ 'id_user' ] = $tm_key->key;
-                $TMS_RESULT = $this->_TMS->update( $config );
+                $TMS_RESULT = $this->_TMS->updateGlossary( $config );
                 $set_code[ ] = $TMS_RESULT;
             }
 
@@ -345,14 +392,14 @@ class glossaryController extends ajaxController {
 
     protected function _delete( $config ){
 
-        $tm_keys = $this->job_info['tm_keys'];
+        $tm_keys = $this->jobData['tm_keys'];
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
@@ -382,5 +429,4 @@ class glossaryController extends ajaxController {
         $this->result[ 'data' ] = ( $set_successful ? 'OK' : null );
 
     }
-
 }

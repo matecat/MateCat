@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Description of catController
@@ -7,14 +9,16 @@
  */
 class editlogController extends viewController {
 
-    private $jid = "";
-    private $password = "";
-    private $start_id;
-    private $sort_by;
-    private $thisUrl;
+    public $project;
+    private   $jid      = "";
+    private   $password = "";
+    private   $start_id;
+    private   $sort_by;
+    private   $thisUrl;
 
 
     public function __construct() {
+
         parent::__construct();
         parent::makeTemplate( "editlog.html" );
 
@@ -36,11 +40,16 @@ class editlogController extends viewController {
         $this->start_id = $__postInput[ 'start' ];
         $this->sort_by  = $__postInput[ 'sortby' ];
         $this->thisUrl  = $_SERVER[ 'REQUEST_URI' ];
+
+        $this->project    = Projects_ProjectDao::findByJobId( $this->jid );
+
+        $this->featureSet->loadForProject( $this->project ) ;
+
     }
 
     public function doAction() {
 
-        $this->generateAuthURL();
+        $this->featureSet->filter( 'beginDoAction', $this );
 
         $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
 
@@ -54,6 +63,15 @@ class editlogController extends viewController {
 
         $this->model->controllerDoAction();
 
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->project->id;
+        $activity->action     = ActivityLogStruct::ACCESS_EDITLOG_PAGE;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->user->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+        
     }
 
     public function setTemplateVars() {

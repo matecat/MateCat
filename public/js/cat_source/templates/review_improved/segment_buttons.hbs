@@ -1,0 +1,19 @@
+{{#if show_approve}}
+    <li class="right">
+        <a id="segment-{{id_segment}}-button-translated"
+           data-segmentid="segment-{{id_segment}}"
+            {{#if disabled }} disabled="disabled" {{/if}}
+           href="javascript:;" class="approved"
+        >APPROVED</a>
+        <p>{{ ctrl }}+ENTER</p>
+    </li>
+{{/if}}
+
+
+{{#if show_reject}}
+    <li class="right">
+        <a class="button button-reject" href="javascript:;">REJECTED</a>
+        <p>{{ ctrl }}+SHIFT+DOWN</p>
+    </li>
+{{/if}}
+

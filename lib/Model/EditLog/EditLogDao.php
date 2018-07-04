@@ -12,7 +12,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EditLog_EditLogSegmentStruct";
 
-    const NUM_SEGS = 10;
+    protected static $NUM_SEGS = 10;
+
+    /**
+     * @param int $NUM_SEGS
+     *
+     * @return $this
+     */
+    public function setNumSegs( $NUM_SEGS = 10 ) {
+        self::$NUM_SEGS = $NUM_SEGS;
+        return $this;
+    }
 
     /**
      * This method returns a set of 2*NUM_SEGS segments
@@ -34,16 +44,19 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $querySegments = "SELECT segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations st ON id = id_segment
-                    JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = %d
-                        AND password = '%s'
-                        AND show_in_cattool = 1
-                        AND segments.id >= %d
-                        AND st.status not in( '%s', '%s' )
-                    LIMIT %u
+        $querySegments = "
+                    SELECT * FROM (
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations st ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = %d
+                            AND password = '%s'
+                            AND show_in_cattool = 1
+                            AND segments.id >= %d
+                            AND st.status not in( '%s', '%s' )
+                        LIMIT %u
+                    ) AS TT1
                     UNION
                     SELECT * from(
                             SELECT  segments.id AS __sid
@@ -57,12 +70,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                             AND st.status not in( '%s', '%s' )
                         ORDER BY __sid DESC
                         LIMIT %u
-                    ) as TT
+                    ) as TT2
                 ";
 
         $query = "SELECT
             s.id,
             s.segment AS source,
+            s.internal_id,
             st.translation AS translation,
             st.time_to_edit,
             st.suggestion,
@@ -71,6 +85,9 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             st.suggestion_match,
             st.suggestion_position,
             st.mt_qe,
+            st.match_type,
+            st.locked,
+            ste.uid,
             j.id_translator,
             j.source AS job_source,
             j.target AS job_target,
@@ -85,13 +102,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 JOIN(
                   %s
                 ) AS TEMP ON TEMP.__sid = s.id
+
+                LEFT JOIN segment_translation_events ste on st.id_segment = ste.id_segment
+                  AND st.version_number = ste.version_number
+
                 WHERE
-                id_job = %d AND
+                st.id_job = %d AND
                 j.password = '%s' AND
                 translation IS NOT NULL AND
                 st.status not in( '%s', '%s' )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                ORDER BY time_to_edit DESC";
+                ORDER BY st.id_segment ASC";
 
         $querySegments = sprintf(
                 $querySegments,
@@ -100,13 +121,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS,
+                self::$NUM_SEGS,
                 $job_id,
                 $password,
                 $ref_segment,
                 Constants_TranslationStatus::STATUS_NEW,
                 Constants_TranslationStatus::STATUS_DRAFT,
-                self::NUM_SEGS
+                self::$NUM_SEGS
         );
 
         $result = $this->_fetch_array(
@@ -119,6 +140,15 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
+
+        $userDao = new Users_UserDao() ;
+        $userDao->setCacheTTL( 60 * 60 * 24 * 30 ) ;
+
+        foreach( $result as $key => $value ) {
+            if ( !is_null( $result[ $key ] [ 'uid' ] ) ) {
+                $result[ $key ] [ 'email' ] = $userDao->getByUid( $result [ $key ] [ 'uid' ] )->email  ;
+            }
+        }
 
         return $this->_buildResult( $result );
     }
@@ -226,7 +256,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -267,7 +297,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
                         Constants_TranslationStatus::STATUS_DRAFT,
-                        self::NUM_SEGS
+                        self::$NUM_SEGS
                 )
         );
 
@@ -308,7 +338,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $result = $this->_fetch_array(
                 sprintf(
                         $queryBefore,
-                        self::NUM_SEGS,
+                        self::$NUM_SEGS,
                         $job_id,
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
@@ -328,6 +358,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function getGlobalStats( $job_id, $password ) {
+
         if ( empty( $job_id ) ) {
             throw new Exception( "Job id required" );
         }
@@ -335,56 +366,15 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         if ( empty( $password ) ) {
             throw new Exception( "Job password required" );
         }
-        $queryValidSegments = "
-        select
-            sum(time_to_edit) as tot_tte,
-            sum(raw_word_count) as raw_words,
-            sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
-            avg_post_editing_effort / sum(raw_word_count) as avg_pee
-        from segment_translations st
-        join segments s on s.id = st.id_segment
-        join jobs j on j.id = st.id_job
-        where id_job = %d
-            and  password = '%s'
-            and st.status not in( '%s', '%s' )
-            and time_to_edit/raw_word_count between %d and %d";
 
-        $resultValidSegs = $this->_fetch_array(
-                sprintf(
-                        $queryValidSegments,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT,
-                        1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
-                        1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
-                )
-        );
-
-        $queryAllSegments = "
-          select
-            sum(time_to_edit) as tot_tte,
-            sum(raw_word_count) as raw_words,
-            sum(time_to_edit)/sum(raw_word_count) as secs_per_word
-          from segment_translations st
-            join segments s on s.id = st.id_segment
-            join jobs j on j.id = st.id_job
-          where id_job = %d
-            and  password = '%s'";
-
-        $resultAllSegs = $this->_fetch_array(
-                sprintf(
-                        $queryAllSegments,
-                        $job_id,
-                        $password
-                )
-        );
+        $resultValidSegs = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $job_id, $password );
+        $resultAllSegs = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getJobRawStats( $job_id, $password );
 
         $result = array(
-                'tot_tte'       => $resultAllSegs[0][ 'tot_tte' ],
-                'raw_words'     => $resultAllSegs[0][ 'raw_words' ],
-                'secs_per_word' => $resultAllSegs[0][ 'secs_per_word' ],
-                'avg_pee'       => $resultValidSegs[0][ 'avg_pee' ]
+                'tot_tte'       => $resultAllSegs->tot_tte,
+                'raw_words'     => $resultAllSegs->raw_words,
+                'secs_per_word' => $resultAllSegs->secs_per_word,
+                'avg_pee'       => $resultValidSegs->avg_pee
         );
 
         return $result;

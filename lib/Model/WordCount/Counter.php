@@ -24,6 +24,11 @@ class WordCount_Counter {
     protected $newStatus;
     protected $oldStatus;
 
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project;
+
     protected static $constCache = array();
 
     /**
@@ -55,15 +60,22 @@ class WordCount_Counter {
         $this->oldWCount = $oldWCount;
     }
 
+    /**
+     * @param Projects_ProjectStruct $project
+     */
+    public function setProject(Projects_ProjectStruct $project ) {
+        $this->project = $project;
+    }
+
     public function setNewStatus( $new_status ) {
         $this->_verifyStatus( $new_status );
-        $this->newStatusCall = ucfirst( strtolower( $new_status ) ) . 'Words';
+        $this->newStatusCall = $this->methodNameForStatusCall($new_status) ;
         $this->newStatus     = $new_status;
     }
 
     public function setOldStatus( $old_status ) {
         $this->_verifyStatus( $old_status );
-        $this->oldStatusCall = ucfirst( strtolower( $old_status ) ) . 'Words';
+        $this->oldStatusCall = $this->methodNameForStatusCall( $old_status );
         $this->oldStatus     = $old_status;
     }
 
@@ -87,15 +99,13 @@ class WordCount_Counter {
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
 
-        //Log::doLog( $newWCount );
+        if (!$this->equivalentStatuses() ) {
+            $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus );
+            $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus );
 
-        $callSetNew = 'set' . $this->newStatusCall;
-        $callSetOld = 'set' . $this->oldStatusCall;
-
-        $newWCount->$callSetOld( -$words_amount );
-        $newWCount->$callSetNew( +$words_amount );
-
-        //Log::doLog( $newWCount );
+            $newWCount->$callSetOld( -$words_amount );
+            $newWCount->$callSetNew( +$words_amount );
+        }
 
         return $newWCount;
 
@@ -133,51 +143,44 @@ class WordCount_Counter {
 
     }
 
-    public function updateDB_countAll( array $_wordCount_Struct_Array ) {
-        /**
-         * @var $_wordCount_Struct_Array WordCount_Struct
-         */
-        $_wordCount_Struct_Array = $_wordCount_Struct_Array[0];
-        $id_job   = $_wordCount_Struct_Array->getIdJob();;
-        $password = $_wordCount_Struct_Array->getJobPassword();
+    public function updateCounts( WordCount_Struct $wordCount_Struct ) {
+
+        $id_job = $wordCount_Struct->getIdJob();;
+        $password = $wordCount_Struct->getJobPassword();
 
         Log::doLog( sprintf(
-                        "Requested updateDB_countAll for job %s-%s",
+                        "Requested updateCounts for job %s-%s",
                         $id_job,
                         $password
                 )
         );
 
+        $sum_sql = $this->getSumSqlBasedOnProjectWordCountType();
+
         $queryStats = "select
-                        st.status, sum(st.eq_word_count) as eq_wc
+                        st.status,
+                        $sum_sql as wc_sum
                         from
                             jobs j join segment_translations st  on j.id = st.id_job
                           join segments s on s.id = st.id_segment
-                        where j.id = %d
-                        and j.password = '%s'
+                        where j.id = :id_job
+                        and j.password = :password
                         and s.show_in_cattool = 1
                         group by st.status";
-
-        $queryUpdate = "UPDATE jobs AS j SET
-           new_words = %d,
-           draft_words = %d,
-           translated_words = %d,
-           approved_words = %d,
-           rejected_words = %d
-           WHERE j.id = %d
-           AND j.password = '%s'";
 
         /*
          * generate job counters
          */
-        $db       = Database::obtain();
-        $jobStats = $db->fetch_array(
-                sprintf(
-                        $queryStats,
-                        $id_job,
-                        $password
-                )
-        );
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( $queryStats );
+
+        $stmt->execute( [
+                'id_job'   => $id_job,
+                'password' => $password
+        ] );
+
+        $jobStats = $stmt->fetchAll();
 
         $new_words        = 0.0;
         $draft_words      = 0.0;
@@ -185,11 +188,15 @@ class WordCount_Counter {
         $approved_words   = 0.0;
         $rejected_words   = 0.0;
 
+
+        // find the appropriate column based on
+        // project config.
+
         foreach ( $jobStats as $row_stat ) {
 
             $counter_name = strtolower( $row_stat[ 'status' ] ) . "_words";
             if ( isset( $$counter_name ) ) {
-                $$counter_name += $row_stat[ 'eq_wc' ];
+                $$counter_name += $row_stat[ 'wc_sum' ];
             }
 
         }
@@ -197,37 +204,29 @@ class WordCount_Counter {
         /**
          * update job counters
          */
-        $db->query(
-                sprintf(
-                        $queryUpdate,
-                        $new_words,
-                        $draft_words,
-                        $translated_words,
-                        $approved_words,
-                        $rejected_words,
-                        $id_job,
-                        $password
-                )
-        );
 
-        if ( $db->affected_rows > 0 ) {
-            $newTotalWCount = new WordCount_Struct();
-            $newTotalWCount->setNewWords( $new_words );
-            $newTotalWCount->setTranslatedWords( $translated_words );
-            $newTotalWCount->setApprovedWords( $approved_words );
-            $newTotalWCount->setRejectedWords( $rejected_words );
-            $newTotalWCount->setDraftWords( $draft_words );
-            $newTotalWCount->setIdSegment( $_wordCount_Struct_Array->getIdSegment() );
-            $newTotalWCount->setOldStatus( $this->oldStatus );
-            $newTotalWCount->setNewStatus( $this->newStatus );
-            $newTotalWCount->setIdJob( $id_job );
-            $newTotalWCount->setJobPassword( $password );
+        $queryUpdate = "UPDATE jobs AS j SET
+           new_words = :new_words,
+           draft_words = :draft_words,
+           translated_words = :translated_words,
+           approved_words = :approved_words,
+           rejected_words = :rejected_words
+           WHERE j.id = :id_job
+           AND j.password = :password";
 
-            return $newTotalWCount;
-        } else {
-            throw new Exception( 'Failed to upload counters' );
-        }
+        $stmt = $conn->prepare( $queryUpdate );
 
+        $stmt->execute( [
+                'new_words'        => $new_words,
+                'draft_words'      => $draft_words,
+                'translated_words' => $translated_words,
+                'approved_words'   => $approved_words,
+                'rejected_words'   => $rejected_words,
+                'id_job'           => $id_job,
+                'password'         => $password,
+        ] );
+
+        return $stmt->rowCount();
     }
 
     /**
@@ -279,6 +278,50 @@ class WordCount_Counter {
 
         return $wStruct;
 
+    }
+
+    /**
+     * Returns the name of the method to call. In case of fixed and rebutted,
+     * translated and rejected are returned respectively.
+     *
+     * @param $name
+     *
+     * @return string
+     */
+    private function methodNameForStatusCall( $name ) {
+        if ( in_array( strtoupper($name), Constants_TranslationStatus::$POST_REVISION_STATUSES  ) ) {
+            return 'TranslatedWords' ;
+        }
+        return ucfirst( strtolower( $name ) ) . 'Words';
+
+    }
+
+    /**
+     * Checks whether the old and new statuses are equal in regard
+     * of the database column to update.
+     */
+    private function equivalentStatuses() {
+        return (
+                $this->methodNameForStatusCall( $this->newStatus ) ==
+                $this->methodNameForStatusCall( $this->oldStatus )
+        );
+    }
+
+    private function getSumSqlBasedOnProjectWordCountType() {
+        $sum_eq_word_count = 'sum(st.eq_word_count)';
+        $sum_raw_word_count = 'sum(s.raw_word_count)';
+
+        if ( !$this->project ) {
+            return $sum_eq_word_count ;
+        }
+
+        $type = $this->project->getWordCountType();
+        if ( $type == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            return $sum_raw_word_count ;
+        }
+        else {
+            return $sum_eq_word_count ;
+        }
     }
 
 } 

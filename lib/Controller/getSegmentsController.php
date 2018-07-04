@@ -18,6 +18,16 @@ class getSegmentsController extends ajaxController {
     private $start_from = 0;
     private $page = 0;
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    private $job;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
+
     private $segment_notes ;
 
 
@@ -59,13 +69,23 @@ class getSegmentsController extends ajaxController {
             return;
         }
 
+        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->project    = $this->job->getProject();
+
+        $this->featureSet->loadForProject( $this->project ) ;
+
 		$lang_handler = Langs_Languages::getInstance();
 
 		if ($this->ref_segment == '') {
 			$this->ref_segment = 0;
 		}
 
-        $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+
+        $data = getMoreSegments(
+                $this->jid, $this->password, $this->step,
+                $this->ref_segment, $this->where,
+                $this->getOptionalQueryFields()
+        );
 
         $this->prepareNotes( $data );
 
@@ -138,6 +158,8 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['segments'] = array();
             }
 
+            $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
+
             unset($seg['id_file']);
             unset($seg['source']);
             unset($seg['target']);
@@ -180,16 +202,40 @@ class getSegmentsController extends ajaxController {
         $this->result['data']['where'] = $this->where;
     }
 
+
+    private function getOptionalQueryFields() {
+        $feature = $this->job->getProject()->isFeatureEnabled('translation_versions');
+        $options = array();
+
+        if ( $feature ) {
+            $options['optional_fields'] = array('st.version_number');
+        }
+
+        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
+
+        return $options;
+    }
+
     private function attachNotes( &$segment ) {
         $segment['notes'] = @$this->segment_notes[ (int) $segment['sid'] ] ;
     }
 
     private function prepareNotes( $segments ) {
-        $start = $segments[0]['sid'];
-        $last = end($segments);
-        $stop = $last['sid'];
+        if ( ! empty( $segments[0] ) ) {
+            $start = $segments[0]['sid'];
+            $last = end($segments);
+            $stop = $last['sid'];
+            if( $this->featureSet->filter( 'prepareAllNotes', false ) ){
+                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
+                foreach ( $this->segment_notes as $k => $noteObj ){
+                    $this->segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
+                }
+                $this->segment_notes = $this->featureSet->filter( 'processExtractedJsonNotes', $this->segment_notes );
+            } else {
+                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+            }
 
-        $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+        }
 
     }
 
