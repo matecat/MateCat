@@ -42,13 +42,13 @@ class QAGlobalWarning {
 
         $this->structure = [
                 'ERROR'   => [
-                        'Categories' => []
+                        'Categories' => new \ArrayObject()
                 ],
                 'WARNING' => [
-                        'Categories' => []
+                        'Categories' => new \ArrayObject()
                 ],
                 'INFO'     => [
-                        'Categories' => []
+                        'Categories' => new \ArrayObject()
                 ]
         ];
 
