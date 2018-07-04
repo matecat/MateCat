@@ -8,27 +8,27 @@
  */
 
 /**
- * Class Engine_AltlangStruct
+ * Class Engine_ApertiumStruct
  *
- * This class contains the default parameters for a Altlang Engine CREATION
+ * This class contains the default parameters for a Apertium Engine CREATION
  *
  */
-class EnginesModel_AltlangStruct extends EnginesModel_EngineStruct {
+class EnginesModel_ApertiumStruct extends EnginesModel_EngineStruct {
 
     /**
      * @var string
      */
-    public $description = "AltLang Engine";
+    public $description = "Apertium Engine";
 
     /**
      * @var string
      */
-    public $base_url = "http://api.altlang.net";
-        
+    public $base_url = "http://api.prompsit.com";
+
     /**
      * @var string
      */
-    public $translate_relative_url = "ws/";
+    public $translate_relative_url = "apertiumws/";
 
     /**
      * @var string
@@ -39,7 +39,7 @@ class EnginesModel_AltlangStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $class_load = Constants_Engines::ALTLANG;
+    public $class_load = Constants_Engines::APERTIUM;
 
     /**
      * @var int
@@ -56,7 +56,7 @@ class EnginesModel_AltlangStruct extends EnginesModel_EngineStruct {
      * @return EnginesModel_EngineStruct
      */
     public static function getStruct() {
-        return new EnginesModel_AltlangStruct();
+        return new EnginesModel_ApertiumStruct();
     }
 
 }
