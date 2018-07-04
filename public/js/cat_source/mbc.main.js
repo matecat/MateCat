@@ -545,10 +545,10 @@ if ( MBC.enabled() )
         };
 
         var parseCommentHtml = function ( text ) {
-            var regExp = /{@([0-9]+|channel)@}/gm;
+            var regExp = /{@([0-9]+|team)@}/gm;
             if ( regExp.test(text) ) {
                 text = text.replace( regExp, function (match, id) {
-                    id = (id === "channel") ? id : parseInt(id);
+                    id = (id === "team") ? id : parseInt(id);
                     var user = findUser(id);
                     if (user) {
                         var html = '<span contenteditable="false" class="tagging-item" data-id="'+id+'">'+ user.first_name + ' ' + user.last_name +'</span>';
@@ -687,8 +687,8 @@ if ( MBC.enabled() )
 
                 //Todo remove this with the new API
                 MBC.teamUsers = [{
-                    uid: "channel",
-                    first_name: "Channel",
+                    uid: "team",
+                    first_name: "Team",
                     last_name: ""
                 }];
                 _.forEach(data.members, function ( elem ) {
