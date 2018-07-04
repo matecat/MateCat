@@ -102,6 +102,7 @@ class QAGlobalWarning {
             case QA::ERR_TAG_ID:
             case QA::ERR_UNCLOSED_X_TAG:
             case QA::ERR_TAG_ORDER:
+            case QA::ERR_UNCLOSED_G_TAG:
                 $category = self::TAGS_CATEGORY;
                 break;
             case QA::ERR_SPACE_MISMATCH_TEXT:
@@ -110,6 +111,9 @@ class QAGlobalWarning {
             case QA::ERR_SYMBOL_MISMATCH:
             case QA::ERR_NEWLINE_MISMATCH:
                 $category = self::MISMATCH_CATEGORY;
+                break;
+            default:
+                throw new \RuntimeException("Undefined Category");
                 break;
         }
 
