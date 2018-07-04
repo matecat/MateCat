@@ -519,14 +519,17 @@ if ( MBC.enabled() )
 
         var addTagging = function (  ) {
 
-
-            $(".mbc-comment-textarea")
-                .atwho({
-                    at: "@",
-                    displayTpl: '<li>${first_name} ${last_name}</li>',
-                    insertTpl: '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
-                    data: MBC.teamUsers,
-                });
+            if ( MBC.teamUsers.length > 0 ) {
+                $(".mbc-comment-textarea")
+                    .atwho({
+                        at: "@",
+                        displayTpl: '<li>${first_name} ${last_name}</li>',
+                        insertTpl: '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
+                        data: MBC.teamUsers,
+                        searchKey: "first_name",
+                        limit: MBC.teamUsers.length
+                    });
+            }
         };
 
         var parseCommentHtmlBeforeSend = function (  ) {
@@ -542,9 +545,10 @@ if ( MBC.enabled() )
         };
 
         var parseCommentHtml = function ( text ) {
-            var regExp = /{@([0-9]+)@}/gm;
+            var regExp = /{@([0-9]+|channel)@}/gm;
             if ( regExp.test(text) ) {
                 text = text.replace( regExp, function (match, id) {
+                    id = (id === "channel") ? id : parseInt(id);
                     var user = findUser(id);
                     if (user) {
                         var html = '<span contenteditable="false" class="tagging-item" data-id="'+id+'">'+ user.first_name + ' ' + user.last_name +'</span>';
@@ -559,7 +563,7 @@ if ( MBC.enabled() )
 
         var findUser = function ( id ) {
             return _.find(MBC.teamUsers, function ( item ) {
-                return parseInt(item.uid) === parseInt(id);
+                return item.uid === id;
             });
         };
 
@@ -678,13 +682,19 @@ if ( MBC.enabled() )
                 url : "/api/v2/teams/" + teamId + "/members"
                 // url : "/api/app/teams/" + teamId + "/members/public"
             }).done(function ( data ) {
+                //TODO: put in teamUsers the array of users objects
                 // MBC.teamUsers = data.users;
 
                 //Todo remove this with the new API
-                MBC.teamUsers = [];
+                MBC.teamUsers = [{
+                    uid: "channel",
+                    first_name: "Channel",
+                    last_name: ""
+                }];
                 _.forEach(data.members, function ( elem ) {
                     MBC.teamUsers.push(elem.user);
                 });
+                //Todo remove this with the new API
 
             }).fail(function ( response ) {
                 MBC.teamUsers = [];
