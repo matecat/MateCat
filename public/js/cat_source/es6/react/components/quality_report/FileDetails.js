@@ -2,13 +2,21 @@ import SegmentQR from "./SegmentQR";
 
 class FileDetails extends React.Component {
 
+    getSegments() {
+        let segments = [];
+        this.props.file.get("segments").forEach((item) =>{
+            let segment = <SegmentQR key={item.get("sid")} segment={item}/>;
+            segments.push(segment);
+        });
+        return segments;
+    }
+
     render () {
 
         return <div className="qr-segments">
-            <div className="document-name">FILE Test_Project_For_New_QR.html</div>
+            <div className="document-name">FILE {this.props.file.get("filename")}</div>
             <div className="qr-segments-list">
-                <SegmentQR/>
-                <SegmentQR/>
+                {this.getSegments()}
             </div>
         </div>
 

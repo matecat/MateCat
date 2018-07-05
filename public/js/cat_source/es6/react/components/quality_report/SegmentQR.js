@@ -10,7 +10,7 @@ class SegmentQR extends React.Component {
                 <thead>
                 <tr>
                     <th className="three wide">
-                        <div className="segment id">1243134</div>
+                        <div className="segment id">{this.props.segment.get("sid")}</div>
                     </th>
                     <th className="wide">
                         <div className="segment-production">

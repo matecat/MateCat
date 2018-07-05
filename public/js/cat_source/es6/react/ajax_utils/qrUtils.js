@@ -5,7 +5,7 @@ let QUALITY_REPORT =  {
     getSegmentsFiles() {
 
         let data = {
-            // jid: 841,
+            jid: 841,
             password: "5ec5f5a60ca2",
             step: 30,
             segment: "756469",
