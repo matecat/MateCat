@@ -675,26 +675,21 @@ if ( MBC.enabled() )
         };
 
         var getTeamUsers = function (  ) {
-            var teamId = 2;
+            var teamId = config.id_team;
             return $.ajax({
                 async: true,
                 type: "get",
-                url : "/api/v2/teams/" + teamId + "/members"
-                // url : "/api/app/teams/" + teamId + "/members/public"
+                // url : "/api/v2/teams/" + teamId + "/members"
+                url : "/api/app/teams/" + teamId + "/members/public"
             }).done(function ( data ) {
-                //TODO: put in teamUsers the array of users objects
-                // MBC.teamUsers = data.users;
-
-                //Todo remove this with the new API
-                MBC.teamUsers = [{
+                var team = {
                     uid: "team",
                     first_name: "Team",
                     last_name: ""
-                }];
-                _.forEach(data.members, function ( elem ) {
-                    MBC.teamUsers.push(elem.user);
-                });
-                //Todo remove this with the new API
+                };
+                MBC.teamUsers = data;
+                MBC.teamUsers.unshift(team);
+
 
             }).fail(function ( response ) {
                 MBC.teamUsers = [];
