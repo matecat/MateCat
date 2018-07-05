@@ -336,7 +336,10 @@ class catController extends viewController {
 
             $team = $this->project->getTeam();
 
+
+
             if( !empty( $team ) ){
+                $this->template->id_team = $this->project->id_team;
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
                 $membersIdList = [];
@@ -378,6 +381,11 @@ class catController extends viewController {
             $this->template->target_code         = $this->target_code;
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
+        }
+
+        $this->template->id_team = null;
+        if(!empty($this->project->id_team)){
+            $this->template->id_team = $this->project->id_team;
         }
 
         $this->template->owner_email        = $this->job_owner;
