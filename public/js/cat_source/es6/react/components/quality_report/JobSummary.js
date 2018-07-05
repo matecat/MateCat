@@ -1,14 +1,14 @@
 import ProductionSummary from "./ProductionSummary";
-import QualitySummary from "./QualitySummary";
+import QualitySummaryTable from "./QualitySummaryTable";
 
 class JobSummary extends React.Component {
 
     render () {
 
-        return <div>
-            <ProductionSummary/>
-            <QualitySummary/>
-        </div>
+        return <div className="qr-production-quality">
+                <ProductionSummary/>
+                <QualitySummaryTable/>
+            </div>
     }
 }
 

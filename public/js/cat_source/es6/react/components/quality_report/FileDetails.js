@@ -4,9 +4,14 @@ class FileDetails extends React.Component {
 
     render () {
 
-        return <div>
-            <SegmentQR/>
+        return <div className="qr-segments">
+            <div className="document-name">FILE Test_Project_For_New_QR.html</div>
+            <div className="qr-segments-list">
+                <SegmentQR/>
+                <SegmentQR/>
+            </div>
         </div>
+
     }
 }
 

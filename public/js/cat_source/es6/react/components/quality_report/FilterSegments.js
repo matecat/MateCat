@@ -3,9 +3,7 @@ class FilterSegments extends React.Component {
 
     render () {
 
-        return <div>
-            Filters
-        </div>
+        return <div className="">Filters by</div>
     }
 }
 
