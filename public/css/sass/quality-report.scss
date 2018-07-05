@@ -1,0 +1,64 @@
+@import "vendor_mc/semantic/matecat_semantic";
+@import "commons/icons";
+@import "commons/shadows";
+@import "commons/progress-mc-bar";
+@import "commons/buttons";
+
+body.reviselog {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    text-align: left;
+    background: #f2f4f7;
+    font-size: 16px;
+}
+.qr-wrapper {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding-bottom: 60px;
+    .qr-container {
+        display: block;
+        .qr-container-inside {
+            height: 100%;
+            display: flex;
+            .qr-job-summary-container {
+                width: 100%;
+                .qr-job-summary {
+                    max-width: 1366px;
+                    min-width: 1024px;
+                    margin: 0 auto;
+                    padding: 0 15px;
+                    h3 {}
+                    .qr-label {
+                        font-weight: 100;
+                        font-size: 12px;
+                        line-height: 12px;
+                    }
+                    .qr-production-quality {
+                        .qr-production {
+                            display: flex;
+                            background: white;
+                            justify-content: space-between;
+                            width: 100%;
+                            padding: 15px;
+                            align-items: center;
+                            .job-id {}
+                            .source-to-target {
+                                display: flex;
+                            }
+                            .progress-bar {
+                                min-width: 130px;
+                            }
+                        }
+                        .qr-quality {
+                            padding-top: 20px;
+                        }
+                    }
+                    .qr-segment-details-container {
+                        background: #e7e9ef;
+                        padding: 15px;
+                    }
+                }
+            }
+        }
+    }
+}

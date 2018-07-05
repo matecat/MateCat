@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width"/>
     <link href="../../public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="../../public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link href="../../public/css/build/quality_report.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -31,7 +32,7 @@
 
 <body class="reviselog" tal:condition="php: supportedBrowser NE 0 && !job_archived">
 <!--metal:use-macro="header.html/main_header"-->
-<header style="padding-bottom:5px">
+<header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
 
@@ -47,9 +48,8 @@
 
 
 
-<div class="wrapper" id="qr-root">
+<div class="qr-wrapper" id="qr-root">
     <script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
-
 </div>
 
 <div class="notifications-wrapper"></div>
