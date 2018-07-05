@@ -503,6 +503,16 @@ module.exports = function(grunt) {
                 ],
                 dest: cssBase + 'build/analyze-build.css'
             },
+            distQR: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/quality-report.scss'
+                ],
+                dest: cssBase + 'build/quality_report.css'
+            },
             distIcons: {
                 options : {
                     sourceMap : false,
