@@ -115,6 +115,18 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * @param $queueElement
+     *
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws \Predis\Connection\ConnectionException
+     */
+    protected function _endQueueCallback( QueueElement $queueElement ){
+        $this->_forceSetSegmentAnalyzed( $queueElement );
+        parent::_endQueueCallback( $queueElement );
+    }
+
+    /**
      * Update the record on the database
      *
      * @param QueueElement $queueElement
