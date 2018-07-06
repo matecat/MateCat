@@ -18,6 +18,7 @@ class convertFileController extends ajaxController {
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
     protected $convertZipFile = true;
+    protected $lang_handler;
 
     public function __construct() {
 
@@ -65,10 +66,16 @@ class convertFileController extends ajaxController {
 
         $this->result[ 'code' ] = 0; // No Good, Default
 
+        $this->lang_handler = Langs_Languages::getInstance();
+        $this->validateSourceLang();
+        $this->validateTargetLangs();
+
         if ( empty( $this->file_name ) ) {
             $this->result[ 'code' ]     = -1; // No Good, Default
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Error: missing file name." );
+        }
 
+        if( !empty( $this->result[ 'errors' ] ) ){
             return false;
         }
 
@@ -114,6 +121,36 @@ class convertFileController extends ajaxController {
         } else {
             $this->result[ 'errors' ] = array_values( $this->result[ 'errors' ] );
         }
+    }
+
+    private function validateSourceLang() {
+        try {
+            $this->lang_handler->validateLanguage( $this->source_lang );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = [ "code" => -3, "message" => $e->getMessage() ];
+        }
+    }
+
+    private function validateTargetLangs() {
+        $targets = explode( ',', $this->target_lang );
+        $targets = array_map( 'trim', $targets );
+        $targets = array_unique( $targets );
+
+        if ( empty( $targets ) ) {
+            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => "Missing target language." ];
+        }
+
+        try {
+
+            foreach ( $targets as $target ) {
+                $this->lang_handler->validateLanguage( $target );
+            }
+
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
+        }
+
+        $this->target_lang = implode( ',', $targets );
     }
 
     private function handleZip( ConversionHandler $conversionHandler ) {
