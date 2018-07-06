@@ -500,11 +500,11 @@ let SearchUtils = {
         let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}\']/g, '\\$&');
         let searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         let self = this;
-        return (this.searchParams['exact-match']) ? items.filter(function() {
+        return (this.searchParams['exact-match']) ? items.filter(function(item) {
             if (self.searchParams['match-case']) {
-                return $(this).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
+                return $(item).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
             } else {
-                return $(this).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
+                return $(item).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
             }
         }) : items;
     },
