@@ -20,7 +20,7 @@ register_shutdown_function( function () {
     restoreDevelopmentConfigFile();
 } );
 
-setTestConfigFile();
+//setTestConfigFile();
 
 Bootstrap::start();
 
@@ -38,6 +38,6 @@ function startConnection() {
 
 startConnection();
 
-TestHelper::init() ;
+//TestHelper::init() ;
 
 INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);
