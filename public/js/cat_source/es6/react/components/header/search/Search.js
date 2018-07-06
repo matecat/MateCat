@@ -330,7 +330,7 @@ class Search extends React.Component {
         let replaceButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton) ? "" : "disabled";
         let replaceAllButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget) ? "" : "disabled";
         let clearVisible = (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" || this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all" );
-        return ( this.props.active ? <form className="ui form">
+        return ( this.props.active ? <div className="ui form">
                 <div className="find-wrapper">
                     <div className="find-container">
                         <div className="find-container-inside">
@@ -414,7 +414,7 @@ class Search extends React.Component {
 
 
 
-        </form> : (null) )
+        </div> : (null) )
     }
 }
 
