@@ -186,13 +186,20 @@ abstract class AbstractWorker implements SplSubject {
     protected function _checkForReQueueEnd( QueueElement $queueElement ) {
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
-            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
-
+            $this->_endQueueCallback( $queueElement );
         } elseif ( isset( $queueElement->reQueueNum ) ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
 
+    /**
+     * @param QueueElement $queueElement
+     *
+     * @throws EndQueueException
+     */
+    protected function _endQueueCallback( QueueElement $queueElement ){
+        throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+    }
 
     /**
      * Check the connection.
