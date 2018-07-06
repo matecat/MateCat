@@ -28,11 +28,18 @@ body.reviselog {
             .qr-job-summary-container {
                 width: 100%;
                 .qr-bg-head {
-                    height: 175px;
+                    height: 200px;
                     background: #E0E3E7;
                     position: absolute;
                     width: 100%;
                     z-index: -1;
+                }
+                .ui.table thead th {
+                    background: #f2f4f7 !important;
+                    border-bottom: 1px solid #f2f4f7 !important;
+                }
+                .ui.celled.table tr th, .ui.celled.table tr td {
+                    border-left: 1px solid #f2f4f7;
                 }
                 .qr-job-summary {
                     max-width: 1366px;
@@ -82,14 +89,6 @@ body.reviselog {
                         }
                         .qr-quality {
                             padding-top: 20px;
-                            .ui.table thead th {
-                                background: #f2f4f7;
-                                border-bottom: 1px solid #f2f4f7;
-                            }
-                            .ui.celled.table tr th, .ui.celled.table tr td {
-                                border-left: 1px solid #f2f4f7;
-                            }
-
                             table.ui.celled {
                                 border-radius: 0;
                                 border: none;
@@ -138,6 +137,50 @@ body.reviselog {
                     .qr-segment-details-container {
                         background: #e7e9ef;
                         padding: 15px;
+                        .qr-segments-summary {
+                            h3{}
+                            .filters-qr {}
+                            .qr-segments {
+                                .qr-segments-list {
+                                    .qr-single-segment {
+                                        padding-top: 10px;
+                                        padding-bottom: 10px;
+                                        table.ui.celled {
+                                            thead {
+                                                .segment-id {
+                                                    font-weight: 100;
+                                                }
+                                                .segment-production {
+                                                    display: flex;
+                                                    justify-content: flex-end;
+                                                    .production {
+                                                        padding: 0 10px;
+                                                    }
+                                                }
+                                                .status-translated {
+
+                                                }
+                                                .status-revised {
+
+                                                }
+                                            }
+                                            tbody {
+                                                .qr-issue {
+                                                    display: flex;
+                                                    align-items: center;
+                                                    width: fit-content;
+                                                    padding: 3px 10px;
+                                                    &.automated {
+                                                        background: #eaeaea;
+                                                        border-radius: 15px;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -5,18 +5,18 @@ class SegmentQR extends React.Component {
 
         return <div className="qr-single-segment">
 
-            <table className="ui celled table">
+            <table className="ui celled table small">
 
                 <thead>
                 <tr>
                     <th className="three wide">
-                        <div className="segment id">1243134</div>
+                        <div className="segment-id">1243134</div>
                     </th>
                     <th className="wide">
                         <div className="segment-production">
-                            <div className="word-speed">Words speed: <b>7"</b></div>
-                            <div className="time-edit">Time to edit: <b>53"</b></div>
-                            <div className="pee">PEE: <b>30%</b></div>
+                            <div className="production word-speed">Words speed: <b>7"</b></div>
+                            <div className="production time-edit">Time to edit: <b>53"</b></div>
+                            <div className="production pee">PEE: <b>30%</b></div>
                         </div>
                     </th>
                     <th className="two wide">
