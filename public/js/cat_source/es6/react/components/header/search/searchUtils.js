@@ -70,7 +70,14 @@ let SearchUtils = {
 
 		this.searchMode = (_.isUndefined(p.source) && _.isUndefined(p.target)) ? 'onlyStatus' :
 			(!_.isUndefined(p.source) && !_.isUndefined(p.target)) ? 'source&target' : 'normal';
-
+		this.whereToFind = "";
+		if ( this.searchMode === 'normal') {
+		    if (!_.isUndefined(p.target)) {
+                this.whereToFind = ".targetarea";
+            } else if (!_.isUndefined(p.source)) {
+                this.whereToFind = ".source";
+            }
+        }
 		let source = (p.source) ? p.source : '';
 		let target = (p.target) ? p.target : '';
 		let replace = (p.replace) ? p.replace : '';
@@ -81,8 +88,7 @@ let SearchUtils = {
 			detectSegmentToScroll: true
 		};
 		UI.body.addClass('searchActive');
-		//Save the current segment to not lose the translation
-		UI.saveSegment(UI.currentSegment).then(() => {
+		let makeSearchFn = () => {
             let dd = new Date();
             APP.doRequest({
                 data: {
@@ -102,7 +108,21 @@ let SearchUtils = {
                     SearchUtils.execFind_success(d);
                 }
             });
-        });
+        };
+		//Save the current segment to not lose the translation
+        var segment;
+        try {
+            segment = UI.Segment.findAbsolute( UI.currentSegmentId );
+            if ( UI.translationIsToSave( segment ) ) {
+                UI.saveSegment(UI.currentSegment).then(() => {
+                    makeSearchFn()
+                });
+            } else  {
+                makeSearchFn();
+            }
+        } catch (e) {
+            makeSearchFn();
+        }
 
 
 	},
@@ -358,7 +378,7 @@ let SearchUtils = {
             }
 
             if ((typeof where == 'undefined') || (where == 'no')) {
-                let elems = this.getSegmentsResult();
+                let elems = this.getSegmentsResult(this.whereToFind);
                 if (txt == "  ") {
                     reg1 = new RegExp(/( &nbsp;)/, 'gi');
                 }
@@ -380,7 +400,7 @@ let SearchUtils = {
                         });
                     }
                 }
-                let elems = this.getSegmentsResult();
+                let elems = this.getSegmentsResult(this.whereToFind);
                 this.doMarkSearchResults(hasTags, elems, reg, q, txt, ignoreCase );
                 $('section.justAdded').removeClass('justAdded');
             }
@@ -480,11 +500,11 @@ let SearchUtils = {
         let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}\']/g, '\\$&');
         let searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         let self = this;
-        return (this.searchParams['exact-match']) ? items.filter(function() {
+        return (this.searchParams['exact-match']) ? items.filter(function(item) {
             if (self.searchParams['match-case']) {
-                return $(this).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
+                return $(item).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
             } else {
-                return $(this).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
+                return $(item).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
             }
         }) : items;
     },
