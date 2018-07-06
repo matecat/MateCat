@@ -83,6 +83,7 @@ abstract class controller implements IController {
 
         //Default :  catController
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
+        $action = end( explode( '\\', $action ) ); // do not accept namespaces ( Security issue: directory traversal )
         $className = $action . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers

@@ -3105,6 +3105,14 @@ $reference = array(
 //                        0 => 'p',
 //                        1 => 'pas',
 //                    ),
+        'text/x-po'                                                                 =>
+                array(
+                        0 => 'po'
+                ),
+        'text/x-gettext-translation'                                                =>
+                array(
+                        0 => 'po'
+                ),
         'text/x-setext'                                                             =>
                 array(
                         0 => 'etx',

@@ -201,9 +201,9 @@ class UploadHandler {
         $file       = new stdClass();
         $file->name = $this->trim_file_name( $name );
         $file->size = intval( $size );
+        $file->tmp_name = $uploaded_file;
         //$file->type = $type; // Override and ignore the client type definition
         $file->type = mime_content_type( $file->tmp_name );
-        $file->tmp_name = $uploaded_file;
 
         if ( $this->validate( $uploaded_file, $file, $error, $index ) ) {
             $file_path   = $this->options[ 'upload_dir' ] . $file->name;
