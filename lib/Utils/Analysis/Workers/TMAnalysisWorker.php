@@ -478,7 +478,7 @@ class TMAnalysisWorker extends AbstractWorker {
              *
              * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
              */
-            if ( $tms_match === null ) {
+            if ( $tms_match === null || empty( $tms_match->matches ) ) {
 
                 $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
                 throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
