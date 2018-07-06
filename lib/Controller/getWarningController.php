@@ -157,6 +157,7 @@ class getWarningController extends ajaxController {
         );
 
         $this->invokeGlobalWarningsOnFeatures();
+
     }
 
     /**
