@@ -164,6 +164,7 @@ module.exports = function(grunt) {
                 },
                 src: [
                     basePath + 'cat_source/es6/react/components/quality_report/*.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/quality_report/*.js',
                 ],
                 dest: buildPath + 'qa-report.js'
             },
