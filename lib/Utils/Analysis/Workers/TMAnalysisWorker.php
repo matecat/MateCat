@@ -490,7 +490,7 @@ class TMAnalysisWorker extends AbstractWorker {
              *
              * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
              */
-            if ( $tms_match === null || empty( $tms_match->matches ) ) {
+            if ( $tms_match === null ) {
 
                 $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
                 throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
@@ -540,6 +540,13 @@ class TMAnalysisWorker extends AbstractWorker {
          * If No results found. Re-Queue
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
+
+            // strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT ( the returned record can NOT be empty ). Try again
+            if( $id_mt_engine == 1 ){
+                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested." );
+                throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
+            }
+
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment." );
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
