@@ -15,6 +15,7 @@ use API\V2\Validators\LoginValidator;
 use API\V2\Validators\TeamAccessValidator;
 use TeamModel;
 use Teams\TeamDao;
+use Teams\MembershipDao;
 
 class TeamPublicMembersController extends KleinController {
 
@@ -23,11 +24,9 @@ class TeamPublicMembersController extends KleinController {
      */
     public function publicList(){
 
-        $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->id_team );
-        $teamModel = new TeamModel( $team );
-        $teamModel->updateMembersProjectsCount();
+        $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->request->id_team );
 
-        $formatter = new Membership( $team->getMembers() ) ;
+        $formatter = new Membership( $memberships ) ;
         $this->response->json( $formatter->renderPublic() );
 
     }
