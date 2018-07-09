@@ -4,6 +4,11 @@
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
 
+$color-red: #FB2A0D;
+$color-orange: #FBAA0D;
+$color-green: #83FD97;
+$color-yellow: #FFE600;
+
 body.reviselog {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     text-align: left;
@@ -22,11 +27,18 @@ body.reviselog {
             display: flex;
             .qr-job-summary-container {
                 width: 100%;
+                .qr-bg-head {
+                    height: 175px;
+                    background: #E0E3E7;
+                    position: absolute;
+                    width: 100%;
+                    z-index: -1;
+                }
                 .qr-job-summary {
                     max-width: 1366px;
                     min-width: 1024px;
                     margin: 0 auto;
-                    padding: 0 15px;
+                    padding: 15px 15px 0;
                     h3 {}
                     .qr-label {
                         font-weight: 100;
@@ -41,16 +53,86 @@ body.reviselog {
                             width: 100%;
                             padding: 15px;
                             align-items: center;
-                            .job-id {}
+                            .job-id {
+                                font-size: 14px;
+                            }
                             .source-to-target {
                                 display: flex;
+                                align-items: center;
+                                .qr-to {
+                                    display: flex;
+                                    i {
+                                        font-size: .8em;
+                                        color: gray;
+                                        margin: 0 3px;
+                                    }
+                                }
                             }
-                            .progress-bar {
-                                min-width: 130px;
+                            .progress-percent {
+                                display: flex;
+                                align-items: center;
+                                .progress-bar {
+                                    margin: 0;
+                                    min-width: 130px;
+                                }
+                                .percent {
+                                    padding-left: 5px;
+                                }
                             }
                         }
                         .qr-quality {
                             padding-top: 20px;
+                            .ui.table thead th {
+                                background: #f2f4f7;
+                                border-bottom: 1px solid #f2f4f7;
+                            }
+                            .ui.celled.table tr th, .ui.celled.table tr td {
+                                border-left: 1px solid #f2f4f7;
+                            }
+
+                            table.ui.celled {
+                                border-radius: 0;
+                                border: none;
+                                position: relative;
+                                thead {
+                                    background: #F2F4F7;
+                                    tr {
+                                        .qr-title {
+                                            background: none;
+                                            padding: 5px;
+                                            &:first-child {
+                                                padding-left: 15px;
+                                            }
+                                            &.critical {
+                                                border-bottom: 4px solid $color-red
+                                            }
+                                            &.major {
+                                                border-bottom: 4px solid $color-orange;
+                                            }
+                                            &.enhacement {
+                                                border-bottom: 4px solid $color-yellow;
+                                            }
+                                            &.qr-total-score {
+                                                padding: 15px 0 !important;
+                                                &.qr-pass {
+                                                    background: $color-green;
+                                                    .qr-info {
+                                                        font-size: 24px;
+
+                                                    }
+                                                }
+                                                &.qr-warning {
+                                                    background: $color-orange;
+                                                }
+                                                &.qr-fail {
+                                                    background: $color-red;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                tbody {}
+                            }
                         }
                     }
                     .qr-segment-details-container {
