@@ -31,6 +31,11 @@ class EditLog_EditLogModel {
     private $languageStatsData;
     private $db;
 
+    /**
+     * @var SplFileObject
+     */
+    private $csvFileHandler;
+
     private $pagination = [
                     'first'        => PHP_INT_MAX,
                     'prev'         => -1,
@@ -611,6 +616,9 @@ class EditLog_EditLogModel {
         list( $data, , ) = $this->getEditLogData();
         $filePath = tempnam("/tmp", "EditLog_");
         $csvHandler = new \SplFileObject($filePath, "w");
+
+        $this->csvFileHandler = $csvHandler; // set class variable to allow the unlink of the file
+
         $csvHandler->setCsvControl( ';' );
 
         $csv_fields = [
@@ -702,6 +710,14 @@ class EditLog_EditLogModel {
         }
 
         return $filePath;
+    }
+
+    public function cleanDownloadResource(){
+
+        $path = $this->csvFileHandler->getRealPath();
+        unset( $this->csvFileHandler );
+        @unlink( $path );
+
     }
 
 }
