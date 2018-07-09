@@ -21,4 +21,12 @@ class User
         );
     }
 
+    public static function renderItemPublic( \Users_UserStruct $user ){
+        return array(
+                'uid'           => (int) $user->uid,
+                'first_name'    => $user->first_name,
+                'last_name'     => $user->last_name,
+        );
+    }
+
 }

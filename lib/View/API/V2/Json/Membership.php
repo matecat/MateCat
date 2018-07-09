@@ -49,5 +49,30 @@ class Membership {
         return $out;
     }
 
+    public function renderPublic() {
+        $out = [];
+        foreach ( $this->data as $membership ) {
+            $render = $this->renderItemPublic( $membership );
+            if($render){
+                $out[] = $render;
+            }
+
+        }
+
+        return $out;
+    }
+
+    public function renderItemPublic( MembershipStruct $membership ) {
+
+        if ( !is_null( $membership->getUser() ) ) {
+            return User::renderItemPublic( $membership->getUser() );
+        }
+        else{
+            return false;
+        }
+
+
+    }
+
 
 }
