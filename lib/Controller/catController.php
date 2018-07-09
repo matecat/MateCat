@@ -322,6 +322,8 @@ class catController extends viewController {
         $this->template->jid         = $this->jid;
         $this->template->password    = $this->password;
 
+        $this->template->id_team = null;
+
         if( $this->job_cancelled || $this->job_archived ) {
 
             $this->template->pid                 = null;
@@ -339,7 +341,7 @@ class catController extends viewController {
 
 
             if( !empty( $team ) ){
-                $this->template->id_team = $this->project->id_team;
+
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
                 $membersIdList = [];
@@ -383,8 +385,7 @@ class catController extends viewController {
             $this->template->fileCounter         = $this->fileCounter;
         }
 
-        $this->template->id_team = null;
-        if(!empty($this->project->id_team)){
+        if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
         }
 
