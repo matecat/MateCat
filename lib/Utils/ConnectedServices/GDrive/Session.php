@@ -41,6 +41,9 @@ class Session {
 
     protected  $session ;
 
+    /**
+     * @var \Google_Service_Drive
+     */
     protected $service ;
     protected $token ;
 
