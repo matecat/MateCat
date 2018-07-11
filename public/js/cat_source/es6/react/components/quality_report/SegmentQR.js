@@ -5,78 +5,157 @@ class SegmentQR extends React.Component {
 
         return <div className="qr-single-segment">
 
-            <table className="ui celled table small">
+            <div className="qr-segment-head shadow-1">
+                <div className="segment-id">1243134</div>
+                <div className="segment-production-container">
+                    <div className="segment-production">
+                        <div className="ui basic button tiny automated-qa">Automated QA<b> (7)</b></div>
+                        <div className="ui basic button tiny human-qa">Human QA<b> (7)</b></div>
+                    </div>
+                    <div className="segment-production">
+                        <div className="production word-speed">Words speed: <b>7"</b></div>
+                        <div className="production time-edit">Time to edit: <b>53"</b></div>
+                        <div className="production pee">PEE: <b>30%</b></div>
+                    </div>
+                </div>
+                <div className="segment-status-container">
+                    <div className="qr-label">Segment status</div>
+                    <div className="qr-info status-translated"><b>Translated</b></div>
+                </div>
+            </div>
 
-                <thead>
-                <tr>
-                    <th className="three wide">
-                        <div className="segment-id">1243134</div>
-                    </th>
-                    <th className="wide">
-                        <div className="segment-production">
-                            <div className="production word-speed">Words speed: <b>7"</b></div>
-                            <div className="production time-edit">Time to edit: <b>53"</b></div>
-                            <div className="production pee">PEE: <b>30%</b></div>
+
+            <div className="qr-segment-body ">
+
+                    <div className="segment-container qr-source">
+                        <div className="segment-content qr-segment-title">
+                            <b>Source</b>
                         </div>
-                    </th>
-                    <th className="two wide">
-                        <div className="qr-label">Segment status</div>
-                        <div className="qr-info status-translated">Translated</div>
-                    </th>
-                </tr>
-                </thead>
+                        <div className="segment-content qr-text">
+                            Hi!
+                            <span className="qr-tags start-tag">&lt;g id="1"&gt;</span> my name is <span className="qr-tags end-tag">&lt;/g&gt;</span>
+                            Rubén Santillàn and I'm a
+                            <span className="qr-tags start-tag violet-tag">&lt;g id="2"&gt;</span>Designer<span className="qr-tags end-tag violet-tag">&lt;/g&gt;</span>
+                        </div>
+                        <div className="segment-content qr-spec">
+                            <div>Words:</div>
+                            <div><b>10</b></div>
+                        </div>
+                    </div>
 
-                <tbody>
-                <tr>
-                    <td>Source</td>
-                    <td><b>Tag issues</b></td>
-                    <td>Words: <b>10</b></td>
-                </tr>
-                <tr>
-                    <td>Suggestion</td>
-                    <td>Translation errors</td>
-                    <td>Public TM <span>97%</span></td>
+                    <div className="segment-container qr-suggestion">
+                        <div className="segment-content qr-segment-title">
+                            <b>Suggestion</b>
+                        </div>
+                        <div className="segment-content qr-text">
+                            Hi! my name is Rubén Santillàn
+                        </div>
+                        <div className="segment-content qr-spec">
+                            <div>Public <b>TM</b></div>
+                            <div className="tm-percent">101%</div>
+                        </div>
+                    </div>
 
-                </tr>
-                <tr>
-                    <td>Translate</td>
-                    <td>Terminology and translation consistency</td>
-                    <td>ICE Match (Modified) </td>
-                </tr>
-                <tr>
-                    <td>Revise</td>
-                    <td>Terminology and translation consistency</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Automated QA</td>
-                    <td>
-                        <div className="qr-issues-list">
-                            <div className="qr-issue automated">
-                                <i className="icon-3dglasses icon" />
-                                <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                    <div className="segment-container qr-translated">
+                        <div className="segment-content qr-segment-title">
+                            <b>Translate</b>
+                            <button>
+                                <i className="icon-eye2 icon" />
+                            </button>
+                        </div>
+                        <div className="segment-content qr-text">
+                            Hi! <span className="qr-diff clear"> my name</span> <span className="qr-diff add"> is Rubén</span> Santillàn
+                        </div>
+                        <div className="segment-content qr-spec">
+                            <div><b>ICE Match</b></div>
+                            <div>(Modified)</div>
+                        </div>
+                    </div>
+
+                    <div className="segment-container qr-revised">
+                        <div className="segment-content qr-segment-title">
+                            <b>Revised</b>
+                            <button>
+                                <i className="icon-eye2 icon" />
+                            </button>
+                        </div>
+                        <div className="segment-content qr-text">
+                            Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn
+                        </div>
+                        <div className="segment-content qr-spec">
+
+                        </div>
+                    </div>
+
+                    <div className="segment-container qr-issues">
+                        <div className="segment-content qr-segment-title">
+                            <b>Atomated QA</b>
+                        </div>
+                        <div className="segment-content qr-text">
+                            <div className="qr-issues-list">
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
+                                <div className="qr-issue automated">
+                                    <i className="icon-3dglasses icon" />
+                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
+                                </div>
                             </div>
                         </div>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Human QA</td>
-                    <td>
-                        <div className="qr-issues-list">
-                            <div className="qr-issue human">
-                                <div className="qr-error"><b>Language quality</b></div>
-                                <div className="sub-type-error">Subtype </div>
-                                <div className="severity">Critical</div>
+                        {/*<div className="segment-content qr-spec">
+                            Words: <b>10</b>
+                        </div>*/}
+                    </div>
+
+                    <div className="segment-container qr-issues">
+                        <div className="segment-content qr-segment-title">
+                            <b>Human QA</b>
+                        </div>
+                        <div className="segment-content qr-text">
+                            <div className="qr-issues-list">
+                                <div className="qr-issue human">
+                                    <div className="qr-error"><b>Language quality</b></div>
+                                    <div className="sub-type-error">Subtype </div>
+                                    <div className="severity"><b>Critical</b></div>
+                                </div>
+                                <div className="qr-issue human">
+                                    <div className="qr-error"><b>Language quality</b></div>
+                                    <div className="sub-type-error">Subtype </div>
+                                    <div className="severity"><b>Critical</b></div>
+                                </div>
+                                <div className="qr-issue human">
+                                    <div className="qr-error"><b>Language quality</b></div>
+                                    <div className="sub-type-error">Subtype </div>
+                                    <div className="severity"><b>Major</b></div>
+                                </div>
+                                <div className="qr-issue human">
+                                    <div className="qr-error"><b>Language quality</b></div>
+                                    <div className="sub-type-error">Subtype </div>
+                                    <div className="severity"><b>Critical</b></div>
+                                </div>
+
                             </div>
                         </div>
-                    </td>
-                    <td></td>
-                </tr>
-                </tbody>
+                    </div>
 
-            </table>
-
+            </div>
         </div>
     }
 }

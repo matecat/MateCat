@@ -8,7 +8,7 @@ class QualitySummaryTable extends React.Component {
             <table className="ui celled table shadow-1">
                 <thead>
                 <tr>
-                    <th className="three wide qr-title qr-issue">Issues</th>
+                    <th className="four wide qr-title qr-issue">Issues</th>
                     <th className="one wide center aligned qr-title qr-severity critical">
                         <div className="qr-info">Critical</div>
                         <div className="qr-label">Weight: <b>3</b></div>
@@ -40,7 +40,7 @@ class QualitySummaryTable extends React.Component {
                     <td className="positive center aligned">Excellent</td>
                 </tr>
                 <tr>
-                    <td>Translation errors</td>
+                    <td><b>Translation errors</b></td>
                     <td className="center aligned"> </td>
                     <td className="center aligned">1</td>
                     <td className="center aligned"> </td>
@@ -49,7 +49,7 @@ class QualitySummaryTable extends React.Component {
                     <td className="warning center aligned">Poor</td>
                 </tr>
                 <tr>
-                    <td>Terminology and translation consistency</td>
+                    <td><b>Terminology and translation consistency</b></td>
                     <td className="center aligned">1</td>
                     <td className="center aligned"></td>
                     <td className="center aligned"></td>
@@ -58,7 +58,7 @@ class QualitySummaryTable extends React.Component {
                     <td className="negative center aligned">Fail</td>
                 </tr>
                 <tr>
-                    <td>Language quality</td>
+                    <td><b>Language quality</b></td>
                     <td className="center aligned"></td>
                     <td className="center aligned"></td>
                     <td className="center aligned"></td>
@@ -67,7 +67,7 @@ class QualitySummaryTable extends React.Component {
                     <td className="positive center aligned">Eccelent</td>
                 </tr>
                 <tr>
-                    <td>Style</td>
+                    <td><b>Style</b></td>
                     <td className="center aligned"></td>
                     <td className="center aligned">1</td>
                     <td className="center aligned">1</td>
