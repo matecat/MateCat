@@ -254,7 +254,21 @@ class engineController extends ajaxController {
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+                
+            case strtolower( Constants_Engines::IADAATPA ):
 
+                /**
+                 * Create a record of type IADAATPA
+                 */
+                $newEngineStruct = EnginesModel_IADAATPAStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+                
             default:
 
                 $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
