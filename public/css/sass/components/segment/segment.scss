@@ -10,7 +10,6 @@
     }
 }
 
-
 section {
     &:not(.readonly):not(.muted):hover .segment-add-inBulk {
         display: block;
@@ -23,7 +22,6 @@ section {
         display: none;
     }
 }
-
 
 body.cattool.editing {
     section {
@@ -38,6 +36,90 @@ body.cattool.editing {
                 background: #edf4fd !important;
             }
         }
+    }
+}
 
+section{
+    &.opened{
+        .segment-body-content{
+            .warnings-block{
+                display: inline-block;
+            }
+        }
+    }
+    .segment-body-content{
+        .warnings-block{
+            display: none;
+            width: 103%;
+            box-sizing: content-box;
+            margin-top: 10px;
+            margin-left: -20px;
+            font-size: 14px;
+            .alert-block{
+                display: inline-block;
+                width: 48%;
+                margin: 0 1%;
+                color: #6A6A69;
+                &.error-alert{
+                    background: #FDEAE2;
+                    .icon-column{
+                        background-color: #F9D7CA;
+                        color: #E1565A;
+                    }
+                }
+                &.warning-alert{
+                    background: #FFF4E3;
+                    .icon-column{
+                        background-color: #FDE6C8;
+                        color: #EA862C;
+                    }
+                }
+                &.info-alert{
+                    background: #F5F7F7;
+                    .icon-column{
+                        background-color: #F2F1F1;
+                        color: #9C9D9C;
+                    }
+                }
+                .icon{
+                    padding: 8px 8px 10px 8px;
+                    font-size: 18px;
+                    margin: 0;
+                }
+            }
+            ul{
+                width: 100%;
+                display: table;
+                li{
+                    display: table-cell;
+                    height: 100%;
+                }
+                .icon-column{
+                    width: 10%;
+                    position: relative;
+                    vertical-align: middle;
+                    text-align: center;
+                }
+                .content-column{
+                    width: 90%;
+                    position: relative;
+                    padding: 5px 8px;
+                    vertical-align: middle;
+                    p:first-child {
+                        margin-top: 0em;
+                        margin-bottom: 0;
+                        line-height: 13px;
+                    }
+                    p:last-child {
+                        margin-bottom: 0em;
+                        line-height: 13px;
+                    }
+                    .error-solution{
+                        font-size: 90%;
+                    }
+                }
+            }
+
+        }
     }
 }

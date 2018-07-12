@@ -15,6 +15,11 @@ class SegmentComment {
      */
     private $data;
 
+    /**
+     * @var \SplFileObject
+     */
+    private $csvHandler;
+
     public function __construct( $data ) {
         $this->data = $data;
     }
@@ -42,10 +47,20 @@ class SegmentComment {
         return $out;
     }
 
+    public function cleanDownloadResource(){
+
+        $path = $this->csvHandler->getRealPath();
+        unset( $this->csvHandler );
+        @unlink( $path );
+
+    }
+
     public function genCSVTmpFile(){
         $filePath = tempnam("/tmp", "SegmentsComments_");
         $csvHandler = new \SplFileObject($filePath, "w");
         $csvHandler->setCsvControl( ';' );
+
+        $this->csvHandler = $csvHandler; // set the handler to allow to clean resource
 
         $csv_fields = [
                 "ID Segment",

@@ -19,6 +19,8 @@ if ( MBC.enabled() )
             }
         };
 
+
+
         var types = {sticky: 3, resolve: 2, comment: 1};
         var source_pages = {revise: 2, translate: 1};
         var loggedUserName = null;
@@ -210,8 +212,9 @@ if ( MBC.enabled() )
             inputForm.addClass( 'mbc-first-input' );
 
             root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
-            el.append( root.show() );
 
+            el.append( root.show() );
+            addTagging();
             inputForm.find( 'textarea' ).focus();
         };
 
@@ -315,8 +318,8 @@ if ( MBC.enabled() )
             var inputForm = renderInputForm();
             inputForm.addClass( 'mbc-reply-input' );
             root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
-
             el.append( root.show() );
+            addTagging();
         };
 
         var renderOnlySegmentsWrap = function ( el ) {
@@ -422,7 +425,9 @@ if ( MBC.enabled() )
                 var root = $( tpls.showComment );
                 root.find( '.mbc-comment-username' ).text( htmlDecode( data.full_name ) );
                 root.find( '.mbc-comment-time' ).text( data.formatted_date );
-                root.find( '.mbc-comment-body' ).html( nl2br( data.message ) );
+                var text = nl2br( data.message );
+                text = parseCommentHtml(text);
+                root.find( '.mbc-comment-body' ).html( text );
                 if ( data.email != null ) {
                     root.find( '.mbc-comment-email-label' ).text( data.email );
                 }
@@ -436,7 +441,7 @@ if ( MBC.enabled() )
         };
 
         var nothingToSubmit = function () {
-            return $.trim( $( '.mbc-comment-textarea' ).val() ) == '';
+            return $.trim( $( '.mbc-comment-textarea' ).text() ) == '';
         };
 
         var ajaxResolveSuccess = function ( resp ) {
@@ -512,10 +517,62 @@ if ( MBC.enabled() )
             }
         };
 
+        var addTagging = function (  ) {
+
+            if ( MBC.teamUsers.length > 0 ) {
+                $(".mbc-comment-textarea")
+                    .atwho({
+                        at: "@",
+                        displayTpl: '<li>${first_name} ${last_name}</li>',
+                        insertTpl: '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
+                        data: MBC.teamUsers,
+                        searchKey: "first_name",
+                        limit: MBC.teamUsers.length
+                    });
+            }
+        };
+
+        var parseCommentHtmlBeforeSend = function (  ) {
+
+            var elem = $( '.mbc-comment-textarea' ).clone();
+            elem.find(".atwho-inserted").each(function (  ) {
+                var id = $(this).find('.tagging-item').data('id');
+                $(this).html("{@"+id+"@}");
+            });
+            elem.find(".tagging-item").remove();
+            return elem.text();
+
+        };
+
+        var parseCommentHtml = function ( text ) {
+            var regExp = /{@([0-9]+|team)@}/gm;
+            if ( regExp.test(text) ) {
+                text = text.replace( regExp, function (match, id) {
+                    id = (id === "team") ? id : parseInt(id);
+                    var user = findUser(id);
+                    if (user) {
+                        var html = '<span contenteditable="false" class="tagging-item" data-id="'+id+'">'+ user.first_name + ' ' + user.last_name +'</span>';
+                        return match.replace(match, html);
+                    }
+                    return match;
+                });
+            }
+
+            return text;
+        };
+
+        var findUser = function ( id ) {
+            return _.find(MBC.teamUsers, function ( item ) {
+                return item.uid === id;
+            });
+        };
+
         var submitComment = function ( el ) {
             if ( nothingToSubmit() ) return;
 
             var segment = new UI.Segment( el );
+
+            var text = parseCommentHtmlBeforeSend();
 
             var data = {
                 action: 'comment',
@@ -526,7 +583,7 @@ if ( MBC.enabled() )
                 username: getUsername(),
                 password: config.password,
                 source_page: getSourcePage(),
-                message: el.find( '.mbc-comment-textarea' ).val(),
+                message: text,
             };
 
             $( '.mbc-comment-textarea' ).attr( 'disabled', 'disabled' );
@@ -617,27 +674,49 @@ if ( MBC.enabled() )
             updateHistoryWithLoadedSegments();
         };
 
-        var resetTextArea = function () {
-            var maxHeight = 100;
-            var minHeight = 34;
-            var borderTopWidth = parseFloat( $( this ).css( "borderTopWidth" ) );
-            var borderBottomWidth = parseFloat( $( this ).css( "borderBottomWidth" ) );
-            var borders = borderTopWidth + borderBottomWidth;
-            var scrollHeightWithBorders = this.scrollHeight + borders;
+        var getTeamUsers = function (  ) {
+            var teamId = config.id_team;
+            return $.ajax({
+                async: true,
+                type: "get",
+                // url : "/api/v2/teams/" + teamId + "/members"
+                url : "/api/app/teams/" + teamId + "/members/public"
+            }).done(function ( data ) {
+                var team = {
+                    uid: "team",
+                    first_name: "Team",
+                    last_name: ""
+                };
+                MBC.teamUsers = data;
+                MBC.teamUsers.unshift(team);
 
-            while ( scrollHeightWithBorders > $( this ).outerHeight() && $( this ).height() < maxHeight ) {
-                $( this ).height( $( this ).height() + 10 );
-            }
-            while ( scrollHeightWithBorders <= $( this ).outerHeight() && $( this ).height() > minHeight ) {
-                $( this ).height( $( this ).height() - 10 );
-            }
 
-            if ( $( this ).height() >= maxHeight ) {
-                $( this ).css( "overflow-y", "auto" );
-            } else {
-                $( this ).css( "overflow-y", "hidden" );
-            }
+            }).fail(function ( response ) {
+                MBC.teamUsers = [];
+            })
         };
+
+        // var resetTextArea = function () {
+        //     var maxHeight = 100;
+        //     var minHeight = 34;
+        //     var borderTopWidth = parseFloat( $( this ).css( "borderTopWidth" ) );
+        //     var borderBottomWidth = parseFloat( $( this ).css( "borderBottomWidth" ) );
+        //     var borders = borderTopWidth + borderBottomWidth;
+        //     var scrollHeightWithBorders = this.scrollHeight + borders;
+        //
+        //     while ( scrollHeightWithBorders > $( this ).outerHeight() && $( this ).height() < maxHeight ) {
+        //         $( this ).height( $( this ).height() + 10 );
+        //     }
+        //     while ( scrollHeightWithBorders <= $( this ).outerHeight() && $( this ).height() > minHeight ) {
+        //         $( this ).height( $( this ).height() - 10 );
+        //     }
+        //
+        //     if ( $( this ).height() >= maxHeight ) {
+        //         $( this ).css( "overflow-y", "auto" );
+        //     } else {
+        //         $( this ).css( "overflow-y", "hidden" );
+        //     }
+        // };
 
         /**
          * Close balloon if the user click on some dead area
@@ -651,7 +730,6 @@ if ( MBC.enabled() )
 
         $( document ).ready( function () {
             initConstants();
-
             // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
             //      Since our DOM elements are children of `section` we must attach to #outer
             //      to in order to prevent bubbling.
@@ -672,7 +750,9 @@ if ( MBC.enabled() )
 
             // TODO: investigate and explain why this is needed
             $( delegate ).on( 'click', '.mbc-comment-balloon-outer', function ( e ) {
-                e.stopPropagation();
+                if ( $(".mbc-history-balloon-outer.mbc-visible").length ) {
+                    e.stopPropagation();
+                }
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
@@ -818,8 +898,8 @@ if ( MBC.enabled() )
             $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
-            refreshElements();
 
+            getTeamUsers().then(refreshElements);
             //New icon inserted in the header -> resize file name
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 
@@ -890,11 +970,11 @@ if ( MBC.enabled() )
             resolveCommentLinkIcon( el.find( '.segment-side-buttons' ), comments_obj );
         } );
 
-        $( document ).on( 'keydown', '.mbc-comment-textarea', resetTextArea );
+        // $( document ).on( 'keydown', '.mbc-comment-textarea', resetTextArea );
         $( document ).on( 'paste', '.mbc-comment-input', function () {
-            setTimeout( function ( el ) {
-                resetTextArea.call( el );
-            }, 100, this );
+            // setTimeout( function ( el ) {
+            //     resetTextArea.call( el );
+            // }, 100, this );
         } );
 
         $( document ).on( 'split:segment:complete', function ( e, sid ) {
@@ -903,12 +983,16 @@ if ( MBC.enabled() )
             renderCommentIconLink( segment.el );
         } );
 
-        $( document ).on( 'focus', '.mbc-comment-input', function ( e ) {
-            $( e.target ).closest( 'div' ).find( '.mbc-comment-btn' ).addClass( 'mbc-visible' );
+        $( document ).on( 'click', '.mbc-comment-input', function ( e ) {
+            $( e.target ).parent( 'div' ).find( '.mbc-comment-btn' ).addClass( 'mbc-visible' );
         } );
 
         $( document ).on( 'click', function ( e ) {
             $( '.mbc-comment-balloon-outer' ).find( '.mbc-comment-send-btn' ).addClass( 'mbc-hide' );
+        } );
+
+        $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
+            $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
         } );
 
         $( document ).on( 'ui:segment:focus', function ( e, sid ) {
@@ -917,7 +1001,6 @@ if ( MBC.enabled() )
                 lastCommentHash = null;
             }
         } );
-
 
         // Interfaces
         $.extend( MBC, {

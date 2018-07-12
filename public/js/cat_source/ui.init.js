@@ -16,8 +16,6 @@ $.extend(UI, {
 		this.editarea = '';
 		this.byButton = false;
 		this.blockGetMoreSegments = true;
-		this.searchParams = {};
-		this.searchParams.search = 0;
 		this.noGlossary = false;
 		this.displayedMessages = [];
 		setTimeout(function() {
@@ -32,8 +30,8 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.autoscrollCorrectionEnabled = true;
         this.offline = false;
-        this.searchEnabled = true;
-		if (this.searchEnabled)
+
+		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;

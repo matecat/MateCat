@@ -218,7 +218,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.tags.js',
                     basePath + 'cat_source/ui.concordance.js',
                     basePath + 'cat_source/ui.glossary.js',
-                    basePath + 'cat_source/ui.search.js',
 
                     basePath + 'cat_source/qa_check_glossary.js',
                     basePath + 'cat_source/qa_check_blacklist.js',
@@ -285,6 +284,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
                     basePath + 'lib/imagesloaded.min.js',
+                    basePath + 'lib/jquery.atwho.min.js',
+                    basePath + 'lib/jquery.caret.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'

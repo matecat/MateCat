@@ -28,7 +28,7 @@ class ChildProjectRequestStruct extends BaseRequestStruct {
     }
 
     public function getParams() {
-        return $this->toArray(['parentKey', 'name', 'type', 'assignee', 'clientId']) ;
+        return $this->toArray(['parentKey', 'name', 'type', 'assignee', 'clientId', 'reviewSettingId']) ;
     }
 
     public function getHeaders() {

@@ -805,9 +805,9 @@ checkInit = function () {
 
 checkAnalyzability = function ( who ) {
 
-    if ( $( '.upload-table tr:not(.failed)' ).length ) {
+    if ( $( '.upload-table tr:not(.failed)' ).length || $( '.gdrive-upload-table tr:not(.failed)' ).length) {
         var res = true;
-        $( '.upload-table tr:not(.failed)' ).each( function () {
+        $( '.upload-table tr:not(.failed), .gdrive-upload-table tr:not(.failed)' ).each( function () {
             if ( $( this ).hasClass( 'converting' ) ) {
                 res = false;
             }
@@ -820,10 +820,9 @@ checkAnalyzability = function ( who ) {
             }
 
         } );
-        if ( !$( '.upload-table tr:not(.failed, .tmx)' ).length ) {
+        if ( !$( '.upload-table tr:not(.failed, .tmx), .gdrive-upload-table tr:not(.failed)' ).length ) {
             return false;
         }
-        if ( $( '.upload-table tr.failed' ).length ) res = false;
         if ( UI.uploadingTMX() ) {
             res = false;
         }

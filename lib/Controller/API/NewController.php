@@ -830,6 +830,10 @@ class NewController extends ajaxController {
 
         $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $__postInput );
 
+        $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
+                'input' => $__postInput
+        ] );
+
     }
 
     private static function parseTmKeyInput( $tmKeyString ) {

@@ -51,6 +51,7 @@
                 target_rfc: '${target_code}',
                 targetIsCJK: ${targetIsCJK|string:false},
                 ownerIsMe: ${jobOwnerIsMe},
+                id_team: ${id_team | string:null},
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -187,6 +188,7 @@
             <script src="${basepath}public/js/build/common.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
         </tal:block>
+
 
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">

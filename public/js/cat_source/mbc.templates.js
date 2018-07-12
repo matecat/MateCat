@@ -92,7 +92,13 @@ if ( MBC.enabled() )
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
             ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
-            ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="Write a comment..."></textarea>' +
+            ' <div class="mbc-comment-input mbc-comment-textarea" contenteditable="true" data-placeholder="Write a comment..."></div>' +
+            // ' <div>' +
+            // ' <a href="javascript:;" class="mbc-tag-link">Tag someone</a>' +
+            // ' </div>' +
+            // ' <div>' +
+            // ' <textarea class="mbc-comment-input mbc-comment-textarea-tagging hide" id="tagging-area" placeholder="Tag someone"></textarea>' +
+            // ' </div>' +
             ' <div>' +
             ' <a href="javascript:;" class="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide">Comment</a>' +
             ' </div>' +

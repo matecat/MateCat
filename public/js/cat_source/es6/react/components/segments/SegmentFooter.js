@@ -9,7 +9,6 @@ let SegmentStore = require('../../stores/SegmentStore');
 let SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
 let SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
 let SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
-let SegmentTabMessages = require('./SegmentFooterTabMessages').default;
 let SegmentTabRevise = require('./SegmentFooterTabRevise').default;
 class SegmentFooter extends React.Component {
 
@@ -232,7 +231,6 @@ class SegmentFooter extends React.Component {
         });
     }
     componentDidMount() {
-        console.log("Mount SegmentFooter" + this.props.sid);
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
@@ -241,7 +239,6 @@ class SegmentFooter extends React.Component {
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooter" + this.props.sid);
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);

@@ -21,8 +21,6 @@ $.extend(UI, {
 			if (decode) {
 				translation = htmlDecode(translation);
 			}
-			if (this.body.hasClass('searchActive'))
-				this.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
 
@@ -233,10 +231,6 @@ $.extend(UI, {
                     ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
                 ) {
 				    copySuggestion();
-                }
-
-                if (UI.body.hasClass('searchActive')) {
-                    UI.addWarningToSearchDisplay();
                 }
 
             }

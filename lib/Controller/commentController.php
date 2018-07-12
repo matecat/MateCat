@@ -43,21 +43,21 @@ class commentController extends ajaxController {
     }
 
     public function doAction() {
-        $this->job = getJobData( $this->__postInput[ 'id_job' ],
-            $this->__postInput['password'] );
+
+        $this->job = Jobs_JobDao::getByIdAndPassword( $this->__postInput[ 'id_job' ], $this->__postInput['password'], 60 * 60 * 24 );
+
+        if( empty( $this->job ) ){
+            $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
+            return;
+        }
 
         $this->readLoginInfo() ;
         if ( $this->userIsLogged ) {
             $this->loadUser();
         }
 
-        $pCheck = new AjaxPasswordCheck();
-        if( !$pCheck->grantJobAccessByJobData( $this->job, $this->__postInput[ 'password' ] ) ){
-            $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
-            return;
-        }
-
         $this->route();
+
     }
 
     private function route() {

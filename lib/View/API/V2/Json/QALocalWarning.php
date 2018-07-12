@@ -37,6 +37,12 @@ class QALocalWarning {
         $out[ 'details' ] = null;
         $out[ 'total' ]   = 0;
 
+        $exceptionList                = QA::JSONtoExceptionList( $this->QA->getNoticesJSON() );
+        $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
+        $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
+        $issues_detail[ QA::INFO ]    = $exceptionList[ QA::INFO ];
+
+
         if ( $this->QA->thereAreNotices() ) {
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
@@ -50,16 +56,18 @@ class QALocalWarning {
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();
-            foreach( $targetTagPositionError as $item => $value ){
+            foreach ( $targetTagPositionError as $item => $value ) {
                 $targetTagPositionError[ $item ] = CatUtils::rawxliff2view( $value );
             }
 
+            $notices = $this->QA->getNotices();
+
             $out[ 'details' ]                              = [];
+            $out[ 'details' ][ 'issues_info' ]             = $issues_detail;
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
-            $out[ 'details' ][ 'warnings' ]                = $this->QA->getNoticesJSON();
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
-            $out[ 'total' ]                                = count( $this->QA->getNotices() );
+            $out[ 'total' ]                                = count( $notices );
         }
 
         return $out;

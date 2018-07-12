@@ -637,7 +637,7 @@ $.extend(UI, {
         $('.rangySelectionBoundary', $tag).remove();
         $('br.end', $tag).remove();
         $('.tag-autocomplete-endcursor', editareaClone).after(ph);
-        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html());
+        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html().trim()); //Trim to remove space at the end
         $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
         UI.closeTagAutocompletePanel();
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
@@ -743,12 +743,12 @@ $.extend(UI, {
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());
-            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
-            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text).trim());
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text).trim());
         } else if (elem.hasClass('locked')) {
             var text = htmlEncode(elem.text());
-            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text));
-            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text));
+            e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text).trim());
+            e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text).trim());
         }
     },
     /**

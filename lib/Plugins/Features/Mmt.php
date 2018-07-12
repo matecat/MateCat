@@ -254,6 +254,7 @@ class Mmt extends BaseFeature {
                 $targets[] = $target;
             }
 
+            $tmp_name = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
             $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
             foreach ( $segments as $pos => $segment ) {
                 $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
@@ -281,6 +282,9 @@ class Mmt extends BaseFeature {
                 Log::doLog( $e->getMessage() );
                 Log::doLog( $e->getTpostTMKeyCreationraceAsString() );
             }
+
+            unset( $tmpFileObject );
+            @unlink( $tmp_name );
 
         }
 

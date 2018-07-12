@@ -170,6 +170,28 @@ var SegmentActions = {
             actionType: SegmentConstants.ENABLE_TAG_LOCK
         });
     },
+
+    setSegmentWarnings: function(sid, warnings){
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
+            sid: sid,
+            warnings: warnings
+        });
+    },
+
+    updateGlobalWarnings: function(warnings){
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_GLOBAL_WARNINGS,
+            warnings: warnings
+        });
+    },
+
+    qaComponentsetLxqIssues: function ( issues ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.QA_LEXIQA_ISSUES,
+            warnings: issues
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

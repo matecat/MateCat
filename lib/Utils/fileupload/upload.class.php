@@ -1,15 +1,5 @@
 <?php
 
-/*
- * jQuery File Upload Plugin PHP Class 5.11.2
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
- */
 define( "DIRSEP", "//" );
 
 class UploadHandler {
@@ -185,7 +175,7 @@ class UploadHandler {
      * into different directories or replacing hidden system files.
      * Also remove control characters and spaces (\x00..\x20) around the filename:
      */
-    protected function trim_file_name( $name, $type, $index ) {
+    protected function trim_file_name( $name ) {
         $name = stripslashes( $name );
 
         $file_name = trim( $this->my_basename( $name ), ".\x00..\x20" );
@@ -203,21 +193,19 @@ class UploadHandler {
         return $file_name;
     }
 
-    protected function handle_form_data( $file, $index ) {
-        // Handle form data, e.g. $_REQUEST['description'][$index]
-    }
-
     protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ) {
 
         Log::$fileName = "upload.log";
         Log::doLog( $uploaded_file );
 
         $file       = new stdClass();
-        $file->name = $this->trim_file_name( $name, $type, $index );
+        $file->name = $this->trim_file_name( $name );
         $file->size = intval( $size );
-        $file->type = $type;
+        $file->tmp_name = $uploaded_file;
+        //$file->type = $type; // Override and ignore the client type definition
+        $file->type = mime_content_type( $file->tmp_name );
+
         if ( $this->validate( $uploaded_file, $file, $error, $index ) ) {
-            $this->handle_form_data( $file, $index );
             $file_path   = $this->options[ 'upload_dir' ] . $file->name;
             $append_file = !$this->options[ 'discard_aborted_uploads' ] &&
                     is_file( $file_path ) && $file->size > filesize( $file_path );
@@ -344,7 +332,7 @@ class UploadHandler {
             fclose( $fp );
 
             $file        = new stdClass();
-            $file->name  = $this->trim_file_name( $matches[ 1 ], trim( $matches[ 2 ] ), null );
+            $file->name  = $this->trim_file_name( $matches[ 1 ] );
             $file->size  = null;
             $file->type  = trim( $matches[ 2 ] );
             $file->error = "The file is too large. " .

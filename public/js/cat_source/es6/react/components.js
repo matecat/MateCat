@@ -57,6 +57,7 @@ window.OutsourceModal = require('./modals/OutsourceModal').default;
 window.SplitJobModal = require('./modals/SplitJob').default;
 window.DQFModal = require('./modals/DQFModal').default;
 window.ShortCutsModal = require('./modals/ShortCutsModal').default;
+window.CopySourceModal = require('./modals/CopySourceModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
@@ -69,4 +70,9 @@ window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
+window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
+window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
+
+window.SearchUtils = require('./components/header/search/searchUtils');
+
 

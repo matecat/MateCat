@@ -41,6 +41,9 @@ class Session {
 
     protected  $session ;
 
+    /**
+     * @var \Google_Service_Drive
+     */
     protected $service ;
     protected $token ;
 
@@ -457,9 +460,9 @@ class Session {
 
                 $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
                 $httpRequest = $service
-                    ->getClient()
-                    ->getAuth()
-                    ->authenticatedRequest( $request );
+                        ->getClient()
+                        ->getAuth()
+                        ->authenticatedRequest( $request );
 
                 if ( $httpRequest->getResponseHttpCode() == 200 ) {
                     $body = $httpRequest->getResponseBody();

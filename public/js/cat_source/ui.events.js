@@ -20,7 +20,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
             UI.openLanguageResourcesPanel();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
-            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
+            if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.redoInSegment(UI.currentSegment);
@@ -172,11 +172,11 @@ $.extend(UI, {
 			 on a glossary item to paste the text in the correct position
 			 */
 
-            if(!$('.editor .rangySelectionBoundary.focusOut').length) {
+            if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
                 saveSelection();
             }
 
-            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
 
             $('.editor .search-source .rangySelectionBoundary.focusOut,' +
                 '.editor .search-target .rangySelectionBoundary.focusOut'
@@ -199,7 +199,7 @@ $.extend(UI, {
 		};
 
 		$("#filterSwitch").bind('click', function(e) {
-			UI.toggleSearch(e);
+            SearchUtils.toggleSearch(e);
 		});
 		$("#advancedOptions").bind('click', function(e) {
 			e.preventDefault();
@@ -281,7 +281,8 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') &&
-					!$("body").hasClass("side-popup" ) ) {
+					!UI.body.hasClass("side-popup" ) &&
+                    !UI.body.hasClass('search-open')) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }
@@ -323,7 +324,10 @@ $.extend(UI, {
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
-		});
+		}).on('click', 'mark.inGlossary', function ( e ) {
+            var $segment = $( e.currentTarget ).closest("section");
+		    UI.openSegmentGlossaryTab($segment);
+        });
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();

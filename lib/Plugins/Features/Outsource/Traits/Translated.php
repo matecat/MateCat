@@ -11,6 +11,9 @@ namespace Features\Outsource\Traits;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
+use Features\Outsource\Constants\ServiceTypes;
+use Features\Outsource\Email\ConfirmedQuotationEmail;
+use Features\Outsource\Email\ErrorQuotationEmail;
 use MultiCurlHandler;
 use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
@@ -27,13 +30,22 @@ use \INIT;
  */
 trait Translated {
 
+    /**
+     * @var ConfirmedQuotationEmail
+     */
     protected $successEmailObject;
+
+    /**
+     * @var ErrorQuotationEmail
+     */
     protected $failureEmailObject;
 
     protected $internal_project_id;
     protected $internal_job_id;
     protected $external_project_id;
     protected $project_words_count;
+
+    protected $external_parent_project_id;
 
     protected $config;
 
@@ -43,6 +55,13 @@ trait Translated {
 
     public function setFailureMailSender( AbstractEmail $emailObject ) {
         $this->failureEmailObject = $emailObject;
+    }
+
+    /**
+     * @param mixed $external_parent_project_id
+     */
+    public function setExternalParentProjectId( $external_parent_project_id ) {
+        $this->external_parent_project_id = $external_parent_project_id;
     }
 
     public function setInternalIdProject( $id ) {
@@ -69,23 +88,23 @@ trait Translated {
         $this->failureEmailObject->setProjectWordsCount( $count );
     }
 
-    public function getInternalIdProject(){
+    public function getInternalIdProject() {
         return $this->internal_project_id;
     }
 
-    public function getInternalJobId(){
+    public function getInternalJobId() {
         return $this->internal_job_id;
     }
 
-    public function getExternalProjectId(){
+    public function getExternalProjectId() {
         return $this->external_project_id;
     }
 
-    public function getProjectWordsCount(){
+    public function getProjectWordsCount() {
         return $this->project_words_count;
     }
 
-    public function requestProjectQuote( $project_id, $_analyzed_report ) {
+    public function requestProjectQuote( $project_id, $_analyzed_report, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
 
         $this->setInternalIdProject( $project_id );
         $eq_words_count = [];
@@ -110,15 +129,15 @@ trait Translated {
 
         foreach ( $jobs as $job ) {
 
-            $this->requestJobQuote($job, $eq_words_count[$job['id']], $project, $formatted);
+            $this->requestJobQuote( $job, $eq_words_count[ $job[ 'id' ] ], $project, $formatted, $service_type );
 
         }
 
     }
 
-    public function requestJobQuote(\Jobs_JobStruct $job, $eq_word, $project, $formatted_urls){
+    public function requestJobQuote( \Jobs_JobStruct $job, $eq_word, $project, $formatted_urls, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
 
-        if( $eq_word != 0 ){
+        if ( $eq_word != 0 ) {
             $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
         }
 
@@ -141,9 +160,10 @@ trait Translated {
                         'matecat_ppass' => $project->password,
                         'matecat_pname' => $project->name,
                         'subject'       => $job->subject,
-                        'jt'            => 'T',
+                        'jt'            => $service_type,
                         'fd'            => 0,
-                        'of'            => 'json'
+                        'of'            => 'json',
+                        'matecat_raw'   => $job->total_raw_wc
                 ], PHP_QUERY_RFC3986 );
 
         try {
@@ -166,13 +186,15 @@ trait Translated {
         $urls = $formatted_urls->render( true )[ 'jobs' ][ $job->id ][ 'chunks' ][ $job->password ];
 
         $confirmation_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
-                        'f'    => 'confirm',
-                        'cid'  => $this->config[ 'translated_username' ],
-                        'p'    => $this->config[ 'translated_password' ],
-                        'pid'  => $quote_response->pid,
-                        'c'    => 1,
-                        'of'   => "json",
-                        'urls' => json_encode( $urls )
+                        'f'             => 'confirm',
+                        'cid'           => $this->config[ 'translated_username' ],
+                        'p'             => $this->config[ 'translated_password' ],
+                        'pid'           => $quote_response->pid,
+                        'c'             => 1,
+                        'of'            => "json",
+                        'urls'          => json_encode( $urls ),
+                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null ),
+                        'matecat_host'  => parse_url( INIT::$HTTPHOST, PHP_URL_HOST )
                 ], PHP_QUERY_RFC3986 );
 
         try {
@@ -200,6 +222,9 @@ trait Translated {
         ] );
         $cDao               = new ConfirmationDao;
         $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
+
+        $cDao->destroyConfirmationCache( $job );
+
         return true;
 
     }

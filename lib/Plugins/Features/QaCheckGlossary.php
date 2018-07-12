@@ -18,6 +18,9 @@ class QaCheckGlossary extends BaseFeature {
 
     const GLOSSARY_SCOPE = 'glossary';
 
+    const GLOASSARY_CATEGORY = "GLOSSARY";
+
+
     public function postTMSegmentAnalyzed( $params ) {
         $tm_data = $params['tm_data'];
 
@@ -91,16 +94,12 @@ class QaCheckGlossary extends BaseFeature {
                         'data'       => json_decode( $element->data, true )
                 ];
             }
-
         }
 
-        $result[ 'data' ][ self::GLOSSARY_SCOPE ]                = [ 'matches' => $data_elements ];
         sort($segments_ids);
         $segments_ids = array_values(array_unique($segments_ids));
-        $result[ 'details' ][ self::GLOSSARY_SCOPE . "_issues" ] = $segments_ids;
-        if ( isset( $result[ 'details' ][ 'totals' ][ QA::ERROR ] ) && is_array( $result[ 'details' ][ 'totals' ][ QA::ERROR ] ) ) {
-            $result[ 'details' ][ 'totals' ][ QA::ERROR ] = array_unique( array_merge( $result[ 'details' ][ 'totals' ][ QA::ERROR ], $segments_ids ) );
-        }
+        $result[ 'data' ][ self::GLOSSARY_SCOPE ]                                     = [ 'matches' => $data_elements ];
+        $result[ 'details' ][ QA::ERROR ][ 'Categories' ][ self::GLOASSARY_CATEGORY ] = $segments_ids;
 
         return $result;
 
