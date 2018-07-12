@@ -233,8 +233,9 @@ body.reviselog {
                                                             outline: none;
                                                             background: none;
                                                             i {
-                                                                font-size: .7em;
+                                                                font-size: .9em;
                                                                 color: gray;
+                                                                margin: 0;
                                                             }
                                                             &:hover {
                                                                 background: #e8e9ef;
@@ -256,10 +257,10 @@ body.reviselog {
                                                         margin-right: 1px;
                                                         .qr-diff {
                                                             &.add {
-                                                                background: rgba(158, 255, 0, 0.22);
+                                                                background: rgba(158, 255, 0, 0.2);
                                                             }
                                                             &.clear {
-                                                                background: rgba(255, 46, 0, 0.22);
+                                                                background: rgba(255, 46, 0, 0.1);
                                                                 text-decoration: line-through;
                                                             }
                                                         }
@@ -293,9 +294,25 @@ body.reviselog {
                                                                 margin-top: 5px;
                                                                 background: #f2f4f7;
                                                                 &.automated {
-                                                                    border-radius: 15px;
-                                                                    box-shadow: 0 0 1px grey;
-                                                                    background: none;
+                                                                    padding: 0;
+                                                                    padding-right: 5px;
+                                                                    .box-icon {
+                                                                        display: flex;
+                                                                        padding: 5px 3px 5px 5px;
+                                                                        background: #e8e9ef;
+                                                                        margin-right: 6px;
+                                                                    }
+                                                                }
+                                                                &.human {
+                                                                    &.critical {
+                                                                        border-bottom: 2px solid #FB2A0D;
+                                                                    }
+                                                                    &.major {
+                                                                        border-bottom: 2px solid #FBAA0D;
+                                                                    }
+                                                                    &.enhacement {
+                                                                        border-bottom: 2px solid #FFE600;
+                                                                    }
                                                                 }
                                                             }
                                                         }

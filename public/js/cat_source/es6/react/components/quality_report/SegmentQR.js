@@ -94,34 +94,19 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-text">
                             <div className="qr-issues-list">
                                 <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
+                                    <div className="box-icon">
+                                        <i className="icon-cancel-circle icon red" />
+                                    </div>
                                     <div className="qr-error">Tag mismatch <b>(2)</b></div>
                                 </div>
                                 <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
-                                <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
-                                <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
-                                <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
-                                <div className="qr-issue automated">
-                                    <i className="icon-3dglasses icon" />
+                                    <div className="box-icon">
+                                        <i className="icon-warning2 icon orange" />
+                                    </div>
                                     <div className="qr-error">Tag mismatch <b>(2)</b></div>
                                 </div>
                             </div>
                         </div>
-                        {/*<div className="segment-content qr-spec">
-                            Words: <b>10</b>
-                        </div>*/}
                     </div>
 
                     <div className="segment-container qr-issues">
@@ -130,25 +115,21 @@ class SegmentQR extends React.Component {
                         </div>
                         <div className="segment-content qr-text">
                             <div className="qr-issues-list">
-                                <div className="qr-issue human">
+
+                                <div className="qr-issue human critical">
                                     <div className="qr-error"><b>Language quality</b></div>
                                     <div className="sub-type-error">Subtype </div>
                                     <div className="severity"><b>Critical</b></div>
                                 </div>
-                                <div className="qr-issue human">
-                                    <div className="qr-error"><b>Language quality</b></div>
-                                    <div className="sub-type-error">Subtype </div>
-                                    <div className="severity"><b>Critical</b></div>
-                                </div>
-                                <div className="qr-issue human">
+                                <div className="qr-issue human major">
                                     <div className="qr-error"><b>Language quality</b></div>
                                     <div className="sub-type-error">Subtype </div>
                                     <div className="severity"><b>Major</b></div>
                                 </div>
-                                <div className="qr-issue human">
+                                <div className="qr-issue human enhacement">
                                     <div className="qr-error"><b>Language quality</b></div>
                                     <div className="sub-type-error">Subtype </div>
-                                    <div className="severity"><b>Critical</b></div>
+                                    <div className="severity"><b>Enhacement</b></div>
                                 </div>
 
                             </div>
