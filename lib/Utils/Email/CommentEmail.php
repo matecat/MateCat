@@ -10,6 +10,7 @@ class CommentEmail extends BaseCommentEmail {
         $vars = parent::_getTemplateVariables();
         $var['title'] = $this->title;
         $vars['action'] = "commented on";
+        $vars['id_segment'] = $this->comment->id_segment;
         return $vars;
     }
 

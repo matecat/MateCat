@@ -16,6 +16,7 @@ class CommentResolveEmail extends BaseCommentEmail {
         $vars = parent::_getTemplateVariables();
         $var['title'] = $this->title;
         $vars['action'] = "resolved a thread that you are following on";
+        $vars['id_segment'] = $this->comment->id_segment;
         return $vars;
     }
 

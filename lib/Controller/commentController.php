@@ -220,12 +220,14 @@ class commentController extends ajaxController {
 
         $userDao = new Users_UserDao( Database::obtain() );
         $users = $userDao->getByUids( $result );
+        $userDao->setCacheTTL( 60 * 60 * 24 );
         $owner = $userDao->getProjectOwner( $this->job['id'] );
 
         if ( !empty( $owner->uid ) && !empty( $owner->email ) ) {
             array_push( $users, $owner );
         }
 
+        $userDao->setCacheTTL( 60 * 10 );
         $assignee = $userDao->getProjectAssignee( $this->job[ 'id_project' ] );
         if ( !empty( $assignee->uid ) && !empty( $assignee->email ) ) {
             array_push( $users, $assignee );

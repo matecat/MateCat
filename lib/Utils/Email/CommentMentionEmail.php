@@ -16,6 +16,7 @@ class CommentMentionEmail extends BaseCommentEmail {
         $vars = parent::_getTemplateVariables();
         $var['title'] = $this->title;
         $vars['action'] = "mentioned you in a comment on";
+        $vars['id_segment'] = $this->comment->id_segment;
         return $vars;
     }
 
