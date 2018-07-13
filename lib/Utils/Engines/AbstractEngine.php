@@ -47,6 +47,12 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
         $this->featureSet = new FeatureSet() ;
     }
 
+    public function setFeatureSet( FeatureSet $fSet = null ){
+        if( $fSet != null ){
+            $this->featureSet = $fSet;
+        }
+    }
+
     /**
      * @param bool $bool
      *
