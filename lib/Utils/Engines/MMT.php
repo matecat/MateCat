@@ -78,8 +78,14 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     public function get( $_config ) {
 
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-            return null;
+        /**
+         * Allow plugins to force to send requests to MMT even if in analysis
+         */
+        $forceMMTAcceptAnalysisRequests = $this->featureSet->filter( 'forceMMTAcceptAnalysisRequests', false );
+        if( !$forceMMTAcceptAnalysisRequests ) {
+            if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+                return [];
+            }
         }
 
         $client = $this->_getClient();
