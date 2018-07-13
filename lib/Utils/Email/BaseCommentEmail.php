@@ -21,7 +21,7 @@ class BaseCommentEmail extends AbstractEmail {
         $this->user = $user ;
         $this->comment = $comment ;
         $this->url = $url ;
-        $this->_setLayout('empty_skeleton.html');
+        $this->_setLayout('skeleton.html');
         $this->_setTemplate('Comment/action_on_a_comment.html');
     }
 
