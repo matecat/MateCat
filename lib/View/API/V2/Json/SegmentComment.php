@@ -39,7 +39,7 @@ class SegmentComment {
                     'resolved_at' =>  $this->formatDate( $record->resolve_date ),
                     'source_page'  => $record->source_page,
                     'message_type' => $record->message_type,
-                    'message'      => $record->message
+                    'message'      => \Comments_CommentDao::placeholdContent($record->message)
             );
             $out[] = $row;
         }
