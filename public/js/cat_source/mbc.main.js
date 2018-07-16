@@ -372,7 +372,7 @@ if ( MBC.enabled() )
         };
 
         var scrollSegment = function ( section ) {
-            var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+            var scrollAnimation = $( UI.scrollSelector );
             var segment = section;
             var pos = 0;
             var article = segment.closest('article');
@@ -392,12 +392,14 @@ if ( MBC.enabled() )
         };
 
         var openSegmentComment = function ( el ) {
-            popLastCommentHash();
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
-            scrollSegment( el ).done( function() {
-                renderSegmentBalloon( el );
-            }); 
+            popLastCommentHash();
+            setTimeout(function(){
+                scrollSegment( el ).done( function() {
+                    renderSegmentBalloon( el );
+                });
+            }, 200)
         };
 
         var openSegmentCommentNoScroll = function ( el ) {
