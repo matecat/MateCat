@@ -39,11 +39,11 @@ class ProductionSummary extends React.Component {
             </div>
             <div className="qr-effort pee">
                 <div className="qr-label">PEE</div>
-                <div className="qr-info"><b>30%</b> <i className="icon-notice icon" /></div>
+                <div className="qr-info qr-good"><b>30%</b> {/*<i className="icon-stats2 icon" />*/}</div>
             </div>
             <div className="qr-effort time-edit">
                 <div className="qr-label">Time Edit</div>
-                <div className="qr-info"><b>30%</b> <i className="icon-notice icon" /></div>
+                <div className="qr-info qr-bad"><b>30' 20''</b> {/*<i className="icon-rocket icon" />*/}</div>
             </div>
         </div>
     }
