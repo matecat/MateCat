@@ -388,16 +388,14 @@ if ( MBC.enabled() )
             scrollAnimation.animate({
                 scrollTop: pos
             }, 500);
-
-
             return scrollAnimation.promise() ;
         };
 
         var openSegmentComment = function ( el ) {
             popLastCommentHash();
-            scrollSegment( el ).promise().done( function() {
-                $( 'article' ).addClass( 'mbc-commenting-opened' );
-                $( 'body' ).addClass( 'side-tools-opened' );
+            $( 'article' ).addClass( 'mbc-commenting-opened' );
+            $( 'body' ).addClass( 'side-tools-opened' );
+            scrollSegment( el ).done( function() {
                 renderSegmentBalloon( el );
             }); 
         };
@@ -530,7 +528,7 @@ if ( MBC.enabled() )
 
         var addTagging = function (  ) {
 
-            if ( MBC.teamUsers.length > 0 ) {
+            if ( MBC.teamUsers && MBC.teamUsers.length > 0 ) {
                 $(".mbc-comment-textarea")
                     .atwho({
                         at: "@",
