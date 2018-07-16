@@ -1,8 +1,14 @@
 @import "vendor_mc/semantic/matecat_semantic";
 @import "commons/icons";
 @import "commons/shadows";
+@import "commons/divider";
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
+
+$color-red: #FB2A0D;
+$color-orange: #FBAA0D;
+$color-green: #83FD97;
+$color-yellow: #FFE600;
 
 body.reviselog {
     font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -22,11 +28,29 @@ body.reviselog {
             display: flex;
             .qr-job-summary-container {
                 width: 100%;
+                transition: 0.3s ease;
+                .qr-bg-head {
+                    height: 200px;
+                    background: #E0E3E7;
+                    position: absolute;
+                    width: 100%;
+                    z-index: -1;
+                }
+                .ui.table thead th {
+                    background: #FFF;
+                    border: none;
+                    border-bottom: 1px solid #f2f4f7;
+                    border-radius: 0;
+                }
+                .ui.celled.table tr th, .ui.celled.table tr td {
+                    border-left: 1px solid #f2f4f7;
+                    border-radius: 0;
+                }
                 .qr-job-summary {
                     max-width: 1366px;
                     min-width: 1024px;
                     margin: 0 auto;
-                    padding: 0 15px;
+                    padding: 15px 15px 0;
                     h3 {}
                     .qr-label {
                         font-weight: 100;
@@ -41,21 +65,299 @@ body.reviselog {
                             width: 100%;
                             padding: 15px;
                             align-items: center;
-                            .job-id {}
+                            .job-id {
+                                font-size: 14px;
+                            }
                             .source-to-target {
                                 display: flex;
+                                align-items: center;
+                                .qr-to {
+                                    display: flex;
+                                    i {
+                                        font-size: .8em;
+                                        color: gray;
+                                        margin: 0 3px;
+                                    }
+                                }
                             }
-                            .progress-bar {
-                                min-width: 130px;
+                            .progress-percent {
+                                display: flex;
+                                align-items: center;
+                                .progress-bar {
+                                    margin: 0;
+                                    min-width: 130px;
+                                }
+                                .percent {
+                                    padding-left: 5px;
+                                }
+                            }
+                            .qr-effort {
+                                .qr-info {
+                                    display: flex;
+                                    align-items: center;
+                                    &.qr-good {
+                                        background: #ebffd0;
+                                        padding: 0 2px;
+                                        width: fit-content;
+                                    }
+                                    &.qr-bad {
+                                        background: #ffd6ce;
+                                        padding: 0 2px;
+                                        width: fit-content;
+                                    }
+                                }
                             }
                         }
                         .qr-quality {
                             padding-top: 20px;
+                            table.ui.celled {
+                                border-radius: 0;
+                                border: none;
+                                position: relative;
+                                thead {
+                                    background: #F2F4F7;
+                                    tr {
+                                        .qr-title {
+                                            background: none;
+                                            padding: 5px;
+                                            &:first-child {
+                                                padding-left: 15px;
+                                            }
+                                            &.critical {
+                                                border-bottom: 5px solid $color-red
+                                            }
+                                            &.major {
+                                                border-bottom: 5px solid $color-orange;
+                                            }
+                                            &.enhacement {
+                                                border-bottom: 5px solid $color-yellow;
+                                            }
+                                            &.qr-total-score {
+                                                padding: 15px 0 !important;
+                                                &.qr-pass {
+                                                    background: $color-green;
+                                                    .qr-info {
+                                                        font-size: 24px;
+
+                                                    }
+                                                }
+                                                &.qr-warning {
+                                                    background: $color-orange;
+                                                }
+                                                &.qr-fail {
+                                                    background: $color-red;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                tbody {}
+                            }
                         }
                     }
                     .qr-segment-details-container {
                         background: #e7e9ef;
-                        padding: 15px;
+                        padding: 45px 15px 15px;
+                        .qr-segments-summary {
+                            h3{}
+                            .filters-qr {}
+                            .qr-segments {
+                                .qr-segments-list {
+                                    .qr-single-segment {
+                                        padding-top: 30px;
+                                        &:first-child {
+                                            padding-top: 15px;
+                                        }
+                                        .qr-segment-head {
+                                            display: flex;
+                                            position: relative;
+                                            background: #FFF;
+                                            align-items: center;
+                                             .segment-id {
+                                                 width: 18%;
+                                                 padding: 15px 0.78571429em;
+                                             }
+                                             .segment-production-container{
+                                                 width: 68%;
+                                                 padding: 15px 0.78571429em;
+                                                 display: flex;
+                                                 justify-content: space-between;
+                                                 align-items: center;
+                                                 .segment-production {
+                                                     display: flex;
+                                                     justify-content: flex-end;
+                                                     .production {
+                                                         padding: 0 10px;
+                                                     }
+                                                 }
+                                             }
+                                            .segment-status-container {
+                                                width: 14%;
+                                                padding: 15px 0.78571429em;
+                                                 .status-translated {
+                                                     font-size: 20px;
+                                                     color: #09beec;
+                                                 }
+                                                 .status-revised {
+                                                     font-size: 20px;
+                                                     color: #7eaf3e;
+                                                 }
+                                            }
+                                        }
+                                        .qr-segment-body {
+                                                .segment-container {
+                                                    display: flex;
+                                                    background: #f2f4f7;
+                                                    &.qr-issues {
+                                                        .qr-text {
+                                                            width: 82%;
+                                                        }
+                                                    }
+                                                    .segment-content {
+                                                        display: flex;
+                                                        align-items: center;
+                                                        padding: 10px 0.78571429em;
+                                                        margin-top: 1px;
+                                                    }
+                                                    .qr-segment-title {
+                                                        width: 18%;
+                                                        background: none;
+                                                        justify-content: space-between;
+                                                        button {
+                                                            width: 22px;
+                                                            height: 22px;
+                                                            border-radius: 50%;
+                                                            margin: 0;
+                                                            padding: 0;
+                                                            border: none;
+                                                            outline: none;
+                                                            background: none;
+                                                            i {
+                                                                font-size: .9em;
+                                                                color: gray;
+                                                                margin: 0;
+                                                            }
+                                                            &:hover {
+                                                                background: #e8e9ef;
+                                                                i {
+                                                                    color: #000000;
+                                                                }
+                                                            }
+                                                            &.active, &:active, &:hover {
+                                                                background: #e8e9ef;
+                                                                i {
+                                                                    color: #000000
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .qr-text {
+                                                        width: 68%;
+                                                        background: #FFFFFF;
+                                                        margin-right: 1px;
+                                                        .qr-diff {
+                                                            &.add {
+                                                                background: rgba(158, 255, 0, 0.2);
+                                                            }
+                                                            &.clear {
+                                                                background: rgba(255, 46, 0, 0.1);
+                                                                text-decoration: line-through;
+                                                            }
+                                                        }
+                                                        .qr-tags {
+                                                            color: #767676;
+                                                            font-style: italic;
+                                                            background: #f2f4f7;
+                                                            border-radius: 7px;
+                                                            padding: 3px;
+                                                            font-size: 14px;
+                                                            &.start-tag {
+
+                                                            }
+                                                            &.end-tag {
+
+                                                            }
+                                                            &.violet-tag {
+                                                                color: #e22bff !important;
+                                                            }
+                                                        }
+                                                        .qr-issues-list {
+                                                            display: flex;
+                                                            flex-wrap: wrap;
+                                                            margin-top: -5px;
+                                                            .qr-issue {
+                                                                display: flex;
+                                                                align-items: center;
+                                                                width: fit-content;
+                                                                padding: 3px 10px;
+                                                                margin-right: 5px;
+                                                                margin-top: 5px;
+                                                                background: #f2f4f7;
+                                                                &.automated {
+                                                                    padding: 0;
+                                                                    padding-right: 5px;
+                                                                    .box-icon {
+                                                                        display: flex;
+                                                                        padding: 5px 3px 5px 5px;
+                                                                        background: #e8e9ef;
+                                                                        margin-right: 6px;
+                                                                    }
+                                                                }
+                                                                &.human {
+                                                                    &.critical {
+                                                                        border-bottom: 2px solid #FB2A0D;
+                                                                    }
+                                                                    &.major {
+                                                                        border-bottom: 2px solid #FBAA0D;
+                                                                    }
+                                                                    &.enhacement {
+                                                                        border-bottom: 2px solid #FFE600;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .qr-spec {
+                                                        width: 14%;
+                                                        justify-content: space-between;
+                                                        background: #FFFFFF;
+                                                        .spec-words {
+
+                                                        }
+                                                        .tm-percent {
+                                                            background: #0abeed;
+                                                            color: #FFFFFF;
+                                                            padding: 0 3px;
+                                                            font-size: 14px;
+                                                        }
+                                                    }
+                                                }
+                                            &.qr-diff-off {
+                                            }
+
+                                            &.qr-diff-on {
+                                                .segment-container {
+                                                    .segment-content {
+                                                        background: #f2f4f7;
+                                                        margin-top: 0;
+                                                    }
+                                                    &.shadow-1 {
+                                                        position: relative;
+                                                        .segment-content {
+                                                            background: #FFFFFF;
+                                                            margin-top: 0;
+                                                        }
+                                                        .qr-segment-title {
+                                                            background: #e8e9ef;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

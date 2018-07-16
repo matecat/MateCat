@@ -14,7 +14,7 @@ class FileDetails extends React.Component {
     render () {
 
         return <div className="qr-segments">
-            <div className="document-name">FILE {this.props.file.get("filename")}</div>
+            <div className="document-name  top-30">FILE {this.props.file.get("filename")}</div>
             <div className="qr-segments-list">
                 {this.getSegments()}
             </div>
