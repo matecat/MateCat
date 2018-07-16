@@ -121,10 +121,11 @@ class MembershipDao extends \DataAccess_AbstractDao {
 
     /**
      * @param $id_team
+     * @param $traverse
      *
      * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
      */
-    public function getMemberListByTeamId( $id_team ) {
+    public function getMemberListByTeamId( $id_team, $traverse = true ) {
         $stmt             = $this->_getStatementForCache( self::$_query_member_list );
         $membershipStruct = new MembershipStruct();
 
@@ -138,10 +139,13 @@ class MembershipDao extends \DataAccess_AbstractDao {
                 )
         );
 
-        foreach ( $members as $member ) {
-            $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $member->uid ) );
-            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUid( $member->uid ) );
+        if ( $traverse ) {
+            foreach ( $members as $member ) {
+                $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $member->uid ) );
+                $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUid( $member->uid ) );
+            }
         }
+
 
         return $members;
     }

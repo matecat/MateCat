@@ -18,6 +18,11 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
     protected static $primary_keys = array('id');
     protected static $auto_increment_fields = array('id');
 
+    /**
+     * @param $id
+     *
+     * @return ConnectedServiceStruct
+     */
     public function findById( $id ) {
         $conn = $this->con->getConnection() ;
         $stmt = $conn->prepare(
