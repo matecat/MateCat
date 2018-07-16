@@ -372,14 +372,25 @@ if ( MBC.enabled() )
         };
 
         var scrollSegment = function ( section ) {
-            var someMarginOnTop = 100;
-            var headerMenu = $( '.header-menu' ).height();
+            var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+            var segment = section;
+            var pos = 0;
+            var article = segment.closest('article');
 
-            var animation = $( "html,body" ).animate( {
-                scrollTop: section.offset().top - headerMenu - someMarginOnTop
-            }, 500 );
-            
-            return animation ;
+            pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
+
+            if (article.prevAll('article').length > 0) {
+                _.forEach(article.prevAll('article'), function ( item ) {
+                    pos = pos + $(item).outerHeight() + 140;
+                });
+            }
+
+            scrollAnimation.animate({
+                scrollTop: pos
+            }, 500);
+
+
+            return scrollAnimation.promise() ;
         };
 
         var openSegmentComment = function ( el ) {
