@@ -478,6 +478,7 @@ class TMAnalysisWorker extends AbstractWorker {
              * @var $tms \Engines_MyMemory
              */
             $tms        = Engine::getInstance( $_TMS );
+            $tms->setFeatureSet( $this->featureSet );
             $tms->doLog = true;
 
             $config = $tms->getConfigStruct();
@@ -507,13 +508,18 @@ class TMAnalysisWorker extends AbstractWorker {
         if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
 
             try {
-                $mt     = \Engine::getInstance( $id_mt_engine );
+                $mt = \Engine::getInstance( $id_mt_engine );
+
+                $mt->setFeatureSet( $this->featureSet );
 
                 //tell to the engine that this is the analysis phase ( some engines want to skip the analysis )
                 $mt->setAnalysis();
 
                 $config = $mt->getConfigStruct();
                 $config = array_merge( $config, $_config );
+
+                //if a callback is not set only the first argument is returned, get the config params from the callback
+                $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mt, $queueElement );
 
                 $mt_result = $mt->get( $config );
 

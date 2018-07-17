@@ -178,7 +178,7 @@ API.SEGMENT = {
     },
 
     getConcordance: function (query, type) {
-        let data = {
+        var data = {
             action: 'getContribution',
             is_concordance: 1,
             from_target: type,

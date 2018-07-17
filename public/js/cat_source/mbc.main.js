@@ -372,23 +372,34 @@ if ( MBC.enabled() )
         };
 
         var scrollSegment = function ( section ) {
-            var someMarginOnTop = 100;
-            var headerMenu = $( '.header-menu' ).height();
+            var scrollAnimation = $( UI.scrollSelector );
+            var segment = section;
+            var pos = 0;
+            var article = segment.closest('article');
 
-            var animation = $( "html,body" ).animate( {
-                scrollTop: section.offset().top - headerMenu - someMarginOnTop
-            }, 500 );
-            
-            return animation ;
+            pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
+
+            if (article.prevAll('article').length > 0) {
+                _.forEach(article.prevAll('article'), function ( item ) {
+                    pos = pos + $(item).outerHeight() + 140;
+                });
+            }
+
+            scrollAnimation.animate({
+                scrollTop: pos
+            }, 500);
+            return scrollAnimation.promise() ;
         };
 
         var openSegmentComment = function ( el ) {
+            $( 'article' ).addClass( 'mbc-commenting-opened' );
+            $( 'body' ).addClass( 'side-tools-opened' );
             popLastCommentHash();
-            scrollSegment( el ).promise().done( function() {
-                $( 'article' ).addClass( 'mbc-commenting-opened' );
-                $( 'body' ).addClass( 'side-tools-opened' );
-                renderSegmentBalloon( el );
-            }); 
+            setTimeout(function(){
+                scrollSegment( el ).done( function() {
+                    renderSegmentBalloon( el );
+                });
+            }, 200)
         };
 
         var openSegmentCommentNoScroll = function ( el ) {
@@ -519,7 +530,7 @@ if ( MBC.enabled() )
 
         var addTagging = function (  ) {
 
-            if ( MBC.teamUsers.length > 0 ) {
+            if ( MBC.teamUsers && MBC.teamUsers.length > 0 ) {
                 $(".mbc-comment-textarea")
                     .atwho({
                         at: "@",
