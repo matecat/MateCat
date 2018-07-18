@@ -42,7 +42,7 @@ if ( ReviewExtended.enabled() ) {
             }
         });
 
-        let originalRender = UI.render;
+        var originalRender = UI.render;
         $.extend(UI, {
 
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
@@ -78,8 +78,8 @@ if ( ReviewExtended.enabled() ) {
             },
 
             getSegmentVersionsIssuesHandler(event) {
-                let sid = event.segment.absId;
-                let fid = UI.getSegmentFileId(event.segment.el);
+                var sid = event.segment.absId;
+                var fid = UI.getSegmentFileId(event.segment.el);
                 UI.getSegmentVersionsIssues(sid, fid);
             },
 

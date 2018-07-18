@@ -424,7 +424,7 @@
         },
 
         isUnlockedSegment: function ( segment ) {
-            let readonly = UI.isReadonlySegment(segment);
+            var readonly = UI.isReadonlySegment(segment);
             return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid))
         },
         getStatusForAutoSave : function( segment ) {
@@ -666,9 +666,9 @@
             return API.SEGMENT.approveSegments(segmentsArray).done(function ( response ) {
                 if (response.data && response.unchangeble_segments.length === 0) {
                     segmentsArray.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
@@ -676,14 +676,14 @@
 
                     })
                 } else if (response.unchangeble_segments.length > 0) {
-                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                    var arrayMapped = _.map(segmentsArray, function ( item ) {
                         return parseInt(item);
                     });
-                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    var array = _.difference(arrayMapped, response.unchangeble_segments);
                     array.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "APPROVED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
@@ -697,23 +697,23 @@
             return API.SEGMENT.translateSegments(segmentsArray).done(function ( response ) {
                 if (response.data && response.unchangeble_segments.length === 0) {
                     segmentsArray.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )
                         }
                     })
                 } else if (response.unchangeble_segments.length > 0) {
-                    let arrayMapped = _.map(segmentsArray, function ( item ) {
+                    var arrayMapped = _.map(segmentsArray, function ( item ) {
                         return parseInt(item);
                     });
-                    let array = _.difference(arrayMapped, response.unchangeble_segments);
+                    var array = _.difference(arrayMapped, response.unchangeble_segments);
                     array.forEach(function ( item ) {
-                        let fileId = UI.getSegmentFileId(UI.getSegmentById(item));
+                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
                         SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        let $segment = UI.getSegmentById(item);
+                        var $segment = UI.getSegmentById(item);
                         if ( $segment ) {
                             UI.setSegmentModified( $segment, false ) ;
                             UI.disableTPOnSegment( $segment )

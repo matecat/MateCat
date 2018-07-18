@@ -27,9 +27,9 @@ if ( ReviewImproved.enabled() ) {
 
         getSegmentVersionsIssuesHandler: function (event) {
             // TODO Uniform behavior of ReviewExtended and ReviewImproved
-            let sid = event.segment.absId;
-            let fid = UI.getSegmentFileId(event.segment.el);
-            let versions = [];
+            var sid = event.segment.absId;
+            var fid = UI.getSegmentFileId(event.segment.el);
+            var versions = [];
             SegmentActions.addTranslationIssuesToSegment(fid, sid, versions);
         },
         submitComment : function(id_segment, id_issue, data) {
