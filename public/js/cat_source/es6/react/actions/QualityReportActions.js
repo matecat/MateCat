@@ -12,6 +12,17 @@ let QualityReportActions =  {
                 });
             }
         });
+    },
+
+    getMoreQRSegments() {
+        QRApi.getSegmentsFiles2().done(function ( response ) {
+            if ( response.data.files ) {
+                AppDispatcher.dispatch({
+                    actionType: QRConstants.ADD_SEGMENTS,
+                    files: response.data.files,
+                });
+            }
+        });
     }
 
 }
