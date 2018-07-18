@@ -112,7 +112,7 @@ if (SegmentFilter.enabled())
             return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
-                let reactState = Object.assign({
+                var reactState = Object.assign({
                     filteredCount : data.count,
                     filtering : true,
                     segmentsArray: data.segment_ids
