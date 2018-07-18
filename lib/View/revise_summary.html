@@ -16,6 +16,28 @@
         };
     </script>
 
+    <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
+        /*<![CDATA[*/
+        config.lfPlaceholder = '${lfPlaceholder | null}';
+        config.crPlaceholder = '${crPlaceholder | null}';
+        config.crlfPlaceholder = '${crlfPlaceholder | null}';
+        config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
+        config.crPlaceholderClass = '${crPlaceholderClass | null}';
+        config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
+        config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
+        config.crPlaceholderRegex = ${crPlaceholderRegex | null};
+        config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
+
+        config.tabPlaceholder       = '${tabPlaceholder | null}';
+        config.tabPlaceholderClass  = '${tabPlaceholderClass | null}';
+        config.tabPlaceholderRegex  = ${tabPlaceholderRegex | null};
+
+        config.nbspPlaceholder       = '${nbspPlaceholder | null}';
+        config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
+        config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
+        /*]]>*/
+    </script>
+
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
     <!--<script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>-->
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>

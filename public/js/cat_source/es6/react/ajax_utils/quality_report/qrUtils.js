@@ -5,10 +5,10 @@ let QUALITY_REPORT =  {
     getSegmentsFiles() {
 
         let data = {
-            jid: 840,
-            password: "1389c4989bdf",
+            jid:  814,
+            password: "f15c51c2183c",
             step: 30,
-            segment: "756318",
+            segment: "749568",
             where: 'after'
         };
         return $.ajax({

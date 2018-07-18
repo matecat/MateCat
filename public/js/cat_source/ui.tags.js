@@ -1,8 +1,6 @@
 /*
 	Component: ui.tags
  */
-
-
 $.extend(UI, {
     noTagsInSegment: function(options) {
         var editarea = options.area;
@@ -72,6 +70,56 @@ $.extend(UI, {
 
     },
 
+    /**
+     * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
+     * @param str
+     * @returns {XML|string}
+     */
+    decodePlaceholdersToText: function (str) {
+        if(!UI.hiddenTextEnabled) return str;
+        var _str = str;
+        if(UI.markSpacesEnabled) {
+            if(jumpSpacesEncode) {
+                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
+            }
+        }
+
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+            .replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+            .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
+            .replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
+
+        return _str;
+    },
+
+    encodeSpacesAsPlaceholders: function(str, root) {
+        var newStr = '';
+        $.each($.parseHTML(str), function() {
+
+            if(this.nodeName == '#text') {
+                newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
+            } else {
+                match = this.outerHTML.match(/<.*?>/gi);
+                if(match.length == 1) { // se è 1 solo, è un tag inline
+
+                } else if(match.length == 2) { // se sono due, non ci sono tag innestati
+                    newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+                } else { // se sono più di due, ci sono tag innestati
+
+                    newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+
+                }
+            }
+        });
+        if(root) {
+            newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+        }
+        return newStr;
+    },
 
     transformTextForLockTags: function ( tx ) {
         var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
@@ -140,7 +188,7 @@ $.extend(UI, {
                 var base = base64Array.shift();
                 return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
             });
-            delete(base64);
+            // delete(base64Array);
             return tx;
         } catch (e) {
             console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");

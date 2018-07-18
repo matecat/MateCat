@@ -1,8 +1,77 @@
-
+import TagsUtils from "../../utils/textUtils"
+import classnames from "classnames";
 class SegmentQR extends React.Component {
-
+    constructor(props) {
+        super(props);
+        this.state = {
+            translateDiffOn: false,
+            reviseDiffOn: false,
+            htmlDiff: ""
+        };
+    }
+    showTranslateDiff() {
+        if (this.state.translateDiffOn) {
+            this.setState({
+                translateDiffOn: false,
+            });
+        } else {
+            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"));
+            this.setState({
+                translateDiffOn: true,
+                reviseDiffOn: false,
+                htmlDiff: diffHtml
+            });
+        }
+    }
+    showReviseDiff() {
+        if (this.state.reviseDiffOn) {
+            this.setState({
+                reviseDiffOn: false,
+            });
+        } else {
+            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"));
+            this.setState({
+                translateDiffOn: false,
+                reviseDiffOn: true,
+                htmlDiff: diffHtml
+            });
+        }
+    }
+    decodeTextAndTransormTags(text) {
+         let decodedText = TagsUtils.decodePlaceholdersToText(text);
+         decodedText = TagsUtils.transformTextForLockTags(decodedText);
+         return decodedText;
+    }
+    allowHTML(string) {
+        return { __html: string };
+    }
+    getDiffPatch(text) {
+        let suggestion = "&lt;g id=\"3521\"&gt;Sintesi: Informazioni sugli aspetti e i  ﻿principali in  all'aggiornamento a Project Server 2013.dd"
+        return TagsUtils.getDiffHtml(suggestion, text);
+    }
     render () {
+        let source = this.decodeTextAndTransormTags(this.props.segment.get("segment"));
+        let target = this.decodeTextAndTransormTags(this.props.segment.get("translation"));
 
+        let segmentBodyClass = classnames({
+            "qr-segment-body": true,
+            "qr-diff-on": (this.state.translateDiffOn || this.state.reviseDiffOn),
+        });
+        let suggestionClasses = classnames({
+            "segment-container": true,
+            "qr-suggestion": true,
+            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn)
+        });
+        let translateClasses = classnames({
+            "segment-container": true,
+            "qr-translated": true,
+            "shadow-1" : (this.state.translateDiffOn )
+        });
+        let revisedClasses = classnames({
+            "segment-container": true,
+            "qr-revised": true,
+            "shadow-1" : (this.state.reviseDiffOn)
+        });
         return <div className="qr-single-segment">
 
             <div className="qr-segment-head shadow-1">
@@ -14,36 +83,36 @@ class SegmentQR extends React.Component {
                     </div>
                     <div className="segment-production">
                         <div className="production word-speed">Words speed: <b>7"</b></div>
-                        <div className="production time-edit">Time to edit: <b>53"</b></div>
+                        <div className="production time-edit">Time to edit: <b>{this.props.segment.get("time_to_edit")}"</b></div>
                         <div className="production pee">PEE: <b>30%</b></div>
                     </div>
                 </div>
                 <div className="segment-status-container">
                     <div className="qr-label">Segment status</div>
-                    <div className="qr-info status-translated"><b>Translated</b></div>
+                    <div className={"qr-info status-" + this.props.segment.get("status").toLowerCase()}><b>{this.props.segment.get("status")}</b></div>
                 </div>
             </div>
 
 
-            <div className="qr-segment-body ">
+            <div className={segmentBodyClass}>
 
                     <div className="segment-container qr-source">
                         <div className="segment-content qr-segment-title">
                             <b>Source</b>
                         </div>
-                        <div className="segment-content qr-text">
-                            Hi!
-                            <span className="qr-tags start-tag">&lt;g id="1"&gt;</span> my name is <span className="qr-tags end-tag">&lt;/g&gt;</span>
-                            Rubén Santillàn and I'm a
-                            <span className="qr-tags start-tag violet-tag">&lt;g id="2"&gt;</span>Designer<span className="qr-tags end-tag violet-tag">&lt;/g&gt;</span>
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(source) }>
+                            {/*Hi!*/}
+                            {/*<span className="qr-tags start-tag">&lt;g id="1"&gt;</span> my name is <span className="qr-tags end-tag">&lt;/g&gt;</span>*/}
+                            {/*Rubén Santillàn and I'm a*/}
+                            {/*<span className="qr-tags start-tag violet-tag">&lt;g id="2"&gt;</span>Designer<span className="qr-tags end-tag violet-tag">&lt;/g&gt;</span>*/}
                         </div>
                         <div className="segment-content qr-spec">
                             <div>Words:</div>
-                            <div><b>10</b></div>
+                            <div><b>{parseInt(this.props.segment.get("raw_word_count"))}</b></div>
                         </div>
                     </div>
 
-                    <div className="segment-container qr-suggestion">
+                    <div className={suggestionClasses}>
                         <div className="segment-content qr-segment-title">
                             <b>Suggestion</b>
                         </div>
@@ -56,15 +125,15 @@ class SegmentQR extends React.Component {
                         </div>
                     </div>
 
-                    <div className="segment-container qr-translated">
+                    <div className={translateClasses}>
                         <div className="segment-content qr-segment-title">
                             <b>Translate</b>
-                            <button>
+                            <button onClick={this.showTranslateDiff.bind(this)}>
                                 <i className="icon-eye2 icon" />
                             </button>
                         </div>
-                        <div className="segment-content qr-text">
-                            Hi! <span className="qr-diff clear"> my name</span> <span className="qr-diff add"> is Rubén</span> Santillàn
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }>
+                            {/*Hi! <span className="qr-diff clear"> my name</span> <span className="qr-diff add"> is Rubén</span> Santillàn*/}
                         </div>
                         <div className="segment-content qr-spec">
                             <div><b>ICE Match</b></div>
@@ -72,10 +141,10 @@ class SegmentQR extends React.Component {
                         </div>
                     </div>
 
-                    <div className="segment-container qr-revised">
+                    <div className={revisedClasses}>
                         <div className="segment-content qr-segment-title">
                             <b>Revised</b>
-                            <button>
+                            <button onClick={this.showReviseDiff.bind(this)}>
                                 <i className="icon-eye2 icon" />
                             </button>
                         </div>

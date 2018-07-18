@@ -598,7 +598,6 @@ function trackChangesHTML(source, target) {
             diffTxt += this[1];
         }
     });
-    console.log("Diff:" + diffTxt);
     return restorePlaceholders(diffTxt) ;
 }
 
@@ -632,7 +631,6 @@ function trackChangesHTMLFromDiffArray(diff) {
             diffTxt += this[1];
         }
     });
-    console.log("Diff:" + diffTxt);
     return restorePlaceholders(diffTxt);
 }
 

@@ -194,14 +194,18 @@ body.reviselog {
                                             .segment-status-container {
                                                 width: 14%;
                                                 padding: 15px 0.78571429em;
-                                                 .status-translated {
-                                                     font-size: 20px;
-                                                     color: #09beec;
-                                                 }
-                                                 .status-revised {
-                                                     font-size: 20px;
-                                                     color: #7eaf3e;
-                                                 }
+                                                .status-translated {
+                                                    font-size: 20px;
+                                                    color: #09beec;
+                                                }
+                                                .status-approved {
+                                                    font-size: 20px;
+                                                    color: #7eaf3e;
+                                                }
+                                                .status-draft {
+                                                    font-size: 20px;
+                                                    color: #ccced2;
+                                                }
                                             }
                                         }
                                         .qr-segment-body {
@@ -255,16 +259,18 @@ body.reviselog {
                                                         width: 68%;
                                                         background: #FFFFFF;
                                                         margin-right: 1px;
-                                                        .qr-diff {
-                                                            &.add {
-                                                                background: rgba(158, 255, 0, 0.2);
-                                                            }
-                                                            &.clear {
-                                                                background: rgba(255, 46, 0, 0.1);
-                                                                text-decoration: line-through;
-                                                            }
+                                                        display: inline-block;
+
+                                                        .added {
+                                                            background: rgba(158, 255, 0, 0.2);
                                                         }
-                                                        .qr-tags {
+                                                        .deleted {
+                                                            background: rgba(255, 46, 0, 0.1);
+                                                            text-decoration: line-through;
+                                                        }
+
+                                                        .qr-tags,
+                                                        span.locked{
                                                             color: #767676;
                                                             font-style: italic;
                                                             background: #f2f4f7;
