@@ -126,6 +126,8 @@ trait Translated {
         $formatted = $this->projectUrls( $formatted );
 
         $this->config = self::getConfig();
+        $this->failureEmailObject->setConfig($this->config);
+        $this->successEmailObject->setConfig($this->config);
 
         foreach ( $jobs as $job ) {
 
