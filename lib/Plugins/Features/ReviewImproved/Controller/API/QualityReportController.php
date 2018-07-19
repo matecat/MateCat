@@ -13,6 +13,7 @@ use API\V2\KleinController;
 use Chunks_ChunkStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
+use CatUtils;
 
 class QualityReportController extends KleinController
 {
@@ -42,6 +43,147 @@ class QualityReportController extends KleinController
         $this->response->json( array(
                 'quality-report' => $this->model->getStructure()
         ));
+    }
+
+    private function getOptionalQueryFields() {
+        $feature = $this->chunk->getProject()->isFeatureEnabled('translation_versions');
+        $options = array();
+
+        if ( $feature ) {
+            $options['optional_fields'] = array('st.version_number');
+        }
+
+        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
+
+        return $options;
+    }
+
+    public function segments() {
+
+        $this->project    = $this->chunk->getProject();
+
+        $this->featureSet->loadForProject( $this->project ) ;
+
+        $lang_handler = \Langs_Languages::getInstance();
+
+        if ($this->ref_segment == '') {
+            $this->ref_segment = 0;
+        }
+
+
+        $data = getMoreSegments(
+                $this->chunk->id, $this->chunk->password, 50,
+                $this->ref_segment, "after",
+                $this->getOptionalQueryFields()
+        );
+
+        foreach ($data as $i => $seg) {
+
+
+            if (empty($this->pname)) {
+                $this->pname = $seg['pname'];
+            }
+
+            if (empty($this->last_opened_segment)) {
+                $this->last_opened_segment = $seg['last_opened_segment'];
+            }
+
+            if (empty($this->cid)) {
+                $this->cid = $seg['cid'];
+            }
+
+            if (empty($this->pid)) {
+                $this->pid = $seg['pid'];
+            }
+
+            if (empty($this->tid)) {
+                $this->tid = $seg['tid'];
+            }
+
+            if (empty($this->create_date)) {
+                $this->create_date = $seg['create_date'];
+            }
+
+            if (empty($this->source_code)) {
+                $this->source_code = $seg['source'];
+            }
+
+            if (empty($this->target_code)) {
+                $this->target_code = $seg['target'];
+            }
+
+            if (empty($this->source)) {
+                $s = explode("-", $seg['source']);
+                $source = strtoupper($s[0]);
+                $this->source = $source;
+            }
+
+            if (empty($this->target)) {
+                $t = explode("-", $seg['target']);
+                $target = strtoupper($t[0]);
+                $this->target = $target;
+            }
+
+            if (empty($this->err)) {
+                $this->err = $seg['serialized_errors_list'];
+            }
+
+            $id_file = $seg['id_file'];
+
+            if ( !isset($this->data["$id_file"]) ) {
+                $this->data["$id_file"]['jid'] = $seg['jid'];
+                $this->data["$id_file"]["filename"] = \ZipArchiveExtended::getFileName($seg['filename']);
+                $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
+                $this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source']);
+                $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target']);
+                $this->data["$id_file"]['source_code'] = $seg['source'];
+                $this->data["$id_file"]['target_code'] = $seg['target'];
+                $this->data["$id_file"]['segments'] = array();
+            }
+
+            $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
+
+            unset($seg['id_file']);
+            unset($seg['source']);
+            unset($seg['target']);
+            unset($seg['source_code']);
+            unset($seg['target_code']);
+            unset($seg['mime_type']);
+            unset($seg['filename']);
+            unset($seg['jid']);
+            unset($seg['pid']);
+            unset($seg['cid']);
+            unset($seg['tid']);
+            unset($seg['pname']);
+            unset($seg['create_date']);
+            unset($seg['id_segment_end']);
+            unset($seg['id_segment_start']);
+            unset($seg['serialized_errors_list']);
+
+            $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
+
+            ( $seg['source_chunk_lengths'] === null ? $seg['source_chunk_lengths'] = '[]' : null );
+            ( $seg['target_chunk_lengths'] === null ? $seg['target_chunk_lengths'] = '{"len":[0],"statuses":["DRAFT"]}' : null );
+            $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
+            $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
+
+            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+                    $seg['segment'] , $seg['source_chunk_lengths'] )
+            );
+
+            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+                    $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
+            );
+
+            //$this->attachNotes( $seg );
+
+            $this->data["$id_file"]['segments'][] = $seg;
+        }
+
+        $this->result['data']['files'] = $this->data;
+
+        //$this->result['data']['where'] = $this->where;
+        $this->response->json($this->result);
     }
 
     public function versions() {
