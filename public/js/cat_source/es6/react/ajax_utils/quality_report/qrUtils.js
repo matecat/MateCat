@@ -5,31 +5,25 @@ let QUALITY_REPORT =  {
     getSegmentsFiles() {
 
         let data = {
-            jid:  814,
-            password: "f15c51c2183c",
             step: 30,
-            segment: "749568",
-            where: 'after'
+            segment: "756469",
         };
         return $.ajax({
             data: data,
-            type: "POST",
-            url : "/?action=getSegments"
+            type: "GET",
+            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
     getSegmentsFiles2() {
 
         let data = {
-            jid: 841,
-            password: "5ec5f5a60ca2",
             step: 30,
-            segment: "756469",
-            where: 'after'
+            segment: "756512",
         };
         return $.ajax({
             data: data,
-            type: "POST",
-            url : "/?action=getSegments"
+            type: "GET",
+            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
 }

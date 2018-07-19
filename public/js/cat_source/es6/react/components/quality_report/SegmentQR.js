@@ -15,7 +15,8 @@ class SegmentQR extends React.Component {
                 translateDiffOn: false,
             });
         } else {
-            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"));
+            let suggestion = "&lt;g id=\"3521\"&gt; " + this.props.segment.get("translation") + "&lt;g id=\"3521\"&gt;";
+            let diffHtml = this.getDiffPatch(suggestion, this.props.segment.get("translation"));
             this.setState({
                 translateDiffOn: true,
                 reviseDiffOn: false,
@@ -29,7 +30,8 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"));
+            let revise = "prova " + this.props.segment.get("translation") + " prova";
+            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"), revise);
             this.setState({
                 translateDiffOn: false,
                 reviseDiffOn: true,
@@ -37,7 +39,17 @@ class SegmentQR extends React.Component {
             });
         }
     }
-    decodeTextAndTransormTags(text) {
+    getDiffPatch(source, text) {
+        return TagsUtils.getDiffHtml(source, text);
+    }
+    openTranslateLink() {
+        window.open("/translate/project_name/langs/" + config.id_job + "-" + config.password + "#" + this.props.segment.get("sid"))
+    }
+
+    openReviseLink() {
+        window.open("/revise/project_name/langs/" + config.id_job + "-" + config.password + "#" + this.props.segment.get("sid"))
+    }
+    decodeTextAndTransformTags( text) {
          let decodedText = TagsUtils.decodePlaceholdersToText(text);
          decodedText = TagsUtils.transformTextForLockTags(decodedText);
          return decodedText;
@@ -45,13 +57,19 @@ class SegmentQR extends React.Component {
     allowHTML(string) {
         return { __html: string };
     }
-    getDiffPatch(text) {
-        let suggestion = "&lt;g id=\"3521\"&gt;Sintesi: Informazioni sugli aspetti e i  ﻿principali in  all'aggiornamento a Project Server 2013.dd"
-        return TagsUtils.getDiffHtml(suggestion, text);
-    }
     render () {
-        let source = this.decodeTextAndTransormTags(this.props.segment.get("segment"));
-        let target = this.decodeTextAndTransormTags(this.props.segment.get("translation"));
+        let source = this.decodeTextAndTransformTags(this.props.segment.get("segment"));
+        let suggestion = this.decodeTextAndTransformTags("&lt;g id=\"3521\"&gt; " + this.props.segment.get("translation") + "&lt;g id=\"3521\"&gt;");
+        let target = this.decodeTextAndTransformTags(this.props.segment.get("translation"));
+        let revise = "Text added " + this.props.segment.get("translation") + " Text added";
+
+        if (this.state.translateDiffOn) {
+            target = this.state.htmlDiff;
+        }
+
+        if (this.state.reviseDiffOn) {
+            revise = this.state.htmlDiff;
+        }
 
         let segmentBodyClass = classnames({
             "qr-segment-body": true,
@@ -60,12 +78,12 @@ class SegmentQR extends React.Component {
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn)
+            "shadow-1" : (this.state.translateDiffOn)
         });
         let translateClasses = classnames({
             "segment-container": true,
             "qr-translated": true,
-            "shadow-1" : (this.state.translateDiffOn )
+            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn )
         });
         let revisedClasses = classnames({
             "segment-container": true,
@@ -116,8 +134,7 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-segment-title">
                             <b>Suggestion</b>
                         </div>
-                        <div className="segment-content qr-text">
-                            Hi! my name is Rubén Santillàn
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }>
                         </div>
                         <div className="segment-content qr-spec">
                             <div>Public <b>TM</b></div>
@@ -127,7 +144,7 @@ class SegmentQR extends React.Component {
 
                     <div className={translateClasses}>
                         <div className="segment-content qr-segment-title">
-                            <b>Translate</b>
+                            <b onClick={this.openTranslateLink.bind(this)}>Translate</b>
                             <button onClick={this.showTranslateDiff.bind(this)}>
                                 <i className="icon-eye2 icon" />
                             </button>
@@ -143,13 +160,12 @@ class SegmentQR extends React.Component {
 
                     <div className={revisedClasses}>
                         <div className="segment-content qr-segment-title">
-                            <b>Revised</b>
+                            <b onClick={this.openReviseLink.bind(this)}>Revised</b>
                             <button onClick={this.showReviseDiff.bind(this)}>
                                 <i className="icon-eye2 icon" />
                             </button>
                         </div>
-                        <div className="segment-content qr-text">
-                            Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn, Hi! my name is Rubén Santillàn
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
                         </div>
                         <div className="segment-content qr-spec">
 
