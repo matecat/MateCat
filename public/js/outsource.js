@@ -1,9 +1,5 @@
 $.extend(UI, {
 
-    // Coupon : calledd now from the outsourceVendor Component
-    populateOutsourceForm : function() {
-    },
-
     sendJobToTranslator: function (email, date, timezone, job, project) {
         API.JOB.sendTranslatorRequest(email, date, timezone, job).done(function (data) {
             APP.ModalWindow.onCloseModal();
