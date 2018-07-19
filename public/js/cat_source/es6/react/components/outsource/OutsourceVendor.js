@@ -192,8 +192,6 @@ class OutsourceVendor extends React.Component {
         $(this.outsourceForm).find('input[name=confirm_urls]').attr('value', this.confirm_urls);
         $(this.outsourceForm).find('input[name=data_key]').attr('value', this.data_key);
 
-        UI.populateOutsourceForm();
-
         //IMPORTANT post out the quotes
         $(this.outsourceForm).find('input[name=quoteData]').attr('value', JSON.stringify( this.quoteResponse ) );
         $(this.outsourceForm).submit();
