@@ -1,5 +1,4 @@
 
-
 APP.USER = {} ;
 APP.USER.STORE = {} ;
 
@@ -54,4 +53,5 @@ APP.USER.STORE = {} ;
     loadUserData();
 
 })(APP, jQuery) ;
+
 

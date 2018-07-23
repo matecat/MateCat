@@ -6,8 +6,20 @@ class SegmentQR extends React.Component {
         this.state = {
             translateDiffOn: false,
             reviseDiffOn: false,
-            htmlDiff: ""
+            htmlDiff: "",
+            automatedQaOpen: false,
+            humanQaOpen:false
         };
+    }
+    openAutomatedQa() {
+        this.setState({
+            automatedQaOpen: !this.state.automatedQaOpen
+        });
+    }
+    openHumandQa() {
+        this.setState({
+            humanQaOpen: !this.state.humanQaOpen
+        });
     }
     showTranslateDiff() {
         if (this.state.translateDiffOn) {
@@ -30,7 +42,7 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let revise = "prova " + this.props.segment.get("translation") + " prova";
+            let revise = "Text added " + this.props.segment.get("translation") + " Text added";
             let diffHtml = this.getDiffPatch(this.props.segment.get("translation"), revise);
             this.setState({
                 translateDiffOn: false,
@@ -64,12 +76,18 @@ class SegmentQR extends React.Component {
         let revise = "Text added " + this.props.segment.get("translation") + " Text added";
 
         if (this.state.translateDiffOn) {
-            target = this.state.htmlDiff;
+            target = this.decodeTextAndTransformTags(this.state.htmlDiff);
         }
 
         if (this.state.reviseDiffOn) {
-            revise = this.state.htmlDiff;
+            revise = this.decodeTextAndTransformTags(this.state.htmlDiff);
         }
+
+        let sourceClass = classnames({
+            "segment-container": true,
+            "qr-source": true,
+            "rtl-lang" : config.source_rtl
+        });
 
         let segmentBodyClass = classnames({
             "qr-segment-body": true,
@@ -78,17 +96,20 @@ class SegmentQR extends React.Component {
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            "shadow-1" : (this.state.translateDiffOn)
+            "shadow-1" : (this.state.translateDiffOn),
+            "rtl-lang" : config.target_rtl
         });
         let translateClasses = classnames({
             "segment-container": true,
             "qr-translated": true,
-            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn )
+            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn ),
+            "rtl-lang" : config.target_rtl
         });
         let revisedClasses = classnames({
             "segment-container": true,
             "qr-revised": true,
-            "shadow-1" : (this.state.reviseDiffOn)
+            "shadow-1" : (this.state.reviseDiffOn),
+            "rtl-lang" : config.target_rtl
         });
         return <div className="qr-single-segment">
 
@@ -96,8 +117,10 @@ class SegmentQR extends React.Component {
                 <div className="segment-id">{this.props.segment.get("sid")}</div>
                 <div className="segment-production-container">
                     <div className="segment-production">
-                        <div className="ui basic button tiny automated-qa">Automated QA<b> (7)</b></div>
-                        <div className="ui basic button tiny human-qa">Human QA<b> (7)</b></div>
+                        <div className={"ui basic button tiny automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
+                            Automated QA<b> (7)</b></div>
+                        <div className={"ui basic button tiny human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
+                            Human QA<b> (7)</b></div>
                     </div>
                     <div className="segment-production">
                         <div className="production word-speed">Words speed: <b>7"</b></div>
@@ -118,12 +141,7 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-segment-title">
                             <b>Source</b>
                         </div>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(source) }>
-                            {/*Hi!*/}
-                            {/*<span className="qr-tags start-tag">&lt;g id="1"&gt;</span> my name is <span className="qr-tags end-tag">&lt;/g&gt;</span>*/}
-                            {/*Rubén Santillàn and I'm a*/}
-                            {/*<span className="qr-tags start-tag violet-tag">&lt;g id="2"&gt;</span>Designer<span className="qr-tags end-tag violet-tag">&lt;/g&gt;</span>*/}
-                        </div>
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(source) }/>
                         <div className="segment-content qr-spec">
                             <div>Words:</div>
                             <div><b>{parseInt(this.props.segment.get("raw_word_count"))}</b></div>
@@ -134,8 +152,7 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-segment-title">
                             <b>Suggestion</b>
                         </div>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }>
-                        </div>
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }/>
                         <div className="segment-content qr-spec">
                             <div>Public <b>TM</b></div>
                             <div className="tm-percent">101%</div>
@@ -145,13 +162,11 @@ class SegmentQR extends React.Component {
                     <div className={translateClasses}>
                         <div className="segment-content qr-segment-title">
                             <b onClick={this.openTranslateLink.bind(this)}>Translate</b>
-                            <button onClick={this.showTranslateDiff.bind(this)}>
+                            <button className={(this.state.translateDiffOn ? "active" : "")} onClick={this.showTranslateDiff.bind(this)}  title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
                         </div>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }>
-                            {/*Hi! <span className="qr-diff clear"> my name</span> <span className="qr-diff add"> is Rubén</span> Santillàn*/}
-                        </div>
+                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }/>
                         <div className="segment-content qr-spec">
                             <div><b>ICE Match</b></div>
                             <div>(Modified)</div>
@@ -161,7 +176,7 @@ class SegmentQR extends React.Component {
                     <div className={revisedClasses}>
                         <div className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
-                            <button onClick={this.showReviseDiff.bind(this)}>
+                            <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
                         </div>
@@ -172,6 +187,7 @@ class SegmentQR extends React.Component {
                         </div>
                     </div>
 
+                {this.state.automatedQaOpen ?
                     <div className="segment-container qr-issues">
                         <div className="segment-content qr-segment-title">
                             <b>Atomated QA</b>
@@ -193,7 +209,9 @@ class SegmentQR extends React.Component {
                             </div>
                         </div>
                     </div>
+                     : (null)}
 
+                {this.state.humanQaOpen ?
                     <div className="segment-container qr-issues">
                         <div className="segment-content qr-segment-title">
                             <b>Human QA</b>
@@ -220,7 +238,7 @@ class SegmentQR extends React.Component {
                             </div>
                         </div>
                     </div>
-
+                    : (null) }
             </div>
         </div>
     }

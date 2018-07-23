@@ -15,6 +15,8 @@
             qa_equivalent_class: '${qa_equivalent_class | string: 30}',
             id_job: '${jid}',
             password: '${password}',
+            source_rtl: ${source_rtl | string:false},
+            target_rtl: ${target_rtl | string:false}
         };
     </script>
 
@@ -41,8 +43,9 @@
     </script>
 
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-    <!--<script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>-->
+    <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
 </head>
 
@@ -73,7 +76,7 @@
 
 
 <div class="qr-wrapper" id="qr-root">
-    <script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
+    <!--<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>-->
 </div>
 
 <div class="notifications-wrapper"></div>
@@ -134,8 +137,8 @@
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
-<!--<div metal:use-macro="common.html/footer_includes" />-->
-
+<div metal:use-macro="common.html/footer_includes" />
+<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
 
 </body>
 </html>

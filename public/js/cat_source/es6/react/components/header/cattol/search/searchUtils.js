@@ -1,5 +1,5 @@
-let SegmentActions = require("../../../actions/SegmentActions");
-let CatToolActions = require("../../../actions/CatToolActions");
+let SegmentActions = require("../../../../actions/SegmentActions");
+let CatToolActions = require("../../../../actions/CatToolActions");
 let SearchUtils = {
 
     searchEnabled: true,

@@ -1,8 +1,8 @@
 let React = require('react');
-let SegmentConstants = require('../../../constants/SegmentConstants');
-let CattolConstants = require('../../../constants/CatToolConstants');
-let SegmentStore = require('../../../stores/SegmentStore');
-let CatToolStore = require('../../../stores/CatToolStore');
+let SegmentConstants = require('../../../../constants/SegmentConstants');
+let CattolConstants = require('../../../../constants/CatToolConstants');
+let SegmentStore = require('../../../../stores/SegmentStore');
+let CatToolStore = require('../../../../stores/CatToolStore');
 let SearchUtils = require('./searchUtils');
 
 class Search extends React.Component {

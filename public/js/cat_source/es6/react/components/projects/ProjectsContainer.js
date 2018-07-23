@@ -1,6 +1,6 @@
 // var React = require('react');
 let ProjectContainer = require('./ProjectContainer').default;
-let FilterProjects = require("../FilterProjects").default;
+let FilterProjects = require("../header/manage/FilterProjectsStatus").default;
 
 
 class ProjectsContainer extends React.Component {

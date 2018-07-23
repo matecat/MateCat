@@ -202,7 +202,13 @@ class reviseSummaryController extends viewController {
             $this->template->nbspPlaceholderClass = CatUtils::nbspPlaceholderClass;
             $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
         }
-	}
+
+        $lang_handler = Langs_Languages::getInstance();
+        $this->template->source_rtl = ( $lang_handler->isRTL( $this->data[ 'source' ] ) ) ? true : false ;
+        $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
+
+
+    }
 }
 
 

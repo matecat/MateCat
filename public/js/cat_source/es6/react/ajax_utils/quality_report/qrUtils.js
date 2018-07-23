@@ -26,6 +26,10 @@ let QUALITY_REPORT =  {
             url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
+
+    getUserData() {
+        return $.getJSON('/api/app/user');
+    }
 }
 
 export default QUALITY_REPORT ;

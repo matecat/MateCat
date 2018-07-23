@@ -4,6 +4,7 @@
 @import "commons/divider";
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
+@import "commons/nav-bar";
 
 $color-red: #FB2A0D;
 $color-orange: #FBAA0D;
@@ -255,6 +256,17 @@ body.reviselog {
                                                             }
                                                         }
                                                     }
+                                                    &.rtl-lang {
+                                                        .qr-text {
+                                                            direction: rtl !important;
+                                                            text-align: right !important;
+                                                        }
+                                                        .qr-tags,
+                                                        span.locked {
+                                                            direction: ltr;
+                                                            display: inline-block;
+                                                        }
+                                                    }
                                                     .qr-text {
                                                         width: 68%;
                                                         background: #FFFFFF;
@@ -263,10 +275,19 @@ body.reviselog {
 
                                                         .added {
                                                             background: rgba(158, 255, 0, 0.2);
+                                                            .qr-tags,
+                                                            span.locked {
+                                                                background: rgba(158, 255, 0, 0.2) !important;
+                                                            }
                                                         }
                                                         .deleted {
-                                                            background: rgba(255, 46, 0, 0.1);
-                                                            text-decoration: line-through;
+                                                            background: rgba(255, 46, 0, 0.1) ;
+                                                            text-decoration: line-through ;
+                                                            .qr-tags,
+                                                            span.locked{
+                                                                background: rgba(255, 46, 0, 0.1) !important;
+                                                                text-decoration: line-through !important;
+                                                            }
                                                         }
 
                                                         .qr-tags,

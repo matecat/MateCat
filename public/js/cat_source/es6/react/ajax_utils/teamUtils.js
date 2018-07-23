@@ -5,15 +5,20 @@ if (!API) {
 
 API.TEAM = {
     getAllTeams: function (force) {
-        if ( APP.USER.STORE.teams && !force) {
-            var data = {
-                teams: APP.USER.STORE.teams
-            };
-            var deferred = $.Deferred().resolve(data);
-            return deferred.promise();
-        } else {
-            return APP.USER.loadUserData();
+        try {
+            if ( APP && APP.USER.STORE.teams && !force) {
+                var data = {
+                    teams: APP.USER.STORE.teams
+                };
+                var deferred = $.Deferred().resolve(data);
+                return deferred.promise();
+            } else {
+                return APP.USER.loadUserData();
+            }
+        } catch (e) {
+
         }
+
 
     },
     getTeamMembers: function (teamId) {

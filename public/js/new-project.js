@@ -356,9 +356,10 @@ $.extend(UI.UPLOAD_PAGE, {
 
         if (config.isLoggedIn) {
             ReactDOM.render(React.createElement(Header, {
-                showSubHeader: false,
+                showFilterProjects: false,
                 showModals: false,
-                showLinks: true
+                showLinks: true,
+                user: APP.USER.STORE
             }), headerMountPoint);
             API.TEAM.getAllTeams().done(function (data) {
                 self.teams = data.teams;
