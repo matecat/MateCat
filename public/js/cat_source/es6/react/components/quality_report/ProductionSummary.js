@@ -3,12 +3,12 @@ class ProductionSummary extends React.Component {
 
     render () {
 
-        return <div className="qr-production">
-            <div className="id-job">ID: 123458-8</div>
+        return <div className="qr-production shadow-1">
+            <div className="job-id">ID: 123458-8</div>
             <div className="source-to-target">
                 <div className="qr-source"><b>Haitian Creole French</b></div>
-                <div className="qr-to"> >
-                    <i className=""/>
+                <div className="qr-to">
+                    <i className="icon-chevron-right icon" />
                 </div>
                 <div className="qr-target"><b>Haitian Creole French</b></div>
             </div>
@@ -39,11 +39,11 @@ class ProductionSummary extends React.Component {
             </div>
             <div className="qr-effort pee">
                 <div className="qr-label">PEE</div>
-                <div className="qr-info"><b>30%</b> <i className="icon-notice icon" /></div>
+                <div className="qr-info qr-good"><b>30%</b> {/*<i className="icon-stats2 icon" />*/}</div>
             </div>
             <div className="qr-effort time-edit">
                 <div className="qr-label">Time Edit</div>
-                <div className="qr-info"><b>30%</b> <i className="icon-notice icon" /></div>
+                <div className="qr-info qr-bad"><b>30' 20''</b> {/*<i className="icon-rocket icon" />*/}</div>
             </div>
         </div>
     }

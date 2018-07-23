@@ -164,6 +164,7 @@ module.exports = function(grunt) {
                 },
                 src: [
                     basePath + 'cat_source/es6/react/components/quality_report/*.js',
+                    basePath + 'cat_source/es6/react/ajax_utils/quality_report/*.js',
                 ],
                 dest: buildPath + 'qa-report.js'
             },
@@ -298,6 +299,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'lib/calendar.min.js',
                     basePath + 'lib/imagesloaded.min.js',
+                    basePath + 'lib/jquery.atwho.min.js',
+                    basePath + 'lib/jquery.caret.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'

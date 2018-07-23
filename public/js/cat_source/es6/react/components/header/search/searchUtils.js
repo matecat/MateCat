@@ -70,7 +70,14 @@ let SearchUtils = {
 
 		this.searchMode = (_.isUndefined(p.source) && _.isUndefined(p.target)) ? 'onlyStatus' :
 			(!_.isUndefined(p.source) && !_.isUndefined(p.target)) ? 'source&target' : 'normal';
-
+		this.whereToFind = "";
+		if ( this.searchMode === 'normal') {
+		    if (!_.isUndefined(p.target)) {
+                this.whereToFind = ".targetarea";
+            } else if (!_.isUndefined(p.source)) {
+                this.whereToFind = ".source";
+            }
+        }
 		let source = (p.source) ? p.source : '';
 		let target = (p.target) ? p.target : '';
 		let replace = (p.replace) ? p.replace : '';
@@ -81,8 +88,7 @@ let SearchUtils = {
 			detectSegmentToScroll: true
 		};
 		UI.body.addClass('searchActive');
-		//Save the current segment to not lose the translation
-		UI.saveSegment(UI.currentSegment).then(() => {
+		let makeSearchFn = () => {
             let dd = new Date();
             APP.doRequest({
                 data: {
@@ -102,7 +108,21 @@ let SearchUtils = {
                     SearchUtils.execFind_success(d);
                 }
             });
-        });
+        };
+		//Save the current segment to not lose the translation
+        var segment;
+        try {
+            segment = UI.Segment.findAbsolute( UI.currentSegmentId );
+            if ( UI.translationIsToSave( segment ) ) {
+                UI.saveSegment(UI.currentSegment).then(() => {
+                    makeSearchFn()
+                });
+            } else  {
+                makeSearchFn();
+            }
+        } catch (e) {
+            makeSearchFn();
+        }
 
 
 	},
@@ -289,8 +309,10 @@ let SearchUtils = {
             let trgHasTags = (txtTrg.match(/<.*?\>/gi) !== null) ? true : false;
 
             if (typeof where == 'undefined') {
-                this.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
-                this.doMarkSearchResults(trgHasTags, $(q + " .targetarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
+                let elemsSource = this.getSegmentsResult('.source');
+                let elemsTarget = this.getSegmentsResult('.targetarea');
+                this.doMarkSearchResults(srcHasTags, elemsSource, regSource, q, txtSrc, ignoreCase);
+                this.doMarkSearchResults(trgHasTags, elemsTarget, regTarget, q, txtTrg, ignoreCase);
 
                 $('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
 
@@ -315,8 +337,10 @@ let SearchUtils = {
                         });
                     }
                 }
-                this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
-                this.execSearchResultsMarking(this.filterExactMatch($(q + ".justAdded:not(.status-new) .targetarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+                let elemsSource = this.getSegmentsResult('.source');
+                let elemsTarget = this.getSegmentsResult('.targetarea');
+                this.execSearchResultsMarking(this.filterExactMatch(elemsSource, txtSrc), regSource, false);
+                this.execSearchResultsMarking(this.filterExactMatch(elemsTarget, txtTrg), regTarget, false);
 
                 $('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
                 $('mark.searchPreMarker').removeClass('searchPreMarker');
@@ -354,12 +378,9 @@ let SearchUtils = {
             }
 
             if ((typeof where == 'undefined') || (where == 'no')) {
-                let elems;
+                let elems = this.getSegmentsResult(this.whereToFind);
                 if (txt == "  ") {
-                    elems = $(q).filter(function(index){ return $(this).text().indexOf('  ')  });
                     reg1 = new RegExp(/( &nbsp;)/, 'gi');
-                } else {
-                    elems = $(q + ":" + containsFunc + "('" + txt + "')");
                 }
                 this.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
             } else {
@@ -379,7 +400,8 @@ let SearchUtils = {
                         });
                     }
                 }
-                this.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase );
+                let elems = this.getSegmentsResult(this.whereToFind);
+                this.doMarkSearchResults(hasTags, elems, reg, q, txt, ignoreCase );
                 $('section.justAdded').removeClass('justAdded');
             }
         }
@@ -447,7 +469,9 @@ let SearchUtils = {
 		$(areas).each(function() {
 		    let segId = UI.getSegmentId( $(this) );
             if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
-                if (!testRegex || ($(this).text().match(testRegex) !== null)) {
+                let isCurrent = $(this).find('.currSearchItem').length > 0;
+                let isTagged = $(this).find('.searchMarker').length > 0;
+                if ( (!testRegex || ($(this).text().match(testRegex) !== null) ) && !isCurrent && !isTagged) {
                     let tt = $(this).html();
                     if (LXQ.cleanUpHighLighting) {
                         tt = LXQ.cleanUpHighLighting(tt);
@@ -473,14 +497,14 @@ let SearchUtils = {
      * @returns the list of items
      */
     filterExactMatch: function(items, txt) {
-        let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        let searchTxt = txt.replace(/[-\/\\^$*+?.()|[\]{}\']/g, '\\$&');
         let searchTxtUppercase = txt.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         let self = this;
-        return (this.searchParams['exact-match']) ? items.filter(function() {
+        return (this.searchParams['exact-match']) ? items.filter(function(item) {
             if (self.searchParams['match-case']) {
-                return $(this).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
+                return $(item).text().match(new RegExp("\\b"+searchTxt+"\\b", "i")) != null;
             } else {
-                return $(this).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
+                return $(item).text().toUpperCase().match(new RegExp("\\b"+searchTxtUppercase+"\\b", "i")) != null;
             }
         }) : items;
     },
@@ -687,6 +711,18 @@ let SearchUtils = {
                 }
             }
         }
+    },
+    getSegmentsResult: function ( className ) {
+        let $objects = [];
+        className = (className) ? className : '.source'
+        _.each(this.searchResultsSegments, function ( item ) {
+            let $obj = UI.getSegmentById(item);
+            if ($obj.length) {
+                $obj = $obj.find(className);
+                $objects.push($obj);
+            }
+        });
+        return $objects;
     },
     nextUnloadedResultSegment: function() {
         let found = '';

@@ -9,6 +9,11 @@ class SegmentTranslationIssue {
 
     private $categories ;
 
+    /**
+     * @var \SplFileObject
+     */
+    private $csvHandler;
+
     public function __construct( ) {
     }
 
@@ -48,6 +53,8 @@ class SegmentTranslationIssue {
         $filePath   = tempnam( "/tmp", "SegmentsIssuesComments_" );
         $csvHandler = new \SplFileObject( $filePath, "w" );
         $csvHandler->setCsvControl( ';' );
+
+        $this->csvHandler = $csvHandler; // set the handler to allow to clean resource
 
         $csv_fields = [
                 "ID Segment",
@@ -104,6 +111,14 @@ class SegmentTranslationIssue {
         }
 
         return null;
+    }
+
+    public function cleanDownloadResource(){
+
+        $path = $this->csvHandler->getRealPath();
+        unset( $this->csvHandler );
+        @unlink( $path );
+
     }
 
 }
