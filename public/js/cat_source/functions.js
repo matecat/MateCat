@@ -302,7 +302,7 @@ function runDownload() {
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.totals && UI.globalWarnings.totals.ERROR.length ) {
+    if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.ERROR && UI.globalWarnings.ERROR.total > 0 ) {
         UI.showFixWarningsOnDownload(continueDownloadFunction);
     } else {
         UI[ continueDownloadFunction ]();
