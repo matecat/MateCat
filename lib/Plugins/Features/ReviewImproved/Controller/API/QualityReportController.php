@@ -11,6 +11,7 @@ namespace Features\ReviewImproved\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
+use Projects_ProjectStruct;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 use CatUtils;
@@ -22,6 +23,11 @@ class QualityReportController extends KleinController
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project;
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -52,6 +58,11 @@ class QualityReportController extends KleinController
         if ( $feature ) {
             $options['optional_fields'] = array('st.version_number');
         }
+
+        $options['optional_fields'][] = "st.suggestion_source";
+        $options['optional_fields'][] = "st.suggestion";
+        $options['optional_fields'][] = "st.edit_distance";
+
 
         $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
 
