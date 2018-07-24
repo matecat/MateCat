@@ -11,6 +11,8 @@ namespace Features\ReviewImproved\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
+use Projects_ProjectStruct;
+use API\V2\Json\QALocalWarning;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 use CatUtils;
@@ -22,6 +24,11 @@ class QualityReportController extends KleinController
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project;
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -53,6 +60,13 @@ class QualityReportController extends KleinController
             $options['optional_fields'] = array('st.version_number');
         }
 
+        $options['optional_fields'][] = "st.suggestion_source";
+        $options['optional_fields'][] = "st.suggestion";
+        $options['optional_fields'][] = "st.edit_distance";
+        $options['optional_fields'][] = "st.locked";
+        $options['optional_fields'][] = "st.match_type";
+
+
         $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
 
         return $options;
@@ -79,55 +93,6 @@ class QualityReportController extends KleinController
 
         foreach ($data as $i => $seg) {
 
-
-            if (empty($this->pname)) {
-                $this->pname = $seg['pname'];
-            }
-
-            if (empty($this->last_opened_segment)) {
-                $this->last_opened_segment = $seg['last_opened_segment'];
-            }
-
-            if (empty($this->cid)) {
-                $this->cid = $seg['cid'];
-            }
-
-            if (empty($this->pid)) {
-                $this->pid = $seg['pid'];
-            }
-
-            if (empty($this->tid)) {
-                $this->tid = $seg['tid'];
-            }
-
-            if (empty($this->create_date)) {
-                $this->create_date = $seg['create_date'];
-            }
-
-            if (empty($this->source_code)) {
-                $this->source_code = $seg['source'];
-            }
-
-            if (empty($this->target_code)) {
-                $this->target_code = $seg['target'];
-            }
-
-            if (empty($this->source)) {
-                $s = explode("-", $seg['source']);
-                $source = strtoupper($s[0]);
-                $this->source = $source;
-            }
-
-            if (empty($this->target)) {
-                $t = explode("-", $seg['target']);
-                $target = strtoupper($t[0]);
-                $this->target = $target;
-            }
-
-            if (empty($this->err)) {
-                $this->err = $seg['serialized_errors_list'];
-            }
-
             $id_file = $seg['id_file'];
 
             if ( !isset($this->data["$id_file"]) ) {
@@ -142,6 +107,13 @@ class QualityReportController extends KleinController
             }
 
             $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
+
+            $qr_struct = new \QualityReport_QualityReportSegmentStruct($seg);
+
+            $seg['warnings'] = $qr_struct->getLocalWarning();
+            $seg['pee'] = $qr_struct->getPEE();
+            $seg['ice_modified'] = $qr_struct->isICEModified();
+            $seg['secs_per_word'] = $qr_struct->getSecsPerWord();
 
             unset($seg['id_file']);
             unset($seg['source']);
@@ -175,9 +147,8 @@ class QualityReportController extends KleinController
                     $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
             );
 
-            //$this->attachNotes( $seg );
-
             $this->data["$id_file"]['segments'][] = $seg;
+
         }
 
         $this->result['data']['files'] = $this->data;
@@ -185,6 +156,8 @@ class QualityReportController extends KleinController
         //$this->result['data']['where'] = $this->where;
         $this->response->json($this->result);
     }
+
+
 
     public function versions() {
         $dao = new ArchivedQualityReportDao();
