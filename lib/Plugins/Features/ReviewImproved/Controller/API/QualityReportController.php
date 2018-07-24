@@ -12,6 +12,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
 use Projects_ProjectStruct;
+use API\V2\Json\QALocalWarning;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 use CatUtils;
@@ -62,6 +63,8 @@ class QualityReportController extends KleinController
         $options['optional_fields'][] = "st.suggestion_source";
         $options['optional_fields'][] = "st.suggestion";
         $options['optional_fields'][] = "st.edit_distance";
+        $options['optional_fields'][] = "st.locked";
+        $options['optional_fields'][] = "st.match_type";
 
 
         $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
@@ -90,55 +93,6 @@ class QualityReportController extends KleinController
 
         foreach ($data as $i => $seg) {
 
-
-            if (empty($this->pname)) {
-                $this->pname = $seg['pname'];
-            }
-
-            if (empty($this->last_opened_segment)) {
-                $this->last_opened_segment = $seg['last_opened_segment'];
-            }
-
-            if (empty($this->cid)) {
-                $this->cid = $seg['cid'];
-            }
-
-            if (empty($this->pid)) {
-                $this->pid = $seg['pid'];
-            }
-
-            if (empty($this->tid)) {
-                $this->tid = $seg['tid'];
-            }
-
-            if (empty($this->create_date)) {
-                $this->create_date = $seg['create_date'];
-            }
-
-            if (empty($this->source_code)) {
-                $this->source_code = $seg['source'];
-            }
-
-            if (empty($this->target_code)) {
-                $this->target_code = $seg['target'];
-            }
-
-            if (empty($this->source)) {
-                $s = explode("-", $seg['source']);
-                $source = strtoupper($s[0]);
-                $this->source = $source;
-            }
-
-            if (empty($this->target)) {
-                $t = explode("-", $seg['target']);
-                $target = strtoupper($t[0]);
-                $this->target = $target;
-            }
-
-            if (empty($this->err)) {
-                $this->err = $seg['serialized_errors_list'];
-            }
-
             $id_file = $seg['id_file'];
 
             if ( !isset($this->data["$id_file"]) ) {
@@ -154,20 +108,12 @@ class QualityReportController extends KleinController
 
             $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
 
-            $edit_log_attr = ['id', 'source', 'internal_id', 'translation', 'time_to_edit', 'suggestion', 'suggestions_array', 'suggestion_source', 'suggestion_match', 'suggestion_position', 'segment_hash', 'mt_qe', 'id_translator', 'job_id', 'job_source', 'job_target', 'raw_word_count', 'proj_name', 'secs_per_word', 'warnings', 'match_type', 'locked', 'uid', 'email'];
+            $qr_struct = new \QualityReport_QualityReportSegmentStruct($seg);
 
-            $edit_log_array = [];
-            foreach($seg as $key => $value){
-                if(in_array($key, $edit_log_attr)){
-                    $edit_log_array[$key] = $value;
-                }
-            }
-
-            $edit_log_array['source'] = $seg['segment'];
-
-            $displaySeg = new \EditLog_EditLogSegmentClientStruct(
-                    $edit_log_array
-            );
+            $seg['warnings'] = $qr_struct->getLocalWarning();
+            $seg['pee'] = $qr_struct->getPEE();
+            $seg['ice_modified'] = $qr_struct->isICEModified();
+            $seg['secs_per_word'] = $qr_struct->getSecsPerWord();
 
             unset($seg['id_file']);
             unset($seg['source']);
@@ -201,13 +147,6 @@ class QualityReportController extends KleinController
                     $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
             );
 
-
-            $seg['pee'] = $displaySeg->getPEE();
-            $seg['ice_modified'] = $displaySeg->isICEModified();
-            $seg['secs_per_word'] = $displaySeg->getSecsPerWord();
-            /*$displaySeg->getWarning();
-            $seg['warnings'] = $displaySeg->warnings;*/
-
             $this->data["$id_file"]['segments'][] = $seg;
 
         }
@@ -217,6 +156,8 @@ class QualityReportController extends KleinController
         //$this->result['data']['where'] = $this->where;
         $this->response->json($this->result);
     }
+
+
 
     public function versions() {
         $dao = new ArchivedQualityReportDao();
