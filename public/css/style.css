@@ -2462,7 +2462,7 @@ section.editor .sid {
 }
 
 .editarea, .search-editarea, .textarea-container .area {
-    display: inline-block;
+    /*display: inline-block;*/
     /*float:right;*/
     width: 100%;
     height: 96%;
@@ -2556,7 +2556,7 @@ body.archived section .status-container a.status:hover {
 .editor .editarea {
     width: 100%;
     font-size: 18px;
-    margin: 2px 0 5px -11px;
+    margin: 2px 0 10px -11px;
     word-break: normal;
     line-height: 25px;
     outline: none;

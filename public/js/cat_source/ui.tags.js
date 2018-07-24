@@ -492,13 +492,6 @@ $.extend(UI, {
         $('.tag-autocomplete').css('left', offset.left);
         this.checkAutocompleteTags();
 	},
-	jumpTag: function(range) {
-		if(typeof range.endContainer.data != 'undefined') {
-            if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
-                setCursorAfterNode(range, range.endContainer.nextElementSibling);
-            }
-        }
-	},
 
     hasSourceOrTargetTags: function ( segment ) {
         return ( $(segment).find( '.locked' ).length > 0 || (UI.sourceTags && UI.sourceTags.length > 0) )
