@@ -27,8 +27,7 @@ class SegmentQR extends React.Component {
                 translateDiffOn: false,
             });
         } else {
-            let suggestion = "&lt;g id=\"3521\"&gt; " + this.props.segment.get("translation") + "&lt;g id=\"3521\"&gt;";
-            let diffHtml = this.getDiffPatch(suggestion, this.props.segment.get("translation"));
+            let diffHtml = this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("translation"));
             this.setState({
                 translateDiffOn: true,
                 reviseDiffOn: false,
@@ -71,7 +70,7 @@ class SegmentQR extends React.Component {
     }
     render () {
         let source = this.decodeTextAndTransformTags(this.props.segment.get("segment"));
-        let suggestion = this.decodeTextAndTransformTags("&lt;g id=\"3521\"&gt; " + this.props.segment.get("translation") + "&lt;g id=\"3521\"&gt;");
+        let suggestion = this.decodeTextAndTransformTags(this.props.segment.get("suggestion"));
         let target = this.decodeTextAndTransformTags(this.props.segment.get("translation"));
         let revise = "Text added " + this.props.segment.get("translation") + " Text added";
 
@@ -118,12 +117,12 @@ class SegmentQR extends React.Component {
                 <div className="segment-production-container">
                     <div className="segment-production">
                         <div className={"ui basic button tiny automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
-                            Automated QA<b> (7)</b></div>
+                            Automated QA<b> ({this.props.segment.get("warning")})</b></div>
                         <div className={"ui basic button tiny human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
                             Human QA<b> (7)</b></div>
                     </div>
                     <div className="segment-production">
-                        <div className="production word-speed">Words speed: <b>7"</b></div>
+                        <div className="production word-speed">Words speed: <b>{this.props.segment.get("secs_per_word")}"</b></div>
                         <div className="production time-edit">Time to edit: <b>{this.props.segment.get("time_to_edit")}"</b></div>
                         <div className="production pee">PEE: <b>30%</b></div>
                     </div>
@@ -137,7 +136,7 @@ class SegmentQR extends React.Component {
 
             <div className={segmentBodyClass}>
 
-                    <div className="segment-container qr-source">
+                    <div className={sourceClass}>
                         <div className="segment-content qr-segment-title">
                             <b>Source</b>
                         </div>
@@ -154,8 +153,8 @@ class SegmentQR extends React.Component {
                         </div>
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }/>
                         <div className="segment-content qr-spec">
-                            <div>Public <b>TM</b></div>
-                            <div className="tm-percent">101%</div>
+                            <div><b>{this.props.segment.get("suggestion_source")}</b></div>
+                            <div className="tm-percent">{this.props.segment.get("suggestion_match")}%</div>
                         </div>
                     </div>
 

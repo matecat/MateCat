@@ -111,8 +111,8 @@ class QualityReportController extends KleinController
             $qr_struct = new \QualityReport_QualityReportSegmentStruct($seg);
 
             $seg['warnings'] = $qr_struct->getLocalWarning();
-            $seg['pee'] = $qr_struct->getPEE();
-            $seg['ice_modified'] = $qr_struct->isICEModified();
+//            $seg['pee'] = $qr_struct->getPEE();
+//            $seg['ice_modified'] = $qr_struct->isICEModified();
             $seg['secs_per_word'] = $qr_struct->getSecsPerWord();
 
             unset($seg['id_file']);
