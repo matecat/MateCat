@@ -150,8 +150,6 @@ $.extend( UI, {
                 r = range.startContainer.innerText;
                 if (r && (r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                     e.preventDefault();
-
-
                     saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
@@ -173,9 +171,9 @@ $.extend( UI, {
             }
             selection = window.getSelection();
             range = selection.getRangeAt(0);
-            if (range.startOffset != range.endOffset) {
+            if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
                 r = range.startContainer.data;
-                if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
+                if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                     saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
@@ -207,7 +205,6 @@ $.extend( UI, {
                 }
             }
             UI.closeTagAutocompletePanel();
-            UI.jumpTag(range, 'end');
         }
 
         if (code == 40) { // down arrow
