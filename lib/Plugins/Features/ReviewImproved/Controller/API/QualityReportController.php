@@ -154,6 +154,21 @@ class QualityReportController extends KleinController
 
             $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
 
+            $edit_log_attr = ['id', 'source', 'internal_id', 'translation', 'time_to_edit', 'suggestion', 'suggestions_array', 'suggestion_source', 'suggestion_match', 'suggestion_position', 'segment_hash', 'mt_qe', 'id_translator', 'job_id', 'job_source', 'job_target', 'raw_word_count', 'proj_name', 'secs_per_word', 'warnings', 'match_type', 'locked', 'uid', 'email'];
+
+            $edit_log_array = [];
+            foreach($seg as $key => $value){
+                if(in_array($key, $edit_log_attr)){
+                    $edit_log_array[$key] = $value;
+                }
+            }
+
+            $edit_log_array['source'] = $seg['segment'];
+
+            $displaySeg = new \EditLog_EditLogSegmentClientStruct(
+                    $edit_log_array
+            );
+
             unset($seg['id_file']);
             unset($seg['source']);
             unset($seg['target']);
@@ -186,9 +201,15 @@ class QualityReportController extends KleinController
                     $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
             );
 
-            //$this->attachNotes( $seg );
+
+            $seg['pee'] = $displaySeg->getPEE();
+            $seg['ice_modified'] = $displaySeg->isICEModified();
+            $seg['secs_per_word'] = $displaySeg->getSecsPerWord();
+            /*$displaySeg->getWarning();
+            $seg['warnings'] = $displaySeg->warnings;*/
 
             $this->data["$id_file"]['segments'][] = $seg;
+
         }
 
         $this->result['data']['files'] = $this->data;
