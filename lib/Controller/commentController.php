@@ -179,21 +179,15 @@ class commentController extends ajaxController {
         $project_data = $this->projectData();
 
         foreach($this->users_mentioned as $user_mentioned) {
-            $email = new \Email\CommentMentionEmail($user_mentioned, $this->struct, $url,
-                    $project_data[0]
-            );
+            $email = new \Email\CommentMentionEmail($user_mentioned, $this->struct, $url, $project_data[0], $this->job);
             $email->send();
         }
 
         foreach($this->users as $user) {
             if($this->struct->message_type == Comments_CommentDao::TYPE_RESOLVE){
-                $email = new \Email\CommentResolveEmail($user, $this->struct, $url,
-                        $project_data[0]
-                );
+                $email = new \Email\CommentResolveEmail($user, $this->struct, $url, $project_data[0], $this->job);
             } else{
-                $email = new \Email\CommentEmail($user, $this->struct, $url,
-                        $project_data[0]
-                );
+                $email = new \Email\CommentEmail($user, $this->struct, $url, $project_data[0], $this->job );
             }
 
             $email->send();
