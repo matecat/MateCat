@@ -61,9 +61,12 @@ class SegmentQR extends React.Component {
         window.open("/revise/project_name/langs/" + config.id_job + "-" + config.password + "#" + this.props.segment.get("sid"))
     }
     decodeTextAndTransformTags( text) {
-         let decodedText = TagsUtils.decodePlaceholdersToText(text);
-         decodedText = TagsUtils.transformTextForLockTags(decodedText);
-         return decodedText;
+        if (text) {
+            let decodedText = TagsUtils.decodePlaceholdersToText(text);
+            decodedText = TagsUtils.transformTextForLockTags(decodedText);
+            return decodedText;
+        }
+        return text;
     }
     allowHTML(string) {
         return { __html: string };
