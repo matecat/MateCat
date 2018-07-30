@@ -10,14 +10,17 @@
     <link href="../../public/css/build/quality_report.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
+        /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
             qa_equivalent_class: '${qa_equivalent_class | string: 30}',
             id_job: '${jid}',
             password: '${password}',
             source_rtl: ${source_rtl | string:false},
-            target_rtl: ${target_rtl | string:false}
+            target_rtl: ${target_rtl | string:false},
+            searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
         };
+        /*]]>*/
     </script>
 
     <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">

@@ -207,7 +207,23 @@ class reviseSummaryController extends viewController {
         $this->template->source_rtl = ( $lang_handler->isRTL( $this->data[ 'source' ] ) ) ? true : false ;
         $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
 
+        $this->template->searchable_statuses = $this->searchableStatuses();
 
+    }
+
+    /**
+     * @return array
+     */
+    private function searchableStatuses() {
+        $statuses = array_merge(
+                Constants_TranslationStatus::$INITIAL_STATUSES,
+                Constants_TranslationStatus::$TRANSLATION_STATUSES,
+                Constants_TranslationStatus::$REVISION_STATUSES
+        );
+
+        return array_map( function ( $item ) {
+            return (object)array( 'value' => $item, 'label' => $item );
+        }, $statuses );
     }
 }
 
