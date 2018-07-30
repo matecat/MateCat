@@ -21,17 +21,8 @@ class PreferencesModal extends React.Component {
         this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
 
-
     openResetPassword() {
         $('#modal').trigger('openresetpassword');
-    }
-
-    componentWillMount() { }
-
-    componentDidMount() {
-        if ( this.state.service && !this.state.service.disabled_at) {
-            $(this.checkDrive).attr('checked', true);
-        }
     }
 
     checkboxChange() {
@@ -217,7 +208,7 @@ class PreferencesModal extends React.Component {
                 <div className="user-gdrive">
 
                     <div className="onoffswitch-drive">
-                        <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
+                        <input type="checkbox" name="onoffswitch" defaultChecked={this.state.service && !this.state.service.disabled_at} onChange={this.checkboxChange.bind(this)}
                                ref={(input) => this.checkDrive = input}
                                className="onoffswitch-checkbox" id="gdrive_check"/>
                         <label className="onoffswitch-label" htmlFor="gdrive_check">
