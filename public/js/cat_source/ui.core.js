@@ -1697,7 +1697,7 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-			    if(d.details){
+			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
