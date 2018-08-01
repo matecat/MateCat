@@ -38,7 +38,7 @@ class EnginesModel_IADAATPAStruct extends EnginesModel_EngineStruct {
 
     /**
      * @var string
-     */
+     */    
     public $class_load = Constants_Engines::IADAATPA;
 
     /**
@@ -55,7 +55,7 @@ class EnginesModel_IADAATPAStruct extends EnginesModel_EngineStruct {
      * An empty struct
      * @return EnginesModel_EngineStruct
      */
-    public static function getStruct() {
+    public static function getStruct() {        
         return new EnginesModel_IADAATPAStruct();
     }
 

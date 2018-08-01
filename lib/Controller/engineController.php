@@ -263,11 +263,11 @@ class engineController extends ajaxController {
                 $newEngineStruct = EnginesModel_IADAATPAStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->uid;
+                $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
-                break;
+                break;                
                 
             default:
 

@@ -32,9 +32,17 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
      * @throws Exception
      */
     protected function _fixLangCode( $lang ) {
-        $separate_pos=strpos($lang,"-");
-        $normalise=substr($lang,0,$separate_pos);
+        
+        if( $lang == 'cav-ES' ) return "ca-valencia"; //Catalan, Valencian
+        if( $lang == 'nn-NO' or $lang == 'nb-NO' ) return "no"; //Norwegian
+        
+        $complete_code= array("ar-SA", "hy-AM", "az-AZ", "be-BY", "ca-ES", "zh-CN", "zh-TW", "de-DE", "en-CA", "en-GB", "en-US", "et-EE", "fr-CA", "fr-FR", "ka-GE", "ga-IE", "gl-ES", "he-IL", "it-IT", "ja-JP", "kk-KZ", "ko-KR", "lv-LV", "lt-LT", "nl-NL", "pl-PL", "pt-BR", "ru-RU", "es-MX", "es-ES", "tk-TM", "tr-TR", "uk-UA", "uz-UZ");
 
+        if( !in_array( $lang, $complete_code ) ){       
+          $separate_pos=strpos($lang,"-");
+          $lang=substr($lang,0,$separate_pos);
+        }
+        
         return $lang;
     }
 
@@ -43,38 +51,36 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
      *
      * @return array
      */
-    protected function _decode( $rawValue ){
+    protected function _decode( $rawValue ){        
+        
         $all_args =  func_get_args();
         
         $original="";
-        if( is_string( $rawValue ) ) {
-            /*$original = json_decode( $all_args[1]["data"] , true );
-            $decoded = json_decode( $rawValue, true );
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )
-                            )
-                    )
-            );*/
+        if( is_string( $rawValue ) ) {            
             $all_args[0] = json_decode( $all_args[0] , true );
             $decoded = json_decode( $rawValue, true );
-            $original=$decoded["data"]["segments"]["segment01"]["segment"];
+
+            $original=$decoded["data"]["segments"][0]["segment"];
 
             $decoded = array(
                 'data' => array(
                     "translations" => array(
-                        array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded["data"]["segments"]["segment01"]["translation"] ) )
+                        array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded["data"]["segments"][0]["translation"] ) )
                         )
                     )
                 );
             
         } else {
+            $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
+            if ( isset( $resp[ "error" ][ "code" ] ) && isset( $resp[ "error" ][ "message" ] ) ) {
+                $rawValue[ "error" ][ "code" ]    = $resp[ "error" ][ "code" ];
+                $rawValue[ "error" ][ "message" ] = $resp[ "error" ][ "message" ];
+            }
             $decoded = $rawValue; // already decoded in case of error
         }
 
         $mt_result = new Engines_Results_MT( $decoded );
-
+        
         if ( $mt_result->error->code < 0 ) {
             $mt_result = $mt_result->get_as_array();
             $mt_result['error'] = (array)$mt_result['error'];
@@ -96,15 +102,16 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
     }
 
     public function get( $_config ) {
+
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
         $parameters = array();
         if (  $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'token' ] = $this->client_secret;
         }
-        $parameters['source'] = $this->_fixLangCode($_config[ 'source' ]);
+        $parameters['source'] = $this->_fixLangCode($_config[ 'source' ]);        
         $parameters['target'] = $this->_fixLangCode($_config[ 'target' ]);
-        $parameters['segments'] = array("segment01"=>$_config[ 'segment' ]);
+        $parameters['segments'] = array(substr($_config[ 'segment' ], 0, 1000));//maximum length of each segment is 1000 characters
 
         $this->_setAdditionalCurlParams( array(
                         CURLOPT_HTTPHEADER     => array("Content-Type: application/json"),
@@ -116,7 +123,6 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
         $this->call( "translate_relative_url", $parameters, true);
 
         return $this->result;
-
     }
 
     public function set( $_config ) {
