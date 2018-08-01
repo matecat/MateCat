@@ -2305,13 +2305,16 @@ UI = {
 	},
 	undoInSegment: function() {
 		console.log('undoInSegment');
-		if (this.undoStackPosition === 0)
-			this.saveInUndoStack('undo');
-		var ind = 0;
+        if (this.undoStack.length === 0) {
+            return;
+        }
+        if (this.undoStackPosition === 0) {
+            this.saveInUndoStack( 'undo' );
+        }
+        var ind = 0;
 		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), this.undoStack[ind]);
-        // this.editarea.html(this.undoStack[ind]);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
             $('.undoCursorPlaceholder').remove();
@@ -2350,12 +2353,12 @@ UI = {
 		if (this.editarea.html() === '') return;
         if (this.editarea.length === 0 ) return ;
 
-		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
-		var tt = this.editarea.html().match(/&lt;/gi);
-        if ( tt ) {
-            if ( (tt.length) && (!ss) )
-                return;
-        }
+        // var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
+        // var tt = this.editarea.html().match(/&lt;/gi);
+        // if ( tt ) {
+        //     if ( (tt.length) && (!ss) )
+        //         return;
+        // }
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
