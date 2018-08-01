@@ -1,7 +1,14 @@
 #review-side-panel.review-extended-panel {
 	overflow: auto !important;
 	padding-bottom: 84px;
-	top: 16px;
+	height: 100%;
+	position: fixed;
+	top: 50px;
+	right: 0;
+	width: 25%;
+	z-index: 1;
+	min-width: 215px;
+	text-align: left;
 }
 #review-side-panel.review-extended-panel h4 {
 	margin: unset;
