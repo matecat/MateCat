@@ -62,7 +62,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * Update all
      */
     updateAll: function (segments, fid, where) {
-        console.time("Time: updateAll segments" + fid);
+        // console.time("Time: updateAll segments" + fid);
         if (this._segments[fid] && where === "before") {
             this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if (this._segments[fid] && where === "after") {
@@ -72,7 +72,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
 
         this.buildSegmentsFiles(fid, segments);
-        console.log(this._segmentsFiles);
+        // console.log(this._segmentsFiles);
 
         if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
