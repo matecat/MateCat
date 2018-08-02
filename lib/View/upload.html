@@ -32,7 +32,12 @@
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
-
+    <!-- Tilde MT -->
+    <!-- add web component support for older browsers -->
+    <SCRIPT src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.22/webcomponents.js"></SCRIPT>
+    <!-- Tilde MT system selection web component manages system selection and configuration by source-target language pair. The system configuration is returned in JSON. The web components documentation can be found at http://www.tilde.com/mt/tools/api -->
+    <link id="tildemt_link" rel="import" href="https://www.letsmt.eu/ws/tildemt-selector.html"/>
+    <!-- Tilde MT -->
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
