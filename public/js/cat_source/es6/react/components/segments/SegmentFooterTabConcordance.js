@@ -24,6 +24,8 @@ class SegmentFooterTabConcordance extends React.Component {
             target: '',
             extended: extended
         }
+
+        this.searchSubmit = this.searchSubmit.bind(this);
     }
 
     componentWillUnmount() {
@@ -193,7 +195,7 @@ class SegmentFooterTabConcordance extends React.Component {
         }
         if (config.tms_enabled) {
             html = <div className={"cc-search " + loadingClass}>
-                <form onSubmit={this.searchSubmit.bind(this)}>
+                <form onSubmit={this.searchSubmit}>
                     <div className="input-group">
                         <input type="text" className="input search-source" onChange={this.sourceChange.bind(this)}
                                value={this.state.source}/>
@@ -202,7 +204,7 @@ class SegmentFooterTabConcordance extends React.Component {
                         <input type="text" className="input search-target" onChange={this.targetChange.bind(this)}
                                value={this.state.target}/>
                     </div>
-                    <input type="submit" value="" style={{display: "none"}}/>
+                    <input type="submit" value="" style={{visibility: "hidden", width: "0", padding: "0", border: "none"}}/>
                 </form>
             </div>;
         } else {
