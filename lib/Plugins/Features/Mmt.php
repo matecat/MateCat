@@ -191,6 +191,9 @@ class Mmt extends BaseFeature {
 
     /**
      * @param ArrayObject $projectStructure
+     *
+     * @throws \Engines\MMT\MMTServiceApiException
+     * @throws Exception
      */
     public function validateProjectCreation( ArrayObject $projectStructure ){
 
@@ -200,7 +203,7 @@ class Mmt extends BaseFeature {
              * @var $availableLangs
              * <code>
              *  {
-             *     "en":["it"],
+             *     "en":["it","zh-TW"],
              *     "de":["en"]
              *  }
              * </code>
@@ -211,6 +214,10 @@ class Mmt extends BaseFeature {
 
             $found = true;
             foreach( $availableLangs as $source => $availableTargets ){
+
+                //take only the language code
+                list( $availableTargets, ) = explode( "-", $availableTargets );
+
                 list( $mSourceCode, ) = explode( "-", $source_language );
                 if( $source == $mSourceCode ){
                     foreach( $target_language_list as $_matecatTarget ){
@@ -238,6 +245,8 @@ class Mmt extends BaseFeature {
     /**
      * @param array $segments
      * @param array $projectRows
+     *
+     * @throws Exception
      */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
@@ -280,7 +289,7 @@ class Mmt extends BaseFeature {
 
             } catch( Exception $e ){
                 Log::doLog( $e->getMessage() );
-                Log::doLog( $e->getTpostTMKeyCreationraceAsString() );
+                Log::doLog( $e->getTraceAsString() );
             }
 
             unset( $tmpFileObject );
