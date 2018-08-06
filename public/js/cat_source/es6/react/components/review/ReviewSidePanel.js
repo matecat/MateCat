@@ -81,6 +81,10 @@ class ReviewSidePanel extends React.Component{
             'review-improved-panel': this.props.reviewType === "improved",
             'review-extended-panel': this.props.reviewType === "extended",
         });
+        let idContainer = classnames({
+            'review-side-panel' : this.props.reviewType === "improved",
+            'review-side-baloon': this.props.reviewType === "extended",
+        });
         if (this.props.reviewType === "improved") {
             if (this.state.visible && this.state.selection != null) {
                 innerPanel = <div className="review-side-inner1">
@@ -109,7 +113,7 @@ class ReviewSidePanel extends React.Component{
             }
         }
 
-        return <div className={classes} id="review-side-panel">
+        return <div className={classes} id={idContainer}>
             {this.state.loader && this.props.reviewType === "extended" ? <WrapperLoader /> : null}
             {this.props.reviewType === "extended" ? (
                 <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
