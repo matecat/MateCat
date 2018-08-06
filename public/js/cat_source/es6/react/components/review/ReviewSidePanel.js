@@ -83,7 +83,7 @@ class ReviewSidePanel extends React.Component{
         });
         let idContainer = classnames({
             'review-side-panel' : this.props.reviewType === "improved",
-            'review-side-baloon': this.props.reviewType === "extended",
+            'review-side-balloon': this.props.reviewType === "extended",
         });
         if (this.props.reviewType === "improved") {
             if (this.state.visible && this.state.selection != null) {
