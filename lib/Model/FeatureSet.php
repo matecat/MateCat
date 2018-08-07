@@ -200,6 +200,8 @@ class FeatureSet {
      * @throws Exceptions_RecordNotFound
      * @throws ValidationError
      * @throws AuthenticationError
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \TaskRunner\Exceptions\EndQueueException
      */
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
@@ -232,7 +234,12 @@ class FeatureSet {
                         throw $e ;
                     } catch ( AuthenticationError $e ) {
                         throw $e ;
-                    } catch ( Exception $e ) {
+                    } catch( \TaskRunner\Exceptions\ReQueueException $e ){
+                        throw $e;
+                    } catch( \TaskRunner\Exceptions\EndQueueException $e ){
+                        throw $e;
+                    }
+                    catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
                     }
                 }
