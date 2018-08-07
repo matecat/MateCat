@@ -11,6 +11,9 @@ let SegmentFooter = require('./SegmentFooter').default;
 let SegmentBody = require('./SegmentBody').default;
 let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
 let IssuesContainer = require('./footer-tab-issues/SegmentFooterTabIssues').default;
+let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
+let WrapperLoader = require('../../common/WrapperLoader').default;
+
 let Immutable = require('immutable');
 
 class Segment extends React.Component {
@@ -41,7 +44,8 @@ class Segment extends React.Component {
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation)
+            && !UI.checkXliffTagsInText(this.props.segment.translation),
+            showRevisionPanel: false
         }
     }
 
@@ -236,6 +240,21 @@ class Segment extends React.Component {
         }
     }
 
+    openRevisionPanel(data) {
+        if (data.sid === this.props.segment.sid) {
+            this.setState({
+                showRevisionPanel: true
+            });
+        }
+    }
+
+    closeRevisionPanel(data) {
+        if (data.sid === this.props.segment.sid) {
+            this.setState({
+                showRevisionPanel: false
+            });
+        }
+    }
 
     allowHTML(string) {
         return { __html: string };
@@ -248,6 +267,9 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        //Review
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
     }
 
 
@@ -258,6 +280,9 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        //Review
+        SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
     }
 
     componentDidUpdate() {
@@ -272,7 +297,8 @@ class Segment extends React.Component {
             (nextState.autopropagated !== this.state.autopropagated) ||
             (nextState.status !== this.state.status) ||
             (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
-            (nextState.readonly !== this.state.readonly)
+            (nextState.readonly !== this.state.readonly) ||
+            (nextState.showRevisionPanel !== this.state.showRevisionPanel)
         );
     }
 
@@ -401,6 +427,23 @@ class Segment extends React.Component {
                         {translationIssues}
                     </div>
                 </div>
+                {this.props.isReviewExtended && this.state.showRevisionPanel ? (
+                    <div className="review-balloon-container">
+                        {!this.props.segment.versions ? (
+                            //{/*<WrapperLoader />*/}
+                            (null)
+                        ) : (
+                            <ReviewExtendedPanel
+                                reviewType={this.props.reviewType}
+                                segment={this.props.segment}
+                                sid={this.props.segment.sid}
+                                isReview={config.isReview}
+                                // setParentLoader={this.changeReviseLoader.bind(this)}
+                            />
+                        )}
+
+                    </div>
+                ) : (null)}
             </section>
         );
     }

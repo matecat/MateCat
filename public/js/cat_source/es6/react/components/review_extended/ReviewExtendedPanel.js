@@ -78,7 +78,7 @@ class ReviewExtendedPanel extends React.Component {
 	}
 
     componentDidMount() {
-		this.props.setParentLoader(false);
+		// this.props.setParentLoader(false);
         SegmentStore.addListener(SegmentConstants.SHOW_ISSUE_MESSAGE, this.showIssuesMessage.bind(this));
     }
 

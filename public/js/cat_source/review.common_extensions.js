@@ -8,20 +8,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
 
     $.extend(UI, {
 
-        mountPanelComponent : function() {
-            UI.issuesMountPoint =   $('[data-mount=review-side-panel]')[0];
-            ReactDOM.render(
-                React.createElement( ReviewSidePanel, {
-                    closePanel: this.closeIssuesPanel,
-                    reviewType: Review.type,
-                    isReview: config.isReview
-                } ),
-                UI.issuesMountPoint );
-        },
 
-        unmountPanelComponent : function() {
-            ReactDOM.unmountComponentAtNode( UI.issuesMountPoint );
-        },
 
         openIssuesPanel : function(data) {
             SearchUtils.closeSearch();
@@ -116,10 +103,6 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
         if ( data.name == 'search' ) {
             UI.closeIssuesPanel();
         }
-    });
-
-    $(document).ready(function() {
-        UI.mountPanelComponent();
     });
 
     $(window).on('segmentOpened', UI.getSegmentVersionsIssuesHandler);

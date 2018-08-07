@@ -17,7 +17,7 @@ class ReviewSidePanel extends React.Component{
 
     }
 
-    openPanel(e, data) {
+    openPanel(data) {
         if (this.props.reviewType === "improved") {
             this.setState({
                 visible: true,
@@ -31,7 +31,7 @@ class ReviewSidePanel extends React.Component{
 
     }
 
-    closePanel(e, data) {
+    closePanel(data) {
         this.setState({visible: false});
     }
 
@@ -113,7 +113,7 @@ class ReviewSidePanel extends React.Component{
             }
         }
 
-        return <div className={classes} id={idContainer}>
+        return <div className={classes} id="review-side-panel">
             {this.state.loader && this.props.reviewType === "extended" ? <WrapperLoader /> : null}
             {this.props.reviewType === "extended" ? (
                 <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>

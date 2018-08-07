@@ -11,7 +11,7 @@ if (ReviewExtended.enabled()) {
         setTimeout(function () {
             if (config.isReview && UI.currentSegment && ReviewExtended.firstLoad ) {
                 ReviewExtended.firstLoad = false;
-                SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
+                // SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
             }
         });
     });

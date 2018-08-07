@@ -4,6 +4,21 @@ if ( ReviewImproved.enabled() ) {
     var prev_getStatusForAutoSave = UI.getStatusForAutoSave ;
 
     $.extend(UI, {
+
+        mountPanelComponent : function() {
+            UI.issuesMountPoint =   $('[data-mount=review-side-panel]')[0];
+            ReactDOM.render(
+                React.createElement( ReviewSidePanel, {
+                    closePanel: this.closeIssuesPanel,
+                    reviewType: Review.type,
+                    isReview: config.isReview
+                } ),
+                UI.issuesMountPoint );
+        },
+
+        unmountPanelComponent : function() {
+            ReactDOM.unmountComponentAtNode( UI.issuesMountPoint );
+        },
         /**
          * getStatusForAutoSave
          *
@@ -36,5 +51,10 @@ if ( ReviewImproved.enabled() ) {
             return ReviewImproved.submitComment(id_segment, id_issue, data)
         },
     });
+
+    $(document).ready(function() {
+        UI.mountPanelComponent();
+    });
+
 })(jQuery, window);
 }

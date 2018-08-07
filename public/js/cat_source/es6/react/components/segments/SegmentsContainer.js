@@ -101,6 +101,7 @@ class SegmentsContainer extends React.Component {
         let items = [];
         let self = this;
         let isReviewImproved = !!(this.props.isReviewImproved);
+        let isReviewExtended = !!(this.props.isReviewExtended);
         this.state.segments.forEach(function (segImmutable) {
             let segment = segImmutable.toJS();
             var item = <Segment
@@ -109,6 +110,7 @@ class SegmentsContainer extends React.Component {
                 timeToEdit={self.state.timeToEdit}
                 fid={self.props.fid}
                 isReviewImproved={isReviewImproved}
+                isReviewExtended={isReviewExtended}
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}
                 tagLockEnabled={self.state.tagLockEnabled}

@@ -580,6 +580,9 @@ AppDispatcher.register(function (action) {
             SegmentStore.updateLexiqaWarnings(action.warnings);
             SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
+        case SegmentConstants.OPEN_ISSUES_PANEL:
+            SegmentStore.emitChange(action.actionType, action.data);
+            break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }
