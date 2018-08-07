@@ -71,7 +71,6 @@ class TranslationIssuesSideButton extends React.Component{
 
     handleClick (e) {
         SegmentActions.openIssuesPanel({sid: this.props.sid});
-        // ReviewImproved.openPanel({sid: this.props.sid});
     }
 
     shouldComponentUpdate (nextProps, nextState) {

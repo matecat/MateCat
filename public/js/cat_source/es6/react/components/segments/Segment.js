@@ -249,11 +249,9 @@ class Segment extends React.Component {
     }
 
     closeRevisionPanel(data) {
-        if (data.sid === this.props.segment.sid) {
-            this.setState({
-                showRevisionPanel: false
-            });
-        }
+        this.setState({
+            showRevisionPanel: false
+        });
     }
 
     allowHTML(string) {
