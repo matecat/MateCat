@@ -51,7 +51,9 @@ if ( QaCheckGlossary.enabled() )
     }
 
     function startLocalUnusedGlossaryHighlight( segment ) {
-        updateGlossaryUnusedMatches( segment, globalWarnings[segment.id] ) ;
+        if (globalWarnings) {
+            updateGlossaryUnusedMatches( segment, globalWarnings[segment.id] ) ;
+        }
     }
     /*
     * Can be called externaly (by LexiQA) to reload powerip
