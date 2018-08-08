@@ -279,17 +279,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return this._segments[fid].get(index);
     },
 
-    addSegmentVersionIssue(fid, sid, issue, versionNumber) {
-        //If is a splitted segment the versions are added to the first of the split
-        let index = this.getSegmentIndex(sid, fid);
-        let versionIndex = this._segments[fid].get(index).get('versions').findIndex(function (item) {
-            return item.get('version_number') === versionNumber;
-        });
-
-        this._segments[fid] = this._segments[fid].updateIn([index, 'versions', versionIndex, 'issues'], arr => arr.push(Immutable.fromJS(issue)));
-
-        return this._segments[fid].get(index);
-    },
     getSegmentByIdToJS(sid, fid) {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
@@ -514,10 +503,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
             SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
-            break;
-        case SegmentConstants.ADD_SEGMENT_VERSION_ISSUE:
-            let segIssue = SegmentStore.addSegmentVersionIssue(action.fid, action.sid, action.issue, action.versionNumber);
-            SegmentStore.emitChange(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, action.sid, segIssue.toJS());
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);

@@ -28,7 +28,7 @@ class ReviewExtendedIssue extends React.Component {
 	deleteIssue(event) {
 		event.preventDefault();
 		event.stopPropagation();
-		SegmentActions.deleteIssue(this.props.issue);
+		SegmentActions.deleteIssue(this.props.issue, this.props.sid);
 	}
 	confirmDeletedIssue(sid,data){
 		let issue_id = data;

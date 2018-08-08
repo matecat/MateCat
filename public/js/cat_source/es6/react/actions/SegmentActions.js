@@ -391,18 +391,8 @@ var SegmentActions = {
         });
     },
 
-    addSegmentVersionIssue: function (fid, sid, issue, versionNumber) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_SEGMENT_VERSION_ISSUE,
-            fid: fid,
-            sid: sid,
-            issue: issue,
-            versionNumber: versionNumber
-        });
-    },
-
-    deleteIssue: function (issue) {
-        UI.deleteIssue(issue);
+    deleteIssue: function (issue, sid) {
+        UI.deleteIssue(issue, sid);
     },
 
     confirmDeletedIssue: function (sid,issue_id) {

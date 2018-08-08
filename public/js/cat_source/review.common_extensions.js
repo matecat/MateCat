@@ -4,10 +4,14 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
 
         openIssuesPanel : function(data) {
             SearchUtils.closeSearch();
-
+            if (config.reviewType === "improved") {
+                $('body').addClass('review-improved-opened');
+                hackIntercomButton( true );
+            } else {
+                $('body').addClass('review-extended-opened');
+            }
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
-            hackIntercomButton( true );
 
             var segment = UI.Segment.findEl( data.sid );
             segment.find( UI.targetContainerSelector() ).click();
@@ -37,7 +41,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
             window.dispatchEvent(new Event('resize'));
         },
 
-        deleteIssue : function( issue ) {
+        deleteIssue : function( issue,sid ) {
             var message = '';
             if ( issue.target_text ) {
                 message = sprintf(
@@ -59,7 +63,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
                 msg: message,
                 okTxt: 'Yes delete this issue',
                 context: JSON.stringify({
-                    id_segment : issue.id_segment,
+                    id_segment : sid,
                     id_issue : issue.id
                 })
             });

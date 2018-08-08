@@ -10,8 +10,6 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
     }
 
-
-
     componentWillReceiveProps ( nextProps ) {
         if(nextProps.issues.length > this.props.issues.length && this.props.segment.sid === nextProps.segment.sid){
             this.setState({
@@ -31,18 +29,9 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
     }
 
-    componentWillUnmount () {
-
-    }
-
-
     render () {
 
-        let cs = classnames({
-            'review-issues-container' : true,
-        });
-        let issues,
-            loaderHtml = '';
+        let issues;
 
         if (this.props.issues.length > 0 ) {
             let sorted_issues = this.props.issues.sort(function(a, b) {
@@ -55,7 +44,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
                 let prog = sorted_issues.length - index;
 
                 return <ReviewExtendedIssue
-                    sid={this.props.sid}
+                    sid={this.props.segment.sid}
 					isReview={this.props.isReview}
                     progressiveNumber={prog}
                     issue={item}
