@@ -269,9 +269,6 @@ $.extend(UI, {
 
 		$('html').on('click', 'section .actions', function(e){
             e.stopPropagation();
-        }).on('click', '#quality-report', function(e){
-            var win = window.open( $('#quality-report' ).data('url') , '_self');
-            win.focus();
         }).on('keydown', function(e) {
             var esc = 27 ;
 
