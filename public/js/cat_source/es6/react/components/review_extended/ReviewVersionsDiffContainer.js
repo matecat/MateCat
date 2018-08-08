@@ -77,8 +77,8 @@ class ReviewVersionsDiffContainer extends React.Component {
     render() {
         return <div className="re-version-diff">
 				<div className="re-header-track">
-					<h4>Revise Track changes</h4>
-					<ReviewVersionDiff
+					{/*<h4>Revise Track changes</h4>*/}
+					{/*<ReviewVersionDiff
 						// textSelectedFn={this.props.textSelectedFn}
 						// removeSelection={this.props.removeSelection}
 						diffPatch={this.state.diffPatch}
@@ -87,7 +87,7 @@ class ReviewVersionsDiffContainer extends React.Component {
 						// selectable={this.props.selectable}
 						selectable={false}
 						customClass={'head'}
-					/>
+					/>*/}
 
 					{/*{this.props.selectable? (*/}
 						{/*<div className="explain-selection">*/}

@@ -160,8 +160,8 @@ class ReviewExtendedIssue extends React.Component {
 			</div>;
         //END comments html section
 
-		return <div className="issue-item" ref={(node)=>this.el=node}>
-			<div className="issue">
+		return <div className="re-item" ref={(node)=>this.el=node}>
+			<div className="re-item-box re-issue">
 				<div className="issue-head">
 					<p><b title="Type of issue">{category_label}</b>: <span title="Type of severity">{this.props.issue.severity}</span></p>
 				</div>

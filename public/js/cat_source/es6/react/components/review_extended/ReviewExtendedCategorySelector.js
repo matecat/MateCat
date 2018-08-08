@@ -51,11 +51,13 @@ class ReviewExtendedCategorySelector extends React.Component{
 
             </div>
         }
-		return <div className="error-item">
-			<div className="error-name">{this.props.category.label}</div>
-			<div className="error-level">
-				{ select }
-			</div>
+		return <div className="re-item">
+            <div className="re-item-box re-error">
+                <div className="error-name">{this.props.category.label}</div>
+                <div className="error-level">
+                    { select }
+                </div>
+            </div>
 		</div>;
     }
 }
