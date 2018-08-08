@@ -8,12 +8,12 @@ if (ReviewExtended.enabled()) {
             SegmentActions.mountTranslationIssues();
         }
 
-        setTimeout(function () {
-            if (config.isReview && UI.currentSegment && ReviewExtended.firstLoad ) {
-                ReviewExtended.firstLoad = false;
-                // SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
-            }
-        });
+        // setTimeout(function () {
+        //     if (config.isReview && UI.currentSegment && ReviewExtended.firstLoad ) {
+        //         ReviewExtended.firstLoad = false;
+        //         SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
+        //     }
+        // });
     });
 
     $(document).on('translation:change', function(e, data) {

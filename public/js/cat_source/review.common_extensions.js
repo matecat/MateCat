@@ -1,14 +1,6 @@
 if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
-    /**
-     * Split segment feature is not compatible with ReviewImproved.
-     */
-    window.config.splitSegmentEnabled = false;
-
-
     $.extend(UI, {
-
-
 
         openIssuesPanel : function(data) {
             SearchUtils.closeSearch();
@@ -72,6 +64,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
                 })
             });
         },
+
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);

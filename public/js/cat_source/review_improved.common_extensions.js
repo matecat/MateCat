@@ -2,6 +2,10 @@ if ( ReviewImproved.enabled() ) {
 (function($, root, undefined) {
 
     var prev_getStatusForAutoSave = UI.getStatusForAutoSave ;
+    /**
+     * Split segment feature is not compatible with ReviewImproved.
+     */
+    window.config.splitSegmentEnabled = false;
 
     $.extend(UI, {
 
