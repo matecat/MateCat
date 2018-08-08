@@ -273,6 +273,7 @@
             margin: 0 5px;
         }
     }*/
+@import "commons/divider";
 
 h1, h2, h3, h4, h5, a, input {
     font-family: Calibri, Arial, Helvetica, sans-serif !important;
@@ -288,29 +289,57 @@ h1, h2, h3, h4, h5, a, input {
         height: 100%;
         position: relative;
         .re-issues-box {
-            padding: 5px;
-            &.re-created {
-                background: #f2f4f7;
-                box-shadow: 0 0 4px #ccc;
-            }
-            .re-issues-box-title {
-            }
+            .re-issues-box-title {}
             .re-list {
                 overflow-y: auto;
                 max-height: 210px;
-                padding: 0 5px;
                 .re-item-head {
-
+                    text-transform: uppercase;
+                    border-bottom: 1px solid #f2f4f7;
+                    margin-top: 10px;
                 }
                 .re-item {
-                    background: white;
-                    padding: 5px 0;
-                    position: relative;
+                    background: #f2f4f7;
                     .re-item-box {
                         display: flex;
                         justify-content: space-between;
-                        background: white;
-                        padding: 5px 5px;
+                        align-items: center;
+                        background: #ffffff;
+                        padding: 5px;
+                    }
+                    .re-issue {
+                        margin-bottom: 2px;
+                        .issue-activity-icon {
+                            .icon-buttons {
+                                display: flex;
+                            }
+                        }
+                    }
+                    .re-error {
+                        padding: 5px 10px;
+                        &:hover {
+                            background: #f2f4f7 !important;
+                        }
+                    }
+                }
+            }
+        }
+
+        .re-created {
+            background: #f2f4f7;
+            box-shadow: 0 0 4px #ccc;
+            padding: 0 5px 5px;
+            margin-bottom: 3px;
+            .issues {}
+        }
+        .re-to-create {
+            background: #ffffff;
+            .errors {
+                max-height: 300px;
+                .re-category-item {
+                    background: #fff;
+                    &:hover {
+                        background: gray;
                     }
                 }
             }

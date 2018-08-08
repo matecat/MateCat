@@ -162,14 +162,14 @@ class ReviewExtendedIssue extends React.Component {
 
 		return <div className="re-item" ref={(node)=>this.el=node}>
 			<div className="re-item-box re-issue">
-				<div className="issue-head">
+				<div className="issue-head pad-right-10">
 					<p><b title="Type of issue">{category_label}</b>: <span title="Type of severity">{this.props.issue.severity}</span></p>
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
 						{/*<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)} title="View track changes"><i className="icon-eye icon"/></button>*/}
-						<button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
-						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
+						<button className={"ui icon basic tiny button issue-note " + commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
+						{this.props.isReview ? (<button className="ui icon basic tiny button issue-delete" onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
 				</div>
 
@@ -190,9 +190,9 @@ class ReviewExtendedIssue extends React.Component {
 					selectable={false}
 				/> : null}
 
-			<div className="issue-date">
+			{/*<div className="issue-date">
 				<i>{formatted_date}</i>
-			</div>
+			</div>*/}
 		</div>
 	}
 }
