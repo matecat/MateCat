@@ -107,18 +107,12 @@ class ReviewExtendedIssuePanel extends React.Component{
         }.bind(this));
 
 
-            return<div className="re-create-issue">
-				<div className="ui accordion">
-					<h4 className="create-issue-title">
-						Error list
-					</h4>
-					{/*<div className="issues-scroll">
-						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
-					</div>*/}
-					<div className="error-list active" ref={(node)=>this.listElm=node}>
-						{categoryComponents}
-					</div>
-				</div>
+            return<div className="re-issues-box re-to-create">
+                {/*<h4 className="re-issues-box-title">Error list</h4>*/}
+                <div className="re-list errors" ref={(node)=>this.listElm=node}>
+                    <div className="re-item-head"><b>Tone of voice</b></div>
+                    {categoryComponents}
+                </div>
 			</div>
     }
 }
