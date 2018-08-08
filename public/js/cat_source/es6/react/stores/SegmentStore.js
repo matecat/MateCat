@@ -96,6 +96,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     let translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
                     let status = segment.target_chunk_lengths.statuses[i];
                     let segData = {
+                        splitted: true,
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
@@ -103,6 +104,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         segment: splittedSourceAr[i],
                         decoded_source: UI.decodeText(segment, splittedSourceAr[i]),
                         segment_hash: segment.segment_hash,
+                        original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
                         split_points_source: [],
@@ -265,8 +267,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     addSegmentVersions(fid, sid, versions) {
-
+        //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid, fid);
+        let segment = this._segments[fid].get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
             this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
@@ -277,6 +280,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     addSegmentVersionIssue(fid, sid, issue, versionNumber) {
+        //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid, fid);
         let versionIndex = this._segments[fid].get(index).get('versions').findIndex(function (item) {
             return item.get('version_number') === versionNumber;

@@ -192,7 +192,7 @@ class Segment extends React.Component {
     }
 
     isFirstOfSplit() {
-        return (!_.isUndefined(this.props.split_group) &&
+        return (!_.isUndefined(this.props.segment.split_group) &&
         this.props.segment.split_group.indexOf(this.props.segment.sid) === 0);
     }
 
@@ -204,7 +204,10 @@ class Segment extends React.Component {
 
     getTranslationIssues() {
         if (this.state.showTranslationIssues &&
-            (!(this.props.segment.readonly === 'true')  && !this.isSplitted()  ) ) {
+            ( !(this.props.segment.readonly === 'true')  &&
+                ( !this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
+            )
+        ) {
             return <TranslationIssuesSideButtons
                     sid={this.props.segment.sid.split('-')[0]}
                     reviewType={this.props.reviewType}
@@ -241,7 +244,7 @@ class Segment extends React.Component {
     }
 
     openRevisionPanel(data) {
-        if (data.sid === this.props.segment.sid) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
             this.setState({
                 showRevisionPanel: true
             });
