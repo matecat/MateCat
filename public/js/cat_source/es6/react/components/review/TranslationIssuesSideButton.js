@@ -29,19 +29,19 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     setStateOnSegmentsChange( segment ) {
-        if ( this.props.sid == segment.sid ) {
+        if ( parseInt(this.props.sid) == parseInt(segment.sid) ) {
             this.setState( this.readDatabaseAndReturnState() );
         }
     }
 
     setStateOnIssueChange( issue ) {
-        if ( this.props.sid == issue.id_segment ) {
+        if ( parseInt(this.props.sid) == parseInt(issue.id_segment) ) {
             this.setState( this.readDatabaseAndReturnState() );
-        }
+         }
     }
 
     setSegmentVersions(sid, segment) {
-        if (this.props.sid === sid && segment.versions.length > 0) {
+        if (parseInt(this.props.sid) === parseInt(sid) && segment.versions.length > 0) {
             this.setState({
                 issues_count : segment.versions[0].issues.length
             });

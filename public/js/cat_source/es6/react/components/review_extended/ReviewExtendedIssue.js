@@ -28,7 +28,7 @@ class ReviewExtendedIssue extends React.Component {
 	deleteIssue(event) {
 		event.preventDefault();
 		event.stopPropagation();
-		SegmentActions.deleteIssue(this.props.issue);
+		SegmentActions.deleteIssue(this.props.issue, this.props.sid);
 	}
 	confirmDeletedIssue(sid,data){
 		let issue_id = data;
@@ -89,7 +89,7 @@ class ReviewExtendedIssue extends React.Component {
         this.setState({sendDisabled : true});
 
         SegmentActions
-            .submitComment( this.props.issue.id_segment, this.props.issue.id, data )
+            .submitComment( this.props.sid, this.props.issue.id, data )
 			.done(function (  ) {
 				self.setState({
 					comment_text: ''

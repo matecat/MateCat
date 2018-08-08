@@ -100,13 +100,11 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
              * @param context
              */
             deleteTranslationIssue : function( context ) {
-                console.debug('delete issue', context);
-
                 var parsed = JSON.parse( context );
                 var issue_path = sprintf(
                     '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                     config.id_job, config.review_password,
-                    parsed.id_segment,
+                    parseInt(parsed.id_segment),
                     parsed.id_issue
                 );
                 var issue_id = parsed.id_issue;
