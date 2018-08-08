@@ -38,7 +38,7 @@ class ReviewExtendedCategorySelector extends React.Component{
                     </div> ;
             }.bind(this));
 
-            select = <div className="ui icon top right pointing dropdown button"
+            select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}
                 data-value={this.state.value}
                 autoFocus={this.props.focus}
@@ -51,7 +51,7 @@ class ReviewExtendedCategorySelector extends React.Component{
 
             </div>
         }
-		return <div className="re-item">
+		return <div className="re-item re-category-item">
             <div className="re-item-box re-error">
                 <div className="error-name">{this.props.category.label}</div>
                 <div className="error-level">

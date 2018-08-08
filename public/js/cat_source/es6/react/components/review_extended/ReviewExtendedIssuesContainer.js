@@ -58,11 +58,13 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
                     {this.props.loader ? <WrapperLoader /> : null}
                     {/*<h4 className="re-issues-box-title">Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></h4>*/}
-                    <div className="re-list issues">
-                        <div className="re-item-head"><b>Tone of voice</b></div>
-                        {issues}
-                    </div>
 
+                        <div className="re-list issues">
+                            <div>
+                                <div className="re-item-head pad-left-5"><b>Tone of voice</b></div>
+                                {issues}
+                            </div>
+                        </div>
 
             </div>;
         }
