@@ -551,6 +551,11 @@ class TMAnalysisWorker extends AbstractWorker {
             if( $id_mt_engine == 1 ){
                 $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested." );
                 throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
+            } else {
+                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Custom MT Engine. Empty field received even if MT was called." );
+                if( isset( $mt ) ){
+                    $queueElement = $this->featureSet->filter( 'handleMTAnalysisRetry', $queueElement, $mt );
+                }
             }
 
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment." );
