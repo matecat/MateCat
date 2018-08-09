@@ -110,8 +110,10 @@ class ReviewExtendedIssuePanel extends React.Component{
             return<div className="re-issues-box re-to-create">
                 {/*<h4 className="re-issues-box-title">Error list</h4>*/}
                 <div className="re-list errors" ref={(node)=>this.listElm=node}>
-                    <div className="re-item-head pad-left-10"><b>Tone of voice</b></div>
-                    {categoryComponents}
+                    <div>
+                        <div className="re-item-head pad-left-10"><b>Tone of voice</b></div>
+                        {categoryComponents}
+                    </div>
                 </div>
 			</div>
     }
