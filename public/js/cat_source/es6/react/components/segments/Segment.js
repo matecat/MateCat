@@ -429,23 +429,25 @@ class Segment extends React.Component {
                         {translationIssues}
                     </div>
                 </div>
-                {this.props.isReviewExtended && this.state.showRevisionPanel ? (
-                    <div className="review-balloon-container">
-                        {!this.props.segment.versions ? (
-                            //{/*<WrapperLoader />*/}
-                            (null)
-                        ) : (
-                            <ReviewExtendedPanel
-                                reviewType={this.props.reviewType}
-                                segment={this.props.segment}
-                                sid={this.props.segment.sid}
-                                isReview={config.isReview}
-                                // setParentLoader={this.changeReviseLoader.bind(this)}
-                            />
-                        )}
+                <div className="segment-side-container">
+                    {this.props.isReviewExtended && this.state.showRevisionPanel ? (
+                        <div className="review-balloon-container">
+                            {!this.props.segment.versions ? (
+                                //{/*<WrapperLoader />*/}
+                                (null)
+                            ) : (
+                                <ReviewExtendedPanel
+                                    reviewType={this.props.reviewType}
+                                    segment={this.props.segment}
+                                    sid={this.props.segment.sid}
+                                    isReview={config.isReview}
+                                    // setParentLoader={this.changeReviseLoader.bind(this)}
+                                />
+                            )}
 
-                    </div>
-                ) : (null)}
+                        </div>
+                    ) : (null)}
+                </div>
             </section>
         );
     }

@@ -213,7 +213,7 @@ if ( MBC.enabled() )
 
             root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
 
-            el.append( root.show() );
+            el.find('.segment-side-container').prepend( root.show() );
             addTagging();
             inputForm.find( 'textarea' ).focus();
         };
@@ -318,7 +318,7 @@ if ( MBC.enabled() )
             var inputForm = renderInputForm();
             inputForm.addClass( 'mbc-reply-input' );
             root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
-            el.append( root.show() );
+            el.find('.segment-side-container').prepend( root.show() );
             addTagging();
         };
 
