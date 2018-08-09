@@ -75,7 +75,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     getCategoriesHtml() {
 
         let categoryComponents = [];
-        this.issueCategories().forEach(function(category, i) {
+        this.issueCategories.forEach(function(category, i) {
             let selectedValue = "";
 
             categoryComponents.push(
