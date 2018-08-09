@@ -142,11 +142,16 @@ class ReviewExtendedIssue extends React.Component {
         //START comments html section
 		let htmlCommentLines = this.generateHtmlCommentLines();
 		let renderHtmlCommentLines = '';
-		if(htmlCommentLines.length> 0){
+		if( htmlCommentLines.length > 0 ){
 			renderHtmlCommentLines = <div className="re-comment-list">
                 {htmlCommentLines}
             </div>;
 		}
+
+		let containerClass = classnames({
+			"re-item": true,
+			"issue-comments-open": this.state.commentView
+		});
 
 		let commentSection = <div className="comments-view">
 				<div className="re-add-comment">
@@ -160,7 +165,7 @@ class ReviewExtendedIssue extends React.Component {
 			</div>;
         //END comments html section
 
-		return <div className="re-item" ref={(node)=>this.el=node}>
+		return <div className={containerClass} ref={(node)=>this.el=node}>
 			<div className="re-item-box re-issue">
 				<div className="issue-head pad-right-10">
 					<p><b title="Type of issue">{category_label}</b>: <span title="Type of severity">{this.props.issue.severity}</span></p>

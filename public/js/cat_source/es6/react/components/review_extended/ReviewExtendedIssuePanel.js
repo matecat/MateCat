@@ -6,11 +6,8 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.state = {
             submitDisabled : true
         };
+        this.issueCategories = JSON.parse(config.lqa_nested_categories).categories
 
-    }
-
-    issueCategories() {
-        return JSON.parse(config.lqa_nested_categories).categories ;
     }
 
     sendIssue(category, severity) {
@@ -70,13 +67,14 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
-    render() {
-        let categoryComponents = [];
-		/*let dropDownIcon = "icon-sort-up icon";
-		if(this.state.listIsOpen){
-			dropDownIcon = "icon-sort-down icon";
-		}*/
 
+    thereAreSubcategories() {
+        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0;
+    }
+
+    getCategoriesHtml() {
+
+        let categoryComponents = [];
         this.issueCategories().forEach(function(category, i) {
             let selectedValue = "";
 
@@ -87,6 +85,19 @@ class ReviewExtendedIssuePanel extends React.Component{
                     selectedValue={selectedValue}
                     nested={false}
                     category={category} />);
+        }.bind(this));
+
+        return <div>
+                    <div className="re-item-head pad-left-10"><b>Type of issue</b></div>
+                    {categoryComponents}
+                </div>;
+    }
+
+    getSubCategoriesHtml() {
+        let categoryComponents = [];
+        this.issueCategories.forEach(function(category, i) {
+            let selectedValue = "";
+            let subcategoriesComponents = [];
 
             if ( category.subcategories.length > 0 ) {
                 category.subcategories.forEach( function(category, ii) {
@@ -94,7 +105,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                     let kk = 'category-selector-' + key ;
                     let selectedValue = "";
 
-                    categoryComponents.push(
+                    subcategoriesComponents.push(
                         <ReviewExtendedCategorySelector
                             key={kk}
                             selectedValue={selectedValue}
@@ -104,18 +115,31 @@ class ReviewExtendedIssuePanel extends React.Component{
                     );
                 }.bind(this) );
             }
+            let html = <div>
+                <div className="re-item-head pad-left-10"><b>{category.label}</b></div>
+                {subcategoriesComponents}
+            </div>
+            categoryComponents.push(html);
         }.bind(this));
 
+        return categoryComponents;
+    }
 
-            return<div className="re-issues-box re-to-create">
-                {/*<h4 className="re-issues-box-title">Error list</h4>*/}
-                <div className="re-list errors" ref={(node)=>this.listElm=node}>
-                    <div>
-                        <div className="re-item-head pad-left-10"><b>Tone of voice</b></div>
-                        {categoryComponents}
-                    </div>
-                </div>
-			</div>
+    render() {
+        let html = [];
+
+        if (this.thereAreSubcategories()) {
+            html = this.getSubCategoriesHtml();
+        } else {
+            html = this.getCategoriesHtml()
+        }
+
+        return<div className="re-issues-box re-to-create">
+            {/*<h4 className="re-issues-box-title">Error list</h4>*/}
+            <div className="re-list errors" ref={(node)=>this.listElm=node}>
+                {html}
+            </div>
+        </div>
     }
 }
 
