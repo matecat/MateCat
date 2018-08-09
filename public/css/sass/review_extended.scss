@@ -280,11 +280,7 @@ h1, h2, h3, h4, h5, a, input {
 }
 
 .review-balloon-container {
-    position: absolute;
-    text-align: left;
-    width: 34%;
-    left: 102%;
-    top: 25%;
+    padding-right: 15px;
     .re-wrapper {
         height: 100%;
         position: relative;
@@ -319,6 +315,27 @@ h1, h2, h3, h4, h5, a, input {
                         padding: 5px 10px;
                         &:hover {
                             background: #f2f4f7 !important;
+                        }
+                    }
+                    .comments-view {
+                        .re-add-comment {
+                            padding: 7px 5px;
+                            .re-comment-input {
+                                border-radius: 20px !important;
+                            }
+                        }
+                        .re-comment-list {
+                            .re-comment {
+                                background: white;
+                                padding: 5px 10px;
+                                margin-bottom: 2px;
+                                .re-revisor {
+                                    font-weight: 700;
+                                }
+                                .re-comment-date {
+                                    color: lightslategray;
+                                }
+                            }
                         }
                     }
                 }

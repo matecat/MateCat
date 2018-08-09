@@ -6,10 +6,6 @@
  ******
  */
 
-.mbc-comment-balloon-outer {
-  padding-right: 15px
-}
-
 .mbc-comment-balloon-inner {
   background: #ffffff;
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
@@ -638,13 +634,8 @@ article.mbc-commenting-opened {
  ******
  */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
-  position: absolute;
-  text-align: left;
-  z-index: 10;
   display: block;
-  width: 20%;
-  max-width: 250px;
-  left: 102%;
+  padding-right: 15px;
 }
 /*
  ******
@@ -843,9 +834,9 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   top: -10px;
 }
 
-section.editor .mbc-comment-balloon-outer {
+/*section.editor .mbc-comment-balloon-outer {
   top: 40px;
-}
+}*/
 
 /*
  ******
@@ -888,10 +879,10 @@ section.editor .mbc-comment-balloon-outer {
 .mbc-comment-icon-button {
     opacity:0;
     -webkit-transition: opacity 1s ease-in-out;
-  -moz-transition: opacity 1s ease-in-out;
-  -ms-transition: opacity 1s ease-in-out;
-  -o-transition: opacity 1s ease-in-out;
-  transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -ms-transition: opacity 1s ease-in-out;
+    -o-transition: opacity 1s ease-in-out;
+    transition: opacity 1s ease-in-out;
 }
 
 section:hover .mbc-comment-icon-button,
