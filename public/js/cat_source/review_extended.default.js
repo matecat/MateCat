@@ -10,7 +10,7 @@ if ( ReviewExtended.enabled() ) {
 
 
     (function (ReviewExtended, $,undefined) {
-
+        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
 
         $.extend(UI, {
             clickOnApprovedButton: function (e, button) {

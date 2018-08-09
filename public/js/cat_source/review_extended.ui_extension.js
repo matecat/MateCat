@@ -4,7 +4,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
     (function (ReviewExtended, $,undefined) {
 
-        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
 
         $.extend(ReviewExtended, {
 
