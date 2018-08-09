@@ -920,7 +920,10 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     text-transform: uppercase;
 }
 
-.buttons .approved.disabled{
+.buttons .approved.disabled,
+.buttons .next-unapproved.disabled ,
+.buttons .next-untranslated.disabled ,
+.buttons .translated.disabled {
     pointer-events: none;
     color: #666 !important;
     border-color: #666;
