@@ -114,6 +114,12 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $this->_destroyObjectCache( $stmt, [ $project_id ] );
     }
 
+    /**
+     * @param     $id_project
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
+     */
     public static function getByProjectId( $id_project, $ttl = 0 ) {
 
         $thisDao = new self();

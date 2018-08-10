@@ -9,6 +9,8 @@
 
 namespace Engines\MMT;
 
+use Log;
+
 class MMTServiceAPIWrapper extends MMTServiceApi {
 
     protected function exec_curl( $curl ) {
@@ -18,10 +20,19 @@ class MMTServiceAPIWrapper extends MMTServiceApi {
         $resource = $handler->addResource( $curl );
         $handler->multiExec();
         $handler->multiCurlCloseAll();
-        return $handler->getSingleContent( $resource );
+        $rawContent = $handler->getSingleContent( $resource );
+        Log::doLog( "$resource ... Received... " . var_export( $rawContent, true ) );
+        return $rawContent;
 
     }
 
     public function close_curl( $curl ) {}
+
+    protected function send( $method, $url, $params = null, $multipart = false ) {
+        if ( !$multipart && $params ) {
+            Log::doLog( "... Request Parameters ... " . var_export( http_build_query( $params ), true ) );
+        }
+        return parent::send( $method, $url, $params, $multipart );
+    }
 
 }

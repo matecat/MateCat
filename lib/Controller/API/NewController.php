@@ -305,16 +305,18 @@ class NewController extends ajaxController {
 
     }
 
-    private function setProjectFeatures() {
+    private function setProjectFeaturesFromPostValues() {
         if ( $this->postInput[ 'project_completion' ] ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
             $this->projectFeatures[] = $feature;
         }
 
+        $postObj = new ArrayObject( $this->postInput );
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $this->postInput, $this->userIsLogged
+                'filterCreateProjectFeatures', $this->projectFeatures, $postObj, $this->userIsLogged
         );
+        $this->postInput = $postObj->getArrayCopy();
 
     }
 
@@ -347,7 +349,7 @@ class NewController extends ajaxController {
 
     public function doAction() {
         try {
-            $this->setProjectFeatures();
+            $this->setProjectFeaturesFromPostValues();
         } catch ( ValidationError $e ) {
             $this->api_output = [ 'status' => 'FAIL', 'message' => $e->getMessage() ];
             return -1;
