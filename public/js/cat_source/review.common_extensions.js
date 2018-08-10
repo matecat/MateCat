@@ -3,13 +3,13 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
     $.extend(UI, {
 
         openIssuesPanel : function(data) {
-            SearchUtils.closeSearch();
             if (config.reviewType === "improved") {
                 $('body').addClass('review-improved-opened');
                 hackIntercomButton( true );
             } else {
                 $('body').addClass('review-extended-opened');
             }
+            SearchUtils.closeSearch();
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
 

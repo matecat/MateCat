@@ -58,6 +58,10 @@ var SegmentActions = {
 
     /********** Segment **********/
 
+    closeSegment: function ( sid, fid ) {
+        this.closeIssuesPanel();
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {
             AppDispatcher.dispatch({
@@ -359,7 +363,14 @@ var SegmentActions = {
 
     closeIssuesPanel: function () {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_ISSUES_PANEL
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+        });
+    },
+
+    closeSegmentIssuePanel: function ( sid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+            sid: sid
         });
     },
 
