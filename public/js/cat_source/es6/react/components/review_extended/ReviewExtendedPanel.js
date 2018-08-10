@@ -90,6 +90,13 @@ class ReviewExtendedPanel extends React.Component {
 		let issues = this.getAllIssues();
 
 		return <div className="re-wrapper">
+			<ReviewVersionDiffContainer
+				textSelectedFn={this.textSelected.bind(this)}
+				updateDiffDataFn={this.updateDiffData.bind(this)}
+				removeSelection={this.removeSelection.bind(this)}
+				segment={this.props.segment}
+				selectable={this.props.isReview}
+			/>
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
 				loader={this.state.issueInCreation}

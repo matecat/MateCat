@@ -722,6 +722,15 @@
                     UI.showTranslateAllModalWarnirng();
                 }
             });
+        },
+        disableSegmentButtons: function ( sid ) {
+            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated");
+            div.addClass('disabled').attr("disabled", false);
+
+        },
+        enableSegmentsButtons: function ( sid ) {
+            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated");
+            div.removeClass('disabled').attr("disabled", true);
         }
     });
 })(jQuery); 

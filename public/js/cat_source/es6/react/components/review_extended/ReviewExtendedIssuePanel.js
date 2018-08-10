@@ -115,10 +115,10 @@ class ReviewExtendedIssuePanel extends React.Component{
                     );
                 }.bind(this) );
             }
-            let html = <div>
+            let html = <div key={category.id}>
                 <div className="re-item-head pad-left-10"><b>{category.label}</b></div>
                 {subcategoriesComponents}
-            </div>
+            </div>;
             categoryComponents.push(html);
         }.bind(this));
 
