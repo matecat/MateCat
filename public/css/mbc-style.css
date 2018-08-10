@@ -50,7 +50,8 @@ section.editor .mbc-comment-balloon-inner {
  ******
  */
 .mbc-thread-wrap {
-  padding: 0 12px 17px 12px;
+  padding: 0 10px 10px 10px;
+  border-top: 1px solid #f2f4f7;
 }
 
 /*
@@ -175,7 +176,7 @@ a.mbc-new-message-link:hover {
 
 .mbc-comment-textarea {
   padding: 5px 8px;
-  position: static;
+  position: relative;
   resize: none;
   word-break: normal;
   outline: none;
@@ -186,7 +187,9 @@ a.mbc-new-message-link:hover {
     min-height: 40px;
     overflow-y: auto;
     max-height: 160px;
-    border-radius: 20px
+    border-radius: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:hover{
@@ -196,13 +199,15 @@ a.mbc-new-message-link:hover {
 .mbc-comment-textarea:focus {
   border: 1px solid #96C8DA;
   box-shadow: inset 0px 0px 2px 2px #96C8DA;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:empty:not(:focus):before {
     content: attr(data-placeholder);
     color: #999;
-    position: relative;
-    top: 5px;
+    position: absolute;
+    top: 10px;
 }
 
 .tagging-item {
