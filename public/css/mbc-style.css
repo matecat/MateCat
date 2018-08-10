@@ -496,10 +496,9 @@ a.mbc-close-icon:hover {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  margin: 6px auto 0;
   padding: 10px 0;
   position: relative;
-  width: 80px;
+  width: 30px;
   display: block!important;
 }
 
@@ -558,7 +557,7 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 44px;
+  left: 17px;
   position: absolute;
   top: 10px;
 }
