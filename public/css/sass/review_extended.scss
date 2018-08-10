@@ -288,7 +288,7 @@ h1, h2, h3, h4, h5, a, input {
             .re-issues-box-title {}
             .re-list {
                 overflow-y: auto;
-                max-height: 210px;
+                max-height: 250px;
                 .re-item-head {
                     text-transform: uppercase;
                     border-bottom: 1px solid #f2f4f7;
@@ -341,7 +341,10 @@ h1, h2, h3, h4, h5, a, input {
                 }
             }
         }
-
+        .re-item.issue-comments-open {
+            margin: 15px 0;
+            border: 1px solid #77c6ff;
+        }
         .re-created {
             background: #f2f4f7;
             box-shadow: 0 0 4px #ccc;
@@ -352,7 +355,7 @@ h1, h2, h3, h4, h5, a, input {
         .re-to-create {
             background: #ffffff;
             .errors {
-                max-height: 300px;
+                max-height: 450px;
                 .re-category-item {
                     background: #fff;
                     &:hover {
