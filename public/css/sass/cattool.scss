@@ -54,16 +54,11 @@ Styles from other css files should be ported over time.
 .segment-side-buttons {
     /* styles based on .sid line 376 style.css */
     color: #999;
-    cursor: default;
-    display: block;
-    font-size: 12px;
     height: inherit;
-    padding-bottom: 1px;
     position: absolute;
-    text-align: center;
     text-decoration: none;
-    right: -8%;
-    width: 8%;
+    right: -10%;
+    width: 10%;
     top: 0;
 }
 
