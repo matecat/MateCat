@@ -212,6 +212,7 @@ class Segment extends React.Component {
                     sid={this.props.segment.sid.split('-')[0]}
                     reviewType={this.props.reviewType}
                     segment={this.props.segment}
+                    open={this.state.showRevisionPanel}
             />;
         }
         return null;
@@ -245,16 +246,35 @@ class Segment extends React.Component {
 
     openRevisionPanel(data) {
         if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
+            if (this.state.showRevisionPanel) {
+                this.setState({
+                    showRevisionPanel: false
+                });
+                setTimeout( function (  ) {
+                    UI.closeIssuesPanel()
+                });
+            } else {
+                this.setState({
+                    showRevisionPanel: true
+                });
+            }
+
+        } else {
             this.setState({
-                showRevisionPanel: true
+                showRevisionPanel: false
             });
         }
     }
-
-    closeRevisionPanel(data) {
-        this.setState({
-            showRevisionPanel: false
-        });
+    /*
+    Is possible to close the single segmentIssue panel passing the id or all segments issue panel
+    without passing anything
+     */
+    closeRevisionPanel(sid) {
+        if ( !sid  || (sid && parseInt(sid) === parseInt(this.props.segment.sid)) ) {
+            this.setState({
+                showRevisionPanel: false
+            });
+        }
     }
 
     allowHTML(string) {

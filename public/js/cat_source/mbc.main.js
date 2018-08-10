@@ -669,7 +669,7 @@ if ( MBC.enabled() )
             if ( (!section.isSplit()) || section.isFirstOfSplit() ) {
                 side_buttons = section.el.find('.segment-side-buttons' );
                 side_buttons.find('.mbc-comment-icon').parent('.txt').remove();
-                side_buttons.append( $(tpls.commentLink ));
+                side_buttons.prepend( $(tpls.commentLink ));
             }
         };
 
@@ -774,7 +774,11 @@ if ( MBC.enabled() )
 
             $( delegate ).on( 'click', '.segment-side-buttons .txt', function ( e ) {
                 var section = $( e.target ).closest( 'section' );
-                openSegmentCommentNoScroll( section );
+                if ( section.find('.mbc-comment-balloon-outer').length ) {
+                    closeBalloon();
+                } else {
+                    openSegmentCommentNoScroll( section );
+                }
             } );
 
             $( delegate ).on( 'click', '.mbc-comment-send-btn', function ( e ) {

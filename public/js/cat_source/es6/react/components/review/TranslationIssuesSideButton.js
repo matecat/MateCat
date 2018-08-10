@@ -74,19 +74,31 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     handleClick (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this.button).addClass('open');
+        if (this.props.reviewType === "extended") {
+            SegmentActions.closeIssuesPanel();
+        }
         SegmentActions.openIssuesPanel({sid: this.props.sid});
+
     }
 
     shouldComponentUpdate (nextProps, nextState) {
         return this.state.issues_count != nextState.issues_count  ;
     }
 
+    componentDidUpdate() {
+        console.log("Update Segment" + this.props.segment.sid);
+    }
+
     render() {
-        var plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
+        let openClass = this.props.open ? "open-issues" : "";
+        let plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
-            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button has-object" + openClass} href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
         } else  {
-            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+            return (<div onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button" + openClass} href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
         }
 
     }
