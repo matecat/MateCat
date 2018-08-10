@@ -118,7 +118,7 @@ if ( MBC.enabled() )
         segmentThread : '' +
             ' <div class="mbc-comment-balloon-outer">' +
             ' <div class="mbc-comment-balloon-inner">' +
-            ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
+            /*' <div class="mbc-triangle mbc-triangle-topleft"></div>' +*/
             ' <div class="mbc-comments-wrap">' +
             ' ' +
             ' </div>' +

@@ -284,6 +284,13 @@ h1, h2, h3, h4, h5, a, input {
     .re-wrapper {
         height: 100%;
         position: relative;
+        .re-warning-not-added-issue {
+            p {
+                background: #ff5f5f;
+                color: #fff;
+                padding: 5px 10px;
+            }
+        }
         .re-issues-box {
             .re-issues-box-title {}
             .re-list {
@@ -315,6 +322,9 @@ h1, h2, h3, h4, h5, a, input {
                         padding: 5px 10px;
                         &:hover {
                             background: #f2f4f7 !important;
+                        }
+                        .error-name {
+                            padding-right: 10px;
                         }
                     }
                     .comments-view {
@@ -355,9 +365,10 @@ h1, h2, h3, h4, h5, a, input {
         }
         .re-to-create {
             background: #ffffff;
+            padding: 5px 0px;
+            box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
             .errors {
                 max-height: 290px;
-                box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
                 .re-category-item {
                     background: #fff;
                     &:hover {
