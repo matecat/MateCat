@@ -89,7 +89,7 @@ class ReviewExtendedPanel extends React.Component {
 	render() {
 		let issues = this.getAllIssues();
 
-		return <div className="re-wrapper">
+		return <div className="re-wrapper shadow-1">
 			<ReviewVersionDiffContainer
 				textSelectedFn={this.textSelected.bind(this)}
 				updateDiffDataFn={this.updateDiffData.bind(this)}
