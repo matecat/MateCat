@@ -5,7 +5,9 @@
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function initReactComponents() {
         if (config.isReview) {
-            SegmentActions.mountTranslationIssues();
+            loadDataPromise.done(function() {
+                SegmentActions.mountTranslationIssues();
+            });
         }
 
         // setTimeout(function () {
@@ -37,4 +39,26 @@ if (ReviewExtended.enabled()) {
             UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         }
     });
+
+    var loadDataPromise = (function() {
+        var issues =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-issues',
+            config.id_job, config.password
+        );
+
+        var versions =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-versions',
+            config.id_job, config.password
+        );
+
+        return $.when(
+            $.getJSON( issues ).done(function( data ) {
+                $(data.issues).each(function() {
+
+                });
+            }),
+
+            $.getJSON( versions ).done(  )
+        );
+    })();
 }

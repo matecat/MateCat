@@ -14,7 +14,11 @@ class ReviewExtendedCategorySelector extends React.Component{
     }
 
     componentDidMount(){
-    	$(this.selectRef).dropdown();
+    	$(this.selectRef).dropdown({
+            // direction: "auto",
+            keepOnScreen: true,
+            context: document.getElementById("re-category-list-" + this.props.sid)
+        });
 	}
     onChangeSelect(){
         let severity = $(this.selectRef).data('value');
