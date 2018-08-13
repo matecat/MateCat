@@ -1649,6 +1649,7 @@ select#mt_engine_int {
     width: 100%;
     margin-bottom: 20px;
     border: 1px solid #ccc;
+    border-spacing: 0;
 }
 
 .privatekey .btn-ok {

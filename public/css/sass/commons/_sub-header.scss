@@ -79,8 +79,11 @@
                 .scrolling.menu {
                     .item{
                         img {
-                            width: 24px;
-                            height: 24px;
+							width: 24px;
+							height: 24px;
+							margin-top: 0;
+							margin-bottom: 0;
+							vertical-align: middle;
                         }
                         .user-name-filter {
                             top: 2px;
