@@ -90,6 +90,7 @@ class ReviewExtendedPanel extends React.Component {
 		let issues = this.getAllIssues();
 
 		return <div className="re-wrapper shadow-1">
+			<div className="mbc-triangle mbc-open-view mbc-re-issues"/>
 			<ReviewVersionDiffContainer
 				textSelectedFn={this.textSelected.bind(this)}
 				updateDiffDataFn={this.updateDiffData.bind(this)}
@@ -122,8 +123,7 @@ class ReviewExtendedPanel extends React.Component {
 				segment={this.props.segment}
                 setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
 			/>): (null)}
-
-		</div>;
+			</div>;
 	}
 }
 

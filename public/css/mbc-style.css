@@ -501,10 +501,10 @@ a.mbc-close-icon:hover {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  padding: 10px 0;
+  padding: 10px 0 7px;
   position: relative;
   width: 30px;
-  display: block!important;
+  display: block !important;
 }
 
 /*
@@ -562,7 +562,7 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 17px;
+  left: 13px;
   position: absolute;
   top: 10px;
 }
@@ -836,6 +836,24 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 section.editor .mbc-triangle.mbc-triangle-topleft {
   top: -10px;
+}
+
+.mbc-open-view {
+  border-top: 12px solid #ffffff;
+  border-left: 14px solid transparent;
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  margin-left: -14px;
+  position: absolute;
+
+}
+
+.mbc-open-view.mbc-re-messages {
+  top: 35px;
+}
+
+.mbc-open-view.mbc-re-issues {
+  top: 93px;
 }
 
 /*section.editor .mbc-comment-balloon-outer {
