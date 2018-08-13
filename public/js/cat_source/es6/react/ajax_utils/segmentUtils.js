@@ -32,6 +32,15 @@ API.SEGMENT = {
         });
     },
 
+    getSegmentsIssues: function ( idSegment ) {
+        var path  = sprintf('/api/v2/jobs/%s/%s/translation-issues',
+            config.id_job, config.password, idSegment);
+        return $.ajax({
+            type: "get",
+            url : path
+        });
+    },
+
     getSegmentVersionsIssues: function (idSegment) {
 
         var path  = sprintf("/api/v2/jobs/%s/%s/revise/segments/%s/translation-versions",

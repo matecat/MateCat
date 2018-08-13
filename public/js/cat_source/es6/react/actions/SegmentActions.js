@@ -381,16 +381,16 @@ var SegmentActions = {
         });
     },
 
-    renderReviseErrors: function (sid, data) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.RENDER_REVISE_ISSUES,
-            sid: sid,
-            data: data
-        });
-    },
-
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
+    },
+
+    addPreloadedIssuesToSegment: function ( sid, issues ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
+            sid: sid,
+            data: issues
+        });
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {

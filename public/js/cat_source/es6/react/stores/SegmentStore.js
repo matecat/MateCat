@@ -497,9 +497,6 @@ AppDispatcher.register(function (action) {
             SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, action.id, action.originalTranslation);
             break;
-        case SegmentConstants.RENDER_REVISE_ISSUES:
-            SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);
-            break;
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
             SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
