@@ -35,7 +35,7 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     setStateOnIssueChange( issue ) {
-        if ( parseInt(this.props.sid) == parseInt(issue.id_segment) ) {
+        if ( parseInt(this.props.sid) === parseInt(issue.id_segment) ) {
             this.setState( this.readDatabaseAndReturnState() );
          }
     }
@@ -91,7 +91,11 @@ class TranslationIssuesSideButton extends React.Component{
         if (this.props.reviewType === "extended") {
             SegmentActions.closeIssuesPanel();
         }
-        SegmentActions.openIssuesPanel({sid: this.props.sid});
+        if (!this.props.open) {
+            SegmentActions.openIssuesPanel({sid: this.props.sid});
+        } else {
+            UI.closeIssuesPanel();
+        }
 
     }
 
@@ -100,7 +104,7 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     componentDidUpdate() {
-        console.log("Update Segment" + this.props.segment.sid);
+        console.log("Update Segment translation button" + this.props.segment.sid);
     }
 
     render() {

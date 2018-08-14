@@ -4,6 +4,7 @@ ReviewExtended = {
         return Review.type === 'extended' ;
     },
     type : config.reviewType,
+    issueRequiredOnSegmentChange: false,
     getSegmentsIssues: function (  ) {
         API.SEGMENT.getSegmentsIssues().done(  ( data ) => {
             var versionsIssues = {};
@@ -28,8 +29,7 @@ if ( ReviewExtended.enabled() ) {
             clickOnApprovedButton: function (e, button) {
                 e.preventDefault();
                 var sid = UI.currentSegmentId;
-                if ( UI.segmentIsModified(sid)) {
-                    SegmentActions.openIssuesPanel({ sid: sid });
+                if ( UI.segmentIsModified(sid) && this.issueRequiredOnSegmentChange) {
                     SegmentActions.showIssuesMessage(sid);
                     return;
                 }

@@ -65,9 +65,12 @@ class ReviewExtendedPanel extends React.Component {
 	}
 
     showIssuesMessage() {
-        this.setState({
-            showAddIssueMessage: true
-        });
+		if (this.props.issueRequiredOnSegmentChange) {
+            this.setState({
+                showAddIssueMessage: true
+            });
+            SegmentActions.openIssuesPanel({ sid: sid });
+        }
     }
 
 	componentWillReceiveProps(nextProps) {
@@ -80,6 +83,7 @@ class ReviewExtendedPanel extends React.Component {
     componentDidMount() {
 		// this.props.setParentLoader(false);
         SegmentStore.addListener(SegmentConstants.SHOW_ISSUE_MESSAGE, this.showIssuesMessage.bind(this));
+
     }
 
     componentWillUnmount() {
@@ -126,5 +130,9 @@ class ReviewExtendedPanel extends React.Component {
 			</div>;
 	}
 }
+ReviewExtendedPanel.defaultProps = {
+    issueRequiredOnSegmentChange: false
+};
+
 
 export default ReviewExtendedPanel;
