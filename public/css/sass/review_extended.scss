@@ -39,8 +39,15 @@ h1, h2, h3, h4, h5, a, input {
                     }
                     .re-issue {
                         .issue-head {
+                            max-width: 85%;
+                            min-width: 30px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            display: flex;
                             .re-category-issue-head {
-
+                                overflow: hidden;
+                                text-overflow: ellipsis;
                             }
                         }
                         .issue-activity-icon {
