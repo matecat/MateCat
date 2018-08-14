@@ -37,11 +37,14 @@ section.editor .mbc-comment-balloon-inner {
  */
 
 .mbc-comments-wrap {
-  height: 100%;
+  min-height: 100%;
   max-height: 200px;
   overflow-y: auto;
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  bottom: 0;
 }
 
 /*
@@ -564,7 +567,7 @@ a.mbc-close-icon:hover {
 .mbc-comment-highlight-segment {
   left: 17px;
   position: absolute;
-  top: 10px;
+  top: 5px;
 }
 
 /*
@@ -637,9 +640,12 @@ article.mbc-commenting-opened {
  ******
  */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
-    display: block;
-    padding-right: 15px;
-    margin-bottom: 30px;
+  display: block;
+  padding-right: 15px;
+  margin-bottom: 30px;
+  position: absolute;
+  bottom: -90px;
+  width: 96%;
 }
 /*
  ******
@@ -849,11 +855,11 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
 }
 
 .mbc-open-view.mbc-re-messages {
-  top: 35px;
+  bottom: 0px;
 }
 
 .mbc-open-view.mbc-re-issues {
-  top: 86px;
+  top: 0px;
 }
 
 
@@ -869,7 +875,7 @@ Close icon ballon - Right panel
   background: #fff;
   position: absolute;
   z-index: 1;
-  left: -13px;
+  right: 0px;
   top: -38px;
   border-radius: 50%;
   color: #7b7b7b;
@@ -893,6 +899,7 @@ Close icon ballon - Right panel
 
 .re-close-balloon.re-close-err {
   top: -15px;
+  right: -15px;
 }
 
 

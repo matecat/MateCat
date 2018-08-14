@@ -75,7 +75,7 @@ if ( MBC.enabled() )
 
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
-            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate pad-left-10"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             '   <span class="mbc-comment-info mbc-comment-time pull-left"></span>' +

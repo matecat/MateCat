@@ -7,6 +7,9 @@ h1, h2, h3, h4, h5, a, input {
 
 .review-balloon-container {
     padding-right: 15px;
+    position: absolute;
+    top: 90px;
+    width: 96%;
     .re-wrapper {
         height: 100%;
         position: relative;
