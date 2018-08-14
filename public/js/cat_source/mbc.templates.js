@@ -75,7 +75,7 @@ if ( MBC.enabled() )
 
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
-            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate pad-left-10"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             '   <span class="mbc-comment-info mbc-comment-time pull-left"></span>' +
@@ -120,6 +120,7 @@ if ( MBC.enabled() )
             ' <div class="mbc-comment-balloon-outer">' +
             ' <div class="mbc-comment-balloon-inner">' +
             ' <div class="mbc-triangle mbc-open-view mbc-re-messages"></div>' +
+            ' <a class="re-close-balloon shadow-1"><i class="icon-cancel3 icon" /></a>' +
             ' <div class="mbc-comments-wrap">' +
             ' ' +
             ' </div>' +
