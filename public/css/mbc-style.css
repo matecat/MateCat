@@ -504,9 +504,9 @@ a.mbc-close-icon:hover {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  padding: 10px 0 7px;
+  padding: 10px 0;
   position: relative;
-  width: 30px;
+  width: 80px;
   display: block !important;
 }
 
@@ -644,8 +644,8 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  bottom: -90px;
-  width: 96%;
+  bottom: -61px;
+  width: 100%;
 }
 /*
  ******
