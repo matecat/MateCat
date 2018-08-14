@@ -51,6 +51,14 @@ class TranslationIssuesSideButton extends React.Component{
             });
         }
     }
+    setSegmentPreloadedIssues(sid, issues) {
+        if (parseInt(this.props.sid) === parseInt(sid)) {
+
+            this.setState({
+                issues_count : issues.length
+            });
+        }
+    }
 
     componentDidMount() {
         if (this.props.reviewType === "improved") {
@@ -59,6 +67,7 @@ class TranslationIssuesSideButton extends React.Component{
                 this.setStateOnIssueChange.bind(this));
         } else if (this.props.reviewType === "extended") {
             SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions.bind(this));
+            SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues.bind(this));
         }
 
     }
@@ -70,6 +79,8 @@ class TranslationIssuesSideButton extends React.Component{
                 this.setStateOnIssueChange);
         } else if (this.props.reviewType === "extended") {
             SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
+            SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues);
+
         }
     }
 
