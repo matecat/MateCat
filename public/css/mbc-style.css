@@ -562,7 +562,7 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 13px;
+  left: 17px;
   position: absolute;
   top: 10px;
 }
@@ -853,12 +853,48 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
 }
 
 .mbc-open-view.mbc-re-issues {
-  top: 93px;
+  top: 86px;
 }
 
-/*section.editor .mbc-comment-balloon-outer {
-  top: 40px;
-}*/
+
+/*
+**********
+Close icon ballon - Right panel
+**********
+*/
+
+.re-close-balloon {
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  position: absolute;
+  z-index: 1;
+  left: -13px;
+  top: -38px;
+  border-radius: 50%;
+  color: #7b7b7b;
+  cursor: pointer;
+}
+
+.re-close-balloon:hover {
+  color: #000000;
+}
+
+.re-close-balloon i {
+  margin: 0;
+  padding: 0;
+  width: 0;
+  height: 0;
+  position: relative;
+  top: 4px;
+  left: 4px;
+  font-size: 16px;
+}
+
+.re-close-balloon.re-close-err {
+  top: -15px;
+}
+
 
 /*
  ******
