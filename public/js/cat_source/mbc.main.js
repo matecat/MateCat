@@ -781,6 +781,10 @@ if ( MBC.enabled() )
                 }
             } );
 
+            $( delegate ).on( 'click', '.mbc-comment-balloon-inner .re-close-balloon', function ( e ) {
+                closeBalloon();
+            } );
+
             $( delegate ).on( 'click', '.mbc-comment-send-btn', function ( e ) {
                 e.preventDefault();
                 submitComment( $( e.target ).closest( 'section' ) );

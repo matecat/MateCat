@@ -73,6 +73,10 @@ class ReviewExtendedPanel extends React.Component {
         }
     }
 
+    closePanel() {
+	    UI.closeIssuesPanel();
+    }
+
 	componentWillReceiveProps(nextProps) {
 		this.setState({
 			versionNumber: nextProps.segment.versions[0].version_number,
@@ -95,7 +99,7 @@ class ReviewExtendedPanel extends React.Component {
 
 		return <div className="re-wrapper shadow-1">
 			<div className="mbc-triangle mbc-open-view mbc-re-issues"/>
-			<a className="re-close-balloon re-close-err shadow-1"><i class="icon-cancel3 icon" /></a>
+			<a className="re-close-balloon re-close-err shadow-1" onClick={this.closePanel.bind(this)}><i class="icon-cancel3 icon" /></a>
 			<ReviewVersionDiffContainer
 				textSelectedFn={this.textSelected.bind(this)}
 				updateDiffDataFn={this.updateDiffData.bind(this)}
