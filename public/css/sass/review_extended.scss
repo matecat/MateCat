@@ -68,6 +68,7 @@ h1, h2, h3, h4, h5, a, input {
                         }
                         .error-name {
                             padding-right: 10px;
+                            display: flex;
                         }
                     }
                     .comments-view {
@@ -147,3 +148,11 @@ h1, h2, h3, h4, h5, a, input {
     }
 }
 
+.re-abb-issue {
+    background: #e5e9f1;
+    padding: 0px 4px;
+    margin-right: 5px;
+    color: black;
+    width: fit-content;
+    height: fit-content;
+}

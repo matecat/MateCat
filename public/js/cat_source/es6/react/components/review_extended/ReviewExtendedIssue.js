@@ -168,7 +168,8 @@ class ReviewExtendedIssue extends React.Component {
 		return <div className={containerClass} ref={(node)=>this.el=node}>
 			<div className="re-item-box re-issue shadow-1">
 				<div className="issue-head pad-right-10">
-					<span className="re-category-issue-head" title={category_label}>{category_label}</span><span title="Type of severity">: <b> {this.props.issue.severity}</b></span>
+					<div className="re-abb-issue">ABB</div>
+					{/*<span className="re-category-issue-head" title={category_label}>{category_label}</span>*/}<b><span title="Type of severity">{this.props.issue.severity}</span></b>
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
