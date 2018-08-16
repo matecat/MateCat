@@ -131,7 +131,8 @@ h1, h2, h3, h4, h5, a, input {
                 flex-direction: column;
                 .mbc-comment-balloon-outer {
                     position: unset;
-                    bottom: -111px !important;
+                    bottom: -11px !important;
+                    margin-bottom: -30px;
                     .mbc-open-view.mbc-re-messages {
                         top: 1px;
                         border-top: 12px solid #ffffff;
@@ -140,8 +141,8 @@ h1, h2, h3, h4, h5, a, input {
                     }
                 }
                 .review-balloon-container {
-                    position: unset;
-                    top: 111px !important;
+                    position: relative;
+                    margin-top: 25px;
                 }
             }
         }
