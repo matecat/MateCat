@@ -118,3 +118,32 @@ h1, h2, h3, h4, h5, a, input {
         }
     }
 }
+.article-segments-container{
+    section {
+        &:nth-child(-n+3) {
+            .segment-side-container {
+                position: absolute;
+                text-align: left;
+                width: 29%;
+                left: 106%;
+                display: flex;
+                flex-direction: column;
+                .mbc-comment-balloon-outer {
+                    position: unset;
+                    bottom: -111px !important;
+                    .mbc-open-view.mbc-re-messages {
+                        top: 1px;
+                        border-top: 12px solid #ffffff;
+                        border-left: 14px solid transparent;
+                        border-bottom: unset;
+                    }
+                }
+                .review-balloon-container {
+                    position: unset;
+                    top: 111px !important;
+                }
+            }
+        }
+    }
+}
+

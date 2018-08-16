@@ -856,6 +856,11 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
 
 .mbc-open-view.mbc-re-messages {
   bottom: 0px;
+  border-top: unset;
+  border-left: unset;
+  border-bottom: 12px solid #ffffff;
+  border-left: 14px solid transparent;
+  filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
 }
 
 .mbc-open-view.mbc-re-issues {
