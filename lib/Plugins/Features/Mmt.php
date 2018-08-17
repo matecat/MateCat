@@ -208,19 +208,18 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see createProjectController::setProjectFeaturesFromPostValues()
-     * Called in @see NewController::setProjectFeaturesFromPostValues()
+     * Called in @see createProjectController::appendFeaturesToProject()
+     * Called in @see NewController::appendFeaturesToProject()
      *
      * @param $projectFeatures
-     * @param $__postInput
-     * @param $userIsLogged
+     * @param $controller \NewController|\createProjectController
      *
      * @return array
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function filterCreateProjectFeatures( $projectFeatures, $__postInput, $userIsLogged ){
+    public function filterCreateProjectFeatures( $projectFeatures, $controller ){
 
-        $engine = Engine::getInstance( $__postInput[ 'mt_engine' ] );
+        $engine = Engine::getInstance( $controller->postInput[ 'mt_engine' ] );
         if( $engine instanceof Engines_MMT ){
             /**
              * @var $availableLangs
@@ -232,8 +231,8 @@ class Mmt extends BaseFeature {
              * </code>
              */
             $availableLangs = $engine->getAvailableLanguages();
-            $target_language_list = explode( ",", $__postInput[ 'target_lang' ] );
-            $source_language = $__postInput[ 'source_lang' ];
+            $target_language_list = explode( ",", $controller->postInput[ 'target_lang' ] );
+            $source_language = $controller->postInput[ 'source_lang' ];
 
             $found = true;
             foreach( $availableLangs as $source => $availableTargets ){
@@ -260,7 +259,7 @@ class Mmt extends BaseFeature {
                 //Force fallback to MyMemory if MMT does not support the language pair
                 //Warning For Multi Lingual projects, this disable MMT for all languages ever if one language is supported, because MateCat at moment
                 // does not support the management of different engines per JOB in the creation phase.
-                $__postInput[ 'mt_engine' ] = 1;
+                $controller->postInput[ 'mt_engine' ] = 1;
             } else {
                 $feature                 = new BasicFeatureStruct();
                 $feature->feature_code   = self::FEATURE_CODE;

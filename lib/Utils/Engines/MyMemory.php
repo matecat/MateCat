@@ -133,8 +133,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @return array
      * @throws Exceptions_RecordNotFound
-     * @throws \Exceptions\ValidationError
      * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function get( $_config ) {
 

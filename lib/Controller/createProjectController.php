@@ -34,7 +34,7 @@ class createProjectController extends ajaxController {
      */
     private $projectFeatures = [];
 
-    private $__postInput;
+    public $postInput;
 
     public function __construct() {
 
@@ -72,46 +72,46 @@ class createProjectController extends ajaxController {
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
 
-        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->setProjectFeaturesFromPostValues();
+        $this->appendFeaturesToProject();
 
         //first we check the presence of a list from tm management panel
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
         //if a string is sent by the client, transform it into a valid array
-        if ( !empty( $this->__postInput[ 'private_tm_key' ] ) ) {
-            $this->__postInput[ 'private_tm_key' ] = [
+        if ( !empty( $this->postInput[ 'private_tm_key' ] ) ) {
+            $this->postInput[ 'private_tm_key' ] = [
                     [
-                            'key'  => trim( $this->__postInput[ 'private_tm_key' ] ),
+                            'key'  => trim( $this->postInput[ 'private_tm_key' ] ),
                             'name' => null,
                             'r'    => true,
                             'w'    => true
                     ]
             ];
         } else {
-            $this->__postInput[ 'private_tm_key' ] = [];
+            $this->postInput[ 'private_tm_key' ] = [];
         }
 
         if ( $array_keys ) { // some keys are selected from panel
 
             //remove duplicates
             foreach ( $array_keys as $pos => $value ) {
-                if ( isset( $this->__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
-                        && $this->__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
+                if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
+                        && $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
                     //same key was get from keyring, remove
-                    $this->__postInput[ 'private_tm_key' ] = [];
+                    $this->postInput[ 'private_tm_key' ] = [];
                 }
             }
 
             //merge the arrays
-            $private_keyList = array_merge( $this->__postInput[ 'private_tm_key' ], $array_keys );
+            $private_keyList = array_merge( $this->postInput[ 'private_tm_key' ], $array_keys );
 
 
         } else {
-            $private_keyList = $this->__postInput[ 'private_tm_key' ];
+            $private_keyList = $this->postInput[ 'private_tm_key' ];
         }
 
         $__postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
@@ -120,20 +120,20 @@ class createProjectController extends ajaxController {
         // NOTE: Global $_POST Overriding from CLI
         // $this->__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->file_name               = $this->__postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
-        $this->project_name            = $this->__postInput[ 'project_name' ];
-        $this->source_lang             = $this->__postInput[ 'source_lang' ];
-        $this->target_lang             = $this->__postInput[ 'target_lang' ];
-        $this->job_subject             = $this->__postInput[ 'job_subject' ];
-        $this->mt_engine               = ( $this->__postInput[ 'mt_engine' ] != null ? $this->__postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
-        $this->disable_tms_engine_flag = $this->__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
+        $this->file_name               = $this->postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
+        $this->project_name            = $this->postInput[ 'project_name' ];
+        $this->source_lang             = $this->postInput[ 'source_lang' ];
+        $this->target_lang             = $this->postInput[ 'target_lang' ];
+        $this->job_subject             = $this->postInput[ 'job_subject' ];
+        $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
+        $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->private_tm_user         = $this->__postInput[ 'private_tm_user' ];
-        $this->private_tm_pass         = $this->__postInput[ 'private_tm_pass' ];
-        $this->lang_detect_files       = $this->__postInput[ 'lang_detect_files' ];
-        $this->pretranslate_100        = $this->__postInput[ 'pretranslate_100' ];
-        $this->only_private            = ( is_null( $this->__postInput[ 'get_public_matches' ] ) ? false : !$this->__postInput[ 'get_public_matches' ] );
-        $this->due_date                = ( empty( $this->__postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->__postInput[ 'due_date' ] ) );
+        $this->private_tm_user         = $this->postInput[ 'private_tm_user' ];
+        $this->private_tm_pass         = $this->postInput[ 'private_tm_pass' ];
+        $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
+        $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
+        $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
+        $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
         $this->__setMetadataFromPostInput();
 
@@ -160,7 +160,7 @@ class createProjectController extends ajaxController {
         $this->__validateUserMTEngine();
 
         if ( $this->userIsLogged ) {
-            $this->__setTeam( $this->__postInput[ 'id_team' ] );
+            $this->__setTeam( $this->postInput[ 'id_team' ] );
         }
 
     }
@@ -175,20 +175,18 @@ class createProjectController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
 
-    private function setProjectFeaturesFromPostValues() {
+    private function appendFeaturesToProject() {
         // change project features
 
-        if ( !empty( $this->__postInput[ 'project_completion' ] ) ) {
+        if ( !empty( $this->postInput[ 'project_completion' ] ) ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
             $this->projectFeatures[] = $feature;
         }
 
-        $postObj = new ArrayObject( $this->__postInput );
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $postObj, $this->userIsLogged
+                'filterCreateProjectFeatures', $this->projectFeatures, $this
         );
-        $this->__postInput = $postObj->getArrayCopy();
 
     }
 
@@ -453,23 +451,23 @@ class createProjectController extends ajaxController {
     private function __setMetadataFromPostInput() {
         $options = [];
 
-        if ( isset( $this->__postInput[ 'lexiqa' ] ) ) {
-            $options[ 'lexiqa' ] = $this->__postInput[ 'lexiqa' ];
+        if ( isset( $this->postInput[ 'lexiqa' ] ) ) {
+            $options[ 'lexiqa' ] = $this->postInput[ 'lexiqa' ];
         }
-        if ( isset( $this->__postInput[ 'speech2text' ] ) ) {
-            $options[ 'speech2text' ] = $this->__postInput[ 'speech2text' ];
+        if ( isset( $this->postInput[ 'speech2text' ] ) ) {
+            $options[ 'speech2text' ] = $this->postInput[ 'speech2text' ];
         }
-        if ( isset( $this->__postInput[ 'tag_projection' ] ) ) {
-            $options[ 'tag_projection' ] = $this->__postInput[ 'tag_projection' ];
+        if ( isset( $this->postInput[ 'tag_projection' ] ) ) {
+            $options[ 'tag_projection' ] = $this->postInput[ 'tag_projection' ];
         }
-        if ( isset( $this->__postInput[ 'segmentation_rule' ] ) ) {
-            $options[ 'segmentation_rule' ] = $this->__postInput[ 'segmentation_rule' ];
+        if ( isset( $this->postInput[ 'segmentation_rule' ] ) ) {
+            $options[ 'segmentation_rule' ] = $this->postInput[ 'segmentation_rule' ];
         }
 
         $this->metadata = $options;
 
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
-                'input' => $this->__postInput
+                'input' => $this->postInput
         ] );
     }
 
