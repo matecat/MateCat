@@ -898,6 +898,16 @@
     ,
         {
             "localized":[{
+                "en":"Kalenjin"
+            }],
+            "isocode":"kln",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kln-KN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kannada"
             }],
             "isocode":"kn",
@@ -954,6 +964,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"km-KH"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kikuyu"
+            }],
+            "isocode":"kik",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kik-KN"
         }
     ,
         {
@@ -1064,6 +1084,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"lt-LT"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Luo"
+            }],
+            "isocode":"luo",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"luo-KN"
         }
     ,
         {
