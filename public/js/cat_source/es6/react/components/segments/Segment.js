@@ -248,20 +248,23 @@ class Segment extends React.Component {
         if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
             if (this.state.showRevisionPanel) {
                 this.setState({
-                    showRevisionPanel: false
+                    showRevisionPanel: false,
+                    showTranslationIssues: true
                 });
                 setTimeout( function (  ) {
                     UI.closeIssuesPanel()
                 });
             } else {
                 this.setState({
-                    showRevisionPanel: true
+                    showRevisionPanel: true,
+                    showTranslationIssues: false
                 });
             }
 
         } else {
             this.setState({
-                showRevisionPanel: false
+                showRevisionPanel: false,
+                showTranslationIssues: true
             });
         }
     }
@@ -272,7 +275,8 @@ class Segment extends React.Component {
     closeRevisionPanel(sid) {
         if ( !sid  || (sid && parseInt(sid) === parseInt(this.props.segment.sid)) ) {
             this.setState({
-                showRevisionPanel: false
+                showRevisionPanel: false,
+                showTranslationIssues: true
             });
         }
     }

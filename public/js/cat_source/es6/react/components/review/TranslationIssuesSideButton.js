@@ -10,8 +10,20 @@ class TranslationIssuesSideButton extends React.Component{
             this.state = this.readDatabaseAndReturnState();
         } else {
             this.state = {
-                issues_count : 0
+                issues_count : this.setIssueCount()
             }
+        }
+    }
+
+    setIssueCount() {
+        let issue_count = 0;
+        if (this.props.segment.versions && this.props.segment.versions.length > 0) {
+            this.props.segment.versions.forEach( (version) => {
+                issue_count = issue_count + version.issues.length;
+            })
+            return issue_count;
+        } else {
+            return 0;
         }
     }
 

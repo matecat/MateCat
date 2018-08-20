@@ -31,7 +31,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
 
             hackIntercomButton( false );
             SegmentActions.closeIssuesPanel();
-            $('body').removeClass('side-tools-opened review-side-panel-opened');
+            $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened review-improved-opened');
 
             if ( UI.currentSegment ) {
                 setTimeout( function() {
