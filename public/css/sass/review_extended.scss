@@ -119,7 +119,7 @@ h1, h2, h3, h4, h5, a, input {
         }
     }
 }
-.article-segments-container{
+article:first-child {
     section {
         &:nth-child(-n+3) {
             .segment-side-container {
@@ -130,7 +130,7 @@ h1, h2, h3, h4, h5, a, input {
                 display: flex;
                 flex-direction: column;
                 .mbc-comment-balloon-outer {
-                    position: unset;
+                    position: relative;
                     bottom: -11px !important;
                     margin-bottom: -30px;
                     .mbc-open-view.mbc-re-messages {
@@ -151,7 +151,16 @@ h1, h2, h3, h4, h5, a, input {
 
 .re-abb-issue {
     background: #e5e9f1;
-    padding: 0px 4px;
+    padding: 0 4px;
+    margin-right: 5px;
+    color: black;
+    width: fit-content;
+    height: fit-content;
+}
+
+.re-abb-issue {
+    background: #e5e9f1;
+    padding: 0 4px;
     margin-right: 5px;
     color: black;
     width: fit-content;

@@ -11,9 +11,9 @@
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
-section.editor .mbc-comment-balloon-inner {
+/*section.editor .mbc-comment-balloon-inner {
   margin-top: -25px;
-}
+}*/
 
 /* Give breathing space to the last comment ballon in page */
 .mbc-comment-balloon-outer:last-of-type {
@@ -565,7 +565,7 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 17px;
+  left: 40px;
   position: absolute;
   top: 5px;
 }
@@ -848,7 +848,7 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   border-top: 12px solid #ffffff;
   border-left: 14px solid transparent;
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
-  filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.2));
   margin-left: -14px;
   position: absolute;
 
@@ -881,7 +881,7 @@ Close icon ballon - Right panel
   position: absolute;
   z-index: 1;
   right: 0px;
-  top: -38px;
+  top: -14px;
   border-radius: 50%;
   color: #7b7b7b;
   cursor: pointer;
