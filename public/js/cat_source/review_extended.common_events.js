@@ -14,15 +14,10 @@ if (ReviewExtended.enabled()) {
         SegmentActions.closeSegmentIssuePanel(UI.getSegmentId(e.segment));
     } );
 
-    /*
-    To close the issue panel when clicking on different segment.
-     TODO: we still dont know when a segment is opened in the Segment component,
-     i need this trick to know when close the panel
-     */
     $( window ).on( 'segmentOpened', function ( e ) {
-        if ( $(e.segment.el).find('.review-balloon-container').length === 0 &&
-            !$(e.segment.el).find('.revise-button').hasClass('open')) {
-            UI.closeIssuesPanel();
+        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) == 'true';
+        if (config.isReview && !panelClosed) {
+            SegmentActions.openIssuesPanel({sid:e.segment.absoluteId})
         }
     } );
 

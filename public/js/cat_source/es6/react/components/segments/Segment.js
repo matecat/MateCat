@@ -39,7 +39,7 @@ class Segment extends React.Component {
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
-            showTranslationIssues: false,
+            showTranslationIssues: true,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,
@@ -203,7 +203,7 @@ class Segment extends React.Component {
     }
 
     getTranslationIssues() {
-        if (this.state.showTranslationIssues &&
+        if (this.state.showTranslationIssues && !this.state.showRevisionPanel &&
             ( !(this.props.segment.readonly === 'true')  &&
                 ( !this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
             )
@@ -295,12 +295,16 @@ class Segment extends React.Component {
         //Review
         SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
+        if (this.state.showRevisionPanel) {
+            setTimeout(()=>{
+                UI.openIssuesPanel()
+            });
+        }
     }
 
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);

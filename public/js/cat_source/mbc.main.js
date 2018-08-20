@@ -19,7 +19,7 @@ if ( MBC.enabled() )
             }
         };
 
-
+        MBC.localStorageCommentsClosed =  "commentsPanelClosed-"+config.id_job+config.password
 
         var types = {sticky: 3, resolve: 2, comment: 1};
         var source_pages = {revise: 2, translate: 1};
@@ -400,7 +400,8 @@ if ( MBC.enabled() )
                 scrollSegment( el ).done( function() {
                     renderSegmentBalloon( el );
                 });
-            }, 200)
+            }, 200);
+            localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
 
         var openSegmentCommentNoScroll = function ( el ) {
@@ -408,13 +409,17 @@ if ( MBC.enabled() )
             $( 'body' ).addClass( 'side-tools-opened' );
             el.find('.mbc-comment-icon-button').css("visibility", "hidden");
             renderSegmentBalloon( el );
+            localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
 
-        var closeBalloon = function () {
+        var closeBalloon = function (segmentClose) {
             $( '.mbc-comment-balloon-outer' ).remove();
             $( 'article' ).removeClass( 'mbc-commenting-opened' );
             $( 'body' ).removeClass( 'side-tools-opened' );
             $('.mbc-comment-icon-button').css("visibility", "");
+            if (!segmentClose) {
+                localStorage.setItem(MBC.localStorageCommentsClosed, true);
+            }
         };
 
         var renderCommentIconLink = function ( el ) {
@@ -515,7 +520,6 @@ if ( MBC.enabled() )
             $( '.mbc-history-balloon-outer' ).append( root );
         };
 
-            db.refreshHistory();
         var updateHistoryWithLoadedSegments = function () {
             db.refreshHistory();
             if ( db.history_count == 0 ) {
@@ -708,6 +712,17 @@ if ( MBC.enabled() )
             }).fail(function ( response ) {
                 MBC.teamUsers = [];
             })
+        };
+
+        var checkOpenSegmentComment = function ( id_segment ) {
+            if ( db.getCommentsCountBySegment && UI.currentSegmentId === id_segment) {
+                var comments_obj = db.getCommentsCountBySegment( id_segment );
+                var el = UI.Segment.findEl( id_segment );
+                var panelClosed = localStorage.getItem(MBC.localStorageCommentsClosed) == 'true';
+                if ( comments_obj.active > 0  && !panelClosed) {
+                    openSegmentCommentNoScroll(el);
+                }
+            }
         };
 
         // var resetTextArea = function () {
@@ -976,7 +991,7 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentClosed', function ( e ) {
-            closeBalloon();
+            closeBalloon(true);
         } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
@@ -984,19 +999,14 @@ if ( MBC.enabled() )
             if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
                 openSegmentComment( $( e.segment ) );
             }
+            checkOpenSegmentComment(segment.absoluteId);
         } );
 
         $( document ).on( 'mbc:segment:update:links', function ( ev, id_segment ) {
             var comments_obj = db.getCommentsCountBySegment( id_segment );
             var el = UI.Segment.findEl( id_segment );
             resolveCommentLinkIcon( el.find( '.segment-side-buttons' ), comments_obj );
-        } );
-
-        // $( document ).on( 'keydown', '.mbc-comment-textarea', resetTextArea );
-        $( document ).on( 'paste', '.mbc-comment-input', function () {
-            // setTimeout( function ( el ) {
-            //     resetTextArea.call( el );
-            // }, 100, this );
+            checkOpenSegmentComment(id_segment);
         } );
 
         $( document ).on( 'split:segment:complete', function ( e, sid ) {

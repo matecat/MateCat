@@ -5,6 +5,7 @@ ReviewExtended = {
     },
     type : config.reviewType,
     issueRequiredOnSegmentChange: false,
+    localStoragePanelClosed: "issuePanelClosed-"+config.id_job+config.password,
     getSegmentsIssues: function (  ) {
         API.SEGMENT.getSegmentsIssues().done(  ( data ) => {
             var versionsIssues = {};
