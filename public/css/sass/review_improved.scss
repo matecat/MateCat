@@ -380,23 +380,17 @@ section {
 }
 
 .segment-side-buttons .revise-button {
-    text-decoration: none!important;
+    text-decoration: none !important;
     font-size: 28px;
     color: #666;
     font-weight: bold;
 }
 
-.segment-side-buttons {
-  color: #666!important;
-}
-
 
 .translation-issues-button {
     cursor: pointer;
-    padding: 20px 0;
-    position: relative;
-    width: 30px;
-    height: 20px;
+    padding: 10px 0;
+    width: 80px;
 }
 
 section:not(.opened) .translation-issues-button {
@@ -426,7 +420,7 @@ section:hover .translation-issues-button .revise-button,
 .revise-button-counter {
     left: 17px;
     position: absolute;
-    top: 15px;
+    top: 55px;
     background: #dc2e34;
     color: #fff;
     border: 1px solid #fff;
@@ -442,7 +436,7 @@ section:hover .translation-issues-button .revise-button,
 }
 
 section:not(.opened) .revise-button-counter {
-    top:0px;
+    top: 50px;
 }
 
 

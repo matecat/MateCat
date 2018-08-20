@@ -7,6 +7,9 @@ h1, h2, h3, h4, h5, a, input {
 
 .review-balloon-container {
     padding-right: 15px;
+    position: absolute;
+    top: 61px;
+    width: 100%;
     .re-wrapper {
         height: 100%;
         position: relative;
@@ -27,6 +30,7 @@ h1, h2, h3, h4, h5, a, input {
                     text-transform: uppercase;
                     border-bottom: 1px solid #f2f4f7;
                     margin-top: 10px;
+                    margin-right: 1px;
                 }
                 .re-item {
                     .re-item-box {
@@ -57,12 +61,14 @@ h1, h2, h3, h4, h5, a, input {
                         }
                     }
                     .re-error {
-                        padding: 5px 10px;
+                        padding: 5px 4px 5px 10px;
+                        margin-right: 1px;
                         &:hover {
                             background: #f2f4f7 !important;
                         }
                         .error-name {
                             padding-right: 10px;
+                            display: flex;
                         }
                     }
                     .comments-view {
@@ -108,13 +114,46 @@ h1, h2, h3, h4, h5, a, input {
             padding: 5px 0;
             .errors {
                 max-height: 290px;
-                .re-category-item {
-                    background: #fff;
-                    &:hover {
-                        background: gray;
+                .re-category-item {}
+            }
+        }
+    }
+}
+.article-segments-container{
+    section {
+        &:nth-child(-n+3) {
+            .segment-side-container {
+                position: absolute;
+                text-align: left;
+                width: 29%;
+                left: 106%;
+                display: flex;
+                flex-direction: column;
+                .mbc-comment-balloon-outer {
+                    position: unset;
+                    bottom: -11px !important;
+                    margin-bottom: -30px;
+                    .mbc-open-view.mbc-re-messages {
+                        top: 1px;
+                        border-top: 12px solid #ffffff;
+                        border-left: 14px solid transparent;
+                        border-bottom: unset;
                     }
+                }
+                .review-balloon-container {
+                    position: relative;
+                    margin-top: 25px;
                 }
             }
         }
     }
+}
+
+.re-abb-issue {
+    background: #e5e9f1;
+    padding: 0px 4px;
+    margin-right: 5px;
+    color: black;
+    width: fit-content;
+    height: fit-content;
 }

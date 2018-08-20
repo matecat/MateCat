@@ -38,7 +38,7 @@ class ReviewExtendedCategorySelector extends React.Component{
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}
                             data-value={severity.label}>
-                        {severity.label}
+                        <b>{severity.label}</b>
                     </div> ;
             }.bind(this));
 
@@ -57,7 +57,7 @@ class ReviewExtendedCategorySelector extends React.Component{
         }
 		return <div className="re-item re-category-item">
             <div className="re-item-box re-error">
-                <div className="error-name">{this.props.category.label}</div>
+                <div className="error-name"><div className="re-abb-issue">ABB</div> {this.props.category.label}</div>
                 <div className="error-level">
                     { select }
                 </div>
