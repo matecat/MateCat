@@ -1084,6 +1084,8 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
 
+            $this->features->run( "beforeInsertJobStruct", $newJob );
+
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );

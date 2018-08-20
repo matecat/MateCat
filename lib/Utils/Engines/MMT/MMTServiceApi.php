@@ -338,7 +338,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    private function send($method, $url, $params = null, $multipart = FALSE) {
+    protected function send($method, $url, $params = null, $multipart = FALSE) {
         if ($params) {
             $params = array_filter($params, function ($value) {
                 return $value !== NULL;

@@ -15,6 +15,8 @@ interface IController {
 
     public function getUser();
 
+    public function userIsLogged();
+
     public function getFeatureSet();
 
     /**
