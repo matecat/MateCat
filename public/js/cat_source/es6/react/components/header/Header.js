@@ -21,6 +21,9 @@ class Header extends React.Component {
         TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
+        $('.ui.dropdown')
+            .dropdown()
+        ;
     }
 
     componentWillUnmount() {
@@ -86,7 +89,7 @@ class Header extends React.Component {
                 />
             </div>;
         } else if (this.props.showJobInfo) {
-            return <div className="ten wide column">
+            return <div className="header-project-container-info">
                 <JobInfo/>
             </div>;
         }

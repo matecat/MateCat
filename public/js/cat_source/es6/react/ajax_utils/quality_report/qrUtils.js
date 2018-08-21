@@ -6,7 +6,7 @@ let QUALITY_REPORT =  {
 
         let data = {
             step: 30,
-            segment: "756469",
+            segment: "170740",
         };
         return $.ajax({
             data: data,
