@@ -39,7 +39,7 @@ class Segment extends React.Component {
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
-            showTranslationIssues: true,
+            showTranslationIssues: false,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,

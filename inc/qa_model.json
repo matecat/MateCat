@@ -6,22 +6,27 @@
     "categories": [
       {
         "label": "Tag issues (mismatches, whitespaces)",
+        "code": "TIS",
         "dqf_id" : 5
       },
       {
         "label": "Translation errors (mistranslation, additions or omissions)",
+        "code": "TER",
         "dqf_id" : 1
       },
       {
         "label": "Terminology and translation consistency",
+        "code": "TTC",
         "dqf_id" : 3
       },
       {
         "label": "Language quality (grammar, punctuation, spelling)",
+        "code": "LQ",
         "dqf_id" : 2
       },
       {
         "label": "Style (readability, consistent style and tone)",
+        "code": "STY",
         "dqf_id" : 4
       }
     ],

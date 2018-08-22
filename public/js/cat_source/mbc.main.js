@@ -792,6 +792,7 @@ if ( MBC.enabled() )
 
             $( delegate ).on( 'click', '.segment-side-buttons .txt', function ( e ) {
                 var section = $( e.target ).closest( 'section' );
+                $('.mbc-comment-icon-button').css("visibility", "");
                 if ( section.find('.mbc-comment-balloon-outer').length ) {
                     closeBalloon();
                 } else {
@@ -853,7 +854,7 @@ if ( MBC.enabled() )
             } );
 
             $( delegate ).on( 'click', '.mbc-login-link', function ( e ) {
-                $( '.login-google' ).show();
+                $('#modal').trigger('openlogin');
             } );
 
             $( delegate ).on( 'click', '.mbc-comment-anonymous-label', function () {
