@@ -506,7 +506,7 @@ a.mbc-close-icon:hover {
   cursor: pointer;
   padding: 10px 0;
   position: relative;
-  width: 80px;
+  width: 50px;
   display: block !important;
 }
 
@@ -565,7 +565,7 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 40px;
+  left: 30px;
   position: absolute;
   top: 5px;
 }
@@ -608,7 +608,7 @@ a.mbc-close-icon:hover {
  ******
  */
 article.mbc-commenting-closed {
-  width: 87.5%; /* add selector to article tag line 874 style.css */
+  width: 88.5%; /* add selector to article tag line 874 style.css */
 }
 
 /*

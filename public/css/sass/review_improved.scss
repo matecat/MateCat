@@ -390,7 +390,7 @@ section {
 .translation-issues-button {
     cursor: pointer;
     padding: 10px 0;
-    width: 80px;
+    width: 50px;
 }
 
 section:not(.opened) .translation-issues-button {
@@ -418,7 +418,7 @@ section:hover .translation-issues-button .revise-button,
 }
 
 .revise-button-counter {
-    left: 40px;
+    left: 30px;
     position: absolute;
     top: 55px;
     background: #dc2e34;
