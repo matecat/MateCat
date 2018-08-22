@@ -6,7 +6,7 @@ let QUALITY_REPORT =  {
 
         let data = {
             step: 30,
-            segment: "756469",
+            segment: config.first_job_segment,
         };
         return $.ajax({
             data: data,

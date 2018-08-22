@@ -208,7 +208,7 @@ class reviseSummaryController extends viewController {
         $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
 
         $this->template->searchable_statuses = $this->searchableStatuses();
-
+        $this->template->first_job_segment   = $this->data->job_first_segment ;
     }
 
     /**
