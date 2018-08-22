@@ -352,13 +352,13 @@ var SegmentActions = {
         });
     },
 
-    openIssuesPanel: function (data) {
+    openIssuesPanel: function (data, openSegment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_ISSUES_PANEL,
             data: data,
         });
 
-        UI.openIssuesPanel(data);
+        UI.openIssuesPanel(data, openSegment);
     },
 
     closeIssuesPanel: function () {

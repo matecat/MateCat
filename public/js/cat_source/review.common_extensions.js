@@ -2,7 +2,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
 
     $.extend(UI, {
 
-        openIssuesPanel : function(data) {
+        openIssuesPanel : function(data, openSegment) {
             if (config.reviewType === "improved") {
                 $('body').addClass('review-improved-opened');
                 hackIntercomButton( true );
@@ -14,18 +14,19 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
             if (data) {
-                var segment = UI.Segment.findEl( data.sid );
-                segment.find( UI.targetContainerSelector() ).click();
+                if (openSegment) {
+                    var segment = UI.Segment.findEl( data.sid );
+                    segment.find( UI.targetContainerSelector() ).click();
+                    window.setTimeout( function ( data ) {
+                        var el = UI.Segment.find( data.sid ).el;
 
-                window.setTimeout( function ( data ) {
-                    var el = UI.Segment.find( data.sid ).el;
+                        if ( UI.currentSegmentId != data.sid ) {
+                            UI.focusSegment( el );
+                        }
 
-                    if ( UI.currentSegmentId != data.sid ) {
-                        UI.focusSegment( el );
-                    }
-
-                    UI.scrollSegment( el );
-                }, 500, data );
+                        UI.scrollSegment( el );
+                    }, 500, data );
+                }
             }
         },
 

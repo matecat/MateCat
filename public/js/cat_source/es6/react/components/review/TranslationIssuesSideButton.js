@@ -104,7 +104,7 @@ class TranslationIssuesSideButton extends React.Component{
             SegmentActions.closeIssuesPanel();
         }
         if (!this.props.open) {
-            SegmentActions.openIssuesPanel({sid: this.props.sid});
+            SegmentActions.openIssuesPanel({sid: this.props.sid}, true);
         } else {
             UI.closeIssuesPanel();
         }

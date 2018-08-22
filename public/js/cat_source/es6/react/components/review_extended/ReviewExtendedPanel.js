@@ -69,7 +69,7 @@ class ReviewExtendedPanel extends React.Component {
             this.setState({
                 showAddIssueMessage: true
             });
-            SegmentActions.openIssuesPanel({ sid: sid });
+            SegmentActions.openIssuesPanel({ sid: sid }, false);
         }
     }
 

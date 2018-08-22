@@ -133,7 +133,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         if ( textSelectedInsideSelectionArea(selection, container ) )  {
             var selection = getSelectionData( selection, container ) ;
-            SegmentActions.openIssuesPanel({ sid: segment.id,  selection : selection })
+            SegmentActions.openIssuesPanel({ sid: segment.id,  selection : selection }, true)
         }
     });
     function renderButtons(segment) {

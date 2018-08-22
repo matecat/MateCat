@@ -297,7 +297,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
         if (this.state.showRevisionPanel) {
             setTimeout(()=>{
-                UI.openIssuesPanel()
+                UI.openIssuesPanel(null, false)
             });
         }
     }

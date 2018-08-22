@@ -11,6 +11,7 @@ MBC = {
 if ( MBC.enabled() )
     (function ( $, config, window, MBC, undefined ) {
 
+        var originalScrollSegment = UI.scrollSegment;
         SSE.init();
 
         MBC.const = {
@@ -372,23 +373,28 @@ if ( MBC.enabled() )
         };
 
         var scrollSegment = function ( section ) {
-            var scrollAnimation = $( UI.scrollSelector );
-            var segment = section;
-            var pos = 0;
-            var article = segment.closest('article');
+            if ($('article.mbc-commenting-opened').length > 0 ) {
 
-            pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
+                var scrollAnimation = $( UI.scrollSelector );
+                var segment = section;
+                var pos = 0;
+                var article = segment.closest('article');
 
-            if (article.prevAll('article').length > 0) {
-                _.forEach(article.prevAll('article'), function ( item ) {
-                    pos = pos + $(item).outerHeight() + 140;
-                });
+                pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
+
+                if (article.prevAll('article').length > 0) {
+                    _.forEach(article.prevAll('article'), function ( item ) {
+                        pos = pos + $(item).outerHeight() + 140;
+                    });
+                }
+                pos = pos - 220;
+                scrollAnimation.animate({
+                    scrollTop: pos
+                }, 500);
+                return scrollAnimation.promise() ;
+            } else {
+                return originalScrollSegment.call(this, section);
             }
-
-            scrollAnimation.animate({
-                scrollTop: pos
-            }, 500);
-            return scrollAnimation.promise() ;
         };
 
         var openSegmentComment = function ( el ) {
@@ -400,7 +406,7 @@ if ( MBC.enabled() )
                 scrollSegment( el ).done( function() {
                     renderSegmentBalloon( el );
                 });
-            }, 200);
+            });
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
 
@@ -721,6 +727,9 @@ if ( MBC.enabled() )
                 var panelClosed = localStorage.getItem(MBC.localStorageCommentsClosed) == 'true';
                 if ( comments_obj.active > 0  && !panelClosed) {
                     openSegmentCommentNoScroll(el);
+                    setTimeout(function(){
+                        scrollSegment( el )
+                    }, 200);
                 }
             }
         };
@@ -770,12 +779,12 @@ if ( MBC.enabled() )
             var delegate = '#outer';
 
             // Click on the link to open the balloon, in any segment on the page.
-            $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
-                e.stopPropagation();
-                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-                var $section = $( e.target ).closest( 'section' );
-                UI.scrollSegment($section, UI.getSegmentId($section));
-            } );
+            // $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
+            //     e.stopPropagation();
+            //     $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            //     var $section = $( e.target ).closest( 'section' );
+            //     UI.scrollSegment($section, UI.getSegmentId($section));
+            // } );
 
             // TODO: investigate and explain why this is needed
             $( delegate ).on( 'click', '.mbc-comment-balloon-outer', function ( e ) {
@@ -790,13 +799,14 @@ if ( MBC.enabled() )
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
-            $( delegate ).on( 'click', '.segment-side-buttons .txt', function ( e ) {
+            $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
                 var section = $( e.target ).closest( 'section' );
                 $('.mbc-comment-icon-button').css("visibility", "");
+                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
                 if ( section.find('.mbc-comment-balloon-outer').length ) {
                     closeBalloon();
                 } else {
-                    openSegmentCommentNoScroll( section );
+                    openSegmentComment(section);
                 }
             } );
 
@@ -1038,6 +1048,19 @@ if ( MBC.enabled() )
         // Interfaces
         $.extend( MBC, {
             openSegmentComment: openSegmentComment,
+            popLastCommentHash: popLastCommentHash,
+
+            wasAskedByCommentHash: function ( sid ) {
+                return lastCommentHash && lastCommentHash.segmentId == sid;
+            },
+            setLastCommentHash: function ( value ) {
+                lastCommentHash = value;
+            }
+        } );
+
+        // Interfaces
+        $.extend( UI, {
+            scrollSegment: scrollSegment,
             popLastCommentHash: popLastCommentHash,
 
             wasAskedByCommentHash: function ( sid ) {
