@@ -13,16 +13,16 @@ class ReviewExtendedIssue extends React.Component {
 
 	}
 
-	categoryLabel() {
+	getCategory() {
 		let id_category = this.props.issue.id_category;
 		config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[")
 			.replace(/\]"/g, "]")
 			.replace(/\"\{/g, "{")
 			.replace(/\}"/g, "}");
-		return _(JSON.parse(config.lqa_flat_categories))
+        return _(JSON.parse(config.lqa_flat_categories))
 			.filter(function (e) {
 				return parseInt(e.id) == id_category;
-			}).first().label
+			}).first();
 	}
 
 	deleteIssue(event) {
@@ -132,7 +132,7 @@ class ReviewExtendedIssue extends React.Component {
 
     }
 	render() {
-		let category_label = this.categoryLabel();
+		let category = this.getCategory();
 		let formatted_date = moment(this.props.issue.created_at).format('lll');
 
 		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
@@ -168,8 +168,12 @@ class ReviewExtendedIssue extends React.Component {
 		return <div className={containerClass} ref={(node)=>this.el=node}>
 			<div className="re-item-box re-issue shadow-1">
 				<div className="issue-head pad-right-10">
-					<div className="re-abb-issue">ABB</div>
-					{/*<span className="re-category-issue-head" title={category_label}>{category_label}</span>*/}<b><span title="Type of severity">{this.props.issue.severity}</span></b>
+                    {category.options && category.options.code ? (
+                        <div className="re-abb-issue">{category.options.code}</div>
+                    ) : (
+                        <span className="re-category-issue-head" title={category.label}>{category.label}</span>
+                    )}
+					<b><span title="Type of severity">{this.props.issue.severity}</span></b>
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">

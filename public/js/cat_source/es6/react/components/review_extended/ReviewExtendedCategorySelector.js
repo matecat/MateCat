@@ -57,7 +57,11 @@ class ReviewExtendedCategorySelector extends React.Component{
         }
 		return <div className="re-item re-category-item">
             <div className="re-item-box re-error">
-                <div className="error-name"><div className="re-abb-issue">ABB</div> {this.props.category.label}</div>
+                <div className="error-name">
+                    {this.props.category.options && this.props.category.options.code ? (
+                        <div className="re-abb-issue">{this.props.category.options.code}</div>
+                    ) : (null)}
+                    {this.props.category.label}</div>
                 <div className="error-level">
                     { select }
                 </div>
