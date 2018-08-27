@@ -390,7 +390,7 @@ if ( MBC.enabled() )
                 pos = pos - 220;
                 scrollAnimation.animate({
                     scrollTop: pos
-                }, 500);
+                }, 200);
                 return scrollAnimation.promise() ;
             } else {
                 return originalScrollSegment.call(this, section);
@@ -413,6 +413,7 @@ if ( MBC.enabled() )
         var openSegmentCommentNoScroll = function ( el ) {
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
+            $('.mbc-comment-icon-button').css("visibility", "");
             el.find('.mbc-comment-icon-button').css("visibility", "hidden");
             renderSegmentBalloon( el );
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
@@ -730,6 +731,8 @@ if ( MBC.enabled() )
                     setTimeout(function(){
                         scrollSegment( el )
                     }, 200);
+                } else {
+                    closeBalloon(true);
                 }
             }
         };
@@ -1001,9 +1004,10 @@ if ( MBC.enabled() )
             appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
         } );
 
-        $( window ).on( 'segmentClosed', function ( e ) {
-            closeBalloon(true);
-        } );
+        // $( window ).on( 'segmentClosed', function ( e ) {
+        //
+        //     // closeBalloon(true);
+        // } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
             var segment = e.segment ;

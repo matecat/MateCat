@@ -273,7 +273,7 @@ class Segment extends React.Component {
     without passing anything
      */
     closeRevisionPanel(sid) {
-        if ( !sid  || (sid && parseInt(sid) === parseInt(this.props.segment.sid)) ) {
+        if ( (!sid  || (sid && parseInt(sid) === parseInt(this.props.segment.sid))) && this.state.showRevisionPanel ) {
             this.setState({
                 showRevisionPanel: false,
                 showTranslationIssues: true
