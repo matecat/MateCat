@@ -661,7 +661,9 @@ class TMAnalysisWorker extends AbstractWorker {
      *  - Set project total segments to analyze, and count the analyzed as segments done
      *
      * @param $queueElement QueueElement
-     * @param $process_pid int
+     * @param $process_pid  int
+     *
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _initializeTMAnalysis( QueueElement $queueElement, $process_pid ){
 
@@ -704,6 +706,8 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $pid
      * @param $eq_words
      * @param $standard_words
+     *
+     * @throws \Predis\Connection\ConnectionException
      */
     protected function _incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
@@ -812,15 +816,15 @@ class TMAnalysisWorker extends AbstractWorker {
                 $database->commit();
             }
 
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
-            Projects_ProjectDao::destroyCacheById( $_project_id );
-
             try {
                 $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );
             } catch(\Exception $e) {
                 //ignore Exception the analysis is finished anyway
                 $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
             }
+
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
+            Projects_ProjectDao::destroyCacheById( $_project_id );
 
         }
 

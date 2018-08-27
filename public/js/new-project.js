@@ -229,8 +229,8 @@ APP.getCreateProjectParams = function() {
 		action						: "createProject",
 		file_name					: APP.getFilenameFromUploadedFiles(),
 		project_name				: $('#project-name').val(),
-		source_language				: $('#source-lang').dropdown('get value'),
-		target_language				: $('#target-lang').dropdown('get value'),
+		source_lang 				: $('#source-lang').dropdown('get value'),
+		target_lang 				: $('#target-lang').dropdown('get value'),
 		job_subject         		: $('#project-subject').dropdown('get value'),
 		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 		mt_engine					: $('.mgmt-mt .activemt').data("id"),
@@ -608,11 +608,14 @@ $.extend(UI.UPLOAD_PAGE, {
             e.preventDefault();
             $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
             var tlAr = $('#target-lang').dropdown('get value').split(',');
+            $('.popup-languages.slide .listlang li input').removeAttr('checked');
+            $('.popup-languages.slide .listlang li').removeClass('on');
+            $('.popup-languages.slide .listlang li input').prop('checked', false);
             $.each(tlAr, function() {
                 var ll = $('.popup-languages.slide .listlang li #' + this);
                 ll.parent().addClass('on');
                 ll.attr('checked','true');
-                ll.prop('checked','true');
+                ll.prop('checked', true);
             });
             $('.popup-languages h1 .number').text( tlAr.length );
             $(".popup-outer.lang-slide").show();

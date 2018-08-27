@@ -54,6 +54,10 @@ abstract class controller implements IController {
         return $this->user;
     }
 
+    public function userIsLogged(){
+        return $this->userIsLogged;
+    }
+
     /**
      * Controllers Factory
      *
