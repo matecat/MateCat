@@ -124,8 +124,10 @@ class TranslationIssuesSideButton extends React.Component{
         let plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
             return (<div onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button has-object " + openClass} href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
-        } else  {
+        } else  if (config.isReview){
             return (<div onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button " + openClass} href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+        } else {
+            return "";
         }
 
     }
