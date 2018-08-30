@@ -461,7 +461,6 @@ class Segment extends React.Component {
                     {this.props.isReviewExtended && this.state.showRevisionPanel ? (
                         <div className="review-balloon-container">
                             {!this.props.segment.versions ? (
-                                //{/*<WrapperLoader />*/}
                                 (null)
                             ) : (
                                 <ReviewExtendedPanel
