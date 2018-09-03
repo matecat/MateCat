@@ -47,7 +47,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
             let cat = this.findCategory(id);
             let issues = this.getIssuesSortedComponentList(issuesList);
             let catHtml = <div key={cat.id}>
-                <div className="re-item-head pad-left-5"><b>{cat.label}</b></div>
+                <div className="re-item-head pad-left-5">{cat.label}</div>
                 {issues}
             </div>;
             html.push(catHtml)
@@ -63,7 +63,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
             issues = this.getIssuesSortedComponentList(this.props.issues)
         }
         return <div>
-                    <div className="re-item-head pad-left-1"><b>Issue List</b></div>
+                    <div className="re-item-head pad-left-1">Found issues</div>
                     {issues}
                 </div>;
     }

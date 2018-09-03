@@ -8,7 +8,7 @@ h1, h2, h3, h4, h5, a, input {
 .review-balloon-container {
     padding-right: 15px;
     position: absolute;
-    top: 61px;
+    top: 80px;
     width: 100%;
     .re-wrapper {
         height: 100%;
@@ -27,10 +27,10 @@ h1, h2, h3, h4, h5, a, input {
                 max-height: 250px;
                 padding-bottom: 5px;
                 .re-item-head {
-                    text-transform: uppercase;
                     border-bottom: 1px solid #f2f4f7;
                     margin-top: 10px;
                     margin-right: 1px;
+                    font-size: 16px;
                 }
                 .re-item {
                     .re-item-box {
@@ -53,6 +53,7 @@ h1, h2, h3, h4, h5, a, input {
                             .re-category-issue-head {
                                 overflow: hidden;
                                 text-overflow: ellipsis;
+                                margin-right: 3px;
                             }
                         }
                         .issue-activity-icon {
@@ -112,7 +113,6 @@ h1, h2, h3, h4, h5, a, input {
         }
         .re-to-create {
             background: #ffffff;
-            padding: 5px 0;
             .errors {
                 max-height: 290px;
                 .re-category-item {}
@@ -171,13 +171,20 @@ article {
     color: black;
     width: fit-content;
     height: fit-content;
+    min-width: 25px;
+    text-align: center;
 }
 
-.re-abb-issue {
-    background: #e5e9f1;
-    padding: 0 4px;
-    margin-right: 5px;
-    color: black;
-    width: fit-content;
-    height: fit-content;
+.re-open-view.re-issues {
+    top: 0px;
+    border-top: 12px solid #fff;
+    border-left: 14px solid transparent;
+    filter: drop-shadow(-1px 0px 1px rgba(0, 0, 0, 0.2));
+    margin-left: -14px;
+    position: absolute;
+}
+
+.re-wrapper.thereAreIssues .re-open-view.re-issues {
+    top: -1px;
+    border-top: 12px solid #e5e9f1;
 }

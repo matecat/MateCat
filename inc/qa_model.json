@@ -32,12 +32,12 @@
     ],
       "severities": [
         {
-          "label": "Enhancement",
+          "label": "Minor",
           "dqf_id" : 1,
           "penalty": 0
         },
         {
-          "label": "Error",
+          "label": "Major",
           "dqf_id" : 2,
           "penalty": 1
         }

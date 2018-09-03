@@ -89,7 +89,7 @@ class ReviewExtendedIssuePanel extends React.Component{
         }.bind(this));
 
         return <div>
-                    <div className="re-item-head pad-left-10"><b>Type of issue</b></div>
+                    <div className="re-item-head pad-left-10">Type of issue</div>
                     {categoryComponents}
                 </div>;
     }
@@ -119,7 +119,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                 } );
             }
             let html = <div key={category.id}>
-                <div className="re-item-head pad-left-10"><b>{category.label}</b></div>
+                <div className="re-item-head pad-left-10">{category.label}</div>
                 {subcategoriesComponents}
             </div>;
             categoryComponents.push(html);

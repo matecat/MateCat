@@ -96,9 +96,9 @@ class ReviewExtendedPanel extends React.Component {
 
 	render() {
 		let issues = this.getAllIssues();
-
-		return <div className="re-wrapper shadow-1">
-			<div className="mbc-triangle mbc-open-view mbc-re-issues"/>
+		let thereAreIssuesClass = (issues.length > 0 ) ? "thereAreIssues" : "";
+        return <div className={"re-wrapper shadow-1 " + thereAreIssuesClass}>
+			<div className="re-open-view re-issues"/>
 			<a className="re-close-balloon re-close-err shadow-1" onClick={this.closePanel.bind(this)}><i className="icon-cancel3 icon" /></a>
 			<ReviewVersionDiffContainer
 				textSelectedFn={this.textSelected.bind(this)}
@@ -115,12 +115,12 @@ class ReviewExtendedPanel extends React.Component {
 				segment={this.props.segment}
 			/>
             {this.state.showAddIssueMessage ? (
-              <div className="re-warning-not-added-issue">
-				  <p>In order to Approve the segment you need to add an Issue from the Error list</p>
-              </div>
+				<div className="re-warning-not-added-issue">
+					<p>In order to Approve the segment you need to add an Issue from the Error list</p>
+				</div>
             ) : (null)}
 
-			{this.props.isReview? (<ReviewExtendedIssuePanel
+            {this.props.isReview? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
 				selection={this.state.selectionObj}
 				segmentVersion={this.state.versionNumber}
@@ -130,9 +130,9 @@ class ReviewExtendedPanel extends React.Component {
 				reviewType={this.props.reviewType}
 				newtranslation={this.state.newtranslation}
 				segment={this.props.segment}
-                setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
+				setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
 			/>): (null)}
-			</div>;
+		</div>;
 	}
 }
 ReviewExtendedPanel.defaultProps = {

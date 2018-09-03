@@ -510,6 +510,10 @@ a.mbc-close-icon:hover {
   display: block !important;
 }
 
+section:not(.opened) .segment-side-buttons .txt {
+  padding-left: 7px;
+}
+
 /*
  ******
  Icon in comment intent element
@@ -644,7 +648,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  bottom: -61px;
+  bottom: -85px;
   width: 100%;
 }
 /*
@@ -861,10 +865,6 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   border-bottom: 12px solid #ffffff;
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
-}
-
-.mbc-open-view.mbc-re-issues {
-  top: 0px;
 }
 
 
