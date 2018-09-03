@@ -1,7 +1,7 @@
-let FilterProjects = require("./FilterProjects").default;
+let FilterProjectsStatus = require("./FilterProjectsStatus").default;
 let SearchInput = require("./SearchInput").default;
 
-class SubHeader extends React.Component {
+class FilterProjects extends React.Component {
     constructor (props) {
         super(props);
         this.ALL_MEMBERS = "-1";
@@ -182,7 +182,7 @@ class SubHeader extends React.Component {
                         <div className="ui right labeled fluid input search-state-filters">
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
-                            <FilterProjects
+                            <FilterProjectsStatus
                                 filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
                     </div>
@@ -201,4 +201,4 @@ class SubHeader extends React.Component {
     }
 }
 
-export default SubHeader ;
+export default FilterProjects ;

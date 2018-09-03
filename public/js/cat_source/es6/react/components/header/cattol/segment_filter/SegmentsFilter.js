@@ -1,5 +1,5 @@
-let CatToolConstants = require('../../../constants/CatToolConstants');
-let CatToolStore = require('../../../stores/CatToolStore');
+let CatToolConstants = require('../../../../constants/CatToolConstants');
+let CatToolStore = require('../../../../stores/CatToolStore');
 
 class SegmentsFilter extends React.Component {
     constructor(props) {

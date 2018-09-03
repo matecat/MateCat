@@ -4,6 +4,7 @@
 @import "commons/divider";
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
+@import "commons/nav-bar";
 
 $color-red: #FB2A0D;
 $color-orange: #FBAA0D;
@@ -16,6 +17,87 @@ body.reviselog {
     background: #f2f4f7;
     font-size: 16px;
 }
+
+header {
+    .nav-mc-bar {
+        .logo {
+            left: 0;
+        }
+        .header-project-container-info {
+            width: 62%;
+            /*background: #00123a;*/
+            color: #FFF;
+            margin-top: 9px;
+            height: 47px;
+            .header-project-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 47px;
+                .header-id-project-name {
+                    display: flex;
+                    .header-project-id {
+                        margin-right: 20px;
+                    }
+                    .header-project-name {
+
+                    }
+                }
+                .header-team-assignee-icon {
+                    display: flex;
+                    align-items: center;
+                    .header-team {
+                        border: 1px solid white;
+                        padding: 5px 15px;
+                        border-radius: 20px;
+                    }
+                    .header-assignee {
+                        margin-left: 20px;
+                        border: 1px solid #676767;
+                        padding: 1px 12px 1px 3px;
+                        border-radius: 20px;
+                        background: #676767;
+                        display: flex;
+                        align-items: center;
+                        .header-icon-assignee {
+                            width: 30px;
+                            height: 30px;
+                            margin-right: 10px;
+                            .header-img-assignee {
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 50%;
+                            }
+                        }
+                    }
+                    .header-icon-dropdown {
+                        margin-left: 10px;
+                        width: 34px;
+                        height: 34px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background: transparent;
+                        color: white;
+                        &:hover {
+                            background: #676767;
+                        }
+                        i {
+                            font-size: 20px;
+                            position: relative;
+                            top: -2px;
+                        }
+                    }
+                    .ui.top.right.pointing.dropdown > .menu {
+                        margin: 7px -4px 0 0px !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 .qr-wrapper {
     position: relative;
     width: 100%;
@@ -30,8 +112,8 @@ body.reviselog {
                 width: 100%;
                 transition: 0.3s ease;
                 .qr-bg-head {
-                    height: 200px;
-                    background: #E0E3E7;
+                    height: 253px;
+                    background: #E5E9F1;
                     position: absolute;
                     width: 100%;
                     z-index: -1;
@@ -50,7 +132,7 @@ body.reviselog {
                     max-width: 1366px;
                     min-width: 1024px;
                     margin: 0 auto;
-                    padding: 15px 15px 0;
+                    padding: 60px 15px 0;
                     h3 {}
                     .qr-label {
                         font-weight: 100;
@@ -156,7 +238,7 @@ body.reviselog {
                         }
                     }
                     .qr-segment-details-container {
-                        background: #e7e9ef;
+                        background: #E5E9F1;
                         padding: 45px 15px 15px;
                         .qr-segments-summary {
                             h3{}
@@ -194,14 +276,18 @@ body.reviselog {
                                             .segment-status-container {
                                                 width: 14%;
                                                 padding: 15px 0.78571429em;
-                                                 .status-translated {
-                                                     font-size: 20px;
-                                                     color: #09beec;
-                                                 }
-                                                 .status-revised {
-                                                     font-size: 20px;
-                                                     color: #7eaf3e;
-                                                 }
+                                                .status-translated {
+                                                    font-size: 20px;
+                                                    color: #09beec;
+                                                }
+                                                .status-approved {
+                                                    font-size: 20px;
+                                                    color: #7eaf3e;
+                                                }
+                                                .status-draft {
+                                                    font-size: 20px;
+                                                    color: #ccced2;
+                                                }
                                             }
                                         }
                                         .qr-segment-body {
@@ -251,20 +337,42 @@ body.reviselog {
                                                             }
                                                         }
                                                     }
+                                                    &.rtl-lang {
+                                                        .qr-text {
+                                                            direction: rtl !important;
+                                                            text-align: right !important;
+                                                        }
+                                                        .qr-tags,
+                                                        span.locked {
+                                                            direction: ltr;
+                                                            display: inline-block;
+                                                        }
+                                                    }
                                                     .qr-text {
                                                         width: 68%;
                                                         background: #FFFFFF;
                                                         margin-right: 1px;
-                                                        .qr-diff {
-                                                            &.add {
-                                                                background: rgba(158, 255, 0, 0.2);
-                                                            }
-                                                            &.clear {
-                                                                background: rgba(255, 46, 0, 0.1);
-                                                                text-decoration: line-through;
+                                                        display: inline-block;
+
+                                                        .added {
+                                                            background: rgba(158, 255, 0, 0.2);
+                                                            .qr-tags,
+                                                            span.locked {
+                                                                background: rgba(158, 255, 0, 0.2) !important;
                                                             }
                                                         }
-                                                        .qr-tags {
+                                                        .deleted {
+                                                            background: rgba(255, 46, 0, 0.1) ;
+                                                            text-decoration: line-through ;
+                                                            .qr-tags,
+                                                            span.locked{
+                                                                background: rgba(255, 46, 0, 0.1) !important;
+                                                                text-decoration: line-through !important;
+                                                            }
+                                                        }
+
+                                                        .qr-tags,
+                                                        span.locked{
                                                             color: #767676;
                                                             font-style: italic;
                                                             background: #f2f4f7;

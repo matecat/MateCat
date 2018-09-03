@@ -27,7 +27,10 @@ UI = {
         var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
-        ReactDOM.render(React.createElement(Header), headerMountPoint);
+        ReactDOM.render(React.createElement(Header ,{
+            user: APP.USER.STORE,
+            showFilterProjects: true
+        }), headerMountPoint);
 
 
 

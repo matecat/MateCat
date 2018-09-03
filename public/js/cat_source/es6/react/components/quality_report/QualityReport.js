@@ -1,10 +1,12 @@
-import Header from "./Header";
 import JobSummary from "./JobSummary";
 import SegmentsDetails from "./SegmentsDetailsContainer";
 import ReactDom from "react-dom";
 import QRActions from "./../../actions/QualityReportActions";
 import QRStore from "./../../stores/QualityReportStore";
 import QRConstants from "./../../constants/QualityReportConstants";
+import Header from "./../header/Header";
+import QRApi from "../../ajax_utils/quality_report/qrUtils";
+
 
 class QualityReport extends React.Component {
 
@@ -23,7 +25,8 @@ class QualityReport extends React.Component {
     }
 
     componentWillMount() {
-        QRActions.loadInitialAjaxData()
+        QRActions.loadInitialAjaxData();
+
     }
 
     componentDidMount() {
@@ -54,3 +57,23 @@ class QualityReport extends React.Component {
 export default QualityReport ;
 
 ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
+
+let headerMountPoint = $("header")[0];
+
+if (config.isLoggedIn) {
+    QRApi.getUserData().done(function ( data ) {
+        ReactDOM.render(React.createElement(Header, {
+            showJobInfo: true,
+            showModals: true,
+            showTeams: false,
+            user: data
+        }), headerMountPoint);
+    });
+} else {
+    ReactDOM.render(React.createElement(Header, {
+        showJobInfo: true,
+        showModals: true,
+        showTeams: false,
+        loggedUser: false,
+    }), headerMountPoint);
+}

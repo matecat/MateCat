@@ -176,7 +176,55 @@ class reviseSummaryController extends viewController {
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
         $this->template->error_max_thresholds = $error_max_thresholds;
 //        $this->template->word_interval = $nrFormatter->format( constant( get_class( $this->reviseClass ) . "::WORD_INTERVAL" ) );
-	}
+
+        /*
+         * Line Feed PlaceHolding System
+         */
+        $this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
+
+        if ( $placeHoldingEnabled ) {
+
+            $this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
+            $this->template->crPlaceholder        = CatUtils::crPlaceholder;
+            $this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
+            $this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
+            $this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
+            $this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
+            $this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
+            $this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
+            $this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+
+            $this->template->tabPlaceholder      = CatUtils::tabPlaceholder;
+            $this->template->tabPlaceholderClass = CatUtils::tabPlaceholderClass;
+            $this->template->tabPlaceholderRegex = CatUtils::tabPlaceholderRegex;
+
+            $this->template->nbspPlaceholder      = CatUtils::nbspPlaceholder;
+            $this->template->nbspPlaceholderClass = CatUtils::nbspPlaceholderClass;
+            $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
+        }
+
+        $lang_handler = Langs_Languages::getInstance();
+        $this->template->source_rtl = ( $lang_handler->isRTL( $this->data[ 'source' ] ) ) ? true : false ;
+        $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
+
+        $this->template->searchable_statuses = $this->searchableStatuses();
+        $this->template->first_job_segment   = $this->data->job_first_segment ;
+    }
+
+    /**
+     * @return array
+     */
+    private function searchableStatuses() {
+        $statuses = array_merge(
+                Constants_TranslationStatus::$INITIAL_STATUSES,
+                Constants_TranslationStatus::$TRANSLATION_STATUSES,
+                Constants_TranslationStatus::$REVISION_STATUSES
+        );
+
+        return array_map( function ( $item ) {
+            return (object)array( 'value' => $item, 'label' => $item );
+        }, $statuses );
+    }
 }
 
 
