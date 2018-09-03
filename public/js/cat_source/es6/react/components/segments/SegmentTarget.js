@@ -63,7 +63,14 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
+        } else if ( this.props.segment.edit_area_locked ) {
+            UI.editAreaClick(event.currentTarget);
         }
+    }
+
+    lockEditArea(event) {
+        event.preventDefault();
+        SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
     }
 
     decodeTranslation(segment, translation) {
@@ -106,14 +113,25 @@ class SegmentTarget extends React.Component {
         var textAreaContainer = "";
         let translation = this.state.translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 
-        if (this.props.isReviewImproved) {
+        if ( this.props.isReviewImproved ) {
             textAreaContainer = <div data-mount="segment_text_area_container">
-                <div className="textarea-container" onClick={this.onClickEvent.bind(this)}>
+                <div className="textarea-container" onClick={this.onClickEvent.bind( this )}>
                     <div className="targetarea issuesHighlightArea errorTaggingArea"
-                         dangerouslySetInnerHTML={this.allowHTML(translation)}/>
+                         dangerouslySetInnerHTML={this.allowHTML( translation )}/>
                 </div>
             </div>
-
+        } else if ( this.props.segment.edit_area_locked ) {
+            textAreaContainer = <div data-mount="segment_text_area_container">
+                <div className="textarea-container" onClick={this.onClickEvent.bind( this )}>
+                    <div className="targetarea issuesHighlightArea errorTaggingArea"
+                         dangerouslySetInnerHTML={this.allowHTML( translation )}/>
+                </div>
+                <div className="toolbar">
+                    {config.isReview && ReviewExtended.enabled() ? (
+                        <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title=""/>
+                    ): null}
+                </div>
+            </div>
         } else {
             var s2tMicro = "";
             var tagModeButton = "";
@@ -179,6 +197,9 @@ class SegmentTarget extends React.Component {
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
                 <div className="toolbar">
+                    {config.isReview && ReviewExtended.enabled() ? (
+                        <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title=""/>
+                    ): null}
                     {tagLockCustomizable}
                     {tagModeButton}
                     {tagCopyButton}

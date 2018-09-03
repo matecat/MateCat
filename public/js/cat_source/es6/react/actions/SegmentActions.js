@@ -229,6 +229,13 @@ var SegmentActions = {
             translation: editAreaText
         });
     },
+    lockEditArea : function ( sid, fid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.LOCK_EDIT_AREA,
+            fid: fid,
+            id: sid,
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({

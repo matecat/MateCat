@@ -192,13 +192,13 @@ class ReviewExtendedIssue extends React.Component {
 			{this.state.commentView ? commentSection: null}
 
 
-			{this.state.extendDiffView ?
-				<ReviewVersionDiff
-					diffPatch={this.props.issue.diff}
-					segment={this.props.segment}
-					decodeTextFn={UI.decodeText}
-					selectable={false}
-				/> : null}
+			{/*{this.state.extendDiffView ?*/}
+				{/*/!*<ReviewVersionDiff*!/*/}
+					{/*/!*diffPatch={this.props.issue.diff}*!/*/}
+					{/*/!*segment={this.props.segment}*!/*/}
+					{/*/!*decodeTextFn={UI.decodeText}*!/*/}
+					{/*/!*selectable={false}*!/*/}
+				{/*/> : null}*/}
 
 			{/*<div className="issue-date">
 				<i>{formatted_date}</i>

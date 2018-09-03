@@ -91,6 +91,9 @@ class Segment extends React.Component {
         if (this.props.isReviewImproved) {
             classes.push("reviewImproved");
         }
+        if (this.props.segment.edit_area_locked) {
+            classes.push("editAreaLocked");
+        }
         if (this.props.segment.inBulk) {
             classes.push("segment-selected-inBulk");
         }

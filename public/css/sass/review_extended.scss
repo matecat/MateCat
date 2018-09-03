@@ -191,3 +191,55 @@ article {
     top: -1px;
     border-top: 12px solid #e5e9f1;
 }
+
+//********Import from review improved ***********//
+
+section.editAreaLocked.opened {
+    .buttons {
+        width: 100%;
+        margin-top: 10px;
+        .left {
+            float: left;
+        }
+
+        .right {
+            float: right;
+        }
+    }
+}
+
+section.editAreaLocked.opened .outersource .copy {
+    display: none;
+}
+
+section.editAreaLocked.opened .textarea-container {
+    width: 100%;
+    padding: 0 4px;
+    font-size:18px;
+}
+
+section.editAreaLocked .errorTaggingArea {
+    padding: 3px;
+    line-height: 27px;
+    padding: 4px 0 0 0 ;
+}
+
+section.editAreaLocked.opened {
+    .errorTaggingArea, .editableTarget, .trackChanges {
+        font-family: "calibri", Arial, Helvetica, sans-serif;
+        padding: 3px;
+        line-height: 27px;
+        padding: 4px 0 0 0 ;
+    }
+
+    .errorTaggingArea {
+        .highlight {
+            background-color: #7EB30C;
+        }
+    }
+
+    .errorTaggingArea::selection {
+        background-color: #FFFF00;
+    }
+}
+//*******************************************************/

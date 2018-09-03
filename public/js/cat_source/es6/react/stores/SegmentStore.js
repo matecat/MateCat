@@ -64,11 +64,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     updateAll: function (segments, fid, where) {
         // console.time("Time: updateAll segments" + fid);
         if (this._segments[fid] && where === "before") {
-            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else if (this._segments[fid] && where === "after") {
-            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else {
-            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
+            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
         }
 
         this.buildSegmentsFiles(fid, segments);
@@ -80,7 +80,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
-    normalizeSplittedSegments: function (segments) {
+    normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
         let self = this;
         $.each(segments, function (index) {
@@ -106,6 +106,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
+                        fid: fid,
                         split_group: splitGroup,
                         split_points_source: [],
                         status: status,
@@ -116,7 +117,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         warning: "0",
                         warnings: {},
                         tagged: !self.hasSegmentTagProjectionEnabled(segment),
-                        unlocked: false
+                        unlocked: false,
+                        edit_area_locked: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -127,6 +129,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
+                segment.fid = fid;
+                segment.edit_area_locked = false;
                 newSegments.push(this);
             }
 
@@ -278,7 +282,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
         return this._segments[fid].get(index);
     },
-
+    lockUnlockEditArea(sid, fid) {
+        let index = this.getSegmentIndex(sid, fid);
+        let segment = this._segments[fid].get(index);
+        let lockedEditArea = segment.get('edit_area_locked');
+        this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
+    },
     getSegmentByIdToJS(sid, fid) {
         return this._segments[fid].find(function (seg) {
             return seg.get('sid') == sid;
@@ -470,6 +479,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.TRANSLATION_EDITED:
             let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
+            break;
+        case SegmentConstants.LOCK_EDIT_AREA:
+            SegmentStore.lockUnlockEditArea(action.id, action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
