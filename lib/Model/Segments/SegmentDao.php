@@ -136,6 +136,128 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param        $jid
+     * @param        $password
+     * @param int    $step
+     * @param        $ref_segment
+     * @param string $where
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getSegmentsForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
+
+        $queryAfter = "
+                SELECT * FROM (
+                    SELECT segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id = id_job
+                    WHERE id_job = $jid
+                        AND password = '$password'
+                        AND show_in_cattool = 1
+                        AND segments.id > $ref_segment
+                        AND segments.id BETWEEN job_first_segment AND job_last_segment
+                    LIMIT %u
+                ) AS TT1
+                ";
+
+        $queryBefore = "
+                SELECT * from(
+                    SELECT  segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id =  id_job
+                    WHERE id_job = $jid
+                        AND password = '$password'
+                        AND show_in_cattool = 1
+                        AND segments.id < $ref_segment
+                        AND segments.id BETWEEN job_first_segment AND job_last_segment
+                    ORDER BY __sid DESC
+                    LIMIT %u
+                ) as TT2
+                ";
+
+        /*
+         * This query is an union of the last two queries with only one difference:
+         * the queryAfter parts differs for the equal sign.
+         * Here is needed
+         *
+         */
+        $queryCenter = "
+                  SELECT * FROM ( 
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id >= $ref_segment
+                        LIMIT %u 
+                  ) AS TT1
+                  UNION
+                  SELECT * from(
+                        SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id < $ref_segment
+                        ORDER BY __sid DESC
+                        LIMIT %u
+                  ) AS TT2
+    ";
+
+        switch ( $where ) {
+            case 'after':
+                $subQuery = sprintf( $queryAfter, $step * 2 );
+                break;
+            case 'before':
+                $subQuery = sprintf( $queryBefore, $step * 2 );
+                break;
+            case 'center':
+                $subQuery = sprintf( $queryCenter, $step, $step );
+                break;
+        }
+
+
+        $query = "SELECT 
+                s.id AS sid,
+                s.segment,
+                s.raw_word_count,
+                IF (st.status='NEW',NULL,st.translation) AS translation,
+                UNIX_TIMESTAMP(st.translation_date) AS version,
+                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
+                st.status,
+                COALESCE(time_to_edit, 0) AS time_to_edit,
+                st.warning,
+                st.suggestion_match as suggestion_match,
+                st.suggestion_source,
+                st.suggestion,
+                st.edit_distance,
+                st.locked,
+                st.match_type
+                FROM segments s
+                JOIN segment_translations st ON st.id_segment = s.id
+                
+            WHERE s.id IN ($subQuery)
+            ORDER BY sid ASC
+";
+
+        $db = Database::obtain();
+
+        try {
+            $results = $db->fetch_array( $query );
+        } catch ( PDOException $e ) {
+            throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
+        }
+        return $results;
+    }
+
+    /**
      * @param Segments_SegmentStruct[] $obj_arr
      *
      * @throws Exception

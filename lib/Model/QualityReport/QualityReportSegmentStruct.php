@@ -5,44 +5,21 @@
  * Date: 24/07/2018
  * Time: 12:46
  */
-
 use API\V2\Json\QALocalWarning;
+
 
 class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    public $pid;
-
-    public $jid;
-
-    public $source;
-
-    public $target;
-
-    public $last_opened_segment;
-
-    public $cid;
-
-    public $tid;
-
-    public $pname;
-
-    public $create_date;
-
-    public $id_file;
-
-    public $filename;
-
-    public $mime_type;
 
     public $sid;
+
+    public $target;
 
     public $segment;
 
     public $segment_hash;
 
     public $raw_word_count;
-
-    public $internal_id;
 
     public $translation;
 
@@ -54,25 +31,9 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $time_to_edit;
 
-    public $xliff_ext_prec_tags;
-
-    public $xliff_ext_succ_tags;
-
-    public $serialized_errors_list;
-
     public $warning;
 
     public $suggestion_match;
-
-    public $source_chunk_lengths;
-
-    public $target_chunk_lengths;
-
-    public $readonly;
-
-    public $autopropagated_from;
-
-    public $repetitions_in_chunk;
 
     public $suggestion_source;
 
