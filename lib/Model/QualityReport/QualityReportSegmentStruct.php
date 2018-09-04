@@ -45,6 +45,18 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $match_type;
 
+    public $warnings;
+
+    public $pee;
+
+    public $ice_modified;
+
+    public $secs_per_word;
+
+    public $parsed_time_to_edit;
+
+    public $comments = [];
+
     /**
      * @return float
      */

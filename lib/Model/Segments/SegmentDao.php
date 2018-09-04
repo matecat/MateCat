@@ -147,20 +147,21 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      */
     public function getSegmentsForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
+        $db = Database::obtain()->getConnection();
+
         $queryAfter = "
                 SELECT * FROM (
                     SELECT segments.id AS __sid
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = $jid
-                        AND password = '$password'
+                    WHERE id_job = :id_job
+                        AND password = :password
                         AND show_in_cattool = 1
-                        AND segments.id > $ref_segment
+                        AND segments.id > :ref_segment
                         AND segments.id BETWEEN job_first_segment AND job_last_segment
                     LIMIT %u
-                ) AS TT1
-                ";
+                ) AS TT1";
 
         $queryBefore = "
                 SELECT * from(
@@ -168,15 +169,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id =  id_job
-                    WHERE id_job = $jid
-                        AND password = '$password'
+                    WHERE id_job = :id_job
+                        AND password = :password
                         AND show_in_cattool = 1
-                        AND segments.id < $ref_segment
+                        AND segments.id < :ref_segment
                         AND segments.id BETWEEN job_first_segment AND job_last_segment
                     ORDER BY __sid DESC
                     LIMIT %u
-                ) as TT2
-                ";
+                ) as TT2";
 
         /*
          * This query is an union of the last two queries with only one difference:
@@ -190,10 +190,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id = id_job
-                        WHERE id_job = $jid
-                            AND password = '$password'
+                        WHERE id_job = :id_job
+                            AND password = :password
                             AND show_in_cattool = 1
-                            AND segments.id >= $ref_segment
+                            AND segments.id >= :ref_segment
                         LIMIT %u 
                   ) AS TT1
                   UNION
@@ -202,14 +202,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
-                        WHERE id_job = $jid
-                            AND password = '$password'
+                        WHERE id_job = :id_job
+                            AND password = :password
                             AND show_in_cattool = 1
-                            AND segments.id < $ref_segment
+                            AND segments.id < :ref_segment
                         ORDER BY __sid DESC
                         LIMIT %u
-                  ) AS TT2
-    ";
+                  ) AS TT2";
 
         switch ( $where ) {
             case 'after':
@@ -221,8 +220,20 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             case 'center':
                 $subQuery = sprintf( $queryCenter, $step, $step );
                 break;
+            default:
+                throw new Exception("No direction selected");
+                break;
         }
 
+        $stmt = $db->prepare($subQuery);
+        $stmt->execute( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment] );
+        $segments_id = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $segments_id = array_map(function($segment_row){
+            return $segment_row['__sid'];
+        }, $segments_id);
+
+        $prepare_str_segments_id = str_repeat( '?,', count( $segments_id ) - 1) . '?';
 
         $query = "SELECT 
                 s.id AS sid,
@@ -243,17 +254,32 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 FROM segments s
                 JOIN segment_translations st ON st.id_segment = s.id
                 
-            WHERE s.id IN ($subQuery)
-            ORDER BY sid ASC
-";
+            WHERE s.id IN (" . $prepare_str_segments_id . " )
+            ORDER BY sid ASC";
 
-        $db = Database::obtain();
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct");
+        $stmt->execute( $segments_id );
 
-        try {
-            $results = $db->fetch_array( $query );
-        } catch ( PDOException $e ) {
-            throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
+        $results = $stmt->fetchAll();
+
+        $comments_query = "SELECT * FROM comments WHERE message_type IN (1,2) AND id_segment IN (" . $prepare_str_segments_id . ")";
+
+        $stmt = $db->prepare($comments_query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, "\Comments_BaseCommentStruct");
+        $stmt->execute( $segments_id );
+        $comments_results = $stmt->fetchAll();
+
+        foreach($results as $result){
+            foreach ($comments_results as $comment){
+                $comment->templateMessage();
+                if($comment->id_segment == $result->sid){
+                    $result->comments[] = $comment;
+                }
+            }
         }
+
+
         return $results;
     }
 

@@ -13,7 +13,7 @@ namespace API\V2\Json;
 use CatUtils;
 use QA;
 
-class QALocalWarning {
+class QALocalWarning extends QAWarning {
 
     protected $QA;
     protected $id_segment;
@@ -37,13 +37,45 @@ class QALocalWarning {
         $out[ 'details' ] = null;
         $out[ 'total' ]   = 0;
 
+        $this->structure = [
+                'ERROR'   => [
+                        'Categories' => new \ArrayObject()
+                ],
+                'WARNING' => [
+                        'Categories' => new \ArrayObject()
+                ],
+                'INFO'     => [
+                        'Categories' => new \ArrayObject()
+                ]
+        ];
+
         $exceptionList                = QA::JSONtoExceptionList( $this->QA->getNoticesJSON() );
+
+
         $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
         $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
         $issues_detail[ QA::INFO ]    = $exceptionList[ QA::INFO ];
 
 
         if ( $this->QA->thereAreNotices() ) {
+
+            if ( count( $exceptionList[ QA::ERROR ] ) > 0 ) {
+                foreach ( $exceptionList[ QA::ERROR ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::ERROR, $exception_error->outcome, $exception_error );
+                }
+            }
+
+            if ( count( $exceptionList[ QA::WARNING ] ) > 0 ) {
+                foreach ( $exceptionList[ QA::WARNING ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::WARNING, $exception_error->outcome, $exception_error );
+                }
+            }
+
+            if ( count( $exceptionList[ QA::INFO ] ) > 0 ) {
+                foreach ( $exceptionList[ QA::INFO ] as $exception_error ) {
+                    $this->pushErrorSegment( QA::INFO, $exception_error->outcome, $exception_error );
+                }
+            }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
@@ -63,7 +95,7 @@ class QALocalWarning {
             $notices = $this->QA->getNotices();
 
             $out[ 'details' ]                              = [];
-            $out[ 'details' ][ 'issues_info' ]             = $issues_detail;
+            $out[ 'details' ][ 'issues_info' ]             = $this->structure;
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;

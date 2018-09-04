@@ -79,20 +79,16 @@ class QualityReportController extends KleinController
 
         foreach ( $data as $i => $seg ) {
 
-            $seg = $this->featureSet->filter( 'filter_get_segments_segment_data', $seg );
+            $seg->warnings      = $seg->getLocalWarning();
+            $seg->pee           = $seg->getPEE();
+            $seg->ice_modified  = $seg->isICEModified();
+            $seg->secs_per_word = $seg->getSecsPerWord();
 
-            $qr_struct = new \QualityReport_QualityReportSegmentStruct( $seg );
+            $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
 
-            $seg[ 'warnings' ]      = $qr_struct->getLocalWarning();
-            $seg[ 'pee' ]           = $qr_struct->getPEE();
-            $seg[ 'ice_modified' ]  = $qr_struct->isICEModified();
-            $seg[ 'secs_per_word' ] = $qr_struct->getSecsPerWord();
+            $seg->segment = CatUtils::rawxliff2view( $seg->segment );
 
-            $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
-
-            $seg[ 'segment' ] = CatUtils::rawxliff2view( $seg[ 'segment' ] );
-
-            $seg[ 'translation' ] = CatUtils::rawxliff2view( $seg[ 'translation' ] );
+            $seg->translation = CatUtils::rawxliff2view( $seg->translation );
 
             $this->result[ 'data' ][] = $seg;
         }

@@ -23,4 +23,8 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
         return ((int) $this->message_type == Comments_CommentDao::TYPE_COMMENT);
     }
 
+    public function templateMessage(){
+        $this->message = \Comments_CommentDao::placeholdContent($this->message);
+    }
+
 }
