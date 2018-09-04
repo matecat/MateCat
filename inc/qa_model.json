@@ -34,19 +34,19 @@
       {
         "label": "Minor",
         "dqf_id" : 1,
-        "penalty": 0
+        "penalty": 3
       },
       {
         "label": "Major",
         "dqf_id" : 2,
-        "penalty": 1
+        "penalty": 100
       }
     ],
 
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : 20
+        "limit" : 20000
       }
     }
   }
