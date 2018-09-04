@@ -133,7 +133,7 @@ class ReviewExtendedIssue extends React.Component {
     }
 	render() {
 		let category = this.getCategory();
-		let formatted_date = moment(this.props.issue.created_at).format('lll');
+		// let formatted_date = moment(this.props.issue.created_at).format('lll');
 
 		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
         let commentViewButtonClass = (this.state.commentView ? "re-active" :  '');
@@ -199,10 +199,6 @@ class ReviewExtendedIssue extends React.Component {
 					decodeTextFn={UI.decodeText}
 					selectable={false}
 				/> : null}
-
-			{/*<div className="issue-date">
-				<i>{formatted_date}</i>
-			</div>*/}
 		</div>
 	}
 }
