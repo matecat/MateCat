@@ -45,7 +45,8 @@ class Segment extends React.Component {
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation),
-            showRevisionPanel: false
+            showRevisionPanel: false,
+            selectedTextObj: null
         }
     }
 
@@ -249,27 +250,27 @@ class Segment extends React.Component {
 
     openRevisionPanel(data) {
         if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
-            if (this.state.showRevisionPanel) {
-                this.setState({
-                    showRevisionPanel: false,
-                    showTranslationIssues: true
-                });
-                setTimeout( function (  ) {
-                    UI.closeIssuesPanel()
-                });
-            } else {
-                this.setState({
-                    showRevisionPanel: true,
-                    showTranslationIssues: false
-                });
-            }
-
+            this.setState( {
+                showRevisionPanel: true,
+                showTranslationIssues: false,
+                selectedTextObj : data.selection
+            } );
         } else {
             this.setState({
                 showRevisionPanel: false,
-                showTranslationIssues: true
+                showTranslationIssues: true,
+                selectedTextObj: null
             });
         }
+    }
+    removeSelection() {
+        var selection = document.getSelection();
+        if ( this.section.contains(selection.anchorNode) ) {
+            selection.removeAllRanges();
+        }
+        this.setState({
+            selectedTextObj: null
+        });
     }
     /*
     Is possible to close the single segmentIssue panel passing the id or all segments issue panel
@@ -324,14 +325,15 @@ class Segment extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return (
-            (!Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))) ||
-            (!Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes))) ||
-            (nextState.modified !== this.state.modified) ||
-            (nextState.autopropagated !== this.state.autopropagated) ||
-            (nextState.status !== this.state.status) ||
-            (nextState.showTranslationIssues !== this.state.showTranslationIssues) ||
-            (nextState.readonly !== this.state.readonly) ||
-            (nextState.showRevisionPanel !== this.state.showRevisionPanel)
+            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) ||
+            !Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes)) ||
+            nextState.modified !== this.state.modified ||
+            nextState.autopropagated !== this.state.autopropagated ||
+            nextState.status !== this.state.status ||
+            nextState.showTranslationIssues !== this.state.showTranslationIssues ||
+            nextState.readonly !== this.state.readonly ||
+            nextState.showRevisionPanel !== this.state.showRevisionPanel ||
+            (nextState.selectedTextObj !== this.state.selectedTextObj)
         );
     }
 
@@ -431,6 +433,7 @@ class Segment extends React.Component {
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
+                        removeSelection={this.removeSelection.bind(this)}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
@@ -471,7 +474,8 @@ class Segment extends React.Component {
                                     segment={this.props.segment}
                                     sid={this.props.segment.sid}
                                     isReview={config.isReview}
-                                    // setParentLoader={this.changeReviseLoader.bind(this)}
+                                    selectionObj={this.state.selectedTextObj}
+                                    removeSelection={this.removeSelection.bind(this)}
                                 />
                             )}
 

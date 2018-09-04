@@ -136,14 +136,19 @@ class ReviewExtendedIssue extends React.Component {
 		let formatted_date = moment(this.props.issue.created_at).format('lll');
 
 		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
-        let commentViewButtonClass = (this.state.commentView ? "re-active" :  '');
-        commentViewButtonClass = (this.props.issue.comments.length > 0) ? commentViewButtonClass + " re-message" : commentViewButtonClass;
-        let iconCommentClass = ( this.props.issue.comments.length > 0 ) ? "icon-uniE96B icon" : 'icon-uniE96E icon';
+        let commentViewButtonClass = (this.state.commentView  ? "re-active" :  '');
+        commentViewButtonClass = (this.props.issue.comments.length > 0 || this.props.issue.target_text) ? commentViewButtonClass + " re-message" : commentViewButtonClass;
+        let iconCommentClass = ( this.props.issue.comments.length > 0 || this.props.issue.target_text ) ? "icon-uniE96B icon" : 'icon-uniE96E icon';
         //START comments html section
 		let htmlCommentLines = this.generateHtmlCommentLines();
+
 		let renderHtmlCommentLines = '';
-		if( htmlCommentLines.length > 0 ){
+		if( htmlCommentLines.length > 0 || this.props.issue.target_text){
 			renderHtmlCommentLines = <div className="re-comment-list">
+                {this.props.issue.target_text ?
+                    (
+                        <p className="re-comment"><span className="re-selected-text"><b>Selected text</b></span>{this.props.issue.target_text}</p>
+                   ):(null)}
                 {htmlCommentLines}
             </div>;
 		}
@@ -184,10 +189,6 @@ class ReviewExtendedIssue extends React.Component {
 				</div>
 
 			</div>
-			{this.props.issue.target_text ?
-				(<div className="selected-text">
-					<p><b>Selected text</b>: <span className="selected">{this.props.issue.target_text}</span></p>
-				</div>):(null)}
 
 			{this.state.commentView ? commentSection: null}
 

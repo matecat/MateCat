@@ -34,19 +34,19 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.end_offset = 0;
         }
 
-        // if(this.props.isDiffChanged){
-        	// let segment = this.props.segment;
-        	// segment.translation = this.props.newtranslation;
-        	// segment.status = 'approved';
-		// 	API.SEGMENT.setTranslation(segment)
-		// 		.done(function(response){
-		// 			issue.version = response.translation.version;
-		// 			deferred.resolve();
-		// 		})
-		// 		.fail( self.handleFail.bind(self) ) ;
-		// }else{
-        	// deferred.resolve();
-		// }
+        if(this.props.isDiffChanged){
+        	let segment = this.props.segment;
+        	segment.translation = this.props.newtranslation;
+        	segment.status = 'approved';
+			API.SEGMENT.setTranslation(segment)
+				.done(function(response){
+					issue.version = response.translation.version;
+					deferred.resolve();
+				})
+				.fail( self.handleFail.bind(self) ) ;
+		}else{
+        	deferred.resolve();
+		}
 
 		data.push(issue);
 

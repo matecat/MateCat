@@ -8,7 +8,6 @@ class ReviewExtendedPanel extends React.Component {
 		super(props);
 		this.state = {
 			versionNumber: this.props.segment.versions[0].version_number,
-			selectionObj: null,
 			diffPatch: null,
 			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
@@ -17,17 +16,9 @@ class ReviewExtendedPanel extends React.Component {
 		};
 	}
 
-	textSelected(data) {
-		this.setState({
-			selectionObj: data
-		});
-	}
-
 	removeSelection() {
         this.setCreationIssueLoader(false);
-		this.setState({
-			selectionObj: null
-		});
+		this.props.removeSelection();
 	}
 
 	getAllIssues() {
@@ -97,7 +88,7 @@ class ReviewExtendedPanel extends React.Component {
 
             {this.props.isReview? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
-				selection={this.state.selectionObj}
+				selection={this.props.selectionObj}
 				segmentVersion={this.state.versionNumber}
 				submitIssueCallback={this.removeSelection.bind(this)}
 				reviewType={this.props.reviewType}

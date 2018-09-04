@@ -63,10 +63,28 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
-        } else if ( this.props.segment.edit_area_locked ) {
+        }
+    }
+
+    selectIssueText(event) {
+        var selection = document.getSelection();
+        var container = $(this.issuesHighlightArea).find('.errorTaggingArea') ;
+        if ( this.textSelectedInsideSelectionArea(selection, container ) )  {
+            event.preventDefault();
+            event.stopPropagation();
+            selection = getSelectionData( selection, container ) ;
+            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid,  selection : selection }, true)
+        } else {
+            this.props.removeSelection();
             UI.editAreaClick(event.currentTarget);
         }
     }
+
+    textSelectedInsideSelectionArea( selection, container ) {
+        return container.contents().text().indexOf(selection.focusNode.textContent)>=0 &&
+            container.contents().text().indexOf(selection.anchorNode.textContent)>=0 &&
+            selection.toString().length > 0 ;
+    };
 
     lockEditArea(event) {
         event.preventDefault();
@@ -122,7 +140,8 @@ class SegmentTarget extends React.Component {
             </div>
         } else if ( this.props.segment.edit_area_locked ) {
             textAreaContainer = <div data-mount="segment_text_area_container">
-                <div className="textarea-container" onClick={this.onClickEvent.bind( this )}>
+                <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
+                ref={(div)=> this.issuesHighlightArea = div}>
                     <div className="targetarea issuesHighlightArea errorTaggingArea"
                          dangerouslySetInnerHTML={this.allowHTML( translation )}/>
                 </div>
