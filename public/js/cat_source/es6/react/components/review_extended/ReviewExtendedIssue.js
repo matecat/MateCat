@@ -169,7 +169,7 @@ class ReviewExtendedIssue extends React.Component {
 			<div className="re-item-box re-issue shadow-1">
 				<div className="issue-head pad-right-10">
                     {category.options && category.options.code ? (
-                        <div className="re-abb-issue">{category.options.code}</div>
+                        <div className="re-abb-issue" title={category.label}>{category.options.code}</div>
                     ) : (
                         <span className="re-category-issue-head" title={category.label}>{category.label}</span>
                     )}

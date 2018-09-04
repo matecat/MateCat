@@ -63,7 +63,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
             issues = this.getIssuesSortedComponentList(this.props.issues)
         }
         return <div>
-                    <div className="re-item-head pad-left-1">Found issues</div>
+                    <div className="re-item-head pad-left-1">Issues Found</div>
                     {issues}
                 </div>;
     }
@@ -90,24 +90,9 @@ class ReviewExtendedIssuesContainer extends React.Component {
         return issues;
     }
 
-    componentWillReceiveProps ( nextProps ) {
-        // if(nextProps.issues.length > this.props.issues.length && this.props.segment.sid === nextProps.segment.sid){
-        //     this.setState({
-        //         animateFirstIssue: true
-        //     })
-        // }
-    }
+    componentWillReceiveProps ( nextProps ) { }
 
-    componentDidUpdate () {
-        // if(this.state.animateFirstIssue){
-        //     $('.re-list.issues .re-item:first-child')
-        //         .transition('pulse');
-        //     this.setState({
-        //         animateFirstIssue: false
-        //     })
-        // }
-
-    }
+    componentDidUpdate () {}
 
     render () {
         if(this.props.issues.length > 0){

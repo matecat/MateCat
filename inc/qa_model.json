@@ -6,7 +6,7 @@
     "categories": [
       {
         "label": "Tag issues (mismatches, whitespaces)",
-        "code": "TIS",
+        "code": "TAG",
         "dqf_id" : 5
       },
       {
@@ -16,7 +16,7 @@
       },
       {
         "label": "Terminology and translation consistency",
-        "code": "TTC",
+        "code": "TRM",
         "dqf_id" : 3
       },
       {
@@ -30,24 +30,24 @@
         "dqf_id" : 4
       }
     ],
-      "severities": [
-        {
-          "label": "Minor",
-          "dqf_id" : 1,
-          "penalty": 0
-        },
-        {
-          "label": "Major",
-          "dqf_id" : 2,
-          "penalty": 1
-        }
-      ],
-
-      "passfail" : {
-        "type" : "points_per_thousand",
-        "options" : {
-          "limit" : 20
-        }
+    "severities": [
+      {
+        "label": "Minor",
+        "dqf_id" : 1,
+        "penalty": 3
+      },
+      {
+        "label": "Major",
+        "dqf_id" : 2,
+        "penalty": 100
       }
+    ],
+
+    "passfail" : {
+      "type" : "points_per_thousand",
+      "options" : {
+        "limit" : 20000
+      }
+    }
   }
 }
