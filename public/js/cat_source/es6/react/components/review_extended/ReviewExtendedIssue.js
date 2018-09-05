@@ -5,7 +5,6 @@ class ReviewExtendedIssue extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			extendDiffView: false,
 			commentView: false,
             sendDisabled : true,
             rebutDisabled: true
@@ -36,17 +35,22 @@ class ReviewExtendedIssue extends React.Component {
 			$(this.el).transition('fade left');
 		}
 	}
-	setExtendedDiffView(event){
-		event.preventDefault();
-		event.stopPropagation();
-		this.setState({
-			extendDiffView : !this.state.extendDiffView,
-            commentView : false
-		})
-	}
+
+    openCommentsAfterCreation(sid, id) {
+	    if ( sid === this.props.sid && id === this.props.issue.id && this.props.issue.target_text) {
+            this.setState({
+                commentView : true
+            });
+        } else {
+            this.setState({
+                commentView : false
+            });
+        }
+    }
     setCommentView(event){
         event.preventDefault();
         event.stopPropagation();
+
         let self = this;
         if(!this.state.commentView){
         	setTimeout(function (  ) {
@@ -54,7 +58,6 @@ class ReviewExtendedIssue extends React.Component {
             }, 100);
         }
         this.setState({
-            extendDiffView : false,
 			commentView : !this.state.commentView
         });
 	}
@@ -123,19 +126,18 @@ class ReviewExtendedIssue extends React.Component {
 	}
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.ISSUE_DELETED, this.confirmDeletedIssue.bind(this));
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUE_COMMENT, this.openCommentsAfterCreation.bind(this));
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.ISSUE_DELETED, this.confirmDeletedIssue);
+        SegmentStore.removeListener(SegmentConstants.OPEN_ISSUE_COMMENT, this.openCommentsAfterCreation);
     }
-    componentDidUpdate(){
 
-    }
 	render() {
 		let category = this.getCategory();
 		// let formatted_date = moment(this.props.issue.created_at).format('lll');
 
-		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
         let commentViewButtonClass = (this.state.commentView  ? "re-active" :  '');
         commentViewButtonClass = (this.props.issue.comments.length > 0 || this.props.issue.target_text) ? commentViewButtonClass + " re-message" : commentViewButtonClass;
         let iconCommentClass = ( this.props.issue.comments.length > 0 || this.props.issue.target_text ) ? "icon-uniE96B icon" : 'icon-uniE96E icon';
@@ -159,14 +161,15 @@ class ReviewExtendedIssue extends React.Component {
 		});
 
 		let commentSection = <div className="comments-view shadow-1">
-				<div className="re-add-comment">
+            {renderHtmlCommentLines}
+			<div className="re-add-comment">
 					<form className="ui form" onSubmit={this.addComment.bind(this)}>
 						<div className="field">
-							<input className="re-comment-input" value={this.state.comment_text} type="text" name="first-name" placeholder="Add a comment + press Enter" onChange={this.handleCommentChange.bind(this)} />
+							<input className="re-comment-input" autoComplete="off" value={this.state.comment_text} type="text" name="first-name" placeholder="Add a comment + press Enter" onChange={this.handleCommentChange.bind(this)} />
 						</div>
 					</form>
 				</div>
-				{renderHtmlCommentLines}
+
 			</div>;
         //END comments html section
 
@@ -182,7 +185,6 @@ class ReviewExtendedIssue extends React.Component {
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
-						{/*<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)} title="View track changes"><i className="icon-eye icon"/></button>*/}
 						<button className={"ui icon basic tiny button issue-note " + commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
 						{this.props.isReview ? (<button className="ui icon basic tiny button issue-delete" onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
@@ -191,15 +193,6 @@ class ReviewExtendedIssue extends React.Component {
 			</div>
 
 			{this.state.commentView ? commentSection: null}
-
-
-			{/*{this.state.extendDiffView ?*/}
-				{/*/!*<ReviewVersionDiff*!/*/}
-					{/*/!*diffPatch={this.props.issue.diff}*!/*/}
-					{/*/!*segment={this.props.segment}*!/*/}
-					{/*/!*decodeTextFn={UI.decodeText}*!/*/}
-					{/*/!*selectable={false}*!/*/}
-				{/*/> : null}*/}
 		</div>
 	}
 }

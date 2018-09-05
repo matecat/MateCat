@@ -392,6 +392,22 @@ var SegmentActions = {
         return UI.submitIssues(sid, data, diff);
     },
 
+    issueAdded: function ( sid, issueId ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ISSUE_ADDED,
+            sid: sid,
+            data: issueId
+        });
+    },
+
+    openIssueComments: function ( sid, issueId ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_ISSUE_COMMENT,
+            sid: sid,
+            data: issueId
+        });
+    },
+
     addPreloadedIssuesToSegment: function ( sid, issues ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
