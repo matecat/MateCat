@@ -312,8 +312,10 @@ class XliffSAXTranslationReplacer {
                         Log::$fileName = $old_fname;
                     }
 
-                    // init translation
+                    // init translation and state
                     $translation = '';
+                    $state = null;
+                    $state_prop = '';
 
                     // we must reset the lastMrkId found because this is a new segment.
                     $lastMrkId = -1;
@@ -362,10 +364,47 @@ class XliffSAXTranslationReplacer {
 
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
 
+                        switch ( $seg[ 'status' ] ) {
+
+                            case \Constants_TranslationStatus::STATUS_FIXED:
+                            case \Constants_TranslationStatus::STATUS_APPROVED:
+                                if ( $state == null  || $state == \Constants_TranslationStatus::STATUS_APPROVED) {
+                                    $state_prop = "state=\"signed-off\"";
+                                    $state      = \Constants_TranslationStatus::STATUS_APPROVED;
+                                }
+                                break;
+
+                            case \Constants_TranslationStatus::STATUS_TRANSLATED:
+                                if ( $state == null  || $state == \Constants_TranslationStatus::STATUS_TRANSLATED  || $state == \Constants_TranslationStatus::STATUS_APPROVED) {
+                                    $state_prop = "state=\"translated\"";
+                                    $state      = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                                }
+                                break;
+
+                            case \Constants_TranslationStatus::STATUS_REJECTED:  // if there is a mark REJECTED and there is not a DRAFT, all the trans-unit is REJECTED
+                            case \Constants_TranslationStatus::STATUS_REBUTTED:
+                            if ( ($state == null ) || ($state != \Constants_TranslationStatus::STATUS_NEW  || $state != \Constants_TranslationStatus::STATUS_DRAFT)) {
+                                $state_prop = "state=\"needs-review-translation\"";
+                                $state      = \Constants_TranslationStatus::STATUS_REJECTED;
+                            }
+                                break;
+
+                            case \Constants_TranslationStatus::STATUS_NEW:
+                                if ( ($state == null) || $state != \Constants_TranslationStatus::STATUS_DRAFT ) {
+                                    $state_prop = "state=\"new\"";
+                                    $state      = \Constants_TranslationStatus::STATUS_NEW;
+                                }
+                                break;
+
+                            case \Constants_TranslationStatus::STATUS_DRAFT:
+                                $state_prop = "state=\"needs-translation\"";
+                                $state      = \Constants_TranslationStatus::STATUS_DRAFT;
+                                break;
+                        }
                     }
 
                     //append translation
-                    $tag = "<target xml:lang=\"" . $this->target_lang . "\">$translation</target>";
+                    $tag = "<target xml:lang=\"" . $this->target_lang . "\" $state_prop>$translation</target>";
                 }
 
                 //signal we are leaving a target
