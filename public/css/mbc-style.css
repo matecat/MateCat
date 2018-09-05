@@ -650,6 +650,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   position: absolute;
   bottom: -85px;
   width: 100%;
+  z-index: 1;
 }
 /*
  ******
