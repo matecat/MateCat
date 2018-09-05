@@ -923,7 +923,7 @@
             "isocode":"kln",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"kln-KN"
+            "rfc3066code":"kln-KE"
         }
     ,
         {
@@ -1003,7 +1003,7 @@
             "isocode":"kik",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"kik-KN"
+            "rfc3066code":"kik-KE"
         }
     ,
         {
@@ -1133,7 +1133,7 @@
             "isocode":"luo",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"luo-KN"
+            "rfc3066code":"luo-KE"
         }
     ,
         {
