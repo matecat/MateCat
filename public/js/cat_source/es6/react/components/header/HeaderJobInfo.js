@@ -18,7 +18,7 @@ class HeaderJobInfo extends React.Component {
                         <div className="header-icon-assignee">
                             <img className="header-img-assignee" src="https://lh3.googleusercontent.com/-ztgS9A9z3jg/AAAAAAAAAAI/AAAAAAAAA2U/jaaYVTR8kjw/photo.jpg?sz=80"/>
                         </div>
-                        <span>Ruben Santillan</span>
+                        <span className="assignee-first-name">Ruben</span> <span>Santillan</span>
                     </div>
                     <div className="header-icon-dropdown ui icon top right pointing dropdown circular button">
                         <i className="icon-more_vert icon" />

@@ -44,7 +44,9 @@ class FilterSegments extends React.Component {
         this.initDropDown();
     }
 
-    componentDidUpdate() {}
+    componentDidUpdate() {
+        this.initDropDown();
+    }
 
     render () {
         let optionsStatus = config.searchable_statuses.map(function (item, index) {
@@ -54,10 +56,10 @@ class FilterSegments extends React.Component {
             </div>;
         });
         let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "not-filtered";
-        return <div className="">Filters by
-            <div className="filter-dropdown">
+        return <div className="qr-filter-list">Filters by
+            <div className="filter-dropdown left-10">
                 <div className={"filter-status " + statusFilterClass}>
-                    <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropdown=dropdown}>
+                    <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.statusDropdown=dropdown}>
                         <div className="text">
                             <div>Segment Status</div>
                         </div>
