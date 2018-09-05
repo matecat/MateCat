@@ -6,18 +6,14 @@
  ******
  */
 
-.mbc-comment-balloon-outer {
-  padding-right: 15px
-}
-
 .mbc-comment-balloon-inner {
   background: #ffffff;
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
-section.editor .mbc-comment-balloon-inner {
+/*section.editor .mbc-comment-balloon-inner {
   margin-top: -25px;
-}
+}*/
 
 /* Give breathing space to the last comment ballon in page */
 .mbc-comment-balloon-outer:last-of-type {
@@ -30,11 +26,7 @@ section.editor .mbc-comment-balloon-inner {
  ******
  */
 .mbc-reply-input {
-  background: #fff;
-  border-top: 1px solid #dadada;
-  box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
-  position: relative;
-  padding:10px 12px 17px!important;
+    background: #ffffff;
 }
 
 
@@ -45,11 +37,14 @@ section.editor .mbc-comment-balloon-inner {
  */
 
 .mbc-comments-wrap {
-  height: 100%;
-  max-height: 300px;
+  min-height: 100%;
+  max-height: 200px;
   overflow-y: auto;
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  bottom: 0;
 }
 
 /*
@@ -58,7 +53,8 @@ section.editor .mbc-comment-balloon-inner {
  ******
  */
 .mbc-thread-wrap {
-  padding: 0 12px 17px 12px;
+  padding: 0 10px 10px 10px;
+  border-top: 1px solid #f2f4f7;
 }
 
 /*
@@ -183,7 +179,7 @@ a.mbc-new-message-link:hover {
 
 .mbc-comment-textarea {
   padding: 5px 8px;
-  position: static;
+  position: relative;
   resize: none;
   word-break: normal;
   outline: none;
@@ -191,9 +187,12 @@ a.mbc-new-message-link:hover {
   border: 1px solid #dedede;
   box-shadow: inset 0 1px 2px #ccc;
   -webkit-box-shadow: inset 0 1px 2px #ccc;
-    min-height: 50px;
+    min-height: 40px;
     overflow-y: auto;
     max-height: 160px;
+    border-radius: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:hover{
@@ -203,11 +202,15 @@ a.mbc-new-message-link:hover {
 .mbc-comment-textarea:focus {
   border: 1px solid #96C8DA;
   box-shadow: inset 0px 0px 2px 2px #96C8DA;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:empty:not(:focus):before {
     content: attr(data-placeholder);
     color: #999;
+    position: absolute;
+    top: 10px;
 }
 
 .tagging-item {
@@ -260,7 +263,7 @@ a.mbc-new-message-link:hover {
   color: #323232;
   font-weight: bold;
   margin-bottom: 4px;
-  padding: 12px 5px 2px 0;
+  padding: 5px 5px 2px 0;
 }
 /*
  Anonymous label
@@ -501,11 +504,14 @@ a.mbc-close-icon:hover {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  margin: 6px auto 0;
   padding: 10px 0;
   position: relative;
-  width: 80px;
-  display: block!important;
+  width: 50px;
+  display: block !important;
+}
+
+section:not(.opened) .segment-side-buttons .txt {
+  padding-left: 7px;
 }
 
 /*
@@ -563,9 +569,9 @@ a.mbc-close-icon:hover {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 44px;
+  left: 30px;
   position: absolute;
-  top: 10px;
+  top: 5px;
 }
 
 /*
@@ -606,7 +612,7 @@ a.mbc-close-icon:hover {
  ******
  */
 article.mbc-commenting-closed {
-  width: 87.5%; /* add selector to article tag line 874 style.css */
+  width: 88.5%; /* add selector to article tag line 874 style.css */
 }
 
 /*
@@ -629,7 +635,7 @@ article.mbc-commenting-opened {
   -webkit-perspective: 1000;
   -webkit-transition: width .2s ease;
   transition: width .2s ease;
-  width: 76.5%;
+  width: 69%;
 }
 
 /*
@@ -638,13 +644,13 @@ article.mbc-commenting-opened {
  ******
  */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
-  position: absolute;
-  text-align: left;
-  z-index: 10;
   display: block;
-  width: 20%;
-  max-width: 250px;
-  left: 102%;
+  padding-right: 15px;
+  margin-bottom: 30px;
+  position: absolute;
+  bottom: -85px;
+  width: 100%;
+  z-index: 1;
 }
 /*
  ******
@@ -843,9 +849,65 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   top: -10px;
 }
 
-section.editor .mbc-comment-balloon-outer {
-  top: 40px;
+.mbc-open-view {
+  border-top: 12px solid #ffffff;
+  border-left: 14px solid transparent;
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.2));
+  margin-left: -14px;
+  position: absolute;
+
 }
+
+.mbc-open-view.mbc-re-messages {
+  bottom: 0px;
+  border-top: unset;
+  border-left: unset;
+  border-bottom: 12px solid #ffffff;
+  border-left: 14px solid transparent;
+  filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
+}
+
+
+/*
+**********
+Close icon ballon - Right panel
+**********
+*/
+
+.re-close-balloon {
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  position: absolute;
+  z-index: 1;
+  right: 0px;
+  top: -14px;
+  border-radius: 50%;
+  color: #7b7b7b;
+  cursor: pointer;
+}
+
+.re-close-balloon:hover {
+  color: #000000;
+}
+
+.re-close-balloon i {
+  margin: 0;
+  padding: 0;
+  width: 0;
+  height: 0;
+  position: relative;
+  top: 4px;
+  left: 4px;
+  font-size: 16px;
+}
+
+.re-close-balloon.re-close-err {
+  top: -15px;
+  right: -15px;
+}
+
 
 /*
  ******
@@ -888,10 +950,10 @@ section.editor .mbc-comment-balloon-outer {
 .mbc-comment-icon-button {
     opacity:0;
     -webkit-transition: opacity 1s ease-in-out;
-  -moz-transition: opacity 1s ease-in-out;
-  -ms-transition: opacity 1s ease-in-out;
-  -o-transition: opacity 1s ease-in-out;
-  transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -ms-transition: opacity 1s ease-in-out;
+    -o-transition: opacity 1s ease-in-out;
+    transition: opacity 1s ease-in-out;
 }
 
 section:hover .mbc-comment-icon-button,

@@ -52,7 +52,7 @@ if ( Review.enabled() )
             evalOpenableSegment : function(section) {
                 if ( isTranslated(section) ) return true ;
                 var sid = UI.getSegmentId( section );
-                if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0 ) {
+                if (UI.projectStats && UI.projectStats.TRANSLATED_PERC === 0 ) {
                     alertNoTranslatedSegments()
                 } else {
                     alertNotTranslatedYet( sid ) ;
@@ -173,7 +173,7 @@ if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended'
             $(this).find('.tab-switcher-review').click();
         }
     }).on('buttonsCreation', 'section', function() {
-            UI.overrideButtonsForRevision();
+        UI.overrideButtonsForRevision();
     }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {

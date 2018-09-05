@@ -53,7 +53,6 @@ Styles from other css files should be ported over time.
 
 .segment-side-buttons {
     /* styles based on .sid line 376 style.css */
-    color: #999;
     cursor: default;
     display: block;
     font-size: 12px;
@@ -62,8 +61,8 @@ Styles from other css files should be ported over time.
     position: absolute;
     text-align: center;
     text-decoration: none;
-    right: -8%;
-    width: 8%;
+    right: -7%;
+    width: 7%;
     top: 0;
 }
 
@@ -89,11 +88,6 @@ Styles from other css files should be ported over time.
     }
 }
 
-
-section:hover .segment-side-buttons {
-    /* styles based on .sid line 460 style.css */
-    color: #6d6e71
-}
 
 .position-sing-in {
     position: relative;

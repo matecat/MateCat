@@ -58,6 +58,10 @@ var SegmentActions = {
 
     /********** Segment **********/
 
+    closeSegment: function ( sid, fid ) {
+        this.closeIssuesPanel();
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {
             AppDispatcher.dispatch({
@@ -348,18 +352,25 @@ var SegmentActions = {
         });
     },
 
-    openIssuesPanel: function (data) {
+    openIssuesPanel: function (data, openSegment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_ISSUES_PANEL,
             data: data,
         });
 
-        UI.openIssuesPanel(data);
+        UI.openIssuesPanel(data, openSegment);
     },
 
     closeIssuesPanel: function () {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_ISSUES_PANEL
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+        });
+    },
+
+    closeSegmentIssuePanel: function ( sid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+            sid: sid
         });
     },
 
@@ -370,16 +381,16 @@ var SegmentActions = {
         });
     },
 
-    renderReviseErrors: function (sid, data) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.RENDER_REVISE_ISSUES,
-            sid: sid,
-            data: data
-        });
-    },
-
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
+    },
+
+    addPreloadedIssuesToSegment: function ( sid, issues ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
+            sid: sid,
+            data: issues
+        });
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {
@@ -391,18 +402,8 @@ var SegmentActions = {
         });
     },
 
-    addSegmentVersionIssue: function (fid, sid, issue, versionNumber) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_SEGMENT_VERSION_ISSUE,
-            fid: fid,
-            sid: sid,
-            issue: issue,
-            versionNumber: versionNumber
-        });
-    },
-
-    deleteIssue: function (issue) {
-        UI.deleteIssue(issue);
+    deleteIssue: function (issue, sid) {
+        UI.deleteIssue(issue, sid);
     },
 
     confirmDeletedIssue: function (sid,issue_id) {

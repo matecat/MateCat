@@ -1,55 +1,43 @@
 if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
-    /**
-     * Split segment feature is not compatible with ReviewImproved.
-     */
-    window.config.splitSegmentEnabled = false;
-
-
     $.extend(UI, {
 
-        mountPanelComponent : function() {
-            UI.issuesMountPoint =   $('[data-mount=review-side-panel]')[0];
-            ReactDOM.render(
-                React.createElement( ReviewSidePanel, {
-                    closePanel: this.closeIssuesPanel,
-                    reviewType: Review.type,
-                    isReview: config.isReview
-                } ),
-                UI.issuesMountPoint );
-        },
-
-        unmountPanelComponent : function() {
-            ReactDOM.unmountComponentAtNode( UI.issuesMountPoint );
-        },
-
-        openIssuesPanel : function(data) {
+        openIssuesPanel : function(data, openSegment) {
+            if (config.reviewType === "improved") {
+                $('body').addClass('review-improved-opened');
+                hackIntercomButton( true );
+            } else {
+                $('body').addClass('review-extended-opened');
+                localStorage.setItem(ReviewExtended.localStoragePanelClosed, false);
+            }
             SearchUtils.closeSearch();
-
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
-            hackIntercomButton( true );
+            if (data) {
+                if (openSegment) {
+                    var segment = UI.Segment.findEl( data.sid );
+                    segment.find( UI.targetContainerSelector() ).click();
+                    window.setTimeout( function ( data ) {
+                        var el = UI.Segment.find( data.sid ).el;
 
-            var segment = UI.Segment.findEl( data.sid );
-            segment.find( UI.targetContainerSelector() ).click();
+                        if ( UI.currentSegmentId != data.sid ) {
+                            UI.focusSegment( el );
+                        }
 
-            window.setTimeout( function(data) {
-                var el = UI.Segment.find( data.sid ).el ;
-
-                if ( UI.currentSegmentId != data.sid ) {
-                    UI.focusSegment( el );
+                        UI.scrollSegment( el );
+                    }, 500, data );
                 }
-
-                UI.scrollSegment( el );
-            }, 500, data);
+            }
         },
 
         closeIssuesPanel : function() {
 
             hackIntercomButton( false );
             SegmentActions.closeIssuesPanel();
-            $('body').removeClass('side-tools-opened review-side-panel-opened');
-
+            $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened review-improved-opened');
+            if (config.reviewType === "extended") {
+                localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
+            }
             if ( UI.currentSegment ) {
                 setTimeout( function() {
                     UI.scrollSegment( UI.currentSegment );
@@ -58,7 +46,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
             window.dispatchEvent(new Event('resize'));
         },
 
-        deleteIssue : function( issue ) {
+        deleteIssue : function( issue,sid ) {
             var message = '';
             if ( issue.target_text ) {
                 message = sprintf(
@@ -80,11 +68,12 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
                 msg: message,
                 okTxt: 'Yes delete this issue',
                 context: JSON.stringify({
-                    id_segment : issue.id_segment,
+                    id_segment : sid,
                     id_issue : issue.id
                 })
             });
         },
+
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);
@@ -116,10 +105,6 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
         if ( data.name == 'search' ) {
             UI.closeIssuesPanel();
         }
-    });
-
-    $(document).ready(function() {
-        UI.mountPanelComponent();
     });
 
     $(window).on('segmentOpened', UI.getSegmentVersionsIssuesHandler);

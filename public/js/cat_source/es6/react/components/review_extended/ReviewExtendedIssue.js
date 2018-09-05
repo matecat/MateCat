@@ -13,22 +13,22 @@ class ReviewExtendedIssue extends React.Component {
 
 	}
 
-	categoryLabel() {
+	getCategory() {
 		let id_category = this.props.issue.id_category;
 		config.lqa_flat_categories = config.lqa_flat_categories.replace(/\"\[/g, "[")
 			.replace(/\]"/g, "]")
 			.replace(/\"\{/g, "{")
 			.replace(/\}"/g, "}");
-		return _(JSON.parse(config.lqa_flat_categories))
+        return _(JSON.parse(config.lqa_flat_categories))
 			.filter(function (e) {
 				return parseInt(e.id) == id_category;
-			}).first().label
+			}).first();
 	}
 
 	deleteIssue(event) {
 		event.preventDefault();
 		event.stopPropagation();
-		SegmentActions.deleteIssue(this.props.issue);
+		SegmentActions.deleteIssue(this.props.issue, this.props.sid);
 	}
 	confirmDeletedIssue(sid,data){
 		let issue_id = data;
@@ -89,7 +89,7 @@ class ReviewExtendedIssue extends React.Component {
         this.setState({sendDisabled : true});
 
         SegmentActions
-            .submitComment( this.props.issue.id_segment, this.props.issue.id, data )
+            .submitComment( this.props.sid, this.props.issue.id, data )
 			.done(function (  ) {
 				self.setState({
 					comment_text: ''
@@ -113,7 +113,7 @@ class ReviewExtendedIssue extends React.Component {
             if(comment.source_page == 1){
 				array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }else if(comment.source_page == 2){
-                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Revisor </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }
         }
         if(array.length > 0 ){
@@ -132,8 +132,8 @@ class ReviewExtendedIssue extends React.Component {
 
     }
 	render() {
-		let category_label = this.categoryLabel();
-		let formatted_date = moment(this.props.issue.created_at).format('lll');
+		let category = this.getCategory();
+		// let formatted_date = moment(this.props.issue.created_at).format('lll');
 
 		let extendedViewButtonClass = (this.state.extendDiffView ? "re-active" : "");
         let commentViewButtonClass = (this.state.commentView ? "re-active" :  '');
@@ -142,13 +142,18 @@ class ReviewExtendedIssue extends React.Component {
         //START comments html section
 		let htmlCommentLines = this.generateHtmlCommentLines();
 		let renderHtmlCommentLines = '';
-		if(htmlCommentLines.length> 0){
+		if( htmlCommentLines.length > 0 ){
 			renderHtmlCommentLines = <div className="re-comment-list">
                 {htmlCommentLines}
             </div>;
 		}
 
-		let commentSection = <div className="comments-view">
+		let containerClass = classnames({
+			"re-item": true,
+			"issue-comments-open": this.state.commentView
+		});
+
+		let commentSection = <div className="comments-view shadow-1">
 				<div className="re-add-comment">
 					<form className="ui form" onSubmit={this.addComment.bind(this)}>
 						<div className="field">
@@ -160,16 +165,21 @@ class ReviewExtendedIssue extends React.Component {
 			</div>;
         //END comments html section
 
-		return <div className="issue-item" ref={(node)=>this.el=node}>
-			<div className="issue">
-				<div className="issue-head">
-					<p><b title="Type of issue">{category_label}</b>: <span title="Type of severity">{this.props.issue.severity}</span></p>
+		return <div className={containerClass} ref={(node)=>this.el=node}>
+			<div className="re-item-box re-issue shadow-1">
+				<div className="issue-head pad-right-10">
+                    {category.options && category.options.code ? (
+                        <div className="re-abb-issue" title={category.label}>{category.options.code}</div>
+                    ) : (
+                        <span className="re-category-issue-head" title={category.label}>{category.label}</span>
+                    )}
+					<b><span title="Type of severity">{this.props.issue.severity}</span></b>
 				</div>
 				<div className="issue-activity-icon">
 					<div className="icon-buttons">
 						{/*<button className={extendedViewButtonClass} onClick={this.setExtendedDiffView.bind(this)} title="View track changes"><i className="icon-eye icon"/></button>*/}
-						<button className={commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
-						{this.props.isReview ? (<button onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
+						<button className={"ui icon basic tiny button issue-note " + commentViewButtonClass} onClick={this.setCommentView.bind(this)} title="Comments"><i className={iconCommentClass}/></button>
+						{this.props.isReview ? (<button className="ui icon basic tiny button issue-delete" onClick={this.deleteIssue.bind(this)} title="Delete issue card"><i className="icon-trash-o icon"/></button>): (null)}
 					</div>
 				</div>
 
@@ -189,10 +199,6 @@ class ReviewExtendedIssue extends React.Component {
 					decodeTextFn={UI.decodeText}
 					selectable={false}
 				/> : null}
-
-			<div className="issue-date">
-				<i>{formatted_date}</i>
-			</div>
 		</div>
 	}
 }

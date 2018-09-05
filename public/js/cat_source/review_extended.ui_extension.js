@@ -1,17 +1,9 @@
-ReviewExtended = {
-    firstLoad: true,
-    enabled : function() {
-        return Review.type === 'extended' ;
-    },
-    type : config.reviewType
-};
 
-if ( ReviewExtended.enabled() ) {
+if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
 
     (function (ReviewExtended, $,undefined) {
 
-        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
 
         $.extend(ReviewExtended, {
 
@@ -26,7 +18,7 @@ if ( ReviewExtended.enabled() ) {
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
-                    ReviewExtended.reloadQualityReport();
+                    UI.reloadQualityReport();
                 });
             },
 
@@ -36,9 +28,6 @@ if ( ReviewExtended.enabled() ) {
                         var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment));
                         UI.getSegmentVersionsIssues(id_segment, fid);
                     });
-            },
-            reloadQualityReport : function() {
-                UI.reloadQualityReport();
             }
         });
 
@@ -64,7 +53,10 @@ if ( ReviewExtended.enabled() ) {
             registerReviseTab: function () {
                 return false;
             },
-
+            /**
+             * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
+             * @param editarea
+             */
             trackChanges: function (editarea) {
                 var segmentId = UI.getSegmentId($(editarea));
                 var segmentFid = UI.getSegmentFileId($(editarea));
@@ -87,29 +79,31 @@ if ( ReviewExtended.enabled() ) {
                 // TODO Uniform behavior of ReviewExtended and ReviewImproved
                 API.SEGMENT.getSegmentVersionsIssues(segmentId)
                     .done(function (response) {
-                        SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, response.versions);
+                        UI.addIssuesToSegment(fileId, segmentId, response.versions)
                     });
             },
 
-            clickOnApprovedButton: function (e, button) {
-                e.preventDefault();
-                var sid = UI.currentSegmentId;
-                if ( UI.segmentIsModified(sid)) {
-                    SegmentActions.openIssuesPanel({ sid: sid });
-                    SegmentActions.showIssuesMessage(sid);
-                    return;
-                }
-                originalClickOnApprovedButton.apply(this, [e , button]);
+            /**
+             * To show the issues in the segment footer
+             * @param fileId
+             * @param segmentId
+             * @param versions
+             */
+            addIssuesToSegment: function ( fileId, segmentId, versions ) {
+                SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions);
             },
 
-            deleteTranslationIssue : function( context ) {
-                console.debug('delete issue', context);
 
+            /**
+             * To delete a segment issue
+             * @param context
+             */
+            deleteTranslationIssue : function( context ) {
                 var parsed = JSON.parse( context );
                 var issue_path = sprintf(
                     '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                     config.id_job, config.review_password,
-                    parsed.id_segment,
+                    parseInt(parsed.id_segment),
                     parsed.id_issue
                 );
                 var issue_id = parsed.id_issue;
@@ -118,15 +112,25 @@ if ( ReviewExtended.enabled() ) {
                     url: issue_path,
                     type: 'DELETE'
                 }).done( function( data ) {
-                    SegmentActions.confirmDeletedIssue(parsed.id_segment,issue_id);
-                    UI.getSegmentVersionsIssues(parsed.id_segment, fid);
+                    UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id);
                     UI.reloadQualityReport();
                 });
             },
-            submitComment : function(id_segment, id_issue, data) {
-                return ReviewExtended.submitComment(id_segment, id_issue, data)
+            /**
+             * To remove Segment issue from the segment footer
+             * @param fid
+             * @param id_segment
+             * @param issue_id
+             */
+            deleteSegmentIssues: function ( fid, id_segment, issue_id ) {
+                SegmentActions.confirmDeletedIssue(id_segment, issue_id);
+                UI.getSegmentVersionsIssues(id_segment, fid);
             },
-
+            /**
+             * To know if a segment has been modified but not yet approved
+             * @param sid
+             * @returns {boolean}
+             */
             segmentIsModified: function ( sid ) {
                 var segmentFid = UI.getSegmentFileId(UI.currentSegment);
                 var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
@@ -136,6 +140,9 @@ if ( ReviewExtended.enabled() ) {
                     return true;
                 }
                 return false;
+            },
+            submitComment : function(id_segment, id_issue, data) {
+                return ReviewExtended.submitComment(id_segment, id_issue, data)
             }
 
         });

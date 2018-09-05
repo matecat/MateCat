@@ -17,7 +17,7 @@ class ReviewSidePanel extends React.Component{
 
     }
 
-    openPanel(e, data) {
+    openPanel(data) {
         if (this.props.reviewType === "improved") {
             this.setState({
                 visible: true,
@@ -31,7 +31,7 @@ class ReviewSidePanel extends React.Component{
 
     }
 
-    closePanel(e, data) {
+    closePanel(data) {
         this.setState({visible: false});
     }
 
@@ -80,6 +80,10 @@ class ReviewSidePanel extends React.Component{
             'hidden' : !this.state.visible,
             'review-improved-panel': this.props.reviewType === "improved",
             'review-extended-panel': this.props.reviewType === "extended",
+        });
+        let idContainer = classnames({
+            'review-side-panel' : this.props.reviewType === "improved",
+            'review-side-balloon': this.props.reviewType === "extended",
         });
         if (this.props.reviewType === "improved") {
             if (this.state.visible && this.state.selection != null) {

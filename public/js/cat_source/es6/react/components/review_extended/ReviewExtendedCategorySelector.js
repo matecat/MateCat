@@ -14,7 +14,11 @@ class ReviewExtendedCategorySelector extends React.Component{
     }
 
     componentDidMount(){
-    	$(this.selectRef).dropdown();
+    	$(this.selectRef).dropdown({
+            // direction: "auto",
+            keepOnScreen: true,
+            context: document.getElementById("re-category-list-" + this.props.sid)
+        });
 	}
     onChangeSelect(){
         let severity = $(this.selectRef).data('value');
@@ -34,11 +38,11 @@ class ReviewExtendedCategorySelector extends React.Component{
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}
                             data-value={severity.label}>
-                        {severity.label}
+                        <b>{severity.label}</b>
                     </div> ;
             }.bind(this));
 
-            select = <div className="ui icon top right pointing dropdown button"
+            select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}
                 data-value={this.state.value}
                 autoFocus={this.props.focus}
@@ -51,11 +55,17 @@ class ReviewExtendedCategorySelector extends React.Component{
 
             </div>
         }
-		return <div className="error-item">
-			<div className="error-name">{this.props.category.label}</div>
-			<div className="error-level">
-				{ select }
-			</div>
+		return <div className="re-item re-category-item">
+            <div className="re-item-box re-error">
+                <div className="error-name">
+                    {this.props.category.options && this.props.category.options.code ? (
+                        <div className="re-abb-issue">{this.props.category.options.code}</div>
+                    ) : (null)}
+                    {this.props.category.label}</div>
+                <div className="error-level">
+                    { select }
+                </div>
+            </div>
 		</div>;
     }
 }

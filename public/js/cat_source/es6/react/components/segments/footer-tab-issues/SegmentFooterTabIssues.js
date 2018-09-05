@@ -216,7 +216,7 @@ class SegmentFooterTabIssues extends React.Component {
             </select>;
 
         this.state.issues.forEach( ( e, i ) => {
-            issue = <SegmentFooterTabIssuesListItem key={i} issue={e}/>;
+            issue = <SegmentFooterTabIssuesListItem key={i} issue={e} sid={this.props.sid}/>;
             issues.push( issue );
         } );
         let containerClasses = classnames({

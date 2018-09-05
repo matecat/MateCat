@@ -4,76 +4,112 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            animateFirstIssue: false
-        };
+        // this.state = {
+        //     animateFirstIssue: false
+        // };
+        this.issueFlatCategories = JSON.parse(config.lqa_flat_categories);
+        this.issueNestedCategories = JSON.parse(config.lqa_nested_categories).categories;
 
     }
 
+    parseIssues() {
+        let issuesObj = {}
+        this.props.issues.forEach( issue => {
+            let cat = this.findCategory(issue.id_category);
+            let id = (this.isSubCategory(cat)) ? cat.id_parent: cat.id;
 
-
-    componentWillReceiveProps ( nextProps ) {
-        if(nextProps.issues.length > this.props.issues.length && this.props.segment.sid === nextProps.segment.sid){
-            this.setState({
-                animateFirstIssue: true
-            })
-        }
-    }
-
-    componentDidUpdate () {
-        if(this.state.animateFirstIssue){
-            $('.issue-item:first-child .issue')
-                .transition('pulse');
-            this.setState({
-                animateFirstIssue: false
-            })
-        }
-
-    }
-
-    componentWillUnmount () {
-
-    }
-
-
-    render () {
-
-        let cs = classnames({
-            'review-issues-container' : true,
+            if (!issuesObj[id]) {
+                issuesObj[id] = [];
+            }
+            issuesObj[id].push(issue);
         });
-        let issues,
-            loaderHtml = '';
+        return issuesObj;
+    }
+
+    findCategory( id ) {
+        return this.issueFlatCategories.find( category => {
+            return id == category.id
+        } )
+    }
+
+    isSubCategory( category ) {
+        return !_.isNull(category.id_parent);
+    }
+
+    thereAreSubcategories() {
+        return this.issueNestedCategories[0].subcategories && this.issueNestedCategories[0].subcategories.length > 0;
+    }
+
+    getSubCategoriesHtml() {
+        let parsedIssues = this.parseIssues();
+        let html = [];
+        _.each(parsedIssues, (issuesList, id) =>  {
+            let cat = this.findCategory(id);
+            let issues = this.getIssuesSortedComponentList(issuesList);
+            let catHtml = <div key={cat.id}>
+                <div className="re-item-head pad-left-5">{cat.label}</div>
+                {issues}
+            </div>;
+            html.push(catHtml)
+        });
+
+        return html;
+    }
+
+    getCategoriesHtml() {
+        let issues;
 
         if (this.props.issues.length > 0 ) {
-            let sorted_issues = this.props.issues.sort(function(a, b) {
-                a = new Date(a.created_at);
-                b = new Date(b.created_at);
-                return a>b ? -1 : a<b ? 1 : 0;
-            });
-
-            issues = sorted_issues.map(function( item, index ) {
-                let prog = sorted_issues.length - index;
-
-                return <ReviewExtendedIssue
-                    sid={this.props.sid}
-					isReview={this.props.isReview}
-                    progressiveNumber={prog}
-                    issue={item}
-                    key={item.id}
-                />
-
-            }.bind(this) );
+            issues = this.getIssuesSortedComponentList(this.props.issues)
         }
-        if(this.props.issues.length > 0){
-            return <div className="re-issues">
-                <div className="re-issues-inner">
-                    {this.props.loader ? <WrapperLoader /> : null}
-                    <div className="issues-list-title">Issues <span>{this.props.issues.length > 0? "("+this.props.issues.length+")" : ''}</span></div>
-                    <div className="issues-list">
-                        {issues}
-                    </div>
-                </div>
+        return <div>
+                    <div className="re-item-head pad-left-1">Issues Found</div>
+                    {issues}
+                </div>;
+    }
 
+    getIssuesSortedComponentList(list) {
+        let issues;
+        let sorted_issues = list.sort(function(a, b) {
+            a = new Date(a.created_at);
+            b = new Date(b.created_at);
+            return a>b ? -1 : a<b ? 1 : 0;
+        });
+
+        issues = sorted_issues.map(function( item, index ) {
+
+            return <ReviewExtendedIssue
+                sid={this.props.segment.sid}
+                isReview={this.props.isReview}
+                issue={item}
+                key={item.id}
+            />
+
+        }.bind(this) );
+
+        return issues;
+    }
+
+    componentWillReceiveProps ( nextProps ) { }
+
+    componentDidUpdate () {}
+
+    render () {
+        if(this.props.issues.length > 0){
+
+            let html;
+            if (this.thereAreSubcategories()) {
+                html = this.getSubCategoriesHtml();
+            } else {
+                html = this.getCategoriesHtml()
+            }
+
+
+            return <div className="re-issues-box re-created">
+                    {this.props.loader ? <WrapperLoader /> : null}
+                    <div className="re-list issues">
+                        {html}
+                    </div>
             </div>;
         }
         return "";

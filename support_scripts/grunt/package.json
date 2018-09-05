@@ -40,6 +40,7 @@
     "react-addons-css-transition-group": "^15.6.2",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.0.0",
+    "semantic-ui": "^2.3.3",
     "showdown": "^1.8.0",
     "sprintf": "^0.1.5"
   },
