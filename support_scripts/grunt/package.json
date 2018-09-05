@@ -16,7 +16,7 @@
     "classnames": "^2.2.3",
     "envify": "^3.4.0",
     "flux": "^2.1.1",
-    "grunt": "~1.0.1",
+    "grunt": "~1.0.3",
     "grunt-browserify": "^5.2.0",
     "grunt-contrib-concat": "~1.0.1",
     "grunt-contrib-handlebars": "^1.0.0",
