@@ -404,7 +404,7 @@ class XliffSAXTranslationReplacer {
                     }
 
                     //append translation
-                    $tag = "<target xml:lang=\"" . strtolower( $this->target_lang ) . "\" $state_prop>$translation</target>";
+                    $tag = "<target xml:lang=\"" . $this->target_lang . "\" $state_prop>$translation</target>";
                 }
 
                 //signal we are leaving a target
