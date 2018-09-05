@@ -104,7 +104,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
                 $current = array(
                     'label'      => $row['label'],
                     'id'         => $row['id'],
-                    'options'    => json_decode( $row['option'], true ),
+                    'options'    => json_decode( $row['options'], true ),
 
                     'severities' => json_decode( $row['severities'], true)
                 );

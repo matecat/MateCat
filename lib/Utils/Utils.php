@@ -151,7 +151,7 @@ class Utils {
                         'token'  => md5( $globalMessage[ 'message' ] ),
                         'expire' => ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
                 ];
-                $retString = json_encode( $resObject );
+                $retString = json_encode( [ $resObject ] );
             }
         }
         return [ 'messages' => $retString ];
