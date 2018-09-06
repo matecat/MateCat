@@ -1,53 +1,94 @@
 {
   "model": {
     "version" : 1,
-    "label": "MateCat default",
-
+    "label": "Airbnb",
     "categories": [
       {
-        "label": "Tag issues (mismatches, whitespaces)",
-        "code": "TAG",
-        "dqf_id" : 5
+        "label": "Accuracy",
+        "severities" : false
       },
       {
-        "label": "Translation errors (mistranslation, additions or omissions)",
-        "code": "TER",
-        "dqf_id" : 1
+        "label": "Client guidelines",
+        "severities" : false
       },
       {
-        "label": "Terminology and translation consistency",
-        "code": "TRM",
-        "dqf_id" : 3
+        "label": "Linguistic",
+        "severities" : false
       },
       {
-        "label": "Language quality (grammar, punctuation, spelling)",
-        "code": "LQ",
-        "dqf_id" : 2
-      },
-      {
-        "label": "Style (readability, consistent style and tone)",
-        "code": "STY",
-        "dqf_id" : 4
+        "label": "Style",
+        "severities" : false
       }
     ],
     "severities": [
       {
         "label": "Minor",
-        "dqf_id" : 1,
-        "penalty": 3
+        "penalty": 1
       },
       {
         "label": "Major",
-        "dqf_id" : 2,
-        "penalty": 100
+        "penalty": 2
       }
     ],
-
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : 20000
+        "limit" : 20
       }
     }
   }
 }
+
+//{
+//  "model": {
+//    "version" : 1,
+//    "label": "MateCat default",
+//
+//    "categories": [
+//      {
+//        "label": "Tag issues (mismatches, whitespaces)",
+//        "code": "TAG",
+//        "dqf_id" : 5
+//      },
+//      {
+//        "label": "Translation errors (mistranslation, additions or omissions)",
+//        "code": "TER",
+//        "dqf_id" : 1
+//      },
+//      {
+//        "label": "Terminology and translation consistency",
+//        "code": "TRM",
+//        "dqf_id" : 3
+//      },
+//      {
+//        "label": "Language quality (grammar, punctuation, spelling)",
+//        "code": "LQ",
+//        "dqf_id" : 2
+//      },
+//      {
+//        "label": "Style (readability, consistent style and tone)",
+//        "code": "STY",
+//        "dqf_id" : 4
+//      }
+//    ],
+//    "severities": [
+//      {
+//        "label": "Minor",
+//        "dqf_id" : 1,
+//        "penalty": 3
+//      },
+//      {
+//        "label": "Major",
+//        "dqf_id" : 2,
+//        "penalty": 100
+//      }
+//    ],
+//
+//    "passfail" : {
+//      "type" : "points_per_thousand",
+//      "options" : {
+//        "limit" : 20000
+//      }
+//    }
+//  }
+//}
