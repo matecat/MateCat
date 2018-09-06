@@ -40,7 +40,9 @@ module.exports = keyMirror({
     ADD_SEGMENT_PRELOADED_ISSUES: null,
     OPEN_TAB: null,
     RENDER_PREVIEW: null,
+    ISSUE_ADDED: null,
     ISSUE_DELETED: null,
+    OPEN_ISSUE_COMMENT: null,
     ADD_TAB_INDEX: null,
     TOGGLE_SEGMENT_ON_BULK: null,
     REMOVE_SEGMENTS_ON_BULK: null,
@@ -54,5 +56,6 @@ module.exports = keyMirror({
     ENABLE_TAG_LOCK: null,
     SET_SEGMENT_WARNINGS: null,
     UPDATE_GLOBAL_WARNINGS: null,
-    QA_LEXIQA_ISSUES: null
+    QA_LEXIQA_ISSUES: null,
+    LOCK_EDIT_AREA: null
 });

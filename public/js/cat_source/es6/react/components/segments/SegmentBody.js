@@ -148,6 +148,7 @@ class SegmentBody extends React.Component {
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                             locked={this.props.locked}
                             readonly={this.props.readonly}
+                            removeSelection={this.props.removeSelection}
                         />
 
                     </div>

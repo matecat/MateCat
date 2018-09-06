@@ -1,5 +1,4 @@
 let ReviewExtendedIssuesContainer = require('./ReviewExtendedIssuesContainer').default;
-let ReviewVersionDiffContainer = require('./ReviewVersionsDiffContainer').default;
 let ReviewExtendedIssuePanel = require('./ReviewExtendedIssuePanel').default;
 let SegmentConstants = require('../../constants/SegmentConstants');
 
@@ -9,7 +8,6 @@ class ReviewExtendedPanel extends React.Component {
 		super(props);
 		this.state = {
 			versionNumber: this.props.segment.versions[0].version_number,
-			selectionObj: null,
 			diffPatch: null,
 			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
@@ -18,34 +16,9 @@ class ReviewExtendedPanel extends React.Component {
 		};
 	}
 
-	textSelected(data) {
-		this.setState({
-			selectionObj: data
-		});
-	}
-	updateDiffData(diffPatch, newTranslation){
-		//detect if diff is changed.
-		let isDiffChanged = false;
-		if(this.props.segment.translation !== newTranslation){
-			isDiffChanged = true;
-		}
-		this.setState({
-			diffPatch: diffPatch,
-			newtranslation: newTranslation,
-			isDiffChanged: isDiffChanged
-		});
-	}
-
-	setDiffStatus(status){
-		this.setState({
-			diffStatus: status
-		});
-	}
 	removeSelection() {
         this.setCreationIssueLoader(false);
-		this.setState({
-			selectionObj: null
-		});
+		this.props.removeSelection();
 	}
 
 	getAllIssues() {
@@ -100,13 +73,6 @@ class ReviewExtendedPanel extends React.Component {
         return <div className={"re-wrapper shadow-1 " + thereAreIssuesClass}>
 			<div className="re-open-view re-issues"/>
 			<a className="re-close-balloon re-close-err shadow-1" onClick={this.closePanel.bind(this)}><i className="icon-cancel3 icon" /></a>
-			<ReviewVersionDiffContainer
-				textSelectedFn={this.textSelected.bind(this)}
-				updateDiffDataFn={this.updateDiffData.bind(this)}
-				removeSelection={this.removeSelection.bind(this)}
-				segment={this.props.segment}
-				selectable={this.props.isReview}
-			/>
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
 				loader={this.state.issueInCreation}
@@ -122,10 +88,8 @@ class ReviewExtendedPanel extends React.Component {
 
             {this.props.isReview? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
-				selection={this.state.selectionObj}
+				selection={this.props.selectionObj}
 				segmentVersion={this.state.versionNumber}
-				diffPatch={this.state.diffPatch}
-				isDiffChanged={this.state.isDiffChanged}
 				submitIssueCallback={this.removeSelection.bind(this)}
 				reviewType={this.props.reviewType}
 				newtranslation={this.state.newtranslation}

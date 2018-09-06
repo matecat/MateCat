@@ -2,7 +2,6 @@ let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
 let ReviewIssueSelectionPanel = require('../review_improved/ReviewIssueSelectionPanel').default;
 let TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default;
-let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
 let WrapperLoader = require('../../common/WrapperLoader').default;
 class ReviewSidePanel extends React.Component{
 
@@ -23,16 +22,15 @@ class ReviewSidePanel extends React.Component{
                 visible: true,
                 selection : data.selection
             });
-        } else {
-            this.setState({
-                visible: true,
-            });
         }
 
     }
 
     closePanel(data) {
-        this.setState({visible: false});
+        this.setState({
+            visible: false,
+            selection : null
+        });
     }
 
     closePanelClick(e, data) {
@@ -78,12 +76,10 @@ class ReviewSidePanel extends React.Component{
         let innerPanel = '';
         let classes = classnames({
             'hidden' : !this.state.visible,
-            'review-improved-panel': this.props.reviewType === "improved",
-            'review-extended-panel': this.props.reviewType === "extended",
+            'review-improved-panel': this.props.reviewType === "improved"
         });
         let idContainer = classnames({
             'review-side-panel' : this.props.reviewType === "improved",
-            'review-side-balloon': this.props.reviewType === "extended",
         });
         if (this.props.reviewType === "improved") {
             if (this.state.visible && this.state.selection != null) {
@@ -100,16 +96,6 @@ class ReviewSidePanel extends React.Component{
                         closePanel={this.props.closePanel}
                     />
                 </div>;
-            }
-        } else {
-            if (this.props.reviewType === "extended" && this.state.segment && this.state.visible) {
-                innerPanel =<ReviewExtendedPanel
-                        reviewType={this.props.reviewType}
-                        segment={this.state.segment}
-                        sid={this.state.segment.sid}
-                        isReview={this.props.isReview}
-                        setParentLoader={this.setLoader.bind(this)}
-                    />;
             }
         }
 

@@ -1,6 +1,6 @@
 /**
  * React Component .
- * Container that show the diff between the originale translation e the modified one
+ * Container that show the diff between the originale translation e the modified one. Not Used
  */
 let ReviewVersionDiff =  require("./ReviewVersionsDiff").default;
 let React = require('react');

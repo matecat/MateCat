@@ -1,12 +1,13 @@
 let ReviewExtendedIssue =  require("./ReviewExtendedIssue").default;
 let WrapperLoader =         require("../../common/WrapperLoader").default;
+let SegmentConstants = require('../../constants/SegmentConstants');
 class ReviewExtendedIssuesContainer extends React.Component {
 
     constructor(props) {
         super(props);
-        // this.state = {
-        //     animateFirstIssue: false
-        // };
+        this.state = {
+            lastIssueAdded: null
+        };
         this.issueFlatCategories = JSON.parse(config.lqa_flat_categories);
         this.issueNestedCategories = JSON.parse(config.lqa_nested_categories).categories;
 
@@ -79,6 +80,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
         issues = sorted_issues.map(function( item, index ) {
 
             return <ReviewExtendedIssue
+                lastIssueId={this.state.lastIssueAdded}
                 sid={this.props.segment.sid}
                 isReview={this.props.isReview}
                 issue={item}
@@ -90,9 +92,23 @@ class ReviewExtendedIssuesContainer extends React.Component {
         return issues;
     }
 
-    componentWillReceiveProps ( nextProps ) { }
+    setLastIssueAdded(sid, id) {
+        if ( sid === this.props.segment.sid ) {
+            setTimeout((  ) => {
+                SegmentActions.openIssueComments(this.props.segment.sid, id);
+            }, 200);
 
-    componentDidUpdate () {}
+        }
+    }
+
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.ISSUE_ADDED, this.setLastIssueAdded.bind(this));
+
+    }
+
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.ISSUE_ADDED, this.setLastIssueAdded);
+    }
 
     render () {
         if(this.props.issues.length > 0){

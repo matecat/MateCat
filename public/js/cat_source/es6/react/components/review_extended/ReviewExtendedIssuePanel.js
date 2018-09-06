@@ -53,8 +53,13 @@ class ReviewExtendedIssuePanel extends React.Component{
 		deferred.then(function () {
 		    SegmentActions.removeClassToSegment(self.props.sid, "modified");
             UI.currentSegment.data('modified', false);
-			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
-				.done( self.props.submitIssueCallback )
+			SegmentActions.submitIssue(self.props.sid, data)
+				.done(function ( data ) {
+                    self.props.submitIssueCallback();
+                    setTimeout(function (  ) {
+                        SegmentActions.issueAdded(self.props.sid, data.issue.id);
+                    });
+                } )
 				.fail( self.handleFail.bind(self) ) ;
 		})
 

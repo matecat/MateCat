@@ -229,6 +229,13 @@ var SegmentActions = {
             translation: editAreaText
         });
     },
+    lockEditArea : function ( sid, fid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.LOCK_EDIT_AREA,
+            fid: fid,
+            id: sid,
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
@@ -383,6 +390,22 @@ var SegmentActions = {
 
     submitIssue: function (sid, data, diff) {
         return UI.submitIssues(sid, data, diff);
+    },
+
+    issueAdded: function ( sid, issueId ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ISSUE_ADDED,
+            sid: sid,
+            data: issueId
+        });
+    },
+
+    openIssueComments: function ( sid, issueId ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_ISSUE_COMMENT,
+            sid: sid,
+            data: issueId
+        });
     },
 
     addPreloadedIssuesToSegment: function ( sid, issues ) {

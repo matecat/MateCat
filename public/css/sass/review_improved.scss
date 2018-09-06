@@ -631,7 +631,7 @@ body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosi
 body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
 {
 /*visibility: hidden;*/
-text-indent: -10000px;
+text-indent: -9995px;
 display: inline-block;
 overflow: hidden;
 position: relative;

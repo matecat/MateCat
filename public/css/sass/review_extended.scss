@@ -33,6 +33,11 @@ h1, h2, h3, h4, h5, a, input {
                     font-size: 16px;
                     font-weight: bold;
                 }
+                &.issues {
+                    .re-item-head {
+                        margin-top: 3px;
+                    }
+                }
                 .re-item {
                     .re-item-box {
                         display: flex;
@@ -95,6 +100,18 @@ h1, h2, h3, h4, h5, a, input {
                                 .re-comment-date {
                                     color: lightslategray;
                                 }
+                                .re-selected-text {
+                                    color: #000;
+                                }
+                            }
+                            .re-highlighted {
+                                padding: 10px;
+                                border-bottom: 1px solid #7979791f;
+
+                            }
+
+                            span.re-selected-text {
+                                margin-right: 5px;
                             }
                         }
                     }
@@ -111,7 +128,7 @@ h1, h2, h3, h4, h5, a, input {
         }
         .re-created {
             background: #E5E9F1;
-            padding: 0 10px 10px;
+            padding: 10px 10px 10px;
             margin-bottom: 0;
             .issues {}
         }
@@ -192,3 +209,80 @@ article {
     top: -1px;
     border-top: 12px solid #e5e9f1;
 }
+
+//********Import from review improved ***********//
+
+section.editAreaLocked.opened {
+
+}
+
+section {
+
+    &.editAreaLocked.opened {
+        .outersource .copy {
+            display: none;
+        }
+        .textarea-container {
+            width: 100%;
+            padding: 0 4px;
+            font-size:18px;
+        }
+        .buttons {
+            margin-top: 30px;
+            .left {
+                float: left;
+            }
+
+            .right {
+                float: right;
+            }
+        }
+    }
+    &.editAreaLocked .errorTaggingArea {
+        line-height: 27px;
+        padding: 4px 0 0 0 ;
+    }
+    .errorTaggingArea, .editableTarget, .trackChanges {
+        font-family: "calibri", Arial, Helvetica, sans-serif;
+        padding: 3px;
+        line-height: 27px;
+        padding: 4px 0 0 0 ;
+    }
+
+    .errorTaggingArea {
+        .highlight {
+            background-color: #7EB30C;
+        }
+    }
+
+    .errorTaggingArea::selection {
+        background-color: #FFFF00;
+    }
+
+    .toolbar {
+        .revise-lock-editArea {
+            float: left;
+            font-size: 60%;
+            min-width: 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 2px;
+            border: 1px solid #C6C6C6;
+            margin-right: 10px;
+            color: #666 !important;
+        }
+        .revise-lock-editArea.active {
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            background-color: #eee;
+            background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+            margin-top: 18px;
+        }
+        .revise-lock-editArea:before {
+            font-size: 19px;
+            display: block;
+        }
+    }
+
+}
+
+//*******************************************************/
