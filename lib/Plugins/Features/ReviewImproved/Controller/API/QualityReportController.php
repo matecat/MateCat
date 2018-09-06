@@ -11,6 +11,8 @@ namespace Features\ReviewImproved\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
+use Features\ReviewExtended;
+use Features\ReviewImproved;
 use Projects_ProjectStruct;
 use API\V2\Json\QALocalWarning;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
@@ -77,6 +79,22 @@ class QualityReportController extends KleinController
         $segmentsDao = new \Segments_SegmentDao;
         $data        = $segmentsDao->getSegmentsForQR( $this->chunk->id, $this->chunk->password, $step, $ref_segment, $where );
 
+        $codes = $this->featureSet->getCodes();
+        if ( in_array( ReviewExtended::FEATURE_CODE, $codes ) OR in_array( ReviewImproved::FEATURE_CODE, $codes ) ) {
+            $issues = ReviewImproved\Model\QualityReportDao::getIssues( $this->chunk );
+        } else {
+            $reviseDao                  = new \Revise_ReviseDAO();
+            $searchReviseStruct         = \Revise_ReviseStruct::getStruct();
+            $searchReviseStruct->id_job = $this->chunk->id;
+            $issues                     = $reviseDao->read( $searchReviseStruct );
+        }
+
+        $commentsDao = new \Comments_CommentDao;
+        $comments = $commentsDao->getThreadsByJob($this->chunk->id);
+
+
+
+
         foreach ( $data as $i => $seg ) {
 
             $seg->warnings      = $seg->getLocalWarning();
@@ -89,6 +107,19 @@ class QualityReportController extends KleinController
             $seg->segment = CatUtils::rawxliff2view( $seg->segment );
 
             $seg->translation = CatUtils::rawxliff2view( $seg->translation );
+
+            foreach ( $issues as $issue ) {
+                if ( $issue->id_segment == $seg->sid ) {
+                    $seg->issues[] = $issue;
+                }
+            }
+
+            foreach ($comments as $comment){
+                $comment->templateMessage();
+                if($comment->id_segment == $seg->sid){
+                    $seg->comments[] = $comment;
+                }
+            }
 
             $this->result[ 'data' ][] = $seg;
         }

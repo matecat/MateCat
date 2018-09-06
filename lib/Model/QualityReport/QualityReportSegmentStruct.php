@@ -57,6 +57,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $comments = [];
 
+    public $issues = [];
+
     /**
      * @return float
      */

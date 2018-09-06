@@ -148,6 +148,18 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $arr_result;
     }
 
+    public function getThreadsByJob($id_job){
+        $db = Database::obtain()->getConnection();
+        $comments_query = "SELECT * FROM comments WHERE message_type IN (1,2) AND id_job = ?";
+
+        $stmt = $db->prepare($comments_query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, "\Comments_BaseCommentStruct");
+        $stmt->execute( [$id_job] );
+        return $stmt->fetchAll();
+    }
+
+
+
 
     /**
      *

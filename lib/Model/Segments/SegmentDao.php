@@ -263,23 +263,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $results = $stmt->fetchAll();
 
-        $comments_query = "SELECT * FROM comments WHERE message_type IN (1,2) AND id_segment IN (" . $prepare_str_segments_id . ")";
-
-        $stmt = $db->prepare($comments_query);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, "\Comments_BaseCommentStruct");
-        $stmt->execute( $segments_id );
-        $comments_results = $stmt->fetchAll();
-
-        foreach($results as $result){
-            foreach ($comments_results as $comment){
-                $comment->templateMessage();
-                if($comment->id_segment == $result->sid){
-                    $result->comments[] = $comment;
-                }
-            }
-        }
-
-
         return $results;
     }
 

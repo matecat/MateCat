@@ -175,4 +175,68 @@ SQL;
 
     }
 
+    /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return array
+     */
+    public static function getIssues( \Chunks_ChunkStruct $chunk ) {
+
+        $sql = <<<SQL
+
+SELECT
+
+  issues.id_segment as id_segment,
+  issues.id as issue_id,
+  issues.create_date as issue_create_date,
+  issues.replies_count as issue_replies_count,
+  
+  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with 
+  -- both start_node and end_node equal to 0 ( no tags in target string ). 
+  issues.start_offset  as issue_start_offset,
+  issues.end_offset    as issue_end_offset,
+
+  qa_categories.label   as issue_category,
+  qa_categories.options as category_options,
+  
+  issues.severity     as issue_severity,
+  issues.comment      as issue_comment,
+  issues.target_text  as target_text,
+  issues.uid          as issue_uid,
+  
+  translation_warnings.scope as warning_scope, 
+  translation_warnings.data as warning_data, 
+  translation_warnings.severity as warning_severity
+
+FROM  qa_entries issues
+
+  JOIN jobs
+    ON jobs.password = :password
+    AND jobs.id = :id_job
+
+  LEFT JOIN qa_entry_comments comments
+    ON comments.id_qa_entry = issues.id
+
+  LEFT JOIN qa_categories
+    ON issues.id_category = qa_categories.id
+    
+  LEFT JOIN translation_warnings 
+    ON translation_warnings.id_segment = issues.id_segment 
+      AND translation_warnings.id_job = jobs.id
+;
+
+SQL;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+
+        $stmt->execute( [
+                'id_job'   => $chunk->id,
+                'password' => $chunk->password
+        ] );
+
+        return $stmt->fetchAll();
+    }
+
 }
