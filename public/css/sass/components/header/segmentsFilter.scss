@@ -202,6 +202,7 @@ section.muted .segment-side-buttons {
                             .text {
                                 transition: 0.3s ease;
                                 display: flex;
+                                align-items: center;
                             }
                             .ui.cancel.label {
                                 position: absolute;
@@ -235,7 +236,7 @@ section.muted .segment-side-buttons {
                                     background-color: #ffffff !important;
                                     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                     color: #000000 !important;
-                                    padding: 9px 20px;
+                                    padding: 9px 20px 9px 15px;
                                     &:hover {
                                         width: fit-content;
                                         .text {
@@ -342,7 +343,7 @@ section.muted .segment-side-buttons {
                         padding-left: 13px;
                         color: black;
                         display: flex;
-                        justify-content: space-around;
+                        justify-content: space-between;
                         width: 135px;
                         .clear-filter, .select-all-filter {
                             display: inline;

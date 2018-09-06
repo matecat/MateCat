@@ -162,12 +162,12 @@ class SegmentQR extends React.Component {
                     </div>
 
                     <div className={translateClasses}>
-                        <div className="segment-content qr-segment-title">
+                        <a className="segment-content qr-segment-title">
                             <b onClick={this.openTranslateLink.bind(this)}>Translate</b>
                             <button className={(this.state.translateDiffOn ? "active" : "")} onClick={this.showTranslateDiff.bind(this)}  title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
-                        </div>
+                        </a>
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }/>
                         <div className="segment-content qr-spec">
                             <div><b>ICE Match</b></div>
@@ -176,12 +176,12 @@ class SegmentQR extends React.Component {
                     </div>
 
                     <div className={revisedClasses}>
-                        <div className="segment-content qr-segment-title">
+                        <a className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
                             <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
-                        </div>
+                        </a>
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
                         </div>
                         <div className="segment-content qr-spec">

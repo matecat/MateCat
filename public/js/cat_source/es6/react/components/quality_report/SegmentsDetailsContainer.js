@@ -42,8 +42,10 @@ class SegmentsDetails extends React.Component {
 
         return <div className="qr-segment-details-container">
             <div className="qr-segments-summary">
-                <h3>Segment details</h3>
-                <Filters/>
+                <div className="qr-filter-container">
+                    <h3>Segment details</h3>
+                    <Filters/>
+                </div>
                 {this.getFiles()}
             </div>
         </div>
