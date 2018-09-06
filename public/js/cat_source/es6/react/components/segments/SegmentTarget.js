@@ -147,7 +147,7 @@ class SegmentTarget extends React.Component {
                 </div>
                 <div className="toolbar">
                     {config.isReview && ReviewExtended.enabled() ? (
-                        <a href="#" className="revise-lock-editArea icon-pencil active" onClick={this.lockEditArea.bind(this)} title="Lock edit area to highlight text and link it to an issue."/>
+                        <a href="#" className="revise-lock-editArea active" onClick={this.lockEditArea.bind(this)} title="Lock edit area to highlight text and link it to an issue."/>
                     ): null}
                 </div>
             </div>
@@ -217,7 +217,7 @@ class SegmentTarget extends React.Component {
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
                 <div className="toolbar">
                     {config.isReview && ReviewExtended.enabled() ? (
-                        <a href="#" className="revise-lock-editArea icon-pencil" onClick={this.lockEditArea.bind(this)} title="Lock edit area to highlight text and link it to an issue."/>
+                        <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title="Lock edit area to highlight text and link it to an issue."/>
                     ): null}
                     {tagLockCustomizable}
                     {tagModeButton}

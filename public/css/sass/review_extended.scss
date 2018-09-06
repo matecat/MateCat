@@ -107,7 +107,6 @@ h1, h2, h3, h4, h5, a, input {
                             .re-highlighted {
                                 padding: 10px;
                                 border-bottom: 1px solid #7979791f;
-
                             }
 
                             span.re-selected-text {
@@ -266,21 +265,28 @@ section {
             min-width: 20px;
             cursor: pointer;
             border-radius: 3px;
-            padding: 2px;
+            //padding: 2px;
             border: 1px solid #C6C6C6;
             margin-right: 10px;
             color: #666 !important;
+
+            background: #fff url(../images/highlighter_icon.png) center center no-repeat;
+            background-color: white;
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            opacity: 0.7;
         }
         .revise-lock-editArea.active {
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
             background-color: #eee;
-            background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+            //background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
             margin-top: 18px;
         }
-        .revise-lock-editArea:before {
-            font-size: 19px;
-            display: block;
-        }
+        //.revise-lock-editArea:before {
+        //    font-size: 19px;
+        //    display: block;
+        //}
     }
 
 }
