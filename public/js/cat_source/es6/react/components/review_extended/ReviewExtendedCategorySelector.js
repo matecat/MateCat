@@ -27,14 +27,19 @@ class ReviewExtendedCategorySelector extends React.Component{
             $(this.selectRef).dropdown('clear');
         }
     }
+    onClick(severity) {
+        if(severity){
+            this.props.sendIssue(this.props.category, severity);
+        }
+    }
     render() {
         // It may happen for a category to come with no severities. In this case
         // the category should be considered to be a header for the nested
         // subcategories. Don't print the select box if no severity is found.
         var select = null;
-
-        if ( this.props.category.severities ) {
-            var severities = this.props.category.severities.map(function(severity, i) {
+        var severities;
+        if ( this.props.category.severities > 2 ) {
+            severities = this.props.category.severities.map(function(severity, i) {
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}
                             data-value={severity.label}>
@@ -54,6 +59,21 @@ class ReviewExtendedCategorySelector extends React.Component{
                 </div>
 
             </div>
+        } else {
+            let button1 =  <button key={'value-' + this.props.category.severities[0].label}
+                                   onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
+                                   className="ui left attached tiny button">{this.props.category.severities[0].label}
+                                   </button>;
+            let button2 =  <button key={'value-' + this.props.category.severities[1].label}
+                                   onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
+                                   className="ui right attached tiny button">{this.props.category.severities[1].label}
+                                   </button>;
+            select = <div className="re-severities-buttons" ref={(input) => { this.selectRef = input;}}
+                          name="severities"
+                          title="Select severities">
+                            {button1}
+                            {button2}
+                    </div>
         }
 		return <div className="re-item re-category-item">
             <div className="re-item-box re-error">

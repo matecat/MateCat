@@ -39,12 +39,14 @@ h1, h2, h3, h4, h5, a, input {
                     }
                 }
                 .re-item {
+                    &:hover {
+                        background: #f2f4f7 !important;
+                    }
                     .re-item-box {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         position: relative;
-                        background: #ffffff;
                         padding: 5px 5px 5px 7px;
 
                     }
@@ -67,13 +69,12 @@ h1, h2, h3, h4, h5, a, input {
                                 display: flex;
                             }
                         }
+
                     }
                     .re-error {
-                        padding: 5px 4px 5px 10px;
-                        margin-right: 1px;
-                        &:hover {
-                            background: #f2f4f7 !important;
-                        }
+                        padding: 0px 4px 0px 10px;
+                        height: 100%;
+                        min-height: 45px;
                         .error-name {
                             padding-right: 10px;
                             display: flex;
@@ -114,6 +115,20 @@ h1, h2, h3, h4, h5, a, input {
                             }
                         }
                     }
+                    .re-severities-buttons {
+                        margin-right: 12px;
+                        min-width: 120px;
+                        visibility: hidden;
+                        opacity: 0;
+                        transition: visibility 0s, opacity 0.2s linear;
+                        position: absolute;
+                        right: 1px;
+                        top: 7px;
+                    }
+                    &:hover .re-severities-buttons {
+                        visibility: visible;
+                        opacity: 1;
+                    }
                 }
             }
         }
@@ -129,7 +144,11 @@ h1, h2, h3, h4, h5, a, input {
             background: #E5E9F1;
             padding: 10px 10px 10px;
             margin-bottom: 0;
-            .issues {}
+            .issues {
+                .re-item-box {
+                    background: #ffffff;
+                }
+            }
         }
         .re-to-create {
             background: #ffffff;
