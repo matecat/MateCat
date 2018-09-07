@@ -62,11 +62,13 @@ class ReviewExtendedCategorySelector extends React.Component{
         } else {
             let button1 =  <button key={'value-' + this.props.category.severities[0].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached tiny button">{this.props.category.severities[0].label.substring(0,3)}
+                                   className="ui left attached tiny button"
+                                   title={this.props.category.severities[0].label}>{this.props.category.severities[0].label.substring(0,3)}
                                    </button>;
             let button2 =  <button key={'value-' + this.props.category.severities[1].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui right attached tiny button">{this.props.category.severities[1].label.substring(0,3)}
+                                   className="ui right attached tiny button"
+                                   title={this.props.category.severities[1].label}>{this.props.category.severities[1].label.substring(0,3)}
                                    </button>;
             select = <div className="re-severities-buttons" ref={(input) => { this.selectRef = input;}}
                           name="severities"
@@ -78,9 +80,9 @@ class ReviewExtendedCategorySelector extends React.Component{
 		return <div className="re-item re-category-item">
             <div className="re-item-box re-error">
                 <div className="error-name">
-                    {this.props.category.options && this.props.category.options.code ? (
-                        <div className="re-abb-issue">{this.props.category.options.code}</div>
-                    ) : (null)}
+                    {/*{this.props.category.options && this.props.category.options.code ? (*/}
+                        {/*<div className="re-abb-issue">{this.props.category.options.code}</div>*/}
+                    {/*) : (null)}*/}
                     {this.props.category.label}</div>
                 <div className="error-level">
                     { select }

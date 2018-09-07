@@ -64,7 +64,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
             issues = this.getIssuesSortedComponentList(this.props.issues)
         }
         return <div>
-                    <div className="re-item-head pad-left-1">Issues Found</div>
+                    <div className="re-item-head pad-left-1">Issues found</div>
                     {issues}
                 </div>;
     }
