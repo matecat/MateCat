@@ -36,8 +36,9 @@ class ReviewExtendedCategorySelector extends React.Component{
         // It may happen for a category to come with no severities. In this case
         // the category should be considered to be a header for the nested
         // subcategories. Don't print the select box if no severity is found.
-        var select = null;
-        var severities;
+        let select = null;
+        let severities;
+        let containerClass = (this.props.category.severities > 2) ? "" : "severity-buttons" ;
         if ( this.props.category.severities > 2 ) {
             severities = this.props.category.severities.map(function(severity, i) {
                 return <div onClick={this.onChangeSelect.bind(this)}
@@ -77,7 +78,7 @@ class ReviewExtendedCategorySelector extends React.Component{
                             {button2}
                     </div>
         }
-		return <div className="re-item re-category-item">
+		return <div className={"re-item re-category-item " + containerClass}>
             <div className="re-item-box re-error">
                 <div className="error-name">
                     {/*{this.props.category.options && this.props.category.options.code ? (*/}

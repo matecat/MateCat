@@ -123,12 +123,42 @@ h1, h2, h3, h4, h5, a, input {
                         transition: visibility 0s, opacity 0.2s linear;
                         position: absolute;
                         right: 1px;
-                        top: -26px;
+                        top: 9px;
                     }
-                    &:hover .re-severities-buttons {
-                        visibility: visible;
-                        opacity: 1;
+                    &.severity-buttons:hover {
+                        .re-severities-buttons {
+                            visibility: visible;
+                            opacity: 1;
+                            button {
+                                padding: 7px 10px;
+                                background-color: #f2f4f7;
+                                &:hover {
+                                    background-color: #CACBCD;
+                                }
+                            }
+                        }
+                        .error-name {
+                            padding-right: 10px;
+                            max-width: 65%;
+                            min-width: 30px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            display: block;
+                            cursor: default;
+                        }
+                        @media only screen and (max-width: 1260px) {
+                            .error-name {
+                                max-width: 55% !important;
+                            }
+                        }
+                        @media only screen and (max-width: 1024px) {
+                            .error-name {
+                                max-width: 53% !important;
+                            }
+                        }
                     }
+
                 }
             }
         }
