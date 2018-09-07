@@ -62,11 +62,11 @@ class ReviewExtendedCategorySelector extends React.Component{
         } else {
             let button1 =  <button key={'value-' + this.props.category.severities[0].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached tiny button">{this.props.category.severities[0].label}
+                                   className="ui left attached tiny button">{this.props.category.severities[0].label.substring(0,3)}
                                    </button>;
             let button2 =  <button key={'value-' + this.props.category.severities[1].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui right attached tiny button">{this.props.category.severities[1].label}
+                                   className="ui right attached tiny button">{this.props.category.severities[1].label.substring(0,3)}
                                    </button>;
             select = <div className="re-severities-buttons" ref={(input) => { this.selectRef = input;}}
                           name="severities"

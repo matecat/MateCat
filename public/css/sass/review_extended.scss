@@ -117,13 +117,12 @@ h1, h2, h3, h4, h5, a, input {
                     }
                     .re-severities-buttons {
                         margin-right: 12px;
-                        min-width: 120px;
                         visibility: hidden;
                         opacity: 0;
                         transition: visibility 0s, opacity 0.2s linear;
                         position: absolute;
                         right: 1px;
-                        top: 7px;
+                        top: -26px;
                     }
                     &:hover .re-severities-buttons {
                         visibility: visible;
