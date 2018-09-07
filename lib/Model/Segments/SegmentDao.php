@@ -236,10 +236,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         return $segments_id;
     }
 
+    /**
+     * @param $segments_id
+     *
+     * @return \QualityReport_QualityReportSegmentStruct[]
+     */
+
     public function getSegmentsForQr($segments_id){
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( '?,', count( $segments_id ) - 1) . '?';
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
 
         $query = "SELECT 
                 s.id AS sid,
@@ -259,7 +265,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.match_type
                 FROM segments s
                 JOIN segment_translations st ON st.id_segment = s.id
-                WHERE s.id IN (" . $prepare_str_segments_id . " )
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
             ORDER BY sid ASC";
 
         $stmt = $db->prepare($query);

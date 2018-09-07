@@ -8,10 +8,11 @@
 
 class QualityReport_QualityReportSegmentModel {
 
-    public function getSegmentsIdForQR($jid, $password, $step = 10, $ref_segment, $where = "after", $options = []){
+    public function getSegmentsIdForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
         $segmentsDao = new \Segments_SegmentDao;
-        $segments_id        = $segmentsDao->getSegmentsIdForQR( $jid, $password, $step, $ref_segment, $where );
+        $segments_id = $segmentsDao->getSegmentsIdForQR( $jid, $password, $step, $ref_segment, $where );
+
         return $segments_id;
     }
 
@@ -50,9 +51,9 @@ class QualityReport_QualityReportSegmentModel {
                 }
             }
 
-            foreach ($comments as $comment){
+            foreach ( $comments as $comment ) {
                 $comment->templateMessage();
-                if($comment->id_segment == $seg->sid){
+                if ( $comment->id_segment == $seg->sid ) {
                     $seg->comments[] = $comment;
                 }
             }
