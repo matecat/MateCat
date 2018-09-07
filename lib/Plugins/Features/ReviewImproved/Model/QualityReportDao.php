@@ -180,11 +180,11 @@ SQL;
      *
      * @return array
      */
-    public static function getIssues( \Chunks_ChunkStruct $chunk ) {
+    public static function getIssuesBySegments( $segments_id ) {
 
-        $sql = <<<SQL
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
 
-SELECT
+        $sql = "SELECT
 
   issues.id_segment as id_segment,
   issues.id as issue_id,
@@ -210,10 +210,6 @@ SELECT
 
 FROM  qa_entries issues
 
-  JOIN jobs
-    ON jobs.password = :password
-    AND jobs.id = :id_job
-
   LEFT JOIN qa_entry_comments comments
     ON comments.id_qa_entry = issues.id
 
@@ -222,19 +218,17 @@ FROM  qa_entries issues
     
   LEFT JOIN translation_warnings 
     ON translation_warnings.id_segment = issues.id_segment 
-      AND translation_warnings.id_job = jobs.id
-;
-
-SQL;
+      
+  JOIN ( 
+		SELECT ? as id_segment
+		".$prepare_str_segments_id."
+) AS SLIST USING( issues.id_segment )";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( [
-                'id_job'   => $chunk->id,
-                'password' => $chunk->password
-        ] );
+        $stmt->execute( $segments_id );
 
         return $stmt->fetchAll();
     }

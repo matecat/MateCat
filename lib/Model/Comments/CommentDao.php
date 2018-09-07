@@ -148,18 +148,23 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $arr_result;
     }
 
-    public function getThreadsByJob($id_job){
+    public function getThreadsBySegments($segments_id){
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
         $db = Database::obtain()->getConnection();
-        $comments_query = "SELECT * FROM comments WHERE message_type IN (1,2) AND id_job = ?";
+        $comments_query = "SELECT * FROM comments 
+        JOIN ( 
+                SELECT ? as id_segment
+                ".$prepare_str_segments_id."
+        ) AS SLIST USING( id_segment )
+        WHERE message_type IN (1,2) ";
 
         $stmt = $db->prepare($comments_query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, "\Comments_BaseCommentStruct");
-        $stmt->execute( [$id_job] );
+        $stmt->execute( $segments_id );
         return $stmt->fetchAll();
     }
-
-
-
 
     /**
      *

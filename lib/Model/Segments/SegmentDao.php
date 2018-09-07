@@ -145,7 +145,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return array
      * @throws Exception
      */
-    public function getSegmentsForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
 
@@ -221,17 +221,23 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 $subQuery = sprintf( $queryCenter, $step, $step );
                 break;
             default:
-                throw new Exception("No direction selected");
+                throw new Exception( "No direction selected" );
                 break;
         }
 
-        $stmt = $db->prepare($subQuery);
-        $stmt->execute( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment] );
-        $segments_id = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare( $subQuery );
+        $stmt->execute( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ] );
+        $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        $segments_id = array_map(function($segment_row){
-            return $segment_row['__sid'];
-        }, $segments_id);
+        $segments_id = array_map( function ( $segment_row ) {
+            return $segment_row[ '__sid' ];
+        }, $segments_id );
+
+        return $segments_id;
+    }
+
+    public function getSegmentsForQr($segments_id){
+        $db = Database::obtain()->getConnection();
 
         $prepare_str_segments_id = str_repeat( '?,', count( $segments_id ) - 1) . '?';
 
@@ -253,8 +259,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.match_type
                 FROM segments s
                 JOIN segment_translations st ON st.id_segment = s.id
-                
-            WHERE s.id IN (" . $prepare_str_segments_id . " )
+                WHERE s.id IN (" . $prepare_str_segments_id . " )
             ORDER BY sid ASC";
 
         $stmt = $db->prepare($query);

@@ -76,53 +76,13 @@ class QualityReportController extends KleinController
             $step = 10;
         }
 
-        $segmentsDao = new \Segments_SegmentDao;
-        $data        = $segmentsDao->getSegmentsForQR( $this->chunk->id, $this->chunk->password, $step, $ref_segment, $where );
+        $qrSegmentModel = new \QualityReport_QualityReportSegmentModel();
+        $segments_id        = $qrSegmentModel->getSegmentsIdForQR( $this->chunk->id, $this->chunk->password, $step, $ref_segment, $where );
 
-        $codes = $this->featureSet->getCodes();
-        if ( in_array( ReviewExtended::FEATURE_CODE, $codes ) OR in_array( ReviewImproved::FEATURE_CODE, $codes ) ) {
-            $issues = ReviewImproved\Model\QualityReportDao::getIssues( $this->chunk );
-        } else {
-            $reviseDao                  = new \Revise_ReviseDAO();
-            $searchReviseStruct         = \Revise_ReviseStruct::getStruct();
-            $searchReviseStruct->id_job = $this->chunk->id;
-            $issues                     = $reviseDao->read( $searchReviseStruct );
-        }
+        $segments = $qrSegmentModel->getSegmentsForQR($segments_id, $this->featureSet);
 
-        $commentsDao = new \Comments_CommentDao;
-        $comments = $commentsDao->getThreadsByJob($this->chunk->id);
-
-
-
-
-        foreach ( $data as $i => $seg ) {
-
-            $seg->warnings      = $seg->getLocalWarning();
-            $seg->pee           = $seg->getPEE();
-            $seg->ice_modified  = $seg->isICEModified();
-            $seg->secs_per_word = $seg->getSecsPerWord();
-
-            $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
-
-            $seg->segment = CatUtils::rawxliff2view( $seg->segment );
-
-            $seg->translation = CatUtils::rawxliff2view( $seg->translation );
-
-            foreach ( $issues as $issue ) {
-                if ( $issue->id_segment == $seg->sid ) {
-                    $seg->issues[] = $issue;
-                }
-            }
-
-            foreach ($comments as $comment){
-                $comment->templateMessage();
-                if($comment->id_segment == $seg->sid){
-                    $seg->comments[] = $comment;
-                }
-            }
-
-            $this->result[ 'data' ][] = $seg;
-        }
+        $this->response->json( $segments );
+    }
 
         $this->response->json( $this->result );
     }
