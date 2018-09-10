@@ -186,7 +186,7 @@ SQL;
 
         $sql = "SELECT
 
-  issues.id_segment as id_segment,
+  issues.id_segment as segment_id,
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
@@ -210,6 +210,11 @@ SQL;
 
 FROM  qa_entries issues
 
+JOIN ( 
+		SELECT ? as id_segment
+		".$prepare_str_segments_id."
+) AS SLIST USING( id_segment )
+
   LEFT JOIN qa_entry_comments comments
     ON comments.id_qa_entry = issues.id
 
@@ -219,10 +224,7 @@ FROM  qa_entries issues
   LEFT JOIN translation_warnings 
     ON translation_warnings.id_segment = issues.id_segment 
       
-  JOIN ( 
-		SELECT ? as id_segment
-		".$prepare_str_segments_id."
-) AS SLIST USING( issues.id_segment )";
+  ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

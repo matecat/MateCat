@@ -22,6 +22,7 @@ class QualityReport_QualityReportSegmentModel {
 
         $codes = $features->getCodes();
         if ( in_array( Features\ReviewExtended::FEATURE_CODE, $codes ) OR in_array( Features\ReviewImproved::FEATURE_CODE, $codes ) ) {
+            $issues = [];
             $issues = \Features\ReviewImproved\Model\QualityReportDao::getIssuesBySegments( $segments_id );
         } else {
             $reviseDao = new \Revise_ReviseDAO();
@@ -46,7 +47,7 @@ class QualityReport_QualityReportSegmentModel {
             $seg->translation = CatUtils::rawxliff2view( $seg->translation );
 
             foreach ( $issues as $issue ) {
-                if ( $issue->id_segment == $seg->sid ) {
+                if ( $issue->segment_id == $seg->sid ) {
                     $seg->issues[] = $issue;
                 }
             }
