@@ -225,7 +225,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
-    public function getLastTranslationBySegments($segments_id){
+    public function getLastTranslationsBySegments($segments_id){
 
         $db = Database::obtain()->getConnection();
 
@@ -258,6 +258,52 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 GROUP BY id_segment
             ) AS TX ON stv.version_number = TX.version_number
                 AND stv.id_segment = TX.id_segment";
+
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $stmt->execute( $segments_id );
+
+        $results = $stmt->fetchAll();
+
+        return $results;
+
+
+    }
+
+    public function getLastRevisionsBySegments($segments_id){
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
+
+        $query = "SELECT 
+            stv.id,
+            stv.id_segment,
+            stv.id_job,
+            stv.translation,
+            TX.version_number,
+            stv.creation_date,
+            stv.propagated_from,
+            stv.time_to_edit,
+            stv.is_review,
+            stv.raw_diff
+        FROM
+            segment_translation_versions stv
+        JOIN
+        (
+                SELECT 
+                    MAX(version_number) AS version_number, stv.id_segment
+                FROM
+                    segment_translation_versions stv
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
+                GROUP BY id_segment
+            ) AS TX ON stv.version_number = TX.version_number
+                AND stv.id_segment = TX.id_segment
+               WHERE is_review = 1 ";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');

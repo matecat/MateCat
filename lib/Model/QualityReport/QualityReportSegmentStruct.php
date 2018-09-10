@@ -59,6 +59,14 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $issues = [];
 
+    public $last_translation;
+
+    public $last_revision;
+
+    public $pee_translation_revise;
+
+    public $pee_translation_suggestion;
+
     /**
      * @return float
      */
@@ -79,7 +87,6 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
-
         $post_editing_effort = round(
                 ( 1 - \MyMemory::TMS_MATCH(
                                 self::cleanSegmentForPee( $this->suggestion ),
@@ -98,6 +105,75 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         return $post_editing_effort;
 
     }
+
+    public function getPEEBwtTranslationSuggestion() {
+        if(empty($this->last_translation)){
+            return null;
+        }
+        $post_editing_effort = round(
+                ( 1 - \MyMemory::TMS_MATCH(
+                                self::cleanSegmentForPee( $this->suggestion ),
+                                self::cleanSegmentForPee( $this->last_translation ),
+                                $this->target
+                        )
+                ) * 100
+        );
+
+        if ( $post_editing_effort < 0 ) {
+            $post_editing_effort = 0;
+        } elseif ( $post_editing_effort > 100 ) {
+            $post_editing_effort = 100;
+        }
+
+        return $post_editing_effort;
+
+    }
+
+    public function getPEEBwtTranslationRevise() {
+        if(empty($this->last_translation) OR empty($this->last_revision)){
+            return null;
+        }
+        $post_editing_effort = round(
+                ( 1 - \MyMemory::TMS_MATCH(
+                                self::cleanSegmentForPee( $this->last_translation ),
+                                self::cleanSegmentForPee( $this->last_revision ),
+                                $this->target
+                        )
+                ) * 100
+        );
+
+        if ( $post_editing_effort < 0 ) {
+            $post_editing_effort = 0;
+        } elseif ( $post_editing_effort > 100 ) {
+            $post_editing_effort = 100;
+        }
+
+        return $post_editing_effort;
+    }
+
+    /*public function getPEEBwtReviseSuggestion() {
+        if(empty($this->last_revision)){
+            return null;
+        }
+        $post_editing_effort = round(
+                ( 1 - \MyMemory::TMS_MATCH(
+                                self::cleanSegmentForPee( $this->last_revision ),
+                                self::cleanSegmentForPee( $this->suggestion ),
+                                $this->target
+                        )
+                ) * 100
+        );
+
+        if ( $post_editing_effort < 0 ) {
+            $post_editing_effort = 0;
+        } elseif ( $post_editing_effort > 100 ) {
+            $post_editing_effort = 100;
+        }
+
+        return $post_editing_effort;
+    }*/
+
+
 
     private static function cleanSegmentForPee( $segment ){
         $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
