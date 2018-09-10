@@ -4,19 +4,19 @@
     "label": "Airbnb",
     "categories": [
       {
-        "label": "Accuracy",
+        "label": "Accuracy (Addition, Omission, Mistranslation, Untranslated, Inconsistency)",
         "code": "ACC"
       },
       {
-        "label": "Client guidelines",
+        "label": "Client guidelines (Terminology, Style Guide, Project instructions)",
         "code": "GUI"
       },
       {
-        "label": "Linguistic",
+        "label": "Linguistic (Punctuation, Spelling, Grammar, Locale conventions)",
         "code": "LNG"
       },
       {
-        "label": "Style",
+        "label": "Style (Inconsistent style, Readability, Unidiomatic)",
         "code": "STY"
       }
     ],
