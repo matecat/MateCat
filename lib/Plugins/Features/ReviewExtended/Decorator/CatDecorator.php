@@ -19,6 +19,13 @@ class CatDecorator extends ReviewImproved\Decorator\CatDecorator {
         $this->template->segmentFilterEnabled = true;
         $this->template->showReplaceOptionsInSearch = true ;
         $this->template->footer_show_revise_link = true;
+        if ( $this->controller->isRevision() ) {
+            $this->template->footer_show_revise_link    = false;
+            $this->template->footer_show_translate_link = true;
+        } else {
+            $this->template->footer_show_revise_link    = true;
+            $this->template->footer_show_translate_link = false;
+        }
     }
 
 }
