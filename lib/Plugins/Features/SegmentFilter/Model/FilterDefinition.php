@@ -27,7 +27,7 @@ class FilterDefinition {
     }
 
     public function isRevision(){
-        return !empty( $this->filter_data['revision'] );
+        return !empty( $this->filter_data['revision'] ) && $this->filter_data['revision'] == 1;
     }
 
     public function isSampled() {
