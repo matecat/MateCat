@@ -258,7 +258,7 @@ UI = {
             title: 'Ooops...',
             text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
             type: 'warning',
-            position: 'tc',
+            position: 'bl',
             allowHtml: true,
             autoDismiss: false,
         };

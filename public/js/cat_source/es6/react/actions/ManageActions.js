@@ -181,7 +181,7 @@ let ManageActions = {
                         title: 'Assignee changed',
                         text: 'The project ' + project.get('name') + ' has been assigned to ' + name,
                         type: 'success',
-                        position: 'tc',
+                        position: 'bl',
                         allowHtml: true,
                         timer: 3000
                     };
@@ -258,7 +258,7 @@ let ManageActions = {
                     title: 'Project Moved',
                     text: 'The project ' + project.get('name') + ' has been moved to the ' + team.name + ' Team',
                     type: 'success',
-                    position: 'tc',
+                    position: 'bl',
                     allowHtml: true,
                     timer: 3000
                 };
