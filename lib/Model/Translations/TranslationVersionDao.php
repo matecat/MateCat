@@ -233,16 +233,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
 
         $query = "SELECT 
-            stv.id,
             stv.id_segment,
-            stv.id_job,
             stv.translation,
             TX.version_number,
             stv.creation_date,
-            stv.propagated_from,
-            stv.time_to_edit,
-            stv.is_review,
-            stv.raw_diff
+            stv.is_review
         FROM
             segment_translation_versions stv
         JOIN
@@ -278,16 +273,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
 
         $query = "SELECT 
-            stv.id,
             stv.id_segment,
-            stv.id_job,
             stv.translation,
             TX.version_number,
             stv.creation_date,
-            stv.propagated_from,
-            stv.time_to_edit,
-            stv.is_review,
-            stv.raw_diff
+            stv.is_review
         FROM
             segment_translation_versions stv
         JOIN

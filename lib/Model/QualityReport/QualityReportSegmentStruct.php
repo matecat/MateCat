@@ -87,57 +87,31 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
-        $post_editing_effort = round(
-                ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->translation ),
-                                $this->target
-                        )
-                ) * 100
-        );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-
+        return self::calculatePEE($this->suggestion, $this->translation, $this->target);
     }
 
     public function getPEEBwtTranslationSuggestion() {
         if(empty($this->last_translation)){
             return null;
         }
-        $post_editing_effort = round(
-                ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->last_translation ),
-                                $this->target
-                        )
-                ) * 100
-        );
 
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-
+        return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
     }
 
     public function getPEEBwtTranslationRevise() {
         if(empty($this->last_translation) OR empty($this->last_revision)){
             return null;
         }
+
+        return self::calculatePEE($this->last_translation, $this->last_revision, $this->target);
+    }
+
+    static function calculatePEE($str_1, $str_2, $target){
         $post_editing_effort = round(
                 ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->last_translation ),
-                                self::cleanSegmentForPee( $this->last_revision ),
-                                $this->target
+                                self::cleanSegmentForPee( $str_1 ),
+                                self::cleanSegmentForPee( $str_2 ),
+                                $target
                         )
                 ) * 100
         );
@@ -150,28 +124,6 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
         return $post_editing_effort;
     }
-
-    /*public function getPEEBwtReviseSuggestion() {
-        if(empty($this->last_revision)){
-            return null;
-        }
-        $post_editing_effort = round(
-                ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->last_revision ),
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                $this->target
-                        )
-                ) * 100
-        );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-    }*/
 
 
 
