@@ -714,6 +714,10 @@ class ProjectManager {
 
         Database::obtain()->begin();
 
+        //pre-fetch Analysis page in transaction and store in cache
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+        ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+
         $this->features->run( 'postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();

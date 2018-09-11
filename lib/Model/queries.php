@@ -1261,39 +1261,6 @@ function getProjectJobData( $pid ) {
 }
 
 /**
- * @param      $pid
- * @param      $job_password
- * @param null $jid
- *
- * @return array
- */
-function getJobAnalysisData( $pid, $job_password, $jid = null ) {
-
-    $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
-		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
-		p.fast_analysis_wc,p.tm_analysis_wc, p.standard_analysis_wc
-
-			from projects p 
-			inner join jobs j on p.id=j.id_project
-			inner join files f on p.id=f.id_project
-			inner join segments s on s.id_file=f.id
-			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-
-			where p.id= '$pid' and j.password='$job_password' ";
-
-    if ( !empty( $jid ) ) {
-        $query = $query . " and j.id = " . intval( $jid );
-    }
-
-    $query = $query . " group by 6,2 ";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-/**
  *
  * Very bound to the query SQL which is used to retrieve project jobs or just the count
  * of records for the pagination and other stuff in manage page.

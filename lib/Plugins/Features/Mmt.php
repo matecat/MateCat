@@ -273,7 +273,6 @@ class Mmt extends BaseFeature {
      *
      * @throws Exception
      *
-     *                  TODO
      */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
