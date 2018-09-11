@@ -108,15 +108,15 @@ if ( QaCheckGlossary.enabled() )
             value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
             //Check if value match inside the span (Ex: ID, class, data, span)
-            var check = re.test( '<span data-id="' + index + '" class="unusedGlossaryTerm">$1</span>' );
+            var check = re.test( '<span class="unusedGlossaryTerm">$1</span>' );
             if ( !check ){
                 newHTML = newHTML.replace(
-                    re , '<span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span>'
+                    re , '<span class="unusedGlossaryTerm">$1</span>'
                 );
             } else  {
                 re = new RegExp( sprintf( "\\s\\b(%s)\\s\\b", value ), QaCheckGlossary.qaCheckRegExpFlags);
                 newHTML = newHTML.replace(
-                    re , ' <span data-id="' + this.id + '" class="unusedGlossaryTerm">$1</span> '
+                    re , ' <span class="unusedGlossaryTerm">$1</span> '
                 );
             }
         });
