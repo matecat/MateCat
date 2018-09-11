@@ -25,8 +25,8 @@ trait HotSwap {
      */
     protected function swapOn( Jobs_JobStruct $jobStruct, $newMT = 1 ){ // 1 == MyMemory
         $redisConn = ( new RedisHandler() )->getConnection();
-        if( $redisConn->setnx( "_old_mt_engine:" . $jobStruct->id_project, $jobStruct->id_mt_engine ) ){
-            $redisConn->expire( "_old_mt_engine:" . $jobStruct->id_project, 60 * 60 * 24 );
+        if( $redisConn->setnx( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, $jobStruct->id_mt_engine ) ){
+            $redisConn->expire( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, 60 * 60 * 24 );
             $jobStruct->id_mt_engine = $newMT;
         }
     }
@@ -45,9 +45,9 @@ trait HotSwap {
         $jobStructs = $jobDao->getByProjectId( $project_id, 60 );
 
         $redisConn = ( new RedisHandler() )->getConnection();
-        $old_mt_engine = $redisConn->get( "_old_mt_engine:" . $jobStructs[0]->id_project ); //Keep only the first one in the list ( all jobs have the same mt )
-        if( $redisConn->del( "_old_mt_engine:" . $jobStructs[0]->id_project ) ){ //avoid race conditions from plugins
-            foreach ( $jobStructs as $jobStruct ){
+        foreach ( $jobStructs as $jobStruct ){
+            $old_mt_engine = $redisConn->get( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password ); //Get the old mt engine value
+            if( $redisConn->del( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password ) ) { //avoid race conditions from plugins ( delete is atomic )
                 $jobStruct->id_mt_engine = $old_mt_engine;
                 $jobDao->updateStruct( $jobStruct );
             }
