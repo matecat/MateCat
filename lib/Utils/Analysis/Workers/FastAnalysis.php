@@ -119,6 +119,7 @@ class FastAnalysis extends AbstractDaemon {
      * @param null $args
      *
      * @return void
+     * @throws \Predis\Connection\ConnectionException
      */
     public function main( $args = null ) {
 

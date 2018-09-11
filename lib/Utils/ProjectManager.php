@@ -98,62 +98,63 @@ class ProjectManager {
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
-                            'HTTP_HOST'                => null,
-                            'id_project'               => null,
-                            'create_date'              => date( "Y-m-d H:i:s" ),
-                            'id_customer'              => self::TRANSLATED_USER,
-                            'project_features'         => [],
-                            'user_ip'                  => null,
-                            'project_name'             => null,
-                            'result'                   => [ "errors" => [], "data" => [] ],
-                            'private_tm_key'           => 0,
-                            'private_tm_user'          => null,
-                            'private_tm_pass'          => null,
-                            'uploadToken'              => null,
-                            'array_files'              => [], //list of file names
-                            'file_id_list'             => [],
-                            'source_language'          => null,
-                            'target_language'          => null,
-                            'job_subject'              => 'general',
-                            'mt_engine'                => null,
-                            'tms_engine'               => null,
-                            'ppassword'                => null,
-                            'array_jobs'               => [
+                            'HTTP_HOST'                    => null,
+                            'id_project'                   => null,
+                            'create_date'                  => date( "Y-m-d H:i:s" ),
+                            'id_customer'                  => self::TRANSLATED_USER,
+                            'project_features'             => [],
+                            'user_ip'                      => null,
+                            'project_name'                 => null,
+                            'result'                       => [ "errors" => [], "data" => [] ],
+                            'private_tm_key'               => 0,
+                            'private_tm_user'              => null,
+                            'private_tm_pass'              => null,
+                            'uploadToken'                  => null,
+                            'array_files'                  => [], //list of file names
+                            'file_id_list'                 => [],
+                            'source_language'              => null,
+                            'target_language'              => null,
+                            'job_subject'                  => 'general',
+                            'mt_engine'                    => null,
+                            'tms_engine'                   => null,
+                            'ppassword'                    => null,
+                            'array_jobs'                   => [
                                     'job_list'      => [],
                                     'job_pass'      => [],
                                     'job_segments'  => [],
                                     'job_languages' => [],
                                     'payable_rates' => [],
                             ],
-                            'job_segments'             => [], //array of job_id => [  min_seg, max_seg  ]
-                            'segments'                 => [], //array of files_id => segments[  ]
-                            'segments_metadata'        => [], //array of segments_metadata
-                            'translations'             => [],
-                            'notes'                    => [],
+                            'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
+                            'segments'                     => [], //array of files_id => segments[  ]
+                            'segments_metadata'            => [], //array of segments_metadata
+                            'translations'                 => [],
+                            'notes'                        => [],
                         //one translation for every file because translations are files related
-                            'status'                   => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                            'job_to_split'             => null,
-                            'job_to_split_pass'        => null,
-                            'split_result'             => null,
-                            'job_to_merge'             => null,
-                            'lang_detect_files'        => [],
-                            'tm_keys'                  => [],
-                            'userIsLogged'             => false,
-                            'uid'                      => null,
-                            'skip_lang_validation'     => false,
-                            'pretranslate_100'         => 0,
-                            'only_private'             => 0,
-                            'owner'                    => '',
-                            'word_count_type'          => '',
-                            'metadata'                 => [],
-                            'id_assignee'              => null,
-                            'session'                  => ( isset( $_SESSION ) ? $_SESSION : false ),
-                            'instance_id'              => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
-                            'id_team'                  => null,
-                            'team'                     => null,
-                            'sanitize_project_options' => true,
-                            'file_segments_count'      => [],
-                            'due_date'                 => null,
+                            'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'                 => null,
+                            'job_to_split_pass'            => null,
+                            'split_result'                 => null,
+                            'job_to_merge'                 => null,
+                            'lang_detect_files'            => [],
+                            'tm_keys'                      => [],
+                            'userIsLogged'                 => false,
+                            'uid'                          => null,
+                            'skip_lang_validation'         => false,
+                            'pretranslate_100'             => 0,
+                            'only_private'                 => 0,
+                            'owner'                        => '',
+                            'word_count_type'              => '',
+                            'metadata'                     => [],
+                            'id_assignee'                  => null,
+                            'session'                      => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'                  => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
+                            'id_team'                      => null,
+                            'team'                         => null,
+                            'sanitize_project_options'     => true,
+                            'file_segments_count'          => [],
+                            'due_date'                     => null,
+                            'target_language_mt_engine_id' => []
                     ] );
 
         }
@@ -170,8 +171,8 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $this->features = new FeatureSet( $this->_getRequestedFeatures() );
-        if ( !empty( $this->projectStructure['id_customer'] ) ) {
-           $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure['id_customer'] );
+        if ( !empty( $this->projectStructure[ 'id_customer' ] ) ) {
+            $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
@@ -185,7 +186,7 @@ class ProjectManager {
     /**
      * @return array
      */
-    protected function _getRequestedFeatures(){
+    protected function _getRequestedFeatures() {
         $features = [];
         if ( count( $this->projectStructure[ 'project_features' ] ) != 0 ) {
             foreach ( $this->projectStructure[ 'project_features' ] as $key => $feature ) {
@@ -196,6 +197,7 @@ class ProjectManager {
             }
             $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
+
         return $features;
     }
 
@@ -289,7 +291,7 @@ class ProjectManager {
         $dao = new Projects_MetadataDao();
 
         $featureCodes = $this->features->getCodes();
-        if( !empty( $featureCodes ) ){
+        if ( !empty( $featureCodes ) ) {
             $dao->set( $this->projectStructure[ 'id_project' ],
                     Projects_MetadataDao::FEATURES_KEY,
                     implode( ',', $featureCodes )
@@ -712,6 +714,10 @@ class ProjectManager {
 
         Database::obtain()->begin();
 
+        //pre-fetch Analysis page in transaction and store in cache
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+        ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+
         $this->features->run( 'postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();
@@ -760,6 +766,7 @@ class ProjectManager {
                         array_keys( $this->projectStructure[ 'array_jobs' ][ 'job_segments' ]->getArrayCopy() ),
                         function ( $acc, $value ) {
                             $acc .= "," . strtr( $value, '-', ':' );
+
                             return $acc;
                         }
                 ), "," );
@@ -1073,7 +1080,7 @@ class ProjectManager {
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
-            $newJob->id_mt_engine      = $projectStructure[ 'mt_engine' ];
+            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
             $newJob->owner             = $projectStructure[ 'owner' ];
@@ -1697,8 +1704,7 @@ class ProjectManager {
                             $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                    }
-                    else {
+                    } else {
 
                         $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
@@ -1993,11 +1999,11 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes ){
+    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes ) {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
-                (empty( $xliff_trans_unit[ 'source' ] ) && empty($xliff_trans_unit[ 'alt-trans' ]['source'])) ||
+                ( empty( $xliff_trans_unit[ 'source' ] ) && empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ) ||
                 empty( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] ) ||
                 empty( $xliff_file_attributes[ 'source-language' ] ) ||
                 empty( $xliff_file_attributes[ 'target-language' ] ) ||
@@ -2014,36 +2020,36 @@ class ProjectManager {
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $tm_info ) {
-                if( $tm_info[ 'w' ] == 1 ){
-                    $config[ 'id_user' ][] = $tm_info['key'];
+                if ( $tm_info[ 'w' ] == 1 ) {
+                    $config[ 'id_user' ][] = $tm_info[ 'key' ];
                 }
             }
 
         }
 
-        $config[ 'source' ]         = $xliff_file_attributes[ 'source-language' ];
-        $config[ 'target' ]         = $xliff_file_attributes[ 'target-language' ];
-        $config[ 'email' ]          = \INIT::$MYMEMORY_API_KEY;
+        $config[ 'source' ] = $xliff_file_attributes[ 'source-language' ];
+        $config[ 'target' ] = $xliff_file_attributes[ 'target-language' ];
+        $config[ 'email' ]  = \INIT::$MYMEMORY_API_KEY;
 
 
-        if(!empty($xliff_trans_unit[ 'source' ])){
+        if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
             $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
 
         }
 
-        if(!empty($xliff_trans_unit[ 'alt-trans' ]['source'])){
-            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ]['source'] );
+        if ( !empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ) {
+            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] );
         }
 
 
-        $config[ 'segment' ]        = CatUtils::raw2DatabaseXliff( $source_extract_external['seg'] );
+        $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
 
-        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
-        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external['seg'] );
+        $target_extract_external    = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
+        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
         $config[ 'context_after' ]  = null;
         $config[ 'context_before' ] = null;
 
-        if( ! empty( $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ] ) ){
+        if ( !empty( $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ] ) ) {
 
             //get the Props
             $config[ 'prop' ] = json_encode( [
@@ -2701,7 +2707,7 @@ class ProjectManager {
             );
 
             return $differentSourceAndTargetIsTranslated;
-           //return true;
+            //return true;
         } else {
             // evaluate if identical source and target should be considered non translated
             $identicalSourceAndTargetIsTranslated = false;

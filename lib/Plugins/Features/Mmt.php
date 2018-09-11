@@ -208,8 +208,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see createProjectController::appendFeaturesToProject()
-     * Called in @see NewController::appendFeaturesToProject()
+     * Called in @see createProjectController::__appendFeaturesToProject()
+     * Called in @see NewController::__appendFeaturesToProject()
      *
      * @param $projectFeatures
      * @param $controller \NewController|\createProjectController
@@ -247,24 +247,17 @@ class Mmt extends BaseFeature {
                     foreach( $target_language_list as $_matecatTarget ){
                         list( $mTargetCode, ) = explode( "-", $_matecatTarget );
                         if( in_array( $mTargetCode, $availableTargets ) ){
-                            $found &= true;
+                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $controller->postInput[ 'mt_engine' ];
                         } else {
-                            $found &= false;
+                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = 1; // MyMemory
                         }
                     }
                 }
             }
 
-            if( !$found ){
-                //Force fallback to MyMemory if MMT does not support the language pair
-                //Warning For Multi Lingual projects, this disable MMT for all languages ever if one language is supported, because MateCat at moment
-                // does not support the management of different engines per JOB in the creation phase.
-                $controller->postInput[ 'mt_engine' ] = 1;
-            } else {
-                $feature                 = new BasicFeatureStruct();
-                $feature->feature_code   = self::FEATURE_CODE;
-                $projectFeatures[] = $feature;
-            }
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = self::FEATURE_CODE;
+            $projectFeatures[] = $feature;
 
         }
 
@@ -279,6 +272,7 @@ class Mmt extends BaseFeature {
      * @param array $projectRows
      *
      * @throws Exception
+     *
      */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
