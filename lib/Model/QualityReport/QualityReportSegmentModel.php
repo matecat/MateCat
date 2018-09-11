@@ -35,7 +35,7 @@ class QualityReport_QualityReportSegmentModel {
         $comments    = $commentsDao->getThreadsBySegments( $segments_id );
 
 
-        if ( !in_array( Features\TranslationVersions::FEATURE_CODE, $codes ) ) {
+        if ( in_array( Features\TranslationVersions::FEATURE_CODE, $codes ) ) {
             $translationVersionDao = new Translations_TranslationVersionDao;
             $last_translations     = $translationVersionDao->getLastTranslationsBySegments( $segments_id );
             $last_revisions        = $translationVersionDao->getLastRevisionsBySegments( $segments_id );

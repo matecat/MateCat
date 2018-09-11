@@ -78,6 +78,7 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
 
 require './lib/Routes/api_v1_routes.php';
 require './lib/Routes/api_v2_routes.php';
+require './lib/Routes/api_v3_routes.php';
 require './lib/Routes/gdrive_routes.php';
 require './lib/Routes/utils_routes.php';
 Features::loadRoutes( $klein );
