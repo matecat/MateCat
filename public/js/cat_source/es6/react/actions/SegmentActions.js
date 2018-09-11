@@ -425,8 +425,8 @@ var SegmentActions = {
         });
     },
 
-    deleteIssue: function (issue, sid) {
-        UI.deleteIssue(issue, sid);
+    deleteIssue: function (issue, sid, dontShowMessage) {
+        UI.deleteIssue(issue, sid, dontShowMessage);
     },
 
     confirmDeletedIssue: function (sid,issue_id) {

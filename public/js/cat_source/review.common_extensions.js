@@ -46,7 +46,7 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
             window.dispatchEvent(new Event('resize'));
         },
 
-        deleteIssue : function( issue,sid ) {
+        deleteIssue : function( issue, sid, dontShowMessage) {
             var message = '';
             if ( issue.target_text ) {
                 message = sprintf(
@@ -61,17 +61,23 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
                     moment( issue.created_at ).format('lll')
                 );
             }
-
-            APP.confirm({
-                name : 'Confirm issue deletion',
-                callback : 'deleteTranslationIssue',
-                msg: message,
-                okTxt: 'Yes delete this issue',
-                context: JSON.stringify({
+            if ( !dontShowMessage) {
+                APP.confirm({
+                    name : 'Confirm issue deletion',
+                    callback : 'deleteTranslationIssue',
+                    msg: message,
+                    okTxt: 'Yes delete this issue',
+                    context: JSON.stringify({
+                        id_segment : sid,
+                        id_issue : issue.id
+                    })
+                });
+            } else {
+                UI.deleteTranslationIssue(JSON.stringify({
                     id_segment : sid,
                     id_issue : issue.id
-                })
-            });
+                }));
+            }
         },
 
         reloadQualityReport : function() {

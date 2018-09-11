@@ -6,7 +6,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            lastIssueAdded: null
+            lastIssueAdded: null,
+            visible: true
         };
         this.issueFlatCategories = JSON.parse(config.lqa_flat_categories);
         this.issueNestedCategories = JSON.parse(config.lqa_nested_categories).categories;
@@ -78,18 +79,38 @@ class ReviewExtendedIssuesContainer extends React.Component {
         });
 
         issues = sorted_issues.map(function( item, index ) {
-
-            return <ReviewExtendedIssue
-                lastIssueId={this.state.lastIssueAdded}
-                sid={this.props.segment.sid}
-                isReview={this.props.isReview}
-                issue={item}
-                key={item.id}
-            />
-
+                return <ReviewExtendedIssue
+                    lastIssueId={this.state.lastIssueAdded}
+                    sid={this.props.segment.sid}
+                    isReview={this.props.isReview}
+                    issue={item}
+                    key={item.id}
+                    changeVisibility={this.changeVisibility.bind(this)}
+                />
         }.bind(this) );
 
         return issues;
+    }
+
+    changeVisibility(id, visible) {
+        let issues = this.props.issues.slice();
+        let index = _.findIndex(issues, function ( item ) {
+            return item.id == id;
+        });
+        issues[index].visible = visible;
+
+        let visibleIssues = _.filter(this.props.issues, function ( item ) {
+            return _.isUndefined(item.visible) || item.visible;
+        });
+        if (visibleIssues.length === 0) {
+            this.setState({
+                visible: false
+            });
+        } else {
+            this.setState({
+                visible: true
+            });
+        }
     }
 
     setLastIssueAdded(sid, id) {
@@ -108,9 +129,20 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.ISSUE_ADDED, this.setLastIssueAdded);
+        //Undo notification
+        APP.removeAllNotifications();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if ( prevProps.issues.length < this.props.issues.length ) {
+            this.setState({
+                visible: true
+            });
+        }
     }
 
     render () {
+
         if(this.props.issues.length > 0){
 
             let html;
@@ -119,9 +151,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
             } else {
                 html = this.getCategoriesHtml()
             }
-
-
-            return <div className="re-issues-box re-created">
+            let classNotVisible = (!this.state.visible) ? 're-issues-box-empty' : ''
+            return <div className={"re-issues-box re-created " + classNotVisible}>
                     {this.props.loader ? <WrapperLoader /> : null}
                     <div className="re-list issues">
                         {html}
