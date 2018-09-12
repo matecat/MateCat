@@ -400,7 +400,7 @@ if ( MBC.enabled() )
                 }, 200);
                 return scrollAnimation.promise() ;
             } else {
-                return originalScrollSegment.call(this, section);
+                return originalScrollSegment.apply(this, arguments);
             }
         };
 
