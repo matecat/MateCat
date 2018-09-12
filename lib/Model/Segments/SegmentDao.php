@@ -149,31 +149,52 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
+        $options_conditions_query = "";
+        $options_conditions_values = [];
+        if(isset($options['filter']['status'])){
+            $options_conditions_query .= " AND st.status = :status ";
+            $options_conditions_values['status'] = $options['filter']['status'];
+        }
+
+        if(isset($options['filter']['issue_category'])){
+            $options_conditions_query .= " AND e.id_category = :id_category ";
+            $options_conditions_values['id_category'] = $options['filter']['issue_category'];
+        }
+
+        if(isset($options['filter']['severity'])){
+            $options_conditions_query .= " AND e.severity = :severity ";
+            $options_conditions_values['severity'] = $options['filter']['severity'];
+        }
+
         $queryAfter = "
                 SELECT * FROM (
-                    SELECT segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations ON id = id_segment
-                    JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = :id_job
-                        AND password = :password
-                        AND show_in_cattool = 1
-                        AND segments.id > :ref_segment
-                        AND segments.id BETWEEN job_first_segment AND job_last_segment
+                    SELECT distinct(s.id) AS __sid
+                    FROM segments s
+                    JOIN segment_translations st ON s.id = st.id_segment
+                    JOIN jobs j ON j.id = st.id_job
+                    LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                    WHERE st.id_job = :id_job
+                        AND j.password = :password
+                        AND s.show_in_cattool = 1
+                        AND s.id > :ref_segment
+                        AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                        %s
                     LIMIT %u
                 ) AS TT1";
 
         $queryBefore = "
                 SELECT * from(
-                    SELECT  segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations ON id = id_segment
-                    JOIN jobs ON jobs.id =  id_job
-                    WHERE id_job = :id_job
-                        AND password = :password
-                        AND show_in_cattool = 1
-                        AND segments.id < :ref_segment
-                        AND segments.id BETWEEN job_first_segment AND job_last_segment
+                    SELECT distinct(s.id) AS __sid
+                    FROM segments s
+                    JOIN segment_translations st ON s.id = st.id_segment
+                    JOIN jobs j ON j.id = st.id_job
+                    LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                    WHERE st.id_job = :id_job
+                        AND j.password = :password
+                        AND s.show_in_cattool = 1
+                        AND s.id < :ref_segment
+                        AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                        %s
                     ORDER BY __sid DESC
                     LIMIT %u
                 ) as TT2";
@@ -186,39 +207,43 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          */
         $queryCenter = "
                   SELECT * FROM ( 
-                        SELECT segments.id AS __sid
-                        FROM segments
-                        JOIN segment_translations ON id = id_segment
-                        JOIN jobs ON jobs.id = id_job
-                        WHERE id_job = :id_job
-                            AND password = :password
-                            AND show_in_cattool = 1
-                            AND segments.id >= :ref_segment
+                        SELECT distinct(s.id) AS __sid
+                        FROM segments s
+                        JOIN segment_translations st ON s.id = st.id_segment
+                        JOIN jobs j ON j.id = st.id_job
+                        LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                        WHERE st.id_job = :id_job
+                            AND j.password = :password
+                            AND s.show_in_cattool = 1
+                            AND s.id >= :ref_segment
+                            %s
                         LIMIT %u 
                   ) AS TT1
                   UNION
                   SELECT * from(
-                        SELECT  segments.id AS __sid
-                        FROM segments
-                        JOIN segment_translations ON id = id_segment
-                        JOIN jobs ON jobs.id =  id_job
-                        WHERE id_job = :id_job
-                            AND password = :password
-                            AND show_in_cattool = 1
-                            AND segments.id < :ref_segment
+                        SELECT distinct(s.id) AS __sid
+                        FROM segments s
+                        JOIN segment_translations st ON s.id = st.id_segment
+                        JOIN jobs j ON j.id = st.id_job
+                        LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                        WHERE st.id_job = :id_job
+                            AND j.password = :password
+                            AND s.show_in_cattool = 1
+                            AND s.id < :ref_segment
+                            %s
                         ORDER BY __sid DESC
                         LIMIT %u
                   ) AS TT2";
 
         switch ( $where ) {
             case 'after':
-                $subQuery = sprintf( $queryAfter, $step * 2 );
+                $subQuery = sprintf( $queryAfter, $options_conditions_query, $step * 2 );
                 break;
             case 'before':
-                $subQuery = sprintf( $queryBefore, $step * 2 );
+                $subQuery = sprintf( $queryBefore, $options_conditions_query, $step * 2 );
                 break;
             case 'center':
-                $subQuery = sprintf( $queryCenter, $step, $step );
+                $subQuery = sprintf( $queryCenter, $options_conditions_query, $step, $options_conditions_query, $step );
                 break;
             default:
                 throw new Exception( "No direction selected" );
@@ -226,7 +251,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
         $stmt = $db->prepare( $subQuery );
-        $stmt->execute( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ] );
+        $conditions_values = array_merge([ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ], $options_conditions_values);
+        $stmt->execute( $conditions_values );
         $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
         $segments_id = array_map( function ( $segment_row ) {

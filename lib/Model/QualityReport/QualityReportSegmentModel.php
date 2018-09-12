@@ -8,12 +8,12 @@
 
 class QualityReport_QualityReportSegmentModel {
 
-    protected $qa_categories;
-
     public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
         $segmentsDao = new \Segments_SegmentDao;
-        $segments_id = $segmentsDao->getSegmentsIdForQR( $chunk->id, $chunk->password, $step, $ref_segment, $where );
+
+        $segments_id = $segmentsDao->getSegmentsIdForQR( $chunk->id, $chunk->password, $step, $ref_segment, $where, $options );
+
 
         return $segments_id;
     }
@@ -108,23 +108,23 @@ class QualityReport_QualityReportSegmentModel {
 
     }
 
-    public function makeSegmentsVersionsUniform( $segments_versions ) {
+    private function makeSegmentsVersionsUniform( $segments_versions ) {
         $array = [];
         foreach ( $segments_versions as $segment_version ) {
-            $array[] = new \DataAccess\ShapelessConcreteStruct([
-                    'id_segment' => $segment_version->id_segment,
-                    'translation' => $segment_version->original_translation,
+            $array[] = new \DataAccess\ShapelessConcreteStruct( [
+                    'id_segment'     => $segment_version->id_segment,
+                    'translation'    => $segment_version->original_translation,
                     'version_number' => 0,
-                    'creation_date' => null,
-                    'is_review' => 0
-            ]);
+                    'creation_date'  => null,
+                    'is_review'      => 0
+            ] );
         }
 
         return $array;
 
     }
 
-    public function makeIssuesDataUniform( $issues ) {
+    private function makeIssuesDataUniform( $issues ) {
         $issues_categories = [];
         foreach ( $issues as $issue ) {
             $issues_categories = array_merge( $issues_categories, $this->makeIssueDataUniform( $issue ) );
@@ -143,7 +143,7 @@ class QualityReport_QualityReportSegmentModel {
      * @return \DataAccess\ShapelessConcreteStruct[]
      */
 
-    public function makeIssueDataUniform( $issue ) {
+    private function makeIssueDataUniform( $issue ) {
 
         $categories_values = [ 'err_typing', 'err_translation', 'err_terminology', 'err_language', 'err_style' ];
 
