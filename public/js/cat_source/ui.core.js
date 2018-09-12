@@ -906,13 +906,11 @@ UI = {
      * react components, closing side panel etc.
      */
     unmountSegments : function() {
-        $('[data-mount=translation-issues-button]').each( function() {
-            ReactDOM.unmountComponentAtNode(this);
-        });
         $('.article-segments-container').each(function (index, value) {
             ReactDOM.unmountComponentAtNode(value);
             delete UI.SegmentsContainers;
         });
+        this.removeWaypoints();
         $('#outer').empty();
     },
 
@@ -1034,7 +1032,7 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-            console.time("Time: RenderSegments"+fid);
+            // console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
             // console.timeEnd("Time: RenderSegments"+fid);
             // console.timeEnd("Time: from start()");
@@ -2283,6 +2281,13 @@ UI = {
 		}, UI.upOpts);
         this.settedWaypoints = true;
 	},
+
+    removeWaypoints: function (  ) {
+        if (this.settedWaypoints) {
+            Waypoint.destroyAll();
+            this.settedWaypoints = false;
+        }
+    },
 
     storeClientInfo: function () {
         clientInfo = {
