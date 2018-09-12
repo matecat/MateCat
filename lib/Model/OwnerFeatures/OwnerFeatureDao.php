@@ -4,7 +4,7 @@ use Teams\TeamStruct;
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
 
-    const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ";
+    const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
 
     public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
        // TODO:
