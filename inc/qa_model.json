@@ -1,39 +1,52 @@
 {
   "model": {
     "version" : 1,
-    "label": "Airbnb",
+    "label": "MateCat default",
+
     "categories": [
       {
-        "label": "Accuracy (Addition, Omission, Mistranslation, Untranslated, Inconsistency)",
-        "code": "ACC"
+        "label": "Tag issues (mismatches, whitespaces)",
+        "code": "TAG",
+        "dqf_id" : 5
       },
       {
-        "label": "Client guidelines (Terminology, Style Guide, Project instructions)",
-        "code": "GUI"
+        "label": "Translation errors (mistranslation, additions or omissions)",
+        "code": "TER",
+        "dqf_id" : 1
       },
       {
-        "label": "Linguistic (Punctuation, Spelling, Grammar, Locale conventions)",
-        "code": "LNG"
+        "label": "Terminology and translation consistency",
+        "code": "TRM",
+        "dqf_id" : 3
       },
       {
-        "label": "Style (Inconsistent style, Readability, Unidiomatic)",
-        "code": "STY"
+        "label": "Language quality (grammar, punctuation, spelling)",
+        "code": "LQ",
+        "dqf_id" : 2
+      },
+      {
+        "label": "Style (readability, consistent style and tone)",
+        "code": "STY",
+        "dqf_id" : 4
       }
     ],
     "severities": [
       {
         "label": "Minor",
-        "penalty": 1
+        "dqf_id" : 1,
+        "penalty": 3
       },
       {
         "label": "Major",
-        "penalty": 2
+        "dqf_id" : 2,
+        "penalty": 100
       }
     ],
+
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : 20
+        "limit" : 20000
       }
     }
   }
