@@ -126,7 +126,7 @@ class Job {
         $featureSet->loadForProject($jStruct->getJob()->getProject());
 
         if(in_array(ReviewImproved::FEATURE_CODE, $featureSet->getCodes()) || in_array(ReviewExtended::FEATURE_CODE, $featureSet->getCodes())){
-            $reviseIssues = [];
+            $reviseIssues = new \stdClass();
 
         } else{
 
