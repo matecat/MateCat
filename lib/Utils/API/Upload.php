@@ -70,7 +70,23 @@ class Upload {
         }
 
         foreach ( $filesToUpload as $inputName => $file ) {
-            $result->$inputName = $this->_uploadFile( $file );
+
+            if( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ){
+
+                $_file = [];
+                foreach ( $file[ 'tmp_name' ] as $index => $value ) {
+                    $_file[ 'tmp_name' ] = $file[ 'tmp_name' ][ $index ];
+                    $_file[ 'name' ]     = $file[ 'name' ][ $index ];
+                    $_file[ 'size' ]     = $file[ 'size' ][ $index ];
+                    $_file[ 'type' ]     = $file[ 'type' ][ $index ];
+                    $_file[ 'error' ]    = $file[ 'error' ][ $index ];
+                    $result->{$_file[ 'tmp_name' ]} = $this->_uploadFile( $_file );
+                }
+
+            } else {
+                $result->$inputName = $this->_uploadFile( $file );
+            }
+
         }
 
         return $result;
