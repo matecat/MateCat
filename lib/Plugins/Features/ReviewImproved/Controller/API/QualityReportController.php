@@ -11,6 +11,8 @@ namespace Features\ReviewImproved\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
+use Features\ReviewExtended;
+use Features\ReviewImproved;
 use Projects_ProjectStruct;
 use API\V2\Json\QALocalWarning;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
@@ -52,109 +54,48 @@ class QualityReportController extends KleinController
         ));
     }
 
-    private function getOptionalQueryFields() {
-        $feature = $this->chunk->getProject()->isFeatureEnabled('translation_versions');
-        $options = array();
-
-        if ( $feature ) {
-            $options['optional_fields'] = array('st.version_number');
-        }
-
-        $options['optional_fields'][] = "st.suggestion_source";
-        $options['optional_fields'][] = "st.suggestion";
-        $options['optional_fields'][] = "st.edit_distance";
-        $options['optional_fields'][] = "st.locked";
-        $options['optional_fields'][] = "st.match_type";
-
-
-        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
-
-        return $options;
-    }
-
     public function segments() {
 
-        $this->project    = $this->chunk->getProject();
+        $this->project = $this->chunk->getProject();
 
-        $this->featureSet->loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project );
 
-        $lang_handler = \Langs_Languages::getInstance();
+        $ref_segment = $this->request->param( 'ref_segment' );
+        $where       = $this->request->param( 'where' );
+        $step        = $this->request->param( 'step' );
+        $filter        = $this->request->param( 'filter' );
 
-        if ($this->ref_segment == '') {
-            $this->ref_segment = 0;
+        if ( empty( $ref_segment ) ) {
+            $ref_segment = 0;
         }
 
-
-        $data = getMoreSegments(
-                $this->chunk->id, $this->chunk->password, 50,
-                $this->ref_segment, "after",
-                $this->getOptionalQueryFields()
-        );
-
-        foreach ($data as $i => $seg) {
-
-            $id_file = $seg['id_file'];
-
-            if ( !isset($this->data["$id_file"]) ) {
-                $this->data["$id_file"]['jid'] = $seg['jid'];
-                $this->data["$id_file"]["filename"] = \ZipArchiveExtended::getFileName($seg['filename']);
-                $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-                $this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source']);
-                $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target']);
-                $this->data["$id_file"]['source_code'] = $seg['source'];
-                $this->data["$id_file"]['target_code'] = $seg['target'];
-                $this->data["$id_file"]['segments'] = array();
-            }
-
-            $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
-
-            $qr_struct = new \QualityReport_QualityReportSegmentStruct($seg);
-
-            $seg['warnings'] = $qr_struct->getLocalWarning();
-//            $seg['pee'] = $qr_struct->getPEE();
-//            $seg['ice_modified'] = $qr_struct->isICEModified();
-            $seg['secs_per_word'] = $qr_struct->getSecsPerWord();
-
-            unset($seg['id_file']);
-            unset($seg['source']);
-            unset($seg['target']);
-            unset($seg['source_code']);
-            unset($seg['target_code']);
-            unset($seg['mime_type']);
-            unset($seg['filename']);
-            unset($seg['jid']);
-            unset($seg['pid']);
-            unset($seg['cid']);
-            unset($seg['tid']);
-            unset($seg['pname']);
-            unset($seg['create_date']);
-            unset($seg['id_segment_end']);
-            unset($seg['id_segment_start']);
-            unset($seg['serialized_errors_list']);
-
-            $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
-
-            ( $seg['source_chunk_lengths'] === null ? $seg['source_chunk_lengths'] = '[]' : null );
-            ( $seg['target_chunk_lengths'] === null ? $seg['target_chunk_lengths'] = '{"len":[0],"statuses":["DRAFT"]}' : null );
-            $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
-            $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
-
-            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
-                    $seg['segment'] , $seg['source_chunk_lengths'] )
-            );
-
-            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
-                    $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
-            );
-
-            $this->data["$id_file"]['segments'][] = $seg;
-
+        if ( empty( $where ) ) {
+            $where = "after";
         }
 
-        $this->result['data']['files'] = $this->data;
+        if ( empty( $step ) ) {
+            $step = 10;
+        }
 
-        //$this->result['data']['where'] = $this->where;
-        $this->response->json($this->result);
+        $qrSegmentModel = new \QualityReport_QualityReportSegmentModel();
+        $options        = [ 'filter' => $filter];
+        $segments_id    = $qrSegmentModel->getSegmentsIdForQR( $this->chunk, $step, $ref_segment, $where, $options );
+        if ( count( $segments_id ) > 0 ) {
+            $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->featureSet );
+
+            $this->response->json( $segments );
+        } else {
+            $this->response->json( [] );
+        }
+
+    }
+
+    public function general(){
+        $project = $this->chunk->getProject();
+        $this->response->json( [
+                'project' => $project,
+                'job' => $this->chunk,
+        ]);
     }
 
 

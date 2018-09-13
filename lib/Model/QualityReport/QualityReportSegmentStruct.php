@@ -5,44 +5,21 @@
  * Date: 24/07/2018
  * Time: 12:46
  */
-
 use API\V2\Json\QALocalWarning;
+
 
 class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    public $pid;
-
-    public $jid;
-
-    public $source;
-
-    public $target;
-
-    public $last_opened_segment;
-
-    public $cid;
-
-    public $tid;
-
-    public $pname;
-
-    public $create_date;
-
-    public $id_file;
-
-    public $filename;
-
-    public $mime_type;
 
     public $sid;
+
+    public $target;
 
     public $segment;
 
     public $segment_hash;
 
     public $raw_word_count;
-
-    public $internal_id;
 
     public $translation;
 
@@ -54,25 +31,9 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $time_to_edit;
 
-    public $xliff_ext_prec_tags;
-
-    public $xliff_ext_succ_tags;
-
-    public $serialized_errors_list;
-
     public $warning;
 
     public $suggestion_match;
-
-    public $source_chunk_lengths;
-
-    public $target_chunk_lengths;
-
-    public $readonly;
-
-    public $autopropagated_from;
-
-    public $repetitions_in_chunk;
 
     public $suggestion_source;
 
@@ -83,6 +44,28 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     public $locked;
 
     public $match_type;
+
+    public $warnings;
+
+    public $pee;
+
+    public $ice_modified;
+
+    public $secs_per_word;
+
+    public $parsed_time_to_edit;
+
+    public $comments = [];
+
+    public $issues = [];
+
+    public $last_translation;
+
+    public $last_revision;
+
+    public $pee_translation_revise;
+
+    public $pee_translation_suggestion;
 
     /**
      * @return float
@@ -104,12 +87,31 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
+        return self::calculatePEE($this->suggestion, $this->translation, $this->target);
+    }
 
+    public function getPEEBwtTranslationSuggestion() {
+        if(empty($this->last_translation)){
+            return null;
+        }
+
+        return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
+    }
+
+    public function getPEEBwtTranslationRevise() {
+        if(empty($this->last_translation) OR empty($this->last_revision)){
+            return null;
+        }
+
+        return self::calculatePEE($this->last_translation, $this->last_revision, $this->target);
+    }
+
+    static function calculatePEE($str_1, $str_2, $target){
         $post_editing_effort = round(
                 ( 1 - \MyMemory::TMS_MATCH(
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->translation ),
-                                $this->target
+                                self::cleanSegmentForPee( $str_1 ),
+                                self::cleanSegmentForPee( $str_2 ),
+                                $target
                         )
                 ) * 100
         );
@@ -121,8 +123,9 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         }
 
         return $post_editing_effort;
-
     }
+
+
 
     private static function cleanSegmentForPee( $segment ){
         $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);

@@ -225,6 +225,87 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
+    public function getLastTranslationsBySegments($segments_id){
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
+
+        $query = "SELECT 
+            stv.id_segment,
+            stv.translation,
+            TX.version_number,
+            stv.creation_date,
+            stv.is_review
+        FROM
+            segment_translation_versions stv
+        JOIN
+        (
+                SELECT 
+                    MAX(version_number) AS version_number, stv.id_segment
+                FROM
+                    segment_translation_versions stv
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
+                GROUP BY id_segment
+            ) AS TX ON stv.version_number = TX.version_number
+                AND stv.id_segment = TX.id_segment";
+
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $stmt->execute( $segments_id );
+
+        $results = $stmt->fetchAll();
+
+        return $results;
+
+
+    }
+
+    public function getLastRevisionsBySegments($segments_id){
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
+
+        $query = "SELECT 
+            stv.id_segment,
+            stv.translation,
+            TX.version_number,
+            stv.creation_date,
+            stv.is_review
+        FROM
+            segment_translation_versions stv
+        JOIN
+        (
+                SELECT 
+                    MAX(version_number) AS version_number, stv.id_segment
+                FROM
+                    segment_translation_versions stv
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
+                GROUP BY id_segment
+            ) AS TX ON stv.version_number = TX.version_number
+                AND stv.id_segment = TX.id_segment
+               WHERE is_review = 1 ";
+
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $stmt->execute( $segments_id );
+
+        $results = $stmt->fetchAll();
+
+        return $results;
+
+
+    }
+
     public function savePropagation($propagation, $id_segment, $job_data) {
 
         $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;

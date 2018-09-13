@@ -136,6 +136,195 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param        $jid
+     * @param        $password
+     * @param int    $step
+     * @param        $ref_segment
+     * @param string $where
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getSegmentsIdForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
+
+        $db = Database::obtain()->getConnection();
+
+        $options_conditions_query  = "";
+        $options_join_query        = "";
+        $options_conditions_values = [];
+        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], Constants_TranslationStatus::$STATUSES) ) {
+            $options_conditions_query              .= " AND st.status = :status ";
+            $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
+        }
+
+        if ( isset( $options[ 'filter' ][ 'issue_category' ] ) OR isset( $options[ 'filter' ][ 'severity' ] ) ) {
+
+            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment ";
+            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment ";
+
+            if ( isset( $options[ 'filter' ][ 'issue_category' ] ) ) {
+                if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
+                    $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] . " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
+                } else {
+                    $options_conditions_query .= " AND e.id_category = :id_category ";
+                    $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
+                }
+
+            }
+
+            if ( isset( $options[ 'filter' ][ 'severity' ] ) ) {
+                $options_conditions_query                .= " AND (e.severity = :severity OR 
+            (sr.err_typing = :severity OR sr.err_translation OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
+                $options_conditions_values[ 'severity' ] = $options[ 'filter' ][ 'severity' ];
+            }
+
+        }
+
+
+
+        $queryAfter = "
+                SELECT * FROM (
+                    SELECT distinct(s.id) AS __sid
+                    FROM segments s
+                    JOIN segment_translations st ON s.id = st.id_segment
+                    JOIN jobs j ON j.id = st.id_job
+                    %s 
+                    WHERE st.id_job = :id_job
+                        AND j.password = :password
+                        AND s.show_in_cattool = 1
+                        AND s.id > :ref_segment
+                        AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                        %s
+                    LIMIT %u
+                ) AS TT1";
+
+        $queryBefore = "
+                SELECT * from(
+                    SELECT distinct(s.id) AS __sid
+                    FROM segments s
+                    JOIN segment_translations st ON s.id = st.id_segment
+                    JOIN jobs j ON j.id = st.id_job
+                    %s
+                    WHERE st.id_job = :id_job
+                        AND j.password = :password
+                        AND s.show_in_cattool = 1
+                        AND s.id < :ref_segment
+                        AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                        %s
+                    ORDER BY __sid DESC
+                    LIMIT %u
+                ) as TT2";
+
+        /*
+         * This query is an union of the last two queries with only one difference:
+         * the queryAfter parts differs for the equal sign.
+         * Here is needed
+         *
+         */
+        $queryCenter = "
+                  SELECT * FROM ( 
+                        SELECT distinct(s.id) AS __sid
+                        FROM segments s
+                        JOIN segment_translations st ON s.id = st.id_segment
+                        JOIN jobs j ON j.id = st.id_job
+                        %s
+                        WHERE st.id_job = :id_job
+                            AND j.password = :password
+                            AND s.show_in_cattool = 1
+                            AND s.id >= :ref_segment
+                            %s
+                        LIMIT %u 
+                  ) AS TT1
+                  UNION
+                  SELECT * from(
+                        SELECT distinct(s.id) AS __sid
+                        FROM segments s
+                        JOIN segment_translations st ON s.id = st.id_segment
+                        JOIN jobs j ON j.id = st.id_job
+                        %s
+                        WHERE st.id_job = :id_job
+                            AND j.password = :password
+                            AND s.show_in_cattool = 1
+                            AND s.id < :ref_segment
+                            %s
+                        ORDER BY __sid DESC
+                        LIMIT %u
+                  ) AS TT2";
+
+        switch ( $where ) {
+            case 'after':
+                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, $step * 2 );
+                break;
+            case 'before':
+                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, $step * 2 );
+                break;
+            case 'center':
+                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, $step, $options_join_query, $options_conditions_query, $step );
+                break;
+            default:
+                throw new Exception( "No direction selected" );
+                break;
+        }
+
+        $stmt = $db->prepare( $subQuery );
+        $conditions_values = array_merge([ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ], $options_conditions_values);
+        $stmt->execute( $conditions_values );
+        $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
+
+        $segments_id = array_map( function ( $segment_row ) {
+            return $segment_row[ '__sid' ];
+        }, $segments_id );
+
+        return $segments_id;
+    }
+
+    /**
+     * @param $segments_id
+     *
+     * @return \QualityReport_QualityReportSegmentStruct[]
+     */
+
+    public function getSegmentsForQr($segments_id){
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
+        $query = "SELECT 
+                s.id AS sid,
+                s.segment,
+                j.target,
+                s.raw_word_count,
+                IF (st.status='NEW',NULL,st.translation) AS translation,
+                UNIX_TIMESTAMP(st.translation_date) AS version,
+                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
+                st.status,
+                COALESCE(time_to_edit, 0) AS time_to_edit,
+                st.warning,
+                st.suggestion_match as suggestion_match,
+                st.suggestion_source,
+                st.suggestion,
+                st.edit_distance,
+                st.locked,
+                st.match_type
+                FROM segments s
+                JOIN segment_translations st ON st.id_segment = s.id
+                JOIN jobs j ON j.id = st.id_job 
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
+            ORDER BY sid ASC";
+
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct");
+        $stmt->execute( $segments_id );
+
+        $results = $stmt->fetchAll();
+
+        return $results;
+    }
+
+    /**
      * @param Segments_SegmentStruct[] $obj_arr
      *
      * @throws Exception

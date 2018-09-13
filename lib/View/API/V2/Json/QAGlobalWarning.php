@@ -12,7 +12,7 @@ namespace API\V2\Json;
 
 use QA;
 
-class QAGlobalWarning {
+class QAGlobalWarning extends QAWarning {
 
     protected $tagIssues;
     protected $translationMismatches;
@@ -92,38 +92,6 @@ class QAGlobalWarning {
         $out[ 'translation_mismatches' ] = $result;
 
         return $out;
-
-    }
-
-    public function pushErrorSegment( $error_type, $error_category, $segment_id ) {
-
-        switch ( $error_category ) {
-            case QA::ERR_TAG_MISMATCH:
-            case QA::ERR_TAG_ID:
-            case QA::ERR_UNCLOSED_X_TAG:
-            case QA::ERR_TAG_ORDER:
-            case QA::ERR_UNCLOSED_G_TAG:
-                $category = self::TAGS_CATEGORY;
-                break;
-            case QA::ERR_SPACE_MISMATCH_TEXT:
-            case QA::ERR_TAB_MISMATCH:
-            case QA::ERR_SPACE_MISMATCH:
-            case QA::ERR_SYMBOL_MISMATCH:
-            case QA::ERR_NEWLINE_MISMATCH:
-                $category = self::MISMATCH_CATEGORY;
-                break;
-            default:
-                throw new \RuntimeException("Undefined Category");
-                break;
-        }
-
-        if ( !isset( $this->structure[ $error_type ][ 'Categories' ][ $category ] ) ) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ] = [];
-        }
-
-        if ( !in_array( $segment_id, $this->structure[ $error_type ][ 'Categories' ][ $category ] ) ) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ][] = $segment_id;
-        }
 
     }
 
