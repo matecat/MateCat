@@ -148,12 +148,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     public function getSegmentsIdForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
-        $categories_values = Constants_Revise::$categoriesDbNames;
 
         $options_conditions_query  = "";
         $options_join_query        = "";
         $options_conditions_values = [];
-        if ( isset( $options[ 'filter' ][ 'status' ] ) ) {
+        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], Constants_TranslationStatus::$STATUSES) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
         }
@@ -164,7 +163,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment ";
 
             if ( isset( $options[ 'filter' ][ 'issue_category' ] ) ) {
-                if ( in_array( $options[ 'filter' ][ 'issue_category' ], $categories_values ) ) {
+                if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
                     $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] . " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
                 } else {
                     $options_conditions_query .= " AND e.id_category = :id_category ";
