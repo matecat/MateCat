@@ -284,7 +284,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return \QualityReport_QualityReportSegmentStruct[]
      */
 
-    public function getSegmentsForQr($segments_id){
+    public function getSegmentsForQr($segments_id, $job_id){
         $db = Database::obtain()->getConnection();
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
@@ -313,11 +313,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."
                  ) AS SLIST USING( id_segment )
+                 WHERE j.id = ?
             ORDER BY sid ASC";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct");
-        $stmt->execute( $segments_id );
+        $stmt->execute( array_merge($segments_id, array($job_id)));
 
         $results = $stmt->fetchAll();
 

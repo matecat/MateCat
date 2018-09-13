@@ -81,7 +81,7 @@ class QualityReportController extends KleinController
         $options        = [ 'filter' => $filter];
         $segments_id    = $qrSegmentModel->getSegmentsIdForQR( $this->chunk, $step, $ref_segment, $where, $options );
         if ( count( $segments_id ) > 0 ) {
-            $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->featureSet );
+            $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->chunk, $this->featureSet );
 
             $this->response->json( $segments );
         } else {
