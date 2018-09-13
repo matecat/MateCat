@@ -293,6 +293,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 s.id AS sid,
                 s.segment,
                 j.target,
+                fj.id_file,
+                f.filename,
                 s.raw_word_count,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
@@ -306,9 +308,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.edit_distance,
                 st.locked,
                 st.match_type
+                
                 FROM segments s
                 JOIN segment_translations st ON st.id_segment = s.id
-                JOIN jobs j ON j.id = st.id_job 
+                JOIN jobs j ON j.id = st.id_job
+                JOIN files_job fj ON fj.id_job = j.id
+                JOIN files f ON f.id = fj.id_file 
                 JOIN (
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."

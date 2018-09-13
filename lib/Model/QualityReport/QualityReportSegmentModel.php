@@ -17,11 +17,15 @@ class QualityReport_QualityReportSegmentModel {
         return $segments_id;
     }
 
-    public function getSegmentsForQR( $segments_id, $chunk, $features ) {
+    public function getSegmentsForQR( $segments_id, Chunks_ChunkStruct $chunk ) {
         $segmentsDao = new \Segments_SegmentDao;
         $data        = $segmentsDao->getSegmentsForQr( $segments_id, $chunk->id );
 
-        $codes = $features->getCodes();
+        $featureSet = new FeatureSet();
+
+        $featureSet->loadForProject( $chunk->getProject() );
+
+        $codes = $featureSet->getCodes();
         if ( in_array( Features\ReviewExtended::FEATURE_CODE, $codes ) OR in_array( Features\ReviewImproved::FEATURE_CODE, $codes ) ) {
             $issues = \Features\ReviewImproved\Model\QualityReportDao::getIssuesBySegments( $segments_id, $chunk->id );
         } else {
@@ -48,8 +52,15 @@ class QualityReport_QualityReportSegmentModel {
         }
 
 
-        $segments = [];
+        $files = [];
         foreach ( $data as $i => $seg ) {
+
+            $id_file = $seg->id_file;
+
+            if ( !isset($files[$id_file]) ) {
+                $files[$id_file]["filename"] = \ZipArchiveExtended::getFileName($seg->filename);
+                $files[$id_file]['segments'] = array();
+            }
 
             $seg->warnings      = $seg->getLocalWarning();
             $seg->pee           = $seg->getPEE();
@@ -100,10 +111,10 @@ class QualityReport_QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $segments[] = $seg;
+            $files[$seg->id_file]['segments'][] = $seg;
         }
 
-        return $segments;
+        return $files;
 
     }
 

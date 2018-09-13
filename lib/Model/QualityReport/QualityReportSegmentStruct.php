@@ -31,6 +31,10 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $time_to_edit;
 
+    public $filename;
+
+    public $id_file;
+
     public $warning;
 
     public $suggestion_match;
