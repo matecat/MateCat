@@ -59,7 +59,7 @@ class QualityReport_QualityReportSegmentModel {
 
             if ( !isset($files[$id_file]) ) {
                 $files[$id_file]["filename"] = \ZipArchiveExtended::getFileName($seg->filename);
-                $files[$id_file]['segments'] = array();
+                $files[$id_file]['segments'] = [];
             }
 
             $seg->warnings      = $seg->getLocalWarning();

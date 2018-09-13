@@ -313,7 +313,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 JOIN segment_translations st ON st.id_segment = s.id
                 JOIN jobs j ON j.id = st.id_job
                 JOIN files_job fj ON fj.id_job = j.id
-                JOIN files f ON f.id = fj.id_file 
+                JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
                 JOIN (
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."
