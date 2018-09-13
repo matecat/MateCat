@@ -6,11 +6,7 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.state = {
             submitDisabled : true
         };
-
-    }
-
-    issueCategories() {
-        return JSON.parse(config.lqa_nested_categories).categories ;
+        this.issueCategories = JSON.parse(config.lqa_nested_categories).categories;
     }
 
     sendIssue(category, severity) {
@@ -57,8 +53,13 @@ class ReviewExtendedIssuePanel extends React.Component{
 		deferred.then(function () {
 		    SegmentActions.removeClassToSegment(self.props.sid, "modified");
             UI.currentSegment.data('modified', false);
-			SegmentActions.submitIssue(self.props.sid, data, self.props.diffPatch)
-				.done( self.props.submitIssueCallback )
+			SegmentActions.submitIssue(self.props.sid, data)
+				.done(function ( data ) {
+                    self.props.submitIssueCallback();
+                    setTimeout(function (  ) {
+                        SegmentActions.issueAdded(self.props.sid, data.issue.id);
+                    });
+                } )
 				.fail( self.handleFail.bind(self) ) ;
 		})
 
@@ -70,14 +71,15 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
     }
-    render() {
-        let categoryComponents = [];
-		/*let dropDownIcon = "icon-sort-up icon";
-		if(this.state.listIsOpen){
-			dropDownIcon = "icon-sort-down icon";
-		}*/
 
-        this.issueCategories().forEach(function(category, i) {
+    thereAreSubcategories() {
+        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0;
+    }
+
+    getCategoriesHtml() {
+
+        let categoryComponents = [];
+        this.issueCategories.forEach(function(category, i) {
             let selectedValue = "";
 
             categoryComponents.push(
@@ -86,40 +88,67 @@ class ReviewExtendedIssuePanel extends React.Component{
                     sendIssue={this.sendIssue.bind(this)}
                     selectedValue={selectedValue}
                     nested={false}
-                    category={category} />);
+                    category={category}
+                    sid={this.props.sid}
+                />);
+        }.bind(this));
+
+        return <div>
+                    <div className="re-item-head pad-left-10">Type of issue</div>
+                    {categoryComponents}
+                </div>;
+    }
+
+    getSubCategoriesHtml() {
+        let categoryComponents = [];
+        this.issueCategories.forEach(function(category, i) {
+            let selectedValue = "";
+            let subcategoriesComponents = [];
 
             if ( category.subcategories.length > 0 ) {
-                category.subcategories.forEach( function(category, ii) {
+                category.subcategories.forEach( (category, ii) => {
                     let key = '' + i + '-' + ii;
                     let kk = 'category-selector-' + key ;
                     let selectedValue = "";
 
-                    categoryComponents.push(
+                    subcategoriesComponents.push(
                         <ReviewExtendedCategorySelector
                             key={kk}
                             selectedValue={selectedValue}
                             sendIssue={this.sendIssue.bind(this)}
                             nested={true}
-                            category={category}  />
+                            category={category}
+                            sid={this.props.sid}
+                        />
                     );
-                }.bind(this) );
+                } );
             }
+            let html = <div key={category.id}>
+                <div className="re-item-head pad-left-10">{category.label}</div>
+                {subcategoriesComponents}
+            </div>;
+            categoryComponents.push(html);
         }.bind(this));
 
+        return categoryComponents;
+    }
 
-            return<div className="re-create-issue">
-				<div className="ui accordion">
-					<h4 className="create-issue-title">
-						Error list
-					</h4>
-					{/*<div className="issues-scroll">
-						<a href="issues-created">Issues Created (<span className="issues-number">2</span>)</a>
-					</div>*/}
-					<div className="error-list active" ref={(node)=>this.listElm=node}>
-						{categoryComponents}
-					</div>
-				</div>
-			</div>
+    render() {
+        let html = [];
+
+        if (this.thereAreSubcategories()) {
+            html = this.getSubCategoriesHtml();
+        } else {
+            html = this.getCategoriesHtml()
+        }
+
+        return<div className="re-issues-box re-to-create" >
+            {/*<h4 className="re-issues-box-title">Error list</h4>*/}
+            {/*<div className="mbc-triangle mbc-triangle-topleft"></div>*/}
+            <div className="re-list errors" id={"re-category-list-" + this.props.sid}  ref={(node)=>this.listElm=node}>
+                {html}
+            </div>
+        </div>
     }
 }
 

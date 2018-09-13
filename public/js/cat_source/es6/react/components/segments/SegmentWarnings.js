@@ -21,44 +21,58 @@ class SegmentWarnings extends React.Component {
     render() {
         let warnings_count = {};
         let warnings = [];
-
+        let fnMap = (el, type) => {
+            if (warnings_count[el.outcome]) {
+                warnings_count[el.outcome]++;
+            } else {
+                let item = el;
+                item.type = type;
+                warnings.push(item);
+                warnings_count[el.outcome] = 1;
+            }
+        };
         if (this.props.warnings) {
             if (this.props.warnings.ERROR) {
-                this.props.warnings.ERROR.map((el, index) => {
-                    if (warnings_count[el.outcome]) {
-                        warnings_count[el.outcome]++;
-                    } else {
-                        let item = el;
-                        item.type = 'ERROR';
-                        warnings.push(item);
-                        warnings_count[el.outcome] = 1;
-                    }
+                _.forOwn(this.props.warnings.ERROR.Categories, (value, key)=> {
+                    value.map((el)=>{
+                        fnMap(el, 'ERROR');
+                    });
                 });
             }
             if (this.props.warnings.WARNING) {
-                this.props.warnings.WARNING.map((el, index) => {
-                    if (warnings_count[el.outcome]) {
-                        warnings_count[el.outcome]++;
-                    } else {
-                        let item = el;
-                        item.type = 'WARNING';
-                        warnings.push(item);
-                        warnings_count[el.outcome] = 1;
-                    }
+                _.forOwn(this.props.warnings.WARNING.Categories, (value, key)=> {
+                    value.map((el)=>{
+                        fnMap(el, 'WARNING');
+                    });
                 });
+                // this.props.warnings.WARNING.map((el, index) => {
+                //     if (warnings_count[el.outcome]) {
+                //         warnings_count[el.outcome]++;
+                //     } else {
+                //         let item = el;
+                //         item.type = 'WARNING';
+                //         warnings.push(item);
+                //         warnings_count[el.outcome] = 1;
+                //     }
+                // });
 
             }
             if (this.props.warnings.INFO) {
-                this.props.warnings.INFO.map((el, index) => {
-                    if (warnings_count[el.outcome]) {
-                        warnings_count[el.outcome]++;
-                    } else {
-                        let item = el;
-                        item.type = 'INFO';
-                        warnings.push(item);
-                        warnings_count[el.outcome] = 1;
-                    }
+                _.forOwn(this.props.warnings.INFO.Categories, (value, key)=> {
+                    value.map((el)=>{
+                        fnMap(el, 'INFO');
+                    });
                 });
+                // this.props.warnings.INFO.map((el, index) => {
+                //     if (warnings_count[el.outcome]) {
+                //         warnings_count[el.outcome]++;
+                //     } else {
+                //         let item = el;
+                //         item.type = 'INFO';
+                //         warnings.push(item);
+                //         warnings_count[el.outcome] = 1;
+                //     }
+                // });
             }
         }
 

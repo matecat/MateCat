@@ -77,7 +77,7 @@ var LXQ = {
 LXQ.init  = function () {
     LXQ.initialized = true;
     var globalReceived = false;
-    if (config.lxq_license) {
+    if (config.lxq_license && $.lexiqaAuthenticator) {
       $.lexiqaAuthenticator.init(
           {
               licenseKey: config.lxq_license,
@@ -86,6 +86,8 @@ LXQ.init  = function () {
               projectId: config.id_job+'-'+config.password
           }
       );
+    } else {
+        config.lxq_enabled = false;
     }
     /*
     * Add lexiQA event handlers for warnings events

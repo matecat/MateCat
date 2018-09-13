@@ -104,15 +104,15 @@ if (SegmentFilter.enabled())
             }
             this.filteringSegments = true;
             data = { filter: data } ;
-
-            var password = (config.isReview) ? config.review_password : config.password
+            data.filter.revision = config.isReview;
+            var password = (config.isReview) ? config.review_password : config.password;
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
                               config.id_job, password, $.param( data ) );
             SegmentActions.removeAllMutedSegments();
             return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
-                let reactState = Object.assign({
+                var reactState = Object.assign({
                     filteredCount : data.count,
                     filtering : true,
                     segmentsArray: data.segment_ids

@@ -12,26 +12,11 @@ class PreferencesModal extends React.Component {
 
         this.state = {
             service: this.props.service,
-            coupon: this.props.metadata.coupon,
-            couponError: '',
-            validCoupon : false,
-            openCoupon: false,
-
         };
-        this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
-
 
     openResetPassword() {
         $('#modal').trigger('openresetpassword');
-    }
-
-    componentWillMount() { }
-
-    componentDidMount() {
-        if ( this.state.service && !this.state.service.disabled_at) {
-            $(this.checkDrive).attr('checked', true);
-        }
     }
 
     checkboxChange() {
@@ -72,47 +57,6 @@ class PreferencesModal extends React.Component {
 
     }
 
-    submitUserChanges() {
-        var self = this;
-        if (!this.state.validCoupon) {
-            return;
-        }
-        return $.post('/api/app/user/metadata', { metadata : {
-            coupon : this.couponInput.value
-        }
-        }).done( function( data ) {
-            if (data) {
-                APP.USER.STORE.metadata = data;
-                self.setState({
-                    coupon: APP.USER.STORE.metadata.coupon
-                });
-            } else {
-                self.setState({
-                    couponError: 'Invalid Coupon'
-                });
-            }
-        }).fail(function () {
-            self.setState({
-                couponError: 'Invalid Coupon'
-            });
-        });
-    }
-
-    onKeyPressCoupon(e) {
-        var length = this.couponInput.value.length;
-        var validCoupon = false;
-        if ( length >= 8 ) {
-            validCoupon = true;
-        }
-        this.setState({
-            couponError : '',
-            validCoupon : validCoupon
-        });
-        if (e.key === 'Enter') {
-            this.submitUserChanges();
-        }
-    }
-
     disableGDrive() {
         return $.post('/api/app/connected_services/' + this.state.service.id, { disabled: true } );
 
@@ -125,12 +69,6 @@ class PreferencesModal extends React.Component {
             } else {
                 window.location.reload();
             }
-        });
-    }
-
-    openCoupon() {
-        this.setState({
-            openCoupon: true
         });
     }
 
@@ -163,44 +101,6 @@ class PreferencesModal extends React.Component {
 
         }
 
-        var couponHtml = '';
-        if ( !this.state.coupon) {
-            var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
-            couponHtml = <div className="coupon-container">
-                {!this.state.openCoupon ? (
-                        <a className="open-coupon-link"
-                        onClick={this.openCoupon.bind(this)}>Add a coupon</a>
-                    ): (
-                    <div>
-                        <h2 htmlFor="user-coupon">Coupon</h2>
-                        <span>If you have received a code, you may be eligible for free credit that you can use for the Outsourcing feature.</span>
-                        <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
-                        onKeyUp={this.onKeyPressCoupon.bind(this)}
-                        ref={(input) => this.couponInput = input}/>
-                        <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
-                        <div className="coupon-message">
-                            <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
-                        </div>
-                    </div>
-                    ) }
-
-
-            </div>
-        } else {
-
-            couponHtml = <div className="coupon-container coupon-success">
-
-                <h2 htmlFor="user-coupon">Coupon</h2>
-                <span>Credit is available when you outsource translation services.</span>
-                <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
-                <div className="coupon-message">
-                    <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '3%', lineHeight: '24px', top: '-38px'}} className="coupon-message">Coupon activated</span>
-                </div>
-
-
-            </div>
-        }
-
         let avatar = <div className="avatar-user pull-left">{config.userShortName}</div>;
         if (this.props.metadata.gplus_picture) {
             avatar = <div className="avatar-user pull-left">
@@ -217,7 +117,7 @@ class PreferencesModal extends React.Component {
                 <div className="user-gdrive">
 
                     <div className="onoffswitch-drive">
-                        <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
+                        <input type="checkbox" name="onoffswitch" defaultChecked={this.state.service && !this.state.service.disabled_at} onChange={this.checkboxChange.bind(this)}
                                ref={(input) => this.checkDrive = input}
                                className="onoffswitch-checkbox" id="gdrive_check"/>
                         <label className="onoffswitch-label" htmlFor="gdrive_check">
@@ -256,7 +156,6 @@ class PreferencesModal extends React.Component {
 
                         {googleDrive}
                         {this.getDqfHtml()}
-                        {couponHtml}
 
                     </div>
             </div>;

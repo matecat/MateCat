@@ -50,6 +50,17 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
+    /**
+     * @param array              $config
+     * @param ContributionStruct $contributionStruct
+     *
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    protected function _update( Array $config, ContributionStruct $contributionStruct ){
+        $this->_set( $config, $contributionStruct );
+    }
+
     protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         //find all the job's TMs with write grants and make a contribution to them

@@ -920,7 +920,10 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     text-transform: uppercase;
 }
 
-.buttons .approved.disabled{
+.buttons .approved.disabled,
+.buttons .next-unapproved.disabled ,
+.buttons .next-untranslated.disabled ,
+.buttons .translated.disabled {
     pointer-events: none;
     color: #666 !important;
     border-color: #666;
@@ -2462,7 +2465,7 @@ section.editor .sid {
 }
 
 .editarea, .search-editarea, .textarea-container .area {
-    display: inline-block;
+    /*display: inline-block;*/
     /*float:right;*/
     width: 100%;
     height: 96%;
@@ -2556,7 +2559,7 @@ body.archived section .status-container a.status:hover {
 .editor .editarea {
     width: 100%;
     font-size: 18px;
-    margin: 2px 0 5px -11px;
+    margin: 2px 0 10px -11px;
     word-break: normal;
     line-height: 25px;
     outline: none;
@@ -5058,7 +5061,7 @@ section.loaded .footer .tab.open {
     top: -1px;
 }
 
-section:hover .segment-side-buttons {
+section .segment-side-buttons {
     color: #6d6e71
 }
 

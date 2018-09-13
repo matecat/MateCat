@@ -906,13 +906,11 @@ UI = {
      * react components, closing side panel etc.
      */
     unmountSegments : function() {
-        $('[data-mount=translation-issues-button]').each( function() {
-            ReactDOM.unmountComponentAtNode(this);
-        });
         $('.article-segments-container').each(function (index, value) {
             ReactDOM.unmountComponentAtNode(value);
             delete UI.SegmentsContainers;
         });
+        this.removeWaypoints();
         $('#outer').empty();
     },
 
@@ -1034,7 +1032,7 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-            console.time("Time: RenderSegments"+fid);
+            // console.time("Time: RenderSegments"+fid);
             UI.renderSegments(this.segments, false, fid, where);
             // console.timeEnd("Time: RenderSegments"+fid);
             // console.timeEnd("Time: from start()");
@@ -1061,7 +1059,7 @@ UI = {
                 this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
                     fid: fid,
                     isReviewImproved: ReviewImproved.enabled() && Review.enabled(),
-                    isReviewExtended: ReviewExtended.enabled() && Review.enabled(),
+                    isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
                     decodeTextFn: UI.decodeText,
@@ -1697,7 +1695,7 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-			    if(d.details){
+			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
@@ -2232,6 +2230,13 @@ UI = {
         this.settedWaypoints = true;
 	},
 
+    removeWaypoints: function (  ) {
+        if (this.settedWaypoints) {
+            Waypoint.destroyAll();
+            this.settedWaypoints = false;
+        }
+    },
+
     storeClientInfo: function () {
         clientInfo = {
             xRes: window.screen.availWidth,
@@ -2253,13 +2258,16 @@ UI = {
 	},
 	undoInSegment: function() {
 		console.log('undoInSegment');
-		if (this.undoStackPosition === 0)
-			this.saveInUndoStack('undo');
-		var ind = 0;
+        if (this.undoStack.length === 0) {
+            return;
+        }
+        if (this.undoStackPosition === 0) {
+            this.saveInUndoStack( 'undo' );
+        }
+        var ind = 0;
 		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), this.undoStack[ind]);
-        // this.editarea.html(this.undoStack[ind]);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
             $('.undoCursorPlaceholder').remove();
@@ -2298,12 +2306,12 @@ UI = {
 		if (this.editarea.html() === '') return;
         if (this.editarea.length === 0 ) return ;
 
-		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
-		var tt = this.editarea.html().match(/&lt;/gi);
-        if ( tt ) {
-            if ( (tt.length) && (!ss) )
-                return;
-        }
+        // var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
+        // var tt = this.editarea.html().match(/&lt;/gi);
+        // if ( tt ) {
+        //     if ( (tt.length) && (!ss) )
+        //         return;
+        // }
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {

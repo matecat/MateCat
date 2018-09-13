@@ -1,6 +1,6 @@
 /**
  * React Component .
-
+ * Container that show the diff between the originale translation e the modified one. Not Used
  */
 let ReviewVersionDiff =  require("./ReviewVersionsDiff").default;
 let React = require('react');
@@ -77,24 +77,24 @@ class ReviewVersionsDiffContainer extends React.Component {
     render() {
         return <div className="re-version-diff">
 				<div className="re-header-track">
-					<h4>Revise Track changes</h4>
-					<ReviewVersionDiff
-						// textSelectedFn={this.props.textSelectedFn}
-						// removeSelection={this.props.removeSelection}
-						diffPatch={this.state.diffPatch}
-						segment={this.props.segment}
-						decodeTextFn={UI.decodeText}
-						// selectable={this.props.selectable}
-						selectable={false}
-						customClass={'head'}
-					/>
+					{/*<h4>Revise Track changes</h4>*/}
+					{/*<ReviewVersionDiff*/}
+						{/*// textSelectedFn={this.props.textSelectedFn}*/}
+						{/*// removeSelection={this.props.removeSelection}*/}
+						{/*diffPatch={this.state.diffPatch}*/}
+						{/*segment={this.props.segment}*/}
+						{/*decodeTextFn={UI.decodeText}*/}
+						{/*// selectable={this.props.selectable}*/}
+						{/*selectable={false}*/}
+						{/*customClass={'head'}*/}
+					{/*/>*/}
 
 					{/*{this.props.selectable? (*/}
 						{/*<div className="explain-selection">*/}
                             {/*Highlight a*/}
 							{/*<span className="selected"> word </span>*/}
 							{/*or*/}
-							{/*<span className="selected"> phrase </span>*/}
+							{/*<span className="selected"> phrase </span>**/}
                             {/*to associate an issue to a specific portion of the text (optional).*/}
 						{/*</div>*/}
 					{/*): (null)}*/}

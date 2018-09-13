@@ -119,6 +119,7 @@ class FastAnalysis extends AbstractDaemon {
      * @param null $args
      *
      * @return void
+     * @throws \Predis\Connection\ConnectionException
      */
     public function main( $args = null ) {
 
@@ -748,17 +749,10 @@ HD;
 
         //anyway take the defaults
         $contextList = $this->_queueContextList->list;
-        $context = $contextList[ 'P1' ];
 
         //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( $mtEngine === null && $queueLen >= 10000 ): // means NONE as selected Engine
-                $context = $contextList[ 'P2' ];
-                break;
-            case ( $mtEngine === null ): // means NONE as selected Engine
-                $context = $contextList[ 'P1' ];
-                break;
-            case ( ! $mtEngine instanceof \Engines_MyMemory ):
+            case ( ! $mtEngine instanceof \Engines_MyMemory && ! $mtEngine instanceof \Engines_NONE ):
                 $context = $contextList[ 'P3' ];
                 break;
             case ( $queueLen >= 10000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s

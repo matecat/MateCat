@@ -55,6 +55,11 @@ abstract class KleinController implements IController {
     protected $featureSet;
 
     /**
+     * @var bool
+     */
+    protected $userIsLogged = false;
+
+    /**
      * @return FeatureSet
      */
     public function getFeatureSet() {
@@ -70,6 +75,14 @@ abstract class KleinController implements IController {
         $this->featureSet = $featuresSet;
 
         return $this;
+    }
+
+    public function getUser(){
+        return $this->user;
+    }
+
+    public function userIsLogged(){
+        return $this->userIsLogged;
     }
 
     /**
@@ -163,10 +176,10 @@ abstract class KleinController implements IController {
             $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
         }
 
-        return $this->user;
-    }
+        if( empty( $this->user ) ){
+            $this->userIsLogged = true;
+        }
 
-    public function getUser(){
         return $this->user;
     }
 

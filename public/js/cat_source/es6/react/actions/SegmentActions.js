@@ -58,6 +58,10 @@ var SegmentActions = {
 
     /********** Segment **********/
 
+    closeSegment: function ( sid, fid ) {
+        this.closeIssuesPanel();
+    },
+
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {
             AppDispatcher.dispatch({
@@ -225,6 +229,13 @@ var SegmentActions = {
             translation: editAreaText
         });
     },
+    lockEditArea : function ( sid, fid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.LOCK_EDIT_AREA,
+            fid: fid,
+            id: sid,
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
@@ -348,18 +359,25 @@ var SegmentActions = {
         });
     },
 
-    openIssuesPanel: function (data) {
+    openIssuesPanel: function (data, openSegment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_ISSUES_PANEL,
             data: data,
         });
 
-        UI.openIssuesPanel(data);
+        UI.openIssuesPanel(data, openSegment);
     },
 
     closeIssuesPanel: function () {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_ISSUES_PANEL
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+        });
+    },
+
+    closeSegmentIssuePanel: function ( sid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
+            sid: sid
         });
     },
 
@@ -370,16 +388,32 @@ var SegmentActions = {
         });
     },
 
-    renderReviseErrors: function (sid, data) {
+    submitIssue: function (sid, data, diff) {
+        return UI.submitIssues(sid, data, diff);
+    },
+
+    issueAdded: function ( sid, issueId ) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.RENDER_REVISE_ISSUES,
+            actionType: SegmentConstants.ISSUE_ADDED,
             sid: sid,
-            data: data
+            data: issueId
         });
     },
 
-    submitIssue: function (sid, data, diff) {
-        return UI.submitIssues(sid, data, diff);
+    openIssueComments: function ( sid, issueId ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_ISSUE_COMMENT,
+            sid: sid,
+            data: issueId
+        });
+    },
+
+    addPreloadedIssuesToSegment: function ( sid, issues ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
+            sid: sid,
+            data: issues
+        });
     },
 
     addTranslationIssuesToSegment: function (fid, sid, versions) {
@@ -391,18 +425,8 @@ var SegmentActions = {
         });
     },
 
-    addSegmentVersionIssue: function (fid, sid, issue, versionNumber) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_SEGMENT_VERSION_ISSUE,
-            fid: fid,
-            sid: sid,
-            issue: issue,
-            versionNumber: versionNumber
-        });
-    },
-
-    deleteIssue: function (issue) {
-        UI.deleteIssue(issue);
+    deleteIssue: function (issue, sid, dontShowMessage) {
+        UI.deleteIssue(issue, sid, dontShowMessage);
     },
 
     confirmDeletedIssue: function (sid,issue_id) {

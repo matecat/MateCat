@@ -95,13 +95,23 @@ class Editarea extends React.Component {
     }
 
     emitTrackChanges(){
-		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' ) || ReviewExtendedFooter.enabled()){
+		if ( Review.enabled() && (Review.type === 'simple' || Review.type === 'extended' || Review.type === 'extended-footer') ){
 			UI.trackChanges(this.editAreaRef);
 		}
 	}
 
+	checkEmptyText() {
+        let text = UI.prepareTextToSend( $(this.editAreaRef).html() );
+        if (text === "") {
+            UI.disableSegmentButtons(this.props.segment.sid);
+        } else {
+            UI.enableSegmentsButtons(this.props.segment.sid);
+        }
+    }
+
     onInputEvent(e) {
         UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
+        this.checkEmptyText();
         this.emitTrackChanges();
     }
     onKeyDownEvent(e) {
@@ -159,6 +169,7 @@ class Editarea extends React.Component {
     }
     componentDidUpdate() {
         let self = this;
+        this.checkEmptyText();
         setTimeout(function (  ) {
             if ( !_.isNull(self.editAreaRef) ) {
                 self.emitTrackChanges();

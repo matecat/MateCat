@@ -77,6 +77,11 @@ class FilterController extends KleinController {
             if (! $this->filter->isValid() ) {
                 throw new ValidationError('Filter is invalid');
             }
+
+            if( $this->filter->isRevision() ){
+                $this->chunk->setIsReview( true );
+            }
+
         } );
         $this->appendValidator( $Validator );
     }

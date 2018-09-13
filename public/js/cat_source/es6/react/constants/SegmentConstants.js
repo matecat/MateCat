@@ -32,16 +32,17 @@ module.exports = keyMirror({
     SET_SEGMENT_ORIGINAL_TRANSLATION: null,
     MOUNT_TRANSLATIONS_ISSUES: null,
     SET_SEGMENT_TAGGED: null,
-    RENDER_REVISE_ISSUES: null,
     SHOW_SELECTION: null,
     OPEN_ISSUES_PANEL: null,
     CLOSE_ISSUES_PANEL: null,
     SHOW_ISSUE_MESSAGE: null,
     ADD_SEGMENT_VERSIONS_ISSUES: null,
-    ADD_SEGMENT_VERSION_ISSUE: null,
+    ADD_SEGMENT_PRELOADED_ISSUES: null,
     OPEN_TAB: null,
     RENDER_PREVIEW: null,
+    ISSUE_ADDED: null,
     ISSUE_DELETED: null,
+    OPEN_ISSUE_COMMENT: null,
     ADD_TAB_INDEX: null,
     TOGGLE_SEGMENT_ON_BULK: null,
     REMOVE_SEGMENTS_ON_BULK: null,
@@ -55,5 +56,6 @@ module.exports = keyMirror({
     ENABLE_TAG_LOCK: null,
     SET_SEGMENT_WARNINGS: null,
     UPDATE_GLOBAL_WARNINGS: null,
-    QA_LEXIQA_ISSUES: null
+    QA_LEXIQA_ISSUES: null,
+    LOCK_EDIT_AREA: null
 });

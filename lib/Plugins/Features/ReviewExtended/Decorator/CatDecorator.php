@@ -15,10 +15,16 @@ class CatDecorator extends ReviewImproved\Decorator\CatDecorator {
     public function decorate() {
         parent::decorate();
 
-        $this->template->review_type = 'extended-footer';
-//        $this->template->review_type = 'extended' ;
+        $this->template->review_type = 'extended';
         $this->template->segmentFilterEnabled = true;
         $this->template->showReplaceOptionsInSearch = true ;
+//        if ( $this->controller->isRevision() ) {
+//            $this->template->footer_show_revise_link    = false;
+//            $this->template->footer_show_translate_link = true;
+//        } else {
+//            $this->template->footer_show_revise_link    = true;
+//            $this->template->footer_show_translate_link = false;
+//        }
     }
 
 }

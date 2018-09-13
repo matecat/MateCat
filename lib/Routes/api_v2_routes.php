@@ -104,3 +104,8 @@ $klein->with('/api/v2/teams', function() {
 
 }) ;
 
+$klein->with('/api/v2/languages', function() {
+
+    route( '', 'GET', '\API\V2\SupportedLanguagesController', 'index' );
+
+});

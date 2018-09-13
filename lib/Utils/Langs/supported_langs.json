@@ -47,7 +47,6 @@
             "isocode":"ar",
             "enabled":true,
             "rtl":true,
-            "top":"top10 top20",
             "rfc3066code":"ar-SA"
         }
     ,
@@ -214,6 +213,16 @@
     ,
         {
             "localized":[{
+                "en":"Borana"
+            }],
+            "isocode":"gax",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"gax-KE"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Bosnian"
             }],
             "isocode":"bs",
@@ -286,6 +295,16 @@
     ,
         {
             "localized":[{
+                "en":"Chadian Arabic"
+            }],
+            "isocode":"shu",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"shu-TD"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Chamorro"
             }],
             "isocode":"ch",
@@ -301,7 +320,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"zh-CN"
         }
     ,
@@ -312,7 +330,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"zh-TW"
         }
     ,
@@ -323,7 +340,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"zh-HK"
         }
     ,
@@ -394,7 +410,6 @@
             "isocode":"da",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"da-DK"
         }
     ,
@@ -415,7 +430,6 @@
             "isocode":"nl",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"nl-NL"
         }
     ,
@@ -436,7 +450,6 @@
             "isocode":"en",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"en-GB"
         }
     ,
@@ -577,7 +590,6 @@
             "isocode":"fi",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"fi-FI"
         }
     ,
@@ -598,7 +610,6 @@
             "isocode":"fr",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"fr-FR"
         }
     ,
@@ -659,7 +670,6 @@
             "isocode":"de",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"de-DE"
         }
     ,
@@ -830,7 +840,6 @@
             "isocode":"it",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"it-IT"
         }
     ,
@@ -841,7 +850,6 @@
             "isocode":"it",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"it-CH"
         }
     ,
@@ -862,7 +870,6 @@
             "isocode":"ja",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"ja-JP"
         }
     ,
@@ -894,6 +901,26 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"kab-DZ"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kalenjin"
+            }],
+            "isocode":"kln",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kln-KE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kamba"
+            }],
+            "isocode":"kam",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kam-KE"
         }
     ,
         {
@@ -958,6 +985,16 @@
     ,
         {
             "localized":[{
+                "en":"Kikuyu"
+            }],
+            "isocode":"kik",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kik-KE"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kinyarwanda"
             }],
             "isocode":"rw",
@@ -974,6 +1011,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"rn-RN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kisii"
+            }],
+            "isocode":"guz",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"guz-KE"
         }
     ,
         {
@@ -1068,12 +1115,42 @@
     ,
         {
             "localized":[{
+                "en":"Luo"
+            }],
+            "isocode":"luo",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"luo-KE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Luhya"
+            }],
+            "isocode":"luy",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"luy-KE"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Luxembourgish"
             }],
             "isocode":"lb",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"lb-LU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Maa"
+            }],
+            "isocode":"mas",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mas-KE"
         }
     ,
         {
@@ -1158,6 +1235,16 @@
     ,
         {
             "localized":[{
+                "en":"Margi"
+            }],
+            "isocode":"mrt",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mrt-NG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Mari"
             }],
             "isocode":"mhr",
@@ -1204,6 +1291,26 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"men-MEN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Meru"
+            }],
+            "isocode":"mer",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mer-KE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Mijikenda"
+            }],
+            "isocode":"nyf",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"nyf-KE"
         }
     ,
         {
@@ -1295,7 +1402,6 @@
             "isocode":"nb",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"nb-NO"
         }
     ,
@@ -1306,7 +1412,6 @@
             "isocode":"nn",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"nn-NO"
         }
     ,
@@ -1418,7 +1523,6 @@
             "isocode":"pl",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"pl-PL"
         }
     ,
@@ -1429,7 +1533,6 @@
             "isocode":"pt",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"pt-PT"
         }
     ,
@@ -1440,7 +1543,6 @@
             "isocode":"pt",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"pt-BR"
         }
     ,
@@ -1511,7 +1613,6 @@
             "isocode":"ru",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"ru-RU"
         }
     ,
@@ -1673,7 +1774,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"es-ES"
         }
     ,
@@ -1684,7 +1784,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"es-MX"
         }
     ,
@@ -1695,7 +1794,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"es-CO"
         }
     ,
@@ -1726,7 +1824,7 @@
             "isocode":"sw",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"sw-SZ",
+            "rfc3066code":"sw-KE",
             "languageRegionCode":"sw-KE"
         }
     ,
@@ -1737,7 +1835,6 @@
             "isocode":"sv",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"sv-SE"
         }
     ,

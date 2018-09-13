@@ -1,19 +1,11 @@
 
-ReviewExtendedFooter = {
-    enabled : function() {
-        return Review.type === 'extended-footer' ;
-    },
-    type : config.reviewType
-};
-
-if ( ReviewExtendedFooter.enabled() ) {
+if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
 
-    (function (ReviewExtendedFooter, $,undefined) {
+    (function (ReviewExtended, $,undefined) {
 
-        var originalGotoNextSegment = UI.gotoNextSegment;
-        var originalRender = UI.render;
-        $.extend(ReviewExtendedFooter, {
+
+        $.extend(ReviewExtended, {
 
             submitIssue: function (sid, data_array, diff) {
                 var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
@@ -26,21 +18,20 @@ if ( ReviewExtendedFooter.enabled() ) {
 
                 return $.when.apply($, deferreds).done(function (response) {
                     UI.getSegmentVersionsIssues(sid, fid);
-                    ReviewExtendedFooter.reloadQualityReport();
+                    UI.reloadQualityReport();
                 });
             },
+
             submitComment : function(id_segment, id_issue, data) {
                 return API.SEGMENT.sendSegmentVersionIssueComment(id_segment, id_issue, data)
                     .done( function( data ) {
                         var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment));
                         UI.getSegmentVersionsIssues(id_segment, fid);
                     });
-            },
-            reloadQualityReport : function() {
-                UI.reloadQualityReport();
             }
         });
 
+        var originalRender = UI.render;
         $.extend(UI, {
 
             alertNotTranslatedMessage: "This segment is not translated yet.<br /> Only translated segments can be revised.",
@@ -53,14 +44,14 @@ if ( ReviewExtendedFooter.enabled() ) {
                     context: $('#outer')
                 };
                 this.upOpts = {
-                    offset: '-40%',
+                    offset: '-100%',
                     context: $('#outer')
                 };
                 return promise;
             },
 
             registerReviseTab: function () {
-                // SegmentActions.registerTab('issues', true, false);
+                return false;
             },
             /**
              * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
@@ -75,19 +66,23 @@ if ( ReviewExtendedFooter.enabled() ) {
             },
 
             submitIssues: function (sid, data, diff) {
-                return ReviewExtendedFooter.submitIssue(sid, data, diff);
+                return ReviewExtended.submitIssue(sid, data, diff);
             },
+
             getSegmentVersionsIssuesHandler(event) {
                 var sid = event.segment.absId;
                 var fid = UI.getSegmentFileId(event.segment.el);
                 UI.getSegmentVersionsIssues(sid, fid);
             },
+
             getSegmentVersionsIssues: function (segmentId, fileId) {
+                // TODO Uniform behavior of ReviewExtended and ReviewImproved
                 API.SEGMENT.getSegmentVersionsIssues(segmentId)
                     .done(function (response) {
                         UI.addIssuesToSegment(fileId, segmentId, response.versions)
                     });
             },
+
             /**
              * To show the issues in the segment footer
              * @param fileId
@@ -97,18 +92,18 @@ if ( ReviewExtendedFooter.enabled() ) {
             addIssuesToSegment: function ( fileId, segmentId, versions ) {
                 SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions);
             },
+
+
             /**
              * To delete a segment issue
              * @param context
              */
             deleteTranslationIssue : function( context ) {
-                console.debug('delete issue', context);
-
                 var parsed = JSON.parse( context );
                 var issue_path = sprintf(
                     '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                     config.id_job, config.review_password,
-                    parsed.id_segment,
+                    parseInt(parsed.id_segment),
                     parsed.id_issue
                 );
                 var issue_id = parsed.id_issue;
@@ -146,27 +141,8 @@ if ( ReviewExtendedFooter.enabled() ) {
                 }
                 return false;
             },
-
             submitComment : function(id_segment, id_issue, data) {
-                return ReviewExtendedFooter.submitComment(id_segment, id_issue, data)
-            },
-
-            setDisabledOfButtonApproved: function (sid,isDisabled ) {
-                var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
-                if(!isDisabled){
-                    div.removeClass('disabled').attr("disabled", false);
-                }else{
-                    div.addClass('disabled').attr("disabled", false);
-                }
-
-            },
-
-            gotoNextSegment: function ( sid ) {
-                if (config.isReview && sid) {
-                    this.setDisabledOfButtonApproved(sid, true);
-                }
-                originalGotoNextSegment.apply(this);
-                return false;
+                return ReviewExtended.submitComment(id_segment, id_issue, data)
             }
 
         });
