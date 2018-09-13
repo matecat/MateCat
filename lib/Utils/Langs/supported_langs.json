@@ -47,7 +47,6 @@
             "isocode":"ar",
             "enabled":true,
             "rtl":true,
-            "top":"top10 top20",
             "rfc3066code":"ar-SA"
         }
     ,
@@ -321,7 +320,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"zh-CN"
         }
     ,
@@ -332,7 +330,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"zh-TW"
         }
     ,
@@ -343,7 +340,6 @@
             "isocode":"zh",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"zh-HK"
         }
     ,
@@ -414,7 +410,6 @@
             "isocode":"da",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"da-DK"
         }
     ,
@@ -435,7 +430,6 @@
             "isocode":"nl",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"nl-NL"
         }
     ,
@@ -456,7 +450,6 @@
             "isocode":"en",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"en-GB"
         }
     ,
@@ -597,7 +590,6 @@
             "isocode":"fi",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"fi-FI"
         }
     ,
@@ -618,7 +610,6 @@
             "isocode":"fr",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"fr-FR"
         }
     ,
@@ -679,7 +670,6 @@
             "isocode":"de",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"de-DE"
         }
     ,
@@ -850,7 +840,6 @@
             "isocode":"it",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"it-IT"
         }
     ,
@@ -861,7 +850,6 @@
             "isocode":"it",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"it-CH"
         }
     ,
@@ -882,7 +870,6 @@
             "isocode":"ja",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"ja-JP"
         }
     ,
@@ -1415,7 +1402,6 @@
             "isocode":"nb",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"nb-NO"
         }
     ,
@@ -1426,7 +1412,6 @@
             "isocode":"nn",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"nn-NO"
         }
     ,
@@ -1538,7 +1523,6 @@
             "isocode":"pl",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"pl-PL"
         }
     ,
@@ -1549,7 +1533,6 @@
             "isocode":"pt",
             "enabled":true,
             "rtl":false,
-            "top":"top10 top20",
             "rfc3066code":"pt-PT"
         }
     ,
@@ -1560,7 +1543,6 @@
             "isocode":"pt",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"pt-BR"
         }
     ,
@@ -1631,7 +1613,6 @@
             "isocode":"ru",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"ru-RU"
         }
     ,
@@ -1793,7 +1774,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top5 top10 top20",
             "rfc3066code":"es-ES"
         }
     ,
@@ -1804,7 +1784,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"es-MX"
         }
     ,
@@ -1815,7 +1794,6 @@
             "isocode":"es",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"es-CO"
         }
     ,
@@ -1857,7 +1835,6 @@
             "isocode":"sv",
             "enabled":true,
             "rtl":false,
-            "top":"top20",
             "rfc3066code":"sv-SE"
         }
     ,
