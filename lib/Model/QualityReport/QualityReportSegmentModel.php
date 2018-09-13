@@ -144,7 +144,7 @@ class QualityReport_QualityReportSegmentModel {
 
     private function makeIssueDataUniform( $issue ) {
 
-        $categories_values = [ 'err_typing', 'err_translation', 'err_terminology', 'err_language', 'err_style' ];
+        $categories_values = Constants_Revise::$categoriesDbNames;
 
         $categories = [];
         foreach ( $categories_values as $category_value ) {

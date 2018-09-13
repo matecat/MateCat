@@ -30,6 +30,10 @@ class Constants_Revise {
             self::MAJOR => self::SERV_VALUE_MAJOR
     );
 
+    public static $categoriesDbNames = [
+            'err_typing', 'err_translation', 'err_terminology', 'err_language', 'err_style'
+    ];
+
     const SERV_VALUE_NONE  = 0;
     const SERV_VALUE_MINOR = 0.03;
     const SERV_VALUE_MAJOR = 1;
