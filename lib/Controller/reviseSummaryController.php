@@ -143,7 +143,7 @@ class reviseSummaryController extends viewController {
         //set the labels
         $error_info = array(
                 constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => 'Tag issues (mismatches, whitespaces)',
-                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions/omissions)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions or omissions)',
                 constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => 'Terminology and translation consistency',
                 constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => 'Language quality (grammar, punctuation, spelling)',
                 constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => 'Style (readability, consistent style and tone)',

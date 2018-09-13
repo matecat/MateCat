@@ -74,6 +74,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
   }
 
 
+    /**
+     * @param \DataAccess_IDaoStruct $uid
+     * @param                        $key
+     */
   public function delete($uid, $key) {
       $sql = "DELETE FROM user_metadata " .
           " WHERE uid = :uid " .

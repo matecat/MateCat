@@ -184,8 +184,9 @@ body.manage {
                         margin-right: 8px;
                         background-color: #ffffff !important;
                         vertical-align: top;
-                        height: 30px !important;
+                        /*height: 30px !important;*/
                         .text {
+                            display: flex;
                             max-width: 170px;
                             min-width: 30px;
                             white-space: nowrap;
@@ -195,12 +196,15 @@ body.manage {
                             padding: 3px 15px 3px 3px;
                             color: #000000;
                             transition: 0.3s ease;
+                            height: 30px;
                             img {
                                 max-height: 24px;
+                                margin-top: 0;
+                                margin-bottom: 0;
                             }
                             span {
                                 position: relative;
-                                top: 1px;
+                                top: 2px;
                             }
                         }
                         .menu {
@@ -223,6 +227,16 @@ body.manage {
                                 }
                                 &:hover {
                                     background-color: #f3f3f3;
+                                }
+                            }
+                            .scrolling {
+                                .item {
+                                    display: flex;
+                                    align-items: center;
+                                    img {
+                                        margin-top: 0;
+                                        margin-bottom: 0;
+                                    }
                                 }
                             }
                         }

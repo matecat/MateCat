@@ -8,12 +8,12 @@ $.extend(UI, {
 	},
 
 	preOpenConcordance: function() {
-		let selection = window.getSelection();
+		var selection = window.getSelection();
 		if (selection.type == 'Range') { // something is selected
-			let isSource = $(selection.baseNode.parentElement).hasClass('source');
-			let str = selection.toString().trim();
+			var isSource = $(selection.baseNode.parentElement).hasClass('source');
+			var str = selection.toString().trim();
 			if (str.length) { // the trimmed string is not empty
-				let currentSearchInTarget = (isSource) ? 0 : 1;
+				var currentSearchInTarget = (isSource) ? 0 : 1;
 				this.openConcordance(str,currentSearchInTarget);
 			}
 		}

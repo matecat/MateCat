@@ -8,6 +8,7 @@ Bootstrap::start();
 use CommandLineTasks\CreateTeamMembershipTask;
 use CommandLineTasks\CreateTeamTask;
 use CommandLineTasks\DumpSchemaTask;
+use CommandLineTasks\Outsource\AirbnbOutsourceToHTS;
 use CommandLineTasks\Outsource\MicrosoftOutsourceToHTS;
 use CommandLineTasks\OwnerFeatures\AssignFeatureTask;
 use CommandLineTasks\Test\PrepareDatabaseTask;
@@ -23,6 +24,7 @@ $app->add( new PrepareDatabaseTask() ) ;
 $app->add( new DumpSchemaTask() ) ;
 $app->add( new DqfAttributesDumpTask() ) ;
 $app->add( new MicrosoftOutsourceToHTS() ) ;
+$app->add( new AirbnbOutsourceToHTS() ) ;
 
 $app->run();
 

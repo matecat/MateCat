@@ -123,3 +123,12 @@ section{
         }
     }
 }
+
+.segment-side-container {
+    position: absolute;
+    text-align: left;
+    width: 31%;
+    left: 102%;
+    display: flex;
+    flex-direction: column;
+}

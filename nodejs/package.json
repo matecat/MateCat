@@ -4,9 +4,9 @@
   "description": "MateCAT SSE server",
   "main": "server.js",
   "dependencies": {
-    "lodash": "^3.9.3",
+    "lodash": "^4.17.10",
     "node-ini": "^1.0.0",
-    "sse-channel": "^1.0.5",
+    "sse-channel": "^3.1.1",
     "stompit": "^0.21.0",
     "winston": "^1.0.0"
   },

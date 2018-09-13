@@ -10,7 +10,6 @@
 namespace Features\Outsource\Email;
 
 use Email\AbstractEmail;
-use Features\Microsoft;
 use INIT;
 
 class ErrorQuotationEmail extends AbstractEmail {
@@ -21,6 +20,7 @@ class ErrorQuotationEmail extends AbstractEmail {
     protected $internal_job_id;
     protected $external_project_id;
     protected $project_words_count;
+    protected $config;
 
 
     public function __construct( $templatePath ) {
@@ -29,9 +29,12 @@ class ErrorQuotationEmail extends AbstractEmail {
         $this->_setTemplateByPath( $templatePath );
     }
 
+    public function setConfig($config){
+        $this->config = $config;
+    }
+
     public function send() {
-        $config = Microsoft::getConfig();
-        $this->sendTo( $config[ 'error_quotation_email_address' ], "Translated Team" );
+        $this->sendTo( $this->config[ 'error_quotation_email_address' ], "Translated Team" );
     }
 
     public function setErrorMessage( $message ) {

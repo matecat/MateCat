@@ -17,7 +17,7 @@
 
         initTM: function() {
 
-// script per lo slide del pannello di manage tmx
+            // script per lo slide del pannello di manage tmx
             UI.setDropDown();
             UI.initOptionsTip();
             UI.initTmxTooltips();

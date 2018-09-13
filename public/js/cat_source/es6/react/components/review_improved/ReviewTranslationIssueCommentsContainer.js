@@ -172,7 +172,7 @@ class ReviewTranslationIssueCommentsContainer extends React.Component{
             if ( comment.source_page == '1' ) {
                 source_page = <strong className="review-issue-translator">Translator:</strong> ;
             } else {
-                source_page = <strong className="review-issue-revisor">Revisor:</strong>;
+                source_page = <strong className="review-issue-revisor">Reviewer:</strong>;
             }
 
             return <div key={comment.id} className="review-issue-comment-detail">

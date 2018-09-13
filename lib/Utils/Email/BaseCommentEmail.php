@@ -15,12 +15,13 @@ class BaseCommentEmail extends AbstractEmail {
     protected $url ;
     protected $project;
 
-    public function __construct( $user, $comment, $url, $project ) {
+    public function __construct( $user, $comment, $url, $project, $job ) {
 
         $this->project = $project ;
         $this->user = $user ;
         $this->comment = $comment ;
         $this->url = $url ;
+        $this->job = $job;
         $this->_setLayout('skeleton.html');
         $this->_setTemplate('Comment/action_on_a_comment.html');
     }
@@ -41,6 +42,7 @@ class BaseCommentEmail extends AbstractEmail {
         return [
                 'user'    => $this->user->toArray(),
                 'project' => $this->project,
+                'job'     => $this->job,
                 'comment' => $this->comment->toArray(),
                 'url'     => $this->url . ",comment",
                 'content' => $content

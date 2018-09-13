@@ -62,17 +62,17 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * Update all
      */
     updateAll: function (segments, fid, where) {
-        console.time("Time: updateAll segments" + fid);
+        // console.time("Time: updateAll segments" + fid);
         if (this._segments[fid] && where === "before") {
-            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else if (this._segments[fid] && where === "after") {
-            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
         } else {
-            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments));
+            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
         }
 
         this.buildSegmentsFiles(fid, segments);
-        console.log(this._segmentsFiles);
+        // console.log(this._segmentsFiles);
 
         if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
@@ -80,7 +80,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
-    normalizeSplittedSegments: function (segments) {
+    normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
         let self = this;
         $.each(segments, function (index) {
@@ -96,6 +96,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     let translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
                     let status = segment.target_chunk_lengths.statuses[i];
                     let segData = {
+                        splitted: true,
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
@@ -103,7 +104,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         segment: splittedSourceAr[i],
                         decoded_source: UI.decodeText(segment, splittedSourceAr[i]),
                         segment_hash: segment.segment_hash,
+                        original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
+                        fid: fid,
                         split_group: splitGroup,
                         split_points_source: [],
                         status: status,
@@ -114,7 +117,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         warning: "0",
                         warnings: {},
                         tagged: !self.hasSegmentTagProjectionEnabled(segment),
-                        unlocked: false
+                        unlocked: false,
+                        edit_area_locked: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -125,6 +129,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
+                segment.fid = fid;
+                segment.edit_area_locked = false;
                 newSegments.push(this);
             }
 
@@ -265,8 +271,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     addSegmentVersions(fid, sid, versions) {
-
+        //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid, fid);
+        let segment = this._segments[fid].get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
             this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
@@ -275,16 +282,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
         return this._segments[fid].get(index);
     },
-
-    addSegmentVersionIssue(fid, sid, issue, versionNumber) {
+    lockUnlockEditArea(sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
-        let versionIndex = this._segments[fid].get(index).get('versions').findIndex(function (item) {
-            return item.get('version_number') === versionNumber;
-        });
-
-        this._segments[fid] = this._segments[fid].updateIn([index, 'versions', versionIndex, 'issues'], arr => arr.push(Immutable.fromJS(issue)));
-
-        return this._segments[fid].get(index);
+        let segment = this._segments[fid].get(index);
+        let lockedEditArea = segment.get('edit_area_locked');
+        this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     getSegmentByIdToJS(sid, fid) {
         return this._segments[fid].find(function (seg) {
@@ -478,6 +480,10 @@ AppDispatcher.register(function (action) {
             let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
+        case SegmentConstants.LOCK_EDIT_AREA:
+            SegmentStore.lockUnlockEditArea(action.id, action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;
@@ -504,16 +510,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, action.id, action.originalTranslation);
             break;
-        case SegmentConstants.RENDER_REVISE_ISSUES:
-            SegmentStore.emitChange(SegmentConstants.RENDER_REVISE_ISSUES, action.sid, action.data);
-            break;
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
             SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
-            break;
-        case SegmentConstants.ADD_SEGMENT_VERSION_ISSUE:
-            let segIssue = SegmentStore.addSegmentVersionIssue(action.fid, action.sid, action.issue, action.versionNumber);
-            SegmentStore.emitChange(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, action.sid, segIssue.toJS());
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);
@@ -579,6 +579,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.QA_LEXIQA_ISSUES:
             SegmentStore.updateLexiqaWarnings(action.warnings);
             SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
+            break;
+        case SegmentConstants.OPEN_ISSUES_PANEL:
+            SegmentStore.emitChange(action.actionType, action.data);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

@@ -10,8 +10,20 @@ class TranslationIssuesSideButton extends React.Component{
             this.state = this.readDatabaseAndReturnState();
         } else {
             this.state = {
-                issues_count : 0
+                issues_count : this.setIssueCount()
             }
+        }
+    }
+
+    setIssueCount() {
+        let issue_count = 0;
+        if (this.props.segment.versions && this.props.segment.versions.length > 0) {
+            this.props.segment.versions.forEach( (version) => {
+                issue_count = issue_count + version.issues.length;
+            })
+            return issue_count;
+        } else {
+            return 0;
         }
     }
 
@@ -29,21 +41,33 @@ class TranslationIssuesSideButton extends React.Component{
     }
 
     setStateOnSegmentsChange( segment ) {
-        if ( this.props.sid == segment.sid ) {
+        if ( parseInt(this.props.sid) == parseInt(segment.sid) ) {
             this.setState( this.readDatabaseAndReturnState() );
         }
     }
 
     setStateOnIssueChange( issue ) {
-        if ( this.props.sid == issue.id_segment ) {
+        if ( parseInt(this.props.sid) === parseInt(issue.id_segment) ) {
             this.setState( this.readDatabaseAndReturnState() );
-        }
+         }
     }
 
     setSegmentVersions(sid, segment) {
-        if (this.props.sid === sid && segment.versions.length > 0) {
+        if (parseInt(this.props.sid) === parseInt(sid) && segment.versions.length > 0) {
+            let issue_count = 0;
+            segment.versions.forEach( (version) => {
+                issue_count = issue_count + version.issues.length;
+            })
             this.setState({
-                issues_count : segment.versions[0].issues.length
+                issues_count : issue_count
+            });
+        }
+    }
+    setSegmentPreloadedIssues(sid, issues) {
+        if (parseInt(this.props.sid) === parseInt(sid)) {
+
+            this.setState({
+                issues_count : issues.length
             });
         }
     }
@@ -55,6 +79,7 @@ class TranslationIssuesSideButton extends React.Component{
                 this.setStateOnIssueChange.bind(this));
         } else if (this.props.reviewType === "extended") {
             SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions.bind(this));
+            SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues.bind(this));
         }
 
     }
@@ -66,24 +91,43 @@ class TranslationIssuesSideButton extends React.Component{
                 this.setStateOnIssueChange);
         } else if (this.props.reviewType === "extended") {
             SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
+            SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues);
+
         }
     }
 
     handleClick (e) {
-        SegmentActions.openIssuesPanel({sid: this.props.sid});
-        // ReviewImproved.openPanel({sid: this.props.sid});
+        e.preventDefault();
+        e.stopPropagation();
+        $(this.button).addClass('open');
+        if (this.props.reviewType === "extended") {
+            SegmentActions.closeIssuesPanel();
+        }
+        if (!this.props.open) {
+            SegmentActions.openIssuesPanel({sid: this.props.sid}, true);
+        } else {
+            UI.closeIssuesPanel();
+        }
+
     }
 
     shouldComponentUpdate (nextProps, nextState) {
         return this.state.issues_count != nextState.issues_count  ;
     }
 
+    componentDidUpdate() {
+        console.log("Update Segment translation button" + this.props.segment.sid);
+    }
+
     render() {
-        var plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
+        let openClass = this.props.open ? "open-issues" : "";
+        let plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
-            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button has-object" href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
-        } else  {
-            return (<div onClick={this.handleClick.bind(this)}><a className="revise-button" href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+            return (<div title="Add Issues" onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button has-object " + openClass} href="javascript:void(0);"><span className="icon-error_outline" /><span className="revise-button-counter">{this.state.issues_count}</span></a></div>);
+        } else  if (config.isReview){
+            return (<div title="Show Issues" onClick={this.handleClick.bind(this)}><a ref={(button)=> this.button=button} className={"revise-button " + openClass} href="javascript:void(0);"><span className="icon-error_outline" />{plus}</a></div>);
+        } else {
+            return "";
         }
 
     }

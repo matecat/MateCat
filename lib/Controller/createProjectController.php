@@ -7,8 +7,8 @@ class createProjectController extends ajaxController {
 
     private $file_name;
     private $project_name;
-    private $source_language;
-    private $target_language;
+    private $source_lang;
+    private $target_lang;
     private $job_subject;
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
@@ -22,7 +22,6 @@ class createProjectController extends ajaxController {
     private $due_date;
 
     private $metadata;
-    private $lang_handler;
 
     /**
      * @var \Teams\TeamStruct
@@ -34,6 +33,8 @@ class createProjectController extends ajaxController {
      */
     private $projectFeatures = [];
 
+    public $postInput;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -43,8 +44,8 @@ class createProjectController extends ajaxController {
         $filterArgs = [
                 'file_name'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'source_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'target_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'job_subject'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -70,70 +71,68 @@ class createProjectController extends ajaxController {
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
 
-        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
-
-        $this->setProjectFeaturesFromPostValues( $__postInput );
+        $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //first we check the presence of a list from tm management panel
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
         //if a string is sent by the client, transform it into a valid array
-        if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
-            $__postInput[ 'private_tm_key' ] = [
+        if ( !empty( $this->postInput[ 'private_tm_key' ] ) ) {
+            $this->postInput[ 'private_tm_key' ] = [
                     [
-                            'key'  => trim( $__postInput[ 'private_tm_key' ] ),
+                            'key'  => trim( $this->postInput[ 'private_tm_key' ] ),
                             'name' => null,
                             'r'    => true,
                             'w'    => true
                     ]
             ];
         } else {
-            $__postInput[ 'private_tm_key' ] = [];
+            $this->postInput[ 'private_tm_key' ] = [];
         }
 
         if ( $array_keys ) { // some keys are selected from panel
 
             //remove duplicates
             foreach ( $array_keys as $pos => $value ) {
-                if ( isset( $__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
-                        && $__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
+                if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
+                        && $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
                     //same key was get from keyring, remove
-                    $__postInput[ 'private_tm_key' ] = [];
+                    $this->postInput[ 'private_tm_key' ] = [];
                 }
             }
 
             //merge the arrays
-            $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
+            $private_keyList = array_merge( $this->postInput[ 'private_tm_key' ], $array_keys );
 
 
         } else {
-            $private_keyList = $__postInput[ 'private_tm_key' ];
+            $private_keyList = $this->postInput[ 'private_tm_key' ];
         }
 
         $__postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
 
         // NOTE: This is for debug purpose only,
         // NOTE: Global $_POST Overriding from CLI
-        // $__postInput = filter_var_array( $_POST, $filterArgs );
+        // $this->__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->file_name               = $__postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
-        $this->project_name            = $__postInput[ 'project_name' ];
-        $this->source_language         = $__postInput[ 'source_language' ];
-        $this->target_language         = $__postInput[ 'target_language' ];
-        $this->job_subject             = $__postInput[ 'job_subject' ];
-        $this->mt_engine               = ( $__postInput[ 'mt_engine' ] != null ? $__postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
-        $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
+        $this->file_name               = $this->postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
+        $this->project_name            = $this->postInput[ 'project_name' ];
+        $this->source_lang             = $this->postInput[ 'source_lang' ];
+        $this->target_lang             = $this->postInput[ 'target_lang' ];
+        $this->job_subject             = $this->postInput[ 'job_subject' ];
+        $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
+        $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
-        $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
-        $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
-        $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
-        $this->only_private            = ( is_null( $__postInput[ 'get_public_matches' ] ) ? false : !$__postInput[ 'get_public_matches' ] );
-        $this->due_date                = ( empty( $__postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $__postInput[ 'due_date' ] ) );
+        $this->private_tm_user         = $this->postInput[ 'private_tm_user' ];
+        $this->private_tm_pass         = $this->postInput[ 'private_tm_pass' ];
+        $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
+        $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
+        $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
+        $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
-        $this->__setMetadataFromPostInput( $__postInput );
+        $this->__setMetadataFromPostInput();
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -152,13 +151,13 @@ class createProjectController extends ajaxController {
         }
 
 
-        $this->lang_handler = Langs_Languages::getInstance();
-        $this->__validateSourceLang();
-        $this->__validateTargetLangs();
+        $this->__validateSourceLang( Langs_Languages::getInstance() );
+        $this->__validateTargetLangs( Langs_Languages::getInstance() );
         $this->__validateUserMTEngine();
-
+        $this->__appendFeaturesToProject();
+        $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
-            $this->__setTeam( $__postInput[ 'id_team' ] );
+            $this->__setTeam( $this->postInput[ 'id_team' ] );
         }
 
     }
@@ -166,24 +165,26 @@ class createProjectController extends ajaxController {
     /**
      * setProjectFeatures
      *
-     * @param $__postInput
-     *
      * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
 
-    private function setProjectFeaturesFromPostValues( $__postInput ) {
+    private function __appendFeaturesToProject() {
         // change project features
 
-        if ( !empty( $__postInput[ 'project_completion' ] ) ) {
+        if ( !empty( $this->postInput[ 'project_completion' ] ) ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
             $this->projectFeatures[] = $feature;
         }
 
         $this->projectFeatures = $this->featureSet->filter(
-                'filterCreateProjectFeatures', $this->projectFeatures, $__postInput, $this->userIsLogged
+                'filterCreateProjectFeatures', $this->projectFeatures, $this
         );
+
     }
 
     public function doAction() {
@@ -213,10 +214,10 @@ class createProjectController extends ajaxController {
         }
         $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
 
-        if ( ( $key = array_search( $this->source_language, $sourceLangAr ) ) !== false ) {
+        if ( ( $key = array_search( $this->source_lang, $sourceLangAr ) ) !== false ) {
             unset( $sourceLangAr[ $key ] );
         }
-        array_unshift( $sourceLangAr, $this->source_language );
+        array_unshift( $sourceLangAr, $this->source_lang );
         if ( $sourceLangAr == \Constants::EMPTY_VAL ) {
             $sourceLangAr = "";
         }
@@ -245,10 +246,10 @@ class createProjectController extends ajaxController {
         }
         $targetLangAr = explode( '||', urldecode( $targetLangHistory ) );
 
-        if ( ( $key = array_search( $this->target_language, $targetLangAr ) ) !== false ) {
+        if ( ( $key = array_search( $this->target_lang, $targetLangAr ) ) !== false ) {
             unset( $targetLangAr[ $key ] );
         }
-        array_unshift( $targetLangAr, $this->target_language );
+        array_unshift( $targetLangAr, $this->target_lang );
         if ( $targetLangAr == \Constants::EMPTY_VAL ) {
             $targetLangAr = "";
         }
@@ -314,23 +315,24 @@ class createProjectController extends ajaxController {
 
         $projectStructure = $projectManager->getProjectStructure();
 
-        $projectStructure[ 'project_name' ]         = $this->project_name;
-        $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
-        $projectStructure[ 'uploadToken' ]          = $_COOKIE[ 'upload_session' ];
-        $projectStructure[ 'array_files' ]          = $arFiles; //list of file name
-        $projectStructure[ 'source_language' ]      = $this->source_language;
-        $projectStructure[ 'target_language' ]      = explode( ',', $this->target_language );
-        $projectStructure[ 'job_subject' ]          = $this->job_subject;
-        $projectStructure[ 'mt_engine' ]            = $this->mt_engine;
-        $projectStructure[ 'tms_engine' ]           = $this->tms_engine;
-        $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
-        $projectStructure[ 'skip_lang_validation' ] = true;
-        $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
-        $projectStructure[ 'only_private' ]         = $this->only_private;
-        $projectStructure[ 'due_date' ]             = $this->due_date;
+        $projectStructure[ 'project_name' ]                 = $this->project_name;
+        $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
+        $projectStructure[ 'private_tm_user' ]              = $this->private_tm_user;
+        $projectStructure[ 'private_tm_pass' ]              = $this->private_tm_pass;
+        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
+        $projectStructure[ 'source_language' ]              = $this->source_lang;
+        $projectStructure[ 'target_language' ]              = explode( ',', $this->target_lang );
+        $projectStructure[ 'job_subject' ]                  = $this->job_subject;
+        $projectStructure[ 'mt_engine' ]                    = $this->mt_engine;
+        $projectStructure[ 'tms_engine' ]                   = $this->tms_engine;
+        $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
+        $projectStructure[ 'skip_lang_validation' ]         = true;
+        $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
+        $projectStructure[ 'only_private' ]                 = $this->only_private;
+        $projectStructure[ 'due_date' ]                     = $this->due_date;
+        $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
 
 
         $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
@@ -396,8 +398,8 @@ class createProjectController extends ajaxController {
         $_SESSION[ 'last_created_pid' ] = $pid;
     }
 
-    private function __validateTargetLangs() {
-        $targets = explode( ',', $this->target_language );
+    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
+        $targets = explode( ',', $this->target_lang );
         $targets = array_map( 'trim', $targets );
         $targets = array_unique( $targets );
 
@@ -407,18 +409,18 @@ class createProjectController extends ajaxController {
 
         try {
             foreach ( $targets as $target ) {
-                $this->lang_handler->validateLanguage( $target );
+                $lang_handler->validateLanguage( $target );
             }
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -4, "message" => $e->getMessage() ];
         }
 
-        $this->target_language = implode( ',', $targets );
+        $this->target_lang = implode( ',', $targets );
     }
 
-    private function __validateSourceLang() {
+    private function __validateSourceLang( Langs_Languages $lang_handler ) {
         try {
-            $this->lang_handler->validateLanguage( $this->source_language );
+            $lang_handler->validateLanguage( $this->source_lang );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -3, "message" => $e->getMessage() ];
         }
@@ -443,28 +445,27 @@ class createProjectController extends ajaxController {
     /**
      * This function sets metadata property from input params.
      *
-     * @param $__postInput
      */
-    private function __setMetadataFromPostInput( $__postInput ) {
+    private function __setMetadataFromPostInput() {
         $options = [];
 
-        if ( isset( $__postInput[ 'lexiqa' ] ) ) {
-            $options[ 'lexiqa' ] = $__postInput[ 'lexiqa' ];
+        if ( isset( $this->postInput[ 'lexiqa' ] ) ) {
+            $options[ 'lexiqa' ] = $this->postInput[ 'lexiqa' ];
         }
-        if ( isset( $__postInput[ 'speech2text' ] ) ) {
-            $options[ 'speech2text' ] = $__postInput[ 'speech2text' ];
+        if ( isset( $this->postInput[ 'speech2text' ] ) ) {
+            $options[ 'speech2text' ] = $this->postInput[ 'speech2text' ];
         }
-        if ( isset( $__postInput[ 'tag_projection' ] ) ) {
-            $options[ 'tag_projection' ] = $__postInput[ 'tag_projection' ];
+        if ( isset( $this->postInput[ 'tag_projection' ] ) ) {
+            $options[ 'tag_projection' ] = $this->postInput[ 'tag_projection' ];
         }
-        if ( isset( $__postInput[ 'segmentation_rule' ] ) ) {
-            $options[ 'segmentation_rule' ] = $__postInput[ 'segmentation_rule' ];
+        if ( isset( $this->postInput[ 'segmentation_rule' ] ) ) {
+            $options[ 'segmentation_rule' ] = $this->postInput[ 'segmentation_rule' ];
         }
 
         $this->metadata = $options;
 
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
-                'input' => $__postInput
+                'input' => $this->postInput
         ] );
     }
 
@@ -513,6 +514,20 @@ class createProjectController extends ajaxController {
 
         }
 
+    }
+
+    /**
+     * This could be already set by MMT engine if enabled ( so check key existence and do not override )
+     *
+     * @see filterCreateProjectFeatures callback
+     * @see createProjectController::__appendFeaturesToProject()
+     */
+    private function __generateTargetEngineAssociation(){
+        if( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ){ // this could be already set by MMT engine if enabled ( so check and do not override )
+            foreach( explode( ",", $this->target_lang ) as $_matecatTarget ){
+                $this->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $this->mt_engine;
+            }
+        }
     }
 
 }

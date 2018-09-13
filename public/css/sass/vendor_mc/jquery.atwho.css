@@ -8,8 +8,9 @@
     color: black;
     border: 1px solid #DDD;
     border-radius: 3px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    box-shadow: 0 0 4px rgba(0,0,0,0.1);
     min-width: 120px;
+    text-align: left;
     z-index: 11110 !important;
 }
 
@@ -62,9 +63,7 @@
 .atwho-view ul li {
     display: block;
     padding: 5px 10px;
-    border-bottom: 1px solid #DDD;
     cursor: pointer;
-    /* border-top: 1px solid #C8C8C8; */
 }
 .atwho-view small {
     font-size: smaller;

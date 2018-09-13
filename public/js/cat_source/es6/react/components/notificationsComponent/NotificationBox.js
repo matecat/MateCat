@@ -71,11 +71,19 @@ class NotificationBox extends React.Component {
         return newNotification;
     }
     removeNotification(notification) {
-        var self = this;
+        let self = this;
+        let containerToDelete = 'container-'+notification.uid;
         Object.keys(this.refs).forEach(function(container) {
-            if (container.indexOf('container') > -1) {
+            if (container == containerToDelete ) {
                 self.refs[container].hideNotification();
             }
+        });
+    }
+
+    removeAllNotifications() {
+        let self = this;
+        Object.keys(this.refs).forEach(function(container) {
+            self.refs[container].hideNotification();
         });
     }
     showMateCat() {
@@ -128,7 +136,7 @@ class NotificationBox extends React.Component {
                      var cat = "";
                     _notifications.forEach(function (notification) {
                         var item = <NotificationItem
-                            ref={ 'container-' + position }
+                            ref={ 'container-' + notification.uid  }
                             title = {notification.title}
                             position = {notification.position}
                             type = {notification.type}

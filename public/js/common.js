@@ -566,6 +566,12 @@ APP = {
         }
     },
 
+    removeAllNotifications: function () {
+        if (APP.notificationBox) {
+            APP.notificationBox.removeAllNotifications();
+        }
+    },
+
     getParameterByName : function(name, url) {
         if (!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, "\\$&");

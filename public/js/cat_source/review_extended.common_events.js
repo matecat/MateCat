@@ -3,18 +3,23 @@
  */
 
 if (ReviewExtended.enabled()) {
-    $(document).on('files:appended', function initReactComponents() {
-        if (config.isReview) {
+    $(document).on('files:appended', function () {
+        // if (config.isReview) {
             SegmentActions.mountTranslationIssues();
-        }
-
-        setTimeout(function () {
-            if (config.isReview && UI.currentSegment && ReviewExtended.firstLoad ) {
-                ReviewExtended.firstLoad = false;
-                SegmentActions.openIssuesPanel(({sid: UI.getSegmentId(UI.currentSegment)}));
-            }
-        });
+            ReviewExtended.getSegmentsIssues();
+        // }
     });
+
+    $( window ).on( 'segmentClosed', function ( e ) {
+        SegmentActions.closeSegmentIssuePanel(UI.getSegmentId(e.segment));
+    } );
+
+    $( window ).on( 'segmentOpened', function ( e ) {
+        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) == 'true';
+        if (config.isReview && !panelClosed) {
+            SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
+        }
+    } );
 
     $(document).on('translation:change', function(e, data) {
         if (data.sid === UI.getSegmentId(UI.currentSegment)) {

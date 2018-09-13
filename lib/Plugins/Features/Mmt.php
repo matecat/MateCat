@@ -10,7 +10,9 @@
 namespace Features;
 
 
+use Analysis\Workers\FastAnalysis;
 use ArrayObject;
+use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionStruct;
 use Contribution\Set;
@@ -44,13 +46,15 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     *
+     * Called in @see Bootstrap::notifyBootCompleted
      */
     public static function bootstrapCompleted(){
         Constants_Engines::setInEnginesList( Constants_Engines::MMT );
     }
 
     /**
+     * Called in @see engineController::add()
+     *
      * Only one MMT engine per user can be registered
      *
      * @param                  $enginesList
@@ -71,6 +75,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see engineController::add()
+     *
      * @param EnginesModel_EngineStruct $newCreatedDbRowStruct
      * @param Users_UserStruct          $userStruct
      *
@@ -110,6 +116,14 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * Called in @see engineController::add()
+     *
+     * @param $errorObject
+     * @param $class_load
+     *
+     * @return array
+     */
     public function engineCreationFailed( $errorObject, $class_load ){
         if( $class_load == Constants_Engines::MMT ){
             return [ 'code' => 403, 'message' => "Creation failed. Only one ModernMT engine is allowed." ];
@@ -118,6 +132,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see engineController::disable()
+     *
      * @param EnginesModel_EngineStruct $engineStruct
      */
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
@@ -136,6 +152,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see getContributionController::doAction()
+     *
      * @param                        $config
      * @param Engines_AbstractEngine $engine
      * @param Jobs_JobStruct         $jobStruct
@@ -190,54 +208,71 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param ArrayObject $projectStructure
+     * Called in @see createProjectController::__appendFeaturesToProject()
+     * Called in @see NewController::__appendFeaturesToProject()
+     *
+     * @param $projectFeatures
+     * @param $controller \NewController|\createProjectController
+     *
+     * @return array
+     * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function validateProjectCreation( ArrayObject $projectStructure ){
+    public function filterCreateProjectFeatures( $projectFeatures, $controller ){
 
-        $engine = Engine::getInstance( $projectStructure[ 'mt_engine' ] );
+        $engine = Engine::getInstance( $controller->postInput[ 'mt_engine' ] );
         if( $engine instanceof Engines_MMT ){
             /**
              * @var $availableLangs
              * <code>
              *  {
-             *     "en":["it"],
+             *     "en":["it","zh-TW"],
              *     "de":["en"]
              *  }
              * </code>
              */
             $availableLangs = $engine->getAvailableLanguages();
-            $target_language_list = $projectStructure['target_language']->getArrayCopy();
-            $source_language = $projectStructure[ 'source_language' ];
+            $target_language_list = explode( ",", $controller->postInput[ 'target_lang' ] );
+            $source_language = $controller->postInput[ 'source_lang' ];
 
             $found = true;
             foreach( $availableLangs as $source => $availableTargets ){
+
+                //take only the language code $langCode is passed by reference, change the value from inside the callback
+                array_walk( $availableTargets,function( &$langCode ){
+                    list( $langCode, ) = explode( "-", $langCode );
+                } );
+
                 list( $mSourceCode, ) = explode( "-", $source_language );
                 if( $source == $mSourceCode ){
                     foreach( $target_language_list as $_matecatTarget ){
                         list( $mTargetCode, ) = explode( "-", $_matecatTarget );
                         if( in_array( $mTargetCode, $availableTargets ) ){
-                            $found &= true;
+                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $controller->postInput[ 'mt_engine' ];
                         } else {
-                            $found &= false;
+                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = 1; // MyMemory
                         }
                     }
                 }
             }
 
-            if( !$found ){
-                //Force fallback to MyMemory if MMT does not support the language pair
-                //Warning For Multi Lingual projects, this disable MMT for all languages ever if one language is supported, because MateCat at moment
-                // does not support the management of different engines per JOB in the creation phase.
-                $projectStructure[ 'mt_engine' ] = 1;
-            }
+            $feature                 = new BasicFeatureStruct();
+            $feature->feature_code   = self::FEATURE_CODE;
+            $projectFeatures[] = $feature;
 
         }
+
+        return $projectFeatures;
 
     }
 
     /**
+     * Called in @see FastAnalysis::main()
+     *
      * @param array $segments
      * @param array $projectRows
+     *
+     * @throws Exception
+     *
      */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
@@ -280,7 +315,7 @@ class Mmt extends BaseFeature {
 
             } catch( Exception $e ){
                 Log::doLog( $e->getMessage() );
-                Log::doLog( $e->getTpostTMKeyCreationraceAsString() );
+                Log::doLog( $e->getTraceAsString() );
             }
 
             unset( $tmpFileObject );
@@ -291,6 +326,9 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     *
+     * Called in @see \setTranslationController::evalSetContribution()
+     *
      * @param                        $response
      * @param ContributionStruct     $contributionStruct
      * @param Projects_ProjectStruct $projectStruct
@@ -353,6 +391,9 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see \ProjectManager::_pushTMXToMyMemory()
+     * Called in @see \loadTMXController::doAction()
+     *
      * @param stdClass $file
      * @param          $user
      * @param          $tm_key
@@ -393,6 +434,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see engineController::add()
+     *
      * @param $isValid
      * @param $data             (object)[
      *                          'providerName' => '',
@@ -428,6 +471,9 @@ class Mmt extends BaseFeature {
     }
 
     /**
+     * Called in @see \ProjectManager::setPrivateTMKeys()
+     * Called in @see \userKeysController::doAction()
+     *
      * @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
      * @param                  $uid              integer
      *

@@ -26,6 +26,10 @@ class FilterDefinition {
         $this->filter_data = $filter_data;
     }
 
+    public function isRevision(){
+        return !empty( $this->filter_data['revision'] ) && $this->filter_data['revision'] == 1;
+    }
+
     public function isSampled() {
         return array_key_exists('sample', $this->filter_data) && $this->filter_data['sample'] == true;
     }

@@ -9,7 +9,7 @@
         "dqf_id" : 5
       },
       {
-        "label": "Translation errors (mistranslation, additions/omissions)",
+        "label": "Translation errors (mistranslation, additions or omissions)",
         "dqf_id" : 1
       },
       {
