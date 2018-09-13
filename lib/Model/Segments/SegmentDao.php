@@ -150,6 +150,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $db = Database::obtain()->getConnection();
 
         $options_conditions_query = "";
+        $options_join_query = "";
         $options_conditions_values = [];
         if(isset($options['filter']['status'])){
             $options_conditions_query .= " AND st.status = :status ";
@@ -158,10 +159,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         if(isset($options['filter']['issue_category'])){
             $options_conditions_query .= " AND e.id_category = :id_category ";
+            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment ";
             $options_conditions_values['id_category'] = $options['filter']['issue_category'];
         }
 
         if(isset($options['filter']['severity'])){
+            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment ";
             $options_conditions_query .= " AND e.severity = :severity ";
             $options_conditions_values['severity'] = $options['filter']['severity'];
         }
@@ -172,7 +175,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
-                    LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                    %s 
                     WHERE st.id_job = :id_job
                         AND j.password = :password
                         AND s.show_in_cattool = 1
@@ -188,7 +191,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
-                    LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                    %s
                     WHERE st.id_job = :id_job
                         AND j.password = :password
                         AND s.show_in_cattool = 1
@@ -211,7 +214,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
-                        LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                        %s
                         WHERE st.id_job = :id_job
                             AND j.password = :password
                             AND s.show_in_cattool = 1
@@ -225,7 +228,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
-                        LEFT JOIN qa_entries e ON e.id_segment = st.id_segment
+                        %s
                         WHERE st.id_job = :id_job
                             AND j.password = :password
                             AND s.show_in_cattool = 1
@@ -237,13 +240,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         switch ( $where ) {
             case 'after':
-                $subQuery = sprintf( $queryAfter, $options_conditions_query, $step * 2 );
+                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, $step * 2 );
                 break;
             case 'before':
-                $subQuery = sprintf( $queryBefore, $options_conditions_query, $step * 2 );
+                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, $step * 2 );
                 break;
             case 'center':
-                $subQuery = sprintf( $queryCenter, $options_conditions_query, $step, $options_conditions_query, $step );
+                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, $step, $options_join_query, $options_conditions_query, $step );
                 break;
             default:
                 throw new Exception( "No direction selected" );

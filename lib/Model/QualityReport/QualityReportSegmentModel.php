@@ -14,7 +14,6 @@ class QualityReport_QualityReportSegmentModel {
 
         $segments_id = $segmentsDao->getSegmentsIdForQR( $chunk->id, $chunk->password, $step, $ref_segment, $where, $options );
 
-
         return $segments_id;
     }
 
