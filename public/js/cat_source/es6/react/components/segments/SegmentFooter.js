@@ -153,7 +153,8 @@ class SegmentFooter extends React.Component {
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
-                    notes={this.props.segment.notes}/>;
+                    notes={this.props.segment.notes}
+                    segmentSource = {this.props.segment.segment}/>;
                 break;
             case 'review':
                 return <SegmentTabRevise
