@@ -27,7 +27,7 @@ trait PhManagementTagTrait {
          * Filters do not use <ph> tags, so it comes directly from a not converted xliff.
          *
          */
-        if( preg_match('|<ph [^>]+>|', $segment ) ){
+        if( preg_match('/^<ph [^>]+>|<ph [^>]+>$/', $segment ) ){
             return true;
         }
         return false;
