@@ -6,7 +6,5 @@
  * Time: 18:00
  */
 
-$klein->with( '/api/v3/jobs/[:id_job]/[:password]/quality-report', function () {
-    route( '/', 'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'general' );
-    route( '/segments', 'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'segments' );
-} );
+route( '/api/v3/jobs/[:id_job]/[:password]', 'GET', '\API\V3\ChunkController', 'show' );
+route( '/api/v3/jobs/[:id_job]/[:password]/quality-report/segments', 'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'segments' );

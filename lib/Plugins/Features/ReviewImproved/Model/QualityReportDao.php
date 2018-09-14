@@ -238,4 +238,34 @@ JOIN (
         return $stmt->fetchAll();
     }
 
+    public function getReviseIssuesByJob($job_id){
+
+        $sql = "SELECT
+
+  issues.id as issue_id,
+  qa_categories.label   as issue_category_label,
+  issues.id_category as id_category,
+  issues.severity     as issue_severity
+  
+FROM  qa_entries issues
+
+  LEFT JOIN qa_categories
+    ON issues.id_category = qa_categories.id
+    
+    WHERE issues.id_job = ?
+      
+  ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+
+        $stmt->execute( array($job_id) );
+
+        return $stmt->fetchAll();
+
+    }
+
+
+
 }
