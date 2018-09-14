@@ -2,25 +2,18 @@
 
 let QUALITY_REPORT =  {
 
-    getSegmentsFiles() {
+    getSegmentsFiles(filter, segmentId) {
         let data = {
-            step: 30
+            step: 10,
+            ref_segment: segmentId,
         };
+        if (filter) {
+            data.filter = filter;
+        }
         return $.ajax({
             data: data,
             type: "GET",
             url : "/api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
-        });
-    },
-    getSegmentsFiles2() {
-        let data = {
-            step: 30,
-            ref_segment: "756512",
-        };
-        return $.ajax({
-            data: data,
-            type: "GET",
-            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
 

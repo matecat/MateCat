@@ -14,8 +14,8 @@ let QualityReportActions =  {
         });
     },
 
-    getMoreQRSegments() {
-        QRApi.getSegmentsFiles2().done(function ( response ) {
+    getMoreQRSegments(filter, segmentId) {
+        QRApi.getSegmentsFiles(filter, segmentId).done(function ( response ) {
             if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.ADD_SEGMENTS,
@@ -23,7 +23,18 @@ let QualityReportActions =  {
                 });
             }
         });
-    }
+    },
+
+    filterSegments(filter, segmentId) {
+        QRApi.getSegmentsFiles(filter, segmentId).done(function ( response ) {
+            if ( response.files ) {
+                AppDispatcher.dispatch({
+                    actionType: QRConstants.RENDER_SEGMENTS,
+                    files: response.files,
+                });
+            }
+        });
+    },
 
 }
 

@@ -5,13 +5,13 @@ class FilterSegments extends React.Component {
         super(props);
 
         this.state = this.defaultState();
-        // this.doSubmitFilter = this.doSubmitFilter.bind(this);
-
     }
 
     defaultState() {
         return {
-            selectedStatus: '',
+            filter: {
+                status: ""
+            },
             filtering: false,
             filteredCount: 0
         }
@@ -20,32 +20,47 @@ class FilterSegments extends React.Component {
     filterSelectChanged(value) {
 
         this.setState({
-            selectedStatus: value,
+            filter: {
+                status: value
+            }
         });
 
-        // setTimeout(this.doSubmitFilter, 100);
+        this.props.applyFilter(this.state.filter);
 
     }
 
     resetStatusFilter() {
         $(this.statusDropdown).dropdown('restore defaults');
+        this.setState({
+            filter: {
+                status: ""
+            }
+        });
+        setTimeout(()=> {
+            this.props.applyFilter(this.state.filter)
+        });
     }
 
     initDropDown() {
         let self = this;
         $(this.statusDropdown).dropdown({
             onChange: function(value, text, $selectedItem) {
-                self.filterSelectChanged(value);
+                if (value !== "") {
+                    self.filterSelectChanged(value);
+                }
             }
         });
+        this.dropdownInitialized = true;
     }
 
     componentDidMount() {
-        this.initDropDown();
+        setTimeout(this.initDropDown.bind(this), 100);
     }
 
     componentDidUpdate() {
-        this.initDropDown();
+        if (!this.dropdownInitialized) {
+            this.initDropDown();
+        }
     }
 
     render () {
@@ -55,7 +70,7 @@ class FilterSegments extends React.Component {
                 {item.label}
             </div>;
         });
-        let statusFilterClass = (this.state.selectedStatus !== "") ? "filtered" : "not-filtered";
+        let statusFilterClass = (this.state.filter.status !== "") ? "filtered" : "not-filtered";
         return <div className="qr-filter-list">Filters by
             <div className="filter-dropdown left-10">
                 <div className={"filter-status " + statusFilterClass}>
