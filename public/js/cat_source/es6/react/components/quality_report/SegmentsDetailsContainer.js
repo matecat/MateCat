@@ -10,6 +10,7 @@ class SegmentsDetails extends React.Component {
             this.props.files.keySeq().forEach(( key, index ) => {
                 let file = <FileDetails key={key} file={this.props.files.get(key)}/>
                 files.push(file)
+                this.lastSegment = this.props.files.get(key)
             });
         }
         return files;

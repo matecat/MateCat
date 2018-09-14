@@ -82,7 +82,9 @@ class QualityReportController extends KleinController
             $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->chunk );
 
 
-            $this->response->json( $segments );
+            $this->response->json( [
+                    'files' =>$segments
+            ] );
         } else {
             $this->response->json( [] );
         }

@@ -3,22 +3,19 @@
 let QUALITY_REPORT =  {
 
     getSegmentsFiles() {
-
         let data = {
-            step: 30,
-            segment: config.first_job_segment,
+            step: 30
         };
         return $.ajax({
             data: data,
             type: "GET",
-            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
+            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
     getSegmentsFiles2() {
-
         let data = {
             step: 30,
-            segment: "756512",
+            ref_segment: "756512",
         };
         return $.ajax({
             data: data,

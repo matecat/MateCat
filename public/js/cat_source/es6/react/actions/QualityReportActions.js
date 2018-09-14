@@ -5,10 +5,10 @@ let QualityReportActions =  {
 
     loadInitialAjaxData() {
         QRApi.getSegmentsFiles().done(function ( response ) {
-            if ( response.data.files ) {
+            if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.RENDER_SEGMENTS,
-                    files: response.data.files,
+                    files: response.files,
                 });
             }
         });
@@ -16,10 +16,10 @@ let QualityReportActions =  {
 
     getMoreQRSegments() {
         QRApi.getSegmentsFiles2().done(function ( response ) {
-            if ( response.data.files ) {
+            if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.ADD_SEGMENTS,
-                    files: response.data.files,
+                    files: response.files,
                 });
             }
         });

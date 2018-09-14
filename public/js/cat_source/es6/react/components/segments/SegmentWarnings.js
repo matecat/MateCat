@@ -45,16 +45,6 @@ class SegmentWarnings extends React.Component {
                         fnMap(el, 'WARNING');
                     });
                 });
-                // this.props.warnings.WARNING.map((el, index) => {
-                //     if (warnings_count[el.outcome]) {
-                //         warnings_count[el.outcome]++;
-                //     } else {
-                //         let item = el;
-                //         item.type = 'WARNING';
-                //         warnings.push(item);
-                //         warnings_count[el.outcome] = 1;
-                //     }
-                // });
 
             }
             if (this.props.warnings.INFO) {
@@ -63,16 +53,6 @@ class SegmentWarnings extends React.Component {
                         fnMap(el, 'INFO');
                     });
                 });
-                // this.props.warnings.INFO.map((el, index) => {
-                //     if (warnings_count[el.outcome]) {
-                //         warnings_count[el.outcome]++;
-                //     } else {
-                //         let item = el;
-                //         item.type = 'INFO';
-                //         warnings.push(item);
-                //         warnings_count[el.outcome] = 1;
-                //     }
-                // });
             }
         }
 

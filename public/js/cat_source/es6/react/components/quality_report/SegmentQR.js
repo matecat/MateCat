@@ -10,6 +10,22 @@ class SegmentQR extends React.Component {
             automatedQaOpen: false,
             humanQaOpen:false
         };
+        this.errorObj = {
+            'types' : {
+                'TAGS': {
+                    label: 'Tag mismatch'
+                },
+                'MISMATCH': {
+                    label: 'Tag mismatch'
+                }
+            },
+            'icons' : {
+                'ERROR' : 'icon-cancel-circle icon red',
+                'WARNING' : 'icon-warning2 icon orange',
+                'INFO' : ''
+            }
+        }
+
     }
     openAutomatedQa() {
         this.setState({
@@ -21,13 +37,63 @@ class SegmentQR extends React.Component {
             humanQaOpen: !this.state.humanQaOpen
         });
     }
+    getAutomatedQaHtml() {
+        let html = [];
+        let fnMap = (key, obj, type) => {
+            let item = <div className="qr-issue automated" key={key+type}>
+                            <div className="box-icon">
+                                <i className={this.errorObj.icons[type]} />
+                            </div>
+                            <div className="qr-error">{this.errorObj.types[key].label} <b>({obj.size})</b></div>
+                        </div>;
+            html.push(item);
+        };
+        let details = this.props.segment.get('warnings').get('details').get('issues_info');
+        if (details.get('ERROR').get('Categories').size > 0) {
+            details.get('ERROR').get('Categories').entrySeq().forEach( (item)=> {
+                let key = item[0];
+                let value = item[1];
+                fnMap(key, value, 'ERROR');
+            });
+        }
+        if (details.get('WARNING').get('Categories').size > 0) {
+            details.get('WARNING').get('Categories').entrySeq().forEach( (item)=> {
+                let key = item[0];
+                let value = item[1];
+                fnMap(key, value, 'WARNING');
+            });
+        }
+        if (details.get('INFO').get('Categories').size > 0) {
+            details.get('INFO').get('Categories').entrySeq().forEach( (item)=> {
+                let key = item[0];
+                let value = item[1];
+                fnMap(key, value, 'INFO');
+            });
+        }
+
+        return html;
+    }
+    getHumanQaHtml() {
+        let html = [];
+        let issues = this.props.segment.get('issues');
+        issues.map((issue)=>{
+            let item = <div className="qr-issue human critical" key={issue.get('issue_id')}>
+                            <div className="qr-error"><b>{issue.get('issue_category')}</b></div>
+                            <div className="sub-type-error">Subtype </div>
+                            <div className="severity"><b>{issue.get('issue_severity')}</b></div>
+                        </div>;
+            html.push(item);
+        });
+
+        return html;
+    }
     showTranslateDiff() {
         if (this.state.translateDiffOn) {
             this.setState({
                 translateDiffOn: false,
             });
         } else {
-            let diffHtml = this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("translation"));
+            let diffHtml = this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("suggestion")), TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
             this.setState({
                 translateDiffOn: true,
                 reviseDiffOn: false,
@@ -41,14 +107,33 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let revise = "Text added " + this.props.segment.get("translation") + " Text added";
-            let diffHtml = this.getDiffPatch(this.props.segment.get("translation"), revise);
+            let revise = this.props.segment.get("last_revision");
+            let diffHtml = this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
             this.setState({
                 translateDiffOn: false,
                 reviseDiffOn: true,
                 htmlDiff: diffHtml
             });
         }
+    }
+    getWordsSpeed() {
+        let str_pad_left = function(string,pad,length) {
+            return (new Array(length+1).join(pad)+string).slice(-length);
+        }
+        let time = parseInt(this.props.segment.get("secs_per_word"));
+        let minutes = Math.floor( time / 60);
+        let seconds = time - minutes * 60;
+        return str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+    }
+    getTimeToEdit() {
+        let str_pad_left = function(string,pad,length) {
+            return (new Array(length+1).join(pad)+string).slice(-length);
+        }
+        let time = parseInt(this.props.segment.get("time_to_edit"));
+        let hours = Math.floor(time / 3600);
+        let minutes = Math.floor( time / 60);
+        let seconds = time - minutes * 60;
+        return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
     getDiffPatch(source, text) {
         return TagsUtils.getDiffHtml(source, text);
@@ -73,9 +158,9 @@ class SegmentQR extends React.Component {
     }
     render () {
         let source = this.decodeTextAndTransformTags(this.props.segment.get("segment"));
-        let suggestion = this.decodeTextAndTransformTags(this.props.segment.get("suggestion"));
-        let target = this.decodeTextAndTransformTags(this.props.segment.get("translation"));
-        let revise = "Text added " + this.props.segment.get("translation") + " Text added";
+        let suggestion = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("suggestion")));
+        let target = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
+        let revise = this.decodeTextAndTransformTags(this.props.segment.get("last_revision"));
 
         if (this.state.translateDiffOn) {
             target = this.decodeTextAndTransformTags(this.state.htmlDiff);
@@ -119,14 +204,21 @@ class SegmentQR extends React.Component {
                 <div className="segment-id">{this.props.segment.get("sid")}</div>
                 <div className="segment-production-container">
                     <div className="segment-production">
-                        <div className={"ui basic button tiny automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
-                            Automated QA<b> ({this.props.segment.get("warning")})</b></div>
-                        <div className={"ui basic button tiny human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
-                            Human QA<b> (7)</b></div>
+
+                        {this.props.segment.get('warnings').get('total') > 0 ? (
+                            <div className={"ui basic button tiny automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
+                                Automated QA<b> ({this.props.segment.get('warnings').get('total')})</b></div>
+                        ) : null}
+
+                        {this.props.segment.get('issues').size > 0 ? (
+                            <div className={"ui basic button tiny human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
+                                Human QA<b> ({this.props.segment.get('issues').size})</b></div>
+                        ) : null}
+
                     </div>
                     <div className="segment-production">
-                        <div className="production word-speed">Words speed: <b>{this.props.segment.get("secs_per_word")}"</b></div>
-                        <div className="production time-edit">Time to edit: <b>{this.props.segment.get("time_to_edit")}"</b></div>
+                        <div className="production word-speed">Words speed: <b>{this.getWordsSpeed()}</b></div>
+                        <div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>
                         <div className="production pee">PEE: <b>30%</b></div>
                     </div>
                 </div>
@@ -160,7 +252,7 @@ class SegmentQR extends React.Component {
                             <div className="tm-percent">{this.props.segment.get("suggestion_match")}%</div>
                         </div>
                     </div>
-
+                {this.props.segment.get('last_translation') ? (
                     <div className={translateClasses}>
                         <a className="segment-content qr-segment-title">
                             <b onClick={this.openTranslateLink.bind(this)}>Translate</b>
@@ -169,12 +261,20 @@ class SegmentQR extends React.Component {
                             </button>
                         </a>
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }/>
-                        <div className="segment-content qr-spec">
-                            <div><b>ICE Match</b></div>
-                            <div>(Modified)</div>
-                        </div>
-                    </div>
 
+                            <div className="segment-content qr-spec">
+                                {this.props.segment.get('ice_locked') === '1' ? (
+                                <div>
+                                    <b>ICE Match</b>
+                                </div>
+                                ) :  null}
+                                {this.props.segment.get('ice_modified') ? (
+                                    <div>(Modified)</div>
+                                ) : null}
+                            </div>
+                    </div>
+                ) : null}
+                {this.props.segment.get('last_revision') ? (
                     <div className={revisedClasses}>
                         <a className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
@@ -185,9 +285,17 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
                         </div>
                         <div className="segment-content qr-spec">
-
+                            <div className="segment-content qr-spec">
+                                { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
+                                    <div>
+                                        <b>ICE Match</b>
+                                    </div>
+                                ) :  null}
+                            </div>
                         </div>
                     </div>
+                ) : null}
+
 
                 {this.state.automatedQaOpen ?
                     <div className="segment-container qr-issues">
@@ -195,19 +303,9 @@ class SegmentQR extends React.Component {
                             <b>Atomated QA</b>
                         </div>
                         <div className="segment-content qr-text">
+
                             <div className="qr-issues-list">
-                                <div className="qr-issue automated">
-                                    <div className="box-icon">
-                                        <i className="icon-cancel-circle icon red" />
-                                    </div>
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
-                                <div className="qr-issue automated">
-                                    <div className="box-icon">
-                                        <i className="icon-warning2 icon orange" />
-                                    </div>
-                                    <div className="qr-error">Tag mismatch <b>(2)</b></div>
-                                </div>
+                                {this.getAutomatedQaHtml()}
                             </div>
                         </div>
                     </div>
@@ -220,23 +318,7 @@ class SegmentQR extends React.Component {
                         </div>
                         <div className="segment-content qr-text">
                             <div className="qr-issues-list">
-
-                                <div className="qr-issue human critical">
-                                    <div className="qr-error"><b>Language quality</b></div>
-                                    <div className="sub-type-error">Subtype </div>
-                                    <div className="severity"><b>Critical</b></div>
-                                </div>
-                                <div className="qr-issue human major">
-                                    <div className="qr-error"><b>Language quality</b></div>
-                                    <div className="sub-type-error">Subtype </div>
-                                    <div className="severity"><b>Major</b></div>
-                                </div>
-                                <div className="qr-issue human enhacement">
-                                    <div className="qr-error"><b>Language quality</b></div>
-                                    <div className="sub-type-error">Subtype </div>
-                                    <div className="severity"><b>Enhacement</b></div>
-                                </div>
-
+                                {this.getHumanQaHtml()}
                             </div>
                         </div>
                     </div>

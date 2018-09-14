@@ -26,7 +26,6 @@ class QualityReport extends React.Component {
 
     componentWillMount() {
         QRActions.loadInitialAjaxData();
-
     }
 
     componentDidMount() {
@@ -41,7 +40,7 @@ class QualityReport extends React.Component {
         return <div className="qr-container">
                 <div className="qr-container-inside">
                     <div className="qr-job-summary-container">
-                        <div className="qr-bg-head"></div>
+                        <div className="qr-bg-head"/>
                         <div className="qr-job-summary">
                             <h3>Job Summary</h3>
                             <JobSummary/>
