@@ -17,39 +17,50 @@ class QualityReport_QualityReportSegmentModel {
         return $segments_id;
     }
 
-    public function getSegmentsForQR( $segments_id, $features ) {
+    public function getSegmentsForQR( $segments_id, Chunks_ChunkStruct $chunk ) {
         $segmentsDao = new \Segments_SegmentDao;
-        $data        = $segmentsDao->getSegmentsForQr( $segments_id );
+        $data        = $segmentsDao->getSegmentsForQr( $segments_id, $chunk->id );
 
-        $codes = $features->getCodes();
+        $featureSet = new FeatureSet();
+
+        $featureSet->loadForProject( $chunk->getProject() );
+
+        $codes = $featureSet->getCodes();
         if ( in_array( Features\ReviewExtended::FEATURE_CODE, $codes ) OR in_array( Features\ReviewImproved::FEATURE_CODE, $codes ) ) {
-            $issues = \Features\ReviewImproved\Model\QualityReportDao::getIssuesBySegments( $segments_id );
+            $issues = \Features\ReviewImproved\Model\QualityReportDao::getIssuesBySegments( $segments_id, $chunk->id );
         } else {
             $reviseDao          = new \Revise_ReviseDAO();
-            $segments_revisions = $reviseDao->readBySegments( $segments_id );
+            $segments_revisions = $reviseDao->readBySegments( $segments_id, $chunk->id );
             $issues             = $this->makeIssuesDataUniform( $segments_revisions );
         }
 
         $commentsDao = new \Comments_CommentDao;
-        $comments    = $commentsDao->getThreadsBySegments( $segments_id );
+        $comments    = $commentsDao->getThreadsBySegments( $segments_id, $chunk->id );
 
 
         if ( in_array( Features\TranslationVersions::FEATURE_CODE, $codes ) ) {
             $translationVersionDao = new Translations_TranslationVersionDao;
-            $last_translations     = $translationVersionDao->getLastTranslationsBySegments( $segments_id );
-            $last_revisions        = $translationVersionDao->getLastRevisionsBySegments( $segments_id );
+            $last_translations     = $translationVersionDao->getLastTranslationsBySegments( $segments_id, $chunk->id );
+            $last_revisions        = $translationVersionDao->getLastRevisionsBySegments( $segments_id, $chunk->id );
         } else {
             if ( !isset( $segments_revisions ) ) {
                 $reviseDao          = new \Revise_ReviseDAO();
-                $segments_revisions = $reviseDao->readBySegments( $segments_id );
+                $segments_revisions = $reviseDao->readBySegments( $segments_id, $chunk->id );
             }
 
             $last_translations = $this->makeSegmentsVersionsUniform( $segments_revisions );
         }
 
 
-        $segments = [];
+        $files = [];
         foreach ( $data as $i => $seg ) {
+
+            $id_file = $seg->id_file;
+
+            if ( !isset($files[$id_file]) ) {
+                $files[$id_file]["filename"] = \ZipArchiveExtended::getFileName($seg->filename);
+                $files[$id_file]['segments'] = [];
+            }
 
             $seg->warnings      = $seg->getLocalWarning();
             $seg->pee           = $seg->getPEE();
@@ -100,10 +111,10 @@ class QualityReport_QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $segments[] = $seg;
+            $files[$seg->id_file]['segments'][] = $seg;
         }
 
-        return $segments;
+        return $files;
 
     }
 

@@ -148,7 +148,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $arr_result;
     }
 
-    public function getThreadsBySegments( $segments_id ) {
+    public function getThreadsBySegments( $segments_id, $job_id ) {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
@@ -158,11 +158,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 SELECT ? as id_segment
                 " . $prepare_str_segments_id . "
         ) AS SLIST USING( id_segment )
-        WHERE message_type IN (1,2) ";
+        WHERE message_type IN (1,2) AND id_job = ? ";
 
         $stmt = $db->prepare( $comments_query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, "\Comments_BaseCommentStruct" );
-        $stmt->execute( $segments_id );
+        $stmt->execute( array_merge($segments_id, array($job_id)) );
 
         return $stmt->fetchAll();
     }

@@ -225,47 +225,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
-    public function getLastTranslationsBySegments($segments_id){
-
-        $db = Database::obtain()->getConnection();
-
-        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
-
-
-        $query = "SELECT 
-            stv.id_segment,
-            stv.translation,
-            TX.version_number,
-            stv.creation_date,
-            stv.is_review
-        FROM
-            segment_translation_versions stv
-        JOIN
-        (
-                SELECT 
-                    MAX(version_number) AS version_number, stv.id_segment
-                FROM
-                    segment_translation_versions stv
-                JOIN (
-                    SELECT ? as id_segment
-                    ".$prepare_str_segments_id."
-                 ) AS SLIST USING( id_segment )
-                GROUP BY id_segment
-            ) AS TX ON stv.version_number = TX.version_number
-                AND stv.id_segment = TX.id_segment";
-
-        $stmt = $db->prepare($query);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( $segments_id );
-
-        $results = $stmt->fetchAll();
-
-        return $results;
-
-
-    }
-
-    public function getLastRevisionsBySegments($segments_id){
+    public function getLastTranslationsBySegments($segments_id, $job_id){
 
         $db = Database::obtain()->getConnection();
 
@@ -293,11 +253,52 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                 GROUP BY id_segment
             ) AS TX ON stv.version_number = TX.version_number
                 AND stv.id_segment = TX.id_segment
-               WHERE is_review = 1 ";
+                WHERE id_job = ?";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( $segments_id );
+        $stmt->execute( array_merge($segments_id, array($job_id)) );
+
+        $results = $stmt->fetchAll();
+
+        return $results;
+
+
+    }
+
+    public function getLastRevisionsBySegments($segments_id, $job_id){
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+
+
+        $query = "SELECT 
+            stv.id_segment,
+            stv.translation,
+            TX.version_number,
+            stv.creation_date,
+            stv.is_review
+        FROM
+            segment_translation_versions stv
+        JOIN
+        (
+                SELECT 
+                    MAX(version_number) AS version_number, stv.id_segment
+                FROM
+                    segment_translation_versions stv
+                JOIN (
+                    SELECT ? as id_segment
+                    ".$prepare_str_segments_id."
+                 ) AS SLIST USING( id_segment )
+                GROUP BY id_segment
+            ) AS TX ON stv.version_number = TX.version_number
+                AND stv.id_segment = TX.id_segment
+               WHERE is_review = 1 AND id_job = ? ";
+
+        $stmt = $db->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
+        $stmt->execute( array_merge($segments_id, array($job_id)) );
 
         $results = $stmt->fetchAll();
 

@@ -58,8 +58,6 @@ class QualityReportController extends KleinController
 
         $this->project = $this->chunk->getProject();
 
-        $this->featureSet->loadForProject( $this->project );
-
         $ref_segment = $this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
         $step        = $this->request->param( 'step' );
@@ -81,7 +79,8 @@ class QualityReportController extends KleinController
         $options        = [ 'filter' => $filter];
         $segments_id    = $qrSegmentModel->getSegmentsIdForQR( $this->chunk, $step, $ref_segment, $where, $options );
         if ( count( $segments_id ) > 0 ) {
-            $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->featureSet );
+            $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->chunk );
+
 
             $this->response->json( $segments );
         } else {

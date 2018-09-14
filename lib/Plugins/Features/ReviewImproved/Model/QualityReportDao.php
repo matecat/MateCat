@@ -176,11 +176,12 @@ SQL;
     }
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param $segments_id array
+     * @param $job_id integer
      *
      * @return array
      */
-    public static function getIssuesBySegments( $segments_id ) {
+    public static function getIssuesBySegments( $segments_id, $job_id ) {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
 
@@ -223,6 +224,8 @@ JOIN (
     
   LEFT JOIN translation_warnings 
     ON translation_warnings.id_segment = issues.id_segment 
+    
+    WHERE issues.id_job = ?
       
   ";
 
@@ -230,7 +233,7 @@ JOIN (
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( $segments_id );
+        $stmt->execute( array_merge($segments_id, array($job_id)) );
 
         return $stmt->fetchAll();
     }

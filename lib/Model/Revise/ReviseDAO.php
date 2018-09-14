@@ -87,7 +87,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
-    public function readBySegments($segments_id){
+    public function readBySegments($segments_id, $job_id){
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
 
@@ -102,13 +102,14 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                          FROM " . self::TABLE . " JOIN (
                             SELECT ? as id_segment
                             ".$prepare_str_segments_id."
-                         ) AS SLIST USING( id_segment )";
+                         ) AS SLIST USING( id_segment )
+                         WHERE id_job = ?";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $query );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( $segments_id );
+        $stmt->execute( array_merge($segments_id, array($job_id)) );
 
         return $stmt->fetchAll();
     }
