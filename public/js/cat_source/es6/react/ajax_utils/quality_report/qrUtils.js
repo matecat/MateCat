@@ -4,7 +4,7 @@ let QUALITY_REPORT =  {
 
     getSegmentsFiles(filter, segmentId) {
         let data = {
-            step: 10,
+            step: 5,
             ref_segment: segmentId,
         };
         if (filter) {

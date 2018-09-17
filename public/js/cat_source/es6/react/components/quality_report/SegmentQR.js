@@ -161,7 +161,8 @@ class SegmentQR extends React.Component {
         let suggestion = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("suggestion")));
         let target = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
         let revise = this.decodeTextAndTransformTags(this.props.segment.get("last_revision"));
-
+        let suggestionMatch = ( this.props.segment.get("match_type") === "ICE") ? 101 : parseInt(this.props.segment.get("suggestion_match"));
+        let suggestionMatchClass = (suggestionMatch === 101)? 'per-blu': (suggestionMatch > 98)? 'per-green' : (suggestionMatch === 98)? 'per-red' : 'per-gray';
         if (this.state.translateDiffOn) {
             target = this.decodeTextAndTransformTags(this.state.htmlDiff);
         }
@@ -249,7 +250,7 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }/>
                         <div className="segment-content qr-spec">
                             <div><b>{this.props.segment.get("suggestion_source")}</b></div>
-                            <div className="tm-percent">{this.props.segment.get("suggestion_match")}%</div>
+                            <div className={"tm-percent " + suggestionMatchClass}>{suggestionMatch}%</div>
                         </div>
                     </div>
                 {this.props.segment.get('last_translation') ? (
@@ -279,7 +280,9 @@ class SegmentQR extends React.Component {
                         <a className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
                             <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
+                                { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
                                 <i className="icon-eye2 icon" />
+                                    ) : null }
                             </button>
                         </a>
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
