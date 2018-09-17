@@ -2,16 +2,7 @@
 class QualitySummaryTable extends React.Component {
     constructor (props) {
         super(props);
-        this.lqaFlatCategories = JSON.parse('[{"id":"3304","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"id_model":"325","id_parent":null,"label":"Accuracy (Addition,' +
-            ' Omission,' +
-        ' Mistranslation, Untranslated,' +
-        ' Inconsistency)","options":{"code":"ACC"}},{"id":"3305","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"id_model":"325","id_parent":null,"label":"Client' +
-            ' guidelines (Terminology, Style Guide, Project instructions)","options":{"code":"GUI"}},{"id":"3306","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"id_model":"325","id_parent":null,"label":"Linguistic (Punctuation, Spelling, Grammar, Locale conventions)","options":{"code":"LNG"}},{"id":"3307","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"id_model":"325","id_parent":null,"label":"Style (Inconsistent style, Readability, Unidiomatic)","options":{"code":"STY"}}]');
-
-        this.lqaNestedCategories = JSON.parse('{"categories":[{"label":"Accuracy (Addition, Omission, Mistranslation, Untranslated,' +
-            ' Inconsistency)","id":"3304","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"options":{"code":"ACC"},"subcategories":[]},{"label":"Client guidelines' +
-            ' (Terminology, Style Guide, Project instructions)","id":"3305","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"options":{"code":"GUI"},"subcategories":[]},{"label":"Linguistic (Punctuation, Spelling, Grammar, Locale conventions)","id":"3306","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"options":{"code":"LNG"},"subcategories":[]},{"label":"Style (Inconsistent style, Readability, Unidiomatic)","id":"3307","severities":[{"label":"Minor","penalty":1},{"label":"Major","penalty":2}],"options":{"code":"STY"},"subcategories":[]}]}');
-        // this.lqaNestedCategories = JSON.parse('{"categories":[{"label":"Accuracy","id":"3187","severities":null,"options":null,"subcategories":[{"label":"Addition","id":"3188","options":null,"severities":[{"label":"pippo","penalty":0},{"label":"franco","penalty":1},{"label":"cicco","penalty":2},{"label":"checco","penalty":3}]},{"label":"Omission","id":"3189","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]},{"label":"Mistranslation","id":"3190","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]},{"label":"Untranslated","id":"3191","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]}]},{"label":"Style","id":"3192","severities":null,"options":null,"subcategories":[{"label":"Company style","id":"3193","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]}]},{"label":"Fluency","id":"3194","severities":null,"options":null,"subcategories":[{"label":"Grammar","id":"3195","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]},{"label":"Punctuation","id":"3196","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]},{"label":"Spelling","id":"3197","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]}]},{"label":"Terminology","id":"3198","severities":null,"options":null,"subcategories":[{"label":"Inconsistent with Termbase","id":"3199","options":null,"severities":[{"label":"Neutral","penalty":0},{"label":"Minor","penalty":1},{"label":"Major","penalty":2},{"label":"Critical","penalty":3}]}]}]}');
+        this.lqaNestedCategories = JSON.parse(config.categories);
         this.getTotalSeverities();
     }
     getTotalSeverities() {
@@ -25,13 +16,29 @@ class QualitySummaryTable extends React.Component {
                         this.severitiesNames.push(sev.label);
                     }
                 });
+            } else {
+                cat.subcategories.forEach((subCat)=>{
+                    subCat.severities.forEach((sev)=>{
+                        if (this.severitiesNames.indexOf(sev.label) === -1 ) {
+                            this.severities.push(sev);
+                            this.severitiesNames.push(sev.label);
+                        }
+                    });
+                });
             }
         });
     }
+    getIssuesForCategory(categoryId) {
+        if (this.props.jobInfo.get('quality_summary').size > 0 ) {
+            return this.props.jobInfo.get('quality_summary').get('revise_issues').find((item, key)=>{
+                return parseInt(key) === parseInt(categoryId);
+            });
+        }
+    }
     getHeader() {
         let html = [];
-        this.severities.forEach((sev)=>{
-            let item = <th className="one wide center aligned qr-title qr-severity critical">
+        this.severities.forEach((sev, index)=>{
+            let item = <th className="one wide center aligned qr-title qr-severity critical" key={sev.label+index}>
                         <div className="qr-info">{sev.label}</div>
                         <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
                     </th>;
@@ -46,24 +53,41 @@ class QualitySummaryTable extends React.Component {
     }
     getBody() {
         let html = [];
-        this.lqaNestedCategories.categories.forEach((cat)=>{
+        this.lqaNestedCategories.categories.forEach((cat, index)=>{
             let catHtml = []
             catHtml.push(
                 <td><b>{cat.label}</b></td>
             );
-            this.severities.forEach((currentSev)=>{
-                let severityFound = cat.severities.filter((sev)=>{
-                    return sev.label === currentSev.label;
+            let totalIssues = this.getIssuesForCategory(cat.id);
+            // if (cat.subcategories.length === 0) {
+                this.severities.forEach((currentSev)=>{
+                    let severityFound = cat.severities.filter((sev)=>{
+                        return sev.label === currentSev.label;
+                    });
+                    if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
+                        catHtml.push(<td className="center aligned">{totalIssues.get('founds').get(currentSev.label)}</td>);
+                    } else {
+                        catHtml.push(<td className="center aligned"/>);
+                    }
                 });
-                if (severityFound.length > 0) {
-                    catHtml.push(<td className="center aligned">Value {currentSev.label}</td>);
-                } else {
-                    catHtml.push(<td className="center aligned">NotFound</td>);
-                }
-            });
+            // } else {
+            //     cat.subcategories.forEach((subCat)=>{
+            //         this.severities.forEach((currentSev)=>{
+            //             let severityFound = subCat.severities.filter((sev)=>{
+            //                 return sev.label === currentSev.label;
+            //             });
+            //             if (severityFound.length > 0) {
+            //                 catHtml.push(<td className="center aligned">Value {currentSev.label}</td>);
+            //             } else {
+            //                 catHtml.push(<td className="center aligned">NotFound</td>);
+            //             }
+            //         });
+            //     });
+            // }
+
             let totalWeight = <td className="right aligned">0</td>;
             catHtml.push(totalWeight);
-            let line = <tr key={cat.id}>
+            let line = <tr key={cat.id+index}>
                         {catHtml}
                     </tr>;
             html.push(line);
