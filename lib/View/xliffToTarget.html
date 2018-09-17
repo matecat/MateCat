@@ -854,7 +854,7 @@
             <ul class="listlang">
 
                 <tal:block tal:repeat="language target_languages">
-                    <li tal:attributes="class language/top">
+                    <li>
                         <input type="checkbox" tal:attributes="value language/code; id language/code"/>
                         <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
                     </li>
@@ -881,7 +881,7 @@
             <ul class="listlang">
 
                 <tal:block tal:repeat="language target_languages">
-                    <li tal:attributes="class language/top">
+                    <li>
                         <input type="checkbox" tal:attributes="value language/code; id language/code"/>
                         <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
                     </li>
