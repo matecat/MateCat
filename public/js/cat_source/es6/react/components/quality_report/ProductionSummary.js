@@ -5,11 +5,11 @@ class ProductionSummary extends React.Component {
         let str_pad_left = function(string,pad,length) {
             return (new Array(length+1).join(pad)+string).slice(-length);
         }
-        let time = parseInt(this.props.jobInfo.get("total_time_to_edit"));
+        let time = parseInt(this.props.jobInfo.get("total_time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time / 60);
-        let seconds = time - minutes * 60;
-        return str_pad_left(hours,'0',3)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        let seconds = parseInt(time - minutes * 60);
+        return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
 
     componentDidUpdate() {
@@ -20,6 +20,7 @@ class ProductionSummary extends React.Component {
 
     render () {
         if (this.props.jobInfo) {
+            let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
             let stats = this.props.jobInfo.get('stats');
             return <div className="qr-production shadow-1">
                 <div className="job-id">ID: {this.props.jobInfo.get('id')}</div>
@@ -55,7 +56,7 @@ class ProductionSummary extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="percent">100%</div>
+                    <div className="percent">{parseInt(stats.get('PROGRESS_PERC_FORMATTED'))}%</div>
                 </div>
                 <div className="qr-effort">
                     <div className="qr-label">Words</div>
@@ -63,12 +64,12 @@ class ProductionSummary extends React.Component {
                 </div>
                 <div className="qr-effort translator">
                     <div className="qr-label">Translator</div>
-                    <div className="qr-info"><b></b></div>
+                    <div className="qr-info"><b>{translator}</b></div>
                 </div>
-                <div className="qr-effort reviser">
-                    <div className="qr-label">Reviser</div>
-                    <div className="qr-info"><b></b></div>
-                </div>
+                {/*<div className="qr-effort reviser">*/}
+                    {/*<div className="qr-label">Reviser</div>*/}
+                    {/*<div className="qr-info"><b></b></div>*/}
+                {/*</div>*/}
                 <div className="qr-effort pee">
                     <div className="qr-label">PEE</div>
                     <div className="qr-info qr-good"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>

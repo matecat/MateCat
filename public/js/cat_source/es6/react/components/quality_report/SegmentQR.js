@@ -129,11 +129,11 @@ class SegmentQR extends React.Component {
         let str_pad_left = function(string,pad,length) {
             return (new Array(length+1).join(pad)+string).slice(-length);
         }
-        let time = parseInt(this.props.segment.get("time_to_edit"));
+        let time = parseInt(this.props.segment.get("time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time / 60);
-        let seconds = time - minutes * 60;
-        return str_pad_left(hours,'0',3)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        let seconds = parseInt(time - minutes * 60);
+        return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
     getDiffPatch(source, text) {
         return TagsUtils.getDiffHtml(source, text);
