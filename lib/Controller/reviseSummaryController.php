@@ -123,7 +123,7 @@ class reviseSummaryController extends viewController {
                         'options'       => []
                 ];
             }
-            $this->categories = json_encode( $categories );
+            $this->categories = json_encode( ['categories' =>  $categories ] );
         }
 
         $this->_saveActivity();
