@@ -285,13 +285,11 @@ class SegmentQR extends React.Component {
                         <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
                         </div>
                         <div className="segment-content qr-spec">
-                            <div className="segment-content qr-spec">
-                                { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
-                                    <div>
-                                        <b>ICE Match</b>
-                                    </div>
-                                ) :  null}
-                            </div>
+                            { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
+                                <div>
+                                    <b>ICE Match</b>
+                                </div>
+                            ) :  null}
                         </div>
                     </div>
                 ) : null}
