@@ -1,6 +1,6 @@
 
 import TeamSelect from "./TeamsSelect";
-import JobInfo from "./HeaderJobInfo";
+import ProjectInfo from "./HeaderProjectInfo";
 import FilterProjects from "./manage/FilterProjects"
 import TeamConstants from "./../../constants/TeamConstants";
 import TeamsStore from "./../../stores/TeamsStore";
@@ -90,7 +90,7 @@ class Header extends React.Component {
             </div>;
         } else if (this.props.showJobInfo) {
             return <div className="header-project-container-info">
-                <JobInfo/>
+                <ProjectInfo/>
             </div>;
         }
     }
