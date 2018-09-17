@@ -21,9 +21,6 @@ class Header extends React.Component {
         TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
-        // $('.ui.dropdown')
-        //     .dropdown()
-        // ;
     }
 
     componentWillUnmount() {

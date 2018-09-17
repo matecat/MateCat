@@ -38,7 +38,7 @@ class QualitySummaryTable extends React.Component {
     getHeader() {
         let html = [];
         this.severities.forEach((sev, index)=>{
-            let item = <th className="one wide center aligned qr-title qr-severity critical" key={sev.label+index}>
+            let item = <th className="two wide center aligned qr-title qr-severity major" key={sev.label+index}>
                         <div className="qr-info">{sev.label}</div>
                         <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
                     </th>;
@@ -46,7 +46,7 @@ class QualitySummaryTable extends React.Component {
         });
 
         return <tr>
-            <th className="four wide qr-title qr-issue">Issues</th>
+            <th className="eight wide qr-title qr-issue">Issues</th>
             {html}
             <th className="wide center aligned qr-title">Total weight</th>
         </tr>
