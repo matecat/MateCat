@@ -116,6 +116,7 @@ class Revise_JobQA {
             $fieldName = $constants = $reflect->getConstant( "ERR_" . strtoupper( $field ) );
             $qaData[]    = array(
                     'type'    => $fieldName,
+                    'field' => $field,
                     'allowed' => round( $info[ 'acceptance' ], 1 , PHP_ROUND_HALF_UP ),
                     'found'   => $info[ 'foundErr' ],
                     'founds' => ['minor' => $info['foundErr_min'], 'major' => $info['foundErr_maj']],
