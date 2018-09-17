@@ -280,11 +280,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     /**
      * @param $segments_id
+     * @param $job_id
+     * @param $job_password
      *
      * @return \QualityReport_QualityReportSegmentStruct[]
      */
 
-    public function getSegmentsForQr($segments_id, $job_id){
+    public function getSegmentsForQr($segments_id, $job_id, $job_password){
         $db = Database::obtain()->getConnection();
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
@@ -310,20 +312,20 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.match_type
                 
                 FROM segments s
-                JOIN segment_translations st ON st.id_segment = s.id
-                JOIN jobs j ON j.id = st.id_job
-                JOIN files_job fj ON fj.id_job = j.id
-                JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
+                RIGHT JOIN segment_translations st ON st.id_segment = s.id
+                RIGHT JOIN jobs j ON j.id = st.id_job
+                RIGHT JOIN files_job fj ON fj.id_job = j.id
+                RIGHT JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
                 JOIN (
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."
                  ) AS SLIST USING( id_segment )
-                 WHERE j.id = ?
+                 WHERE j.id = ? AND j.password = ?
             ORDER BY sid ASC";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct");
-        $stmt->execute( array_merge($segments_id, array($job_id)));
+        $stmt->execute(array_merge($segments_id, array($job_id, $job_password)));
 
         $results = $stmt->fetchAll();
 

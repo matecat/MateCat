@@ -19,7 +19,7 @@ class QualityReport_QualityReportSegmentModel {
 
     public function getSegmentsForQR( $segments_id, Chunks_ChunkStruct $chunk ) {
         $segmentsDao = new \Segments_SegmentDao;
-        $data        = $segmentsDao->getSegmentsForQr( $segments_id, $chunk->id );
+        $data        = $segmentsDao->getSegmentsForQr( $segments_id, $chunk->id, $chunk->password );
 
         $featureSet = new FeatureSet();
 
