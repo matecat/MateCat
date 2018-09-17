@@ -212,15 +212,15 @@ header {
                                             &:first-child {
                                                 padding-left: 15px;
                                             }
-                                            &.critical {
+                                            &.major {
                                                 border-bottom: 5px solid $color-red
                                             }
-                                            &.major {
+                                            &.minor {
                                                 border-bottom: 5px solid $color-orange;
                                             }
-                                            &.enhacement {
+                                            /*&.enhacement {
                                                 border-bottom: 5px solid $color-yellow;
-                                            }
+                                            }*/
                                             &.qr-total-score {
                                                 padding: 15px 0 !important;
                                                 &.qr-pass {
@@ -258,6 +258,10 @@ header {
                             }
                             .filters-qr {}
                             .qr-segments {
+                                margin-top: 50px;
+                                &:nth-child(2) {
+                                    margin-top: 0px;
+                                }
                                 .qr-segments-list {
                                     .qr-single-segment {
                                         padding-top: 30px;
@@ -290,6 +294,10 @@ header {
                                             .segment-status-container {
                                                 width: 14%;
                                                 padding: 15px 0.78571429em;
+                                                .status-new {
+                                                    font-size: 20px;
+                                                    color: #8b8e92;
+                                                }
                                                 .status-translated {
                                                     font-size: 20px;
                                                     color: #09beec;
@@ -338,6 +346,7 @@ header {
                                                             border: none;
                                                             outline: none;
                                                             background: none;
+                                                            cursor: pointer;
                                                             i {
                                                                 font-size: .9em;
                                                                 color: gray;
