@@ -13,14 +13,21 @@ class QualityReport extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            segmentFiles: null
+            segmentFiles: null,
+            jobInfo: null
         };
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
+        this.renderJobInfo = this.renderJobInfo.bind(this);
     }
 
     renderSegmentsFiles(files) {
         this.setState({
             segmentFiles: files
+        });
+    }
+    renderJobInfo(jobInfo) {
+        this.setState({
+            jobInfo: jobInfo
         });
     }
 
@@ -30,9 +37,12 @@ class QualityReport extends React.Component {
 
     componentDidMount() {
         QRStore.addListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
+        QRStore.addListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
+        // console.log("Render Quality Report");
     }
     componentWillUnmount() {
         QRStore.removeListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
+        QRStore.removeListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
     }
 
     render () {
@@ -43,7 +53,7 @@ class QualityReport extends React.Component {
                         <div className="qr-bg-head"/>
                         <div className="qr-job-summary">
                             <h3>Job Summary</h3>
-                            <JobSummary/>
+                            <JobSummary jobInfo={this.state.jobInfo}/>
                             <SegmentsDetails files={this.state.segmentFiles}/>
                         </div>
                     </div>

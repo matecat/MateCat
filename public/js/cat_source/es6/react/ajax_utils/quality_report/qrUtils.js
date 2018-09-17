@@ -19,6 +19,13 @@ let QUALITY_REPORT =  {
 
     getUserData() {
         return $.getJSON('/api/app/user');
+    },
+
+    getQRinfo() {
+        return $.ajax({
+            type: "GET",
+            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password
+        });
     }
 }
 

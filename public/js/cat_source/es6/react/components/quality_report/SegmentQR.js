@@ -133,7 +133,7 @@ class SegmentQR extends React.Component {
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time / 60);
         let seconds = time - minutes * 60;
-        return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        return str_pad_left(hours,'0',3)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
     getDiffPatch(source, text) {
         return TagsUtils.getDiffHtml(source, text);
@@ -219,7 +219,7 @@ class SegmentQR extends React.Component {
                     <div className="segment-production">
                         <div className="production word-speed">Words speed: <b>{this.getWordsSpeed()}</b></div>
                         <div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>
-                        <div className="production pee">PEE: <b>30%</b></div>
+                        <div className="production pee">PEE: <b>{this.props.segment.get("pee")}%</b></div>
                     </div>
                 </div>
                 <div className="segment-status-container">

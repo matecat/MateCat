@@ -6,8 +6,8 @@ class JobSummary extends React.Component {
     render () {
 
         return <div className="qr-production-quality">
-                <ProductionSummary/>
-                <QualitySummaryTable/>
+                <ProductionSummary jobInfo={this.props.jobInfo}/>
+                <QualitySummaryTable jobInfo={this.props.jobInfo}/>
             </div>
     }
 }

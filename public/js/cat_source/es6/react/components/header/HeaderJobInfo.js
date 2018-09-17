@@ -1,6 +1,8 @@
 
 class HeaderJobInfo extends React.Component {
-
+    componentDidMount() {
+        // console.log("Render Header");
+    }
     render () {
         return <div className="header-project-info">
                 <div className="header-id-project-name">
