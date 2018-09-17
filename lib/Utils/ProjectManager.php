@@ -2003,8 +2003,7 @@ class ProjectManager {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
-                ( empty( $xliff_trans_unit[ 'source' ] ) && empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ) ||
-                empty( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] ) ||
+                !isset( $xliff_trans_unit[ 'alt-trans' ] ) ||
                 empty( $xliff_file_attributes[ 'source-language' ] ) ||
                 empty( $xliff_file_attributes[ 'target-language' ] ) ||
                 count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
@@ -2031,34 +2030,41 @@ class ProjectManager {
         $config[ 'target' ] = $xliff_file_attributes[ 'target-language' ];
         $config[ 'email' ]  = \INIT::$MYMEMORY_API_KEY;
 
+        foreach( $xliff_trans_unit[ 'alt-trans' ] as $altTrans ) {
 
-        if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
-            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+            //Wrong alt-trans tag
+            if ( ( empty( $xliff_trans_unit[ 'source' ] ) && empty( $altTrans[ 'source' ] ) ) || empty( $altTrans[ 'target' ] ) ) {
+                continue;
+            }
+
+            if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
+                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+            }
+
+            //Override with the alt-trans source value
+            if ( !empty( $altTrans[ 'source' ] ) ) {
+                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ] );
+            }
+
+            $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
+
+            $target_extract_external    = $this->_strip_external( $altTrans[ 'target' ] );
+            $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
+            $config[ 'context_after' ]  = null;
+            $config[ 'context_before' ] = null;
+
+            if ( !empty( $altTrans[ 'attr' ][ 'match-quality' ] ) ) {
+
+                //get the Props
+                $config[ 'prop' ] = json_encode( [
+                        "match-quality" => $altTrans[ 'attr' ][ 'match-quality' ]
+                ] );
+
+            }
+
+            $engine->set( $config );
 
         }
-
-        if ( !empty( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] ) ) {
-            $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'source' ] );
-        }
-
-
-        $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
-
-        $target_extract_external    = $this->_strip_external( $xliff_trans_unit[ 'alt-trans' ][ 'target' ] );
-        $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-        $config[ 'context_after' ]  = null;
-        $config[ 'context_before' ] = null;
-
-        if ( !empty( $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ] ) ) {
-
-            //get the Props
-            $config[ 'prop' ] = json_encode( [
-                    "match-quality" => $xliff_trans_unit[ 'alt-trans' ][ 'attr' ][ 'match-quality' ]
-            ] );
-
-        }
-
-        $engine->set( $config );
 
     }
 
