@@ -12,6 +12,7 @@ class reviseSummaryController extends viewController {
 	private $jid = "";
 	private $project_status = "";
 	private $thisUrl;
+	private $categories;
 
     private $data;
     private $job_stats;
@@ -98,6 +99,32 @@ class reviseSummaryController extends viewController {
         $this->qa_overall_text     = $jobVote[ 'minText' ];
         $this->qa_overall_avg      = $jobVote[ 'avg' ];
         $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
+
+        $codes = $this->featureSet->getCodes();
+        if(in_array(Features\ReviewImproved::FEATURE_CODE, $codes) OR in_array(Features\ReviewExtended::FEATURE_CODE, $codes)){
+            $project = Projects_ProjectDao::findById($this->project_status['id']);
+
+            $model = $project->getLqaModel() ;
+            $this->categories = $model->getSerializedCategories();
+        }
+        else {
+            $categoriesDbNames = Constants_Revise::$categoriesDbNames;
+            $categories        = [];
+            foreach ( $categoriesDbNames as $categoryDbName ) {
+
+                $categories[] = [
+                        'label'         => constant( "Constants_Revise::" . strtoupper( $categoryDbName ) ),
+                        'id'            => $categoryDbName,
+                        'severities'    => [
+                                ['label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MINOR]],
+                                ['label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MAJOR]]
+                        ],
+                        'subcategories' => [],
+                        'options'       => []
+                ];
+            }
+            $this->categories = json_encode( $categories );
+        }
 
         $this->_saveActivity();
 
@@ -209,6 +236,9 @@ class reviseSummaryController extends viewController {
 
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->first_job_segment   = $this->data->job_first_segment ;
+
+        $this->template->categories = $this->categories;
+
     }
 
     /**
