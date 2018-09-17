@@ -3,13 +3,19 @@ import FileDetails from "./FileDetails"
 import QualityReportActions from "./../../actions/QualityReportActions"
 
 class SegmentsDetails extends React.Component {
-
+    constructor(props) {
+        super(props);
+        this.state = {
+            filter: null
+        };
+    }
     getFiles() {
         let files = [];
         if ( this.props.files ) {
             this.props.files.keySeq().forEach(( key, index ) => {
                 let file = <FileDetails key={key} file={this.props.files.get(key)}/>
                 files.push(file)
+                this.lastSegment = this.props.files.get(key).get('segments').last().get('sid');
             });
         }
         return files;
@@ -23,11 +29,17 @@ class SegmentsDetails extends React.Component {
     }
 
     onScroll(){
-        // (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 500)
         if ( $(window).scrollTop() + $(window).height() > $(document).height() - 200)  {
             console.log("Load More Segments!");
-            QualityReportActions.getMoreQRSegments();
+            QualityReportActions.getMoreQRSegments(this.state.filter, this.lastSegment);
         }
+    }
+    filterSegments(filter) {
+        this.setState({
+            filter: filter
+        });
+        this.lastSegment = 0;
+        QualityReportActions.filterSegments(filter, null)
     }
 
     componentDidMount() {
@@ -44,7 +56,7 @@ class SegmentsDetails extends React.Component {
             <div className="qr-segments-summary">
                 <div className="qr-filter-container">
                     <h3>Segment details</h3>
-                    <Filters/>
+                    <Filters applyFilter={this.filterSegments.bind(this)}/>
                 </div>
                 {this.getFiles()}
             </div>

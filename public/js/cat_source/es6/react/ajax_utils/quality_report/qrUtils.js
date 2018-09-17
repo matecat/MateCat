@@ -2,33 +2,30 @@
 
 let QUALITY_REPORT =  {
 
-    getSegmentsFiles() {
-
+    getSegmentsFiles(filter, segmentId) {
         let data = {
-            step: 30,
-            segment: config.first_job_segment,
+            step: 10,
+            ref_segment: segmentId,
         };
+        if (filter) {
+            data.filter = filter;
+        }
         return $.ajax({
             data: data,
             type: "GET",
-            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
-        });
-    },
-    getSegmentsFiles2() {
-
-        let data = {
-            step: 30,
-            segment: "756512",
-        };
-        return $.ajax({
-            data: data,
-            type: "GET",
-            url : "/api/v2/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
+            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
 
     getUserData() {
         return $.getJSON('/api/app/user');
+    },
+
+    getQRinfo() {
+        return $.ajax({
+            type: "GET",
+            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password
+        });
     }
 }
 

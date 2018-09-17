@@ -9,9 +9,13 @@ EventEmitter.prototype.setMaxListeners(0);
 let QualityReportStore = assign({}, EventEmitter.prototype, {
 
     _segmentsFiles: Immutable.fromJS({}),
-
+    _jobInfo: Immutable.fromJS({}),
     storeSegments: function(files) {
         this._segmentsFiles = Immutable.fromJS(files);
+    },
+
+    storeJobInfo: function(job) {
+        this._jobInfo = Immutable.fromJS(job);
     },
 
     addSegments: function ( files ) {
@@ -37,6 +41,10 @@ AppDispatcher.register(function(action) {
         case QRConstants.ADD_SEGMENTS:
             QualityReportStore.addSegments(action.files);
             QualityReportStore.emitChange(QRConstants.RENDER_SEGMENTS, QualityReportStore._segmentsFiles);
+            break;
+        case QRConstants.RENDER_REPORT:
+            QualityReportStore.storeJobInfo(action.job);
+            QualityReportStore.emitChange(QRConstants.RENDER_REPORT, QualityReportStore._jobInfo);
             break;
 
     }

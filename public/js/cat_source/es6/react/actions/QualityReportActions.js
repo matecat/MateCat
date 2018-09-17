@@ -5,25 +5,44 @@ let QualityReportActions =  {
 
     loadInitialAjaxData() {
         QRApi.getSegmentsFiles().done(function ( response ) {
-            if ( response.data.files ) {
+            if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.RENDER_SEGMENTS,
-                    files: response.data.files,
+                    files: response.files,
+                });
+            }
+        });
+        QRApi.getQRinfo().done(function(response) {
+            if (response.job) {
+                AppDispatcher.dispatch({
+                    actionType: QRConstants.RENDER_REPORT,
+                    job: response.job.chunks[0],
                 });
             }
         });
     },
 
-    getMoreQRSegments() {
-        QRApi.getSegmentsFiles2().done(function ( response ) {
-            if ( response.data.files ) {
+    getMoreQRSegments(filter, segmentId) {
+        QRApi.getSegmentsFiles(filter, segmentId).done(function ( response ) {
+            if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.ADD_SEGMENTS,
-                    files: response.data.files,
+                    files: response.files,
                 });
             }
         });
-    }
+    },
+
+    filterSegments(filter, segmentId) {
+        QRApi.getSegmentsFiles(filter, segmentId).done(function ( response ) {
+            if ( response.files ) {
+                AppDispatcher.dispatch({
+                    actionType: QRConstants.RENDER_SEGMENTS,
+                    files: response.files,
+                });
+            }
+        });
+    },
 
 }
 

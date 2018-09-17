@@ -152,7 +152,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $options_conditions_query  = "";
         $options_join_query        = "";
         $options_conditions_values = [];
-        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], Constants_TranslationStatus::$STATUSES) ) {
+        $statuses = array_merge(
+                Constants_TranslationStatus::$INITIAL_STATUSES,
+                Constants_TranslationStatus::$TRANSLATION_STATUSES,
+                Constants_TranslationStatus::$REVISION_STATUSES
+        );
+        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], $statuses) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
         }
