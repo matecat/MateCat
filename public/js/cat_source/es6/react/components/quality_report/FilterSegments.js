@@ -5,24 +5,50 @@ class FilterSegments extends React.Component {
         super(props);
 
         this.state = this.defaultState();
+        this.lqaNestedCategories = JSON.parse(config.categories);
+        this.severities = this.getSeverities();
     }
 
     defaultState() {
         return {
             filter: {
-                status: ""
-            },
-            filtering: false,
-            filteredCount: 0
+                status: "",
+                issue_category: null,
+                severity: null
+            }
         }
     }
 
-    filterSelectChanged(value) {
-
-        this.setState({
-            filter: {
-                status: value
+    getSeverities() {
+        let severities = [];
+        let severitiesNames = [];
+        this.lqaNestedCategories.categories.forEach((cat)=>{
+            if (cat.subcategories.length === 0) {
+                cat.severities.forEach((sev)=>{
+                    if (severitiesNames.indexOf(sev.label) === -1 ) {
+                        severities.push(sev);
+                        severitiesNames.push(sev.label);
+                    }
+                });
+            } else {
+                cat.subcategories.forEach((subCat)=>{
+                    subCat.severities.forEach((sev)=>{
+                        if (severitiesNames.indexOf(sev.label) === -1 ) {
+                            severities.push(sev);
+                            severitiesNames.push(sev.label);
+                        }
+                    });
+                });
             }
+        });
+        return severities;
+    }
+
+    filterSelectChanged(type, value) {
+        let filter = jQuery.extend({}, this.state.filter);
+        filter[type] = value;
+        this.setState({
+            filter: filter
         });
 
         this.props.applyFilter(this.state.filter);
@@ -30,11 +56,34 @@ class FilterSegments extends React.Component {
     }
 
     resetStatusFilter() {
+        let filter = jQuery.extend({}, this.state.filter);
+        filter.status = "";
         $(this.statusDropdown).dropdown('restore defaults');
         this.setState({
-            filter: {
-                status: ""
-            }
+            filter: filter
+        });
+        setTimeout(()=> {
+            this.props.applyFilter(this.state.filter)
+        });
+    }
+    resetCategoryFilter() {
+        let filter = jQuery.extend({}, this.state.filter);
+        filter.issue_category = null;
+        $(this.categoryDropdown).dropdown('restore defaults');
+        this.setState({
+            filter: filter
+        });
+        setTimeout(()=> {
+            this.props.applyFilter(this.state.filter)
+        });
+    }
+
+    resetSeverityFilter() {
+        let filter = jQuery.extend({}, this.state.filter);
+        filter.severity = null;
+        $(this.severityDropdown).dropdown('restore defaults');
+        this.setState({
+            filter: filter
         });
         setTimeout(()=> {
             this.props.applyFilter(this.state.filter)
@@ -45,8 +94,22 @@ class FilterSegments extends React.Component {
         let self = this;
         $(this.statusDropdown).dropdown({
             onChange: function(value, text, $selectedItem) {
-                if (value !== "") {
-                    self.filterSelectChanged(value);
+                if (value && value !== "") {
+                    self.filterSelectChanged('status', value);
+                }
+            }
+        });
+        $(this.categoryDropdown).dropdown({
+            onChange: (value, text, $selectedItem) => {
+                if (value && value !== "") {
+                    self.filterSelectChanged('issue_category', value);
+                }
+            }
+        });
+        $(this.severityDropdown).dropdown({
+            onChange: (value, text, $selectedItem) => {
+                if (value && value !== "") {
+                    self.filterSelectChanged('severity', value);
                 }
             }
         });
@@ -70,7 +133,19 @@ class FilterSegments extends React.Component {
                 {item.label}
             </div>;
         });
-        let statusFilterClass = (this.state.filter.status !== "") ? "filtered" : "not-filtered";
+        let optionsCategory = this.lqaNestedCategories.categories.map((item, index) => {
+            return <div className="item" key={index} data-value={item.id}>
+                {item.label}
+            </div>;
+        });
+        let optionsSeverities = this.severities.map((item, index) => {
+            return <div className="item" key={index} data-value={item.label}>
+                {item.label}
+            </div>;
+        });
+        let statusFilterClass = (this.state.filter.status && this.state.filter.status !== "") ? "filtered" : "not-filtered";
+        let categoryFilterClass = (this.state.filter.issue_category && this.state.filter.issue_category !== "") ? "filtered" : "not-filtered";
+        let severityFilterClass = (this.state.filter.severity && this.state.filter.severity !== "") ? "filtered" : "not-filtered";
         return <div className="qr-filter-list">Filters by
             <div className="filter-dropdown left-10">
                 <div className={"filter-status " + statusFilterClass}>
@@ -81,6 +156,28 @@ class FilterSegments extends React.Component {
                         <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetStatusFilter.bind(this)}/></div>
                         <div className="menu">
                             {optionsStatus}
+                        </div>
+                    </div>
+                </div>
+                <div className={"filter-category " + categoryFilterClass}>
+                    <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.categoryDropdown=dropdown}>
+                        <div className="text">
+                            <div>Issue Category</div>
+                        </div>
+                        <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetCategoryFilter.bind(this)}/></div>
+                        <div className="menu">
+                            {optionsCategory}
+                        </div>
+                    </div>
+                </div>
+                <div className={"filter-category " + severityFilterClass}>
+                    <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.severityDropdown=dropdown}>
+                        <div className="text">
+                            <div>Issue Severity</div>
+                        </div>
+                        <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetSeverityFilter.bind(this)}/></div>
+                        <div className="menu">
+                            {optionsSeverities}
                         </div>
                     </div>
                 </div>
