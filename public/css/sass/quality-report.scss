@@ -773,7 +773,7 @@ header {
                 }
             }
         }
-        .filter-status, .filter-activities, .filter-data-sample {
+        .filter-status, .filter-severity , .filter-category, .filter-activities, .filter-data-sample {
             &.not-filtered {
                 .ui.basic.button {
                     &:hover {
