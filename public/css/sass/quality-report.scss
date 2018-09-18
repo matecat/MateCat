@@ -209,18 +209,10 @@ header {
                                         .qr-title {
                                             background: none;
                                             padding: 5px;
+                                            text-transform: capitalize;
                                             &:first-child {
                                                 padding-left: 15px;
                                             }
-                                            &.major {
-                                                border-bottom: 5px solid $color-red
-                                            }
-                                            &.minor {
-                                                border-bottom: 5px solid $color-orange;
-                                            }
-                                            /*&.enhacement {
-                                                border-bottom: 5px solid $color-yellow;
-                                            }*/
                                             &.qr-total-score {
                                                 padding: 15px 0 !important;
                                                 &.qr-pass {
@@ -236,6 +228,20 @@ header {
                                                 &.qr-fail {
                                                     background: $color-red;
                                                 }
+                                            }
+                                        }
+                                        .qr-severity {
+                                            &:nth-child(2) {
+                                                border-bottom: 5px solid $color-yellow;
+                                            }
+                                            &:nth-child(3) {
+                                                border-bottom: 5px solid $color-orange;
+                                            }
+                                             &:nth-child(4) {
+                                                border-bottom: 5px solid $color-red;
+                                            }
+                                            &:nth-last-child(2) {
+                                                border-bottom: 5px solid $color-red !important;
                                             }
                                         }
                                     }
