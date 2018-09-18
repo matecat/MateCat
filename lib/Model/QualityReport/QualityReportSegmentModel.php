@@ -162,7 +162,7 @@ class QualityReport_QualityReportSegmentModel {
         foreach ( $categories_values as $category_value ) {
 
             $issue_old_severity = $issue->{$category_value};
-            if ( $issue_old_severity == "" ) {
+            if ( $issue_old_severity == "" || $issue_old_severity == "none" ) {
                 continue;
             }
 
@@ -175,7 +175,7 @@ class QualityReport_QualityReportSegmentModel {
                     "issue_end_offset"    => "0",
                     "issue_category"      => constant( "Constants_Revise::" . strtoupper( $category_value ) ),
                     "category_options"    => null,
-                    "issue_severity"      => $issue->{$category_value},
+                    "issue_severity"      => $issue_old_severity,
                     "issue_comment"       => null,
                     "target_text"         => null,
                     "issue_uid"           => null,
