@@ -1,5 +1,5 @@
 
-class QualitySummaryTable extends React.Component {
+class QualitySummaryTableOldRevise extends React.Component {
     constructor (props) {
         super(props);
         this.lqaNestedCategories = JSON.parse(config.categories);
@@ -43,9 +43,9 @@ class QualitySummaryTable extends React.Component {
         let html = [];
         this.severities.forEach((sev, index)=>{
             let item = <th className="two wide center aligned qr-title qr-severity" key={sev.label+index}>
-                        <div className="qr-info">{sev.label}</div>
-                        <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
-                    </th>;
+                <div className="qr-info">{sev.label}</div>
+                <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
+            </th>;
             html.push(item);
         });
 
@@ -89,9 +89,9 @@ class QualitySummaryTable extends React.Component {
             });
             let catTotalWeightHtml = <td className="right aligned">{catTotalWeightValue}</td>;
             let line = <tr key={cat.id+index}>
-                        {catHtml}
-                        {catTotalWeightHtml}
-                    </tr>;
+                {catHtml}
+                {catTotalWeightHtml}
+            </tr>;
             html.push(line);
             this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
@@ -112,4 +112,4 @@ class QualitySummaryTable extends React.Component {
     }
 }
 
-export default QualitySummaryTable ;
+export default QualitySummaryTableOldRevise ;
