@@ -129,6 +129,7 @@ class reviseSummaryController extends viewController {
 
             $model = $project->getLqaModel() ;
             $this->categories = $model->getSerializedCategories();
+            $this->project_type = "new";
         }
         else {
             $categoriesDbNames = Constants_Revise::$categoriesDbNames;
@@ -147,6 +148,7 @@ class reviseSummaryController extends viewController {
                 ];
             }
             $this->categories = json_encode( ['categories' =>  $categories ] );
+            $this->project_type = "old";
         }
 
         $this->_saveActivity();
@@ -244,6 +246,7 @@ class reviseSummaryController extends viewController {
         $this->template->first_job_segment   = $this->data->job_first_segment ;
 
         $this->template->categories = $this->categories;
+        $this->template->project_type = $this->project_type;
 
     }
 
