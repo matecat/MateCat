@@ -58,10 +58,11 @@ class SegmentsDetails extends React.Component {
                     <h3>Segment details</h3>
                     <Filters applyFilter={this.filterSegments.bind(this)}/>
                 </div>
-                {this.props.files && this.props.files.size > 0 ?
-                    this.getFiles()
-                 : (
+                {this.props.files && this.props.files.size === 0 ?
                     <div>No Segments found</div>
+
+                 : (
+                    this.getFiles()
                 ) }
 
             </div>
