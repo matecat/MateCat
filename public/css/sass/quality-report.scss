@@ -16,15 +16,18 @@ body {
     text-align: left;
     background: #f2f4f7;
     font-size: 16px;
+    min-width: 1024px;
+    overflow: auto;
 }
 
 header {
+    min-width: 1024px;
     .nav-mc-bar {
         .logo {
             left: 0;
         }
         .header-project-container-info {
-            width: 62%;
+            width: 75%;
             /*background: #00123a;*/
             color: #FFF;
             margin-top: 9px;
@@ -398,7 +401,7 @@ header {
                                                         background: #FFFFFF;
                                                         margin-right: 1px;
                                                         display: inline-block;
-
+                                                        color: #5f5f5f;
                                                         .added {
                                                             background: rgba(158, 255, 0, 0.2);
                                                             .qr-tags,
@@ -467,6 +470,12 @@ header {
                                                                         border-bottom: 2px solid #FFE600;
                                                                     }
                                                                 }
+                                                                .qr-error {
+
+                                                                }
+                                                                .qr-severity {
+                                                                    margin-left: 5px;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -482,6 +491,9 @@ header {
                                                             color: #FFFFFF;
                                                             padding: 0 3px;
                                                             font-size: 14px;
+                                                        }
+                                                        .per-yellow {
+                                                            padding: 0 3px;
                                                         }
                                                     }
                                                 }
@@ -917,4 +929,3 @@ header {
         }
     }
 }
-
