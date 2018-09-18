@@ -46,16 +46,33 @@ class QualityReport extends React.Component {
     }
 
     render () {
-
+        let spinnerContainer = {
+            position: 'absolute',
+            height : '100%',
+            width : '100%',
+            backgroundColor: 'rgba(76, 69, 69, 0.3)',
+            top: $(window).scrollTop(),
+            left: 0,
+            zIndex: 3
+        };
         return <div className="qr-container">
                 <div className="qr-container-inside">
                     <div className="qr-job-summary-container">
                         <div className="qr-bg-head"/>
+                        { this.state.jobInfo ? (
                             <div className="qr-job-summary">
                                 <h3>Job Summary</h3>
                                 <JobSummary jobInfo={this.state.jobInfo}/>
                                 <SegmentsDetails files={this.state.segmentFiles}/>
                             </div>
+                        ) : (
+                            <div style={spinnerContainer}>
+                                <div className="ui active inverted dimmer">
+                                    <div className="ui massive text loader">Loading</div>
+                                </div>
+                            </div>
+                        ) }
+
                     </div>
 
                 </div>
