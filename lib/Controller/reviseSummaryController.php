@@ -13,6 +13,8 @@ class reviseSummaryController extends viewController {
 	private $project_status = "";
 	private $thisUrl;
 	private $categories;
+	private $error_info;
+	private $error_max_thresholds;
 
     private $data;
     private $job_stats;
@@ -85,7 +87,9 @@ class reviseSummaryController extends viewController {
                 $this->reviseClass
         );
 
-        $this->featureSet->loadFromUserEmail( $this->user->getEmail() );
+        $project = Projects_ProjectDao::findById($this->project_status['id']);
+
+        $this->featureSet->loadForProject( $project );
 
         list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $this->jid,
                 $this->password,
@@ -100,9 +104,28 @@ class reviseSummaryController extends viewController {
         $this->qa_overall_avg      = $jobVote[ 'avg' ];
         $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
 
+
+        //set the labels
+        $this->error_info = array(
+                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => 'Tag issues (mismatches, whitespaces)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions or omissions)',
+                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => 'Terminology and translation consistency',
+                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => 'Language quality (grammar, punctuation, spelling)',
+                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => 'Style (readability, consistent style and tone)',
+        );
+
+        $this->error_max_thresholds = array(
+                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => constant( get_class( $this->reviseClass ) . "::MAX_TYPING" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => constant( get_class( $this->reviseClass ) . "::MAX_TRANSLATION" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => constant( get_class( $this->reviseClass ) . "::MAX_TERMINOLOGY" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => constant( get_class( $this->reviseClass ) . "::MAX_QUALITY" ),
+                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
+        );
+
+
+
         $codes = $this->featureSet->getCodes();
         if(in_array(Features\ReviewImproved::FEATURE_CODE, $codes) OR in_array(Features\ReviewExtended::FEATURE_CODE, $codes)){
-            $project = Projects_ProjectDao::findById($this->project_status['id']);
 
             $model = $project->getLqaModel() ;
             $this->categories = $model->getSerializedCategories();
@@ -113,14 +136,14 @@ class reviseSummaryController extends viewController {
             foreach ( $categoriesDbNames as $categoryDbName ) {
 
                 $categories[] = [
-                        'label'         => constant( "Constants_Revise::" . strtoupper( $categoryDbName ) ),
+                        'label'         => constant( get_class( $this->reviseClass ) ."::". strtoupper( $categoryDbName ) ),
                         'id'            => $categoryDbName,
                         'severities'    => [
                                 ['label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MINOR]],
                                 ['label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MAJOR]]
                         ],
                         'subcategories' => [],
-                        'options'       => []
+                        'options'       => [],
                 ];
             }
             $this->categories = json_encode( ['categories' =>  $categories ] );
@@ -167,29 +190,12 @@ class reviseSummaryController extends viewController {
         $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
 
-        //set the labels
-        $error_info = array(
-                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => 'Tag issues (mismatches, whitespaces)',
-                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions or omissions)',
-                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => 'Terminology and translation consistency',
-                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => 'Language quality (grammar, punctuation, spelling)',
-                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => 'Style (readability, consistent style and tone)',
-        );
-
-        $error_max_thresholds = array(
-                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => constant( get_class( $this->reviseClass ) . "::MAX_TYPING" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => constant( get_class( $this->reviseClass ) . "::MAX_TRANSLATION" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => constant( get_class( $this->reviseClass ) . "::MAX_TERMINOLOGY" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => constant( get_class( $this->reviseClass ) . "::MAX_QUALITY" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
-        );
-
         $this->template->reviseClass = $this->reviseClass;
 
 
 
         foreach( $this->qa_data as $k => $value ){
-            $this->qa_data[ $k ][ 'text_content' ] = $error_info[ $value[ 'type' ] ];
+            $this->qa_data[ $k ][ 'text_content' ] = $this->error_info[ $value[ 'type' ] ];
         }
 
 //        $nrFormatter = new NumberFormatter("en-US", NumberFormatter::DECIMAL);
@@ -201,7 +207,7 @@ class reviseSummaryController extends viewController {
         $this->template->qa_overall_avg        = $this->qa_overall_avg;
         $this->template->qa_equivalent_class   = $this->qa_equivalent_class;
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
-        $this->template->error_max_thresholds = $error_max_thresholds;
+        $this->template->error_max_thresholds = $this->error_max_thresholds;
 //        $this->template->word_interval = $nrFormatter->format( constant( get_class( $this->reviseClass ) . "::WORD_INTERVAL" ) );
 
         /*

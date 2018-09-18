@@ -130,10 +130,11 @@ class Chunk extends \API\V2\Json\Chunk {
 
             $reviseIssues = [];
             foreach ( $qa_data as $issue ) {
-                $reviseIssues[ str_replace( " ", "_", strtolower( $issue[ 'type' ] ) ) ] = [
+                $reviseIssues[ "err_".str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
                         'allowed' => $issue[ 'allowed' ],
                         'found'   => $issue[ 'found' ],
-                        'founds'  => $issue[ 'founds' ]
+                        'founds'  => $issue[ 'founds' ],
+                        'vote' => $issue['vote']
                 ];
             }
         }
