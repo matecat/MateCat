@@ -64,7 +64,7 @@ class QualitySummaryTable extends React.Component {
                 </div>
             ) }
 
-        </tr>
+            </div>
     }
     getBody() {
         let  html = [];
