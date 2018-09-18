@@ -37,12 +37,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->template->footer_show_revise_link = false;
 
-
-        // TODO: complete this with the actual URL
-        $this->template->quality_report_href = \Routes::pluginsBase() .
-            "/review_improved/quality_report/" .
-            "{$this->controller->getChunk()->id}/" .
-            "{$this->controller->getChunk()->password}";
+        $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
         if ( $this->controller->isRevision() ) {
             $this->template->showReplaceOptionsInSearch = false ;
