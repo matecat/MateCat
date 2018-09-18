@@ -51,11 +51,11 @@ class QualityReport extends React.Component {
                 <div className="qr-container-inside">
                     <div className="qr-job-summary-container">
                         <div className="qr-bg-head"/>
-                        <div className="qr-job-summary">
-                            <h3>Job Summary</h3>
-                            <JobSummary jobInfo={this.state.jobInfo}/>
-                            <SegmentsDetails files={this.state.segmentFiles}/>
-                        </div>
+                            <div className="qr-job-summary">
+                                <h3>Job Summary</h3>
+                                <JobSummary jobInfo={this.state.jobInfo}/>
+                                <SegmentsDetails files={this.state.segmentFiles}/>
+                            </div>
                     </div>
 
                 </div>

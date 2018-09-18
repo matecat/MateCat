@@ -86,7 +86,7 @@ class QualityReportController extends KleinController
                     'files' =>$segments
             ] );
         } else {
-            $this->response->json( [] );
+            $this->response->json( ['files' =>[] ]);
         }
 
     }
