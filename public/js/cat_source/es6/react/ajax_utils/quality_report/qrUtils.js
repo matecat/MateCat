@@ -4,7 +4,6 @@ let QUALITY_REPORT =  {
 
     getSegmentsFiles(filter, segmentId) {
         let data = {
-            step: 5,
             ref_segment: segmentId,
         };
         if (filter) {
@@ -27,6 +26,6 @@ let QUALITY_REPORT =  {
             url : "/api/v3/jobs/"+ config.id_job +"/" + config.password
         });
     }
-}
+};
 
 export default QUALITY_REPORT ;

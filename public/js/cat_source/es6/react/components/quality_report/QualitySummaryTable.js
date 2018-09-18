@@ -4,6 +4,7 @@ class QualitySummaryTable extends React.Component {
         super(props);
         this.lqaNestedCategories = JSON.parse(config.categories);
         this.getTotalSeverities();
+        this.qaLimit = config.qa_limit;
         this.htmlBody = this.getBody();
         this.htmlHead = this.getHeader();
 
@@ -51,11 +52,19 @@ class QualitySummaryTable extends React.Component {
         return <div className="qr-head">
             <div className="qr-title qr-issue">Issues</div>
             {html}
-            <div className="qr-title qr-total-severity">
-                <div className="qr-info">Job Passed/Not Passed</div>
-                <div className="qr-label">Total Weight: <b>{this.totalWeight}/soglia?</b></div>
-            </div>
-        </div>
+            { parseInt(this.totalWeight) > parseInt(this.qaLimit) ? (
+                <div className="qr-title qr-total-severity">
+                    <div className="qr-info">Job Not Passed</div>
+                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
+                </div>
+            ) : (
+                <div className="qr-title qr-total-severity">
+                    <div className="qr-info">Job Passed</div>
+                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
+                </div>
+            ) }
+
+        </tr>
     }
     getBody() {
         let  html = [];

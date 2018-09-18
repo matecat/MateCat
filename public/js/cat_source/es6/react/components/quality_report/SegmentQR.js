@@ -119,11 +119,15 @@ class SegmentQR extends React.Component {
     getWordsSpeed() {
         let str_pad_left = function(string,pad,length) {
             return (new Array(length+1).join(pad)+string).slice(-length);
-        }
+        };
         let time = parseInt(this.props.segment.get("secs_per_word"));
         let minutes = Math.floor( time / 60);
         let seconds = time - minutes * 60;
-        return str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        if (minutes > 0) {
+            return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+        } else {
+            return str_pad_left(seconds,'0',2)+"''";
+        }
     }
     getTimeToEdit() {
         let str_pad_left = function(string,pad,length) {
@@ -133,17 +137,24 @@ class SegmentQR extends React.Component {
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time / 60);
         let seconds = parseInt(time - minutes * 60);
-        return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        if (hours > 0 ) {
+            return str_pad_left(hours,'0',2)+''+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+        } else if (minutes > 0) {
+            return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+        } else {
+            return str_pad_left(seconds,'0',2)+"''";
+        }
+
     }
     getDiffPatch(source, text) {
         return TagsUtils.getDiffHtml(source, text);
     }
     openTranslateLink() {
-        window.open("/translate/project_name/langs/" + config.id_job + "-" + config.password + "#" + this.props.segment.get("sid"))
+        window.open(this.props.urls.get("translate_url") + "#" + this.props.segment.get("sid"))
     }
 
     openReviseLink() {
-        window.open("/revise/project_name/langs/" + config.id_job + "-" + config.password + "#" + this.props.segment.get("sid"))
+        window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
     }
     decodeTextAndTransformTags( text) {
         if (text) {
@@ -218,7 +229,7 @@ class SegmentQR extends React.Component {
 
                     </div>
                     <div className="segment-production">
-                        <div className="production word-speed">Words speed: <b>{this.getWordsSpeed()}</b></div>
+                        <div className="production word-speed">Secs/Word: <b>{this.getWordsSpeed()}</b></div>
                         <div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>
                         <div className="production pee">PEE: <b>{this.props.segment.get("pee")}%</b></div>
                     </div>
@@ -284,7 +295,7 @@ class SegmentQR extends React.Component {
                     <div className={revisedClasses}>
                         <a className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
-                            { (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
+                            { this.props.segment.get('ice_locked') === '0' || (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
                             <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
