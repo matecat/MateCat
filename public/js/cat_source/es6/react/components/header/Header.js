@@ -101,6 +101,8 @@ class Header extends React.Component {
         let componentToShow = this.getHeaderComponentToShow();
         if (this.props.showLinks) {
             containerClass = "user-teams thirteen";
+        } else if (this.props.showJobInfo) {
+            containerClass = "user-teams one";
         }
 
         return <section className="nav-mc-bar ui grid">

@@ -78,9 +78,9 @@ class SegmentQR extends React.Component {
         let issues = this.props.segment.get('issues');
         issues.map((issue)=>{
             let item = <div className="qr-issue human critical" key={issue.get('issue_id')}>
-                            <div className="qr-error"><b>{issue.get('issue_category')}</b></div>
-                            <div className="sub-type-error">Subtype </div>
-                            <div className="severity"><b>{issue.get('issue_severity')}</b></div>
+                            <div className="qr-error">{issue.get('issue_category')}: </div>
+                            {/*<div className="sub-type-error">Subtype </div>*/}
+                            <div className="qr-severity"><b>[{issue.get('issue_severity')}]</b></div>
                         </div>;
             html.push(item);
         });
