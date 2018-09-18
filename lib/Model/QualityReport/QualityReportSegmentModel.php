@@ -72,6 +72,7 @@ class QualityReport_QualityReportSegmentModel {
             $seg->segment = CatUtils::rawxliff2view( $seg->segment );
 
             $seg->translation = CatUtils::rawxliff2view( $seg->translation );
+            $seg->suggestion = CatUtils::rawxliff2view( $seg->suggestion );
 
             foreach ( $issues as $issue ) {
                 if ( $issue->segment_id == $seg->sid ) {
@@ -91,7 +92,7 @@ class QualityReport_QualityReportSegmentModel {
             } else {
                 foreach ( $last_translations as $last_translation ) {
                     if ( $last_translation->id_segment == $seg->sid ) {
-                        $seg->last_translation = $last_translation->translation;
+                        $seg->last_translation = CatUtils::rawxliff2view($last_translation->translation);
                     }
                 }
             }
@@ -102,7 +103,7 @@ class QualityReport_QualityReportSegmentModel {
                 if ( isset( $last_revisions ) ) {
                     foreach ( $last_revisions as $last_revision ) {
                         if ( $last_revision->id_segment == $seg->sid ) {
-                            $seg->last_revision = $last_revision->translation;
+                            $seg->last_revision = CatUtils::rawxliff2view($last_revision->translation);
                         }
                     }
                 }
