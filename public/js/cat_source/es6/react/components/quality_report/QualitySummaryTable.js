@@ -4,9 +4,9 @@ class QualitySummaryTable extends React.Component {
         super(props);
         this.lqaNestedCategories = JSON.parse(config.categories);
         this.getTotalSeverities();
+        this.qaLimit = config.qa_limit;
         this.htmlBody = this.getBody();
         this.htmlHead = this.getHeader();
-        this.qaLimit = config.qa_limit;
 
     }
     getTotalSeverities() {
