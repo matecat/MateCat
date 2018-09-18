@@ -78,9 +78,9 @@ class SegmentQR extends React.Component {
         let issues = this.props.segment.get('issues');
         issues.map((issue)=>{
             let item = <div className="qr-issue human critical" key={issue.get('issue_id')}>
-                            <div className="qr-error"><b>{issue.get('issue_category')}</b></div>
-                            <div className="sub-type-error">Subtype </div>
-                            <div className="severity"><b>{issue.get('issue_severity')}</b></div>
+                            <div className="qr-error">{issue.get('issue_category')}: </div>
+                            {/*<div className="sub-type-error">Subtype </div>*/}
+                            <div className="qr-severity"><b>[{issue.get('issue_severity')}]</b></div>
                         </div>;
             html.push(item);
         });
@@ -284,7 +284,7 @@ class SegmentQR extends React.Component {
                     <div className={revisedClasses}>
                         <a className="segment-content qr-segment-title">
                             <b onClick={this.openReviseLink.bind(this)}>Revised</b>
-                            { (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
+                            { this.props.segment.get('ice_locked') === '0' || (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
                             <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
                                 <i className="icon-eye2 icon" />
                             </button>
