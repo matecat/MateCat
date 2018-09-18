@@ -46,7 +46,7 @@
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : 20000
+        "limit" : 2000
       }
     }
   }
