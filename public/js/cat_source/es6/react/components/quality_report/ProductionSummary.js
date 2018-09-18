@@ -75,7 +75,7 @@ class ProductionSummary extends React.Component {
                 <div className="qr-info qr-good"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
             <div className="qr-effort time-edit">
-                <div className="qr-label">Time Edit</div>
+                <div className="qr-label">Time to edit</div>
                 <div className="qr-info"><b>{this.getTimeToEdit()}</b> </div>
             </div>
         </div>

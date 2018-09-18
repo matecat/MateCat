@@ -63,7 +63,7 @@ class QualityReport extends React.Component {
                             <div className="qr-job-summary">
                                 <h3>Job Summary</h3>
                                 <JobSummary jobInfo={this.state.jobInfo}/>
-                                <SegmentsDetails files={this.state.segmentFiles}/>
+                                <SegmentsDetails files={this.state.segmentFiles} urls={this.state.jobInfo.get('urls')}/>
                             </div>
                         ) : (
                             <div style={spinnerContainer}>
