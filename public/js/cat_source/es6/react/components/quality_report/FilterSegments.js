@@ -81,7 +81,7 @@ class FilterSegments extends React.Component {
     resetSeverityFilter() {
         let filter = jQuery.extend({}, this.state.filter);
         filter.severity = null;
-        $(this.categoryDropdown).dropdown('restore defaults');
+        $(this.severityDropdown).dropdown('restore defaults');
         this.setState({
             filter: filter
         });
