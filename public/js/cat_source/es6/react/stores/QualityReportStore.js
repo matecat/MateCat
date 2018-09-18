@@ -19,8 +19,17 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
     },
 
     addSegments: function ( files ) {
-        let immFiles = Immutable.fromJS(files);
-        this._segmentsFiles = this._segmentsFiles.mergeDeep(immFiles);
+        _.forEach(files, (file, key)=>{
+
+            if (this._segmentsFiles.get(key)) {
+                let immFiles = Immutable.fromJS(file.segments);
+                this._segmentsFiles = this._segmentsFiles.setIn([key, 'segments'], this._segmentsFiles.get(key).get('segments').push(...immFiles));
+            } else {
+                this._segmentsFiles = this._segmentsFiles.set(key, Immutable.fromJS(file));
+            }
+        });
+
+        // this._segmentsFiles = this._segmentsFiles.mergeDeep(immFiles);
     },
 
     emitChange: function(event, args) {

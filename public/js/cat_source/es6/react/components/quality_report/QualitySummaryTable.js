@@ -4,6 +4,9 @@ class QualitySummaryTable extends React.Component {
         super(props);
         this.lqaNestedCategories = JSON.parse(config.categories);
         this.getTotalSeverities();
+        this.htmlBody = this.getBody();
+        this.htmlHead = this.getHeader();
+
     }
     getTotalSeverities() {
         this.severities = [];
@@ -38,7 +41,7 @@ class QualitySummaryTable extends React.Component {
     getHeader() {
         let html = [];
         this.severities.forEach((sev, index)=>{
-            let item = <th className="two wide center aligned qr-title qr-severity major" key={sev.label+index}>
+            let item = <th className="two wide center aligned qr-title qr-severity" key={sev.label+index}>
                         <div className="qr-info">{sev.label}</div>
                         <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
                     </th>;
@@ -48,11 +51,15 @@ class QualitySummaryTable extends React.Component {
         return <tr>
             <th className="eight wide qr-title qr-issue">Issues</th>
             {html}
-            <th className="wide center aligned qr-title">Total weight</th>
+            <th className="wide center aligned qr-title">
+                <div className="qr-info">Job Passed/Not Passed</div>
+                <div className="qr-label">Total Weight: <b>{this.totalWeight}/soglia?</b></div>
+            </th>
         </tr>
     }
     getBody() {
         let html = [];
+        this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
             let catHtml = []
             catHtml.push(
@@ -60,11 +67,13 @@ class QualitySummaryTable extends React.Component {
             );
             let totalIssues = this.getIssuesForCategory(cat.id);
             // if (cat.subcategories.length === 0) {
+            let catTotalWeightValue = 0;
                 this.severities.forEach((currentSev)=>{
                     let severityFound = cat.severities.filter((sev)=>{
                         return sev.label === currentSev.label;
                     });
                     if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
+                        catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
                         catHtml.push(<td className="center aligned">{totalIssues.get('founds').get(currentSev.label)}</td>);
                     } else {
                         catHtml.push(<td className="center aligned"/>);
@@ -85,73 +94,25 @@ class QualitySummaryTable extends React.Component {
             //     });
             // }
 
-            let totalWeight = <td className="right aligned">0</td>;
-            catHtml.push(totalWeight);
+            let catTotalWeightHtml = <td className="right aligned">{catTotalWeightValue}</td>;
             let line = <tr key={cat.id+index}>
                         {catHtml}
+                        {catTotalWeightHtml}
                     </tr>;
             html.push(line);
+            this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
         return <tbody>
         {html}
         </tbody>
     }
     render () {
-
         return <div className="qr-quality">
-
             <table className="ui celled table shadow-1">
                 <thead>
-                {this.getHeader()}
+                {this.htmlHead}
                 </thead>
-                {this.getBody()}
-                {/*<tbody>*/}
-                {/*<tr>*/}
-                    {/*<td><b>Tag issues</b></td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*/!*<td className="center aligned"></td>*!/*/}
-                    {/*<td className="right aligned">0</td>*/}
-                    {/*/!*<td className="right aligned">1.8</td>*!/*/}
-                    {/*/!*<td className="positive center aligned">Excellent</td>*!/*/}
-                {/*</tr>*/}
-                {/*<tr>*/}
-                    {/*<td><b>Translation errors</b></td>*/}
-                    {/*<td className="center aligned"> </td>*/}
-                    {/*<td className="center aligned">1</td>*/}
-                    {/*/!*<td className="center aligned"> </td>*!/*/}
-                    {/*<td className="right aligned">1</td>*/}
-                    {/*/!*<td className="right aligned">1.8</td>*!/*/}
-                    {/*/!*<td className="warning center aligned">Poor</td>*!/*/}
-                {/*</tr>*/}
-                {/*<tr>*/}
-                    {/*<td><b>Terminology and translation consistency</b></td>*/}
-                    {/*<td className="center aligned">1</td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*/!*<td className="center aligned"></td>*!/*/}
-                    {/*<td className="right aligned">3</td>*/}
-                    {/*/!*<td className="right aligned">0.9</td>*!/*/}
-                    {/*/!*<td className="negative center aligned">Fail</td>*!/*/}
-                {/*</tr>*/}
-                {/*<tr>*/}
-                    {/*<td><b>Language quality</b></td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*/!*<td className="center aligned"></td>*!/*/}
-                    {/*<td className="right aligned">0</td>*/}
-                    {/*/!*<td className="right aligned">2.6</td>*!/*/}
-                    {/*/!*<td className="positive center aligned">Eccelent</td>*!/*/}
-                {/*</tr>*/}
-                {/*<tr>*/}
-                    {/*<td><b>Style</b></td>*/}
-                    {/*<td className="center aligned"></td>*/}
-                    {/*<td className="center aligned">1</td>*/}
-                    {/*/!*<td className="center aligned">1</td>*!/*/}
-                    {/*<td className="right aligned">1.03</td>*/}
-                    {/*/!*<td className="right aligned">6.1</td>*!/*/}
-                    {/*/!*<td className="positive center aligned">Very good</td>*!/*/}
-                {/*</tr>*/}
-                {/*</tbody>*/}
+                {this.htmlBody}
             </table>
 
         </div>
