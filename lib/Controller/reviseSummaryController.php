@@ -15,6 +15,8 @@ class reviseSummaryController extends viewController {
 	private $categories;
 	private $error_info;
 	private $error_max_thresholds;
+	private $project_type;
+	private $qa_model;
 
     private $data;
     private $job_stats;
@@ -122,7 +124,8 @@ class reviseSummaryController extends viewController {
                 constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
         );
 
-
+        $qa_model = json_decode(file_get_contents( INIT::$ROOT . '/inc/qa_model.json'));
+        $this->qa_model = $qa_model->model;
 
         $codes = $this->featureSet->getCodes();
         if(in_array(Features\ReviewImproved::FEATURE_CODE, $codes) OR in_array(Features\ReviewExtended::FEATURE_CODE, $codes)){
@@ -247,7 +250,7 @@ class reviseSummaryController extends viewController {
 
         $this->template->categories = $this->categories;
         $this->template->project_type = $this->project_type;
-
+        $this->template->qa_limit = $this->qa_model->passfail->options->limit;
     }
 
     /**
