@@ -200,9 +200,9 @@ header {
                                 }
                             }
                         }
-                        .qr-quality {
+                        /*.qr-quality {
                             padding-top: 20px;
-                            table.ui.celled {
+                            .qr-head {
                                 border-radius: 0;
                                 border: none;
                                 position: relative;
@@ -250,6 +250,49 @@ header {
                                     }
                                 }
                                 tbody {}
+                            }
+                        }*/
+                        .qr-quality {
+                            padding-top: 20px;
+                            .qr-head {
+                                display: flex;
+                                align-items: center;
+                                font-weight: 700;
+                                .qr-title {
+                                    text-align: center;
+                                    &:first-child {
+                                        text-align: left;
+                                    }
+                                }
+                            }
+                            .qr-body-list {
+                                display: flex;
+                                border-top: 1px solid #f2f4f7;
+                                &:first-child {
+                                    border: none;
+                                }
+                                .qr-element {
+                                    border-left: 1px solid #f2f4f7;
+                                    background: white;
+                                    position: relative;
+                                    z-index: -1;
+                                    &:first-child {
+                                        border: none;
+                                    }
+                                }
+
+                            }
+                            .qr-title, .qr-element {
+                                padding: 10px 15px;
+                            }
+                            .qr-issue, .qr-issue-name {
+                                width: 56%;
+                            }
+                            .qr-severity, .severity {
+                                width: 12%;
+                            }
+                            .qr-total-severity, .total-severity {
+                                width: 20%;
                             }
                         }
                     }
