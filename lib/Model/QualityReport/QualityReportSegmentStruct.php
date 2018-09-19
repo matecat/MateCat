@@ -142,6 +142,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public function getLocalWarning(){
         $QA = new \QA( $this->segment, $this->translation );
+        $QA->performConsistencyCheck();
         $local_warning = new QALocalWarning($QA, $this->sid);
         return $local_warning->render();
     }

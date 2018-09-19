@@ -186,7 +186,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
 
-
         $queryAfter = "
                 SELECT * FROM (
                     SELECT distinct(s.id) AS __sid
