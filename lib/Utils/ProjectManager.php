@@ -2032,8 +2032,10 @@ class ProjectManager {
 
         foreach( $xliff_trans_unit[ 'alt-trans' ] as $altTrans ) {
 
+            $source_extract_external = '';
+
             //Wrong alt-trans tag
-            if ( ( empty( $xliff_trans_unit[ 'source' ] ) && empty( $altTrans[ 'source' ] ) ) || empty( $altTrans[ 'target' ] ) ) {
+            if ( ( empty( $xliff_trans_unit[ 'source' ] /* theoretically impossible empty source */ ) && empty( $altTrans[ 'source' ] ) ) || empty( $altTrans[ 'target' ] ) ) {
                 continue;
             }
 
@@ -2046,9 +2048,14 @@ class ProjectManager {
                 $source_extract_external = $this->_strip_external( $altTrans[ 'source' ] );
             }
 
-            $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
-
             $target_extract_external    = $this->_strip_external( $altTrans[ 'target' ] );
+
+            //wrong alt-trans content: source == target
+            if( $source_extract_external[ 'seg' ] == $target_extract_external[ 'seg' ] ){
+                continue;
+            }
+
+            $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
             $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
             $config[ 'context_after' ]  = null;
             $config[ 'context_before' ] = null;
