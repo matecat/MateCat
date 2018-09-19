@@ -831,12 +831,12 @@ header {
             border-radius: 40px;
             transition: 0.3s ease;
             box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+            max-width: 155px;
+            min-width: 30px;
+            display: flex;
             .text {
                 transition: 0.3s ease;
-                display: flex;
                 align-items: center;
-                max-width: 155px;
-                min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
