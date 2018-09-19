@@ -252,7 +252,9 @@ header {
                             }
                         }*/
                         .qr-quality {
-                            padding-top: 20px;
+                            margin-top: 20px;
+                            position: relative;
+                            z-index: 1;
                             .qr-head {
                                 display: flex;
                                 align-items: center;
@@ -286,12 +288,47 @@ header {
                             }
                             .qr-issue, .qr-issue-name {
                                 width: 56%;
+                                font-weight: 700;
                             }
                             .qr-severity, .severity {
                                 width: 12%;
+                                text-align: center;
+                            }
+                            .qr-severity {
+                                &:nth-child(2) {
+                                    border-bottom: 5px solid $color-yellow;
+                                }
+                                &:nth-child(3) {
+                                    border-bottom: 5px solid $color-orange;
+                                }
+                                &:nth-child(4) {
+                                    border-bottom: 5px solid $color-red;
+                                }
+                                &:nth-last-child(2) {
+                                    border-bottom: 5px solid $color-red !important;
+                                }
                             }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
+                            }
+                            .qr-total-severity {
+                                &.job-not-passed {
+                                    background-color: #FB590D;
+                                }
+                                &.job-passed {
+                                    background-color: #83FD97;
+                                }
+                            }
+                            .total-severity {
+                                &.job-not-passed {
+                                    background-color: rgba(255, 123, 35, 0.31);
+                                }
+                                &.job-passed {
+                                    background-color: rgba(131, 253, 151, 0.3);
+                                }
+                            }
+                            .total-severity {
+                                text-align: right;
                             }
                         }
                     }
@@ -536,6 +573,8 @@ header {
                                                         }
                                                         .per-yellow {
                                                             padding: 0 3px;
+                                                            background: #FFCC00 !important;
+                                                            color: #333 !important;
                                                         }
                                                     }
                                                 }
@@ -812,6 +851,11 @@ header {
                 transition: 0.3s ease;
                 display: flex;
                 align-items: center;
+                max-width: 155px;
+                min-width: 30px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .ui.cancel.label {
                 position: absolute;
@@ -826,6 +870,9 @@ header {
                     background-color: #cccccc !important;
                 }
             }
+        }
+        .filter-category {
+            margin-left: 10px;
         }
         .filter-status, .filter-severity , .filter-category, .filter-activities, .filter-data-sample {
             &.not-filtered {
