@@ -252,7 +252,9 @@ header {
                             }
                         }*/
                         .qr-quality {
-                            padding-top: 20px;
+                            margin-top: 20px;
+                            position: relative;
+                            z-index: 1;
                             .qr-head {
                                 display: flex;
                                 align-items: center;
@@ -286,12 +288,31 @@ header {
                             }
                             .qr-issue, .qr-issue-name {
                                 width: 56%;
+                                font-weight: 700;
                             }
                             .qr-severity, .severity {
                                 width: 12%;
+                                text-align: center;
+                            }
+                            .qr-severity {
+                                &:nth-child(2) {
+                                    border-bottom: 5px solid $color-yellow;
+                                }
+                                &:nth-child(3) {
+                                    border-bottom: 5px solid $color-orange;
+                                }
+                                &:nth-child(4) {
+                                    border-bottom: 5px solid $color-red;
+                                }
+                                &:nth-last-child(2) {
+                                    border-bottom: 5px solid $color-red !important;
+                                }
                             }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
+                            }
+                            .total-severity {
+                                text-align: right;
                             }
                         }
                     }

@@ -116,7 +116,7 @@ class QualitySummaryTable extends React.Component {
         </div>
     }
     render () {
-        return <div className="qr-quality">
+        return <div className="qr-quality shadow-1">
                 {this.htmlHead}
                 {this.htmlBody}
         </div>
