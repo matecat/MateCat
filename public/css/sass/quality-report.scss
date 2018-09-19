@@ -311,6 +311,22 @@ header {
                             .qr-total-severity, .total-severity {
                                 width: 20%;
                             }
+                            .qr-total-severity {
+                                &.job-not-passed {
+                                    background-color: #FB590D;
+                                }
+                                &.job-passed {
+                                    background-color: #83FD97;
+                                }
+                            }
+                            .total-severity {
+                                &.job-not-passed {
+                                    background-color: rgba(255, 123, 35, 0.31);
+                                }
+                                &.job-passed {
+                                    background-color: rgba(131, 253, 151, 0.3);
+                                }
+                            }
                             .total-severity {
                                 text-align: right;
                             }
