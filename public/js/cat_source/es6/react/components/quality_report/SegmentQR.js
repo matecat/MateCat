@@ -107,7 +107,7 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let revise = this.props.segment.get("last_revision");
+            let revise = TagsUtils.htmlEncode(this.props.segment.get("last_revision"));
             let diffHtml = this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
             this.setState({
                 translateDiffOn: false,

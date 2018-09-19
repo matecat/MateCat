@@ -91,12 +91,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
+        if(empty($this->translation) || empty($this->suggestion)){
+            return 0;
+        }
         return self::calculatePEE($this->suggestion, $this->translation, $this->target);
     }
 
     public function getPEEBwtTranslationSuggestion() {
         if(empty($this->last_translation)){
-            return null;
+            return 0;
         }
 
         return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
@@ -104,7 +107,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public function getPEEBwtTranslationRevise() {
         if(empty($this->last_translation) OR empty($this->last_revision)){
-            return null;
+            return 0;
         }
 
         return self::calculatePEE($this->last_translation, $this->last_revision, $this->target);

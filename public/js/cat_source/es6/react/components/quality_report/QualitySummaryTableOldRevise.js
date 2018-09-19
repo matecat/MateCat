@@ -1,5 +1,5 @@
 
-class QualitySummaryTable extends React.Component {
+class QualitySummaryTableOldRevise extends React.Component {
     constructor (props) {
         super(props);
         this.lqaNestedCategories = JSON.parse(config.categories);
@@ -43,9 +43,9 @@ class QualitySummaryTable extends React.Component {
         let html = [];
         this.severities.forEach((sev, index)=>{
             let item = <div className="qr-title qr-severity" key={sev.label+index}>
-                        <div className="qr-info">{sev.label}</div>
-                        <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
-                    </div>;
+                <div className="qr-info">{sev.label}</div>
+                <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
+            </div>;
             html.push(item);
         });
 
@@ -64,7 +64,7 @@ class QualitySummaryTable extends React.Component {
                 </div>
             ) }
 
-            </div>
+        </div>
     }
     getBody() {
         let  html = [];
@@ -89,22 +89,22 @@ class QualitySummaryTable extends React.Component {
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
             let line = <div className="qr-body-list" key={cat.id+index}>
-                        {catHtml}
-                        {catTotalWeightHtml}
-                    </div>;
+                {catHtml}
+                {catTotalWeightHtml}
+            </div>;
             html.push(line);
             this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
         return <div className="qr-body">
-        {html}
+            {html}
         </div>
     }
     render () {
-        return <div className="qr-quality shadow-1">
-                {this.htmlHead}
-                {this.htmlBody}
+        return <div className="qr-quality">
+            {this.htmlHead}
+            {this.htmlBody}
         </div>
     }
 }
 
-export default QualitySummaryTable ;
+export default QualitySummaryTableOldRevise ;
