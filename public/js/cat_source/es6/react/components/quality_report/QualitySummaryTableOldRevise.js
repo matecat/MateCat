@@ -35,7 +35,7 @@ class QualitySummaryTableOldRevise extends React.Component {
     getIssuesForCategory(categoryId) {
         if (this.props.jobInfo.get('quality_summary').size > 0 ) {
             return this.props.jobInfo.get('quality_summary').get('revise_issues').find((item, key)=>{
-                return parseInt(key) === parseInt(categoryId);
+                return key === categoryId;
             });
         }
     }
@@ -48,21 +48,25 @@ class QualitySummaryTableOldRevise extends React.Component {
             </div>;
             html.push(item);
         });
-
+        let qualityVote = this.props.jobInfo.get('quality_summary').get('quality_overall');
+        let passedClass =  (qualityVote === 'poor' || qualityVote === 'fail') ? 'job-not-passed' : "job-passed";
         return <div className="qr-head">
             <div className="qr-title qr-issue">Issues</div>
             {html}
-            { parseInt(this.totalWeight) > parseInt(this.qaLimit) ? (
-                <div className="qr-title qr-total-severity">
-                    <div className="qr-info">Job Not Passed</div>
-                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </div>
-            ) : (
-                <div className="qr-title qr-total-severity">
-                    <div className="qr-info">Job Passed</div>
-                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </div>
-            ) }
+
+            <div className="qr-title qr-total-severity">
+                <div className="qr-info">Total Weight</div>
+            </div>
+
+            <div className="qr-title qr-total-severity">
+                <div className="qr-info">Tolerated Issues</div>
+            </div>
+
+            <div className={"qr-title qr-total-severity " + passedClass}>
+                <div className="qr-info">{this.props.jobInfo.get('quality_summary').get('quality_overall')}</div>
+                <div className="qr-label">Total Score</div>
+            </div>
+
 
         </div>
     }
@@ -75,22 +79,29 @@ class QualitySummaryTableOldRevise extends React.Component {
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
             let totalIssues = this.getIssuesForCategory(cat.id);
-            let catTotalWeightValue = 0;
+            let catTotalWeightValue = 0, toleratedIssuesValue = 0, voteValue = "";
             this.severities.forEach((currentSev)=>{
                 let severityFound = cat.severities.filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
                     catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
+                    toleratedIssuesValue = totalIssues.get('allowed');
+                    voteValue = totalIssues.get('vote');
                     catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
                 } else {
                     catHtml.push(<div className="qr-element severity"/>);
                 }
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
+            let toleratedIssuesHtml = <div className="qr-element total-severity">{toleratedIssuesValue}</div>;
+            let voteClass = (voteValue.toLowerCase() === 'poor' || voteValue.toLowerCase() === 'fail') ? 'job-not-passed' : "job-passed";
+            let voteHtml = <div className={"qr-element total-severity " + voteClass}>{voteValue}</div>;
             let line = <div className="qr-body-list" key={cat.id+index}>
                 {catHtml}
                 {catTotalWeightHtml}
+                {toleratedIssuesHtml}
+                {voteHtml}
             </div>;
             html.push(line);
             this.totalWeight = this.totalWeight + catTotalWeightValue;
