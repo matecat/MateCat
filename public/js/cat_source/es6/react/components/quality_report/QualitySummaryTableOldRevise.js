@@ -42,37 +42,37 @@ class QualitySummaryTableOldRevise extends React.Component {
     getHeader() {
         let html = [];
         this.severities.forEach((sev, index)=>{
-            let item = <th className="two wide center aligned qr-title qr-severity" key={sev.label+index}>
+            let item = <div className="qr-title qr-severity" key={sev.label+index}>
                 <div className="qr-info">{sev.label}</div>
                 <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
-            </th>;
+            </div>;
             html.push(item);
         });
 
-        return <tr>
-            <th className="eight wide qr-title qr-issue">Issues</th>
+        return <div className="qr-head">
+            <div className="qr-title qr-issue">Issues</div>
             {html}
             { parseInt(this.totalWeight) > parseInt(this.qaLimit) ? (
-                <th className="wide center aligned qr-title job-not-passed">
+                <div className="qr-title qr-total-severity">
                     <div className="qr-info">Job Not Passed</div>
                     <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </th>
+                </div>
             ) : (
-                <th className="wide center aligned qr-title job-passed">
+                <div className="qr-title qr-total-severity">
                     <div className="qr-info">Job Passed</div>
                     <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </th>
+                </div>
             ) }
 
-        </tr>
+        </div>
     }
     getBody() {
-        let html = [];
+        let  html = [];
         this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
             let catHtml = []
             catHtml.push(
-                <td><b>{cat.label}</b></td>
+                <div className="qr-element qr-issue-name">{cat.label}</div>
             );
             let totalIssues = this.getIssuesForCategory(cat.id);
             let catTotalWeightValue = 0;
@@ -82,32 +82,27 @@ class QualitySummaryTableOldRevise extends React.Component {
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
                     catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
-                    catHtml.push(<td className="center aligned">{totalIssues.get('founds').get(currentSev.label)}</td>);
+                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
                 } else {
-                    catHtml.push(<td className="center aligned"/>);
+                    catHtml.push(<div className="qr-element severity"/>);
                 }
             });
-            let catTotalWeightHtml = <td className="right aligned">{catTotalWeightValue}</td>;
-            let line = <tr key={cat.id+index}>
+            let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
+            let line = <div className="qr-body-list" key={cat.id+index}>
                 {catHtml}
                 {catTotalWeightHtml}
-            </tr>;
+            </div>;
             html.push(line);
             this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
-        return <tbody>
-        {html}
-        </tbody>
+        return <div className="qr-body">
+            {html}
+        </div>
     }
     render () {
         return <div className="qr-quality">
-            <table className="ui celled table shadow-1">
-                <thead>
-                {this.htmlHead}
-                </thead>
-                {this.htmlBody}
-            </table>
-
+            {this.htmlHead}
+            {this.htmlBody}
         </div>
     }
 }

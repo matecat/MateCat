@@ -1,5 +1,6 @@
 import ProductionSummary from "./ProductionSummary";
 import QualitySummaryTable from "./QualitySummaryTable";
+import QualitySummaryTableOld from "./QualitySummaryTableOldRevise";
 
 class JobSummary extends React.Component {
 
@@ -11,7 +12,12 @@ class JobSummary extends React.Component {
             ) : null}
 
             {this.props.jobInfo? (
+            (config.project_type === 'new') ? (
                 <QualitySummaryTable jobInfo={this.props.jobInfo}/>
+                ) : (
+                <QualitySummaryTableOld jobInfo={this.props.jobInfo}/>
+            )
+
             ) : null}
 
         </div>
