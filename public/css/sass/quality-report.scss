@@ -24,7 +24,7 @@ header {
     min-width: 1024px;
     .nav-mc-bar {
         .logo {
-            left: 0;
+            left: 13px;
         }
         .header-project-container-info {
             width: 75%;
@@ -121,7 +121,7 @@ header {
                 width: 100%;
                 transition: 0.3s ease;
                 .qr-bg-head {
-                    height: 245px;
+                    height: 254px;
                     background: #E5E9F1;
                     position: absolute;
                     width: 100%;
@@ -154,7 +154,7 @@ header {
                             background: white;
                             justify-content: space-between;
                             width: 100%;
-                            padding: 15px;
+                            padding-left: 15px;
                             align-items: center;
                             .job-id {
                                 font-size: 14px;
@@ -183,74 +183,38 @@ header {
                                 }
                             }
                             .qr-effort {
+                                padding: 15px 0;
+                                &:last-child {
+                                    padding-right: 15px !important;
+                                }
+                                &.translator {
+                                    max-width: 135px;
+                                    min-width: 30px;
+                                    b {
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                    }
+                                }
+                                &.qr-score {
+                                    padding: 15px;
+                                    .qr-tolerated-score, .qr-pass-score {
+                                        font-size: 20px;
+                                        margin-top: 5px;
+                                    }
+                                }
+
+                                &.qr-pass {
+                                    background: rgba(0, 255, 0, 0.23);
+                                }
                                 .qr-info {
                                     display: flex;
                                     align-items: center;
-                                    &.qr-good {
-                                        background: #ebffd0;
-                                        padding: 0 2px;
-                                        width: fit-content;
-                                    }
-                                    &.qr-bad {
-                                        background: #ffd6ce;
-                                        padding: 0 2px;
-                                        width: fit-content;
-                                    }
+                                    justify-content: space-between;
                                 }
+
                             }
                         }
-                        /*.qr-quality {
-                            padding-top: 20px;
-                            .qr-head {
-                                border-radius: 0;
-                                border: none;
-                                position: relative;
-                                thead {
-                                    background: #F2F4F7;
-                                    tr {
-                                        .qr-title {
-                                            background: none;
-                                            padding: 5px;
-                                            text-transform: capitalize;
-                                            &:first-child {
-                                                padding-left: 15px;
-                                            }
-                                            &.qr-total-score {
-                                                padding: 15px 0 !important;
-                                                &.qr-pass {
-                                                    background: $color-green;
-                                                    .qr-info {
-                                                        font-size: 24px;
-
-                                                    }
-                                                }
-                                                &.qr-warning {
-                                                    background: $color-orange;
-                                                }
-                                                &.qr-fail {
-                                                    background: $color-red;
-                                                }
-                                            }
-                                        }
-                                        .qr-severity {
-                                            &:nth-child(2) {
-                                                border-bottom: 5px solid $color-yellow;
-                                            }
-                                            &:nth-child(3) {
-                                                border-bottom: 5px solid $color-orange;
-                                            }
-                                             &:nth-child(4) {
-                                                border-bottom: 5px solid $color-red;
-                                            }
-                                            &:nth-last-child(2) {
-                                                border-bottom: 5px solid $color-red !important;
-                                            }
-                                        }
-                                    }
-                                }
-                                tbody {}
-                            }
-                        }*/
                         .qr-quality {
                             margin-top: 20px;
                             position: relative;
@@ -259,6 +223,7 @@ header {
                                 display: flex;
                                 align-items: center;
                                 font-weight: 700;
+                                background: #f4f5f8;
                                 .qr-title {
                                     text-align: center;
                                     &:first-child {
@@ -293,20 +258,6 @@ header {
                             .qr-severity, .severity {
                                 width: 12%;
                                 text-align: center;
-                            }
-                            .qr-severity {
-                                &:nth-child(2) {
-                                    border-bottom: 5px solid $color-yellow;
-                                }
-                                &:nth-child(3) {
-                                    border-bottom: 5px solid $color-orange;
-                                }
-                                &:nth-child(4) {
-                                    border-bottom: 5px solid $color-red;
-                                }
-                                &:nth-last-child(2) {
-                                    border-bottom: 5px solid $color-red !important;
-                                }
                             }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
@@ -847,12 +798,12 @@ header {
             border-radius: 40px;
             transition: 0.3s ease;
             box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+            max-width: 155px;
+            min-width: 30px;
+            display: flex;
             .text {
                 transition: 0.3s ease;
-                display: flex;
                 align-items: center;
-                max-width: 155px;
-                min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -1016,5 +967,11 @@ header {
                 }
             }
         }
+    }
+}
+
+footer {
+    #statistics {
+        display: none;
     }
 }

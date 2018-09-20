@@ -23,15 +23,15 @@ class ProductionSummary extends React.Component {
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
         return <div className="qr-production shadow-1">
-            <div className="job-id">ID: {this.props.jobInfo.get('id')}</div>
-            <div className="source-to-target">
+            <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
+            <div className="qr-effort source-to-target">
                 <div className="qr-source"><b>{this.props.jobInfo.get('sourceTxt')}</b></div>
                 <div className="qr-to">
                     <i className="icon-chevron-right icon" />
                 </div>
                 <div className="qr-target"><b>{this.props.jobInfo.get('targetTxt')}</b></div>
             </div>
-            <div className="progress-percent" ref={(bar)=>this.progressBar=bar}>
+            <div className="qr-effort progress-percent" ref={(bar)=>this.progressBar=bar}>
                 <div className="progress-bar">
                     <div className="progr">
                         <div className="meter">
@@ -62,9 +62,13 @@ class ProductionSummary extends React.Component {
                 <div className="qr-label">Words</div>
                 <div className="qr-info"><b>{this.props.jobInfo.get('total_raw_wc')}</b></div>
             </div>
+            <div className="qr-effort qr-review-words">
+                <div className="qr-label">Review</div>
+                <div className="qr-info"><b>639</b></div>
+            </div>
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
-                <div className="qr-info"><b>{translator}</b></div>
+                <div className="qr-info" title={translator}><b>{translator}</b></div>
             </div>
             {/*<div className="qr-effort reviser">*/}
                 {/*<div className="qr-label">Reviser</div>*/}
@@ -72,11 +76,19 @@ class ProductionSummary extends React.Component {
             {/*</div>*/}
             <div className="qr-effort pee">
                 <div className="qr-label">PEE</div>
-                <div className="qr-info qr-good"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
+                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
             <div className="qr-effort time-edit">
                 <div className="qr-label">Time to edit</div>
                 <div className="qr-info"><b>{this.getTimeToEdit()}</b> </div>
+            </div>
+            <div className="qr-effort qr-score qr-pass">
+                <div className="qr-label">Finale score <i className="icon-info icon" /></div>
+                <div className="qr-label">Based on Reviewed Words</div>
+                <div className="qr-info">
+                    <div className="qr-tolerated-score"><b>13/15</b></div>
+                    <div className="qr-pass-score"><b>Job Pass</b></div>
+                </div>
             </div>
         </div>
 
