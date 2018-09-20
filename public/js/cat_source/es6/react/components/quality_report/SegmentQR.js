@@ -7,8 +7,8 @@ class SegmentQR extends React.Component {
             translateDiffOn: false,
             reviseDiffOn: false,
             htmlDiff: "",
-            automatedQaOpen: false,
-            humanQaOpen:false
+            automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
+            humanQaOpen: this.props.segment.get('issues').size > 0
         };
         this.errorObj = {
             'types' : {
@@ -29,12 +29,14 @@ class SegmentQR extends React.Component {
     }
     openAutomatedQa() {
         this.setState({
-            automatedQaOpen: !this.state.automatedQaOpen
+            automatedQaOpen: true,
+            humanQaOpen: false
         });
     }
     openHumandQa() {
         this.setState({
-            humanQaOpen: !this.state.humanQaOpen
+            automatedQaOpen: false,
+            humanQaOpen: true
         });
     }
     getAutomatedQaHtml() {
@@ -215,19 +217,7 @@ class SegmentQR extends React.Component {
             <div className="qr-segment-head shadow-1">
                 <div className="segment-id">{this.props.segment.get("sid")}</div>
                 <div className="segment-production-container">
-                    <div className="ui basic mini buttons segment-production">
 
-                        {this.props.segment.get('warnings').get('total') > 0 ? (
-                            <div className={"ui button automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
-                                Automated QA<b> ({this.props.segment.get('warnings').get('total')})</b></div>
-                        ) : null}
-
-                        {this.props.segment.get('issues').size > 0 ? (
-                            <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
-                                Human QA<b> ({this.props.segment.get('issues').size})</b></div>
-                        ) : null}
-
-                    </div>
                     <div className="segment-production">
                         <div className="production word-speed">Secs/Word: <b>{this.getWordsSpeed()}</b></div>
                         <div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>
@@ -313,33 +303,42 @@ class SegmentQR extends React.Component {
                     </div>
                 ) : null}
 
+                <div className="segment-container qr-issues">
+                    <div className="segment-content qr-segment-title">
+                        <b>QA</b>
+                        <div className="ui basic mini buttons segment-production">
 
-                {this.state.automatedQaOpen ?
-                    <div className="segment-container qr-issues">
-                        <div className="segment-content qr-segment-title">
-                            <b>Atomated QA</b>
+                            {this.props.segment.get('issues').size > 0 ? (
+                                <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
+                                    Human QA<b> ({this.props.segment.get('issues').size})</b></div>
+                            ) : null}
+
+                            {this.props.segment.get('warnings').get('total') > 0 ? (
+                                <div className={"ui button automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
+                                    Automated QA<b> ({this.props.segment.get('warnings').get('total')})</b></div>
+                            ) : null}
+
                         </div>
-                        <div className="segment-content qr-text">
+                    </div>
+                    <div className="segment-content qr-text">
+
+                        {this.state.automatedQaOpen ?
 
                             <div className="qr-issues-list">
                                 {this.getAutomatedQaHtml()}
                             </div>
-                        </div>
-                    </div>
-                     : (null)}
 
-                {this.state.humanQaOpen ?
-                    <div className="segment-container qr-issues">
-                        <div className="segment-content qr-segment-title">
-                            <b>Human QA</b>
-                        </div>
-                        <div className="segment-content qr-text">
+                            : (null)}
+
+                        {this.state.humanQaOpen ?
+
                             <div className="qr-issues-list">
                                 {this.getHumanQaHtml()}
                             </div>
-                        </div>
+
+                            : (null) }
                     </div>
-                    : (null) }
+                </div>
             </div>
         </div>
     }

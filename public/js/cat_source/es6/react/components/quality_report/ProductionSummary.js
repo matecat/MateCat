@@ -18,7 +18,14 @@ class ProductionSummary extends React.Component {
         }
     }
 
+    componentDidMount() {
+        $(this.tooltip).popup({
+            position: 'bottom right'
+        });
+    }
+
     render () {
+        let tooltipText = '<div style="color:red">lorem ipsum</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
         let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
         let jobPassed = (score < limit);
@@ -67,7 +74,7 @@ class ProductionSummary extends React.Component {
             </div>
             <div className="qr-effort qr-review-words">
                 <div className="qr-label">Reviewed Words</div>
-                <div className="qr-info"><b>{stats.get('APPROVED_FORMATTED')}</b></div>
+                <div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>
             </div>
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
@@ -95,7 +102,9 @@ class ProductionSummary extends React.Component {
                     ) }
                     <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
-                <div className="qr-label">Finale score <i className="icon-info icon" /></div>
+                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
+                    Finale score <i className="icon-info icon" />
+                </div>
             </div>
         </div>
 
