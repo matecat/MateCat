@@ -49,7 +49,9 @@ class QALocalWarning extends QAWarning {
                 ]
         ];
 
-        $exceptionList                = QA::JSONtoExceptionList( $this->QA->getNoticesJSON() );
+        $noticesJson = $this->QA->getNoticesJSON();
+
+        $exceptionList                = QA::JSONtoExceptionList( $noticesJson );
 
 
         $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
@@ -92,14 +94,12 @@ class QALocalWarning extends QAWarning {
                 $targetTagPositionError[ $item ] = CatUtils::rawxliff2view( $value );
             }
 
-            $notices = $this->QA->getNotices();
-
             $out[ 'details' ]                              = [];
             $out[ 'details' ][ 'issues_info' ]             = $this->structure;
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
-            $out[ 'total' ]                                = count( $notices );
+            $out[ 'total' ]                                = count( json_decode($noticesJson) );
         }
 
         return $out;
