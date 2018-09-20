@@ -19,7 +19,10 @@ class ProductionSummary extends React.Component {
     }
 
     render () {
-
+        let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
+        let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
+        let jobPassed = (score < limit);
+        let jobPassedClass = (jobPassed) ? "qr-pass" : "qr-fail";
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
         return <div className="qr-production shadow-1">
@@ -60,11 +63,11 @@ class ProductionSummary extends React.Component {
             </div>
             <div className="qr-effort">
                 <div className="qr-label">Words</div>
-                <div className="qr-info"><b>{this.props.jobInfo.get('total_raw_wc')}</b></div>
+                <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
             </div>
             <div className="qr-effort qr-review-words">
-                <div className="qr-label">Review</div>
-                <div className="qr-info"><b>639</b></div>
+                <div className="qr-label">Reviewed Words</div>
+                <div className="qr-info"><b>{stats.get('APPROVED_FORMATTED')}</b></div>
             </div>
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
@@ -82,11 +85,15 @@ class ProductionSummary extends React.Component {
                 <div className="qr-label">PEE</div>
                 <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
-            <div className="qr-effort qr-score qr-pass">
+            <div className={"qr-effort qr-score " + jobPassedClass}>
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
-                    <div className="qr-pass-score"><b>Job Pass</b></div>
-                    <div className="qr-tolerated-score"><b>13/15</b></div>
+                    <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
+                    { jobPassed ? (
+                        <div className="qr-pass-score"><b>Job Pass</b></div>
+                    ) : (
+                        <div className="qr-pass-score"><b>Job Fail</b></div>
+                    ) }
                 </div>
                 <div className="qr-label">Finale score <i className="icon-info icon" /></div>
             </div>
