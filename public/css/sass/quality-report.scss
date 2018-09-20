@@ -207,6 +207,9 @@ header {
                                 &.qr-pass {
                                     background: rgba(0, 255, 0, 0.23);
                                 }
+                                &.qr-fail {
+                                    background: rgba(255, 0, 0, 0.23);
+                                }
                                 .qr-info {
                                     display: flex;
                                     align-items: center;
@@ -258,6 +261,10 @@ header {
                             .qr-severity, .severity {
                                 width: 12%;
                                 text-align: center;
+                            }
+                            .qr-total-severity {
+                                display: flex;
+                                justify-content: space-between;
                             }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
