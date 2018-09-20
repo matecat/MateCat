@@ -303,6 +303,7 @@ class SegmentQR extends React.Component {
                     </div>
                 ) : null}
 
+                {( this.state.automatedQaOpen || this.state.humanQaOpen ) ? (
                 <div className="segment-container qr-issues">
                     <div className="segment-content qr-segment-title">
                         <b>QA</b>
@@ -339,6 +340,7 @@ class SegmentQR extends React.Component {
                             : (null) }
                     </div>
                 </div>
+                ): null }
             </div>
         </div>
     }
