@@ -145,7 +145,7 @@ header {
                     h3 {}
                     .qr-label {
                         font-weight: 100;
-                        font-size: 12px;
+                        font-size: 14px;
                         line-height: 12px;
                     }
                     .qr-production-quality {
@@ -373,7 +373,7 @@ header {
                                                     background: #f2f4f7;
                                                     &.qr-issues {
                                                         .qr-text {
-                                                            width: 82%;
+                                                            width: 80%;
                                                         }
                                                     }
                                                     .segment-content {
@@ -384,7 +384,7 @@ header {
                                                     }
 
                                                     .qr-segment-title {
-                                                        width: 18%;
+                                                        width: 20%;
                                                         background: none;
                                                         justify-content: space-between;
 
@@ -439,7 +439,7 @@ header {
                                                         }
                                                     }
                                                     .qr-text {
-                                                        width: 68%;
+                                                        width: 66%;
                                                         background: #FFFFFF;
                                                         margin-right: 1px;
                                                         display: inline-block;
