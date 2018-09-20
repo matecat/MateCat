@@ -56,7 +56,7 @@ p.button-aligned-right {
     margin: 20px 0 20px 0;
 }
 
-.popup a.anonymous {
+.popup a.anonymous {    padding: 8px 18px;
     font-size: 12px;
 }
 

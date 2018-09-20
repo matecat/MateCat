@@ -2,9 +2,9 @@
 class QualitySummaryTable extends React.Component {
     constructor (props) {
         super(props);
-        this.lqaNestedCategories = JSON.parse(config.categories);
+        this.lqaNestedCategories = JSON.parse(this.props.jobInfo.get('quality_summary').get('categories'));
         this.getTotalSeverities();
-        this.qaLimit = config.qa_limit;
+        this.qaLimit = JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit;
         this.htmlBody = this.getBody();
         this.htmlHead = this.getHeader();
 
