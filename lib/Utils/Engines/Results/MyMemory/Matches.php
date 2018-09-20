@@ -69,6 +69,11 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'create-date' ]      = $args[ 4 ];
             $match[ 'last-update-date' ] = $args[ 4 ];
             $match[ 'prop' ]             = ( isset( $args[ 5 ] ) ? $args[ 5 ] : [] );
+        } else {
+            $match[ 'raw_segment' ]     = $match[ 'segment' ];
+            $match[ 'segment' ]         = CatUtils::rawxliff2view( $match[ 'segment' ] );
+            $match[ 'raw_translation' ] = $match[ 'translation' ];
+            $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
