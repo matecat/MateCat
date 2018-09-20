@@ -109,12 +109,15 @@ class Chunk extends \API\V2\Json\Chunk {
             }
 
             $quality_overall = @$chunkReview->is_pass ? 'excellent' : 'fail' ;
+
             $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
-            $score = $chunkReviewModel->getScore();
+            $score = number_format( $chunkReviewModel->getScore(), 2, ".", ",");
+
+            $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
+
             $project = $jStruct->getProject();
             $model = $project->getLqaModel() ;
             $categories = $model->getSerializedCategories();
-
 
         } else {
 
@@ -140,18 +143,21 @@ class Chunk extends \API\V2\Json\Chunk {
 
             $reviseIssues = [];
             foreach ( $qa_data as $issue ) {
-                $reviseIssues[ "err_".str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
+                $reviseIssues[ "err_" . str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
                         'allowed' => $issue[ 'allowed' ],
                         'found'   => $issue[ 'found' ],
                         'founds'  => $issue[ 'founds' ],
-                        'vote' => $issue['vote']
+                        'vote'    => $issue[ 'vote' ]
                 ];
             }
 
-            $quality_overall = strtolower( $chunkReview['minText'] ) ;
+            $quality_overall = strtolower( $chunkReview[ 'minText' ] );
+
             $score = 0;
 
-            $categories = CatUtils::getSerializedCategories($reviseClass);
+            $total_issues_weight = 0;
+
+            $categories = CatUtils::getSerializedCategories( $reviseClass );
         }
 
         $stats = CatUtils::getFastStatsForJob( $jobStats, false );
@@ -185,15 +191,16 @@ class Chunk extends \API\V2\Json\Chunk {
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$jStruct->total_raw_wc,
-                'quality_summary'         => [
-                        'equivalent_class' => $jStruct->getQualityInfo(),
-                        'quality_overall'  => $quality_overall,
-                        'errors_count'     => (int)$jStruct->getErrorsCount(),
-                        'revise_issues'    => $reviseIssues,
-                        'score' => $score,
-                        'categories' => $categories,
-                        'passfail' => json_encode($qa_model->model->passfail)
-                ],
+                'quality_summary' => [
+                        'equivalent_class'    => $jStruct->getQualityInfo(),
+                        'quality_overall'     => $quality_overall,
+                        'errors_count'        => (int)$jStruct->getErrorsCount(),
+                        'revise_issues'       => $reviseIssues,
+                        'score'               => $score,
+                        'categories'          => $categories,
+                        'total_issues_weight' => $total_issues_weight,
+                        'passfail'            => json_encode( $qa_model->model->passfail )
+                ]
 
         ];
 
