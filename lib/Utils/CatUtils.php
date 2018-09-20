@@ -893,8 +893,9 @@ class CatUtils {
         $values = self::getQualityInfoFromJobStruct( $job );
 
         $result = null ;
+        $codes = $job->getProject()->getFeatures()->getCodes();
 
-        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+        if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes) ) {
             $result = @$values->is_pass ? 'excellent' : 'fail' ;
         } else {
             $result = strtolower( $values['minText'] ) ;
@@ -916,7 +917,7 @@ class CatUtils {
         $project = $job->getProject();
         $featureSet = $project->getFeatures();
 
-        if ( in_array( Features::REVIEW_IMPROVED, $featureSet->getCodes() ) ) {
+        if ( in_array( \Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( \Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
             $result = $review;
         } else {
@@ -965,6 +966,25 @@ class CatUtils {
             return $wStruct;
         }
         return $wStruct;
+    }
+
+    public static function getSerializedCategories($reviceClass){
+        $categoriesDbNames = Constants_Revise::$categoriesDbNames;
+        $categories        = [];
+        foreach ( $categoriesDbNames as $categoryDbName ) {
+
+            $categories[] = [
+                    'label'         => constant( get_class( $reviceClass ) ."::". strtoupper( $categoryDbName ) ),
+                    'id'            => $categoryDbName,
+                    'severities'    => [
+                            ['label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MINOR]],
+                            ['label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MAJOR]]
+                    ],
+                    'subcategories' => [],
+                    'options'       => [],
+            ];
+        }
+        return json_encode( ['categories' =>  $categories ] );
     }
 
 }
