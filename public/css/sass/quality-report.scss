@@ -207,6 +207,9 @@ header {
                                 &.qr-pass {
                                     background: rgba(0, 255, 0, 0.23);
                                 }
+                                &.qr-fail {
+                                    background: rgba(255, 0, 0, 0.23);
+                                }
                                 .qr-info {
                                     display: flex;
                                     align-items: center;
@@ -259,8 +262,14 @@ header {
                                 width: 12%;
                                 text-align: center;
                             }
+                            .qr-total-severity {
+                                display: flex;
+                                justify-content: space-between;
+                                padding: 20px 15px;
+                            }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
+                                background: #e4e4e4;
                             }
                             .qr-total-severity {
                                 &.job-not-passed {

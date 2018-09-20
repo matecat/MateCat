@@ -74,13 +74,13 @@ class ProductionSummary extends React.Component {
                 {/*<div className="qr-label">Reviser</div>*/}
                 {/*<div className="qr-info"><b></b></div>*/}
             {/*</div>*/}
-            <div className="qr-effort pee">
-                <div className="qr-label">PEE</div>
-                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
-            </div>
             <div className="qr-effort time-edit">
                 <div className="qr-label">Time to edit</div>
                 <div className="qr-info"><b>{this.getTimeToEdit()}</b> </div>
+            </div>
+            <div className="qr-effort pee">
+                <div className="qr-label">PEE</div>
+                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
             <div className="qr-effort qr-score qr-pass">
                 <div className="qr-label">Finale score <i className="icon-info icon" /></div>
