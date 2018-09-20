@@ -5,7 +5,7 @@ class FilterSegments extends React.Component {
         super(props);
 
         this.state = this.defaultState();
-        this.lqaNestedCategories = JSON.parse(config.categories);
+        this.lqaNestedCategories = this.props.categories;
         this.severities = this.getSeverities();
     }
 
