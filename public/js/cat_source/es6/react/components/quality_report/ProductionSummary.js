@@ -73,7 +73,7 @@ class ProductionSummary extends React.Component {
                 <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
             </div>
             <div className="qr-effort qr-review-words">
-                <div className="qr-label">Reviewed Words</div>
+                <div className="qr-label">Reviewed Words (No ICE)</div>
                 <div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>
             </div>
             <div className="qr-effort translator">
