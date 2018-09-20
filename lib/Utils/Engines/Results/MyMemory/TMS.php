@@ -20,11 +20,6 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
             if ( is_array( $matches ) and !empty( $matches ) ) {
 
                 foreach ( $matches as $match ) {
-                    $match[ 'raw_segment' ]     = $match[ 'segment' ];
-                    $match[ 'segment' ]         = CatUtils::rawxliff2view( $match[ 'segment' ] );
-                    $match[ 'raw_translation' ] = $match[ 'translation' ];
-                    $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
-
                     $currMatch        = new Engines_Results_MyMemory_Matches( $match );
                     $this->matches[ ] = $currMatch;
                 }
