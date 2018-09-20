@@ -151,7 +151,7 @@ class FilterSegments extends React.Component {
                 <div className={"filter-status " + statusFilterClass}>
                     <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.statusDropdown=dropdown}>
                         <div className="text">
-                            <div>Segment Status</div>
+                            <div>Segment status</div>
                         </div>
                         <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetStatusFilter.bind(this)}/></div>
                         <div className="menu">
@@ -162,7 +162,7 @@ class FilterSegments extends React.Component {
                 <div className={"filter-category " + categoryFilterClass}>
                     <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.categoryDropdown=dropdown}>
                         <div className="text">
-                            <div>Issue Category</div>
+                            <div>Issue category</div>
                         </div>
                         <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetCategoryFilter.bind(this)}/></div>
                         <div className="menu">
@@ -173,7 +173,7 @@ class FilterSegments extends React.Component {
                 <div className={"filter-category " + severityFilterClass}>
                     <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.severityDropdown=dropdown}>
                         <div className="text">
-                            <div>Issue Severity</div>
+                            <div>Issue severity</div>
                         </div>
                         <div className="ui cancel label"><i className="icon-cancel3" onClick={this.resetSeverityFilter.bind(this)}/></div>
                         <div className="menu">

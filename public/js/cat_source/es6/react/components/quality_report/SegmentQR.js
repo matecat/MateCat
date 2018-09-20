@@ -215,15 +215,15 @@ class SegmentQR extends React.Component {
             <div className="qr-segment-head shadow-1">
                 <div className="segment-id">{this.props.segment.get("sid")}</div>
                 <div className="segment-production-container">
-                    <div className="segment-production">
+                    <div className="ui basic mini buttons segment-production">
 
                         {this.props.segment.get('warnings').get('total') > 0 ? (
-                            <div className={"ui basic button tiny automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
+                            <div className={"ui button automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
                                 Automated QA<b> ({this.props.segment.get('warnings').get('total')})</b></div>
                         ) : null}
 
                         {this.props.segment.get('issues').size > 0 ? (
-                            <div className={"ui basic button tiny human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
+                            <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
                                 Human QA<b> ({this.props.segment.get('issues').size})</b></div>
                         ) : null}
 
