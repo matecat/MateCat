@@ -3,9 +3,14 @@ class QualitySummaryTable extends React.Component {
     constructor (props) {
         super(props);
         this.lqaNestedCategories = JSON.parse(this.props.jobInfo.get('quality_summary').get('categories'));
+        this.thereAreSubCategories = false;
         this.getTotalSeverities();
         this.qaLimit = JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit;
-        this.htmlBody = this.getBody();
+        if (this.thereAreSubCategories) {
+            this.htmlBody = this.getBodyWithSubtagories();
+        } else {
+            this.htmlBody = this.getBody();
+        }
         this.htmlHead = this.getHeader();
 
     }
@@ -21,6 +26,7 @@ class QualitySummaryTable extends React.Component {
                     }
                 });
             } else {
+                this.thereAreSubCategories = true;
                 cat.subcategories.forEach((subCat)=>{
                     subCat.severities.forEach((sev)=>{
                         if (this.severitiesNames.indexOf(sev.label) === -1 ) {
@@ -38,6 +44,15 @@ class QualitySummaryTable extends React.Component {
                 return parseInt(key) === parseInt(categoryId);
             });
         }
+    }
+    getCategorySeverities(categoryId) {
+        let severities;
+        this.lqaNestedCategories.categories.forEach((cat)=>{
+            if ( categoryId === cat.id ) {
+                severities = (cat.severities) ? cat.severities : cat.subcategories[0].severities;
+            }
+        });
+        return severities;
     }
     getHeader() {
         let html = [];
@@ -70,7 +85,7 @@ class QualitySummaryTable extends React.Component {
         let  html = [];
         this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
-            let catHtml = []
+            let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
@@ -78,6 +93,45 @@ class QualitySummaryTable extends React.Component {
             let catTotalWeightValue = 0;
             this.severities.forEach((currentSev)=>{
                 let severityFound = cat.severities.filter((sev)=>{
+                    return sev.label === currentSev.label;
+                });
+                if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
+                    catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
+                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
+                } else {
+                    catHtml.push(<div className="qr-element severity"/>);
+                }
+            });
+            let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
+            let line = <div className="qr-body-list" key={cat.id+index}>
+                        {catHtml}
+                        {catTotalWeightHtml}
+                    </div>;
+            html.push(line);
+            this.totalWeight = this.totalWeight + catTotalWeightValue;
+        });
+        return <div className="qr-body">
+        {html}
+        </div>
+    }
+    getBodyWithSubtagories() {
+        let  html = [];
+        this.totalWeight = 0;
+        this.lqaNestedCategories.categories.forEach((cat, index)=>{
+            let catHtml = [];
+            catHtml.push(
+                <div className="qr-element qr-issue-name">{cat.label}</div>
+            );
+            let totalIssues;
+            if (!cat.severities) {
+                totalIssues = this.getIssuesForCategory(cat.id);
+            } else {
+                totalIssues = this.getIssuesForCategory(cat.id);
+            }
+            let catTotalWeightValue = 0;
+            this.severities.forEach((currentSev)=>{
+                let catSeverities = this.getCategorySeverities(cat.id);
+                let severityFound = catSeverities.filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
