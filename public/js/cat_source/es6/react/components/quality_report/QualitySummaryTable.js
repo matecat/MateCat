@@ -49,7 +49,7 @@ class QualitySummaryTable extends React.Component {
         let severities;
         this.lqaNestedCategories.categories.forEach((cat)=>{
             if ( categoryId === cat.id ) {
-                severities = (cat.severities) ? cat.severities : cat.subcategories[0].severities;
+                severities (cat.severities) ? cat.severities : cat.subcategories[0].severities;
             }
         });
         return severities;
@@ -63,27 +63,19 @@ class QualitySummaryTable extends React.Component {
                     </div>;
             html.push(item);
         });
-
+        let totalScore = Math.round(this.props.jobInfo.get('quality_summary').get('total_issues_weight'));
         return <div className="qr-head">
             <div className="qr-title qr-issue">Issues</div>
             {html}
-            { parseInt(this.totalWeight) > parseInt(this.qaLimit) ? (
-                <div className="qr-title qr-total-severity">
-                    <div className="qr-info">Job Not Passed</div>
-                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </div>
-            ) : (
-                <div className="qr-title qr-total-severity">
-                    <div className="qr-info">Job Passed</div>
-                    <div className="qr-label">Total Weight: <b>{this.totalWeight}/{this.qaLimit}</b></div>
-                </div>
-            ) }
+            <div className="qr-title qr-total-severity">
+                <div className="qr-info">Total error point</div>
+                <div className="qr-label"><b>{totalScore}</b></div>
+            </div>
 
             </div>
     }
     getBody() {
         let  html = [];
-        this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
@@ -108,7 +100,6 @@ class QualitySummaryTable extends React.Component {
                         {catTotalWeightHtml}
                     </div>;
             html.push(line);
-            this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
         return <div className="qr-body">
         {html}
@@ -116,7 +107,6 @@ class QualitySummaryTable extends React.Component {
     }
     getBodyWithSubtagories() {
         let  html = [];
-        this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
@@ -147,7 +137,6 @@ class QualitySummaryTable extends React.Component {
                         {catTotalWeightHtml}
                     </div>;
             html.push(line);
-            this.totalWeight = this.totalWeight + catTotalWeightValue;
         });
         return <div className="qr-body">
         {html}
