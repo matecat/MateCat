@@ -26,7 +26,12 @@ class ProductionSummary extends React.Component {
     }
 
     render () {
-        let tooltipText = '<div style="color:red">lorem ipsum</div>';
+        let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality. ' +
+            'Data provided by the reviser generates error points. ' +
+            'This value is first calculated on 1,000 words, then weighed against the number of words that have actually been revised.</br>' +
+            'The final score is compared to a maximum amount of tolerated error points to determine the final quality. ' +
+            '<a href="https://www.matecat.com" target="_blank">Learn more</a><' +
+            '/div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
         let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
         let jobPassed = (score < limit);
