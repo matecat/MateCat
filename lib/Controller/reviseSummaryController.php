@@ -135,22 +135,7 @@ class reviseSummaryController extends viewController {
             $this->project_type = "new";
         }
         else {
-            $categoriesDbNames = Constants_Revise::$categoriesDbNames;
-            $categories        = [];
-            foreach ( $categoriesDbNames as $categoryDbName ) {
-
-                $categories[] = [
-                        'label'         => constant( get_class( $this->reviseClass ) ."::". strtoupper( $categoryDbName ) ),
-                        'id'            => $categoryDbName,
-                        'severities'    => [
-                                ['label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MINOR]],
-                                ['label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[Constants_Revise::MAJOR]]
-                        ],
-                        'subcategories' => [],
-                        'options'       => [],
-                ];
-            }
-            $this->categories = json_encode( ['categories' =>  $categories ] );
+            $this->categories = CatUtils::getSerializedCategories($this->reviseClass);
             $this->project_type = "old";
         }
 
@@ -250,7 +235,7 @@ class reviseSummaryController extends viewController {
 
         $this->template->categories = $this->categories;
         $this->template->project_type = $this->project_type;
-        $this->template->qa_limit = $this->qa_model->passfail->options->limit;
+        $this->template->passfail = json_encode($this->qa_model->passfail);
     }
 
     /**

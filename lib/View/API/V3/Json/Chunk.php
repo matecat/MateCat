@@ -85,6 +85,8 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $featureSet->loadForProject( $jStruct->getJob()->getProject() );
 
+        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $jStruct );
+
         if ( in_array( ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $reviseIssues     = [];
             $qualityReportDao = new ReviewImproved\Model\QualityReportDao();
@@ -105,6 +107,13 @@ class Chunk extends \API\V2\Json\Chunk {
                     }
                 }
             }
+
+            $quality_overall = @$chunkReview->is_pass ? 'excellent' : 'fail' ;
+            $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
+            $score = $chunkReviewModel->getScore();
+            $project = $jStruct->getProject();
+            $model = $project->getLqaModel() ;
+            $categories = $model->getSerializedCategories();
 
 
         } else {
@@ -138,7 +147,16 @@ class Chunk extends \API\V2\Json\Chunk {
                         'vote' => $issue['vote']
                 ];
             }
+
+            $quality_overall = strtolower( $chunkReview['minText'] ) ;
+            $score = 0;
+
+            $categories = CatUtils::getSerializedCategories($reviseClass);
         }
+
+        $stats = CatUtils::getFastStatsForJob( $jobStats, false );
+
+        $qa_model = json_decode(file_get_contents( \INIT::$ROOT . '/inc/qa_model.json'));
 
         $result = [
                 'id'                      => (int)$jStruct->id,
@@ -158,20 +176,23 @@ class Chunk extends \API\V2\Json\Chunk {
                 'created_at'              => Utils::api_timestamp( $jStruct->create_date ),
                 'create_date'             => $jStruct->create_date,
                 'formatted_create_date'   => ManageUtils::formatJobDate( $jStruct->create_date ),
-                'quality_overall'         => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
+                'quality_overall'         => $quality_overall,
                 'pee'                     => $jStruct->getPeeForTranslatedSegments(),
                 'private_tm_key'          => $this->getKeyList( $jStruct ),
                 'warnings_count'          => $warningsCount->warnings_count,
                 'warning_segments'        => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                   => CatUtils::getFastStatsForJob( $jobStats, false ),
+                'stats'                   => $stats,
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$jStruct->total_raw_wc,
                 'quality_summary'         => [
                         'equivalent_class' => $jStruct->getQualityInfo(),
-                        'quality_overall'  => $jStruct->getQualityOverall(),
+                        'quality_overall'  => $quality_overall,
                         'errors_count'     => (int)$jStruct->getErrorsCount(),
-                        'revise_issues'    => $reviseIssues
+                        'revise_issues'    => $reviseIssues,
+                        'score' => $score,
+                        'categories' => $categories,
+                        'passfail' => json_encode($qa_model->model->passfail)
                 ],
 
         ];
