@@ -111,9 +111,10 @@ class Chunk extends \API\V2\Json\Chunk {
             $quality_overall = @$chunkReview->is_pass ? 'excellent' : 'fail' ;
 
             $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
-            $score = number_format( $chunkReviewModel->getScore(), 2, ".", ",");
+            $score = number_format( $chunkReviewModel->getScore(), 2, ",", "");
 
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
+            $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
 
             $project = $jStruct->getProject();
             $model = $project->getLqaModel() ;
@@ -156,6 +157,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $score = 0;
 
             $total_issues_weight = 0;
+            $total_reviews_words_count = 0;
 
             $categories = CatUtils::getSerializedCategories( $reviseClass );
         }
@@ -163,6 +165,7 @@ class Chunk extends \API\V2\Json\Chunk {
         $stats = CatUtils::getFastStatsForJob( $jobStats, false );
 
         $qa_model = json_decode(file_get_contents( \INIT::$ROOT . '/inc/qa_model.json'));
+
 
         $result = [
                 'id'                      => (int)$jStruct->id,
@@ -199,6 +202,7 @@ class Chunk extends \API\V2\Json\Chunk {
                         'score'               => $score,
                         'categories'          => $categories,
                         'total_issues_weight' => $total_issues_weight,
+                        'total_reviews_words_count' => $total_reviews_words_count,
                         'passfail'            => json_encode( $qa_model->model->passfail )
                 ]
 
