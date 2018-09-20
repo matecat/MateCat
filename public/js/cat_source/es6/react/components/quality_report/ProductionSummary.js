@@ -19,7 +19,7 @@ class ProductionSummary extends React.Component {
     }
 
     render () {
-        let score = Math.round(this.props.jobInfo.get('quality_summary').get('score'));
+        let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
         let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
         let jobPassed = (score < limit);
         let jobPassedClass = (jobPassed) ? "qr-pass" : "qr-fail";
@@ -77,13 +77,13 @@ class ProductionSummary extends React.Component {
                 {/*<div className="qr-label">Reviser</div>*/}
                 {/*<div className="qr-info"><b></b></div>*/}
             {/*</div>*/}
-            <div className="qr-effort pee">
-                <div className="qr-label">PEE</div>
-                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
-            </div>
             <div className="qr-effort time-edit">
                 <div className="qr-label">Time to edit</div>
                 <div className="qr-info"><b>{this.getTimeToEdit()}</b> </div>
+            </div>
+            <div className="qr-effort pee">
+                <div className="qr-label">PEE</div>
+                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
             <div className={"qr-effort qr-score " + jobPassedClass}>
                 <div className="qr-label">Finale score <i className="icon-info icon" /></div>

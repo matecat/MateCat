@@ -49,7 +49,7 @@ class QualitySummaryTable extends React.Component {
         let severities;
         this.lqaNestedCategories.categories.forEach((cat)=>{
             if ( categoryId === cat.id ) {
-                severities (cat.severities) ? cat.severities : cat.subcategories[0].severities;
+                severities = (cat.severities) ? cat.severities : cat.subcategories[0].severities;
             }
         });
         return severities;
