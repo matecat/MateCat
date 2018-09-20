@@ -83,12 +83,12 @@ class ProductionSummary extends React.Component {
                 <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
             <div className="qr-effort qr-score qr-pass">
-                <div className="qr-label">Finale score <i className="icon-info icon" /></div>
-                <div className="qr-label">Based on Reviewed Words</div>
+                {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
-                    <div className="qr-tolerated-score"><b>13/15</b></div>
                     <div className="qr-pass-score"><b>Job Pass</b></div>
+                    <div className="qr-tolerated-score"><b>13/15</b></div>
                 </div>
+                <div className="qr-label">Finale score <i className="icon-info icon" /></div>
             </div>
         </div>
 

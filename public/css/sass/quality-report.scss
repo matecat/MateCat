@@ -188,7 +188,7 @@ header {
                                     padding-right: 15px !important;
                                 }
                                 &.translator {
-                                    max-width: 135px;
+                                    max-width: 20%;
                                     min-width: 30px;
                                     b {
                                         white-space: nowrap;
@@ -200,7 +200,10 @@ header {
                                     padding: 15px;
                                     .qr-tolerated-score, .qr-pass-score {
                                         font-size: 20px;
-                                        margin-top: 5px;
+                                    }
+                                    .qr-info {
+                                        flex-direction: column;
+                                        align-items: unset;
                                     }
                                 }
 
