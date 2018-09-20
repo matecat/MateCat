@@ -88,12 +88,12 @@ class ProductionSummary extends React.Component {
             <div className={"qr-effort qr-score " + jobPassedClass}>
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
-                    <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                     { jobPassed ? (
                         <div className="qr-pass-score"><b>Job Pass</b></div>
                     ) : (
                         <div className="qr-pass-score"><b>Job Fail</b></div>
                     ) }
+                    <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
                 <div className="qr-label">Finale score <i className="icon-info icon" /></div>
             </div>
