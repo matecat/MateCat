@@ -124,18 +124,11 @@ class reviseSummaryController extends viewController {
                 constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
         );
 
-        $qa_model = json_decode(file_get_contents( INIT::$ROOT . '/inc/qa_model.json'));
-        $this->qa_model = $qa_model->model;
-
         $codes = $this->featureSet->getCodes();
         if(in_array(Features\ReviewImproved::FEATURE_CODE, $codes) OR in_array(Features\ReviewExtended::FEATURE_CODE, $codes)){
-
-            $model = $project->getLqaModel() ;
-            $this->categories = $model->getSerializedCategories();
             $this->project_type = "new";
         }
         else {
-            $this->categories = CatUtils::getSerializedCategories($this->reviseClass);
             $this->project_type = "old";
         }
 
@@ -233,9 +226,7 @@ class reviseSummaryController extends viewController {
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->first_job_segment   = $this->data->job_first_segment ;
 
-        $this->template->categories = $this->categories;
         $this->template->project_type = $this->project_type;
-        $this->template->passfail = json_encode($this->qa_model->passfail);
     }
 
     /**
