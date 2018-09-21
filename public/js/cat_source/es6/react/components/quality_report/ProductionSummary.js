@@ -18,7 +18,21 @@ class ProductionSummary extends React.Component {
         }
     }
 
+    componentDidMount() {
+        $(this.tooltip).popup({
+            position: 'bottom right'
+        });
+        $(this.tooltipRev).popup({
+            position: 'bottom right'
+        });
+    }
+
     render () {
+        let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality based on industry standards. </br>' +
+            'The final score is compared to a maximum amount of tolerated error points to determine the final quality.' +
+            '<a href="https://www.matecat.com" target="_blank">Learn more</a>' +
+            '</div>';
+        let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
         let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
         let jobPassed = (score < limit);
@@ -66,8 +80,8 @@ class ProductionSummary extends React.Component {
                 <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
             </div>
             <div className="qr-effort qr-review-words">
-                <div className="qr-label">Reviewed Words</div>
-                <div className="qr-info"><b>{stats.get('APPROVED_FORMATTED')}</b></div>
+                <div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>
+                <div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>
             </div>
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
@@ -95,7 +109,9 @@ class ProductionSummary extends React.Component {
                     ) }
                     <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
-                <div className="qr-label">Finale score <i className="icon-info icon" /></div>
+                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
+                    Finale score <i className="icon-info icon" />
+                </div>
             </div>
         </div>
 
