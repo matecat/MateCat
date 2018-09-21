@@ -164,9 +164,6 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $stats = CatUtils::getFastStatsForJob( $jobStats, false );
 
-        $qa_model = json_decode(file_get_contents( \INIT::$ROOT . '/inc/qa_model.json'));
-
-
         $result = [
                 'id'                      => (int)$jStruct->id,
                 'password'                => $jStruct->password,
@@ -203,7 +200,7 @@ class Chunk extends \API\V2\Json\Chunk {
                         'categories'          => $categories,
                         'total_issues_weight' => $total_issues_weight,
                         'total_reviews_words_count' => $total_reviews_words_count,
-                        'passfail'            => json_encode( $qa_model->model->passfail )
+                        'passfail'            => (isset($model)?json_encode( [$model->pass_type => ['options' => json_decode($model->pass_options)]] ):'')
                 ]
 
         ];
