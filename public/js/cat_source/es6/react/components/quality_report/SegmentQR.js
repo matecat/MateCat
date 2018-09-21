@@ -191,7 +191,7 @@ class SegmentQR extends React.Component {
         });
 
         let segmentBodyClass = classnames({
-            "qr-segment-body": true,
+            "qr-segment-body shadow-1": true,
             "qr-diff-on": (this.state.translateDiffOn || this.state.reviseDiffOn),
         });
         let suggestionClasses = classnames({

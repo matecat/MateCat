@@ -20,7 +20,8 @@ class ProductionSummary extends React.Component {
 
     componentDidMount() {
         $(this.tooltip).popup({
-            position: 'bottom right'
+            position: 'bottom right',
+            on    : 'click'
         });
         $(this.tooltipRev).popup({
             position: 'bottom right'
@@ -30,7 +31,7 @@ class ProductionSummary extends React.Component {
     render () {
         let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality based on industry standards. </br>' +
             'The final score is compared to a maximum amount of tolerated error points to determine the final quality. </br>' +
-            '<a href="https://www.matecat.com" target="_blank">Learn more</a>' +
+            '<a style="text-decoration: underline" href="https://www.matecat.com" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
@@ -107,16 +108,24 @@ class ProductionSummary extends React.Component {
             <div className={"qr-effort qr-score " + jobPassedClass}>
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
+                    <div className="qr-tolerated-score"><b>{score}</b></div>
                     { jobPassed ? (
-                        <div className="qr-pass-score"><b>Job Pass</b></div>
+                        <div>
+                            <div className="qr-label">
+                                Quality score
+                            </div>
+                            <div className="qr-pass-score"><b>Pass</b></div>
+                        </div>
                     ) : (
-                        <div className="qr-pass-score"><b>Job Fail</b></div>
+                        <div>
+                            <div className="qr-label">
+                                Quality score
+                            </div>
+                            <div className="qr-pass-score"><b>Fail</b></div>
+                        </div>
                     ) }
-                    <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
-                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
-                    Final score <i className="icon-info icon" />
-                </div>
+                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>Treshold {limit} <i className="icon-info icon" /></div>
             </div>
             ) :null}
         </div>
