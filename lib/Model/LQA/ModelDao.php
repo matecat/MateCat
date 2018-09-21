@@ -12,6 +12,8 @@ class ModelDao extends DataAccess_AbstractDao {
 
     protected static $auto_increment_fields = ['id'];
 
+    protected static $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1" ;
+
     protected function _buildResult( $array_result ) { }
 
     /**
@@ -19,12 +21,12 @@ class ModelDao extends DataAccess_AbstractDao {
      * @return \LQA\ModelStruct
      */
     public static function findById( $id ) {
-        $sql = "SELECT * FROM qa_models WHERE id = :id LIMIT 1" ;
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute(array('id' => $id));
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ModelStruct' );
-        return $stmt->fetch();
+        $stmt = $conn->prepare( self::$_sql_get_model_by_id );
+
+        return $thisDao->setCacheTTL( 60*60*24*30 )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id ] )[0];
     }
 
     /**
