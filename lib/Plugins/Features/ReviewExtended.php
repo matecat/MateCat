@@ -5,7 +5,7 @@ namespace Features ;
 
 use API\V2\Json\ProjectUrls;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
-use Features\ReviewImproved\Observer\SegmentTranslationObserver;
+use Features\ReviewExtended\Observer\SegmentTranslationObserver;
 use SegmentTranslationModel;
 
 class ReviewExtended extends AbstractRevisionFeature {
