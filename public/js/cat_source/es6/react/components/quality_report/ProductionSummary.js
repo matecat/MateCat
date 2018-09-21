@@ -34,7 +34,7 @@ class ProductionSummary extends React.Component {
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
-        let limit = parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit);
+        let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit):0;
         let jobPassed = (score < limit);
         let jobPassedClass = (jobPassed) ? "qr-pass" : "qr-fail";
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
@@ -79,10 +79,14 @@ class ProductionSummary extends React.Component {
                 <div className="qr-label">Words</div>
                 <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
             </div>
+
+            {config.project_type !== "old" ? (
             <div className="qr-effort qr-review-words">
                 <div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>
                 <div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>
             </div>
+            ) :null}
+
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
                 <div className="qr-info" title={translator}><b>{translator}</b></div>
@@ -99,6 +103,7 @@ class ProductionSummary extends React.Component {
                 <div className="qr-label">PEE</div>
                 <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
             </div>
+            {config.project_type !== "old" ? (
             <div className={"qr-effort qr-score " + jobPassedClass}>
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
@@ -113,6 +118,7 @@ class ProductionSummary extends React.Component {
                     Finale score <i className="icon-info icon" />
                 </div>
             </div>
+            ) :null}
         </div>
 
     }

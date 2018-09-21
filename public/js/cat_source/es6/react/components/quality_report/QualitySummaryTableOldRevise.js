@@ -73,7 +73,7 @@ class QualitySummaryTableOldRevise extends React.Component {
         let  html = [];
         this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
-            let catHtml = []
+            let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
@@ -96,7 +96,7 @@ class QualitySummaryTableOldRevise extends React.Component {
             let toleratedIssuesHtml = <div className="qr-element total-severity">{toleratedIssuesValue}</div>;
             let voteClass = (voteValue.toLowerCase() === 'poor' || voteValue.toLowerCase() === 'fail') ? 'job-not-passed' : "job-passed";
             let voteHtml = <div className={"qr-element total-severity " + voteClass}>{voteValue}</div>;
-            let line = <div className="qr-body-list" key={cat.id+index}>
+            let line = <div className="qr-body-list" key={cat.id+index+cat.label}>
                 {catHtml}
                 {catTotalWeightHtml}
                 {toleratedIssuesHtml}
