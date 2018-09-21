@@ -214,6 +214,28 @@ header {
                                 &.qr-fail {
                                     background: rgba(255, 0, 0, 0.23);
                                 }
+                                &.qr-pass, &.qr-fail {
+                                    margin-right: -1px;
+                                    .qr-info {
+                                        display: flex;
+                                        flex-direction: row;
+                                        align-items: center;
+                                        .qr-tolerated-score {
+                                            font-size: 42px;
+                                            margin-right: 10px;
+                                        }
+                                    }
+                                    .qr-label {
+                                        text-decoration: underline;
+                                        cursor: pointer;
+                                        &:hover {
+                                            text-decoration: none;
+                                        }
+                                        &:first-child {
+                                            text-decoration: none;
+                                        }
+                                    }
+                                }
                                 .qr-info {
                                     display: flex;
                                     align-items: center;
@@ -515,7 +537,7 @@ header {
                                                                         margin-right: 6px;
                                                                     }
                                                                 }
-                                                                &.human {
+                                                                /*&.human {
                                                                     &.critical {
                                                                         border-bottom: 2px solid #FB2A0D;
                                                                     }
@@ -525,7 +547,7 @@ header {
                                                                     &.enhacement {
                                                                         border-bottom: 2px solid #FFE600;
                                                                     }
-                                                                }
+                                                                }*/
                                                                 .qr-error {
 
                                                                 }
