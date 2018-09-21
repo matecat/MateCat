@@ -264,7 +264,7 @@ header {
                                 font-weight: 700;
                             }
                             .qr-severity, .severity {
-                                width: 12%;
+                                width: 16%;
                                 text-align: center;
                             }
                             .qr-total-severity, .total-severity {
@@ -311,7 +311,7 @@ header {
                     }
                     .qr-segment-details-container {
                         background: #E5E9F1;
-                        padding: 45px 15px 15px;
+                        padding: 35px 15px 15px;
                         .qr-segments-summary {
                             h3{
                                 margin-bottom: 0;
@@ -849,7 +849,7 @@ header {
             }
         }
         .filter-category {
-            margin-left: 10px;
+            margin-left: 5px;
         }
         .filter-status, .filter-severity , .filter-category, .filter-activities, .filter-data-sample {
             &.not-filtered {
@@ -1007,4 +1007,11 @@ footer {
     margin: 15px 0;
     border: 1px dashed #c3c8d0;
     padding: 15px;
+}
+
+.one.column.spinner {
+    margin: 30px 15px 15px;
+    .ui.active.inverted.dimmer {
+        background: #f4f5f8;
+    }
 }
