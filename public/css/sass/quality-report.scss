@@ -197,7 +197,7 @@ header {
                                     }
                                 }
                                 &.qr-score {
-                                    padding: 15px;
+                                    padding: 15px 25px;
                                     .qr-tolerated-score, .qr-pass-score {
                                         font-size: 20px;
                                     }
@@ -232,6 +232,7 @@ header {
                                 background: #f4f5f8;
                                 .qr-title {
                                     text-align: center;
+                                    text-transform: capitalize;
                                     &:first-child {
                                         text-align: left;
                                     }
@@ -265,29 +266,40 @@ header {
                                 width: 12%;
                                 text-align: center;
                             }
-                            .qr-total-severity {
-                                display: flex;
-                                justify-content: space-between;
-                                padding: 20px 15px;
-                            }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
                                 background: #e4e4e4;
                             }
                             .qr-total-severity {
+                                display: flex;
+                                justify-content: space-between;
+                                padding: 20px 15px;
                                 &.job-not-passed {
                                     background-color: #FB590D;
                                 }
                                 &.job-passed {
                                     background-color: #83FD97;
+                                    &.qr-old {
+                                        background-color: #83FD97;
+                                        display: unset;
+                                    }
                                 }
+                                &.qr-old {
+                                    background: inherit;
+                                    display: unset;
+                                }
+                            }
+                            .qr-element.total-severity {
+
                             }
                             .total-severity {
                                 &.job-not-passed {
                                     background-color: rgba(255, 123, 35, 0.31);
+                                    text-align: center;
                                 }
                                 &.job-passed {
-                                    background-color: rgba(131, 253, 151, 0.3);
+                                    background-color: rgba(0, 255, 0, 0.23);
+                                    text-align: center;
                                 }
                             }
                             .total-severity {

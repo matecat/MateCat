@@ -53,15 +53,15 @@ class QualitySummaryTableOldRevise extends React.Component {
             <div className="qr-title qr-issue">Issues</div>
             {html}
 
-            <div className="qr-title qr-total-severity">
+            <div className="qr-title qr-total-severity qr-old">
                 <div className="qr-info">Total Weight</div>
             </div>
 
-            <div className="qr-title qr-total-severity">
+            <div className="qr-title qr-total-severity qr-old">
                 <div className="qr-info">Tolerated Issues</div>
             </div>
 
-            <div className={"qr-title qr-total-severity " + passedClass}>
+            <div className={"qr-title qr-total-severity qr-old " + passedClass}>
                 <div className="qr-info">{this.props.jobInfo.get('quality_summary').get('quality_overall')}</div>
                 <div className="qr-label">Total Score</div>
             </div>
@@ -73,7 +73,7 @@ class QualitySummaryTableOldRevise extends React.Component {
         let  html = [];
         this.totalWeight = 0;
         this.lqaNestedCategories.categories.forEach((cat, index)=>{
-            let catHtml = []
+            let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
@@ -92,11 +92,11 @@ class QualitySummaryTableOldRevise extends React.Component {
                     catHtml.push(<div className="qr-element severity"/>);
                 }
             });
-            let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
-            let toleratedIssuesHtml = <div className="qr-element total-severity">{toleratedIssuesValue}</div>;
+            let catTotalWeightHtml = <div className="qr-element total-severity qr-old">{catTotalWeightValue}</div>;
+            let toleratedIssuesHtml = <div className="qr-element total-severity qr-old">{toleratedIssuesValue}</div>;
             let voteClass = (voteValue.toLowerCase() === 'poor' || voteValue.toLowerCase() === 'fail') ? 'job-not-passed' : "job-passed";
-            let voteHtml = <div className={"qr-element total-severity " + voteClass}>{voteValue}</div>;
-            let line = <div className="qr-body-list" key={cat.id+index}>
+            let voteHtml = <div className={"qr-element total-severity qr-old " + voteClass}>{voteValue}</div>;
+            let line = <div className="qr-body-list" key={cat.id+index+cat.label}>
                 {catHtml}
                 {catTotalWeightHtml}
                 {toleratedIssuesHtml}
