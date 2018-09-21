@@ -279,13 +279,17 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $translation_model = new SegmentTranslationModel( $new_translation_struct );
         $translation_model->setOldTranslation( $old_translation_struct );
 
+        $this->attachObserver( $translation_model );
+        $translation_model->notify();
+    }
+
+    protected function attachObserver( SegmentTranslationModel $translation_model ){
         /**
          * This implementation may seem overkill since we are already into review improved feature
          * so we could avoid to delegate to an observer. This is done with aim to the future when
          * the SegmentTranslationModel will be used directly into setTranslation controller.
          */
         $translation_model->attach( new SegmentTranslationObserver() );
-        $translation_model->notify();
     }
 
     /**
