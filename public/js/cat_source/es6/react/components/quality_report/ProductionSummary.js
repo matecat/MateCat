@@ -115,6 +115,13 @@ class ProductionSummary extends React.Component {
                             <div className="qr-label">
                                 Quality score
                             </div>
+                            <div className="qr-pass-score"></div>
+                        </div>
+                    ) : (jobPassed ? (
+                        <div>
+                            <div className="qr-label">
+                                Quality score
+                            </div>
                             <div className="qr-pass-score"><b>Pass</b></div>
                         </div>
                     ) : (
@@ -124,7 +131,7 @@ class ProductionSummary extends React.Component {
                             </div>
                             <div className="qr-pass-score"><b>Fail</b></div>
                         </div>
-                    ) }
+                    ))}
                 </div>
                 <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>Treshold {limit} <i className="icon-info icon" /></div>
             </div>
