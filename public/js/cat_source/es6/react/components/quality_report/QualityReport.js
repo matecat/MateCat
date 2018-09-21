@@ -14,15 +14,23 @@ class QualityReport extends React.Component {
         super(props);
         this.state = {
             segmentFiles: null,
-            jobInfo: null
+            jobInfo: null,
+            moreSegments: true
         };
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
         this.renderJobInfo = this.renderJobInfo.bind(this);
+        this.noMoreSegments = this.noMoreSegments.bind(this);
     }
 
     renderSegmentsFiles(files) {
         this.setState({
             segmentFiles: files
+        });
+    }
+
+    noMoreSegments() {
+        this.setState({
+            moreSegments: false
         });
     }
     renderJobInfo(jobInfo) {
@@ -38,11 +46,13 @@ class QualityReport extends React.Component {
     componentDidMount() {
         QRStore.addListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
         QRStore.addListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
+        QRStore.addListener(QRConstants.NO_MORE_SEGMENTS, this.noMoreSegments);
         // console.log("Render Quality Report");
     }
     componentWillUnmount() {
         QRStore.removeListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
         QRStore.removeListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
+        QRStore.removeListener(QRConstants.NO_MORE_SEGMENTS, this.noMoreSegments);
     }
 
     render () {
@@ -66,6 +76,7 @@ class QualityReport extends React.Component {
                                 <SegmentsDetails files={this.state.segmentFiles}
                                                  urls={this.state.jobInfo.get('urls')}
                                                  categories={JSON.parse(this.state.jobInfo.get('quality_summary').get('categories'))}
+                                                 moreSegments={this.state.moreSegments}
                                 />
                             </div>
                         ) : (

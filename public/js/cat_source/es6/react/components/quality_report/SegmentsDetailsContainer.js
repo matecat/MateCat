@@ -31,7 +31,9 @@ class SegmentsDetails extends React.Component {
     onScroll(){
         if ( $(window).scrollTop() + $(window).height() > $(document).height() - 200)  {
             console.log("Load More Segments!");
-            QualityReportActions.getMoreQRSegments(this.state.filter, this.lastSegment);
+            if (this.props.moreSegments) {
+                QualityReportActions.getMoreQRSegments(this.state.filter, this.lastSegment);
+            }
         }
     }
     filterSegments(filter) {
@@ -66,6 +68,16 @@ class SegmentsDetails extends React.Component {
                  : (
                     this.getFiles()
                 ) }
+                {this.props.moreSegments? (
+                    <div className="ui one column grid">
+                        <div className="one column spinner" style={{height: "100px"}}>
+                            <div className="ui active inverted dimmer">
+                                <div className="ui medium text loader">Loading more segments</div>
+                            </div>
+                        </div>
+                    </div>
+                ):null}
+
 
             </div>
         </div>

@@ -55,6 +55,10 @@ AppDispatcher.register(function(action) {
             QualityReportStore.storeJobInfo(action.job);
             QualityReportStore.emitChange(QRConstants.RENDER_REPORT, QualityReportStore._jobInfo);
             break;
+        case QRConstants.NO_MORE_SEGMENTS:
+            QualityReportStore.storeJobInfo(action.job);
+            QualityReportStore.emitChange(QRConstants.NO_MORE_SEGMENTS);
+            break;
 
     }
 });
