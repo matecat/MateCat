@@ -29,7 +29,7 @@ class ProductionSummary extends React.Component {
 
     render () {
         let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality based on industry standards. </br>' +
-            'The final score is compared to a maximum amount of tolerated error points to determine the final quality.' +
+            'The final score is compared to a maximum amount of tolerated error points to determine the final quality. </br>' +
             '<a href="https://www.matecat.com" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
@@ -115,7 +115,7 @@ class ProductionSummary extends React.Component {
                     <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
                 <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
-                    Finale score <i className="icon-info icon" />
+                    Final score <i className="icon-info icon" />
                 </div>
             </div>
             ) :null}

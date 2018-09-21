@@ -68,7 +68,7 @@ class QualitySummaryTable extends React.Component {
             <div className="qr-title qr-issue">Issues</div>
             {html}
             <div className="qr-title qr-total-severity">
-                <div className="qr-info">Total error point</div>
+                <div className="qr-info">Total error points</div>
                 <div className="qr-info"><b>{totalScore}</b></div>
             </div>
 
