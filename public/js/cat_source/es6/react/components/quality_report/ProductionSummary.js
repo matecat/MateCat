@@ -35,8 +35,9 @@ class ProductionSummary extends React.Component {
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
         let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit):0;
-        let jobPassed = (score < limit);
-        let jobPassedClass = (jobPassed) ? "qr-pass" : "qr-fail";
+        let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
+        let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;
+        let jobPassedClass = (jobPassed === null) ? "" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
         return <div className="qr-production shadow-1">
@@ -101,17 +102,19 @@ class ProductionSummary extends React.Component {
             </div>
             <div className="qr-effort pee">
                 <div className="qr-label">PEE</div>
-                <div className="qr-info"><b>{parseInt(this.props.jobInfo.get('pee'))}%</b> </div>
+                <div className="qr-info"><b>{(this.props.jobInfo.get('pee')) ? parseInt(this.props.jobInfo.get('pee')):0}%</b> </div>
             </div>
             {config.project_type !== "old" ? (
             <div className={"qr-effort qr-score " + jobPassedClass}>
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
-                    { jobPassed ? (
+                    { jobPassed === null ? (
+                        <div className="qr-pass-score"></div>
+                    ) : (jobPassed ? (
                         <div className="qr-pass-score"><b>Job Pass</b></div>
-                    ) : (
+                    ):(
                         <div className="qr-pass-score"><b>Job Fail</b></div>
-                    ) }
+                    )) }
                     <div className="qr-tolerated-score"><b>{score}/{limit}</b></div>
                 </div>
                 <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>
