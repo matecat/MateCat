@@ -67,8 +67,10 @@ class SegmentsDetails extends React.Component {
 
                  : (
                     this.getFiles()
+
                 ) }
-                {this.props.moreSegments? (
+
+                {this.props.moreSegments && this.props.files && this.props.files.size !== 0 ? (
                     <div className="ui one column grid">
                         <div className="one column spinner" style={{height: "100px"}}>
                             <div className="ui active inverted dimmer">
@@ -77,7 +79,6 @@ class SegmentsDetails extends React.Component {
                         </div>
                     </div>
                 ):null}
-
 
             </div>
         </div>
