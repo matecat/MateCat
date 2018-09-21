@@ -345,11 +345,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         ));
     }
 
-    public function saveVersion($old_translation) {
+    public function saveVersion($old_translation, $new_translation) {
         $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number, time_to_edit ) " .
+            " ( id_job, id_segment, translation, version_number, time_to_edit, is_review ) " .
             " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit )";
+            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :is_review )";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql );
@@ -359,7 +359,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             'id_segment'     => $old_translation['id_segment'] ,
             'translation'    => $old_translation['translation'],
             'version_number' => $old_translation['version_number'],
-            'time_to_edit'   => $old_translation['time_to_edit']
+            'time_to_edit'   => $old_translation['time_to_edit'],
+            'is_review' => ($old_translation['status'] == Constants_TranslationStatus::STATUS_APPROVED)?1:0
         ));
     }
 
