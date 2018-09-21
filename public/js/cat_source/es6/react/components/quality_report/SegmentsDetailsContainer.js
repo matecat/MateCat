@@ -61,7 +61,7 @@ class SegmentsDetails extends React.Component {
                     />
                 </div>
                 {this.props.files && this.props.files.size === 0 ?
-                    <div>No Segments found</div>
+                    <div className="no-segments-found" >No segments found</div>
 
                  : (
                     this.getFiles()
