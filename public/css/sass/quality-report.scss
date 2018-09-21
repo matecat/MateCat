@@ -156,6 +156,7 @@ header {
                             width: 100%;
                             padding-left: 15px;
                             align-items: center;
+                            position: relative;
                             .job-id {
                                 font-size: 14px;
                             }
@@ -300,6 +301,7 @@ header {
                                 &.job-passed {
                                     background-color: rgba(0, 255, 0, 0.23);
                                     text-align: center;
+                                    border: 1px;
                                 }
                             }
                             .total-severity {
