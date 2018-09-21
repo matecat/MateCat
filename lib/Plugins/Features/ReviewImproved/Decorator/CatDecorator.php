@@ -65,10 +65,11 @@ class CatDecorator extends \AbstractDecorator {
             )
         ));
 
-        if ( $reviews[0]->is_pass ) {
+        if ( $reviews[0]->is_pass === null ) {
+            return '';
+        } else if ($reviews[0]->is_pass) {
             return 'excellent';
-        }
-        else {
+        } else {
             return 'fail';
         }
     }
