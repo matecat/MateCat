@@ -23,13 +23,15 @@ class ProductionSummary extends React.Component {
             position: 'bottom right',
             hoverable: true
         });
-        $(this.tooltipRev).popup({
-            position: 'bottom right'
-        });
+        // $(this.tooltipRev).popup({
+        //     position: 'bottom right'
+        // });
     }
 
     render () {
-        let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality based on industry standards. </br>' +
+        let tooltipText = '<div style="color:gray">MateCat calculates the score based on the following formula: </br></br>' +
+                '<code>(total error points * 1000) / reviewed words</code></br></br>' +
+                '<code>Reviewed words =  raw words - ICE matches that have not been modified</code></br></br>'+
             'The final score is compared to a maximum amount of tolerated error points to determine the final quality. </br>' +
             '<a style="text-decoration: underline" href="https://www.matecat.com" target="_blank">Learn more</a>' +
             '</div>';
@@ -82,12 +84,12 @@ class ProductionSummary extends React.Component {
                 <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
             </div>
 
-            {config.project_type !== "old" ? (
-            <div className="qr-effort qr-review-words">
-                <div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>
-                <div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>
-            </div>
-            ) :null}
+            {/*{config.project_type !== "old" ? (*/}
+            {/*<div className="qr-effort qr-review-words">*/}
+                {/*<div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>*/}
+                {/*<div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>*/}
+            {/*</div>*/}
+            {/*) :null}*/}
 
             <div className="qr-effort translator">
                 <div className="qr-label">Translator</div>
