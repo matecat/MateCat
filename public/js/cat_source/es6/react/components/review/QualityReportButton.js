@@ -35,7 +35,7 @@ class QualityReportButton extends React.Component {
         className="draft"
         data-vote={this.getVote()} 
         href={this.props.quality_report_href}
-        target="_self">{label}</a> ; 
+        target="_blank">{label}</a> ;
     }
 }
 

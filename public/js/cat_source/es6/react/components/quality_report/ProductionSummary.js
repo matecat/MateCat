@@ -23,13 +23,15 @@ class ProductionSummary extends React.Component {
             position: 'bottom right',
             hoverable: true
         });
-        $(this.tooltipRev).popup({
-            position: 'bottom right'
-        });
+        // $(this.tooltipRev).popup({
+        //     position: 'bottom right'
+        // });
     }
 
     render () {
-        let tooltipText = '<div style="color:gray">MateCat uses an analytical approach to assess quality based on industry standards. </br>' +
+        let tooltipText = '<div style="color:gray">MateCat calculates the score based on the following formula: </br></br>' +
+                '<code>(total error points * 1000) / reviewed words</code></br></br>' +
+                '<code>Reviewed words =  raw words - ICE matches that have not been modified</code></br></br>'+
             'The final score is compared to a maximum amount of tolerated error points to determine the final quality. </br>' +
             '<a style="text-decoration: underline" href="https://www.matecat.com" target="_blank">Learn more</a>' +
             '</div>';
