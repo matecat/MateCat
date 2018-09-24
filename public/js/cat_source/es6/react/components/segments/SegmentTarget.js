@@ -139,7 +139,7 @@ class SegmentTarget extends React.Component {
                 </div>
             </div>
         } else if ( this.props.segment.edit_area_locked ) {
-            textAreaContainer = <div data-mount="segment_text_area_container">
+            textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
                 ref={(div)=> this.issuesHighlightArea = div}>
                     <div className="targetarea issuesHighlightArea errorTaggingArea"

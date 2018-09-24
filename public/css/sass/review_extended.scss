@@ -73,12 +73,15 @@ h1, h2, h3, h4, h5, a, input {
 
                     }
                     .re-error {
-                        padding: 0px 4px 0px 10px;
+                        padding: 0 10px;
                         height: 100%;
                         min-height: 45px;
+                        min-width: 30px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
                         .error-name {
-                            padding-right: 10px;
-                            display: flex;
+
                         }
                     }
                     .comments-view {
@@ -117,18 +120,11 @@ h1, h2, h3, h4, h5, a, input {
                         }
                     }
                     .re-severities-buttons {
-                        margin-right: 12px;
-                        visibility: hidden;
-                        opacity: 0;
-                        transition: visibility 0s, opacity 0.2s linear;
-                        position: absolute;
-                        right: 1px;
-                        top: 9px;
+                        display: none;
                     }
                     &.severity-buttons:hover {
                         .re-severities-buttons {
-                            visibility: visible;
-                            opacity: 1;
+                            display: flex;
                             button {
                                 padding: 7px 10px;
                                 background-color: #f2f4f7;
@@ -139,13 +135,9 @@ h1, h2, h3, h4, h5, a, input {
                         }
                         .error-name {
                             padding-right: 10px;
-                            max-width: 65%;
-                            min-width: 30px;
-                            white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;
-                            display: block;
-                            cursor: default;
+                            white-space: nowrap;
                         }
                         @media only screen and (max-width: 1260px) {
                             .error-name {
@@ -269,17 +261,23 @@ section.editAreaLocked.opened {
 
 section {
 
+
     &.editAreaLocked.opened {
         .outersource .copy {
             display: none;
         }
-        .textarea-container {
-            width: 100%;
-            padding: 0 4px;
-            font-size:18px;
+        .segment-text-area-container {
+            position: relative !important;
+            width: 100% !important;
+            float: right !important;
+            .textarea-container {
+                padding: 0 5px;
+                font-size: 18px;
+                margin: 3px 0 2px;
+            }
         }
         .buttons {
-            margin-top: 30px;
+
             .left {
                 float: left;
             }
