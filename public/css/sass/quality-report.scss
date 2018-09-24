@@ -415,6 +415,7 @@ header {
                                                     &.qr-issues {
                                                         .qr-text {
                                                             width: 80%;
+                                                            border-left: 1px solid #e8e9ec;
                                                         }
                                                         .button.no-hover {
                                                             cursor: default !important;
@@ -590,6 +591,7 @@ header {
 
                                             &.qr-diff-on {
                                                 .segment-container {
+                                                    box-shadow: none !important;
                                                     .segment-content {
                                                         background: #f2f4f7;
                                                         .qr-issues-list {
@@ -597,6 +599,7 @@ header {
                                                                 background: #FFFFFF;
                                                             }
                                                         }
+
                                                     }
                                                     &.shadow-1 {
                                                         position: relative;
@@ -606,6 +609,9 @@ header {
                                                         .qr-segment-title {
                                                             background: #e8e9ef;
                                                         }
+                                                    }
+                                                    &.qr-text {
+                                                        border-left: 1px solid #e8e9ec;
                                                     }
                                                 }
                                             }
