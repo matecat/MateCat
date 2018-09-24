@@ -599,7 +599,9 @@ header {
                                                                 background: #FFFFFF;
                                                             }
                                                         }
-
+                                                        &.qr-text {
+                                                            border-left: 1px solid #e8e9ec;
+                                                        }
                                                     }
                                                     &.shadow-1 {
                                                         position: relative;
@@ -609,9 +611,6 @@ header {
                                                         .qr-segment-title {
                                                             background: #e8e9ef;
                                                         }
-                                                    }
-                                                    &.qr-text {
-                                                        border-left: 1px solid #e8e9ec;
                                                     }
                                                 }
                                             }
@@ -1083,4 +1082,8 @@ footer {
 .per-gray {
     background: #aaa !important;
     color: #333 !important
+}
+
+.ui.popup.bottom.right.transition.visible {
+    max-width: 350px !important;
 }
