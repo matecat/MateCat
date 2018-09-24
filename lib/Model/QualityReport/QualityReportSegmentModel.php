@@ -99,7 +99,7 @@ class QualityReport_QualityReportSegmentModel {
 
             if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
                 $seg->last_revision = $seg->translation;
-                if(empty($last_translations)){
+                if(empty($seg->last_translation)){
                     $seg->last_translation = $seg->translation;
                 }
             } else {
