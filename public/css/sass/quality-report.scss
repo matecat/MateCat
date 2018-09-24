@@ -593,6 +593,11 @@ header {
                                                     .segment-content {
                                                         background: #f2f4f7;
                                                         margin-top: 0;
+                                                        .qr-issues-list {
+                                                            .qr-issue {
+                                                                background: #FFFFFF;
+                                                            }
+                                                        }
                                                     }
                                                     &.shadow-1 {
                                                         position: relative;

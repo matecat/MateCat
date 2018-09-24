@@ -133,7 +133,7 @@ class ProductionSummary extends React.Component {
                         </div>
                     ))}
                 </div>
-                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>Treshold {limit} <i className="icon-info icon" /></div>
+                <div className="qr-label" data-html={tooltipText} ref={(tooltip) => this.tooltip = tooltip}>Threshold {limit} <i className="icon-info icon" /></div>
             </div>
             ) :null}
         </div>
