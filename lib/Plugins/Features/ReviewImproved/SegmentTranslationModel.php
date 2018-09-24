@@ -7,49 +7,50 @@
  */
 
 namespace Features\ReviewImproved;
-use Features\TranslationVersions\SegmentTranslationModel as VersionModel ;
+
+use Features\TranslationVersions\SegmentTranslationModel as VersionModel;
 use LQA\ChunkReviewStruct;
 use LQA\ChunkReviewDao;
 
-class SegmentTranslationModel
-{
+class SegmentTranslationModel {
     /**
      * @var \SegmentTranslationModel
      */
-    private $model ;
+    protected $model;
 
     /**
      * @var \Chunks_ChunkStruct
      */
-    private $chunk ;
+    protected $chunk;
 
     /**
      * @var ChunkReviewStruct
      */
-    private $chunk_review;
+    protected $chunk_review;
 
     /**
      * @var bool
      */
-    private $did_change_reviewed_words_count = false;
+    protected $did_change_reviewed_words_count = false;
 
-    public function __construct(\SegmentTranslationModel $model ) {
+    public function __construct( \SegmentTranslationModel $model ) {
 
         $this->model = $model;
-        $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation()) ;
+        $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation() );
 
-        $reviews =  ChunkReviewDao::findChunkReviewsByChunkIds(array(
-            array(
-                $this->chunk->id, $this->chunk->password
-            )
-        ));
-        return $this->chunk_review = $reviews[0];
+        $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( [
+                [
+                        $this->chunk->id, $this->chunk->password
+                ]
+        ] );
+
+        return $this->chunk_review = $reviews[ 0 ];
 
     }
 
     public function recountPenaltyPoints() {
-        $penaltyPoints = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
-        $this->chunk_review->penalty_points = $penaltyPoints ;
+        $penaltyPoints                      = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
+        $this->chunk_review->penalty_points = $penaltyPoints;
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
         $chunk_review_model->updatePassFailResult();
@@ -89,32 +90,29 @@ class SegmentTranslationModel
      * @return bool
      */
     public function didChangeReviewedWordsCount() {
-        return $this->did_change_reviewed_words_count ;
+        return $this->did_change_reviewed_words_count;
     }
 
 
-    private function checkReviewedStateTransition()
-    {
+    protected function checkReviewedStateTransition() {
         if ( $this->model->entersReviewedState() ) {
             $this->addCount();
-        }
-        elseif ( $this->model->exitsReviewedState() ) {
+        } elseif ( $this->model->exitsReviewedState() ) {
             $this->subtractCount();
         }
 
     }
 
-    private function checkTranslationIssuesExist()
-    {
-        $translation = $this->model->getTranslation() ;
+    protected function checkTranslationIssuesExist() {
+        $translation = $this->model->getTranslation();
 
         $entries = \LQA\EntryDao::findAllByTranslationVersion(
-            $translation->id_segment,
-            $translation->id_job,
-            $translation->version_number
+                $translation->id_segment,
+                $translation->id_job,
+                $translation->version_number
         );
 
-        if ( count($entries) == 0 ) {
+        if ( count( $entries ) == 0 ) {
             $this->checkReviewedStateTransition();
         }
     }
@@ -123,21 +121,21 @@ class SegmentTranslationModel
      * @return \LQA\ChunkReviewStruct
      */
     public function getChunkReview() {
-        return $this->chunk_review ;
+        return $this->chunk_review;
 
     }
 
-    private function addCount() {
+    protected function addCount() {
         $segment = $this->model->getSegmentStruct();
-        $model = new ChunkReviewModel( $this->chunk_review );
+        $model   = new ChunkReviewModel( $this->chunk_review );
         $model->addWordsCount( $segment->raw_word_count );
 
     }
 
-    private function subtractCount() {
+    protected function subtractCount() {
         $segment = $this->model->getSegmentStruct();
-        $model = new ChunkReviewModel($this->chunk_review);
-        $model->subtractWordsCount($segment->raw_word_count);
+        $model   = new ChunkReviewModel( $this->chunk_review );
+        $model->subtractWordsCount( $segment->raw_word_count );
     }
 
 }

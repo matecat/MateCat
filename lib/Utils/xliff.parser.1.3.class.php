@@ -204,6 +204,7 @@ class Xliff_Parser {
                         // Getting Source and Target raw content
                         $this->getSource( $xliff, $i, $j, $trans_unit );
 						$this->getTarget( $xliff, $i, $j, $trans_unit );
+						$this->getContextGroups( $xliff, $i, $j, $trans_unit );
 						$this->getAltTrans( $xliff, $i, $j, $trans_unit );
 						$this->getSDLStatus( $xliff, $i, $j, $trans_unit );
 
@@ -450,7 +451,7 @@ class Xliff_Parser {
         }
     }
 
-    private function getAltTrans(  &$xliff, $i, $j, $trans_unit  ){
+    private function getAltTrans( &$xliff, $i, $j, $trans_unit ){
         try {
 
             $tagList = $this->_getTagContent( 'alt-trans', $trans_unit, 'trans-unit', true );
@@ -474,6 +475,36 @@ class Xliff_Parser {
                 $alt_trans[ 'target' ] = self::fix_non_well_formed_xml( $targetArray[ 'content' ] );
 
                 $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'alt-trans' ][] = $alt_trans;
+
+            }
+
+        } catch( UnexpectedValueException $e ){
+            //Found Empty Target Tag
+            Log::doLog( $e->getMessage() );
+        }
+    }
+
+    private function getContextGroups( &$xliff, $i, $j, $trans_unit ){
+        try {
+
+            $tagList = $this->_getTagContent( 'context-group', $trans_unit, 'trans-unit', true );
+
+            foreach( $tagList as $tag ){
+
+                $context_group = [];
+                $context_group[ 'attr' ] = @$tag[ 'attributes' ];
+
+                try{
+
+                    $contexts = $this->_getTagContent( 'context', $tag[ 'content' ], 'root', true );
+                    $context_group[ 'contexts' ] = $contexts;
+
+                } catch( UnexpectedValueException $e ){
+                    //Found Empty Target Tag
+                    Log::doLog( $e->getMessage() );
+                }
+
+                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'context-group' ][] = $context_group;
 
             }
 
