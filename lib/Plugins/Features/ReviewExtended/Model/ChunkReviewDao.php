@@ -16,11 +16,12 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
      * @return int
      */
     public static function getPenaltyPointsForChunk( \Chunks_ChunkStruct $chunk ) {
+
         $sql = "SELECT SUM(penalty_points) FROM qa_entries e
-            JOIN jobs on jobs.id = e.id_job
-            WHERE jobs.id = :id_job AND jobs.password = :password
-              BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-             ";
+                JOIN jobs on jobs.id = e.id_job
+                WHERE jobs.id = :id_job 
+                AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+        ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
