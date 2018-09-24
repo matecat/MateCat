@@ -4,12 +4,13 @@ class SegmentQR extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translateDiffOn: false,
-            reviseDiffOn: false,
+            translateDiffOn: !_.isNull(this.props.segment.get('last_translation')) && _.isNull(this.props.segment.get('last_revision')),
+            reviseDiffOn: !_.isNull(this.props.segment.get('last_revision')) && !_.isNull(this.props.segment.get('last_translation')),
             htmlDiff: "",
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
             humanQaOpen: this.props.segment.get('issues').size > 0
         };
+        this.state.htmlDiff = this.initializeDiff();
         this.errorObj = {
             'types' : {
                 'TAGS': {
@@ -26,6 +27,14 @@ class SegmentQR extends React.Component {
             }
         }
 
+    }
+    initializeDiff() {
+        if (this.state.translateDiffOn) {
+            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("suggestion")), TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
+        } else {
+            let revise = TagsUtils.htmlEncode(this.props.segment.get("last_revision"));
+            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
+        }
     }
     openAutomatedQa() {
         this.setState({

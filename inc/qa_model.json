@@ -33,24 +33,24 @@
     "severities": [
       {
         "label": "Neutral",
-        "dqf_id" : 1,
+        "dqf_id" : 0,
         "penalty": 0
       },{
         "label": "Minor",
         "dqf_id" : 2,
-        "penalty": 3
+        "penalty": 0.03
       },
       {
         "label": "Major",
         "dqf_id" : 3,
-        "penalty": 100
+        "penalty": 1
       }
     ],
 
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : 2000
+        "limit" : 20
       }
     }
   }
