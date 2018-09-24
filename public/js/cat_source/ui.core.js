@@ -1709,7 +1709,7 @@ UI = {
     translationIsToSave : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.id );
-        var emptyTranslation = ( segment && segment.el.find('.editarea').text().trim().length )? false : true;
+        var emptyTranslation = ( segment && segment.el.find('.targetarea').text().trim().length )? false : true;
 
         return ((!alreadySet)&&(!emptyTranslation));
     },
