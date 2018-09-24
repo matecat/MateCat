@@ -189,9 +189,6 @@ body.manage {
                             display: flex;
                             max-width: 170px;
                             min-width: 30px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
                             border-radius: 15px;
                             padding: 3px 15px 3px 3px;
                             color: #000000;
@@ -205,6 +202,9 @@ body.manage {
                             span {
                                 position: relative;
                                 top: 2px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
                             }
                         }
                         .menu {
