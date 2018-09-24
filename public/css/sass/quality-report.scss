@@ -121,7 +121,7 @@ header {
                 width: 100%;
                 transition: 0.3s ease;
                 .qr-bg-head {
-                    height: 254px;
+                    height: 258px;
                     background: #E5E9F1;
                     position: absolute;
                     width: 100%;
@@ -228,6 +228,8 @@ header {
                                     .qr-label {
                                         text-decoration: underline;
                                         cursor: pointer;
+                                        width: fit-content;
+                                        padding-right: 8px;
                                         &:hover {
                                             text-decoration: none;
                                         }
@@ -305,6 +307,7 @@ header {
                                     &.qr-old {
                                         background-color: #83FD97;
                                         display: unset;
+
                                     }
                                 }
                                 &.qr-old {
@@ -319,11 +322,12 @@ header {
                                 &.job-not-passed {
                                     background-color: rgba(255, 123, 35, 0.31);
                                     text-align: center;
+                                    border-left: 1px solid rgba(255, 123, 35, 0.31);
                                 }
                                 &.job-passed {
                                     background-color: rgba(0, 255, 0, 0.23);
                                     text-align: center;
-                                    border: 1px;
+                                    border-left: 1px solid rgba(0, 255, 0, 0.23);
                                 }
                             }
                             .total-severity {
