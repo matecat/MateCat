@@ -4,12 +4,13 @@ class SegmentQR extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translateDiffOn: false,
-            reviseDiffOn: false,
+            translateDiffOn: !_.isNull(this.props.segment.get('last_translation')) && _.isNull(this.props.segment.get('last_revision')),
+            reviseDiffOn: !_.isNull(this.props.segment.get('last_revision')) && !_.isNull(this.props.segment.get('last_translation')),
             htmlDiff: "",
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
             humanQaOpen: this.props.segment.get('issues').size > 0
         };
+        this.state.htmlDiff = this.initializeDiff();
         this.errorObj = {
             'types' : {
                 'TAGS': {
@@ -26,6 +27,14 @@ class SegmentQR extends React.Component {
             }
         }
 
+    }
+    initializeDiff() {
+        if (this.state.translateDiffOn) {
+            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("suggestion")), TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
+        } else {
+            let revise = TagsUtils.htmlEncode(this.props.segment.get("last_revision"));
+            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
+        }
     }
     openAutomatedQa() {
         this.setState({
@@ -310,12 +319,14 @@ class SegmentQR extends React.Component {
                         <div className="ui basic mini buttons segment-production">
 
                             {this.props.segment.get('issues').size > 0 ? (
-                                <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "")} onClick={this.openHumandQa.bind(this)}>
+                                <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "") + " " + (this.props.segment.get('warnings').get('total') > 0 ? "" : "no-hover")}
+                                     onClick={this.openHumandQa.bind(this)}>
                                     Human<b> ({this.props.segment.get('issues').size})</b></div>
                             ) : null}
 
                             {this.props.segment.get('warnings').get('total') > 0 ? (
-                                <div className={"ui button automated-qa " + (this.state.automatedQaOpen ? "active" : "")} onClick={this.openAutomatedQa.bind(this)}>
+                                <div className={"ui button automated-qa " + (this.state.automatedQaOpen ? "active" : "")+ " " + (this.props.segment.get('issues').size > 0 ? "" : "no-hover")}
+                                     onClick={this.openAutomatedQa.bind(this)}>
                                     Automated<b> ({this.props.segment.get('warnings').get('total')})</b></div>
                             ) : null}
 

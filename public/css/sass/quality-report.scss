@@ -416,6 +416,9 @@ header {
                                                         .qr-text {
                                                             width: 80%;
                                                         }
+                                                        .button.no-hover {
+                                                            cursor: default !important;
+                                                        }
                                                     }
                                                     .segment-content {
                                                         display: flex;
