@@ -20,8 +20,7 @@ class ProductionSummary extends React.Component {
 
     componentDidMount() {
         $(this.tooltip).popup({
-            position: 'bottom right',
-            on    : 'click'
+            position: 'bottom right'
         });
         $(this.tooltipRev).popup({
             position: 'bottom right'
