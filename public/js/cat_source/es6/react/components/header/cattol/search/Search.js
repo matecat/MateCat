@@ -238,9 +238,9 @@ class Search extends React.Component {
             if (this.state.search.exactMatch)
                 query.push(' exactly');
             if (this.state.search.searchSource)
-                query.push(<span className="query"><span className="param">{htmlEncode(this.state.search.searchSource)}</span>in source </span>);
+                query.push(<span className="query"><span className="param">{this.state.search.searchSource}</span>in source </span>);
             if (this.state.search.searchTarget)
-                query.push(<span className="query"><span className="param">{htmlEncode(this.state.search.searchTarget)}</span>in target </span>);
+                query.push(<span className="query"><span className="param">{this.state.search.searchTarget}</span>in target </span>);
             if (this.state.search.selectStatus !== 'all') {
                 let statusLabel = <span> and status <span className="param">{this.state.search.selectStatus}</span></span>;
                 query.push(statusLabel);
