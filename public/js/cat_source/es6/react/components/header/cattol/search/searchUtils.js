@@ -165,7 +165,7 @@ let SearchUtils = {
         let numRes = $('.search-display .numbers .results'),
             currRes = parseInt(numRes.text()),
             newRes = (currRes == 0)? 0 : currRes - 1;
-        numRes.text(newRes);
+        numRes.text(" " + newRes);
         if (($('.targetarea mark.searchMarker', segment).length - 1) <= 0) {
             let numSeg = $('.search-display .numbers .segments'),
                 currSeg = parseInt(numSeg.text()),
@@ -204,7 +204,7 @@ let SearchUtils = {
         }
 
         let searchTarget = params.searchTarget;
-        if (searchTarget !== '' && searchTarget !== ' ' && searchTarget !== '\'' && searchTarget !== '"')  {
+        if (searchTarget !== '' && searchTarget !== ' '  && searchTarget !== '"')  {
             this.searchParams.target = searchTarget;
         } else {
             APP.alert({msg: 'You must specify the Target value to replace.'});
@@ -213,7 +213,7 @@ let SearchUtils = {
         }
 
         let replaceTarget =  params.replaceTarget;
-        if (replaceTarget !== '\'' && replaceTarget !== '"')  {
+        if ( replaceTarget !== '"')  {
             this.searchParams.replace = replaceTarget;
         } else {
             APP.alert({msg: 'You must specify the replacement value.'});
