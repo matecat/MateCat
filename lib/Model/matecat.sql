@@ -177,6 +177,26 @@ CREATE TABLE `connected_services` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `context_groups`
+--
+
+DROP TABLE IF EXISTS `context_groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `context_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_project` int(11) NOT NULL,
+  `id_segment` bigint(20) unsigned DEFAULT NULL,
+  `id_file` int(10) unsigned DEFAULT NULL,
+  `context_json` varchar(16320) NOT NULL,
+  PRIMARY KEY (`id`,`id_project`),
+  KEY `id_segment_idx` (`id_segment`) USING BTREE,
+  KEY `id_file_idx` (`id_file`) USING BTREE,
+  KEY `id_project_idx` (`id_project`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `dqf_projects_map`
 --
 
@@ -1176,7 +1196,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-21 19:56:49
+-- Dump completed on 2018-09-25 12:20:20
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1342,6 +1362,7 @@ INSERT INTO `phinxlog` VALUES (20171214110059,'2017-12-18 16:48:13','2017-12-18 
 INSERT INTO `phinxlog` VALUES (20180207155126,'2018-03-30 17:15:01','2018-03-30 17:15:03');
 INSERT INTO `phinxlog` VALUES (20180330145502,'2018-03-30 17:15:03','2018-03-30 17:15:16');
 INSERT INTO `phinxlog` VALUES (20180921144444,'2018-09-21 16:47:50','2018-09-21 16:47:52');
+INSERT INTO `phinxlog` VALUES (20180924143503,'2018-09-25 10:47:17','2018-09-25 10:47:20');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1353,4 +1374,4 @@ INSERT INTO `phinxlog` VALUES (20180921144444,'2018-09-21 16:47:50','2018-09-21 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-21 19:56:49
+-- Dump completed on 2018-09-25 12:20:20

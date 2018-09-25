@@ -108,7 +108,13 @@ class Chunk extends \API\V2\Json\Chunk {
                 }
             }
 
-            $quality_overall = ( $chunkReview->is_pass == null ? null : (!empty( $chunkReview->is_pass ) ? 'excellent' : 'fail') );
+            if( @$chunkReview->is_pass == null ){
+                $quality_overall = $chunkReview->is_pass;
+            } elseif( !empty( $chunkReview->is_pass ) ){
+                $quality_overall = 'excellent';
+            } else {
+                $quality_overall = 'fail';
+            }
 
             $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
             $score = number_format( $chunkReviewModel->getScore(), 2, ",", "");
