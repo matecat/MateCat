@@ -21,7 +21,10 @@ class ProductionSummary extends React.Component {
     componentDidMount() {
         $(this.tooltip).popup({
             position: 'bottom right',
-            hoverable: true,
+            className   : {
+                popup       : 'ui popup qr-score-popup'
+            },
+            hoverable: true
             /*on : 'click'*/
         });
         // $(this.tooltipRev).popup({

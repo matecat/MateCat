@@ -415,7 +415,6 @@ header {
                                                     &.qr-issues {
                                                         .qr-text {
                                                             width: 80%;
-                                                            border-left: 1px solid #e8e9ec;
                                                         }
                                                         .button.no-hover {
                                                             cursor: default !important;
@@ -1084,6 +1083,7 @@ footer {
     color: #333 !important
 }
 
-.ui.popup.bottom.right.transition.visible {
+.ui.popup.bottom.right.qr-score-popup {
     max-width: 350px !important;
+
 }
