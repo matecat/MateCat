@@ -896,8 +896,15 @@ class CatUtils {
         $codes = $job->getProject()->getFeatures()->getCodes();
 
         if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes) ) {
-//            $result = @$values->is_pass ? 'excellent' : 'fail' ;
-            $result = ( @$values->is_pass == null ? null : (!empty( @$values->is_pass ) ? 'excellent' : 'fail' )) ;
+
+            if( @$values->is_pass == null ){
+                $result = $values->is_pass;
+            } elseif( !empty( $values->is_pass ) ){
+                $result = 'excellent';
+            } else {
+                $result = 'fail';
+            }
+
         } else {
             $result = strtolower( $values['minText'] ) ;
         }
