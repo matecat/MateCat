@@ -25,7 +25,7 @@ class ProductionSummary extends React.Component {
                 popup       : 'ui popup qr-score-popup'
             },
             hoverable: true
-            /*on : 'click'*/
+            // /*on : 'click'
         });
         // $(this.tooltipRev).popup({
         //     position: 'bottom right'
@@ -34,10 +34,10 @@ class ProductionSummary extends React.Component {
 
     render () {
         let tooltipText = '<div style="color:gray">MateCat calculates the score as follows: </br></br>' +
-                '(Tot. error points * 1000) / reviewed words</br>' +
+                '<code>(Tot. error points * 1000) / reviewed words</code></br>' +
                 'Reviewed words =  raw words - unmodified ICE matches</br></br>'+
             'The score is compared to a max. amount of tolerated error points.' +
-            '<a style="text-decoration: underline" href="https://www.matecat.com" target="_blank">Learn more</a>' +
+            '<a style="text-decoration: underline" href="https://www.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
