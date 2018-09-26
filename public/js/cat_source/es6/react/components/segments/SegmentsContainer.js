@@ -5,7 +5,7 @@
 var React = require('react');
 let PropTypes = require('prop-types');
 var SegmentStore = require('../../stores/SegmentStore');
-var Segment = require('./Segment').default;
+let Segment = require('./Segment').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 class SegmentsContainer extends React.Component {
 
@@ -70,6 +70,34 @@ class SegmentsContainer extends React.Component {
         SegmentActions.setBulkSelectionInterval(from, to, fid);
     }
 
+    getSegments() {
+        let items = [];
+        let self = this;
+        let isReviewImproved = !!(this.props.isReviewImproved);
+        let isReviewExtended = !!(this.props.isReviewExtended);
+        this.state.segments.forEach(function (segImmutable) {
+            let segment = segImmutable.toJS();
+            let item = <Segment
+                key={segment.sid}
+                segment={segment}
+                timeToEdit={self.state.timeToEdit}
+                fid={self.props.fid}
+                isReviewImproved={isReviewImproved}
+                isReviewExtended={isReviewExtended}
+                enableTagProjection={self.props.enableTagProjection}
+                decodeTextFn={self.props.decodeTextFn}
+                tagLockEnabled={self.state.tagLockEnabled}
+                tagModesEnabled={self.props.tagModesEnabled}
+                speech2textEnabledFn={self.props.speech2textEnabledFn}
+                reviewType={self.props.reviewType}
+                setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
+                setBulkSelection={self.setBulkSelection.bind(self)}
+            />;
+            items.push(item);
+        });
+        return items;
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
@@ -98,30 +126,7 @@ class SegmentsContainer extends React.Component {
     }
 
     render() {
-        let items = [];
-        let self = this;
-        let isReviewImproved = !!(this.props.isReviewImproved);
-        let isReviewExtended = !!(this.props.isReviewExtended);
-        this.state.segments.forEach(function (segImmutable) {
-            let segment = segImmutable.toJS();
-            var item = <Segment
-                key={segment.sid}
-                segment={segment}
-                timeToEdit={self.state.timeToEdit}
-                fid={self.props.fid}
-                isReviewImproved={isReviewImproved}
-                isReviewExtended={isReviewExtended}
-                enableTagProjection={self.props.enableTagProjection}
-                decodeTextFn={self.props.decodeTextFn}
-                tagLockEnabled={self.state.tagLockEnabled}
-                tagModesEnabled={self.props.tagModesEnabled}
-                speech2textEnabledFn={self.props.speech2textEnabledFn}
-                reviewType={self.props.reviewType}
-                setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
-                setBulkSelection={self.setBulkSelection.bind(self)}
-            />;
-            items.push(item);
-        });
+        let items = this.getSegments();
         return <div>{items}</div>;
     }
 }
