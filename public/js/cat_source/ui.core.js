@@ -2111,7 +2111,7 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
-            SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
+            SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending modified');
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
