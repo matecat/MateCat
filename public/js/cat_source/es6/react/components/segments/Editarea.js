@@ -136,6 +136,9 @@ class Editarea extends React.Component {
         UI.handleDragEvent(e);
     }
     onDragEnd() {
+        //TODO remove this line
+        //This is is to remove the span that react add after the drop
+        $(this.editAreaRef).find("span[style]").remove();
         this.draggingFromEditArea = false;
     }
     onDropEvent(e) {
