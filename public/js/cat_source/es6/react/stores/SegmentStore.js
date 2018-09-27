@@ -470,7 +470,6 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
-            // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
