@@ -6,11 +6,11 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
             if (config.reviewType === "improved") {
                 $('body').addClass('review-improved-opened');
                 hackIntercomButton( true );
+                SearchUtils.closeSearch();
             } else {
                 $('body').addClass('review-extended-opened');
                 localStorage.setItem(ReviewExtended.localStoragePanelClosed, false);
             }
-            SearchUtils.closeSearch();
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
             if (data) {
