@@ -573,7 +573,7 @@
                 if (before.length === 0 ) {
                     return undefined;
                 }
-                else if (before.attr('data-split-original-id') !== originalId) {
+                else if (before.attr('data-split-original-id') && before.attr('data-split-original-id') !== originalId) {
                     return before;
                 } else {
                     return findBefore(before);
@@ -602,7 +602,7 @@
                 if (after.length === 0 ) {
                     return undefined;
                 }
-                else if (after.attr('data-split-original-id') !== originalId) {
+                else if (after.attr('data-split-original-id') && after.attr('data-split-original-id') !== originalId) {
                     return after;
                 } else {
                     return findAfter(after);
