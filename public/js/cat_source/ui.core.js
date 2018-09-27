@@ -1808,9 +1808,9 @@ UI = {
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
-        var idBefore = UI.getIdBefore(segment.sid);
+        var idBefore = UI.getIdBefore(id_segment);
         var contextAfter = UI.getContextAfter(segment.sid);
-        var idAfter = UI.getIdAfter(segment.sid);
+        var idAfter = UI.getIdAfter(id_segment);
 
         this.lastTranslatedSegmentId = id_segment;
 
