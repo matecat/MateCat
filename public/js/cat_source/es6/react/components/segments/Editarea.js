@@ -132,13 +132,12 @@ class Editarea extends React.Component {
 		this.emitTrackChanges();
     }
     onDragEvent(e) {
+        //Temporarily disable the D&D of the tags because on the new chrome version there are problems
+        // UI.handleDragEvent(e);
+        e.preventDefault();
         this.draggingFromEditArea = true;
-        UI.handleDragEvent(e);
     }
     onDragEnd() {
-        //TODO remove this line
-        //This is is to remove the span that react add after the drop
-        $(this.editAreaRef).find("span[style]").remove();
         this.draggingFromEditArea = false;
     }
     onDropEvent(e) {
