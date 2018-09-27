@@ -622,6 +622,49 @@
                 return $('.source', segmentAfter ).text();
             }
         },
+        getIdBefore: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentBefore = (function  findBefore(segment) {
+                var before = segment.prev('section');
+                if (before.length === 0 ) {
+                    return undefined;
+                }
+                else if (before.attr('data-split-original-id') !== originalId) {
+                    return before;
+                } else {
+                    return findBefore(before);
+                }
+
+            })(segment);
+            // var segmentBefore = findSegmentBefore();
+            if (_.isUndefined(segmentBefore)) {
+                return null;
+            }
+            var segmentBeforeId = UI.getSegmentId(segmentBefore);
+            return segmentBeforeId;
+        },
+        getIdAfter: function(segmentId) {
+            var segment = $('#segment-' + segmentId);
+            var originalId = segment.attr('data-split-original-id');
+            var segmentAfter = (function findAfter(segment) {
+                var after = segment.next('section');
+                if (after.length === 0 ) {
+                    return undefined;
+                }
+                else if (after.attr('data-split-original-id') !== originalId) {
+                    return after;
+                } else {
+                    return findAfter(after);
+                }
+
+            })(segment);
+            if (_.isUndefined(segmentAfter)) {
+                return null;
+            }
+            var segmentAfterId = UI.getSegmentId(segmentAfter);
+            return segmentAfterId;
+        },
         /**
          * findNextSegment
          *

@@ -1808,9 +1808,11 @@ UI = {
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
-		var contextAfter = UI.getContextAfter(id_segment);
+        var idBefore = UI.getIdBefore(segment.sid);
+        var contextAfter = UI.getContextAfter(segment.sid);
+        var idAfter = UI.getIdAfter(segment.sid);
 
-		this.lastTranslatedSegmentId = id_segment;
+        this.lastTranslatedSegmentId = id_segment;
 
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
@@ -1856,7 +1858,9 @@ UI = {
             version: segment.attr('data-version'),
             propagate: propagate,
             context_before: contextBefore,
-            context_after: contextAfter
+            id_before: idBefore,
+            context_after: contextAfter,
+            id_after: idAfter,
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
