@@ -166,7 +166,7 @@ class Dqf extends BaseFeature {
      * @throws ValidationError
      */
     public function filterCreateProjectFeatures( $features, $controller ) {
-        if ( isset( $postInput[ 'dqf' ] ) && !!$controller->postInput[ 'dqf' ] ) {
+        if ( isset( $controller->postInput[ 'dqf' ] ) && !!$controller->postInput[ 'dqf' ] ) {
             $validationErrors = ProjectMetadata::getValiationErrors( $controller->postInput ) ;
 
             if ( !empty( $validationErrors ) ) {
