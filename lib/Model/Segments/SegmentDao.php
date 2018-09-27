@@ -136,6 +136,26 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_list
+     *
+     * @return object
+     */
+    public function getContextAndSegmentByIDs( $id_list ){
+        $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
+        $stmt = $this->_getStatementForCache( $query );
+        /** @var $res Segments_SegmentStruct[] */
+        $res = $this->_fetchObject( $stmt,
+                new Segments_SegmentStruct(),
+                $id_list
+        );
+        $reverse_id_list = array_flip( $id_list );
+        foreach( $res as $element ){
+            $id_list[ $reverse_id_list[ $element->id ] ] = $element;
+        }
+        return (object)$id_list;
+    }
+
+    /**
      * @param        $jid
      * @param        $password
      * @param int    $step
