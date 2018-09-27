@@ -1809,7 +1809,7 @@ UI = {
 		var segment = $('#segment-' + id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
         var idBefore = UI.getIdBefore(id_segment);
-        var contextAfter = UI.getContextAfter(segment.sid);
+        var contextAfter = UI.getContextAfter(id_segment);
         var idAfter = UI.getIdAfter(id_segment);
 
         this.lastTranslatedSegmentId = id_segment;
