@@ -251,7 +251,7 @@ class getSegmentsController extends ajaxController {
     }
 
     private function attachContexts( &$segment, $contexts ){
-        $segment['context-group'] = @$contexts[ (int) $segment['sid'] ] ;
+        $segment['context_groups'] = @$contexts[ (int) $segment['sid'] ] ;
     }
 
 

@@ -62,8 +62,8 @@ class SegmentFooter extends React.Component {
                 label : 'Messages',
                 code : 'notes',
                 tab_class : 'segment-notes',
-                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
-                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
+                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
                 open : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
                 elements : []
             },
@@ -155,6 +155,7 @@ class SegmentFooter extends React.Component {
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
                     notes={this.props.segment.notes}
+                    context_groups={this.props.segment.context_groups}
                     segmentSource = {this.props.segment.segment}/>;
                 break;
             case 'review':
