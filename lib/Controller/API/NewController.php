@@ -249,11 +249,11 @@ class NewController extends ajaxController {
      */
     private function __validateEngines() {
 
-        if ( !isset(  $this->postInput[ 'tms_engine' ] ) || empty( $this->postInput[ 'tms_engine' ] ) ) {
+        if ( !isset(  $this->postInput[ 'tms_engine' ] ) ) {
             $this->postInput[ 'tms_engine' ] = 1;
         }
 
-        if ( !isset(  $this->postInput[ 'mt_engine' ] ) || empty( $this->postInput[ 'mt_engine' ] ) ) {
+        if ( !isset(  $this->postInput[ 'mt_engine' ] ) ) {
             $this->postInput[ 'mt_engine' ] = 1;
         }
 
