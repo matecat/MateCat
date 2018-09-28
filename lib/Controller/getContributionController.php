@@ -250,7 +250,7 @@ class getContributionController extends ajaxController {
             $tms_match = $tms_match->get_matches_as_array();
         }
 
-        if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
+        if ( $this->id_mt_engine > 1 /* Request MT Directly */ && !$this->concordance_search ) {
 
             /**
              * @var $mt_engine Engines_MMT
