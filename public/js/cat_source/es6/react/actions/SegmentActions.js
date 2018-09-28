@@ -289,7 +289,13 @@ var SegmentActions = {
         });
     },
 
-
+    setTabOpen: function (sid, tabName ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_DEFAULT_TAB,
+            sid: sid,
+            data: tabName
+        });
+    },
     renderPreview: function ( sid, data ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_PREVIEW,
