@@ -7,8 +7,8 @@ use Teams\TeamStruct;
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
-    protected static $auto_increment_fields = array('id');
-    protected static $primary_keys = array('id');
+    protected static $auto_increment_field = array('id');
+    protected static $primary_keys         = array('id');
 
     protected static $_sql_project_data = "
             SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,

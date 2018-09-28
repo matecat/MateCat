@@ -15,8 +15,8 @@ use PDO;
 class DqfSegmentsDao extends DataAccess_AbstractDao {
     const TABLE = 'dqf_segments';
 
-    protected static $primary_keys = ['id_segment'];
-    protected static $auto_increment_fields = [] ;
+    protected static $primary_keys         = ['id_segment'];
+    protected static $auto_increment_field = [] ;
 
     public function getByIdSegment( $id_segment ) {
         $sql = "SELECT * FROM dqf_segments WHERE id_segment = ?" ;

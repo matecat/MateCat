@@ -444,7 +444,7 @@ class Xliff_Parser {
         try {
             $tagArray = $this->_getTagContent( 'target', $trans_unit );
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
-            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attributes' ];
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attr' ];
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
             Log::doLog( $e->getMessage() );
@@ -459,7 +459,7 @@ class Xliff_Parser {
             foreach( $tagList as $tag ){
 
                 $alt_trans = [];
-                $alt_trans[ 'attr' ] = @$tag[ 'attributes' ];
+                $alt_trans[ 'attr' ] = @$tag[ 'attr' ];
 
                 try{
 
@@ -492,7 +492,7 @@ class Xliff_Parser {
             foreach( $tagList as $tag ){
 
                 $context_group = [];
-                $context_group[ 'attr' ] = @$tag[ 'attributes' ];
+                $context_group[ 'attr' ] = @$tag[ 'attr' ];
 
                 try{
 
@@ -593,7 +593,7 @@ class Xliff_Parser {
 
                 $TagList[] = [
                         'content' => $_tmpTag,
-                        'attributes' => $_tagAttributes
+                        'attr'    => $_tagAttributes
                 ];
 
             }
