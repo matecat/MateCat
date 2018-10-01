@@ -74,9 +74,7 @@ class SegmentSource extends React.Component {
     }
 
     onDragEvent(e) {
-        //Temporarily disable the D&D of the tags because on the new chrome version there are problems
-        e.preventDefault();
-        // UI.handleDragEvent(e);
+        UI.handleDragEvent(e);
     }
 
     componentDidMount() {
