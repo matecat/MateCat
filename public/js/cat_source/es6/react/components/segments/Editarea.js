@@ -211,6 +211,7 @@ class Editarea extends React.Component {
                     onInput={this.onInputEvent}
                     onPaste={this.onPasteEvent}
                     ref={(ref) => this.editAreaRef = ref}
+                    tabIndex="-1"
         />;
     }
 }
