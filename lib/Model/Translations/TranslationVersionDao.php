@@ -250,10 +250,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."
                  ) AS SLIST USING( id_segment )
+                 WHERE is_review = 0
                 GROUP BY id_segment
             ) AS TX ON stv.version_number = TX.version_number
                 AND stv.id_segment = TX.id_segment
-                WHERE id_job = ?";
+                WHERE is_review = 0 AND id_job = ?";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
@@ -291,6 +292,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
                     SELECT ? as id_segment
                     ".$prepare_str_segments_id."
                  ) AS SLIST USING( id_segment )
+                 WHERE is_review = 1
                 GROUP BY id_segment
             ) AS TX ON stv.version_number = TX.version_number
                 AND stv.id_segment = TX.id_segment
