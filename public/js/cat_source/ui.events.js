@@ -66,6 +66,10 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.underlineFormatting.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.boldFormatting.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
         });
 	},
 	unbindShortcuts: function() {

@@ -780,6 +780,8 @@ $.extend(UI, {
     handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+            //Temporarily disable the D&D of the tags because on the new chrome version there are problems
+            e.preventDefault();
             var tag = elem.parent('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
@@ -787,6 +789,8 @@ $.extend(UI, {
             e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text).trim());
             e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text).trim());
         } else if (elem.hasClass('locked')) {
+            //Temporarily disable the D&D of the tags because on the new chrome version there are problems
+            e.preventDefault();
             var text = htmlEncode(elem.text());
             e.dataTransfer.setData('text/plain', UI.transformTextForLockTags(text).trim());
             e.dataTransfer.setData('text/html', UI.transformTextForLockTags(text).trim());
