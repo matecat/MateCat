@@ -980,6 +980,10 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     font-size: 18px;
 }
 
+.button-reject:hover {
+    color: #fff;
+}
+
 article .translated,
 .guesstags,
 article .draft,
