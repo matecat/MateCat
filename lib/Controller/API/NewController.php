@@ -126,10 +126,6 @@ class NewController extends ajaxController {
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        foreach ( $this->postInput as $key => $val ) {
-            $this->postInput[ $key ] = urldecode( $val );
-        }
-
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
@@ -253,11 +249,11 @@ class NewController extends ajaxController {
      */
     private function __validateEngines() {
 
-        if ( !isset(  $this->postInput[ 'tms_engine' ] ) || empty( $this->postInput[ 'tms_engine' ] ) ) {
+        if ( !isset(  $this->postInput[ 'tms_engine' ] ) ) {
             $this->postInput[ 'tms_engine' ] = 1;
         }
 
-        if ( !isset(  $this->postInput[ 'mt_engine' ] ) || empty( $this->postInput[ 'mt_engine' ] ) ) {
+        if ( !isset(  $this->postInput[ 'mt_engine' ] ) ) {
             $this->postInput[ 'mt_engine' ] = 1;
         }
 
@@ -557,11 +553,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
 
         //default get all public matches from TM
-        $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) || empty( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
+        $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
 
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
-        $projectStructure[ 'due_date' ]                     = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
+        $projectStructure[ 'due_date' ]                     = ( !isset( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
 
         if ( $this->user ) {

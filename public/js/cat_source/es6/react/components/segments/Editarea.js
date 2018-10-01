@@ -132,8 +132,10 @@ class Editarea extends React.Component {
 		this.emitTrackChanges();
     }
     onDragEvent(e) {
+        //Temporarily disable the D&D of the tags because on the new chrome version there are problems
+        // UI.handleDragEvent(e);
+        e.preventDefault();
         this.draggingFromEditArea = true;
-        UI.handleDragEvent(e);
     }
     onDragEnd() {
         this.draggingFromEditArea = false;

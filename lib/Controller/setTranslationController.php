@@ -55,8 +55,9 @@ class setTranslationController extends ajaxController {
     protected $project ;
     protected $id_segment;
 
+    protected $id_before;
+    protected $id_after;
     protected $context_before;
-
     protected $context_after;
 
     /**
@@ -93,6 +94,8 @@ class setTranslationController extends ajaxController {
                 ],
                 'context_before'          => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'context_after'           => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_before'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_after'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -107,7 +110,11 @@ class setTranslationController extends ajaxController {
         !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */ ;
 
         $this->propagate             = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
+
         $this->id_segment            = $this->__postInput[ 'id_segment' ];
+        $this->id_before             = $this->__postInput[ 'id_before' ];
+        $this->id_after              = $this->__postInput[ 'id_after' ];
+
         $this->time_to_edit          = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator         = $this->__postInput[ 'id_translator' ];
         $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
@@ -115,8 +122,19 @@ class setTranslationController extends ajaxController {
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
         list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
 
-        $this->context_before = CatUtils::view2rawxliff( $this->__postInput[ 'context_before' ] );
-        $this->context_after = CatUtils::view2rawxliff( $this->__postInput[ 'context_after' ] );
+
+        //Get contexts
+        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+                [
+                        'id_before'  => $this->id_before,
+                        'id_segment' => $this->id_segment,
+                        'id_after'   => $this->id_after
+                ]
+        );
+        $this->context_before = $segmentsList->id_before->segment;
+        $this->context_after  = $segmentsList->id_after->segment;
+        //Get contexts
+
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
 

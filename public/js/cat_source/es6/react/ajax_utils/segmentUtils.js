@@ -7,7 +7,9 @@ API.SEGMENT = {
 
     setTranslation: function (segment) {
         var contextBefore = UI.getContextBefore(segment.sid);
+        var idBefore = UI.getIdBefore(segment.sid);
         var contextAfter = UI.getContextAfter(segment.sid);
+        var idAfter = UI.getIdAfter(segment.sid);
         var trans = UI.prepareTextToSend(segment.translation);
         var time_to_edit = new Date() - UI.editStart;
         // var id_translator = config.id_translator;
@@ -21,7 +23,9 @@ API.SEGMENT = {
             segment : segment.segment,
             propagate: false,
             context_before: contextBefore,
+            id_before: idBefore,
             context_after: contextAfter,
+            id_after: idAfter,
             time_to_edit: time_to_edit,
             // id_translator: id_translator,
         };
