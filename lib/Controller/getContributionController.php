@@ -119,6 +119,7 @@ class getContributionController extends ajaxController {
          */
         if ( !$this->concordance_search ) {
             //
+
             $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                     [
                             'id_before'  => $this->id_before,
@@ -126,6 +127,8 @@ class getContributionController extends ajaxController {
                             'id_after'   => $this->id_after
                     ]
             );
+
+            $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
             $this->context_before = $segmentsList->id_before->segment;
             $this->text           = $segmentsList->id_segment->segment;
