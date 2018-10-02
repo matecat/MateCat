@@ -207,6 +207,7 @@ class getContributionController extends ajaxController {
              * @var $tms Engines_MyMemory
              */
             $tms = Engine::getInstance( $_TMS );
+            $tms->setFeatureSet( $this->featureSet );
 
             $config = array_merge( $tms->getConfigStruct(), $config );
             $config[ 'segment' ]       = $this->text;

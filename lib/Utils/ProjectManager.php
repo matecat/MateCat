@@ -773,16 +773,16 @@ class ProjectManager {
                         }
                 ), "," );
 
-        foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentList ) {
+        foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentElement ) {
 
-            unset( $segmentList[ 'internal_id' ] );
-            unset( $segmentList[ 'xliff_mrk_id' ] );
-            unset( $segmentList[ 'show_in_cattool' ] );
+            unset( $segmentElement[ 'internal_id' ] );
+            unset( $segmentElement[ 'xliff_mrk_id' ] );
+            unset( $segmentElement[ 'show_in_cattool' ] );
 
-            $segmentList[ 'jsid' ]          = $segmentList[ 'id' ] . "-" . $job_id_passes;
-            $segmentList[ 'source' ]        = $this->projectStructure[ 'source_language' ];
-            $segmentList[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
-            $segmentList[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
+            $segmentElement[ 'jsid' ]          = $segmentElement[ 'id' ] . "-" . $job_id_passes;
+            $segmentElement[ 'source' ]        = $this->projectStructure[ 'source_language' ];
+            $segmentElement[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
+            $segmentElement[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
 
         }
 
@@ -1861,15 +1861,23 @@ class ProjectManager {
             $this->projectStructure[ 'file_segments_count' ] [ $fid ]++;
 
             // TODO: continue here to find the count of segments per project
-            $segments_metadata[] = [
-                    'id'              => $id_segment,
-                    'internal_id'     => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
-                    'segment'         => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                    'segment_hash'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
-                    'raw_word_count'  => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
-                    'xliff_mrk_id'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
-                    'show_in_cattool' => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
+            $_metadata = [
+                    'id'                 => $id_segment,
+                    'internal_id'        => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
+                    'segment'            => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                    'segment_hash'       => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
+                    'raw_word_count'     => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
+                    'xliff_mrk_id'       => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
+                    'show_in_cattool'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
+                    'additional_params'  => null,
             ];
+
+            /*
+             *This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data but only to eventually add new fields
+             */
+            $_metadata = $this->features->filter( 'appendFieldToAnalysisObject', $_metadata, $this->projectStructure );
+
+            $segments_metadata[] = $_metadata;
 
         }
 
@@ -2536,7 +2544,7 @@ class ProjectManager {
      *
      */
     private function insertSegmentNotesForFile() {
-        $this->features->filter( 'handleJsonNotes', $this->projectStructure );
+        $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure[ 'notes' ] );
     }
 

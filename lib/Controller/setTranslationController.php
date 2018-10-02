@@ -869,8 +869,11 @@ class setTranslationController extends ajaxController {
         $contributionStruct->context_after        = $this->context_after;
         $contributionStruct->context_before       = $this->context_before;
 
-        $contributionStruct = $this->featureSet->filter(
-                'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
+        $this->featureSet->filter(
+                'filterContributionStructOnSetTranslation',
+                $contributionStruct,
+                $this->project
+        );
 
         /** TODO Remove , is only for debug purposes */
         try {
