@@ -132,9 +132,7 @@ class Editarea extends React.Component {
 		this.emitTrackChanges();
     }
     onDragEvent(e) {
-        //Temporarily disable the D&D of the tags because on the new chrome version there are problems
-        // UI.handleDragEvent(e);
-        e.preventDefault();
+        UI.handleDragEvent(e);
         this.draggingFromEditArea = true;
     }
     onDragEnd() {
@@ -213,6 +211,7 @@ class Editarea extends React.Component {
                     onInput={this.onInputEvent}
                     onPaste={this.onPasteEvent}
                     ref={(ref) => this.editAreaRef = ref}
+                    tabIndex="-1"
         />;
     }
 }
