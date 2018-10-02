@@ -411,9 +411,13 @@ if ( MBC.enabled() )
             popLastCommentHash();
             $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
             setTimeout(function(){
-                scrollSegment( el ).done( function() {
+                if ( el.hasClass("opened") ) {
                     renderSegmentBalloon( el );
-                });
+                } else {
+                    scrollSegment( el ).done( function() {
+                        renderSegmentBalloon( el );
+                    });
+                }
             });
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };

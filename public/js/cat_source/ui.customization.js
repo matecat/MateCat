@@ -152,22 +152,6 @@ $.extend(UI, {
                             "standard": "ctrl+s",
                             "mac": "ctrl+s",
                         }
-                    },
-                    "boldFormatting": {
-                        "label": "",
-                        "equivalent": "",
-                        "keystrokes": {
-                            "standard": "ctrl+b",
-                            "mac": "ctrl+b",
-                        }
-                    },
-                    "underlineFormatting": {
-                        "label": "",
-                        "equivalent": "",
-                        "keystrokes": {
-                            "standard": "ctrl+u",
-                            "mac": "ctrl+u",
-                        }
                     }
                 }
             },
