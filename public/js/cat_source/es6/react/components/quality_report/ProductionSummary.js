@@ -7,8 +7,8 @@ class ProductionSummary extends React.Component {
         }
         let time = parseInt(this.props.jobInfo.get("total_time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
-        let minutes = Math.floor( time / 60);
-        let seconds = parseInt(time - minutes * 60);
+        let minutes = Math.floor( time % 3600 / 60);
+        let seconds = Math.floor(time % 3600 % 60);
         return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
 
