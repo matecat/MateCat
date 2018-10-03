@@ -45,7 +45,7 @@ abstract class DataAccess_AbstractDao {
     /**
      * @var array
      */
-    protected static $auto_increment_fields = [];
+    protected static $auto_increment_field = [];
 
     /**
      * @var string
@@ -339,7 +339,7 @@ abstract class DataAccess_AbstractDao {
             return $_cacheResult;
         }
 
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
+                /** @noinspection PhpMethodParametersCountMismatchInspection */
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
@@ -386,6 +386,7 @@ abstract class DataAccess_AbstractDao {
      * @return string
      * @internal param array $options of options for the SQL statement
      *
+     * @throws Exception
      */
     public static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
 
@@ -565,7 +566,7 @@ abstract class DataAccess_AbstractDao {
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
-        $mask = array_diff( $mask, static::$auto_increment_fields );
+        $mask = array_diff( $mask, static::$auto_increment_field );
 
         $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
 
@@ -577,7 +578,7 @@ abstract class DataAccess_AbstractDao {
         Log::getLogger()->debug( "insert data:", $data );
 
         if ( $stmt->execute( $data ) ) {
-            if ( count( static::$auto_increment_fields ) ) {
+            if ( count( static::$auto_increment_field ) ) {
                 return $conn->lastInsertId();
             } else {
                 return true;
@@ -603,12 +604,13 @@ abstract class DataAccess_AbstractDao {
      * @param array $options
      *
      * @return bool|string
+     * @throws Exception
      */
     public static function insertStructWithAutoIncrements( $struct, $options = [] ) {
-        $auto_increment_fields = static::$auto_increment_fields ;
-        static::$auto_increment_fields = [] ;
-        $id = self::insertStruct( $struct, $options ) ;
-        static::$auto_increment_fields =  $auto_increment_fields ;
+        $auto_increment_fields        = static::$auto_increment_field ;
+        static::$auto_increment_field = [] ;
+        $id                           = self::insertStruct( $struct, $options ) ;
+        static::$auto_increment_field =  $auto_increment_fields ;
         return $id ;
     }
 

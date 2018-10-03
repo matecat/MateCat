@@ -62,8 +62,8 @@ class SegmentFooter extends React.Component {
                 label : 'Messages',
                 code : 'notes',
                 tab_class : 'segment-notes',
-                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
-                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
+                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
                 open : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
                 elements : []
             },
@@ -87,6 +87,7 @@ class SegmentFooter extends React.Component {
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
         this.addTabIndex = this.addTabIndex.bind(this);
+        this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
     registerTab(tabName, visible, open) {
@@ -154,6 +155,7 @@ class SegmentFooter extends React.Component {
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
                     notes={this.props.segment.notes}
+                    context_groups={this.props.segment.context_groups}
                     segmentSource = {this.props.segment.segment}/>;
                 break;
             case 'review':
@@ -180,7 +182,15 @@ class SegmentFooter extends React.Component {
             tabs: tabs
         });
     }
-
+    setDefaultTabOpen( sid, tabName) {
+        if (this.tabs[tabName]) {
+            //Close all tabs
+            for ( let item in this.tabs ) {
+                this.tabs[item].open = false
+            }
+            this.tabs[tabName].open = true;
+        }
+    }
     openTab(sid, tabCode) {
         // Todo: refactoring, no jquery
         if (this.props.sid === sid ) {
@@ -202,7 +212,14 @@ class SegmentFooter extends React.Component {
                 return false;
             }
         }
-        return true;
+        return false;
+    }
+
+    tabClick(tabName, forceOpen) {
+        this.changeTab(tabName, forceOpen);
+        setTimeout(( ) =>{
+            SegmentActions.setTabOpen(this.props.sid, tabName);
+        });
     }
 
     changeTab(tabName, forceOpen) {
@@ -237,6 +254,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
+        SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     componentWillUnmount() {
@@ -245,6 +263,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
+        SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     componentWillMount() {
@@ -284,7 +303,7 @@ class SegmentFooter extends React.Component {
                     id={"segment-" + this.props.sid + tab.code}
                     data-tab-class={ tab.tab_class }
                     data-code={ tab.code }
-                    onClick={ self.changeTab.bind(this, key, false) }>
+                    onClick={ self.tabClick.bind(this, key, false) }>
                     <a tabIndex="-1" >{ tab.label }
                         <span className="number">{(tab.index) ? ' (' + tab.index + ')' : ''}</span>
                     </a>

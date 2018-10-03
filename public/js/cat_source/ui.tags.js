@@ -802,7 +802,9 @@ $.extend(UI, {
      * removed the first time you press the delete key (ui.editarea-> 51 )
      */
     removeSelectedClassToTags: function (  ) {
-        UI.editarea.find('.locked.selected').removeClass('selected');
+        if (UI.editarea) {
+            UI.editarea.find('.locked.selected').removeClass('selected');
+        }
     }
 
 });

@@ -26,6 +26,7 @@ module.exports = keyMirror({
     CREATE_FOOTER: null,
     REGISTER_TAB: null,
     CLOSE_TABS: null,
+    SET_DEFAULT_TAB: null,
     SET_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
     RENDER_GLOSSARY: null,

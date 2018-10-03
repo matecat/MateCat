@@ -12,6 +12,7 @@ use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Jobs\SplitQueue;
+use Segments\ContextGroupDao;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -130,6 +131,7 @@ class ProjectManager {
                             'segments_metadata'            => [], //array of segments_metadata
                             'translations'                 => [],
                             'notes'                        => [],
+                            'context-group'                => [],
                         //one translation for every file because translations are files related
                             'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
                             'job_to_split'                 => null,
@@ -771,16 +773,16 @@ class ProjectManager {
                         }
                 ), "," );
 
-        foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentList ) {
+        foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentElement ) {
 
-            unset( $segmentList[ 'internal_id' ] );
-            unset( $segmentList[ 'xliff_mrk_id' ] );
-            unset( $segmentList[ 'show_in_cattool' ] );
+            unset( $segmentElement[ 'internal_id' ] );
+            unset( $segmentElement[ 'xliff_mrk_id' ] );
+            unset( $segmentElement[ 'show_in_cattool' ] );
 
-            $segmentList[ 'jsid' ]          = $segmentList[ 'id' ] . "-" . $job_id_passes;
-            $segmentList[ 'source' ]        = $this->projectStructure[ 'source_language' ];
-            $segmentList[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
-            $segmentList[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
+            $segmentElement[ 'jsid' ]          = $segmentElement[ 'id' ] . "-" . $job_id_passes;
+            $segmentElement[ 'source' ]        = $this->projectStructure[ 'source_language' ];
+            $segmentElement[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
+            $segmentElement[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
 
         }
 
@@ -1124,19 +1126,15 @@ class ProjectManager {
             $this->insertSegmentNotesForFile();
         }
 
+        if( !empty( $this->projectStructure[ 'context-group' ] ) ){
+            $this->insertContextsForFile();
+        }
+
         //Clean Translation array
         $this->projectStructure[ 'translations' ]->exchangeArray( [] );
 
         $this->features->run( 'processJobsCreated', $projectStructure );
 
-    }
-
-    /**
-     *
-     */
-    private function insertSegmentNotesForFile() {
-        $this->features->filter( 'handleJsonNotes', $this->projectStructure );
-        Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure[ 'notes' ] );
     }
 
     /**
@@ -1701,7 +1699,8 @@ class ProjectManager {
                         } // end foreach seg-source
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
-                            $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
+                            $this->__addNotesToProjectStructure( $xliff_trans_unit, $fid );
+                            $this->__addTUnitContextsToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
                     } else {
@@ -1747,7 +1746,8 @@ class ProjectManager {
                         }
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
-                            $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
+                            $this->__addNotesToProjectStructure( $xliff_trans_unit, $fid );
+                            $this->__addTUnitContextsToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
                         $segStruct = new Segments_SegmentStruct( [
@@ -1861,15 +1861,23 @@ class ProjectManager {
             $this->projectStructure[ 'file_segments_count' ] [ $fid ]++;
 
             // TODO: continue here to find the count of segments per project
-            $segments_metadata[] = [
-                    'id'              => $id_segment,
-                    'internal_id'     => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
-                    'segment'         => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                    'segment_hash'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
-                    'raw_word_count'  => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
-                    'xliff_mrk_id'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
-                    'show_in_cattool' => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
+            $_metadata = [
+                    'id'                 => $id_segment,
+                    'internal_id'        => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
+                    'segment'            => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                    'segment_hash'       => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
+                    'raw_word_count'     => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
+                    'xliff_mrk_id'       => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
+                    'show_in_cattool'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
+                    'additional_params'  => null,
             ];
+
+            /*
+             *This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data but only to eventually add new fields
+             */
+            $_metadata = $this->features->filter( 'appendFieldToAnalysisObject', $_metadata, $this->projectStructure );
+
+            $segments_metadata[] = $_metadata;
 
         }
 
@@ -1896,7 +1904,8 @@ class ProjectManager {
 
                 // The following call is to save `id_segment` for notes,
                 // to be used later to insert the record in notes table.
-                $this->setSegmentIdForNotes( $row );
+                $this->__setSegmentIdForNotes( $row );
+                $this->__setSegmentIdForContexts( $row );
 
                 // The following block of code is for translations
                 if ( $this->projectStructure[ 'translations' ]->offsetExists( $row[ 'internal_id' ] ) ) {
@@ -1963,33 +1972,6 @@ class ProjectManager {
                     return $value[ 'show_in_cattool' ] == 1;
                 } )
         );
-    }
-
-    /**
-     * setSegmentIdForNotes
-     *
-     * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, due to the <mrk> tags.
-     *
-     * Example:
-     * ['notes'][ $internal_id] => array( 'xxx' );
-     * ['notes'][ $internal_id] => array( 'xxx', 'yyy' ); // in case of mrk tags
-     *
-     */
-
-    private function setSegmentIdForNotes( $row ) {
-        $internal_id = $row[ 'internal_id' ];
-
-        if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
-
-            if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
-                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
-            } else {
-                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
-            }
-
-        }
-
     }
 
     /**
@@ -2493,7 +2475,6 @@ class ProjectManager {
         return CatUtils::generate_password( $length );
     }
 
-
     /**
      * addNotesToProjectStructure
      *
@@ -2503,11 +2484,14 @@ class ProjectManager {
      *      'entries' => array( // one item per comment in the trans unit ),
      *      'id_segment' => (int) to be populated later for the database insert
      *
+     * @param $trans_unit
+     * @param $fid
      */
-    private function addNotesToProjectStructure( $trans_unit, $fid ) {
+    private function __addNotesToProjectStructure( $trans_unit, $fid ) {
 
         $internal_id = self::sanitizedUnitId( $trans_unit[ 'attr' ][ 'id' ], $fid );
         if ( isset( $trans_unit[ 'notes' ] ) ) {
+
             foreach ( $trans_unit[ 'notes' ] as $note ) {
                 $this->initArrayObject( 'notes', $internal_id );
 
@@ -2525,7 +2509,92 @@ class ProjectManager {
                 }
 
             }
+
         }
+
+    }
+
+    /**
+     * setSegmentIdForNotes
+     *
+     * Adds notes to segment, taking into account that a same note may be assigned to
+     * more than one MateCat segment, due to the <mrk> tags.
+     *
+     * Example:
+     * ['notes'][ $internal_id] => array( 'xxx' );
+     * ['notes'][ $internal_id] => array( 'xxx', 'yyy' ); // in case of mrk tags
+     *
+     */
+    private function __setSegmentIdForNotes( $row ) {
+        $internal_id = $row[ 'internal_id' ];
+
+        if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
+
+            if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
+            } else {
+                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+            }
+
+        }
+
+    }
+
+    /**
+     *
+     */
+    private function insertSegmentNotesForFile() {
+        $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
+        Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure[ 'notes' ] );
+    }
+
+    /**
+     * addNotesToProjectStructure
+     *
+     * ContextGroup structure is the following:
+     *
+     *  ... ['context-group']
+     *        [ $internal_id ] = array(
+     *          'context_json' => [], //context-group-xml-structure,
+     *          'context_json_segment_ids' => [ ] //a list to be populated later for the database insert
+     *        )
+     *
+     * @param $trans_unit
+     * @param $fid
+     */
+    private function __addTUnitContextsToProjectStructure( $trans_unit, $fid ) {
+
+        $internal_id = self::sanitizedUnitId( $trans_unit[ 'attr' ][ 'id' ], $fid );
+        if ( isset( $trans_unit[ 'context-group' ] ) ) {
+
+            $this->initArrayObject( 'context-group', $internal_id );
+
+            if ( !$this->projectStructure[ 'context-group' ][ $internal_id ]->offsetExists( 'context_json' ) ) {
+                $this->projectStructure[ 'context-group' ][ $internal_id ]->offsetSet( 'context_json', $trans_unit[ 'context-group' ] );
+                $this->projectStructure[ 'context-group' ][ $internal_id ]->offsetSet( 'context_json_segment_ids', [] ); // because of mrk tags, same context can be owned by different segments
+            }
+
+        }
+
+    }
+
+    private function __setSegmentIdForContexts( $row ){
+
+        $internal_id = $row[ 'internal_id' ];
+
+        if ( $this->projectStructure[ 'context-group' ]->offsetExists( $internal_id ) ) {
+            array_push( $this->projectStructure[ 'context-group' ][ $internal_id ][ 'context_json_segment_ids' ], $row[ 'id' ] );
+        }
+
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    private function insertContextsForFile() {
+        $this->features->filter( 'handleTUContextGroups', $this->projectStructure );
+        ContextGroupDao::bulkInsertTUFromProjectStructure( $this->projectStructure );
     }
 
     private function initArrayObject( $key, $id ) {
@@ -2709,6 +2778,8 @@ class ProjectManager {
      * @throws Exceptions_RecordNotFound
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {

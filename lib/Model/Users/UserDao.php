@@ -11,8 +11,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
     const TABLE = "users";
     const STRUCT_TYPE = "Users_UserStruct";
 
-    protected static $auto_increment_fields = array('uid');
-    protected static $primary_keys = array('uid');
+    protected static $auto_increment_field = array('uid');
+    protected static $primary_keys         = array('uid');
 
     protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
     protected static $_query_user_by_email = " SELECT * FROM users WHERE email = :email ";

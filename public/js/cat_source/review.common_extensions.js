@@ -3,30 +3,31 @@ if ( ReviewImproved.enabled() || ReviewExtended.enabled() || ReviewExtendedFoote
     $.extend(UI, {
 
         openIssuesPanel : function(data, openSegment) {
+            var segment = (data)? UI.Segment.findEl( data.sid ): data;
             if (config.reviewType === "improved") {
                 $('body').addClass('review-improved-opened');
                 hackIntercomButton( true );
                 SearchUtils.closeSearch();
             } else {
+                if (segment && !Review.evalOpenableSegment( segment )) {
+                    return false;
+                }
                 $('body').addClass('review-extended-opened');
                 localStorage.setItem(ReviewExtended.localStoragePanelClosed, false);
             }
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
-            if (data) {
-                if (openSegment) {
-                    var segment = UI.Segment.findEl( data.sid );
-                    segment.find( UI.targetContainerSelector() ).click();
-                    window.setTimeout( function ( data ) {
-                        var el = UI.Segment.find( data.sid ).el;
+            if (data && openSegment) {
+                segment.find( UI.targetContainerSelector() ).click();
+                window.setTimeout( function ( data ) {
+                    var el = UI.Segment.find( data.sid ).el;
 
-                        if ( UI.currentSegmentId != data.sid ) {
-                            UI.focusSegment( el );
-                        }
+                    if ( UI.currentSegmentId != data.sid ) {
+                        UI.focusSegment( el );
+                    }
 
-                        UI.scrollSegment( el );
-                    }, 500, data );
-                }
+                    UI.scrollSegment( el );
+                }, 500, data );
             }
         },
 

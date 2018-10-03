@@ -122,20 +122,6 @@ class setTranslationController extends ajaxController {
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
         list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
 
-
-        //Get contexts
-        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
-                [
-                        'id_before'  => $this->id_before,
-                        'id_segment' => $this->id_segment,
-                        'id_after'   => $this->id_after
-                ]
-        );
-        $this->context_before = $segmentsList->id_before->segment;
-        $this->context_after  = $segmentsList->id_after->segment;
-        //Get contexts
-
-
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
 
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
@@ -265,6 +251,24 @@ class setTranslationController extends ajaxController {
 
     }
 
+    protected function _getContexts(){
+
+        //Get contexts
+        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+                [
+                        'id_before'  => $this->id_before,
+                        'id_segment' => $this->id_segment,
+                        'id_after'   => $this->id_after
+                ]
+        );
+
+        $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
+
+        $this->context_before = $segmentsList->id_before->segment;
+        $this->context_after  = $segmentsList->id_after->segment;
+
+    }
+
     public function doAction() {
         try {
 
@@ -284,6 +288,7 @@ class setTranslationController extends ajaxController {
 
         $this->readLoginInfo();
         $this->initVersionHandler();
+        $this->_getContexts();
 
         //check tag mismatch
         //get original source segment, first
@@ -869,8 +874,11 @@ class setTranslationController extends ajaxController {
         $contributionStruct->context_after        = $this->context_after;
         $contributionStruct->context_before       = $this->context_before;
 
-        $contributionStruct = $this->featureSet->filter(
-                'filterContributionStructOnSetTranslation', $contributionStruct,  $this->project );
+        $this->featureSet->filter(
+                'filterContributionStructOnSetTranslation',
+                $contributionStruct,
+                $this->project
+        );
 
         /** TODO Remove , is only for debug purposes */
         try {

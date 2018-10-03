@@ -20,8 +20,8 @@ class TeamDao extends \DataAccess_AbstractDao {
     const TABLE       = "teams";
     const STRUCT_TYPE = "TeamStruct";
 
-    protected static $auto_increment_fields = array( 'id' );
-    protected static $primary_keys          = array( 'id' );
+    protected static $auto_increment_field = array( 'id' );
+    protected static $primary_keys         = array( 'id' );
 
     protected static $_query_find_by_id         = " SELECT * FROM teams WHERE id = :id ";
     protected static $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";

@@ -10,7 +10,7 @@ use Log;
 class ModelDao extends DataAccess_AbstractDao {
     const TABLE = "qa_models";
 
-    protected static $auto_increment_fields = ['id'];
+    protected static $auto_increment_field = ['id'];
 
     protected static $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1" ;
 
