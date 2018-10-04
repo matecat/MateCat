@@ -244,29 +244,31 @@ class getContributionController extends ajaxController {
 
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ && !$this->concordance_search ) {
 
-            /**
-             * @var $mt_engine Engines_MMT
-             */
-            $mt_engine        = Engine::getInstance( $this->id_mt_engine );
-            $config = $mt_engine->getConfigStruct();
+            if( !empty( $tms_match ) && (int)str_replace( "%", "", $tms_match[ 0 ] ) < 100 ) {
+                /**
+                 * @var $mt_engine Engines_MMT
+                 */
+                $mt_engine = Engine::getInstance( $this->id_mt_engine );
+                $config    = $mt_engine->getConfigStruct();
 
-            //if a callback is not set only the first argument is returned, get the config params from the callback
-            $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
+                //if a callback is not set only the first argument is returned, get the config params from the callback
+                $config = $this->featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $this->jobData );
 
-            $config[ 'segment' ] = $this->text;
-            $config[ 'source' ]  = $this->source;
-            $config[ 'target' ]  = $this->target;
-            $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
-            $config[ 'segid' ]   = $this->id_segment;
+                $config[ 'segment' ] = $this->text;
+                $config[ 'source' ]  = $this->source;
+                $config[ 'target' ]  = $this->target;
+                $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]   = $this->id_segment;
 
-            $mt_result = $mt_engine->get( $config );
+                $mt_result = $mt_engine->get( $config );
 
-            if ( isset( $mt_result['error']['code'] ) ) {
-                $mt_result['error']['created_by_type'] = 'MT';
-                $this->result[ 'errors' ][] = $mt_result['error'];
-                $mt_result = false;
+                if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                    $mt_result[ 'error' ][ 'created_by_type' ] = 'MT';
+                    $this->result[ 'errors' ][]                = $mt_result[ 'error' ];
+                    $mt_result                                 = false;
+                }
             }
-
+            
         }
         $matches = array();
 

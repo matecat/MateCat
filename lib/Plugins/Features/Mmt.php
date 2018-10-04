@@ -177,11 +177,21 @@ class Mmt extends BaseFeature {
             $mt_context = @array_pop( ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' ) );
             $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
             $config[ 'job_id' ] = $jobStruct->id;
+            $config[ 'secret_key' ] = self::getSecretKey();
 
         }
 
         return $config;
 
+    }
+
+    public static function getSecretKey() {
+        $secret_key = [ 'secret_key' => null ];
+        $config_file_path = realpath( \INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
+        if( file_exists( $config_file_path ) ){
+            $secret_key = parse_ini_file( $config_file_path ) ;
+        }
+        return $secret_key[ 'secret_key' ];
     }
 
     /**
