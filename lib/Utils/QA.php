@@ -322,7 +322,7 @@ class QA {
          *  3 =>  'bad target xml',
          */
         29 => "Should be < g ... > ... < /g >",
-        1000 => "Press the < key to add tags."
+        1000 => "Press the < key to add tags or delete extra tags."
 
     );
 
