@@ -15,13 +15,15 @@ trait XliffConversionTrait {
     /**
      * Override the instance decision to convert or not the normal xlf/xliff files
      *
-     * @param $forceXliff
+     * @param      $forceXliff
      *
-     * @param $_userIsLogged
+     * @param      $_userIsLogged
+     *
+     * @param null $filePath
      *
      * @return bool
      */
-    public function forceXLIFFConversion( $forceXliff, $_userIsLogged ) {
+    public function forceXLIFFConversion( $forceXliff, $_userIsLogged, $filePath =  null ) {
         if( !$_userIsLogged ) {
             return $forceXliff;
         }

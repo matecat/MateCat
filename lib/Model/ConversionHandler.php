@@ -57,7 +57,7 @@ class ConversionHandler {
             return -1;
         }
 
-        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged );
+        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged, $file_path );
 
         //XLIFF Conversion management
         $fileMustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $file_path, $forceXliff );
