@@ -23,7 +23,7 @@ class EnginesModel_IADAATPAStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "https://iadaatpa.eu";
+    public $base_url = "https://app.iadaatpa.eu";
 
     /**
      * @var string
