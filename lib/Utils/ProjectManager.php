@@ -463,7 +463,8 @@ class ProjectManager {
             $forceXliff = $this->features->filter(
                     'forceXLIFFConversion',
                     INIT::$FORCE_XLIFF_CONVERSION,
-                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] )
+                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] ),
+                    "$this->uploadDir/$fileName"
             );
 
             /*
@@ -471,7 +472,7 @@ class ProjectManager {
                Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $mustBeConverted = $this->fileMustBeConverted( $fileName, $forceXliff );
+            $mustBeConverted = $this->fileMustBeConverted( "$this->uploadDir/$fileName", $forceXliff );
 
             //if it's one of the listed formats or conversion is not enabled in first place
             if ( !$mustBeConverted ) {
@@ -2607,11 +2608,9 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function fileMustBeConverted( $fileName, $forceXliff ) {
+    private function fileMustBeConverted( $filePathName, $forceXliff ) {
 
-        $fullPath = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
-
-        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $fullPath, $forceXliff );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filePathName, $forceXliff );
 
         /**
          * Application misconfiguration.
@@ -2621,7 +2620,7 @@ class ProjectManager {
         if ( -1 === $mustBeConverted ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -8,
-                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
             ];
             if ( PHP_SAPI != 'cli' ) {
                 setcookie( "upload_session", "", time() - 10000 );
