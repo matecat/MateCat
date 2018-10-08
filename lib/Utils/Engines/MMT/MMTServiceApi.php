@@ -319,6 +319,15 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $curlResource
+     *
+     * @return int
+     */
+    protected function curl_get_error_number( $curlResource ){
+        return curl_errno( $curlResource );
+    }
+
+    /**
      * @param $curl
      */
     protected function close_curl($curl) {
@@ -409,7 +418,7 @@ class MMTServiceApi {
             curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
 
         $result = $this->exec_curl($curl);
-        $curl_errno = curl_errno($curl);
+        $curl_errno = $this->curl_get_error_number($curl);
         $this->close_curl($curl);
 
         if ($result === FALSE) {
