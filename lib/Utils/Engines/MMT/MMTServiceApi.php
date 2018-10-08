@@ -27,7 +27,7 @@ class MMTServiceApi {
      */
     public static function newInstance($baseUrl = null) {
         $baseUrl = $baseUrl == null ? self::DEFAULT_BASE_URL : rtrim($baseUrl, "/");
-        return new MMTServiceApi($baseUrl);
+        return new static($baseUrl);
     }
 
     /**
