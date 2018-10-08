@@ -55,14 +55,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     ];
 
     protected function _getClient(){
-        return new Engines\MMT\MMTServiceAPIWrapper(
-                null,
-                null,
-                $this->engineRecord->extra_parameters[ 'MMT-License' ],
-                "1.0",
-                "MateCat",
-                INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER
-        );
+        return ( Engines\MMT\MMTServiceAPIWrapper::newInstance() )
+                ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
+                ->setLicense( $this->engineRecord->extra_parameters[ 'MMT-License' ] );
     }
 
     /**

@@ -28,11 +28,11 @@ class MMTServiceAPIWrapper extends MMTServiceApi {
 
     public function close_curl( $curl ) {}
 
-    protected function send( $method, $url, $params = null, $multipart = false ) {
+    protected function send( $method, $url, $params = null, $multipart = FALSE, $timeout = null) {
         if ( !$multipart && $params ) {
             Log::doLog( "... Request Parameters ... " . var_export( http_build_query( $params ), true ) );
         }
-        return parent::send( $method, $url, $params, $multipart );
+        return parent::send( $method, $url, $params, $multipart, $timeout );
     }
 
 }
