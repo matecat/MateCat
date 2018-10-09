@@ -244,7 +244,7 @@ class getContributionController extends ajaxController {
 
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ && !$this->concordance_search ) {
 
-            if( !empty( $tms_match ) && (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
+            if( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
                 /**
                  * @var $mt_engine Engines_MMT
                  */
