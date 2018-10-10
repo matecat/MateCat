@@ -78,11 +78,12 @@ if (true)
          * Mark the glossary matches in the source
          * @param d
          */
-        markGlossaryItemsInSource: function ( matchesObj ) {
+        markGlossaryItemsInSource: function (segmentToMark, matchesObj ) {
 
             if ( ! Object.size( matchesObj ) ) return ;
 
-            var container = $('.source', UI.currentSegment ) ;
+            var segment = (segmentToMark) ? segmentToMark : UI.currentSegment;
+            var container = $('.source', segment ) ;
 
             root.QaCheckGlossary.enabled() && root.QaCheckGlossary.removeUnusedGlossaryMarks( container );
 
@@ -144,7 +145,7 @@ if (true)
                 //find all glossary matches
                 var match = re.exec(cleanString);
                 //Check if glossary term break a marker EX: &lt;g id="3"&gt;
-                if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && UI.hasSourceOrTargetTags(UI.currentSegment)) {
+                if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && UI.hasSourceOrTargetTags(segment)) {
                     return;
                 }
                 while(match) {
@@ -184,7 +185,7 @@ if (true)
                     added = markLength * index;
                     sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
                     sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
-                    SegmentActions.replaceSourceText(UI.getSegmentId(UI.currentSegment) , UI.getSegmentFileId(UI.currentSegment), sourceString)
+                    SegmentActions.replaceSourceText(UI.getSegmentId(segment) , UI.getSegmentFileId(segment), sourceString)
                 } );
             }
             UI.lastIntervalUnionAnalysed = null;
@@ -193,7 +194,7 @@ if (true)
                     $( this ).replaceWith( $( this ).html() );
                 } );
             }, 100);
-            $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( UI.currentSegment ) } );
+            $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( segment ) } );
 
         },
         removeGlossaryMarksFormSource: function () {
