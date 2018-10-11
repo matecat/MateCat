@@ -177,7 +177,7 @@ if (true)
             UI.startGlossaryMark = '<mark class="inGlossary">';
             UI.endGlossaryMark = '</mark>';
             markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
-            var sourceString = $( '.editor .source' ).html();
+            var sourceString = container.html();
             if ( sourceString ) {
                 $.each( UI.intervalsUnion, function ( index ) {
                     if ( this === UI.lastIntervalUnionAnalysed ) return;
