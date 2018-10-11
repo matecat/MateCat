@@ -122,11 +122,13 @@ if ( QaCheckGlossary.enabled() )
                 );
             }
         });
-        setTimeout(function (  ) {
-            SegmentActions.replaceSourceText(UI.getSegmentId(container), UI.getSegmentFileId(container), newHTML);
-            bindEvents( container, unusedMatches );
+        (function (cont, html, matches) {
+            setTimeout(function (  ) {
+                SegmentActions.replaceSourceText(UI.getSegmentId(cont), UI.getSegmentFileId(cont), html);
+                bindEvents( cont, matches );
+            }, 200);
+        })(container, newHTML, unusedMatches);
 
-        }, 200);
 
     }
 
