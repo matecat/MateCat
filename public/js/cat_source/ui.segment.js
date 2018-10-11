@@ -166,7 +166,7 @@
             //         .replace(/\t/g, config.tabPlaceholder )
             //         .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
             SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
-            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
+            UI.markGlossaryItemsInSource(currentSegment, UI.cachedGlossaryData);
         },
         /**
          * Set the tag projection to true and reload file

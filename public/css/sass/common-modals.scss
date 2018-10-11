@@ -1383,6 +1383,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             &.ctrl:after {
                                 content: "Ctrl";
                             }
+                            &.Meta:after {
+                                content: "Meta";
+                            }
                             &.shift:after {
                                 content: "Shift";
                             }
