@@ -118,7 +118,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         warnings: {},
                         tagged: !self.hasSegmentTagProjectionEnabled(segment),
                         unlocked: false,
-                        edit_area_locked: false
+                        edit_area_locked: false,
+                        notes: segment.notes
                     };
                     newSegments.push(segData);
                     segData = null;
