@@ -185,7 +185,7 @@ if (true)
                     added = markLength * index;
                     sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
                     sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
-                    SegmentActions.replaceSourceText(UI.getSegmentId(segment) , UI.getSegmentFileId(segment), sourceString)
+                    SegmentActions.replaceSourceText(UI.getSegmentId(segment) , UI.getSegmentFileId(segment), sourceString);
                 } );
             }
             UI.lastIntervalUnionAnalysed = null;
@@ -197,12 +197,15 @@ if (true)
             $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( segment ) } );
 
         },
-        removeGlossaryMarksFormSource: function () {
-            $( '.editor mark.inGlossary' ).each( function () {
+        removeGlossaryMarksFormSource: function (segment) {
+            segment.find( '.source mark.inGlossary' ).each( function () {
                 $( this ).replaceWith( $( this ).html() );
             } );
+            SegmentActions.replaceSourceText(UI.getSegmentId(segment) , UI.getSegmentFileId(segment), segment.find('.source').html());
+
         },
         removeGlossaryMarksFormAllSources: function () {
+            //Todo: Find a way to communicate to all segments that they have to remove glossary tags
             $( 'section mark.inGlossary' ).each( function () {
                 $( this ).replaceWith( $( this ).html() );
             } );

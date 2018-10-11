@@ -273,7 +273,7 @@ UI = {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton, segment);
-            this.removeGlossaryMarksFormSource();
+            this.removeGlossaryMarksFormSource(segment);
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
 
