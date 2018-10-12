@@ -104,22 +104,20 @@ trait Translated {
         return $this->project_words_count;
     }
 
-    public function requestProjectQuote( $project_id, $_analyzed_report, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
+    public function requestProjectQuote( \Projects_ProjectStruct $projectStruct, $_analyzed_report, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
 
-        $this->setInternalIdProject( $project_id );
+        $this->setInternalIdProject( $projectStruct->id );
         $eq_words_count = [];
         foreach ( $_analyzed_report as $job_info ) {
             $eq_words_count[ $job_info[ 'id_job' ] ] = $job_info[ 'eq_wc' ];
         }
 
-        $jobs = ( new \Jobs_JobDao() )->getByProjectId( $project_id );
-        /** @var $jobs \Jobs_JobStruct[] */
-        $project = $jobs[ 0 ]->getProject();
+        $jobs = ( new \Jobs_JobDao() )->getByProjectId( $projectStruct->id );
 
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $projectStruct->id, $projectStruct->password );
         $formatted   = new ProjectUrls( $projectData );
 
         //Let the Feature Class decide about Urls
@@ -131,13 +129,13 @@ trait Translated {
 
         foreach ( $jobs as $job ) {
 
-            $this->requestJobQuote( $job, $eq_words_count[ $job[ 'id' ] ], $project, $formatted, $service_type );
+            $this->requestJobQuote( $job, $eq_words_count[ $job[ 'id' ] ], $projectStruct, $formatted, $service_type );
 
         }
 
     }
 
-    public function requestJobQuote( \Jobs_JobStruct $job, $eq_word, $project, $formatted_urls, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
+    public function requestJobQuote( \Jobs_JobStruct $job, $eq_word, \Projects_ProjectStruct $project, $formatted_urls, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
 
         if ( $eq_word != 0 ) {
             $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
