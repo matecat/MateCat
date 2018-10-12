@@ -405,6 +405,9 @@ if ( MBC.enabled() )
         };
 
         var openSegmentComment = function ( el ) {
+            if (_.isUndefined(MBC.teamUsers) ) {
+                return;
+            }
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
             el.find('.mbc-comment-icon-button').css("visibility", "hidden");
@@ -964,15 +967,16 @@ if ( MBC.enabled() )
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
 
-            getTeamUsers().then(refreshElements);
+            getTeamUsers().then( function() {
+                refreshElements
+                // open a comment if was asked by hash
+                var lastAsked = popLastCommentHash();
+                if ( lastAsked ) {
+                    openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
+                }
+            });
             //New icon inserted in the header -> resize file name
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-
-            // open a comment if was asked by hash
-            var lastAsked = popLastCommentHash();
-            if ( lastAsked ) {
-                openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
-            }
         } );
 
         $( document ).on( 'sse:ack', function ( ev, message ) {
