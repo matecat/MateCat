@@ -968,7 +968,7 @@ if ( MBC.enabled() )
 
 
             getTeamUsers().then( function() {
-                refreshElements
+                refreshElements()
                 // open a comment if was asked by hash
                 var lastAsked = popLastCommentHash();
                 if ( lastAsked ) {
