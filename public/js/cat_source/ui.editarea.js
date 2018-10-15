@@ -266,7 +266,7 @@ $.extend( UI, {
         }
 
         UI.closeTagAutocompletePanel();
-        UI.removeHighlightCorrespondingTags();
+        UI.removeHighlightCorrespondingTags($(target).closest('section'));
 
         var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
 

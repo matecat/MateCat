@@ -362,7 +362,7 @@ $.extend(UI, {
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                         UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
                     }
-                    UI.removeHighlightCorrespondingTags();
+                    UI.removeHighlightCorrespondingTags(UI.editarea);
 
                     UI.numCharsUntilTagRight = null;
                     UI.numCharsUntilTagLeft = null;
@@ -434,8 +434,9 @@ $.extend(UI, {
         }
         $(el).addClass('highlight');
     },
-    removeHighlightCorrespondingTags: function () {
-        $(UI.editarea).find('.locked.highlight').removeClass('highlight');
+    removeHighlightCorrespondingTags: function (segment$) {
+        segment$.find('.locked.highlight').removeClass('highlight');
+        segment$.find('.locked.mismatch').removeClass('mismatch');
     },
 
     // TAG MISMATCH
