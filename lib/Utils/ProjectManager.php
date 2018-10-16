@@ -2015,6 +2015,10 @@ class ProjectManager {
 
         foreach( $xliff_trans_unit[ 'alt-trans' ] as $altTrans ) {
 
+            if ( !empty( $altTrans[ 'attr' ][ 'match-quality' ] ) && $altTrans[ 'attr' ][ 'match-quality' ] < '50' ) {
+                continue;
+            }
+
             $source_extract_external = '';
 
             //Wrong alt-trans tag
