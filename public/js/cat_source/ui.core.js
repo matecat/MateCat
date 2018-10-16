@@ -1697,6 +1697,7 @@ UI = {
 			success: function(d) {
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
+                    UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
                 }
