@@ -226,6 +226,16 @@ section {
             border:1px solid #848689;
         }
 
+        .button-fixed {
+            border: 1px solid #848689;
+            color: #fff;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 2px;
+            font-size: 18px;
+        }
+
         .status-fixed {
             background: $approved-color;
             border:1px solid #848689;
