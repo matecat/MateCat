@@ -90,7 +90,7 @@ class Chunk extends \API\V2\Json\Chunk {
         if ( in_array( ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $reviseIssues     = [];
             $qualityReportDao = new ReviewImproved\Model\QualityReportDao();
-            $qa_data          = $qualityReportDao->getReviseIssuesByJob( $jStruct->id );
+            $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
             foreach ( $qa_data as $issue ) {
                 if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
                     $reviseIssues[ $issue->id_category ] = [
