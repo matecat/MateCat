@@ -178,6 +178,20 @@
         margin-left: 70px
       }
     }
+    @media (max-width: 1230px) {
+      .label-issues.label-issues-segment {
+        display: none;
+      }
+    }
+    @media (max-width: 1060px) {
+      .label-issues.labl {
+        width: 0;
+        overflow: hidden;
+      }
+      .qa-lexiqa-info {
+        display: none;
+      }
+    }
     .qa-issues-list {
       display: flex;
       flex-grow: 3;
