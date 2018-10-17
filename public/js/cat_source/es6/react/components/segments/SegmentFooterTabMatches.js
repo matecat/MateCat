@@ -83,9 +83,21 @@ class SegmentFooterTabMatches extends React.Component {
             if ( !_.isUndefined(this.tm_properties) ) {
                 item.tm_properties = this.tm_properties;
             }
-            matchesProcessed.push(item);
+            let matchToInsert = self.processMatchCallback(item);
+            if ( matchToInsert ) {
+                matchesProcessed.push(item);
+            }
         });
         return matchesProcessed;
+    }
+
+    /**
+     * Used by the plugins to override matches
+     * @param item
+     * @returns {*}
+     */
+    processMatchCallback( item) {
+        return item;
     }
 
     chooseSuggestion(sid, index) {
