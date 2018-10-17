@@ -1700,6 +1700,7 @@ UI = {
                     UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
+                    UI.removeHighlightCorrespondingTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}

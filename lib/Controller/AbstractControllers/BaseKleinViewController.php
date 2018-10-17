@@ -19,9 +19,9 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
         $this->view->config_js      = array() ;
         $this->view->css_resources  = array();
 
-        $this->view->logged_user   = $this->user->shortName() ;
-        $this->view->extended_user = $this->user->fullName() ;
         $this->view->isLoggedIn    = $this->isLoggedIn();
+        $this->view->logged_user   = ( $this->isLoggedIn() ) ? $this->user->shortName() : "";
+        $this->view->extended_user = ( $this->isLoggedIn() ) ? $this->user->fullName() : "";
         $this->view->userMail      = $this->user->email;
 
         $oauth_client = OauthClient::getInstance()->getClient();
