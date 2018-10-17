@@ -135,19 +135,17 @@ trait Translated {
 
     }
 
-    public function requestJobQuote( \Jobs_JobStruct $job, $eq_word, \Projects_ProjectStruct $project, $formatted_urls, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
+    /**
+     * @param \Jobs_JobStruct         $job
+     * @param                         $eq_word
+     * @param \Projects_ProjectStruct $project
+     * @param string                  $service_type
+     *
+     * @return string
+     */
+    protected function prepareQuoteUrl( \Jobs_JobStruct $job, $eq_word, \Projects_ProjectStruct $project, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ){
 
-        if ( $eq_word != 0 ) {
-            $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
-        }
-
-        $this->setInternalIdProject( $job->id_project );
-
-        $this->setInternalJobId( $job->id );
-
-        $this->setProjectWordsCount( $eq_word );
-
-        $quote_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
+        return "http://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'             => 'quote',
                         'cid'           => $this->config[ 'translated_username' ],
                         'p'             => $this->config[ 'translated_password' ],
@@ -165,6 +163,50 @@ trait Translated {
                         'of'            => 'json',
                         'matecat_raw'   => $job->total_raw_wc
                 ], PHP_QUERY_RFC3986 );
+
+    }
+
+    /**
+     *
+     * WARNING DO NOT REMOVE : This method expects a Projects_ProjectStruct, this is needed by other plugins
+     *
+     * @param \Projects_ProjectStruct $project
+     * @param                         $urls
+     *
+     * @return string
+     */
+    protected function prepareConfirmUrl( $urls, \Projects_ProjectStruct $project ){
+
+        return "http://www.translated.net/hts/index.php?" . http_build_query( [
+                        'f'             => 'confirm',
+                        'cid'           => $this->config[ 'translated_username' ],
+                        'p'             => $this->config[ 'translated_password' ],
+                        'pid'           => $this->external_project_id,
+                        'c'             => 1,
+                        'of'            => "json",
+                        'urls'          => json_encode( $urls ),
+                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null ),
+                        'matecat_host'  => parse_url( INIT::$HTTPHOST, PHP_URL_HOST )
+                ], PHP_QUERY_RFC3986 );
+
+    }
+
+    public function requestJobQuote( \Jobs_JobStruct $job, $eq_word, \Projects_ProjectStruct $project, ProjectUrls $formatted_urls, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ) {
+
+        if ( $eq_word != 0 ) {
+            $eq_word = max( number_format( $eq_word + 0.00000001, 0, "", "" ), 1 );
+        }
+
+        $this->setInternalIdProject( $job->id_project );
+
+        $this->setInternalJobId( $job->id );
+
+        $this->setProjectWordsCount( $eq_word );
+
+        /*
+         * Build quote URL
+         */
+        $quote_url = $this->prepareQuoteUrl( $job, $eq_word, $project, $service_type );
 
         try {
             $quote_response = json_decode( self::request( $quote_url ) );
@@ -185,17 +227,10 @@ trait Translated {
         /** @var $formatted ProjectUrls */
         $urls = $formatted_urls->render( true )[ 'jobs' ][ $job->id ][ 'chunks' ][ $job->password ];
 
-        $confirmation_url = "http://www.translated.net/hts/index.php?" . http_build_query( [
-                        'f'             => 'confirm',
-                        'cid'           => $this->config[ 'translated_username' ],
-                        'p'             => $this->config[ 'translated_password' ],
-                        'pid'           => $quote_response->pid,
-                        'c'             => 1,
-                        'of'            => "json",
-                        'urls'          => json_encode( $urls ),
-                        'append_to_pid' => ( !empty( $this->external_parent_project_id ) ? $this->external_parent_project_id : null ),
-                        'matecat_host'  => parse_url( INIT::$HTTPHOST, PHP_URL_HOST )
-                ], PHP_QUERY_RFC3986 );
+        /*
+         * Build confirm URL
+         */
+        $confirmation_url = $this->prepareConfirmUrl( $urls, $project );
 
         try {
             $response              = self::request( $confirmation_url );
