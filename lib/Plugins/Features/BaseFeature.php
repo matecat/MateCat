@@ -5,6 +5,7 @@ use BasicFeatureStruct;
 use Exception;
 use INIT;
 use Klein\Klein;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -18,9 +19,12 @@ abstract class BaseFeature implements IBaseFeature {
 
     protected $feature;
 
+    /**
+     * @var Logger
+     */
     private $log ;
 
-    private $logger_name ;
+    protected $logger_name ;
 
     /**
      * @var bool This property defines if the feature is automatically active when projects are created,
@@ -72,11 +76,18 @@ abstract class BaseFeature implements IBaseFeature {
         return static::$dependencies ;
     }
 
-    // gets a feature specific logger
+    /**
+     * gets a feature specific logger
+     *
+     * @return Logger
+     * @throws Exception
+     */
     public function getLogger() {
         if ( $this->log == null ) {
-            $this->log = new Logger($this->logger_name);
-            $this->log->pushHandler(new StreamHandler($this->logFilePath(),  Logger::INFO));
+            $this->log = new Logger( $this->logger_name );
+            $streamHandler = new StreamHandler( $this->logFilePath(),  Logger::INFO );
+            $streamHandler->setFormatter( new LineFormatter( null, null, true, true ) );
+            $this->log->pushHandler( $streamHandler );
         }
         return $this->log;
     }

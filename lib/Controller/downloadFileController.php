@@ -149,10 +149,6 @@ class downloadFileController extends downloadController {
 
                     $data[ 'matecat|' . $internalId ] [] = $i;
 
-                    //FIXME: temporary patch
-                    $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
-                    $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
-
                     //remove binary chars in some xliff files
                     $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
                     $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
@@ -175,7 +171,11 @@ class downloadFileController extends downloadController {
                  * we add an hook to allow some plugins to force the conversion parameters ( languages for example )
                  * TODO: ( 25/05/2018 ) Remove when the issue will be fixed
                  */
-                $_target_lang = $this->featureSet->filter( 'overrideConversionRequest', Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ) );
+                $_target_lang = $this->featureSet->filter(
+                        'changeXliffTargetLangCode',
+                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        , $file[ 'xliffFilePath' ]
+                );
 
 
                 //instatiate parser
