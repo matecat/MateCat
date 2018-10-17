@@ -177,6 +177,7 @@ class Job {
                 'formatted_create_date' => ManageUtils::formatJobDate( $jStruct->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
                 'pee'                   => $jStruct->getPeeForTranslatedSegments(),
+                'tte'                   => (int)((int)$jStruct->total_time_to_edit/1000),
                 'private_tm_key'        => $this->getKeyList( $jStruct ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
