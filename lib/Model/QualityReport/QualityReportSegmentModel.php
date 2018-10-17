@@ -97,19 +97,26 @@ class QualityReport_QualityReportSegmentModel {
                 }
             }
 
+            if ( isset( $last_revisions ) ) {
+                foreach ( $last_revisions as $last_revision ) {
+                    if ( $last_revision->id_segment == $seg->sid ) {
+                        $last_revision_translation = CatUtils::rawxliff2view($last_revision->translation);
+                    }
+                }
+            }
+
             if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
                 $seg->last_revision = $seg->translation;
                 if(empty($seg->last_translation)){
                     $seg->last_translation = $seg->translation;
                 }
+                if(!isset($last_revision_translation)){
+                    $seg->last_translation = $seg->translation;
+                }
             } else {
 
-                if ( isset( $last_revisions ) ) {
-                    foreach ( $last_revisions as $last_revision ) {
-                        if ( $last_revision->id_segment == $seg->sid ) {
-                            $seg->last_revision = CatUtils::rawxliff2view($last_revision->translation);
-                        }
-                    }
+                if(isset($last_revision_translation)){
+                    $seg->last_revision = $last_revision_translation;
                 }
             }
 
