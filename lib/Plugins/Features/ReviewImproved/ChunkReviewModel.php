@@ -17,10 +17,10 @@ class ChunkReviewModel
     /**
      * @var \LQA\ChunkReviewStruct
      */
-    private $chunk_review;
+    protected $chunk_review;
 
 
-    private $penalty_points;
+    protected $penalty_points;
 
 
     public function __construct( ChunkReviewStruct $chunk_review ) {
