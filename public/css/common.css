@@ -193,7 +193,7 @@ footer ul.external-links li:last-child
     float: right;
 }
 
-footer a
+footer a, footer #stat-todo span
 {
     color: #fff;
     text-shadow: none;
@@ -202,7 +202,7 @@ footer a
     cursor: pointer;
 }
 
-footer a:hover
+footer a:hover, footer #stat-todo span:hover
 {
     text-decoration: none;
     color: #ffffff;

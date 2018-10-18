@@ -324,7 +324,7 @@ $.extend(UI, {
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection( 'Click from Human Authorized' );
-		}).on('click', '#statistics .meter a', function(e) {
+		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
 		}).on('click', 'mark.inGlossary', function ( e ) {

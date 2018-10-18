@@ -255,7 +255,7 @@
                             </tal:block>
                             <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
-                        <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+                        <li id="stat-todo"><span>To-do</span> : <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                    </ul>
                     <ul class="statistics-details">
                         <li id="stat-wph" title="Based on last 10 segments performance">Speed:
