@@ -237,20 +237,6 @@ UI = {
     maxNumSegmentsReached : function() {
         return $('section').length > config.maxNumSegments  ;
     },
-
-    checkIfFinished: function(closing) {
-       if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
-               this.body.addClass('justdone');
-       } else {
-               this.body.removeClass('justdone');
-       }
-    },
-
-    checkIfFinishedFirst: function() {
-       if ($('section').length == $('section.status-translated, section.status-approved').length) {
-           this.body.addClass('justdone');
-       }
-    },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
@@ -261,7 +247,6 @@ UI = {
                 segment: segment
             });
 
-            clearTimeout(this.liveConcordanceSearchReq);
 
             var saveBehaviour = true;
             if (operation != 'noSave') {
@@ -276,11 +261,6 @@ UI = {
             this.removeGlossaryMarksFormSource(segment);
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
-
-
-            if (!this.opening) {
-                this.checkIfFinished(1);
-            }
 
             // close split segment
             $('.sid .actions .split').removeClass('cancel');
@@ -1324,7 +1304,6 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-        this.checkIfFinished();
         this.done_percentage = this.progress_perc;
 
 		$('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');

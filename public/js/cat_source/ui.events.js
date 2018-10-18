@@ -392,13 +392,6 @@ $.extend(UI, {
 			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});
 
-
-
-		$(".end-message-box a.close").on('click', function(e) {
-			e.preventDefault();
-			UI.body.removeClass('justdone');
-		});
-
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
 			if (UI.currentSegment) {
@@ -446,7 +439,6 @@ $.extend(UI, {
 
         if (!this.segmentToScrollAtRender)
             UI.gotoSegment(this.startSegmentId);
-        this.checkIfFinishedFirst();
 
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;

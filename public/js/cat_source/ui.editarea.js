@@ -280,7 +280,6 @@ $.extend( UI, {
             }
 
             UI.lastOperation = operation;
-
             UI.openSegment(target, operation);
 
             if (operation != 'moving') {
@@ -292,8 +291,11 @@ $.extend( UI, {
                 }
             }
         }
-        UI.saveInUndoStack();
-        UI.checkTagProximity();
+
+        setTimeout(function() {
+            UI.saveInUndoStack();
+            UI.checkTagProximity();
+        }, 100);
 
 
         // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
