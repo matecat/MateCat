@@ -170,7 +170,7 @@ let SearchUtils = {
             let numSeg = $('.search-display .numbers .segments'),
                 currSeg = parseInt(numSeg.text()),
                 newSeg = (currSeg == 0)? 0 : currSeg - 1;
-            numSeg.text(newSeg);
+            numSeg.text(" " + newSeg);
         }
         this.updateSearchItemsCount();
     },
