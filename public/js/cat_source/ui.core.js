@@ -2263,7 +2263,11 @@ UI = {
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
-        var html = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]
+        var index = this.undoStack.length - 1 - this.undoStackPosition - 1 + 2;  //??
+        if ( index >= this.undoStack.length ) {
+            return false;
+        }
+        var html = this.undoStack[index];
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), html);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
