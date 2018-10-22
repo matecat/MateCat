@@ -180,7 +180,7 @@ class setRevisionController extends ajaxController {
         if ( in_array( Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $reviseIssues     = [];
             $qualityReportDao = new Features\ReviewImproved\Model\QualityReportDao();
-            $qa_data          = $qualityReportDao->getReviseIssuesByJob( $chunk->id );
+            $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $chunk->id, $chunk->password );
             foreach ( $qa_data as $issue ) {
                 if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
                     $reviseIssues[ $issue->id_category ] = [

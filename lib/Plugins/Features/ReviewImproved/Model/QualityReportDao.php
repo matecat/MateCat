@@ -238,7 +238,7 @@ JOIN (
         return $stmt->fetchAll();
     }
 
-    public function getReviseIssuesByJob($job_id){
+    public function getReviseIssuesByChunk($job_id, $password){
 
         $sql = "SELECT
 
@@ -249,10 +249,15 @@ JOIN (
   
 FROM  qa_entries issues
 
+JOIN jobs j ON issues.id_job = j.id 
+    AND issues.id_segment >= j.job_first_segment
+    AND issues.id_segment <= j.job_last_segment
+  
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
     
-    WHERE issues.id_job = ?
+    
+    WHERE j.id = ? AND j.password = ?
       
   ";
 
@@ -260,7 +265,7 @@ FROM  qa_entries issues
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( array($job_id) );
+        $stmt->execute( array($job_id, $password) );
 
         return $stmt->fetchAll();
 
