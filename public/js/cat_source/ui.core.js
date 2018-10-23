@@ -1288,6 +1288,7 @@ UI = {
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
 		var t_formatted = s.TODO_FORMATTED;
+		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
@@ -1312,8 +1313,11 @@ UI = {
 		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
 
 		$('#stat-progress').html(this.progress_perc);
-
-		$('#stat-todo strong').html(t_formatted);
+        if ( config.isReview ) {
+            $('#stat-todo strong').html(revise_todo_formatted);
+        } else {
+            $('#stat-todo strong').html(t_formatted);
+        }
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
