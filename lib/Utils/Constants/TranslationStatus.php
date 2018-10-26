@@ -17,6 +17,14 @@ class Constants_TranslationStatus {
     const STATUS_FIXED      = 'FIXED';
     const STATUS_REBUTTED   = 'REBUTTED';
 
+    const DB_STATUS_NEW        = 1;
+    const DB_STATUS_DRAFT      = 2;
+    const DB_STATUS_TRANSLATED = 3;
+    const DB_STATUS_APPROVED   = 4;
+    const DB_STATUS_REJECTED   = 5;
+    const DB_STATUS_FIXED      = 6;
+    const DB_STATUS_REBUTTED   = 7;
+
     public static $STATUSES = array(
             self::STATUS_NEW,
             self::STATUS_DRAFT,
