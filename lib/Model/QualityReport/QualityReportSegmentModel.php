@@ -87,36 +87,47 @@ class QualityReport_QualityReportSegmentModel {
                 }
             }
 
-            if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-                $seg->last_translation = $seg->translation;
-            } else {
+            //last translation version object
+            $find_last_translation_version = null;
+            if(isset($last_translations)){
                 foreach ( $last_translations as $last_translation ) {
                     if ( $last_translation->id_segment == $seg->sid ) {
-                        $seg->last_translation = CatUtils::rawxliff2view($last_translation->translation);
+                        $last_translation->translation = CatUtils::rawxliff2view( $last_translation->translation );
+                        $find_last_translation_version = $last_translation;
+                        break;
                     }
                 }
             }
 
+            //last revision version object
+            $find_last_revision_version = null;
             if ( isset( $last_revisions ) ) {
                 foreach ( $last_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_revision_translation = CatUtils::rawxliff2view($last_revision->translation);
+                        $last_revision->translation = CatUtils::rawxliff2view( $last_revision->translation );
+                        $find_last_revision_version = $last_revision;
+                        break;
                     }
                 }
             }
 
-            if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
-                $seg->last_revision = $seg->translation;
-                if(empty($seg->last_translation)){
-                    $seg->last_translation = $seg->translation;
-                }
-                if(!isset($last_revision_translation)){
-                    $seg->last_translation = $seg->translation;
-                }
-            } else {
 
-                if(isset($last_revision_translation)){
-                    $seg->last_revision = $last_revision_translation;
+            if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+                $seg->last_translation = $seg->translation;
+                //if i came back to translation from revise
+                if ( !empty( $find_last_revision_version ) ) {
+                    $seg->last_revision = $find_last_revision_version->translation;
+                }
+            }
+
+
+            if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+                $seg->last_revision    = $seg->translation;
+                $seg->last_translation = $seg->translation;
+
+                //check if new status is approved, it means that a revisor makes a new change from translation made by translator
+                if ( !empty( $find_last_translation_version ) && $find_last_translation_version->new_status == \Constants_TranslationStatus::DB_STATUS_APPROVED ) {
+                    $seg->last_translation = $find_last_translation_version->translation;
                 }
             }
 
