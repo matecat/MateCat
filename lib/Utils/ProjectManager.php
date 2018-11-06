@@ -2790,8 +2790,14 @@ class ProjectManager {
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
+
             // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = true;
+            if( empty( $target ) ){
+                $differentSourceAndTargetIsTranslated = false;
+            } else {
+                $differentSourceAndTargetIsTranslated = true;
+            }
+
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                     'filterDifferentSourceAndTargetIsTranslated',
                     $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
