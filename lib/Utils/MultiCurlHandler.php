@@ -326,6 +326,9 @@ class MultiCurlHandler {
         return null;
     }
 
+    public function getOptionRequest( $tokenHash ) {
+            return $this->curl_options_requests[ $tokenHash ];
+    }
 
     public function getError( $tokenHash ) {
         $res                = array();
