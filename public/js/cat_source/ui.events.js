@@ -324,9 +324,13 @@ $.extend(UI, {
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection( 'Click from Human Authorized' );
-		}).on('click', '#statistics .meter a', function(e) {
+		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
 			e.preventDefault();
-			UI.gotoNextUntranslatedSegment();
+			if ( config.isReview ) {
+                UI.openNextTranslated();
+            } else {
+                UI.gotoNextUntranslatedSegment();
+            }
 		}).on('click', 'mark.inGlossary', function ( e ) {
             var $segment = $( e.currentTarget ).closest("section");
 		    UI.openSegmentGlossaryTab($segment);
@@ -392,13 +396,6 @@ $.extend(UI, {
 			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});
 
-
-
-		$(".end-message-box a.close").on('click', function(e) {
-			e.preventDefault();
-			UI.body.removeClass('justdone');
-		});
-
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
 			if (UI.currentSegment) {
@@ -446,7 +443,6 @@ $.extend(UI, {
 
         if (!this.segmentToScrollAtRender)
             UI.gotoSegment(this.startSegmentId);
-        this.checkIfFinishedFirst();
 
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;

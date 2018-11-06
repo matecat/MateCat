@@ -237,20 +237,6 @@ UI = {
     maxNumSegmentsReached : function() {
         return $('section').length > config.maxNumSegments  ;
     },
-
-    checkIfFinished: function(closing) {
-       if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
-               this.body.addClass('justdone');
-       } else {
-               this.body.removeClass('justdone');
-       }
-    },
-
-    checkIfFinishedFirst: function() {
-       if ($('section').length == $('section.status-translated, section.status-approved').length) {
-           this.body.addClass('justdone');
-       }
-    },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
@@ -261,7 +247,6 @@ UI = {
                 segment: segment
             });
 
-            clearTimeout(this.liveConcordanceSearchReq);
 
             var saveBehaviour = true;
             if (operation != 'noSave') {
@@ -276,11 +261,6 @@ UI = {
             this.removeGlossaryMarksFormSource(segment);
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
-
-
-            if (!this.opening) {
-                this.checkIfFinished(1);
-            }
 
             // close split segment
             $('.sid .actions .split').removeClass('cancel');
@@ -1308,6 +1288,7 @@ UI = {
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
 		var t_formatted = s.TODO_FORMATTED;
+		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
@@ -1324,7 +1305,6 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-        this.checkIfFinished();
         this.done_percentage = this.progress_perc;
 
 		$('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
@@ -1333,8 +1313,11 @@ UI = {
 		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
 
 		$('#stat-progress').html(this.progress_perc);
-
-		$('#stat-todo strong').html(t_formatted);
+        if ( config.isReview ) {
+            $('#stat-todo strong').html(revise_todo_formatted);
+        } else {
+            $('#stat-todo strong').html(t_formatted);
+        }
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
@@ -2284,7 +2267,11 @@ UI = {
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
-        var html = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]
+        var index = this.undoStack.length - 1 - this.undoStackPosition - 1 + 2;  //??
+        if ( index >= this.undoStack.length ) {
+            return false;
+        }
+        var html = this.undoStack[index];
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), html);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);

@@ -3229,6 +3229,7 @@ var spec = {
                 "formatted_create_date": {"type": "string"},
                 "quality_overall": {"type": "string"},
                 "pee": {"type": "integer"},
+                "tte": {"type": "integer", "format": "seconds"},
                 "private_tm_key": {
                     "type": "array",
                     "items": {

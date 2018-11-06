@@ -6,7 +6,21 @@
  * Time: 11:21
  */
 
-class QualityReport_QualityReportSegmentModel {
+namespace QualityReport;
+
+use CatUtils;
+use Chunks_ChunkStruct;
+use Constants_Revise;
+use Constants_TranslationStatus;
+use Features\ReviewExtended;
+use Features\ReviewImproved;
+use Features\ReviewImproved\Model\QualityReportDao;
+use Features\TranslationVersions;
+use FeatureSet;
+use Translations_TranslationVersionDao;
+use ZipArchiveExtended;
+
+class QualityReportSegmentModel {
 
     public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
@@ -26,8 +40,8 @@ class QualityReport_QualityReportSegmentModel {
         $featureSet->loadForProject( $chunk->getProject() );
 
         $codes = $featureSet->getCodes();
-        if ( in_array( Features\ReviewExtended::FEATURE_CODE, $codes ) OR in_array( Features\ReviewImproved::FEATURE_CODE, $codes ) ) {
-            $issues = \Features\ReviewImproved\Model\QualityReportDao::getIssuesBySegments( $segments_id, $chunk->id );
+        if ( in_array( ReviewExtended::FEATURE_CODE, $codes ) OR in_array( ReviewImproved::FEATURE_CODE, $codes ) ) {
+            $issues = QualityReportDao::getIssuesBySegments( $segments_id, $chunk->id );
         } else {
             $reviseDao          = new \Revise_ReviseDAO();
             $segments_revisions = $reviseDao->readBySegments( $segments_id, $chunk->id );
@@ -38,7 +52,7 @@ class QualityReport_QualityReportSegmentModel {
         $comments    = $commentsDao->getThreadsBySegments( $segments_id, $chunk->id );
 
 
-        if ( in_array( Features\TranslationVersions::FEATURE_CODE, $codes ) ) {
+        if ( in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
             $translationVersionDao = new Translations_TranslationVersionDao;
             $last_translations     = $translationVersionDao->getLastTranslationsBySegments( $segments_id, $chunk->id );
             $last_revisions        = $translationVersionDao->getLastRevisionsBySegments( $segments_id, $chunk->id );
@@ -58,7 +72,7 @@ class QualityReport_QualityReportSegmentModel {
             $id_file = $seg->id_file;
 
             if ( !isset($files[$id_file]) ) {
-                $files[$id_file]["filename"] = \ZipArchiveExtended::getFileName($seg->filename);
+                $files[$id_file]["filename"] = ZipArchiveExtended::getFileName($seg->filename);
                 $files[$id_file]['segments'] = [];
             }
 

@@ -53,7 +53,7 @@ class AirbnbOutsourceToHTS extends AbstractOutsource {
         $this->setSuccessMailSender( new ConfirmedQuotationEmail( Airbnb::getPluginBasePath() . '/Features/Airbnb/View/Emails/confirmed_quotation.html' ) );
         $this->setFailureMailSender( new ErrorQuotationEmail( Airbnb::getPluginBasePath() . '/Features/Airbnb/View/Emails/error_quotation.html' ) );
 
-        $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted, ServiceTypes::SERVICE_TYPE_PROFESSIONAL );
+        $response = $this->requestJobQuote( $job, $eq_word, $project, $formatted, ServiceTypes::SERVICE_TYPE_PREMIUM );
 
         if ( !empty( $response ) ) {
             $this->output->writeln( "  - Quote Success, HTS PID: " . $this->getExternalProjectId() . " - Words: $eq_word", true );
