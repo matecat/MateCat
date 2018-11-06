@@ -2982,6 +2982,12 @@ $reference = [
         'text/richtext'                                                             =>
                 [
                         0 => 'rtx',
+                        1 => 'rtf',
+                ],
+        'text/rtf'                                                             =>
+                [
+                        0 => 'rtx',
+                        1 => 'rtf',
                 ],
         'text/sgml'                                                                 =>
                 [

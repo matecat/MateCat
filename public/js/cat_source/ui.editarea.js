@@ -25,11 +25,13 @@ $.extend( UI, {
          */
     },
     keydownEditAreaEventHandler: function (e) {
-
+        var code = e.which || e.keyCode;
         if (e.ctrlKey || e.shiftKey || e.metaKey){
+            if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
+                UI.saveInUndoStack('arrow');
+            }
             return;
         }
-        var code = e.which || e.keyCode;
         var selection, range, r, rr, referenceNode;
         if ((code == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
             return true;
@@ -280,7 +282,6 @@ $.extend( UI, {
             }
 
             UI.lastOperation = operation;
-
             UI.openSegment(target, operation);
 
             if (operation != 'moving') {
@@ -292,8 +293,11 @@ $.extend( UI, {
                 }
             }
         }
-        UI.saveInUndoStack();
-        UI.checkTagProximity();
+
+        setTimeout(function() {
+            UI.saveInUndoStack();
+            UI.checkTagProximity();
+        }, 100);
 
 
         // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }

@@ -152,7 +152,7 @@ trait Translated {
                         's'             => $job->source,
                         't'             => $job->target,
                         'pn'            => $project->name,
-                        'w'             => $eq_word,
+                        'w'             => ( is_null( $eq_word ) ? 0 : $eq_word ),
                         'df'            => 'matecat',
                         'matecat_pid'   => $project->id,
                         'matecat_ppass' => $project->password,

@@ -237,7 +237,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             stv.translation,
             TX.version_number,
             stv.creation_date,
-            stv.is_review
+            stv.is_review,
+            stv.new_status,
+            stv.old_status
         FROM
             segment_translation_versions stv
         JOIN
@@ -279,7 +281,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             stv.translation,
             TX.version_number,
             stv.creation_date,
-            stv.is_review
+            stv.is_review,
+            stv.new_status,
+            stv.old_status
         FROM
             segment_translation_versions stv
         JOIN
@@ -347,23 +351,26 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         ));
     }
 
-    public function saveVersion($old_translation, $new_translation) {
+    public function saveVersion( $old_translation, $new_translation ) {
         $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number, time_to_edit, is_review ) " .
-            " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :is_review )";
+                " ( id_job, id_segment, translation, version_number, time_to_edit, is_review, old_status, new_status ) " .
+                " VALUES " .
+                " (:id_job, :id_segment, :translation, 
+:version_number, :time_to_edit, :is_review, :old_status, :new_status )";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
+        $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( array(
-            'id_job'         => $old_translation['id_job'],
-            'id_segment'     => $old_translation['id_segment'] ,
-            'translation'    => $old_translation['translation'],
-            'version_number' => $old_translation['version_number'],
-            'time_to_edit'   => $old_translation['time_to_edit'],
-            'is_review' => ($old_translation['status'] == Constants_TranslationStatus::STATUS_APPROVED)?1:0
-        ));
+        return $stmt->execute( [
+                'id_job'         => $old_translation[ 'id_job' ],
+                'id_segment'     => $old_translation[ 'id_segment' ],
+                'translation'    => $old_translation[ 'translation' ],
+                'version_number' => $old_translation[ 'version_number' ],
+                'time_to_edit'   => $old_translation[ 'time_to_edit' ],
+                'is_review'      => $old_translation[ 'is_review' ],
+                'old_status'     => $old_translation[ 'db_status' ],
+                'new_status'     => $new_translation[ 'db_status' ]
+        ] );
     }
 
     public function updateVersion( $old_translation ) {

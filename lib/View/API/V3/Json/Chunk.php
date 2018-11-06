@@ -204,7 +204,7 @@ class Chunk extends \API\V2\Json\Chunk {
                         'revise_issues'       => $reviseIssues,
                         'score'               => $score,
                         'categories'          => $categories,
-                        'total_issues_weight' => $total_issues_weight,
+                        'total_issues_weight' => (int)$total_issues_weight,
                         'total_reviews_words_count' => $total_reviews_words_count,
                         'passfail'            => (isset($model)?json_encode( ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] ):'')
                 ]
