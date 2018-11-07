@@ -49,9 +49,14 @@ class SegmentTranslationModel extends AbstractModelSubject {
     }
 
     public function entersReviewedState() {
+        /*return
+                (($this->old_translation->match_type == "ICE" && $this->old_translation->isReviewedStatus() && $this->old_translation->time_to_edit <= 0) OR !
+                        $this->old_translation->isReviewedStatus()) and
+            $this->translation->isReviewedStatus();*/
+
         return
-            ! $this->old_translation->isReviewedStatus() and
-            $this->translation->isReviewedStatus();
+                ! $this->old_translation->isReviewedStatus() and
+                $this->translation->isReviewedStatus();
     }
 
     public function exitsReviewedState() {
