@@ -98,6 +98,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = ? AND jobs.password = ?
             AND st.status IN ( $statuses_placeholder )
+            AND ( st.match_type != 'ICE' OR ( st.match_type = 'ICE' AND st.time_to_edit > 0 ) ) 
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
              ";
