@@ -58,9 +58,11 @@ if (true)
                 segment = segmentToLookForGlossary.el ;
             }
 
-            txt =  $( '.text .source', segment ).text() ;
-            txt = UI.removeAllTags( htmlEncode(txt) );
-            txt = txt.replace(/\"/g, "");
+            //remove unwanted dom elements and get the text content
+            var tmpSeg = $( '.text .source', segment ).clone();
+            $( 'span', tmpSeg ).remove();
+            txt = tmpSeg.text() ;
+
             if ( _.isUndefined(txt) || (txt === '') ) return false;
             setTimeout(function (  ) {
                 SegmentActions.renderSegmentGlossary(UI.getSegmentId(segment), txt);

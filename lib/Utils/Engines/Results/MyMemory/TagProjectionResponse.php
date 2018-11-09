@@ -10,7 +10,7 @@ class Engines_Results_MyMemory_TagProjectionResponse extends Engines_Results_Abs
 
     public function __construct( $response ){
 
-        $this->responseData    = isset( $response[ 'data' ][ 'translation' ] ) ? CatUtils::rawxliff2view( $response[ 'data' ][ 'translation' ] ) : '';
+        $this->responseData    = isset( $response[ 'data' ][ 'translation' ] ) ? CatUtils::subFilterRawDatabaseXliffForView( $response[ 'data' ][ 'translation' ] ) : '';
 
     }
 

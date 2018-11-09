@@ -127,7 +127,7 @@ class SegmentVersion {
                 'id'              => (int)$version->id,
                 'id_segment'      => (int)$version->id_segment,
                 'id_job'          => (int)$version->id_job,
-                'translation'     => \CatUtils::rawxliff2view( $version->translation ),
+                'translation'     => \CatUtils::subFilterRawDatabaseXliffForView( $version->translation ),
                 'version_number'  => (int)$version->version_number,
                 'propagated_from' => (int)$version->propagated_from,
                 'created_at'      => $version->creation_date,

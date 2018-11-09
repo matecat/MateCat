@@ -273,15 +273,4 @@ class MyMemory {
         return $ret;
     }
 
-    private static function placehold_xml_entities( $segment ) {
-        $pattern = "|&#(.*?);|";
-        $res     = preg_replace( $pattern, "<x id=\"XMLENT$1\"/>", $segment );
-
-        return $res;
-    }
-
-    public static function restore_xml_entities( $segment ) {
-        return preg_replace( "|<x id=\"XMLENT(.*?)\"/>|", "&#$1", $segment );
-    }
-
 }

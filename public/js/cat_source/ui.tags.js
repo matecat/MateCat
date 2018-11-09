@@ -705,7 +705,7 @@ $.extend(UI, {
         area.find('span.space-marker').replaceWith(' ');
         area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
         area = this.encodeTagsWithHtmlAttribute(area);
-        return area.text();
+        return view2rawxliff( area.text() );
     },
 
     prepareTextToSend: function (text) {

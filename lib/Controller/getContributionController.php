@@ -311,8 +311,8 @@ class getContributionController extends ajaxController {
                     Log::doLog( $log_prepend . var_export($matches[0], true) );
                     Log::doLog( $log_prepend . "Realignment Success:");
                     */
-                    $matches[ 0 ][ 'segment' ]     = CatUtils::rawxliff2view( $this->text );
-                    $matches[ 0 ][ 'translation' ] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
+                    $matches[ 0 ][ 'segment' ]     = CatUtils::subFilterRawDatabaseXliffForView( $this->text );
+                    $matches[ 0 ][ 'translation' ] = CatUtils::subFilterRawDatabaseXliffForView( $qaRealign->getTrgNormalized() );
                     $matches[ 0 ][ 'match' ]       = ( $fuzzy == 0 ? '100%' : '99%' );
                     /*
                     Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
@@ -347,7 +347,7 @@ class getContributionController extends ajaxController {
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
                     $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'raw_translation' ] );
+                    $match[ 'translation' ]     = CatUtils::subFilterRawDatabaseXliffForView( $match[ 'raw_translation' ] );
                 } else {
                     Log::doLog( $QA->getErrors() );
                 }
@@ -405,9 +405,9 @@ class getContributionController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = $segmentsList->id_before->segment;
-        $this->text           = $segmentsList->id_segment->segment;
-        $this->context_after  = $segmentsList->id_after->segment;
+        $this->context_before = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_before->segment );
+        $this->text           = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_segment->segment );
+        $this->context_after  = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_after->segment );
 
     }
 
@@ -433,7 +433,7 @@ class getContributionController extends ajaxController {
         if ( count( $matches ) > 0 ) {
 
             foreach ( $matches as $k => $m ) {
-                $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+                $matches[ $k ][ 'raw_translation' ] = CatUtils::unFilterXliffForDatabase( $matches[ $k ][ 'raw_translation' ] );
 
                 if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!

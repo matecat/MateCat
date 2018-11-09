@@ -264,8 +264,8 @@ class setTranslationController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = $segmentsList->id_before->segment;
-        $this->context_after  = $segmentsList->id_after->segment;
+        $this->context_before = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_before->segment );
+        $this->context_after  = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_after->segment );
 
     }
 
@@ -633,8 +633,6 @@ class setTranslationController extends ajaxController {
 
         $this->evalSetContribution( $_Translation, $old_translation );
 
-        $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
-
     }
 
     /**
@@ -646,7 +644,7 @@ class setTranslationController extends ajaxController {
         $translation = array(
                 'version_number' => @$saved_translation['version_number'],
                 'sid'            => $saved_translation['id_segment'],
-                'translation'    => \CatUtils::rawxliff2view( $saved_translation['translation'] ),
+                'translation'    => \CatUtils::subFilterRawDatabaseXliffForView( $saved_translation['translation'] ),
                 'status'         => $saved_translation['status']
         );
         return $translation ;
@@ -819,14 +817,6 @@ class setTranslationController extends ajaxController {
         return $old_count ;
     }
 
-    private function logForTagProjection($msg) {
-        $logfile = \Log::$fileName;  //Todo: check why is null
-
-        \Log::$fileName = 'tagProjection.log';
-        \Log::doLog( $msg );
-        \Log::$fileName = $logfile;
-    }
-
     /**
      * @param $_Translation
      * @param $old_translation
@@ -861,13 +851,13 @@ class setTranslationController extends ajaxController {
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;
-        $contributionStruct->segment              = $this->segment[ 'segment' ];
-        $contributionStruct->translation          = $_Translation[ 'translation' ];
+        $contributionStruct->segment              = CatUtils::subFilterRawDatabaseXliff( $this->segment[ 'segment' ] );
+        $contributionStruct->translation          = $this->__postInput[ 'translation' ];
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
-        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
-        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
+        $contributionStruct->oldSegment           = CatUtils::subFilterRawDatabaseXliff( $this->segment[ 'segment' ] ); //
+        $contributionStruct->oldTranslation       = CatUtils::subFilterRawDatabaseXliff( $old_translation[ 'translation' ] );
         $contributionStruct->propagationRequest   = $this->propagate;
         $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
 

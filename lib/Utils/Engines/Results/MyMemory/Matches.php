@@ -60,9 +60,9 @@ class Engines_Results_MyMemory_Matches {
         }
 
         if ( count( $args ) >= 5 and !is_array( $args[ 0 ] ) ) {
-            $match[ 'segment' ]          = CatUtils::rawxliff2view( $args[ 0 ] );
+            $match[ 'segment' ]          = CatUtils::subFilterRawDatabaseXliffForView( $args[ 0 ] );
             $match[ 'raw_segment' ]      = $args[ 0 ];
-            $match[ 'translation' ]      = CatUtils::rawxliff2view( $args[ 1 ] );
+            $match[ 'translation' ]      = CatUtils::subFilterRawDatabaseXliffForView( $args[ 1 ] );
             $match[ 'raw_translation' ]  = $args[ 1 ];
             $match[ 'match' ]            = $args[ 2 ];
             $match[ 'created-by' ]       = $args[ 3 ];
@@ -71,9 +71,9 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'prop' ]             = ( isset( $args[ 5 ] ) ? $args[ 5 ] : [] );
         } else {
             $match[ 'raw_segment' ]     = $match[ 'segment' ];
-            $match[ 'segment' ]         = CatUtils::rawxliff2view( $match[ 'segment' ] );
+            $match[ 'segment' ]         = CatUtils::subFilterRawDatabaseXliffForView( $match[ 'segment' ] );
             $match[ 'raw_translation' ] = $match[ 'translation' ];
-            $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
+            $match[ 'translation' ]     = CatUtils::subFilterRawDatabaseXliffForView( $match[ 'translation' ] );
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';

@@ -154,9 +154,6 @@ class glossaryController extends ajaxController {
             }
         }
 
-        //remove tags from requests sent to MyMemory
-        $config[ 'segment' ] = CatUtils::view2rawxliff( preg_replace( '#<(?:/?[^>]+/?)>#', "", $config[ 'segment' ] ) );
-
         $TMS_RESULT = $this->_TMS->get( $config )->get_glossary_matches_as_array();
 
         /**
@@ -278,8 +275,8 @@ class glossaryController extends ajaxController {
 
         }
 
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
+        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false  ); //no XML sanitization is needed because those requests are plain text from UI
 
         $config[ 'prop' ]        = $this->jobData->getTMProps();
         $this->featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $this->user );
@@ -345,16 +342,17 @@ class glossaryController extends ajaxController {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
+        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false  ); //no XML sanitization is needed because those requests are plain text from UI
 
         $config[ 'prop' ]        = $this->jobData->getTMProps();
         $this->featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $this->user );
         $config[ 'prop' ]        = json_encode( $config[ 'prop' ] );
 
         if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
-            $config[ 'newsegment' ]     = CatUtils::view2rawxliff( $config[ 'newsegment' ] );
-            $config[ 'newtranslation' ] = CatUtils::view2rawxliff( $config[ 'newtranslation' ] );
+            $config[ 'newsegment' ]     = htmlspecialchars( $config[ 'newsegment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
+            $config[ 'newtranslation' ] = htmlspecialchars( $config[ 'newtranslation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false  ); //no XML sanitization is needed because those requests are plain text from UI
+
         }
         //prepare the error report
         $set_code = array();

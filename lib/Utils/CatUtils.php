@@ -83,21 +83,6 @@ class CatUtils {
         return $dosString;
     }
 
-    /**
-     * @param $segment
-     * @return mixed
-     * @deprecated
-     */
-    private static function placehold_xml_entities($segment) {
-        $pattern ="|&#(.*?);|";
-        $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
-        return $res;
-    }
-
-    public static function restore_xml_entities($segment) {
-        return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
-    }
-
     public static function placehold_xliff_tags($segment) {
 
         //remove not existent </x> tags
@@ -183,75 +168,6 @@ class CatUtils {
         return $segment;
     }
 
-
-
-     private static function get_xliff_tags($segment) {
-
-        //remove not existent </x> tags
-        $segment = preg_replace('|(</x>)|si', "", $segment);
-
-        $matches=array();
-        $match=array();
-
-
-        $res=preg_match('|(<g\s*id=["\']+.*?["\']+\s*[^<>]*?>)|si',$segment, $match);
-        if ($res and isset($match[0])){
-            $matches[]=$match[0];
-        }
-
-        $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/bpt)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/ept)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/it)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/mrk)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        return $segment;
-    }
-
-    public static function stripTags($text) {
-        $pattern_g_o = '|(<.*?>)|';
-        $pattern_g_c = '|(</.*?>)|';
-        $pattern_x = '|(<.*?/>)|';
-
-        $text = preg_replace($pattern_x, "", $text);
-
-        $text = preg_replace($pattern_g_o, "", $text);
-        $text = preg_replace($pattern_g_c, "", $text);
-        return $text;
-    }
-
-    public static function raw2DatabaseXliff( $segment ){
-
-        $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars(
-                html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
-                ENT_NOQUOTES | 16, 'UTF-8', false
-        );
-
-        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
-
-        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
-
-        //encode all not valid XML entities
-        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
-
-        $segment = self::restore_xliff_tags($segment);
-        return $segment;
-
-    }
-
     /**
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
@@ -315,72 +231,95 @@ class CatUtils {
 
     }
 
-    public static function view2rawxliff($segment) {
+    /**
+     * Used to transform database raw xml content to the UI structures
+     * @param $segment
+     *
+     * @return mixed
+     */
+    public static function subFilterRawDatabaseXliffForView( $segment ) {
 
-        //normal control characters should not be sent by the client
-        $segment = str_replace(
-                array(
-                        "\r", "\n", "\t",
-                        "&#0A;", "&#0D;", "&#09;"
-                ), "", $segment
-        );
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\EntitiesDecode() );
+        $subfilter->addLast( new \SubFiltering\HtmlToPh() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsForView() );
+        $subfilter->addLast( new \SubFiltering\PlaceHoldCtrlCharsForView() );
+        $subfilter->addLast( new \SubFiltering\LtGtEncode() );
+        return $subfilter->transform( $segment );
 
-        //Replace br placeholders
-        $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
-        $segment = str_replace( self::lfPlaceholder,"\n", $segment );
-        $segment = str_replace( self::crPlaceholder,"\r", $segment );
-        $segment = str_replace( self::tabPlaceholder,"\t", $segment );
-
-        // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-        // output : <g> bang &amp; olufsen are > 555 </g> <x/>
-        // caso controverso <g id="4" x="&lt; dfsd &gt;">
-        $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars(
-            html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
-            ENT_NOQUOTES, 'UTF-8', false
-        );
-
-        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
-
-        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( self::unicode2chr(0Xa0) , " ", $segment );
-
-        // now convert the real &nbsp;
-        $segment = str_replace( self::nbspPlaceholder, self::unicode2chr(0Xa0) , $segment );
-
-        //encode all not valid XML entities
-        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
-
-        $segment = self::restore_xliff_tags($segment);
-        return $segment;
     }
 
-    public static function rawxliff2view($segment) {
-        // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        //$segment = self::placehold_xml_entities($segment);
-        $segment = self::placehold_xliff_tags($segment);
+    /**
+     * Used to transform database raw xml content to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications
+     * @param $segment
+     *
+     * @return mixed
+     */
+    public static function subFilterRawDatabaseXliff( $segment ) {
 
-        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/[ ]{2}/', "&nbsp; ", $segment);
-        $segment = preg_replace('/[ ]$/', "&nbsp;", $segment);
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\EncodeToRawXML() );
+        $subfilter->addLast( new \SubFiltering\EntitiesDecode() );
+        $subfilter->addLast( new \SubFiltering\HtmlToPh() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsContent() );
+        $subfilter->addLast( new \SubFiltering\RestorePlaceHoldersToXLIFFLtGt() );
+        return $subfilter->transform( $segment );
 
-        $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
+    }
 
-        // restore < e >
-        $segment = str_replace("<", "&lt;", $segment);
-        $segment = str_replace(">", "&gt;", $segment);
-        $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
+    /**
+     * Used to transform external server raw xml content ( Ex: TM/MT ) to allow them to be stored in database, used for server to server communications
+     * @param $segment
+     *
+     * @return mixed
+     */
+    public static function unFilterXliffForDatabase( $segment ){
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\SubFilteredPhToHtml() );
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\EncodeToRawXML() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsContent() );
+        $subfilter->addLast( new \SubFiltering\RestorePlaceHoldersToXLIFFLtGt() );
+        return $subfilter->transform( $segment );
+    }
 
-        $segment = self::restore_xliff_tags_for_view($segment);
+    /**
+     * Used to convert the raw XLIFF content from file to an XML for the database
+     * @param $segment
+     *
+     * @return mixed
+     */
+    public static function raw2DatabaseXliff( $segment ){
 
-        $segment = str_replace("\r\n", self::crlfPlaceholder, $segment );
-        $segment = str_replace("\n", self::lfPlaceholder, $segment );
-        $segment = str_replace("\r", self::crPlaceholder, $segment ); //x0D character
-        $segment = str_replace("\t", self::tabPlaceholder, $segment ); //x09 character
-        $segment = preg_replace( '/[\x{c2}]{0,1}\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
-        return $segment;
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\EncodeToRawXML() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsContent() );
+        $subfilter->addLast( new \SubFiltering\RestorePlaceHoldersToXLIFFLtGt() );
+        return $subfilter->transform( $segment );
+
+    }
+
+    /**
+     *
+     * @param $segment
+     *
+     * @return mixed
+     */
+    public static function view2rawxliff( $segment ) {
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\CtrlCharsPlaceHoldToAscii() );
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\EncodeToRawXML() );
+        $subfilter->addLast( new \SubFiltering\HtmlToEntities() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsContent() );
+        $subfilter->addLast( new \SubFiltering\RestoreEquivTextPhToXliffOriginal() );
+        $subfilter->addLast( new \SubFiltering\RestorePlaceHoldersToXLIFFLtGt() );
+        $subfilter->addLast( new \SubFiltering\SubFilteredPhToHtml() );
+        return $subfilter->transform( $segment );
+
     }
 
     /**
@@ -390,12 +329,14 @@ class CatUtils {
      *
      * @return mixed
      */
-    public static function rawxliff2rawview($segment) {
-        // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars( $segment, ENT_XML1 | ENT_QUOTES, 'UTF-8', false );
-        $segment = self::restore_xliff_tags_for_view($segment);
-        return $segment;
+    public static function rawXliff2RawView( $segment) {
+
+        $subfilter = new \SubFiltering\Pipeline();
+        $subfilter->addLast( new \SubFiltering\PlaceHoldXliffTags() );
+        $subfilter->addLast( new \SubFiltering\HtmlToEntities() );
+        $subfilter->addLast( new \SubFiltering\RestoreXliffTagsForView() );
+        return $subfilter->transform( $segment );
+
     }
 
     public static function addSegmentTranslation( array $_Translation, array &$errors ) {

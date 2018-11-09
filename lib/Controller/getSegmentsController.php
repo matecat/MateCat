@@ -185,11 +185,11 @@ class getSegmentsController extends ajaxController {
             $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
             $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
 
-            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+            $seg['segment'] = CatUtils::subFilterRawDatabaseXliffForView( CatUtils::reApplySegmentSplit(
                 $seg['segment'] , $seg['source_chunk_lengths'] )
             );
 
-            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+            $seg['translation'] = CatUtils::subFilterRawDatabaseXliffForView( CatUtils::reApplySegmentSplit(
                 $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
             );
 

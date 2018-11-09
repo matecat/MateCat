@@ -27,7 +27,7 @@ SRC;
 &lt;g id="43"&gt;bang & olufsen &lt; 3 ' &gt; 1&lt;/g&gt; &lt;x id="33"/&gt;
 SRC;
 
-        $source_seg = CatUtils::rawxliff2view( $source_seg );
+        $source_seg = CatUtils::subFilterRawDatabaseXliffForView( $source_seg );
         $this->assertEquals( $source_seg, $source_expected );
 
     }

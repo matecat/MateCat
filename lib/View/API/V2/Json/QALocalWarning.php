@@ -82,16 +82,16 @@ class QALocalWarning extends QAWarning {
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
-                $malformedStructs[ 'source' ][ $k ] = CatUtils::rawxliff2view( $rawSource );
+                $malformedStructs[ 'source' ][ $k ] = CatUtils::subFilterRawDatabaseXliffForView( $rawSource );
             }
 
             foreach ( $malformedStructs[ 'target' ] as $k => $rawTarget ) {
-                $malformedStructs[ 'target' ][ $k ] = CatUtils::rawxliff2view( $rawTarget );
+                $malformedStructs[ 'target' ][ $k ] = CatUtils::subFilterRawDatabaseXliffForView( $rawTarget );
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();
             foreach ( $targetTagPositionError as $item => $value ) {
-                $targetTagPositionError[ $item ] = CatUtils::rawxliff2view( $value );
+                $targetTagPositionError[ $item ] = CatUtils::subFilterRawDatabaseXliffForView( $value );
             }
 
             $out[ 'details' ]                              = [];
