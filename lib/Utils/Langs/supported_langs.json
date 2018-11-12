@@ -349,6 +349,16 @@
     ,
         {
             "localized":[{
+                "en":"Chittagonian"
+            }],
+            "isocode":"ctg",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ctg-BD"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Classical Greek"
             }],
             "isocode":"grc",
@@ -568,6 +578,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"fo-FO"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Fijian"
+            }],
+            "isocode":"fj",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"fj-FJ"
         }
     ,
         {
