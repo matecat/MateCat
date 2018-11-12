@@ -35,9 +35,9 @@
                 "en":"Antigua and Barbuda Creole English"
             }],
             "isocode":"aig",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"aig-AIG"
+            "rfc3066code":"aig-AG"
         }
     ,
         {
@@ -117,9 +117,9 @@
                 "en":"Bahamas Creole English"
             }],
             "isocode":"bah",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"bah-BAH"
+            "rfc3066code":"bah-BS"
         }
     ,
         {
@@ -127,9 +127,9 @@
                 "en":"Bajan"
             }],
             "isocode":"bjs",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"bjs-BJS"
+            "rfc3066code":"bjs-BB"
         }
     ,
         {
@@ -167,9 +167,9 @@
                 "en":"Bemba"
             }],
             "isocode":"bem",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"bem-BEM"
+            "rfc3066code":"bem-ZM"
         }
     ,
         {
@@ -207,9 +207,9 @@
                 "en":"Bislama"
             }],
             "isocode":"bi",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"bi-BI"
+            "rfc3066code":"bi-VU"
         }
     ,
         {
@@ -309,9 +309,9 @@
                 "en":"Chamorro"
             }],
             "isocode":"ch",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ch-CH"
+            "rfc3066code":"cha-GU"
         }
     ,
         {
@@ -351,10 +351,10 @@
             "localized":[{
                 "en":"Classical Greek"
             }],
-            "isocode":"XNA",
-            "enabled":false,
+            "isocode":"grc",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"XN-GR"
+            "rfc3066code":"grc-GR"
         }
     ,
         {
@@ -362,9 +362,9 @@
                 "en":"Comorian Ngazidja"
             }],
             "isocode":"zdj",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"zdj-ZDJ"
+            "rfc3066code":"zdj-KM"
         }
     ,
         {
@@ -444,9 +444,9 @@
                 "en":"Dzongkha"
             }],
             "isocode":"dz",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"dz-DZ"
+            "rfc3066code":"dzo-BT"
         }
     ,
         {
@@ -698,9 +698,9 @@
                 "en":"Grenadian Creole English"
             }],
             "isocode":"gcl",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"gcl-GCL"
+            "rfc3066code":"gcl-GD"
         }
     ,
         {
@@ -718,9 +718,9 @@
                 "en":"Guyanese Creole English"
             }],
             "isocode":"gyn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"gyn-GYN"
+            "rfc3066code":"gyn-GY"
         }
     ,
         {
@@ -827,10 +827,10 @@
             "localized":[{
                 "en":"Inuktitut Greenlandic"
             }],
-            "isocode":"kl",
-            "enabled":false,
+            "isocode":"kal",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"kl-KL"
+            "rfc3066code":"kal-GL"
         }
     ,
         {
@@ -869,10 +869,10 @@
             "localized":[{
                 "en":"Jamaican Creole English"
             }],
-            "isocode":"en",
-            "enabled":false,
+            "isocode":"jam",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"en-JM"
+            "rfc3066code":"jam-JM"
         }
     ,
         {
@@ -901,9 +901,9 @@
                 "en":"Kabuverdianu"
             }],
             "isocode":"kea",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"kea-KEA"
+            "rfc3066code":"kea-CV"
         }
     ,
         {
@@ -1020,10 +1020,10 @@
             "localized":[{
                 "en":"Kirundi"
             }],
-            "isocode":"rn",
-            "enabled":false,
+            "isocode":"run",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"rn-RN"
+            "rfc3066code":"run-RN"
         }
     ,
         {
@@ -1210,10 +1210,10 @@
             "localized":[{
                 "en":"Maldivian"
             }],
-            "isocode":"dv",
-            "enabled":false,
+            "isocode":"div",
+            "enabled":true,
             "rtl":true,
-            "rfc3066code":"dv-DV"
+            "rfc3066code":"div-DV"
         }
     ,
         {
@@ -1362,9 +1362,9 @@
                 "en":"Morisyen"
             }],
             "isocode":"mfe",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"mfe-MFE"
+            "rfc3066code":"mfe-MU"
         }
     ,
         {
@@ -1475,9 +1475,9 @@
                 "en":"Palauan"
             }],
             "isocode":"pau",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"pau-PAU"
+            "rfc3066code":"pau-PW"
         }
     ,
         {
@@ -1640,19 +1640,19 @@
                 "en":"Saint Lucian Creole French"
             }],
             "isocode":"acf",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"acf-ACF"
+            "rfc3066code":"acf-LC"
         }
     ,
         {
             "localized":[{
                 "en":"Samoan"
             }],
-            "isocode":"sm",
-            "enabled":false,
+            "isocode":"smo",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"sm-SM"
+            "rfc3066code":"smo-WS"
         }
     ,
         {
@@ -1702,9 +1702,9 @@
                 "en":"Seselwa Creole French"
             }],
             "isocode":"crs",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"crs-CRS"
+            "rfc3066code":"crs-SC"
         }
     ,
         {
@@ -1730,10 +1730,10 @@
             "localized":[{
                 "en":"Shona"
             }],
-            "isocode":"sn",
-            "enabled":false,
+            "isocode":"sna",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"sn-SN"
+            "rfc3066code":"sna-ZW"
         }
     ,
         {
@@ -1967,10 +1967,10 @@
             "localized":[{
                 "en":"Tibetan"
             }],
-            "isocode":"bo",
-            "enabled":false,
+            "isocode":"bod",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"bo-CN"
+            "rfc3066code":"bod-CN"
         }
     ,
         {
@@ -1998,19 +1998,19 @@
                 "en":"Tok Pisin"
             }],
             "isocode":"tpi",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"tpi-TPI"
+            "rfc3066code":"tpi-PG"
         }
     ,
         {
             "localized":[{
                 "en":"Tongan"
             }],
-            "isocode":"to",
-            "enabled":false,
+            "isocode":"ton",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"to-TO"
+            "rfc3066code":"ton-TO"
         }
     ,
         {
@@ -2027,10 +2027,10 @@
             "localized":[{
                 "en":"Tswana"
             }],
-            "isocode":"tn",
-            "enabled":false,
+            "isocode":"tsn",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"tn-TN"
+            "rfc3066code":"tsn-BW"
         }
     ,
         {
@@ -2128,9 +2128,9 @@
                 "en":"Vincentian Creole English"
             }],
             "isocode":"svc",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"svc-SVC"
+            "rfc3066code":"svc-VC"
         }
     ,
         {
@@ -2138,9 +2138,9 @@
                 "en":"Virgin Islands Creole English"
             }],
             "isocode":"vic",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"vic-VIC"
+            "rfc3066code":"vic-US"
         }
     ,
         {
