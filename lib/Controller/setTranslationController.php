@@ -768,7 +768,9 @@ class setTranslationController extends ajaxController {
          * TODO: really, this is not good.
          */
 
-        $version_saved = $this->VersionsHandler->saveVersion( $_Translation, $old_translation );
+        $is_revision = $this->isRevision();
+        $page = ($is_revision)?'revise':'translate';
+        $version_saved = $this->VersionsHandler->saveVersion( $_Translation, $old_translation, $page);
 
         if ( $version_saved ) {
             $_Translation['version_number'] = $old_translation['version_number'] + 1;
