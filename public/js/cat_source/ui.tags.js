@@ -197,7 +197,7 @@ $.extend(UI, {
 
     },
     /**
-     * To transform text with the' ph' tags that have the attribute' equival-text' into text only, without html
+     * To transform text with the' ph' tags that have the attribute' equiv-text' into text only, without html
      */
     removePhTagsWithEquivTextIntoText: function ( tx ) {
         try {
@@ -730,7 +730,7 @@ $.extend(UI, {
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        div = this.transformPlaceholdersHtml($div);
+        $div = this.transformPlaceholdersHtml($div);
         $div.find('span.space-marker').replaceWith(' ');
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
