@@ -749,7 +749,12 @@ LXQ.init  = function () {
                        word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
-
+                   if (cl === 'o1' && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
+                        //need to modify message with word.
+                        ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
+                        word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].tootipExtraText;
+                        txt = txt.replace('XXXX',word);
+                    }
                    if (txt!==null && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
                         ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
                         var warningData = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]];
