@@ -77,7 +77,7 @@ class SegmentTranslationVersionHandler {
      * @param $page
      */
 
-    public function saveVersion( $new_translation, $old_translation, $page ) {
+    public function saveVersion( $new_translation, $old_translation ) {
 
         /**
          * This is where we decide if a new translation version is to be generated.
@@ -98,8 +98,6 @@ class SegmentTranslationVersionHandler {
         $new_translation['version_number'] += 1 ;
 
         $old_translation[ 'is_review' ] = ( $old_translation[ 'status' ] == \Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
-
-        $new_translation[ 'page' ] = $page;
 
         $old_translation = $this->evaluateDbStatus( $old_translation );
         $new_translation = $this->evaluateDbStatus( $new_translation );

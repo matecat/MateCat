@@ -96,7 +96,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->featureSet->loadForProject($project);
         $codes = $this->featureSet->getCodes();
 
-        if(in_array(\Features::REVIEW_EXTENDED ,$codes)){
+        if(in_array(\Features::REVIEW_EXTENDED, $codes)){
             $model = new \Features\ReviewExtended\TranslationIssueModel(
                     $this->request->id_job,
                     $this->validator->getChunkReview()->password,
