@@ -7,10 +7,11 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
+use SubFiltering\Commons\AbstractHandler;
 
-class HtmlToEntities extends AbstractChannelHandler {
+class HtmlToEntities extends AbstractHandler {
 
     /**
      * @param $segment

@@ -78,14 +78,10 @@ class setSegmentSplitController extends ajaxController {
                     'message' => 'Invalid source_chunk_lengths json'
             );
         }
-        /*
-        else if ( empty( $this->source_chunk_lengths ) ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -6,
-                    'message' => 'source_chunk_lengths cannot be empty'
-            );
-        }
-        */
+
+        //check Job password
+        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
+        $this->featureSet->loadForProject( $jobStruct->getProject() );
 
     }
 
@@ -102,7 +98,8 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
 
-        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->segment ) );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths )  -1 : 1 );
@@ -121,34 +118,6 @@ class setSegmentSplitController extends ajaxController {
         }
     }
 
-    private function split() {
-
-        //save the 2 arrays in the DB
-
-//        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
-//
-//        $translationStruct->id_segment          = $this->id_segment;
-//        $translationStruct->id_job              = $this->id_job;
-//
-//        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
-//
-//        /* Fill the statuses with DEFAULT DRAFT VALUES */
-//        $pieces = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths )  -1 : 1 );
-//        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT ) );
-//
-//        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
-//        $result = $translationDao->update($translationStruct);
-//
-//        if($result instanceof TranslationsSplit_SplitStruct){
-//            //return success
-//            $this->result['data'] = 'OK';
-//        }
-//        else{
-//            Log::doLog("Failed while splitting/merging segment.");
-//            Log::doLog($translationStruct);
-//        }
-
-    }
 }
 
 

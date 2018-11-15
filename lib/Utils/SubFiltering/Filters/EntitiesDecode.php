@@ -7,10 +7,11 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
+use SubFiltering\Commons\AbstractHandler;
 
-class EntitiesDecode extends AbstractChannelHandler {
+class EntitiesDecode extends AbstractHandler {
 
     public function transform( $segment ) {
 

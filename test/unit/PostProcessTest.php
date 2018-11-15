@@ -12,8 +12,8 @@ TRG;
 <g id="1621">By selecting this menu as shown in Fig.18 you can review the measurement records (refer to Fig.19), press the <x id="1622"/> </g> <g id="1623"> </g> <g id="1624"> or the <x id="1625"/></g><g id="1626"> </g> <g id="1627"> button to review the records page by page, the longer you press the <x id="1628"/></g><g id="1629">  </g><g id="1630"> or <x id="1631"/> </g><g id="1632"> </g><g id="1633"> button the faster record page changes. </g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -48,8 +48,8 @@ SRC;
 Only Text
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -83,8 +83,8 @@ SRC;
 <g id="6"> <g id="7"> st </g> <g id="8">&nbsp;Section of <.++* Tokyo <g id="9"> <g id="10"> Station </g> </g>, Osaka </g> </g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -125,8 +125,8 @@ TRG;
 <g id="1877"> 31-235 </g><g id="1878"> L'impostazione predefinita PR IS120 allarme. </g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -160,8 +160,8 @@ TRG;
 <g id="1877"> 31-235 </g><x id="1878"/> L'impostazione predefinita PR IS120 allarme.
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -198,8 +198,8 @@ TRG;
 SRC;
 
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new PostProcess($source_seg, $target_seg);
         $check->realignMTSpaces();
@@ -239,8 +239,8 @@ TRG;
 <g id="1877"> 31-235 </g><g id="1878"> L'impostazione predefinita PR IS120 allarme. </g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
 
         $check = new PostProcess($source_seg, $target_seg);

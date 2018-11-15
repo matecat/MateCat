@@ -108,8 +108,9 @@ class getWarningController extends ajaxController {
                 return;
             }
 
-            $this->__postInput->src_content = CatUtils::view2rawxliff( $this->__postInput->src_content );
-            $this->__postInput->trg_content = CatUtils::view2rawxliff( $this->__postInput->trg_content );
+            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $this->__postInput->src_content = $Filter->fromLayer2ToLayer0( $this->__postInput->src_content );
+            $this->__postInput->trg_content = $Filter->fromLayer2ToLayer0( $this->__postInput->trg_content );
             $this->__segmentWarningsCall();
         }
 

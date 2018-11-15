@@ -7,10 +7,13 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class PlaceHoldXliffTags extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
+
+class PlaceHoldXliffTags extends AbstractHandler {
 
     public function transform( $segment ) {
 

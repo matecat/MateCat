@@ -7,10 +7,13 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class PlaceHoldCtrlCharsForView extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
+
+class PlaceHoldCtrlCharsForView extends AbstractHandler {
 
     public function transform( $segment ) {
 

@@ -7,10 +7,12 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class LtGtEncode extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+
+class LtGtEncode extends AbstractHandler {
 
     public function transform( $segment ) {
         // restore < e >

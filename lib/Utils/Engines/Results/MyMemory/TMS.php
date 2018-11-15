@@ -30,11 +30,11 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
 
     }
 
-    public function get_matches_as_array() {
+    public function get_matches_as_array( $layerNum = 2 ) {
         $matchesArray = array();
 
         foreach ( $this->matches as $match ) {
-            $item            = $match->get_as_array();
+            $item            = $match->getMatches( $layerNum );
             $matchesArray[ ] = $item;
         }
 

@@ -7,10 +7,12 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
 
-class EncodeToRawXML extends AbstractChannelHandler {
+class EncodeToRawXML extends AbstractHandler {
 
     public function transform( $segment ) {
 

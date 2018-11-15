@@ -45,13 +45,13 @@ class SegmentTranslationMismatches {
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [
-                        'translation' => CatUtils::subFilterRawDatabaseXliffForView( $row[ 'translation' ] ),
+                        'translation' => CatUtils::layer0ToLayer2( $row[ 'translation' ] ),
                         'TOT'         => $row[ 'TOT' ],
                         'involved_id' => explode( ",", $row[ 'involved_id' ] )
                 ];
             } else {
                 $result[ 'not_editable' ][] = [
-                        'translation' => CatUtils::subFilterRawDatabaseXliffForView( $row[ 'translation' ] ),
+                        'translation' => CatUtils::layer0ToLayer2( $row[ 'translation' ] ),
                         'TOT'         => $row[ 'TOT' ],
                         'involved_id' => explode( ",", $row[ 'involved_id' ] )
                 ];

@@ -7,12 +7,12 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Commons;
 
 class Pipeline {
 
     /**
-     * @var AbstractChannelHandler[]
+     * @var AbstractHandler[]
      */
     protected $handlers;
 
@@ -21,11 +21,11 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractChannelHandler $handler
+     * @param AbstractHandler $handler
      *
      * @return Pipeline
      */
-    public function addFirst( AbstractChannelHandler $handler ) {
+    public function addFirst( AbstractHandler $handler ) {
         $this->_attach( $handler );
         array_unshift( $this->handlers, $handler );
 
@@ -33,12 +33,12 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractChannelHandler $newPipeline
-     * @param AbstractChannelHandler $before
+     * @param AbstractHandler $newPipeline
+     * @param AbstractHandler $before
      *
      * @return Pipeline
      */
-    public function addBefore( AbstractChannelHandler $newPipeline, AbstractChannelHandler $before ) {
+    public function addBefore( AbstractHandler $newPipeline, AbstractHandler $before ) {
         $this->_attach( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $before->getName() ) {
@@ -52,12 +52,12 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractChannelHandler $newPipeline
-     * @param AbstractChannelHandler $before
+     * @param AbstractHandler $newPipeline
+     * @param AbstractHandler $before
      *
      * @return Pipeline
      */
-    public function addAfter( AbstractChannelHandler $newPipeline, AbstractChannelHandler $before ) {
+    public function addAfter( AbstractHandler $newPipeline, AbstractHandler $before ) {
         $this->_attach( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $before->getName() ) {
@@ -71,11 +71,11 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractChannelHandler $handler
+     * @param AbstractHandler $handler
      *
      * @return Pipeline
      */
-    public function addLast( AbstractChannelHandler $handler ) {
+    public function addLast( AbstractHandler $handler ) {
         $this->_attach( $handler );
         $this->handlers[] = $handler;
 
@@ -98,11 +98,11 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractChannelHandler $handler
+     * @param AbstractHandler $handler
      *
      * @return $this
      */
-    protected function _attach( AbstractChannelHandler $handler ) {
+    protected function _attach( AbstractHandler $handler ) {
         $handler->setPipeline( $this );
 
         return $this;

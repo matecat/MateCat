@@ -290,9 +290,9 @@ class EditLog_EditLogModel {
             $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $seg->suggestion );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
 
-            $displaySeg->source          = trim( CatUtils::subFilterRawDatabaseXliffForView( $seg->source ) );
-            $displaySeg->suggestion_view = trim( CatUtils::subFilterRawDatabaseXliffForView( $seg->suggestion ) );
-            $displaySeg->translation     = trim( CatUtils::subFilterRawDatabaseXliffForView( $seg->translation ) );
+            $displaySeg->source          = trim( CatUtils::layer0ToLayer2( $seg->source ) );
+            $displaySeg->suggestion_view = trim( CatUtils::layer0ToLayer2( $seg->suggestion ) );
+            $displaySeg->translation     = trim( CatUtils::layer0ToLayer2( $seg->translation ) );
 
             //NOT USED //TODO REMOVE FROM Dao, Struct, MyMemory-Match, and Re-USE the field in database for raw_word_count ?!?
             if ( $seg->mt_qe == 0 ) {

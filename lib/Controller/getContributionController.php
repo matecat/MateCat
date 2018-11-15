@@ -311,8 +311,10 @@ class getContributionController extends ajaxController {
                     Log::doLog( $log_prepend . var_export($matches[0], true) );
                     Log::doLog( $log_prepend . "Realignment Success:");
                     */
-                    $matches[ 0 ][ 'segment' ]     = CatUtils::subFilterRawDatabaseXliffForView( $this->text );
-                    $matches[ 0 ][ 'translation' ] = CatUtils::subFilterRawDatabaseXliffForView( $qaRealign->getTrgNormalized() );
+                    $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+                    $matches[ 0 ][ 'segment' ]     = $Filter->fromLayer0ToLayer2( $this->text );
+                    $matches[ 0 ][ 'translation' ] = $Filter->fromLayer0ToLayer2( $qaRealign->getTrgNormalized() );
+
                     $matches[ 0 ][ 'match' ]       = ( $fuzzy == 0 ? '100%' : '99%' );
                     /*
                     Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
@@ -335,6 +337,8 @@ class getContributionController extends ajaxController {
             //
         }
 
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
         foreach ( $matches as &$match ) {
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
@@ -347,7 +351,7 @@ class getContributionController extends ajaxController {
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
                     $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = CatUtils::subFilterRawDatabaseXliffForView( $match[ 'raw_translation' ] );
+                    $match[ 'translation' ]     = $Filter->fromLayer0ToLayer2( $match[ 'raw_translation' ] );
                 } else {
                     Log::doLog( $QA->getErrors() );
                 }
@@ -405,9 +409,11 @@ class getContributionController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_before->segment );
-        $this->text           = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_segment->segment );
-        $this->context_after  = CatUtils::subFilterRawDatabaseXliff( $segmentsList->id_after->segment );
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
+        $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+        $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
 
     }
 
@@ -433,7 +439,8 @@ class getContributionController extends ajaxController {
         if ( count( $matches ) > 0 ) {
 
             foreach ( $matches as $k => $m ) {
-                $matches[ $k ][ 'raw_translation' ] = CatUtils::unFilterXliffForDatabase( $matches[ $k ][ 'raw_translation' ] );
+                $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+                $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
                 if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!

@@ -399,8 +399,9 @@ class glossaryController extends ajaxController {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
+        $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = array();

@@ -7,10 +7,13 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class RestorePlaceHoldersToXLIFFLtGt extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
+
+class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
 
     public function transform( $segment ) {
 

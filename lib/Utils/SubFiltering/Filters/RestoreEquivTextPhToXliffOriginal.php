@@ -7,10 +7,13 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class RestoreEquivTextPhToXliffOriginal extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
+
+class RestoreEquivTextPhToXliffOriginal extends AbstractHandler {
 
     /**
      * @param $segment

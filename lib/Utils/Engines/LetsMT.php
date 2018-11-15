@@ -69,7 +69,7 @@ class Engines_LetsMT extends Engines_AbstractEngine {
                         date( "Y-m-d" )
                 );
 
-                $mt_res                          = $mt_match_res->get_as_array();
+                $mt_res                          = $mt_match_res->getMatches();
                 $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
                 $retObj = new stdClass();

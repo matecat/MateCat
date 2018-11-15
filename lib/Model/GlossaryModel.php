@@ -28,7 +28,7 @@ class GlossaryModel {
         $this->job = $job ;
 
         $this->featureSet = new FeatureSet;
-        $this->featureSet->loadFromString($this->job->getProjectFeatures());
+        $this->featureSet->loadForProject( $this->job->getProject() );
 
         $this->_TMS = Engine::getInstance( self::MYMEMORY_ID );
 
@@ -72,7 +72,10 @@ class GlossaryModel {
     }
 
     public function get($segment, $translation) {
-        $config[ 'segment' ] = CatUtils::view2rawxliff( preg_replace( '#<(?:/?[^>]+/?)>#', "", $segment ) );
+
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
+        $config[ 'segment' ] = $Filter->fromLayer2ToLayer0( preg_replace( '#<(?:/?[^>]+/?)>#', "", $segment ) );
         $config[ 'translation' ] = $translation ;
 
         $config[ 'source' ]      = $this->job->source ;

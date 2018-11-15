@@ -7,10 +7,12 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
 
-class CtrlCharsPlaceHoldToAscii extends AbstractChannelHandler {
+class CtrlCharsPlaceHoldToAscii extends AbstractHandler {
 
     public function transform( $segment ) {
 

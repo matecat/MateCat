@@ -2,8 +2,6 @@
 
 class deleteContributionController extends ajaxController {
 
-    private $seg;
-    private $tra;
     private $source_lang;
     private $target_lang;
     private $id_translator;
@@ -72,8 +70,10 @@ class deleteContributionController extends ajaxController {
         $config = $tms->getConfigStruct();
 //        $config = TMS::getConfigStruct();
 
-        $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
-        $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
+
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $config[ 'segment' ]       = $Filter->fromLayer2ToLayer0( $this->source );
+        $config[ 'translation' ]   = $Filter->fromLayer2ToLayer0( $this->target );
         $config[ 'source' ]        = $this->source_lang;
         $config[ 'target' ]        = $this->target_lang;
         $config[ 'email' ]         = INIT::$MYMEMORY_API_KEY;

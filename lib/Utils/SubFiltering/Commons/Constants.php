@@ -7,7 +7,7 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Commons;
 
 
 class Constants {

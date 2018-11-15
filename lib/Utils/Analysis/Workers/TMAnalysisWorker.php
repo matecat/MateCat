@@ -12,6 +12,7 @@ use Constants\Ices;
 use Engine;
 use Jobs_JobDao;
 use Projects_ProjectDao;
+use SubFiltering\Filter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -136,10 +137,9 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ){
 
-        $suggestion = \CatUtils::view2rawxliff( $this->_matches[ 0 ][ 'raw_translation' ] );
+        $filter = Filter::getInstance( $this->featureSet );
 
-        // OLD Patch for wrong tag in memories: preg_replace all x tags <x not closed > inside suggestions with correctly closed
-        $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
+        $suggestion = $this->_matches[ 0 ][ 'raw_translation' ];
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
         $suggestion_json   = json_encode( $this->_matches );
@@ -174,7 +174,6 @@ class TMAnalysisWorker extends AbstractWorker {
             //this should every time be ok because MT preserve tags, but we use the check on the errors
             //for logic correctness
             if ( !$check->thereAreErrors() ) {
-                $suggestion = \CatUtils::view2rawxliff( $check->getTrgNormalized() );
                 $err_json   = '';
             } else {
                 $err_json = $check->getErrorsJSON();
@@ -202,6 +201,8 @@ class TMAnalysisWorker extends AbstractWorker {
                     $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
                     $mt_qe = null
         );
+
+        $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $tm_data                             = array();
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
@@ -499,7 +500,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             }
 
-            $tms_match = $tms_match->get_matches_as_array();
+            $tms_match = $tms_match->get_matches_as_array( 1 );
 
         }
 

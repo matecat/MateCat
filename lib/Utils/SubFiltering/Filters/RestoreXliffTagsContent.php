@@ -7,10 +7,13 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
 
-class RestoreXliffTagsContent extends AbstractChannelHandler {
+use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
+
+class RestoreXliffTagsContent extends AbstractHandler {
 
     public function transform( $segment ) {
 

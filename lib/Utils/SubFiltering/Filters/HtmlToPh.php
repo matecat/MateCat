@@ -7,7 +7,9 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
+
+use SubFiltering\Commons\AbstractHandler;
 
 /**
  * Class HtmlToPh
@@ -18,7 +20,7 @@ namespace SubFiltering;
  * @package SubFiltering
  *
  */
-class HtmlToPh extends AbstractChannelHandler {
+class HtmlToPh extends AbstractHandler {
 
     const STATE_PLAINTEXT = 0;
     const STATE_HTML      = 1;

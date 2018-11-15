@@ -25,8 +25,8 @@ TRG;
 <g id="1877"> 31-235</g> L'impostazione predefinita <x id="1879"/>PR IS120 allarme. <g id="1878"></g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
 
         $check = new QA($source_seg, $target_seg);
@@ -55,8 +55,8 @@ TRG;
 <g id="1630">or</g><x id="1631"/><g id="1632"> </g><g id="1633">button the faster record page changes.</g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
 
         $check = new QA($source_seg, $target_seg);
@@ -85,8 +85,8 @@ TRG;
 <g id="1630">or<g id="1632"><x id="1631"/><g id="1633">button the faster record page changes.</g></g></g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
 
         $check = new QA($source_seg, $target_seg);
@@ -115,8 +115,8 @@ SRC;
 <g id="6"> <g id="7">st</g> <g id="8">&nbsp;<span class="this is in entities">Section</span> of <.++* Tokyo <g id="9"></g><g id="10"> Station</g>, Osaka </g></g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
 
         $check = new QA($source_seg, $target_seg);

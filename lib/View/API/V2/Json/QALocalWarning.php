@@ -12,6 +12,7 @@ namespace API\V2\Json;
 
 use CatUtils;
 use QA;
+use SubFiltering\Filter;
 
 class QALocalWarning extends QAWarning {
 
@@ -81,17 +82,19 @@ class QALocalWarning extends QAWarning {
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
+            $Filter = Filter::getInstance();
+
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
-                $malformedStructs[ 'source' ][ $k ] = CatUtils::subFilterRawDatabaseXliffForView( $rawSource );
+                $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer0ToLayer2( $rawSource );
             }
 
             foreach ( $malformedStructs[ 'target' ] as $k => $rawTarget ) {
-                $malformedStructs[ 'target' ][ $k ] = CatUtils::subFilterRawDatabaseXliffForView( $rawTarget );
+                $malformedStructs[ 'target' ][ $k ] = $Filter->fromLayer0ToLayer2( $rawTarget );
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();
             foreach ( $targetTagPositionError as $item => $value ) {
-                $targetTagPositionError[ $item ] = CatUtils::subFilterRawDatabaseXliffForView( $value );
+                $targetTagPositionError[ $item ] = $Filter->fromLayer0ToLayer2( $value );
             }
 
             $out[ 'details' ]                              = [];

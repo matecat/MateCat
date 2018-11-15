@@ -7,10 +7,11 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Filters;
 
+use SubFiltering\Commons\AbstractHandler;
 
-class SubFilteredPhToHtml extends AbstractChannelHandler {
+class SubFilteredPhToHtml extends AbstractHandler {
 
     /**
      * @param $segment

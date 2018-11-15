@@ -83,10 +83,10 @@ class QualityReportSegmentModel {
 
             $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
 
-            $seg->segment = CatUtils::subFilterRawDatabaseXliffForView( $seg->segment );
+            $seg->segment = CatUtils::layer0ToLayer2( $seg->segment );
 
-            $seg->translation = CatUtils::subFilterRawDatabaseXliffForView( $seg->translation );
-            $seg->suggestion = CatUtils::subFilterRawDatabaseXliffForView( $seg->suggestion );
+            $seg->translation = CatUtils::layer0ToLayer2( $seg->translation );
+            $seg->suggestion = CatUtils::layer0ToLayer2( $seg->suggestion );
 
             foreach ( $issues as $issue ) {
                 if ( $issue->segment_id == $seg->sid ) {
@@ -106,7 +106,7 @@ class QualityReportSegmentModel {
             if(isset($last_translations)){
                 foreach ( $last_translations as $last_translation ) {
                     if ( $last_translation->id_segment == $seg->sid ) {
-                        $last_translation->translation = CatUtils::subFilterRawDatabaseXliffForView( $last_translation->translation );
+                        $last_translation->translation = CatUtils::layer0ToLayer2( $last_translation->translation );
                         $find_last_translation_version = $last_translation;
                         break;
                     }
@@ -118,7 +118,7 @@ class QualityReportSegmentModel {
             if ( isset( $last_revisions ) ) {
                 foreach ( $last_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_revision->translation = CatUtils::subFilterRawDatabaseXliffForView( $last_revision->translation );
+                        $last_revision->translation = CatUtils::layer0ToLayer2( $last_revision->translation );
                         $find_last_revision_version = $last_revision;
                         break;
                     }

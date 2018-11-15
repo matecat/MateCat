@@ -7,10 +7,10 @@
  *
  */
 
-namespace SubFiltering;
+namespace SubFiltering\Commons;
 
 
-abstract class AbstractChannelHandler {
+abstract class AbstractHandler {
 
     protected $name;
 
@@ -27,7 +27,7 @@ abstract class AbstractChannelHandler {
     public abstract function transform( $segment );
 
     /**
-     * AbstractChannelHandler constructor.
+     * AbstractHandler constructor.
      */
     public function __construct() {
         $this->name = get_class($this);

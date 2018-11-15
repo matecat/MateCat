@@ -33,7 +33,7 @@ trait FormatResponse {
                 date( "Y-m-d" )
         );
 
-        return $mt_match_res->get_as_array();
+        return $mt_match_res->getMatches();
 
     }
 

@@ -75,7 +75,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
                 date( "Y-m-d" )
         );
 
-        $mt_res = $mt_match_res->get_as_array();
+        $mt_res = $mt_match_res->getMatches();
 
         return $mt_res;
 

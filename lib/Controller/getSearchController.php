@@ -96,13 +96,7 @@ class getSearchController extends ajaxController {
 
         //get Job Info
         $this->job_data = Jobs_JobDao::getByIdAndPassword( (int)$this->job, $this->password );
-
-        $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
-        if ( !$pCheck->grantJobAccessByJobData( $this->job_data, $this->password ) ) {
-            $this->result[ 'errors' ][] = [ "code" => -10, "message" => "wrong password" ];
-            return;
-        }
+        $this->featureSet->loadForProject( $this->job_data->getProject() );
 
         switch ( $this->function ) {
             case 'find':
@@ -151,9 +145,12 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function doReplaceAll(){
-        $this->queryParams[ 'trg' ]         = CatUtils::view2rawxliff( $this->target );
-        $this->queryParams[ 'src' ]         = CatUtils::view2rawxliff( $this->source );
-        $this->queryParams[ 'replacement' ] = CatUtils::view2rawxliff( $this->replace );
+
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
+        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
+        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
+        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
