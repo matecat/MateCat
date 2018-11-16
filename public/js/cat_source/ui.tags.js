@@ -781,7 +781,7 @@ $.extend(UI, {
     handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked:not(.inside-attribute)');
+            var tag = elem.closest('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());
