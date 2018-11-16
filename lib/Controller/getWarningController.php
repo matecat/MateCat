@@ -2,7 +2,6 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
-use API\V2\Json\SegmentTranslationMismatches;
 
 class getWarningController extends ajaxController {
 

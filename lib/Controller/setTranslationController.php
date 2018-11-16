@@ -162,20 +162,12 @@ class setTranslationController extends ajaxController {
             $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
             if ( empty( $this->jobData ) ) {
-                $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-                Log::doLog( $msg );
-                Utils::sendErrMailReport( $msg );
+                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
 
             //add check for job status archived.
             if ( strtolower( $this->jobData[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
-            }
-
-            //check for Password correctness ( remove segment split )
-            $pCheck = new AjaxPasswordCheck();
-            if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password, $this->id_segment ) ) {
-                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
 
             /**
@@ -402,7 +394,7 @@ class setTranslationController extends ajaxController {
          */
 
         $this->updateJobPEE( $old_translation, $_Translation );
-        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
+        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
 

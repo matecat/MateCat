@@ -26,25 +26,27 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-        $this->model = new EditLog_EditLogModel( $this->id_job, $this->password );
-
-        $this->outputContent = file_get_contents( $this->model->genCSVTmpFile() );
-        $this->model->cleanDownloadResource();
-
         /**
          * Retrieve user information
          */
         $this->readLoginInfo();
 
+        $project = Projects_ProjectDao::findByJobId( $this->id_job, 60 * 60 );
+        $this->featureSet->loadForProject( $project );
+
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
-        $activity->id_project = Projects_ProjectDao::findByJobId( $this->id_job, 60 * 60 )->id; //assume that all rows have the same project id
+        $activity->id_project = $project->id; //assume that all rows have the same project id
         $activity->action     = ActivityLogStruct::DOWNLOAD_EDIT_LOG;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
-        
+
+        $this->model = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
+        $this->outputContent = file_get_contents( $this->model->genCSVTmpFile() );
+        $this->model->cleanDownloadResource();
+
     }
 
 }

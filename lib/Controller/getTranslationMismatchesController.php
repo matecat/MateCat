@@ -36,6 +36,8 @@ class getTranslationMismatchesController extends ajaxController {
         $this->id_job     = (int)$__postInput[ 'id_job' ];
         $this->password   = $__postInput[ 'password' ];
 
+        $this->featureSet->loadForProject( Projects_ProjectDao::findByJobId( $this->id_job, 60 * 60 ) );
+
     }
 
     /**
@@ -56,7 +58,7 @@ class getTranslationMismatchesController extends ajaxController {
         }
 
         $this->result[ 'code' ] = 1;
-        $this->result[ 'data' ] = ( new SegmentTranslationMismatches( $Translation_mismatches, $thereArePossiblePropagations ) )->render();
+        $this->result[ 'data' ] = ( new SegmentTranslationMismatches( $Translation_mismatches, $thereArePossiblePropagations, $this->featureSet ) )->render();
 
     }
 
