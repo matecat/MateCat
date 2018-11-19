@@ -74,6 +74,7 @@ class SegmentTranslationVersionHandler {
      *
      * @param $old_translation
      * @param $new_translation
+     * @param $page
      */
 
     public function saveVersion( $new_translation, $old_translation ) {

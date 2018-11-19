@@ -8,7 +8,6 @@
 
 namespace Features\ReviewExtended;
 
-use Features\ReviewImproved\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use \Features\ReviewImproved\SegmentTranslationModel as ReviewImprovedSegmentTranslationModel;
 
@@ -16,10 +15,6 @@ class SegmentTranslationModel extends ReviewImprovedSegmentTranslationModel {
 
 
     protected function checkReviewedStateTransition() {
-
-        if( $this->model->getOldTranslation()->match_type == 'ICE' ){
-            return;
-        }
 
         if ( $this->model->entersReviewedState() ) {
             $this->addCount();

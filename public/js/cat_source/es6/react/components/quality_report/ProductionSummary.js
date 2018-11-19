@@ -40,7 +40,7 @@ class ProductionSummary extends React.Component {
             '<a style="text-decoration: underline" href="https://www.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
-        let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
+        let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
         let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit):0;
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;

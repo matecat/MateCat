@@ -62,6 +62,7 @@ div.segment-notes ul.graysmall li span.note-label {
     font-size: 16px;
     float: left;
     width: 100%;
+    word-break: break-word;
 }
 
 .segments-notes-container div.note p{
