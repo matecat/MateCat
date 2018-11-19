@@ -333,7 +333,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.suggestion,
                 st.edit_distance,
                 st.locked,
-                st.match_type
+                st.match_type,
+                st.version_number
                 
                 FROM segments s
                 RIGHT JOIN segment_translations st ON st.id_segment = s.id

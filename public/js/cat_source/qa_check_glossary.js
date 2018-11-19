@@ -80,9 +80,6 @@ if ( QaCheckGlossary.enabled() )
             var entry = _.chain(unusedMatches).filter(function findMatch(match, index) {
                 return match.id == el.data('id');
             }).first().value();
-
-            console.log( entry );
-
             el.powerTip({ placement : 's' });
             el.data({ 'powertipjq' : $('<div class="unusedGlossaryTip" style="padding: 4px;">Unused glossary term</div>') });
         });
@@ -90,17 +87,14 @@ if ( QaCheckGlossary.enabled() )
 
     function updateGlossaryUnusedMatches( segment, unusedMatches ) {
         // read the segment source, find with a regexp and replace with a span
-        var container = segment.el.find('.source');
+        var container = segment.el.find('.source').clone();
 
         removeUnusedGlossaryMarks( container ) ;
         if (_.isUndefined(unusedMatches) || unusedMatches.length === 0) {
             return;
         }
-        var newHTML = container.html();
-        //clean up lexiqa highlighting - if enabled
-        if (LXQ.enabled()) {
-            newHTML = LXQ.cleanUpHighLighting(newHTML);
-        }
+        container.find('.inside-attribute').remove();
+        var newHTML = htmlEncode(container.text());
         unusedMatches = unusedMatches.sort(function(a, b){
             return b.raw_segment.length - a.raw_segment.length;
         });
@@ -124,10 +118,10 @@ if ( QaCheckGlossary.enabled() )
         });
         (function (cont, html, matches) {
             setTimeout(function (  ) {
-                SegmentActions.replaceSourceText(UI.getSegmentId(cont), UI.getSegmentFileId(cont), html);
+                SegmentActions.replaceSourceText(UI.getSegmentId(cont), UI.getSegmentFileId(cont), UI.transformTextForLockTags(html));
                 bindEvents( cont, matches );
             }, 200);
-        })(container, newHTML, unusedMatches);
+        })(segment.el, newHTML, unusedMatches);
 
 
     }

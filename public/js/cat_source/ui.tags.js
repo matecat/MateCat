@@ -197,7 +197,7 @@ $.extend(UI, {
 
     },
     /**
-     * To transform text with the' ph' tags that have the attribute' equival-text' into text only, without html
+     * To transform text with the' ph' tags that have the attribute' equiv-text' into text only, without html
      */
     removePhTagsWithEquivTextIntoText: function ( tx ) {
         try {
@@ -730,7 +730,7 @@ $.extend(UI, {
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        div = this.transformPlaceholdersHtml($div);
+        $div = this.transformPlaceholdersHtml($div);
         $div.find('span.space-marker').replaceWith(' ');
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
@@ -781,7 +781,7 @@ $.extend(UI, {
     handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked:not(.inside-attribute)');
+            var tag = elem.closest('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());

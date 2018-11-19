@@ -71,6 +71,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $pee_translation_suggestion;
 
+    public $version_number;
+
     /**
      * @return float
      */

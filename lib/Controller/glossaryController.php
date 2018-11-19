@@ -74,6 +74,7 @@ class glossaryController extends ajaxController {
          *
          */
         $this->_TMS = Engine::getInstance( 1 );
+        $this->_TMS->setFeatureSet( $this->featureSet );
 
         $this->readLoginInfo();
 
