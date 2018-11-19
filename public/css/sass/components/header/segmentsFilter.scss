@@ -266,7 +266,7 @@ section.muted .segment-side-buttons {
                                 &.draft-color {
                                     background: #E8E8E8;;
                                 }
-                                &.translated-color {
+                                &.translated-color, &.post-edited-color {
                                     background: #09beec;
                                 }
                                 &.approved-color {
