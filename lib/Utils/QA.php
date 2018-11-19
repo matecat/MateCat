@@ -1,4 +1,6 @@
-<?php include_once INIT::$UTILS_ROOT . '/Log.php';
+<?php
+
+use SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
  * Class errObject
@@ -1130,12 +1132,12 @@ class QA {
         $totalResult     = [ 'source' => [], 'target' => [] ];
         $source_segments = array_merge( $clonedSrc, $clonedClosingSrc );
         foreach ( $source_segments as $source_segment ) {
-            $totalResult[ 'source' ][] = CatUtils::restore_xliff_tags_for_view( $source_segment );
+            $totalResult[ 'source' ][] = ( new RestoreXliffTagsForView() )->transform( $source_segment );
         }
 
         $target_segments = array_merge( $clonedTrg, $clonedClosingTrg );
         foreach ( $target_segments as $target_segment ) {
-            $totalResult[ 'target' ][] = CatUtils::restore_xliff_tags_for_view( $target_segment );
+            $totalResult[ 'target' ][] = ( new RestoreXliffTagsForView() )->transform( $target_segment );
         }
 
 
@@ -1250,7 +1252,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1259,7 +1261,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1275,7 +1277,7 @@ class QA {
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( str_replace(" ", "", $selfClosingTags_src[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $selfClosingTags_trg[ $pos ] );
+                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $selfClosingTags_trg[ $pos ] );
 
                 return;
             }
