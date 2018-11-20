@@ -24,7 +24,9 @@ use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use SubFiltering\Filters\RestoreXliffTagsContent;
 use SubFiltering\Filters\RestoreXliffTagsForView;
+use SubFiltering\Filters\SprintfToPH;
 use SubFiltering\Filters\SubFilteredPhToHtml;
+use SubFiltering\Filters\TwigToPh;
 
 /**
  * Class Filter
@@ -111,6 +113,8 @@ class Filter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
+        $channel->addLast( new TwigToPh() );
+        $channel->addLast( new SprintfToPH() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new PlaceHoldCtrlCharsForView() );
@@ -191,6 +195,8 @@ class Filter {
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new EntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
+        $channel->addLast( new TwigToPh() );
+        $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel = $this->_featureSet->filter( 'fromLayer0ToLayer1', $channel );

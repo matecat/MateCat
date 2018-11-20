@@ -391,8 +391,12 @@ class CatUtils {
      * @param string $source_lang
      *
      * @return mixed|string
+     * @throws Exception
      */
     public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US' ){
+
+        $Filter = SubFiltering\Filter::getInstance();
+        $string = $Filter->fromLayer0ToLayer1( $string );
 
         //return empty on string composed only by spaces
         //do nothing
@@ -442,8 +446,9 @@ class CatUtils {
      * @param string $source_lang
      *
      * @return float|int
+     * @throws Exception
      */
-    public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
+    public static function segment_raw_word_count( $string, $source_lang = 'en-US' ) {
 
         $string = self::clean_raw_string_4_word_count( $string, $source_lang );
         
