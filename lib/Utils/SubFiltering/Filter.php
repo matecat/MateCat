@@ -139,6 +139,7 @@ class Filter {
     public function fromLayer1ToLayer2( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer2', $channel );
