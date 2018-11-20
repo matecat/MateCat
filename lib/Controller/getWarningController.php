@@ -107,9 +107,6 @@ class getWarningController extends ajaxController {
                 return;
             }
 
-            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-            $this->__postInput->src_content = $Filter->fromLayer2ToLayer0( $this->__postInput->src_content );
-            $this->__postInput->trg_content = $Filter->fromLayer2ToLayer0( $this->__postInput->trg_content );
             $this->__segmentWarningsCall();
         }
 
@@ -167,6 +164,10 @@ class getWarningController extends ajaxController {
     private function __segmentWarningsCall() {
 
         $this->result[ 'total' ]   = 0;
+
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
+        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();

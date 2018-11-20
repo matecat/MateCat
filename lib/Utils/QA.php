@@ -1,5 +1,6 @@
 <?php
 
+use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
@@ -835,7 +836,7 @@ class QA {
     /**
      * After initialization by Constructor, the dom is parsed and map structures are built
      *
-     * @throws Exception
+     * @throws Exception|DOMException
      */
     protected function _prepareDOMStructures() {
 
@@ -1132,12 +1133,12 @@ class QA {
         $totalResult     = [ 'source' => [], 'target' => [] ];
         $source_segments = array_merge( $clonedSrc, $clonedClosingSrc );
         foreach ( $source_segments as $source_segment ) {
-            $totalResult[ 'source' ][] = ( new RestoreXliffTagsForView() )->transform( $source_segment );
+            $totalResult[ 'source' ][] = $source_segment;
         }
 
         $target_segments = array_merge( $clonedTrg, $clonedClosingTrg );
         foreach ( $target_segments as $target_segment ) {
-            $totalResult[ 'target' ][] = ( new RestoreXliffTagsForView() )->transform( $target_segment );
+            $totalResult[ 'target' ][] = $target_segment;
         }
 
 
@@ -1252,7 +1253,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1261,7 +1262,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1393,6 +1394,7 @@ class QA {
     }
 
     //
+
     /**
      * Try to perform an heuristic re-align of tags id by position.
      *
@@ -1403,6 +1405,7 @@ class QA {
      * if no errors where found the dom is reloaded and tags map are updated.
      *
      * @return errObject[]|null
+     * @throws Exception|DOMException
      */
     public function tryRealignTagID() {
 
@@ -1417,14 +1420,15 @@ class QA {
         $targetNumDiff = count( $this->trgDomMap[ 'DOMElement' ] ) - count( $this->srcDomMap[ 'DOMElement' ] );
         $diffTagG      = count( @$this->trgDomMap[ 'g' ] ) - count( @$this->srcDomMap[ 'g' ] );
         $diffTagX      = count( @$this->trgDomMap[ 'x' ] ) - count( @$this->srcDomMap[ 'x' ] );
-		$diffTagBX     = count(@$this->trgDomMap['bx']) - count(@$this->srcDomMap['bx']);
-		$diffTagEX     = count(@$this->trgDomMap['ex']) - count(@$this->srcDomMap['ex']);
+		$diffTagBX     = count( @$this->trgDomMap['bx']) - count(@$this->srcDomMap['bx'] );
+		$diffTagEX     = count( @$this->trgDomMap['ex']) - count(@$this->srcDomMap['ex'] );
+		$diffTagPH     = count( @$this->trgDomMap['ph']) - count(@$this->srcDomMap['ph'] );
 
         //there are the same number of tags in source and target
         if ( $targetNumDiff == 0 && !empty( $this->srcDomMap[ 'refID' ] ) ) {
 
             //if tags are in exact number
-            if( $diffTagG == 0 && $diffTagX == 0 && $diffTagBX == 0 && $diffTagEX == 0 ){
+            if( $diffTagG == 0 && $diffTagX == 0 && $diffTagBX == 0 && $diffTagEX == 0 && $diffTagPH == 0 ){
 
                 //Steps:
 
@@ -1448,6 +1452,11 @@ class QA {
 					$pattern[] = '|<ex id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
 					$replacement[] = '<ex id="###' . $this->srcDomMap['ex'][$pos] . '###" />';
 				}
+
+                foreach( $this->trgDomMap['ph'] as $pos => $tagID ){
+                    $pattern[] = '|<ph id ?= ?["\']{1}(' . $tagID . ')["\']{1} (equiv-text=["\'].+?["\'] ?)/>|ui';
+                    $replacement[] = '<ph id="###' . $this->srcDomMap['ph'][$pos] . '###" $2/>';
+                }
 
                 $result = preg_replace( $pattern, $replacement, $this->target_seg, 1 );
 

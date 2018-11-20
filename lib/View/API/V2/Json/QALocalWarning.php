@@ -85,16 +85,16 @@ class QALocalWarning extends QAWarning {
             $Filter = Filter::getInstance();
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
-                $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer0ToLayer2( $rawSource );
+                $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );
             }
 
             foreach ( $malformedStructs[ 'target' ] as $k => $rawTarget ) {
-                $malformedStructs[ 'target' ][ $k ] = $Filter->fromLayer0ToLayer2( $rawTarget );
+                $malformedStructs[ 'target' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawTarget );
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();
             foreach ( $targetTagPositionError as $item => $value ) {
-                $targetTagPositionError[ $item ] = $Filter->fromLayer0ToLayer2( $value );
+                $targetTagPositionError[ $item ] = $value;
             }
 
             $out[ 'details' ]                              = [];

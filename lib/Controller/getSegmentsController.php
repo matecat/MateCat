@@ -186,13 +186,16 @@ class getSegmentsController extends ajaxController {
             $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
 
             $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-            $seg['segment'] = $Filter->fromLayer0ToLayer2( CatUtils::reApplySegmentSplit(
+            $seg['segment'] = $Filter->fromLayer0ToLayer1( CatUtils::reApplySegmentSplit(
                     $seg['segment'] , $seg['source_chunk_lengths'] )
             );
 
-            $seg['translation'] = $Filter->fromLayer0ToLayer2( CatUtils::reApplySegmentSplit(
+            $seg['translation'] = $Filter->fromLayer0ToLayer1( CatUtils::reApplySegmentSplit(
                 $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
             );
+
+            $seg['translation'] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg['segment'], $seg['translation'] ) );
+            $seg['segment']     = $Filter->fromLayer1ToLayer2( $seg['segment'] );
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );

@@ -147,6 +147,30 @@ class Filter {
     }
 
     /**
+     * Used to transform UI data ( Layer 2 ) to the XML structures ( Layer 1 )
+     *
+     * @param $segment
+     *
+     * @return mixed
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \Exceptions_RecordNotFound
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    public function fromLayer2ToLayer1( $segment ) {
+        $channel = new Pipeline();
+        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new HtmlToEntities() );
+        $channel->addLast( new RestoreXliffTagsContent() );
+        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel = $this->_featureSet->filter( 'fromLayer2ToLayer1', $channel );
+        return $channel->transform( $segment );
+
+    }
+
+    /**
      *
      * Used to transform the UI structures ( Layer 2 ) to allow them to be stored in database ( Layer 0 )
      *
@@ -273,6 +297,40 @@ class Filter {
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
         return $channel->transform( $segment );
+
+    }
+
+    /**
+     * Used to align the tags when created from Layer 0 to Layer 1, when converting data from database there is possible that html placeholders are in different positions
+     * and their id are ordered differently.
+     *
+     * The source own the reason, re-align target id by matching the base64 content.
+     * If there are several equals base64, the id are not relevant
+     *
+     * @param $source
+     * @param $target
+     *
+     * @return string
+     */
+    public function realignIDInLayer1( $source, $target ){
+
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
+        preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
+        preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
+        if( count( $src_tags[ 0 ] ) != count( $trg_tags[ 0 ] ) ){
+            return $target; //WRONG NUMBER OF TAGS, in the translation there is a tag mismatch, let the user fix it
+        }
+
+        foreach ( $src_tags[ 2 ] as $position => $b64 ){
+            $target = preg_replace(
+                    '|<ph id ?= ?["\']mtc_[0-9]+["\'] ?' . $b64 . ' ?/>|',
+                    $src_tags[ 0 ][ $position ],
+                    $target,
+                    1
+            );
+        }
+
+        return $target;
 
     }
 
