@@ -242,12 +242,14 @@ FROM
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND id_job = ?
         UNION 
         SELECT id_segment, translation, version_number, id_job 
         FROM segment_translations 
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND id_job = ?
     ) stv
 JOIN
 (
@@ -258,6 +260,7 @@ JOIN
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND ste.id_job = ?
         AND ste.source_page = ".\Constants::SOURCE_PAGE_TRANSLATE."
         GROUP BY id_segment
 
@@ -266,7 +269,7 @@ JOIN
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, $segments_id, $segments_id ));
+        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
 
         $results = $stmt->fetchAll();
 
@@ -294,12 +297,14 @@ FROM
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND id_job = ?
         UNION 
         SELECT id_segment, translation, version_number, id_job 
         FROM segment_translations 
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND id_job = ?
     ) stv
 JOIN
 (
@@ -310,6 +315,7 @@ JOIN
         WHERE id_segment IN(
             ".$prepare_str_segments_id."
         )
+        AND ste.id_job = ?
         AND ste.source_page = ".\Constants::SOURCE_PAGE_REVISION."
         GROUP BY id_segment
 
@@ -317,7 +323,7 @@ JOIN
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, $segments_id, $segments_id) );
+        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
 
         $results = $stmt->fetchAll();
 
