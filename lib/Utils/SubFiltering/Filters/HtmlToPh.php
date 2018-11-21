@@ -204,7 +204,7 @@ class HtmlToPh extends AbstractHandler {
          *
          */
         if ( preg_match( '#<[/]{0,1}[a-zA-Z].*?(?:[a-zA-Z]|["\']{0,1}|[/]{0,1})>#isU', $buffer ) ){
-            if( is_numeric( substr( $buffer, -2, 1 ) ) ){
+            if( is_numeric( substr( $buffer, -2, 1 ) && preg_match( '/<[/]{0,1}h[1-6][^>]*>/' ) ) ){ //H tag are an exception
                 //tag can not end with a number
                 return false;
             }
