@@ -3681,6 +3681,11 @@ span.locked.tag-html-container-close {
     color: #e000ff !important;
 }
 
+span.deleted .locked,
+span.added .locked {
+    background-color: unset !important;
+}
+
 .editor .cc-search .input .locked {
     font-size: 13px;
 }
