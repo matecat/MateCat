@@ -103,12 +103,13 @@ let TAGS_UTILS =  {
 
     },
     getDiffHtml: function(source, target) {
+        let dmp = new diff_match_patch();
         /*
-    There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
-    they come out of the function broken.
-    Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
-    indexed with the id of the tags.
-     */
+        There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
+        they come out of the function broken.
+        Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
+        indexed with the id of the tags.
+         */
         var phTagsObject = {};
         var diff;
         source = source.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, group1, group2) {
@@ -125,19 +126,19 @@ let TAGS_UTILS =  {
             return '<'+ Base64.encode(group2) +'> ';
         });
 
-        diff   = UI.dmp.diff_main(
-            cleanupHTMLCharsForDiff( source ),
-            cleanupHTMLCharsForDiff( target )
+        diff   = dmp.diff_main(
+            this.replacePlaceholder(source.replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(target.replace(/&nbsp;/g, '')),
         );
 
-        UI.dmp.diff_cleanupSemantic( diff ) ;
+        dmp.diff_cleanupSemantic( diff ) ;
 
         /*
         Before adding spans to identify added or subtracted portions we need to check and fix broken tags
          */
         diff = this.setUnclosedTagsInDiff(diff);
         var diffTxt = '';
-
+        var self = this;
         $.each(diff, function (index, text) {
             text[1] = text[1].replace( /<(.*?)>/gi, function (match, text) {
                 try {
@@ -153,16 +154,16 @@ let TAGS_UTILS =  {
             });
             var rootElem;
             var newElem;
-            if(this[0] === -1) {
+            if(text[0] === -1) {
                 rootElem = $( document.createElement( 'div' ) );
                 newElem = $.parseHTML( '<span class="deleted"/>' );
-                $( newElem ).text( htmlDecode(text[1]) );
+                $( newElem ).text( self.htmlDecode(text[1]) );
                 rootElem.append( newElem );
                 diffTxt += $( rootElem ).html();
             } else if(text[0] === 1) {
                 rootElem = $( document.createElement( 'div' ) );
                 newElem = $.parseHTML( '<span class="added"/>' );
-                $( newElem ).text( htmlDecode(text[1]) );
+                $( newElem ).text( self.htmlDecode(text[1]) );
                 rootElem.append( newElem );
                 diffTxt += $( rootElem ).html();
             } else {
@@ -170,7 +171,7 @@ let TAGS_UTILS =  {
             }
         });
 
-        return restorePlaceholders(diffTxt) ;
+        return this.restorePlaceholders(diffTxt) ;
     },
 
     /**
