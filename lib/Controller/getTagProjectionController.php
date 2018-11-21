@@ -102,11 +102,11 @@ class getTagProjectionController extends ajaxController {
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
 
         $config                  = array();
-        $config[ 'source' ]      = $Filter->fromLayer2ToLayer0( $this->source );
-        $config[ 'target' ]      = $Filter->fromLayer2ToLayer0( $this->target );
+        $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );
+        $config[ 'target' ]      = $Filter->fromLayer2ToLayer1( $this->target );
         $config[ 'source_lang' ] = $this->source_lang;
         $config[ 'target_lang' ] = $this->target_lang;
-        $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer0( $this->suggestion );
+        $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer1( $this->suggestion );
 
         $result = $engine->getTagProjection( $config );
         if( empty( $result->error ) ){
