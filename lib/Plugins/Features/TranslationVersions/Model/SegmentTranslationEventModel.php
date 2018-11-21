@@ -64,7 +64,7 @@ class SegmentTranslationEventModel {
         return (
                 $this->old_translation['translation'] != $this->translation['translation'] ||
                 $this->old_translation['status']      != $this->translation['status']
-                ) && !is_null( $this->user->uid ) ;
+                );
     }
 
 }
