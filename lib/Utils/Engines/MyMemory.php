@@ -277,7 +277,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         ( !$_config[ 'isGlossary' ] ? $function = "delete_relative_url" : $function = "gloss_delete_relative_url" );
 
-        $this->call( $function, $parameters );
+        $this->call( $function, $parameters, true );
 
         /*
          * If the segment to be deleted is not present in the current TM,
