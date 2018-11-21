@@ -306,7 +306,6 @@ class Filter {
      * and their id are ordered differently.
      *
      * The source own the reason, re-align target id by matching the base64 content.
-     * If there are several equals base64, the id are not relevant
      *
      * @param $source
      * @param $target
@@ -318,17 +317,20 @@ class Filter {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
         preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
+
         if( count( $src_tags[ 0 ] ) != count( $trg_tags[ 0 ] ) ){
             return $target; //WRONG NUMBER OF TAGS, in the translation there is a tag mismatch, let the user fix it
         }
 
-        foreach ( $src_tags[ 2 ] as $position => $b64 ){
+        foreach ( $trg_tags[ 2 ] as $trg_tag_position => $b64 ){
+            $src_tag_element_position = array_search( $b64, $src_tags[ 2 ], true );
             $target = preg_replace(
-                    '|<ph id ?= ?["\']mtc_[0-9]+["\'] ?' . $b64 . ' ?/>|',
-                    $src_tags[ 0 ][ $position ],
+                    '|' . $trg_tags[ 0 ][ $trg_tag_position ] . '|',
+                    $src_tags[ 0 ][ $src_tag_element_position ],
                     $target,
                     1
             );
+            unset( $src_tags[ 2 ][ $src_tag_element_position ] ); // remove the index to allow array_search to find the equal next one if it is present
         }
 
         return $target;
