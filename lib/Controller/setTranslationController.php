@@ -310,7 +310,7 @@ class setTranslationController extends ajaxController {
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $check = new QA( $this->segment[ 'segment' ], $this->translation );
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
@@ -319,7 +319,8 @@ class setTranslationController extends ajaxController {
             $translation = $this->translation;
         } else {
             $err_json    = '';
-            $translation = $check->getTrgNormalized();
+            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $translation = $Filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
         }
 
         /*
