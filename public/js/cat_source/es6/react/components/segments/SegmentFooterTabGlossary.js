@@ -57,7 +57,7 @@ class SegmentFooterTabGlossary extends React.Component {
             e.preventDefault();
             let txt = this.source.textContent;
             let target = this.target.textContent;
-            if (txt.length > 2 && !target) {
+            if (txt.length > 0 && !target) {
                 this.setState({
                     loading: true
                 });
