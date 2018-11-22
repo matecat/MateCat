@@ -15,8 +15,9 @@ use SubFiltering\Commons\AbstractHandler;
  * Class HtmlToPh
  *
  * Based on the code https://github.com/ericnorris/striptags
- * Rewritten and Changed for PHP
+ * Rewritten/Improved and Changed for PHP
  *
+ * @author domenico domenico@translated.net / ostico@gmail.com
  * @package SubFiltering
  *
  */
@@ -25,6 +26,7 @@ class HtmlToPh extends AbstractHandler {
     const STATE_PLAINTEXT = 0;
     const STATE_HTML      = 1;
     const STATE_COMMENT   = 2;
+    const STATE_JS_CSS    = 3;
 
     public function transform( $segment ) {
 
@@ -76,6 +78,12 @@ class HtmlToPh extends AbstractHandler {
                         if ( $depth ) {
                             $depth--;
 
+                            break;
+                        }
+
+                        if( in_array( substr( $buffer, 0, 6 ), [ '<scrip', '<style' ] ) ){
+                            $buffer .= $char;
+                            $state         = static::STATE_JS_CSS;
                             break;
                         }
 
@@ -149,6 +157,24 @@ class HtmlToPh extends AbstractHandler {
                         $buffer .= $char;
                         break;
                 }
+            } elseif ( $state == static::STATE_JS_CSS ) {
+                switch ( $char ) {
+                    case '>':
+                        $buffer .= $char;
+
+                        if ( in_array( substr( $buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
+                            // close the comment
+                            $state = static::STATE_PLAINTEXT;
+                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+                            $buffer = '';
+                        }
+
+                        break;
+
+                    default:
+                        $buffer .= $char;
+                        break;
+                }
             }
         }
 
@@ -178,7 +204,7 @@ class HtmlToPh extends AbstractHandler {
          *
          */
         if ( preg_match( '#<[/]{0,1}[a-zA-Z].*?(?:[a-zA-Z]|["\']{0,1}|[/]{0,1})>#isU', $buffer ) ){
-            if( is_numeric( substr( $buffer, -2, 1 ) ) ){
+            if( is_numeric( substr( $buffer, -2, 1 ) && !preg_match( '/<[/]{0,1}[hH][1-6][^>]*>/', $buffer ) ) ){ //H tag are an exception
                 //tag can not end with a number
                 return false;
             }

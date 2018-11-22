@@ -26,6 +26,7 @@ use SubFiltering\Filters\RestoreXliffTagsContent;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 use SubFiltering\Filters\SprintfToPH;
 use SubFiltering\Filters\SubFilteredPhToHtml;
+use SubFiltering\Filters\TabsToNBSPForView;
 use SubFiltering\Filters\TwigToPh;
 
 /**
@@ -111,6 +112,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new TabsToNBSPForView() );
         $channel->addLast( new EntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
