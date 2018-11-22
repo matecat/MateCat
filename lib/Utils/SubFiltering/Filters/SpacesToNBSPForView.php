@@ -11,7 +11,7 @@ namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
 
-class TabsToNBSPForView extends AbstractHandler {
+class SpacesToNBSPForView extends AbstractHandler {
 
     public function transform( $segment ) {
 
