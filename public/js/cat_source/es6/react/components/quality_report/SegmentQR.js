@@ -29,9 +29,9 @@ class SegmentQR extends React.Component {
 
     }
     initializeDiff() {
-        if (this.state.translateDiffOn) {
+        if ( this.state.translateDiffOn ) {
             return this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("last_translation"));
-        } else {
+        } else if ( this.state.reviseDiffOn ){
             let revise = this.props.segment.get("last_revision");
             return this.getDiffPatch(this.props.segment.get("last_translation"), revise);
         }
