@@ -405,16 +405,16 @@ UI = {
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+            currentButton = '<li ><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
         } else {
-            nextUntranslated = (sameButton || filtering)? '' : '<li><a id="segment-' + this.currentSegmentId +
+            nextUntranslated = (sameButton || filtering)? '' : '<li><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
                 this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+            currentButton = '<li><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';

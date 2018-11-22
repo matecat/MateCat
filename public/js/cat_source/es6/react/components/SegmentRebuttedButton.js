@@ -24,7 +24,9 @@ class SegmentRebuttedButton extends React.Component{
             <a className="button button-rebutted status-rebutted"
                onClick={this.handleClick.bind(this)}
                href="javascript:;"
-               disabled={!this.state.disabled} >
+               disabled={!this.state.disabled}
+               draggable="false"
+            >
                 Rebutted
             </a>
             <p>{window.UI.shortcutLeader}+ENTER</p>
