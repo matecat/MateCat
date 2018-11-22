@@ -26,7 +26,7 @@ use SubFiltering\Filters\RestoreXliffTagsContent;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 use SubFiltering\Filters\SprintfToPH;
 use SubFiltering\Filters\SubFilteredPhToHtml;
-use SubFiltering\Filters\TabsToNBSPForView;
+use SubFiltering\Filters\SpacesToNBSPForView;
 use SubFiltering\Filters\TwigToPh;
 
 /**
@@ -112,7 +112,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new TabsToNBSPForView() );
+        $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new EntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
@@ -121,6 +121,7 @@ class Filter {
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new PlaceHoldCtrlCharsForView() );
         $channel->addLast( new LtGtEncode() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToLayer2', $channel );
         return $channel->transform( $segment );
 
@@ -144,6 +145,7 @@ class Filter {
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer2', $channel );
         return $channel->transform( $segment );
 
@@ -168,6 +170,7 @@ class Filter {
         $channel->addLast( new HtmlToEntities() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer2ToLayer1', $channel );
         return $channel->transform( $segment );
 
@@ -197,6 +200,7 @@ class Filter {
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SubFilteredPhToHtml() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer2ToLayer0', $channel );
         return $channel->transform( $segment );
 
@@ -226,6 +230,7 @@ class Filter {
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToLayer1', $channel );
         return $channel->transform( $segment );
 
@@ -246,12 +251,16 @@ class Filter {
     public function fromLayer1ToLayer0( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDoubleEncode() );
+        $channel->addLast( new RestoreXliffTagsContent() );
+        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
         return $channel->transform( $segment );
     }
@@ -275,6 +284,7 @@ class Filter {
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromRawXliffToLayer0', $channel );
         return $channel->transform( $segment );
 
@@ -298,16 +308,19 @@ class Filter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new HtmlToEntities() );
         $channel->addLast( new RestoreXliffTagsForView() );
+        /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
         return $channel->transform( $segment );
 
     }
 
     /**
-     * Used to align the tags when created from Layer 0 to Layer 1, when converting data from database there is possible that html placeholders are in different positions
-     * and their id are ordered differently.
+     * Used to align the tags when created from Layer 0 to Layer 1, when converting data from database is possible that html placeholders are in different positions
+     * and their id are different because they are simple sequences.
+     * We must place the right source tag ID in the corresponding target tags.
      *
-     * The source own the reason, re-align target id by matching the base64 content.
+     * The source holds the truth :D
+     * realigns the target ids by matching the content of the base64.
      *
      * @param $source
      * @param $target

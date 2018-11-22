@@ -22,7 +22,7 @@ class EncodeToRawXML extends AbstractHandler {
         );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ 'CatUtils', 'htmlentitiesFromUnicode' ], $segment );
 
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
         $segment = str_replace( \CatUtils::unicode2chr( 0Xa0 ), " ", $segment );

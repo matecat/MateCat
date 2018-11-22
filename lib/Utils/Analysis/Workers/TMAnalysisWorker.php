@@ -595,6 +595,8 @@ class TMAnalysisWorker extends AbstractWorker {
             //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
             if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
+
+                //TODO check fo BUG in html encoding html_entity_decode
                 $qaRealign = new \QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
                 $qaRealign->tryRealignTagID();
 
