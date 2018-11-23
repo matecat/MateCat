@@ -136,6 +136,15 @@ class QualityReportSegmentModel {
 
             }
 
+            if (! in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
+                if($seg->status == Constants_TranslationStatus::STATUS_APPROVED){
+                    $seg->last_revision = $seg->translation;
+                }
+                if($seg->status == Constants_TranslationStatus::STATUS_TRANSLATED){
+                    $seg->last_translation = $seg->translation;
+                }
+            }
+
 
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
