@@ -93,7 +93,7 @@ class HtmlToPh extends AbstractHandler {
                         $buffer    .= '>';
 
                         if ( $this->isTagValid( $buffer ) ){
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
                         } else {
                             $output .= $buffer;
                         }
@@ -147,7 +147,7 @@ class HtmlToPh extends AbstractHandler {
                         if ( substr( $buffer, -3 ) == '-->' ) {
                             // close the comment
                             $state = static::STATE_PLAINTEXT;
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
                             $buffer = '';
                         }
 
@@ -165,7 +165,7 @@ class HtmlToPh extends AbstractHandler {
                         if ( in_array( substr( $buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
                             // close the comment
                             $state = static::STATE_PLAINTEXT;
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
                             $buffer = '';
                         }
 

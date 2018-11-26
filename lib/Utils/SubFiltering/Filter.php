@@ -13,11 +13,14 @@ use FeatureSet;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use SubFiltering\Filters\EncodeToRawXML;
-use SubFiltering\Filters\EntitiesDecode;
+use SubFiltering\Filters\FromViewNBSPToSpaces;
+use SubFiltering\Filters\HtmlEntitiesDecode;
+use SubFiltering\Filters\LtGtEncode;
+use SubFiltering\Filters\UnicodeToEntities;
 use SubFiltering\Filters\HtmlToEntities;
 use SubFiltering\Filters\HtmlToPh;
 use SubFiltering\Filters\LtGtDoubleEncode;
-use SubFiltering\Filters\LtGtEncode;
+use SubFiltering\Filters\LtGtDecode;
 use SubFiltering\Filters\PlaceHoldCtrlCharsForView;
 use SubFiltering\Filters\PlaceHoldXliffTags;
 use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
@@ -113,7 +116,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new SpacesToNBSPForView() );
-        $channel->addLast( new EntitiesDecode() );
+        $channel->addLast( new UnicodeToEntities() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new SprintfToPH() );
@@ -142,6 +145,7 @@ class Filter {
     public function fromLayer1ToLayer2( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
@@ -167,6 +171,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new HtmlToEntities() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -223,8 +228,8 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new EncodeToRawXML() );
-        $channel->addLast( new EntitiesDecode() );
+        $channel->addLast( new LtGtDecode() );
+        $channel->addLast( new HtmlEntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new SprintfToPH() );

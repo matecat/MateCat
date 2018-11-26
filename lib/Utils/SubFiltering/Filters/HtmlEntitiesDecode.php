@@ -11,7 +11,7 @@ namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
 
-class HtmlToEntities extends AbstractHandler {
+class HtmlEntitiesDecode extends AbstractHandler {
 
     /**
      * @param $segment
@@ -19,7 +19,7 @@ class HtmlToEntities extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ){
-        return htmlspecialchars( $segment, ENT_XML1, 'UTF-8', true );
+        return html_entity_decode( $segment, ENT_QUOTES | ENT_XML1, 'UTF-8' );
     }
 
 }

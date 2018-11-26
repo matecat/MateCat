@@ -1,6 +1,6 @@
 <?php
 
-use SubFiltering\Filters\LtGtEncode;
+use SubFiltering\Filters\LtGtDecode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
@@ -1253,7 +1253,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtDecode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1262,7 +1262,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtDecode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }

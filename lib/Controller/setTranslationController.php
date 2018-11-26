@@ -2,6 +2,7 @@
 
 use \Contribution\ContributionStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
+use SubFiltering\Filters\FromViewNBSPToSpaces;
 
 class setTranslationController extends ajaxController {
 
@@ -310,11 +311,11 @@ class setTranslationController extends ajaxController {
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
+        $spaceHandler = new FromViewNBSPToSpaces();
+        $check = new QA( $spaceHandler->transform( $this->__postInput[ 'segment' ] ), $spaceHandler->transform( $this->__postInput[ 'translation' ] ) );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
-
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
@@ -375,7 +376,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'id_job' ]                 = $this->id_job;
         $_Translation[ 'status' ]                 = $this->status;
         $_Translation[ 'time_to_edit' ]           = $this->time_to_edit;
-        $_Translation[ 'translation' ]            = preg_replace( '/[\0]+$/u', '', $translation );
+        $_Translation[ 'translation' ]            = $translation;
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
