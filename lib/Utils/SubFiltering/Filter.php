@@ -14,7 +14,6 @@ use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use SubFiltering\Filters\EncodeToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
-use SubFiltering\Filters\HtmlEntitiesDecode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\UnicodeToEntities;
 use SubFiltering\Filters\HtmlToEntities;
@@ -229,7 +228,6 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
-        $channel->addLast( new HtmlEntitiesDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new SprintfToPH() );
@@ -264,6 +262,7 @@ class Filter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
+        $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
@@ -311,8 +310,8 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new HtmlToEntities() );
-        $channel->addLast( new RestoreXliffTagsForView() );
+        $channel->addLast( new RestoreXliffTagsContent() );
+        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
         return $channel->transform( $segment );

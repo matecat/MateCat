@@ -55,6 +55,9 @@ class exportTMXController extends downloadController {
                     'message' => 'Job password missing'
             );
         }
+
+        $this->featureSet = new FeatureSet();
+
     }
 
     /**
