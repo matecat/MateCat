@@ -718,24 +718,29 @@ if ( MBC.enabled() )
 
         var getTeamUsers = function (  ) {
             var teamId = config.id_team;
-            return $.ajax({
-                async: true,
-                type: "get",
-                // url : "/api/v2/teams/" + teamId + "/members"
-                url : "/api/app/teams/" + teamId + "/members/public"
-            }).done(function ( data ) {
-                var team = {
-                    uid: "team",
-                    first_name: "Team",
-                    last_name: ""
-                };
-                MBC.teamUsers = data;
-                MBC.teamUsers.unshift(team);
+            if ( teamId ) {
+                return $.ajax({
+                    async: true,
+                    type: "get",
+                    // url : "/api/v2/teams/" + teamId + "/members"
+                    url : "/api/app/teams/" + teamId + "/members/public"
+                }).done(function ( data ) {
+                    var team = {
+                        uid: "team",
+                        first_name: "Team",
+                        last_name: ""
+                    };
+                    MBC.teamUsers = data;
+                    MBC.teamUsers.unshift(team);
 
 
-            }).fail(function ( response ) {
+                }).fail(function ( response ) {
+                    MBC.teamUsers = [];
+                })
+            } else {
                 MBC.teamUsers = [];
-            })
+                return $.Deferred().resolve();
+            }
         };
 
         var checkOpenSegmentComment = function ( id_segment ) {
