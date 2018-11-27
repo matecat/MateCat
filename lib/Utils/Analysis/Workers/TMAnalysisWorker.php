@@ -138,8 +138,7 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _updateRecord( QueueElement $queueElement ){
 
         $filter = Filter::getInstance( $this->featureSet );
-
-        $suggestion = $this->_matches[ 0 ][ 'raw_translation' ];
+        $suggestion = $filter->fromLayer2ToLayer1( $this->_matches[ 0 ][ 'raw_translation' ] );
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
         $suggestion_json   = json_encode( $this->_matches );
@@ -169,6 +168,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
             $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion );
+            $check->setFeatureSet( $this->featureSet );
             $check->realignMTSpaces();
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
@@ -185,6 +185,7 @@ class TMAnalysisWorker extends AbstractWorker {
              * Otherwise try to perform only the tagCheck
              */
             $check = new \PostProcess( $queueElement->params->segment, $suggestion );
+            $check->setFeatureSet( $this->featureSet );
             $check->performTagCheckOnly();
 
             //_TimeStampMsg( $check->getErrors() );

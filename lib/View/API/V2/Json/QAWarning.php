@@ -35,7 +35,7 @@ class QAWarning {
                 $category = self::MISMATCH_CATEGORY;
                 break;
             default:
-                throw new \RuntimeException("Undefined Category");
+                $category = self::TAGS_CATEGORY;
                 break;
         }
 

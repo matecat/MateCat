@@ -313,6 +313,7 @@ class setTranslationController extends ajaxController {
         // QA here stands for Quality Assurance
         $spaceHandler = new FromViewNBSPToSpaces();
         $check = new QA( $spaceHandler->transform( $this->__postInput[ 'segment' ] ), $spaceHandler->transform( $this->__postInput[ 'translation' ] ) );
+        $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {

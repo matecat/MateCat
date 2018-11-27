@@ -28,6 +28,7 @@ class PostProcess extends QA {
         //- re-import in the dom target after regular expression
         //- perform check again ( recursive over the entire class )
         $qaCheck = new self( $this->source_seg, $target_seg );
+        $qaCheck->setFeatureSet( $this->featureSet );
         $qaCheck->performTagCheckOnly();
         if ( !$qaCheck->thereAreErrors() ) {
             $this->target_seg = $target_seg;

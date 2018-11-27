@@ -170,6 +170,7 @@ class getWarningController extends ajaxController {
         $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
+        $QA->setFeatureSet( $this->featureSet );
         $QA->performConsistencyCheck();
 
         $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );

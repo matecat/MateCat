@@ -118,6 +118,11 @@ class errObject {
 class QA {
 
     /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
      * RAW Source string segment for comparison
      *
      * @var string
@@ -329,6 +334,21 @@ class QA {
 
     );
 
+    /**
+     * <code>
+     * $errorMap = [
+     *      'code'  => (int),
+     *      'debug' => (string),
+     *      'tip'   => (string)
+     * ]
+     * </code>
+     * @param array $errorMap
+     */
+    public function addCustomError( Array $errorMap ){
+        $this->_errorMap[ $errorMap[ 'code' ] ] = $errorMap[ 'debug' ];
+        $this->_tipMap[ $errorMap[ 'code' ] ] = $errorMap[ 'tip' ];
+    }
+
     protected static $asciiPlaceHoldMap = array(
             '00' => array( 'symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00 ),
             '01' => array( 'symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01 ),
@@ -533,6 +553,13 @@ class QA {
                 break;
         }
 
+    }
+
+    /**
+     * @return array
+     */
+    public function getEexeptionList(){
+        return $this->exceptionList;
     }
 
     /**
@@ -831,6 +858,42 @@ class QA {
 
         $this->_resetDOMMaps();
 
+    }
+
+    /**
+     * @param FeatureSet $featureSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featureSet ) {
+        $this->featureSet = $featureSet;
+
+        return $this;
+    }
+
+    /**
+     * @return FeatureSet
+     * @throws Exception
+     */
+    protected function getFeatureSet() {
+        if( $this->featureSet == null ){
+            $this->featureSet = new FeatureSet();
+        }
+        return $this->featureSet;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceSeg() {
+        return $this->source_seg;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetSeg() {
+        return $this->target_seg;
     }
 
     /**
@@ -1653,10 +1716,12 @@ class QA {
      * @param int $trgNodeCount
      *
      * @return int
+     * @throws \Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
+
         if ( $srcNodeCount != $trgNodeCount ) {
-            $this->_addError( self::ERR_COUNT );
+            $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_COUNT, $this ) );
         }
 
         return $trgNodeCount - $srcNodeCount;

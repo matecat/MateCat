@@ -300,6 +300,7 @@ class getContributionController extends ajaxController {
             if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy >= 0 ) ) {
 
                 $qaRealign = new QA( $this->text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
+                $qaRealign->setFeatureSet( $this->featureSet );
                 $qaRealign->tryRealignTagID();
 
                 $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
@@ -345,6 +346,7 @@ class getContributionController extends ajaxController {
                 $match[ 'match' ] = 'MT';
 
                 $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
+                $QA->setFeatureSet( $this->featureSet );
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors

@@ -32,6 +32,7 @@ class QALocalWarning extends QAWarning {
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function render() {
 
@@ -50,10 +51,7 @@ class QALocalWarning extends QAWarning {
                 ]
         ];
 
-        $noticesJson = $this->QA->getNoticesJSON();
-
-        $exceptionList                = QA::JSONtoExceptionList( $noticesJson );
-
+        $exceptionList = $this->QA->getEexeptionList();
 
         $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
         $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
