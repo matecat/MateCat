@@ -238,7 +238,7 @@ class XliffSAXTranslationReplacer {
             //add tag ending
             $tag .= ">";
 
-            //seta a Buffer for the segSource Source tag
+            //set a a Buffer for the segSource Source tag
             if ( 'source' == $name
                     || 'seg-source' == $name
                     || $this->bufferIsActive
@@ -247,7 +247,8 @@ class XliffSAXTranslationReplacer {
                     || 'ept' == $name
                     || 'ph' == $name
                     || 'st' == $name
-                    || 'note' == $name ) {
+                    || 'note' == $name
+                    || 'context' == $name ) { // we are opening a critical CDATA section
 
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
@@ -444,7 +445,8 @@ class XliffSAXTranslationReplacer {
                     || 'bpt' == $name
                     || 'ept' == $name
                     || 'st' == $name
-                    || 'note' == $name ) { // we are closing a critical CDATA section
+                    || 'note' == $name
+                    || 'context' == $name ) { // we are closing a critical CDATA section
 
                 $this->bufferIsActive = false;
                 $tag                  = $this->CDATABuffer . "</$name>";

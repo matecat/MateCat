@@ -706,65 +706,60 @@
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
         },
         approveFilteredSegments: function(segmentsArray) {
-            return API.SEGMENT.approveSegments(segmentsArray).done(function ( response ) {
-                if (response.data && response.unchangeble_segments.length === 0) {
-                    segmentsArray.forEach(function ( item ) {
-                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, "APPROVED");
-                        var $segment = UI.getSegmentById(item);
-                        if ( $segment ) {
-                            UI.setSegmentModified( $segment, false ) ;
-                            UI.disableTPOnSegment( $segment )
-                        }
-
-                    })
-                } else if (response.unchangeble_segments.length > 0) {
-                    var arrayMapped = _.map(segmentsArray, function ( item ) {
-                        return parseInt(item);
-                    });
-                    var array = _.difference(arrayMapped, response.unchangeble_segments);
-                    array.forEach(function ( item ) {
-                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, "APPROVED");
-                        var $segment = UI.getSegmentById(item);
-                        if ( $segment ) {
-                            UI.setSegmentModified( $segment, false ) ;
-                            UI.disableTPOnSegment( $segment )
-                        }
-                    });
-                    UI.showApproveAllModalWarnirng();
-                }
-            });
+            var self = this;
+            if (segmentsArray.length >= 500) {
+                var subArray = segmentsArray.slice(0, 499);
+                var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
+                return this.approveFilteredSegments(subArray).then(function (  ) {
+                    return self.approveFilteredSegments(todoArray);
+                });
+            } else {
+                return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
+                    self.bulkChangeStatusCallback(response, segmentsArray, "APPROVED");
+                });
+            }
         },
         translateFilteredSegments: function(segmentsArray) {
-            return API.SEGMENT.translateSegments(segmentsArray).done(function ( response ) {
-                if (response.data && response.unchangeble_segments.length === 0) {
-                    segmentsArray.forEach(function ( item ) {
+            var self = this;
+            if (segmentsArray.length >= 500) {
+                var subArray = segmentsArray.slice(0, 499);
+                var todoArray = segmentsArray.slice(499, segmentsArray.length);
+                return this.translateFilteredSegments(subArray).then(function (  ) {
+                    return self.translateFilteredSegments(todoArray);
+                });
+            } else {
+                return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
+                    self.bulkChangeStatusCallback(response, segmentsArray, "TRANSLATED");
+                });
+            }
+        },
+        bulkChangeStatusCallback: function( response, segmentsArray, status) {
+            if (response.data && response.unchangeble_segments.length === 0) {
+                segmentsArray.forEach(function ( item ) {
+                    var $segment = UI.getSegmentById(item);
+                    if ( $segment.length > 0) {
                         var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        var $segment = UI.getSegmentById(item);
-                        if ( $segment ) {
-                            UI.setSegmentModified( $segment, false ) ;
-                            UI.disableTPOnSegment( $segment )
-                        }
-                    })
-                } else if (response.unchangeble_segments.length > 0) {
-                    var arrayMapped = _.map(segmentsArray, function ( item ) {
-                        return parseInt(item);
-                    });
-                    var array = _.difference(arrayMapped, response.unchangeble_segments);
-                    array.forEach(function ( item ) {
+                        SegmentActions.setStatus(item, fileId, status);
+                        UI.setSegmentModified( $segment, false ) ;
+                        UI.disableTPOnSegment( $segment )
+                    }
+                })
+            } else if (response.unchangeble_segments.length > 0) {
+                var arrayMapped = _.map(segmentsArray, function ( item ) {
+                    return parseInt(item);
+                });
+                var array = _.difference(arrayMapped, response.unchangeble_segments);
+                array.forEach(function ( item ) {
+                    var $segment = UI.getSegmentById(item);
+                    if ( $segment > 0) {
                         var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, "TRANSLATED");
-                        var $segment = UI.getSegmentById(item);
-                        if ( $segment ) {
-                            UI.setSegmentModified( $segment, false ) ;
-                            UI.disableTPOnSegment( $segment )
-                        }
-                    });
-                    UI.showTranslateAllModalWarnirng();
-                }
-            });
+                        SegmentActions.setStatus(item, fileId, status);
+                        UI.setSegmentModified( $segment, false ) ;
+                        UI.disableTPOnSegment( $segment )
+                    }
+                });
+                UI.showTranslateAllModalWarnirng();
+            }
         },
         disableSegmentButtons: function ( sid ) {
             var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated");
