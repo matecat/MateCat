@@ -1,6 +1,6 @@
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
-let ReviewIssueSelectionPanel = require('../review_improved/ReviewIssueSelectionPanel').default;
+let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
 let TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default;
 let WrapperLoader = require('../../common/WrapperLoader').default;
 class ReviewSidePanel extends React.Component{

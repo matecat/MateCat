@@ -247,7 +247,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/review_extended.common_events.js',
                     basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
-                    basePath + 'cat_source/review.*.js',
+                    basePath + 'cat_source/review.common_extensions.js',
 
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
