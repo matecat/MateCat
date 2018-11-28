@@ -8,7 +8,8 @@ class BulkSelectionBar extends React.Component {
         super(props);
         this.state = {
             count: 0,
-            segmentsArray: []
+            segmentsArray: [],
+            changingStatus: false
         };
 
         this.countInBulkElements = this.countInBulkElements.bind(this);
@@ -66,16 +67,25 @@ class BulkSelectionBar extends React.Component {
     }
     onClickBack(){
         SegmentActions.removeSegmentsOnBulk();
+        this.setState( {
+            changingStatus: false
+        });
     }
 
     onClickBulk(){
+        this.setState( {
+            changingStatus: true
+        });
         if(this.props.isReview){
-            UI.approveFilteredSegments(this.state.segmentsArray).done(response =>{
+            UI.approveFilteredSegments(this.state.segmentsArray).then(response =>{
                 this.onClickBack();
+                setTimeout(CatToolActions.reloadSegmentFilter, 100);
+
             });
         }else{
-            UI.translateFilteredSegments(this.state.segmentsArray).done(response =>{
+            UI.translateFilteredSegments(this.state.segmentsArray).then(response =>{
                 this.onClickBack();
+                setTimeout(CatToolActions.reloadSegmentFilter, 100);
             });
         }
         UI.closeSegment(UI.currentSegment, 1);
@@ -118,9 +128,18 @@ class BulkSelectionBar extends React.Component {
                 )}
 
             </div>
-            <div className="bulk-activity-icons">
-                <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}</button>
-            </div>
+
+            {this.state.changingStatus ? (
+                <div className="bulk-activity-icons">
+                    <div className="label-filters labl">Applying changes
+                        <div className="loader"/>
+                    </div>
+                </div>
+            ) : (
+                <div className="bulk-activity-icons">
+                    <button className={buttonClass} onClick={this.onClickBulk}><i className="icon-checkmark5 icon" /> {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}</button>
+                </div>
+            ) }
         </div> : null)
     }
 }

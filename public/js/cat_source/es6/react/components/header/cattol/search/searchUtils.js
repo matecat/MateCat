@@ -372,16 +372,13 @@ let SearchUtils = {
 
 
             // Finding double spaces
-            if (txt == "  ") {
-                reg1 = new RegExp(/( &nbsp;)/, 'gi');
-                reg = new RegExp(/( &nbsp;)/, 'gi');
+            if (txt === "  ") {
+                reg1 = new RegExp(/(&nbsp; )/, 'gi');
+                reg = new RegExp(/(&nbsp; )/, 'gi');
             }
 
             if ((typeof where == 'undefined') || (where == 'no')) {
                 let elems = this.getSegmentsResult(this.whereToFind);
-                if (txt == "  ") {
-                    reg1 = new RegExp(/( &nbsp;)/, 'gi');
-                }
                 this.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
             } else {
                 if ( seg.length > 0 ) {
