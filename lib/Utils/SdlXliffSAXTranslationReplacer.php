@@ -112,7 +112,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
             //add tag ending
             $tag .= ">";
 
-            //seta a Buffer for the segSource Source tag
+            //set a a Buffer for the segSource Source tag
             if ( 'source' == $name
                     || 'seg-source' == $name
                     || $this->bufferIsActive
@@ -121,7 +121,8 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                     || 'ept' == $name
                     || 'ph' == $name
                     || 'st' == $name
-                    || 'note' == $name ) {
+                    || 'note' == $name
+                    || 'context' == $name ) { // we are opening a critical CDATA section
 
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
