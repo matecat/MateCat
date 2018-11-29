@@ -120,7 +120,6 @@ class ReviewExtendedIssue extends React.Component {
 	addComment(e){
 		e.preventDefault();
 		let self = this;
-        // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length === 0 ) {
             return ;
         }

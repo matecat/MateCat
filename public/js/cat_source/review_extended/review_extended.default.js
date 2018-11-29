@@ -22,22 +22,3 @@ ReviewExtended = {
     }
 };
 
-if ( ReviewExtended.enabled() ) {
-    (function (ReviewExtended, $,undefined) {
-        var originalClickOnApprovedButton = UI.clickOnApprovedButton;
-
-        $.extend(UI, {
-            clickOnApprovedButton: function (e, button) {
-                e.preventDefault();
-                var sid = UI.currentSegmentId;
-                var isSplit = sid.indexOf("-") !== -1;
-                if (!isSplit && UI.segmentIsModified(sid) && this.issueRequiredOnSegmentChange) {
-                    SegmentActions.showIssuesMessage(sid);
-                    return;
-                }
-                originalClickOnApprovedButton.apply(this, [e , button]);
-            },
-
-        });
-})(Review, jQuery);
-}

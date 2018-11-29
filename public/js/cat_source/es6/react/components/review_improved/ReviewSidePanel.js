@@ -2,7 +2,6 @@ let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentStore = require('../../stores/SegmentStore');
 let ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default;
 let TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default;
-let WrapperLoader = require('../../common/WrapperLoader').default;
 class ReviewSidePanel extends React.Component{
 
     constructor(props) {
@@ -100,10 +99,6 @@ class ReviewSidePanel extends React.Component{
         }
 
         return <div className={classes} id="review-side-panel">
-            {this.state.loader && this.props.reviewType === "extended" ? <WrapperLoader /> : null}
-            {this.props.reviewType === "extended" ? (
-                <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
-            ) : (null)}
             {innerPanel}
         </div>;
     }
