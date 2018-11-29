@@ -8,47 +8,43 @@ ReviewExtendedFooter = {
 
 if ( ReviewExtendedFooter.enabled() ) {
 
+    var originalGotoNextSegment = UI.gotoNextSegment;
+    var originalRender = UI.render;
 
-    (function (ReviewExtended, $,undefined) {
+    $.extend(UI, {
 
-        var originalGotoNextSegment = UI.gotoNextSegment;
-        var originalRender = UI.render;
-
-        $.extend(UI, {
-
-            render: function ( options ) {
-                var promise = (new $.Deferred() ).resolve();
-                originalRender.call(this, options);
-                this.downOpts = {
-                    offset: '100%',
-                    context: $('#outer')
-                };
-                this.upOpts = {
-                    offset: '-40%',
-                    context: $('#outer')
-                };
-                return promise;
-            },
+        render: function ( options ) {
+            var promise = (new $.Deferred() ).resolve();
+            originalRender.call(this, options);
+            this.downOpts = {
+                offset: '100%',
+                context: $('#outer')
+            };
+            this.upOpts = {
+                offset: '-40%',
+                context: $('#outer')
+            };
+            return promise;
+        },
 
 
-            setDisabledOfButtonApproved: function (sid,isDisabled ) {
-                var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
-                if(!isDisabled){
-                    div.removeClass('disabled').attr("disabled", false);
-                }else{
-                    div.addClass('disabled').attr("disabled", false);
-                }
-
-            },
-
-            gotoNextSegment: function ( sid ) {
-                if (config.isReview && sid) {
-                    this.setDisabledOfButtonApproved(sid, true);
-                }
-                originalGotoNextSegment.apply(this);
-                return false;
+        setDisabledOfButtonApproved: function (sid,isDisabled ) {
+            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved");
+            if(!isDisabled){
+                div.removeClass('disabled').attr("disabled", false);
+            }else{
+                div.addClass('disabled').attr("disabled", false);
             }
 
-        });
-    })(Review, jQuery);
+        },
+
+        gotoNextSegment: function ( sid ) {
+            if (config.isReview && sid) {
+                this.setDisabledOfButtonApproved(sid, true);
+            }
+            originalGotoNextSegment.apply(this);
+            return false;
+        }
+
+    });
 }
