@@ -19,6 +19,7 @@ if (ReviewExtended.enabled()) {
         if (config.isReview && !panelClosed) {
             SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
         }
+        UI.getSegmentVersionsIssuesHandler(e);
     } );
 
     $(document).on('translation:change', function(e, data) {
