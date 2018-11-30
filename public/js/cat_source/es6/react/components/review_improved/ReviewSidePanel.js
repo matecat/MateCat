@@ -16,13 +16,10 @@ class ReviewSidePanel extends React.Component{
     }
 
     openPanel(data) {
-        if (this.props.reviewType === "improved") {
-            this.setState({
-                visible: true,
-                selection : data.selection
-            });
-        }
-
+        this.setState({
+            visible: true,
+            selection : data.selection
+        });
     }
 
     closePanel(data) {
@@ -75,27 +72,24 @@ class ReviewSidePanel extends React.Component{
         let innerPanel = '';
         let classes = classnames({
             'hidden' : !this.state.visible,
-            'review-improved-panel': this.props.reviewType === "improved"
+            'review-improved-panel': true
         });
         let idContainer = classnames({
-            'review-side-panel' : this.props.reviewType === "improved",
+            'review-side-panel' : true,
         });
-        if (this.props.reviewType === "improved") {
-            if (this.state.visible && this.state.selection != null) {
-                innerPanel = <div className="review-side-inner1">
-                    <ReviewIssueSelectionPanel submitIssueCallback={this.submitIssueCallback.bind(this)}
-                                               selection={this.state.selection} sid={this.state.sid}/>
-                </div>
-            }
-            else if (this.state.visible) {
-                innerPanel = <div className="review-side-inner1">
-                    <TranslationIssuesOverviewPanel
-                        sid={this.state.sid}
-                        reviewType={this.props.reviewType}
-                        closePanel={this.props.closePanel}
-                    />
-                </div>;
-            }
+        if (this.state.visible && this.state.selection != null) {
+            innerPanel = <div className="review-side-inner1">
+                <ReviewIssueSelectionPanel submitIssueCallback={this.submitIssueCallback.bind(this)}
+                                           selection={this.state.selection} sid={this.state.sid}/>
+            </div>
+        } else if (this.state.visible) {
+            innerPanel = <div className="review-side-inner1">
+                <TranslationIssuesOverviewPanel
+                    sid={this.state.sid}
+                    reviewType={this.props.reviewType}
+                    closePanel={this.props.closePanel}
+                />
+            </div>;
         }
 
         return <div className={classes} id="review-side-panel">

@@ -43,10 +43,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             };
             return promise;
         },
-
-        registerReviseTab: function () {
-            return false;
-        },
         /**
          * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
          * @param editarea

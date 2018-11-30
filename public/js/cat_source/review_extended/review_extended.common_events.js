@@ -42,5 +42,4 @@ if (ReviewExtended.enabled()) {
         }
     });
 
-    $(window).on('segmentOpened', UI.getSegmentVersionsIssuesHandler);
 }

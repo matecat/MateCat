@@ -1,7 +1,12 @@
 /*
  Component: ui.review
  */
-
+Review = {
+    enabled : function() {
+        return (config.enableReview && !!config.isReview);
+    },
+    type : config.reviewType
+};
 $.extend( UI, {
     clenaupTextFromPleaceholders : function(text) {
         text = text
