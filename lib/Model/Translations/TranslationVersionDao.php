@@ -229,36 +229,47 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
-
+        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1)." ?";;
 
         $query = "SELECT 
-            stv.id_segment,
-            stv.translation,
-            TX.version_number,
-            stv.creation_date,
-            stv.is_review
+    stv.id_segment,
+    stv.translation,
+    TX.version_number
+FROM
+    (
+        SELECT id_segment, translation, version_number, id_job 
+        FROM segment_translation_versions 
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND id_job = ?
+        UNION 
+        SELECT id_segment, translation, version_number, id_job 
+        FROM segment_translations 
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND id_job = ?
+    ) stv
+JOIN
+(
+        SELECT 
+            MAX(version_number) AS version_number, ste.id_segment
         FROM
-            segment_translation_versions stv
-        JOIN
-        (
-                SELECT 
-                    MAX(version_number) AS version_number, stv.id_segment
-                FROM
-                    segment_translation_versions stv
-                JOIN (
-                    SELECT ? as id_segment
-                    ".$prepare_str_segments_id."
-                 ) AS SLIST USING( id_segment )
-                 WHERE is_review = 0
-                GROUP BY id_segment
-            ) AS TX ON stv.version_number = TX.version_number
-                AND stv.id_segment = TX.id_segment
-                WHERE is_review = 0 AND id_job = ?";
+            segment_translation_events ste
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND ste.id_job = ?
+        AND ste.source_page = ".\Constants::SOURCE_PAGE_TRANSLATE."
+        GROUP BY id_segment
+
+) AS TX ON stv.version_number = TX.version_number AND stv.id_segment = TX.id_segment";
+
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, array($job_id)) );
+        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
 
         $results = $stmt->fetchAll();
 
@@ -271,36 +282,48 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1)." ?";
+
 
 
         $query = "SELECT 
-            stv.id_segment,
-            stv.translation,
-            TX.version_number,
-            stv.creation_date,
-            stv.is_review
+    stv.id_segment,
+    stv.translation,
+    TX.version_number
+FROM
+    (
+        SELECT id_segment, translation, version_number, id_job 
+        FROM segment_translation_versions 
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND id_job = ?
+        UNION 
+        SELECT id_segment, translation, version_number, id_job 
+        FROM segment_translations 
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND id_job = ?
+    ) stv
+JOIN
+(
+        SELECT 
+            MAX(version_number) AS version_number, ste.id_segment
         FROM
-            segment_translation_versions stv
-        JOIN
-        (
-                SELECT 
-                    MAX(version_number) AS version_number, stv.id_segment
-                FROM
-                    segment_translation_versions stv
-                JOIN (
-                    SELECT ? as id_segment
-                    ".$prepare_str_segments_id."
-                 ) AS SLIST USING( id_segment )
-                 WHERE is_review = 1
-                GROUP BY id_segment
-            ) AS TX ON stv.version_number = TX.version_number
-                AND stv.id_segment = TX.id_segment
-               WHERE is_review = 1 AND id_job = ? ";
+            segment_translation_events ste
+        WHERE id_segment IN(
+            ".$prepare_str_segments_id."
+        )
+        AND ste.id_job = ?
+        AND ste.source_page = ".\Constants::SOURCE_PAGE_REVISION."
+        GROUP BY id_segment
+
+) AS TX ON stv.version_number = TX.version_number AND stv.id_segment = TX.id_segment";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, array($job_id)) );
+        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
 
         $results = $stmt->fetchAll();
 
@@ -347,23 +370,26 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         ));
     }
 
-    public function saveVersion($old_translation, $new_translation) {
+    public function saveVersion( $old_translation, $new_translation ) {
         $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, translation, version_number, time_to_edit, is_review ) " .
-            " VALUES " .
-            " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :is_review )";
+                " ( id_job, id_segment, translation, version_number, time_to_edit, is_review, old_status, new_status ) " .
+                " VALUES " .
+                " (:id_job, :id_segment, :translation, 
+:version_number, :time_to_edit, :is_review, :old_status, :new_status )";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
+        $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( array(
-            'id_job'         => $old_translation['id_job'],
-            'id_segment'     => $old_translation['id_segment'] ,
-            'translation'    => $old_translation['translation'],
-            'version_number' => $old_translation['version_number'],
-            'time_to_edit'   => $old_translation['time_to_edit'],
-            'is_review' => ($old_translation['status'] == Constants_TranslationStatus::STATUS_APPROVED)?1:0
-        ));
+        return $stmt->execute( [
+                'id_job'         => $old_translation[ 'id_job' ],
+                'id_segment'     => $old_translation[ 'id_segment' ],
+                'translation'    => $old_translation[ 'translation' ],
+                'version_number' => $old_translation[ 'version_number' ],
+                'time_to_edit'   => $old_translation[ 'time_to_edit' ],
+                'is_review'      => $old_translation[ 'is_review' ],
+                'old_status'     => $old_translation[ 'db_status' ],
+                'new_status'     => $new_translation[ 'db_status' ],
+        ] );
     }
 
     public function updateVersion( $old_translation ) {

@@ -93,6 +93,9 @@
 
         <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
             <ul>
+                <li><a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}" class="footer_show_translate_link">Translate</a></li>
+
+                <li><a tal:attributes="href string:${basepath}revise/${pname}/${source_code}-${target_code}/${jid}-${password}" class="footer_show_revise_link">Revise</a></li>
 
                 <li><a class="link-manage-page" href="/manage/">Manage</a></li>
 

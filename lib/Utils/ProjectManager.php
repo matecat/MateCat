@@ -2083,29 +2083,33 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $iceLockArray = $this->features->filter( 'setICESLockFromXliffValues',
+                $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
-                                'approved'         => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
-                                'locked'           => 0,
-                                'match_type'       => 'ICE',
-                                'eq_word_count'    => 0,
-                                'status'           => $status,
-                                'suggestion_match' => null,
-                                'trans-unit'       => $translation_row[ 4 ],
+                                'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
+                                'locked'              => 0,
+                                'match_type'          => 'ICE',
+                                'eq_word_count'       => 0,
+                                'standard_word_count' => null,
+                                'status'              => $status,
+                                'suggestion_match'    => null,
+                                'suggestion'          => null,
+                                'trans-unit'          => $translation_row[ 4 ],
+                                'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
                         ]
                 );
 
-                //WARNING do not change the order of the keys
+                /* WARNING do not change the order of the keys */
                 $sql_values = [
-                        'id_segment'       => $translation_row [ 0 ],
-                        'id_job'           => $jid,
-                        'segment_hash'     => $translation_row [ 3 ],
-                        'status'           => $iceLockArray[ 'status' ],
-                        'translation'      => $translation_row [ 2 ],
-                        'locked'           => $iceLockArray[ 'locked' ],
-                        'match_type'       => $iceLockArray[ 'match_type' ],
-                        'eq_word_count'    => $iceLockArray[ 'eq_word_count' ],
-                        'suggestion_match' => $iceLockArray[ 'suggestion_match' ],
+                        'id_segment'          => $translation_row [ 0 ],
+                        'id_job'              => $jid,
+                        'segment_hash'        => $translation_row [ 3 ],
+                        'status'              => $iceLockArray[ 'status' ],
+                        'translation'         => $translation_row [ 2 ],
+                        'locked'              => $iceLockArray[ 'locked' ],
+                        'match_type'          => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
+                        'suggestion_match'    => $iceLockArray[ 'suggestion_match' ],
+                        'standard_word_count' => $iceLockArray[ 'standard_word_count' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2129,12 +2133,12 @@ class ProjectManager {
                         locked, 
                         match_type, 
                         eq_word_count,
-                        suggestion_match
+                        suggestion_match,
+                        standard_word_count
                 )
                 VALUES ";
 
-            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ? )";
-
+            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ? )";
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 
@@ -2786,8 +2790,14 @@ class ProjectManager {
      */
     private function __isTranslated( $source, $target, $xliff_trans_unit ) {
         if ( $source != $target ) {
+
             // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = true;
+            if( empty( $target ) ){
+                $differentSourceAndTargetIsTranslated = false;
+            } else {
+                $differentSourceAndTargetIsTranslated = true;
+            }
+
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                     'filterDifferentSourceAndTargetIsTranslated',
                     $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit

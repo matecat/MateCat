@@ -74,6 +74,7 @@ class SegmentTranslationVersionHandler {
      *
      * @param $old_translation
      * @param $new_translation
+     * @param $page
      */
 
     public function saveVersion( $new_translation, $old_translation ) {
@@ -96,8 +97,25 @@ class SegmentTranslationVersionHandler {
 
         $new_translation['version_number'] += 1 ;
 
+        $old_translation[ 'is_review' ] = ( $old_translation[ 'status' ] == \Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
+
+        $old_translation = $this->evaluateDbStatus( $old_translation );
+        $new_translation = $this->evaluateDbStatus( $new_translation );
+
         return $this->saveOrUpdateOldVersion( $old_translation, $new_translation );
 
+    }
+
+    private function evaluateDbStatus( $translation ) {
+        if ( $translation[ 'status' ] == \Constants_TranslationStatus::STATUS_APPROVED ) {
+            $translation[ 'db_status' ] = \Constants_TranslationStatus::DB_STATUS_APPROVED;
+        } elseif ( $translation[ 'status' ] == \Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            $translation[ 'db_status' ] = \Constants_TranslationStatus::DB_STATUS_TRANSLATED;
+        } else {
+            $translation[ 'db_status' ] = null;
+        }
+
+        return $translation;
     }
 
     /**
@@ -118,7 +136,7 @@ class SegmentTranslationVersionHandler {
             return $this->dao->updateVersion( $old_translation ) ;
         }
 
-        return $this->dao->saveVersion( $old_translation );
+        return $this->dao->saveVersion( $old_translation, $new_translation );
     }
 
     /**

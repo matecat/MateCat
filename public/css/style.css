@@ -3917,7 +3917,7 @@ section.mismatch li.tag-mismatch {
 }
 
 body.rtl-source section .source,
-body.rtl-target section .editarea,
+body.rtl-target section .targetarea,
 body.rtl-source .footer .sugg-source,
 body.rtl-target .footer .sugg-target {
     direction: rtl !important;

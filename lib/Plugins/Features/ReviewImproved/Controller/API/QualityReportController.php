@@ -11,13 +11,10 @@ namespace Features\ReviewImproved\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
-use Features\ReviewExtended;
-use Features\ReviewImproved;
 use Projects_ProjectStruct;
-use API\V2\Json\QALocalWarning;
 use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
-use CatUtils;
+use QualityReport\QualityReportSegmentModel;
 
 class QualityReportController extends KleinController
 {
@@ -75,8 +72,8 @@ class QualityReportController extends KleinController
             $step = 10;
         }
 
-        $qrSegmentModel = new \QualityReport_QualityReportSegmentModel();
-        $options        = [ 'filter' => $filter];
+        $qrSegmentModel = new QualityReportSegmentModel();
+        $options        = [ 'filter' => $filter ];
         $segments_id    = $qrSegmentModel->getSegmentsIdForQR( $this->chunk, $step, $ref_segment, $where, $options );
         if ( count( $segments_id ) > 0 ) {
             $segments = $qrSegmentModel->getSegmentsForQR( $segments_id, $this->chunk );

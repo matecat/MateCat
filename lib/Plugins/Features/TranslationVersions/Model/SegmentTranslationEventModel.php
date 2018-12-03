@@ -39,7 +39,7 @@ class SegmentTranslationEventModel {
         $struct                 = new SegmentTranslationEventStruct() ;
         $struct->id_job         = $this->translation['id_job'] ;
         $struct->id_segment     = $this->translation['id_segment'] ;
-        $struct->uid            = $this->user->uid ;
+        $struct->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
         $struct->status         = $this->translation['status'] ;
         $struct->version_number = $this->translation['version_number'] ;
         $struct->source_page    = $this->source_page_code ;
@@ -64,7 +64,7 @@ class SegmentTranslationEventModel {
         return (
                 $this->old_translation['translation'] != $this->translation['translation'] ||
                 $this->old_translation['status']      != $this->translation['status']
-                ) && !is_null( $this->user->uid ) ;
+                );
     }
 
 }

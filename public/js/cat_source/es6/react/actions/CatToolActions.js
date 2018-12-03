@@ -29,6 +29,11 @@ let CatToolActions = {
             state: state
         });
     },
+    reloadSegmentFilter: function ( segments, state ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.RELOAD_SEGMENT_FILTER
+        });
+    },
     toggleQaIssues: function () {
         AppDispatcher.dispatch({
             actionType: CattolConstants.TOGGLE_CONTAINER,
