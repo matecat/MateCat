@@ -16,7 +16,7 @@ class SprintfToPH extends AbstractHandler {
 
     public function transform( $segment ) {
         //
-        preg_match_all( '/%(?:\d+\$)?[+-]?(?:[ 0]|\'.{1})?-?\d*(?:\.\d+)?[bcdeEufFgGosxX]/', $segment, $vars, PREG_SET_ORDER );
+        preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
         foreach ( $vars as $pos => $variable ) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
