@@ -124,7 +124,7 @@ $.extend( UI, {
             if($('.tag-autocomplete').length) {
                 UI.closeTagAutocompletePanel();
                 setTimeout(function() {
-                    UI.openTagAutocompletePanel();
+                    // UI.openTagAutocompletePanel();
                     var added = UI.getPartialTagAutocomplete();
                     if(added === '') UI.closeTagAutocompletePanel();
                 }, 10);
@@ -303,7 +303,7 @@ $.extend( UI, {
         // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 
     },
-    keyPressEditAreaEventHandler: function (e) {
+    keyPressEditAreaEventHandler: function (e, sid) {
         // if (e.ctrlKey || e.shiftKey){
         //     return;
         // }
@@ -312,7 +312,8 @@ $.extend( UI, {
                 e.preventDefault();
                 return false;
             }
-            UI.openTagAutocompletePanel();
+            SegmentActions.showTagsMenu(sid);
+            // UI.openTagAutocompletePanel();
         }
         if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
             if($('.tag-autocomplete').length) {

@@ -236,6 +236,17 @@ var SegmentActions = {
             id: sid,
         });
     },
+    showTagsMenu: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_TAGS_MENU,
+            sid: sid,
+        });
+    },
+    closeTagsMenu: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_TAGS_MENU
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
