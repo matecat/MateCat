@@ -767,14 +767,19 @@ $.extend(UI, {
         return $elem;
     },
 
-    handleSourceCopyEvent: function ( e ) {
+    handleCopyEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = cloneTag.text();
-            e.clipboardData.setData('text/plain', text);
+            e.clipboardData.setData('text/plain', text.trim());
+            e.preventDefault();
+        } else if (elem.hasClass('locked')) {
+            var text = htmlEncode(elem.text());
+            e.clipboardData.setData('text/plain', text.trim());
+            e.clipboardData.setData('text/html', text.trim());
             e.preventDefault();
         }
     },
@@ -801,6 +806,7 @@ $.extend(UI, {
     removeSelectedClassToTags: function (  ) {
         if (UI.editarea) {
             UI.editarea.find('.locked.selected').removeClass('selected');
+            $('.editor .source .locked').removeClass('selected');
         }
     }
 

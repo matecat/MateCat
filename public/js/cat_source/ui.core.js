@@ -1628,16 +1628,6 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-    segmentLexiQA: function (_segment) {
-        var segment = _segment;
-        //new API?
-        if (_segment.raw) {
-            segment = _segment.raw
-        }
-        var translation = $('.editarea', segment).text().replace(/\uFEFF/g, '');
-        var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
-    },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2155,7 +2145,7 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                var trans = $('.editarea', this ).text().replace(/\uFEFF/g,'');
+                var trans = UI.postProcessEditarea(segment, '.targetarea').replace(/\uFEFF/g,'');
                 LXQ.doLexiQA(this,trans,UI.getSegmentId(this),true,null);
             });
 
