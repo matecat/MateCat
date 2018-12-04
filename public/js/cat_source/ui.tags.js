@@ -537,6 +537,9 @@ $.extend(UI, {
             var textDecoded = UI.transformTextForLockTags(text);
             $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
+        if ( window.innerHeight - offset.top < $('.tag-autocomplete').height() + 100 ) {
+            offset.top = offset.top - $('.tag-autocomplete').height() - 30;
+        }
         $('.tag-autocomplete').css('top', offset.top + addition);
         $('.tag-autocomplete').css('left', offset.left);
         this.checkAutocompleteTags();
