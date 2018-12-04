@@ -289,6 +289,7 @@ $.extend(UI, {
                     !UI.body.hasClass('search-open')) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
+                        UI.closeTagAutocompletePanel();
                     }
             }
 
