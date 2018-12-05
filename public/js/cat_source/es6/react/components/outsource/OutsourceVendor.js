@@ -308,7 +308,7 @@ class OutsourceVendor extends React.Component {
     getNewRates() {
         let date = $(this.calendar).calendar('get date');
         let time = $(this.dropdownTime).dropdown('get value');
-        date.setHours(time[0]);
+        date.setHours(time);
         date.setMinutes(date.getMinutes() + (2 - parseFloat(this.state.timezone)) * 60);
         let timestamp = (new Date(date)).getTime();
         let now = new Date().getTime();
