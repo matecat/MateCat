@@ -4,6 +4,7 @@
 use ConnectedServices\GDrive;
 
 use LexiQA\LexiQADecorator;
+use Engines_Intento as Intento;
 
 class newProjectController extends viewController {
 
@@ -285,6 +286,7 @@ class newProjectController extends viewController {
         $this->template->extended_user              = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->logged_user                = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                   = $this->user->email;
+        $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;

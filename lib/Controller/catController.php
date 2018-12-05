@@ -3,7 +3,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Exceptions\NotFoundError;
 use TmKeyManagement\UserKeysModel;
-
+use Engines_Intento as Intento;
 
 /**
  * Description of catController
@@ -403,6 +403,8 @@ class catController extends viewController {
 
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->chunk->id_mt_engine ;
+
+        $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
         $this->template->first_job_segment   = $this->chunk->job_first_segment ;
         $this->template->last_job_segment    = $this->chunk->job_last_segment ;

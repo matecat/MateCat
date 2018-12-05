@@ -446,3 +446,82 @@
         <a href="https://cloud.google.com/translate/" target="_blank" class="continuebtn btn-ok">Find out more</a>
     </template>
 </div>
+
+<div metal:define-macro="template-intento">
+    <template id="mt-provider-intento-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name"/>
+        <div class="provider-data engine-intento">
+            <div class="provider-field">
+                <label>API key<sup>*</sup></label>
+                <input class="required" data-field-name="secret"/>
+            </div>
+            <div class="provider-field providers">
+                <label>Providers<sup>*</sup></label>
+                <select class="required" name="provider" data-field-name="provider">
+                    <option value="" selected="">Choose provider...</option>
+                    <tal:block tal:repeat="provider translation_engines_intento_providers">
+                        <option value="${provider/id}">${provider/name}</option>
+                    </tal:block>
+                </select>
+            </div>
+            <div class="provider-field provider-auth-data">
+                <label>Provider auth data</label>
+                <input name="providerkey" data-field-name="providerkey" />
+                <tal:block tal:repeat="provider translation_engines_intento_providers">
+                    <p class="provider-auth-data-help" data-id="${provider/id}">${provider/auth_example}</p>
+                </tal:block>
+            </div>
+            <div class="provider-field provider-category">
+                <label>Custom Model</label>
+                <input name="providercategory" data-field-name="providercategory" />
+            </div>
+        </div>
+        <style>
+            .engine-intento .providers select {
+                width: 100%;
+                box-shadow: rgb(221, 221, 221) 0px 1px 3px inset;
+                box-sizing: border-box;
+                background: rgb(255, 255, 255);
+                padding: 8px;
+                border-radius: 2px;
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(34, 36, 38, 0.15);
+                height: auto;
+            }
+            .engine-intento .provider-auth-data textarea {
+                width: 100%;
+                box-shadow: rgb(221, 221, 221) 0px 1px 3px inset;
+                box-sizing: border-box;
+                background: rgb(255, 255, 255);
+                padding: 8px;
+                border-radius: 2px;
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(34, 36, 38, 0.15);
+                height: 80px;
+            }
+            .engine-intento .provider-auth-data-help {
+                display: none;
+            }
+        </style>
+        <script>
+            $(document).ready(function () {
+                $('.engine-intento .providers select').on('change', function () {
+                    var key = this.value;
+                    help = $("[data-id='" + key + "']");
+                    $('.engine-intento .provider-auth-data-help').hide();
+                    help.show();
+                });
+            });
+        </script>
+    </template>
+    <template id="mt-provider-intento-msg">
+        <p>A performance of third-party AI models varies up to 4x case by case. It depends on how their training data is similar to yours and you never know. Given 100x difference in price, the wrong
+            choice may be a complete miss. We help to source, evaluate and use the right models in a vendor-agnostic fashion.</p>
+        <a href="https://inten.to" target="_blank" class="continuebtn btn-ok">Intento</a>
+    </template>
+</div>
