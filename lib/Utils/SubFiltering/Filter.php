@@ -91,9 +91,9 @@ class Filter {
 
         if( static::$_INSTANCE === null ){
             static::$_INSTANCE = new Filter();
+            static::$_INSTANCE->_featureSet( $featureSet );
         }
 
-        static::$_INSTANCE->_featureSet( $featureSet );
         return static::$_INSTANCE;
 
     }
