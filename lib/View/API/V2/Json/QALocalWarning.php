@@ -100,7 +100,7 @@ class QALocalWarning extends QAWarning {
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
-            $out[ 'total' ]                                = count( json_decode($noticesJson) );
+            $out[ 'total' ]                                = count( json_decode( $this->QA->getNoticesJSON() ) );
         }
 
         return $out;

@@ -415,8 +415,17 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        $string = preg_replace( '#<.*?>#si', ' ', $string );
-        $string = preg_replace( '#<\/.*?>#si', ' ', $string );
+        if ( preg_match_all( '#<[/]{0,1}[a-zA-Z].*?(?:[a-zA-Z]|["\']{0,1}|[/]{0,1})>#is', $string, $matches, PREG_SET_ORDER ) ) {
+
+            foreach ( $matches as $tag ) {
+                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#<[/]{0,1}[hH][1-6][^>]*>#', $tag[ 0 ] ) ) { //H tag are an exception
+                    //tag can not end with a number
+                    continue;
+                }
+                $string = str_replace( $tag[ 0 ], " ", $string );
+            }
+
+        }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
         $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
@@ -436,7 +445,7 @@ class CatUtils {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'TRANSLATED_NUMBER', $string );
+            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', ' TRANSLATED_NUMBER ', $string );
 
         }
 
@@ -494,10 +503,7 @@ class CatUtils {
 
         } else {
 
-            $string = str_replace( " ", "<sep>", $string );
-            $string = str_replace( " ", "<sep>", $string ); //use breaking spaces also
-
-            $words_array = explode( "<sep>", $string );
+            $words_array = preg_split( '/[\s]+/u', $string );
             $words_array = array_filter( $words_array, function ( $word ) {
                 return trim( $word ) != "";
             } );
