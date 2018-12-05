@@ -168,26 +168,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/es6/react/utils/textUtils.js',
                 ],
                 dest: buildPath + 'qa-report.js'
-            },
-            test: {
-                options: {
-                    external: [
-                        'react/addons',
-                        'react/lib/ReactContext',
-                        'react/lib/ExecutionEnvironment'
-                    ],
-                    transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
-                    ],
-                    browserifyOptions: {
-                        paths: [ __dirname + '/node_modules' ]
-                    }
-                },
-                src: [
-                    basePath + '__tests__/*.js',
-                ],
-                dest: buildPath + '/tests/test-react.js'
-            },
+            }
         },
 
         //

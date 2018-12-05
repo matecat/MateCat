@@ -471,6 +471,8 @@ $.extend(UI, {
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
+        } else {
+            $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         }
 	},	
 
@@ -537,6 +539,9 @@ $.extend(UI, {
             var textDecoded = UI.transformTextForLockTags(text);
             $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
+        if ( window.innerHeight - offset.top < $('.tag-autocomplete').height() + 100 ) {
+            offset.top = offset.top - $('.tag-autocomplete').height() - 30;
+        }
         $('.tag-autocomplete').css('top', offset.top + addition);
         $('.tag-autocomplete').css('left', offset.left);
         this.checkAutocompleteTags();
@@ -767,14 +772,19 @@ $.extend(UI, {
         return $elem;
     },
 
-    handleSourceCopyEvent: function ( e ) {
+    handleCopyEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = cloneTag.text();
-            e.clipboardData.setData('text/plain', text);
+            e.clipboardData.setData('text/plain', text.trim());
+            e.preventDefault();
+        } else if (elem.hasClass('locked')) {
+            var text = htmlEncode(elem.text());
+            e.clipboardData.setData('text/plain', text.trim());
+            e.clipboardData.setData('text/html', text.trim());
             e.preventDefault();
         }
     },
@@ -801,6 +811,7 @@ $.extend(UI, {
     removeSelectedClassToTags: function (  ) {
         if (UI.editarea) {
             UI.editarea.find('.locked.selected').removeClass('selected');
+            $('.editor .source .locked').removeClass('selected');
         }
     }
 

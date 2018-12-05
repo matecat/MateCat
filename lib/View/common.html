@@ -5,8 +5,8 @@
             config = {} ;
         }
         config.userMail  = '${userMail}';
-        config.userFullName = '${extended_user}';
-        config.userShortName = '${logged_user}';
+        config.userFullName = "${extended_user}";
+        config.userShortName = "${logged_user}";
         config.isLoggedIn = ${isLoggedIn|string:false};
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.authURL = ${structure php:json_encode(authURL)} ;

@@ -127,6 +127,18 @@ class Editarea extends React.Component {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e);
 		this.emitTrackChanges();
     }
+    onCopyText(e) {
+        UI.handleCopyEvent(e);
+    }
+    onCutText(e) {
+        var elem = $(e.target);
+        if ( elem.hasClass('locked') || elem.parent().hasClass('locked') ) {
+            UI.handleCopyEvent(e);
+            removeSelectedText();
+            UI.saveInUndoStack('cut');
+            this.emitTrackChanges();
+        }
+    }
     onPasteEvent(e) {
         UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
 		this.emitTrackChanges();
@@ -210,8 +222,10 @@ class Editarea extends React.Component {
                     onContextMenu={this.onMouseUpEvent}
                     onBlur={this.onBlurEvent}
                     onClick={this.onClickEvent.bind(this)}
+                    onCut={this.onCutText.bind(this)}
                     onKeyDown={this.onKeyDownEvent}
                     onKeyPress={this.onKeyPressEvent}
+                    onCopy={this.onCopyText.bind(this)}
                     onInput={this.onInputEvent}
                     onPaste={this.onPasteEvent}
                     ref={(ref) => this.editAreaRef = ref}

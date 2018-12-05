@@ -3622,6 +3622,14 @@ span.locked.tag-html-container-close {
     display: none !important;
 }
 
+.locked.selected, .locked .selected {
+    background-color: #c6dcfa !important;
+}
+
+.locked::selection, span.locked a::selection {
+    background-color: transparent;
+}
+
 .editarea .locked,
 .source .locked,
 .target .locked,

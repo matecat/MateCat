@@ -1148,7 +1148,8 @@ LXQ.init  = function () {
             var seg =  UI.getSegmentById(segment);
             if (UI.getSegmentTarget(seg).length > 0) {
                 // console.log('Requesting QA for: '+segment);
-                LXQ.doLexiQA(seg, UI.getSegmentTarget(seg),segment, true, checkNextUncheckedSegment);
+                var translation = UI.postProcessEditarea(seg, '.targetarea').replace(/\uFEFF/g,'');
+                LXQ.doLexiQA(seg, translation,segment, true, checkNextUncheckedSegment);
             }
             else {
                 checkNextUncheckedSegment();
@@ -1320,7 +1321,7 @@ LXQ.init  = function () {
 
             // var sourcetext = $( segment ).find( '.source' ).text();
             var sourcetext = UI.postProcessEditarea(segment, '.source');
-            targettext = view2rawxliff(UI.prepareTextToSend(translation));
+            var targettext = view2rawxliff(UI.prepareTextToSend(translation));
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
             $.lexiqaAuthenticator.doLexiQA(
                 {
