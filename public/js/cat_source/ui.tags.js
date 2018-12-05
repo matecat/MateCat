@@ -465,14 +465,13 @@ $.extend(UI, {
         $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
         $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
 
+        $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
             $( '#segment-' + d.id_segment + ' .editarea .locked' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
-        } else {
-            $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         }
 	},	
 
