@@ -471,6 +471,8 @@ $.extend(UI, {
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
+        } else {
+            $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         }
 	},	
 
