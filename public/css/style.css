@@ -3670,8 +3670,8 @@ span.locked.tag-html-container-close {
 .editarea .locked.mismatch,
 .source .locked.mismatch,
 .locked.mismatch-old,
-.editarea .locked.mismatch .locked,
-.source .locked.mismatch .locked,
+.editarea .locked.mismatch,
+.source .locked.mismatch,
 .locked.mismatch-old .locked {
     background-color: #fdeae2;
     color: #e1595d;
