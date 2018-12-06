@@ -1326,7 +1326,7 @@ LXQ.init  = function () {
                     sourcelanguage: config.source_rfc,
                     targetlanguage: config.target_rfc,
                     sourcetext: sourcetext,
-                    targettext: targettext,
+                    targettext: translation,
                     returnUrl: returnUrl,
                     segmentId: id_segment,
                     partnerId: LXQ.partnerid,
