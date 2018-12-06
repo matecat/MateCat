@@ -99,7 +99,7 @@ LXQ.init  = function () {
         if (data.segment.raw) {
           segment = data.segment.raw
         }
-        var translation = UI.postProcessEditarea(segment, '.targetarea').replace(/\uFEFF/g,'');
+        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         var id_segment = UI.getSegmentId(segment);
         LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
     });
@@ -116,7 +116,7 @@ LXQ.init  = function () {
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
         var segment = data.segment;
-        var translation = UI.postProcessEditarea(segment, '.targetarea').replace(/\uFEFF/g,'');
+        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
     });
     /* invoked when more segments are loaded...*/
@@ -1148,8 +1148,7 @@ LXQ.init  = function () {
             var seg =  UI.getSegmentById(segment);
             if (UI.getSegmentTarget(seg).length > 0) {
                 // console.log('Requesting QA for: '+segment);
-                var translation = UI.postProcessEditarea(seg, '.targetarea').replace(/\uFEFF/g,'');
-                LXQ.doLexiQA(seg, translation,segment, true, checkNextUncheckedSegment);
+                LXQ.doLexiQA(seg, UI.getSegmentTarget(seg),segment, true, checkNextUncheckedSegment);
             }
             else {
                 checkNextUncheckedSegment();
@@ -1319,8 +1318,8 @@ LXQ.init  = function () {
             //     .replace( /\&gt;/g, '>' )
             //     .replace( /\&lt;/g, '<' );
 
-            // var sourcetext = $( segment ).find( '.source' ).text();
-            var sourcetext = UI.postProcessEditarea(segment, '.source');
+            var sourcetext = $( segment ).find( '.source' ).text();
+
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
             $.lexiqaAuthenticator.doLexiQA(
                 {
