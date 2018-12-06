@@ -3622,9 +3622,11 @@ span.locked.tag-html-container-close {
     display: none !important;
 }
 
-.locked.selected, .locked .selected {
-    background-color: #c6dcfa !important;
+.locked.inside-attribute {
+    background-color: unset !important;
 }
+
+
 
 .locked::selection, span.locked a::selection {
     background-color: transparent;
@@ -3662,6 +3664,7 @@ span.locked.tag-html-container-close {
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
+    transition: 0.3s ease;
 }
 
 .editarea .locked.mismatch,
@@ -3670,7 +3673,18 @@ span.locked.tag-html-container-close {
 .editarea .locked.mismatch .locked,
 .source .locked.mismatch .locked,
 .locked.mismatch-old .locked {
-    color: red !important;
+    background-color: #fdeae2;
+    color: #e1595d;
+    border: 1px solid #e1565a;
+}
+
+.editor .editarea .locked.mismatch:hover,
+.editor .editarea .locked.mismatch:hover,
+.source .locked.mismatch:hover,
+.locked.mismatch-old
+{
+    background-color: #f9d7ca;
+    transition: 0.3s ease;
 }
 
 .source .locked a,
@@ -3681,12 +3695,34 @@ span.locked.tag-html-container-close {
     color: #767676
 }
 
-.editarea .locked.order-error,
-.editarea .locked.order-error .locked,
-.source .locked.order-error,
 .opened .targetarea .locked a,
 .opened .source .locked a {
     color: #e000ff !important;
+}
+
+.editor .editarea .locked.order-error,
+.editor .editarea .locked.order-error,
+.source .locked.order-error {
+    background-color: #fff4e3;
+    color: #ea862c;
+    border: 1px solid #ea862c;
+}
+
+
+.editor .editarea .locked.order-error:hover,
+.editor .editarea .locked.order-error:hover,
+.source .locked.order-error:hover
+{
+    background-color: #fde6c8;
+    transition: 0.3s ease;
+}
+
+.locked.selected,
+.locked .selected,
+.locked.order-error.selected,
+.editarea .locked.mismatch.selected,
+.source .locked.mismatch.selected {
+    background-color: #c6dcfa !important;
 }
 
 .editor .cc-search .input .locked {
