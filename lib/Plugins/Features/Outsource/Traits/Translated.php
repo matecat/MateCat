@@ -47,6 +47,8 @@ trait Translated {
 
     protected $external_parent_project_id;
 
+    protected $total_batch_word_count;
+
     protected $config;
 
     public function setSuccessMailSender( AbstractEmail $emailObject ) {
@@ -62,6 +64,17 @@ trait Translated {
      */
     public function setExternalParentProjectId( $external_parent_project_id ) {
         $this->external_parent_project_id = $external_parent_project_id;
+    }
+
+    /**
+     * @param mixed $total_batch_word_count
+     *
+     * @return $this
+     */
+    public function setTotalBatchWordCount( $total_batch_word_count ) {
+        $this->total_batch_word_count = $total_batch_word_count;
+
+        return $this;
     }
 
     public function setInternalIdProject( $id ) {
