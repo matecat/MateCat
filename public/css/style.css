@@ -4381,7 +4381,7 @@ section .toolbar .autofillTag {
 .sugg-source span.softReturn, /*to be tested*/
 .track-changes span.softReturn
 {
-    display: inline;
+    display: inline !important;
     margin-left: 6px;
     padding: 1px 2px 3px 40px;
     background-image: url(../img/soft-return1.png);
@@ -4390,6 +4390,8 @@ section .toolbar .autofillTag {
     background-position: center left;
     width: 20px;
     position: relative;
+    direction: ltr;
+    text-align: unset;
 }
 
 .editarea br.soft {
