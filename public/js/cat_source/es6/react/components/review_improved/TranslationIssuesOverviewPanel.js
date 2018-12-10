@@ -1,17 +1,10 @@
-let ReviewTranslationVersion = require("../review_improved/ReviewTranslationVersion").default;
+let ReviewTranslationVersion = require("./ReviewTranslationVersion").default;
 class TranslationIssuesOverviewPanel extends React.Component {
     
     
     constructor(props) {
         super(props);
-        if (this.props.reviewType === "improved") {
-            this.state = this.getStateFromSid(this.props.sid);
-        } else {
-            this.state = {
-                versions: this.props.segment.versions,
-                segment: this.props.segment
-            }
-        }
+        this.state = this.getStateFromSid(this.props.sid);
 
     }
     closePanelClick(e, data) {
@@ -19,21 +12,12 @@ class TranslationIssuesOverviewPanel extends React.Component {
     }
 
     componentWillReceiveProps ( nextProps ) {
-        if (this.props.reviewType === "improved") {
-            this.setState( this.getStateFromSid( nextProps.sid ) );
-        } else {
-            this.setState({
-                versions: nextProps.segment.versions,
-                segment: nextProps.segment
-            });
-        }
-
+        this.setState( this.getStateFromSid( nextProps.sid ) );
     } 
 
     getStateFromSid (sid) {
         let segment = MateCat.db.segments.by('sid', sid);
         let original_target = this.getOriginalTarget( segment );
-
         return {
             segment         : segment,
             original_target : original_target,
@@ -139,14 +123,11 @@ class TranslationIssuesOverviewPanel extends React.Component {
 
 
         return <div className="review-issues-overview-panel">
-                { this.props.reviewType === "improved" ? (
-                    <div className="review-version-wrapper">
-                        <h3>Original target</h3>
-                        <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
-                        <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
-                    </div>
-                ) : (null) }
-
+                <div className="review-version-wrapper">
+                    <h3>Original target</h3>
+                    <div className="ui ignored message" dangerouslySetInnerHTML={this.originalTarget()} />
+                    <div className="review-side-panel-close" onClick={this.closePanelClick.bind(this)}>x</div>
+                </div>
                 {fullList}
         </div>
         ;

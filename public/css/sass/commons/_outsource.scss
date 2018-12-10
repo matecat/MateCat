@@ -337,7 +337,7 @@
             left: 50%;
             margin: 0;
             text-align: center;
-            z-index: 1000;
+            z-index: 1;
             -webkit-transform: translateX(-50%) translateY(-50%);
             transform: translateX(-50%) translateY(-50%);
             img {
@@ -347,7 +347,6 @@
                 font-size: 28px;
                 margin-top: 10px;
                 font-weight: 700;
-                color: #2f587f;
             }
         }
         .outsource-to-vendor {
@@ -375,7 +374,7 @@
                         .logo-t {
                             width: 100px;
                             position: relative;
-                            top: 9px;
+                            top: 6px;
                             padding: 0;
                             margin: 0 0 0 5px;
                         }
@@ -929,7 +928,7 @@
             padding-left: 15px !important;
             padding-right: 15px !important;
             position: relative;
-            min-height: 125px;
+            min-height: 145px;
             .reduced-boxes {
                 .container-reduced {
                     padding: 0 10px;

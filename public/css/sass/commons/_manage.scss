@@ -368,6 +368,9 @@ body.manage {
                             padding: 8px 15px;
                             &.outsource-container {
                             }
+                            &.outsource-container.no-outsource {
+                                overflow: unset;
+                            }
                             .outsource.modal .popup {
                                 box-shadow: none;
                             }
@@ -479,8 +482,8 @@ body.manage {
                                         display: inherit;
                                         margin-left: 10px;
                                         img.outsource-logo {
-                                            width: 100px;
-                                            margin: -5px 10px 0 0;
+                                            width: 108px;
+                                            margin: -9px 10px 0 0;
                                             vertical-align: middle;
                                         }
                                         @media only screen and (max-width: 1199px) and (min-width: 992px) {

@@ -335,7 +335,7 @@ class OutsourceVendor extends React.Component {
             msg = "Choosing the best available translator from the matching " + this.props.translatorsNumber.printable + "...";
         }
         return <div className="translated-loader">
-            <img src="../../public/img/loading-outsource-translated.gif" />
+            <img src="../../public/img/loader-matecat-translated-outsource.gif" />
             <div className="text-loader-outsource">{msg}</div>
         </div>
     }
@@ -359,7 +359,7 @@ class OutsourceVendor extends React.Component {
                 </div>
                 <div className="fiducial-logo">
                     <div className="translated-logo">Guaranteed by
-                        <img className="logo-t" src="/public/img/logo_translated.png" />
+                        <img className="logo-t" src="/public/img/matecat-logo-translated.svg" />
                     </div>
                 </div>
             </div>
