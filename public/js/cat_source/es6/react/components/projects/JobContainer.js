@@ -460,7 +460,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
-                    <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
+                    <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/matecat-logo-translated.svg" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
         } else if (this.props.job.get('translator')) {
             let email = this.props.job.get('translator').get('email');
