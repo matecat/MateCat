@@ -141,11 +141,11 @@ $.extend(UI, {
             .replace( /\&lt;\/div\>/gi, "</div>" )
             .replace( /\&lt;br\>/gi, "<br />" )
             .replace( /\&lt;br \/>/gi, "<br />" )
-            .replace( /\&lt;mark/gi, "<mark" )
+            .replace( /\&lt;mark /gi, "<mark " )
             .replace( /\&lt;\/mark/gi, "</mark" )
-            .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
+            .replace( /\&lt;ins /gi, "<ins " ) // For translation conflicts tab
             .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
-            .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
+            .replace( /\&lt;del /gi, "<del " ) // For translation conflicts tab
             .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
