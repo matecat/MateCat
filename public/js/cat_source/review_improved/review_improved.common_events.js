@@ -80,4 +80,21 @@ if ( ReviewImproved.enabled() ) {
         UI.closeIssuesPanel();
     });
 
+    $( document ).on( 'keydown', function ( e ) {
+        var esc = '27' ;
+        if ( e.which == esc ) {
+            if (!$('.modal').is(':visible')) {
+                UI.closeIssuesPanel();
+            }
+        }
+    });
+
+    $(document).on('header-tool:open', function(e, data) {
+        if ( data.name == 'search' ) {
+            UI.closeIssuesPanel();
+        }
+    });
+
+    $(window).on('segmentOpened', UI.getSegmentVersionsIssuesHandler);
+
 }

@@ -967,7 +967,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 	color: #09beec;
 }*/
 
-.button-reject {
+.button-reject,
+.button-rebutted{
     border: 1px solid;
     background: #b02429;
     border: 1px solid #848689;
@@ -978,9 +979,12 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     border-radius: 2px;
     border-radius: 2px;
     font-size: 18px;
+    text-transform: uppercase;
 }
 
-.button-reject:hover {
+.button-reject:hover,
+.button-rebutted:hover
+{
     color: #fff;
 }
 

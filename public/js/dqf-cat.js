@@ -57,7 +57,7 @@
 
     var isReadonlySegment = function( segment ) {
         return readonlyStatus() || original_isReadonlySegment( segment ) ;
-    }
+    };
 
     var messageForClickOnReadonly = function( section ) {
         if ( readonlyStatus() ) {

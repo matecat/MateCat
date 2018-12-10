@@ -19,6 +19,7 @@ if (ReviewExtended.enabled()) {
         if (config.isReview && !panelClosed) {
             SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
         }
+        UI.getSegmentVersionsIssuesHandler(e);
     } );
 
     $(document).on('translation:change', function(e, data) {
@@ -26,4 +27,20 @@ if (ReviewExtended.enabled()) {
             UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         }
     });
+
+    $( document ).on( 'keydown', function ( e ) {
+        var esc = '27' ;
+        if ( e.which == esc ) {
+            if (!$('.modal').is(':visible')) {
+                UI.closeIssuesPanel();
+            }
+        }
+    });
+
+    $(document).on('header-tool:open', function(e, data) {
+        if ( data.name == 'search' ) {
+            UI.closeIssuesPanel();
+        }
+    });
+
 }
