@@ -13,8 +13,8 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
     const TABLE       = "segment_translation_events";
     const STRUCT_TYPE = "\Features\Dqf\Model\SegmentTranslationEventStruct";
 
-    protected static $auto_increment_fields = [ 'id' ];
-    protected static $primary_keys          = [ 'id' ];
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
     public function insertForPropagation($propagatedIds, SegmentTranslationEventStruct $struct) {
 

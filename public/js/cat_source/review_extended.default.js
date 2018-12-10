@@ -30,7 +30,8 @@ if ( ReviewExtended.enabled() ) {
             clickOnApprovedButton: function (e, button) {
                 e.preventDefault();
                 var sid = UI.currentSegmentId;
-                if ( UI.segmentIsModified(sid) && this.issueRequiredOnSegmentChange) {
+                var isSplit = sid.indexOf("-") !== -1;
+                if (!isSplit && UI.segmentIsModified(sid) && this.issueRequiredOnSegmentChange) {
                     SegmentActions.showIssuesMessage(sid);
                     return;
                 }

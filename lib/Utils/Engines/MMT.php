@@ -55,14 +55,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     ];
 
     protected function _getClient(){
-        return new Engines\MMT\MMTServiceAPIWrapper(
-                null,
-                null,
-                $this->engineRecord->extra_parameters[ 'MMT-License' ],
-                "1.0",
-                "MateCat",
-                INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER
-        );
+        return Engines\MMT\MMTServiceAPIWrapper::newInstance()
+                ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
+                ->setLicense( $this->engineRecord->extra_parameters[ 'MMT-License' ] );
     }
 
     /**
@@ -92,19 +87,39 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
-        $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ] );
-
-        if( !empty( $translation[ 'translation' ] ) ){
-            $this->result = ( new Engines_Results_MyMemory_Matches(
+        try{
+            $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ], static::GET_REQUEST_TIMEOUT );
+            return ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
                     date( "Y-m-d" )
             ) )->get_as_array();
+        } catch( Exception $e ){
+            return $this->fallback( $_config );
         }
 
-        return $this->result;
+    }
+
+    protected function fallback( $_config ){
+
+        /**
+         * Create a record of type GoogleTranslate
+         */
+        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+
+        $newEngineStruct->name                                = "Generic";
+        $newEngineStruct->uid                                 = 0;
+        $newEngineStruct->type                                = Constants_Engines::MT;
+        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
+
+        $gtEngine = Engine::createTempInstance( $newEngineStruct );
+
+        /**
+         * @var $gtEngine Engines_GoogleTranslate
+         */
+        return $gtEngine->get( $_config );
 
     }
 

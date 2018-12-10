@@ -1,14 +1,6 @@
 <?php
 /**
  * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 10/10/17
- * Time: 12.55
- *
- */
-
-/**
- * Created by PhpStorm.
  * User: davide
  * Date: 03/10/17
  * Time: 14:14
@@ -20,40 +12,64 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'MMTServiceApiException.php';
 
 class MMTServiceApi {
 
-    const DEFAULT_SERVER_HOST = 'api.modernmt.eu';
-    const DEFAULT_SERVER_PORT = 443;
+    const DEFAULT_BASE_URL = 'https://api.modernmt.eu';
 
     private $baseUrl;
     private $license;
+    private $client = 0;
     private $pluginVersion;
     private $platform;
     private $platformVersion;
 
     /**
-     * MMTServiceApi constructor.
-     * @param string $host
-     * @param int $port
-     * @param string $license
-     * @param string $pluginVersion
-     * @param string $platform
-     * @param string $platformVersion
+     * @param string|null $baseUrl
+     * @return MMTServiceApi
      */
-    public function __construct($host = null, $port = null, $license = null,
-                                $pluginVersion = null, $platform = null, $platformVersion = null) {
-        $host = $host ? $host : self::DEFAULT_SERVER_HOST;
-        $port = $port ? $port : self::DEFAULT_SERVER_PORT;
-        $this->baseUrl = "https://$host:$port";
-        $this->license = $license;
+    public static function newInstance($baseUrl = null) {
+        $baseUrl = $baseUrl == null ? self::DEFAULT_BASE_URL : rtrim($baseUrl, "/");
+        return new static($baseUrl);
+    }
+
+    /**
+     * MMTServiceApi constructor.
+     * @param string $baseUrl
+     */
+    private function __construct($baseUrl) {
+        $this->baseUrl = $baseUrl;
+    }
+
+    /**
+     * @param string $pluginVersion   the plugin version (i.e. "2.4")
+     * @param string $platform        the platform name (i.e. "Matecat")
+     * @param string $platformVersion the platform version (i.e. "1.10.7")
+     *
+     * @return MMTServiceApi
+     */
+    public function setIdentity($pluginVersion = null, $platform = null, $platformVersion = null) {
         $this->pluginVersion = $pluginVersion;
         $this->platform = $platform;
         $this->platformVersion = $platformVersion;
+        return $this;
     }
 
     /**
      * @param string $license
+     *
+     * @return MMTServiceApi
      */
     public function setLicense($license) {
         $this->license = $license;
+        return $this;
+    }
+
+    /**
+     * @param int $client
+     *
+     * @return MMTServiceApi
+     */
+    public function setClient($client) {
+        $this->client = $client;
+        return $this;
     }
 
     /* - Instance --------------------------------------------------------------------------------------------------- */
@@ -62,7 +78,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getAvailableLanguages(){
+    public function getAvailableLanguages() {
         return $this->send('GET', "$this->baseUrl/languages");
     }
 
@@ -220,18 +236,8 @@ class MMTServiceApi {
      */
     public function importIntoMemoryContent($id, $tmx, $compression = null) {
         return $this->send('POST', "$this->baseUrl/memories/$id/content", [
-                'tmx' => $this->_setCulFileUpload( $tmx ) , 'compression' => $compression
+                'tmx' => $this->_setCulFileUpload($tmx), 'compression' => $compression
         ], TRUE);
-    }
-
-    /**
-     * @param $id
-     *
-     * @return mixed
-     * @throws MMTServiceApiException
-     */
-    public function emptyMemoryContent($id) {
-        return $this->send('DELETE', "$this->baseUrl/memories/$id/content");
     }
 
     /**
@@ -276,7 +282,7 @@ class MMTServiceApi {
      */
     public function getContextVectorFromFile($source, $targets, $file, $compression = null, $hints = null, $limit = null) {
         return $this->send('GET', "$this->baseUrl/context-vector", [
-                'source' => $source, 'targets' => implode(',', $targets), 'content' => $this->_setCulFileUpload( $file ),
+                'source' => $source, 'targets' => implode(',', $targets), 'content' => $this->_setCulFileUpload($file),
                 'compression' => $compression, 'hints' => ($hints ? implode(',', $hints) : null), 'limit' => $limit
         ], TRUE);
     }
@@ -288,15 +294,17 @@ class MMTServiceApi {
      * @param string|null $contextVector
      * @param array|null $hints
      * @param int|null $projectId
+     * @param int $timeout
      *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate($source, $target, $text, $contextVector = null, $hints = null, $projectId = null ) {
+    public function translate($source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null) {
         return $this->send('GET', "$this->baseUrl/translate", [
                 'source' => $source, 'target' => $target, 'q' => $text, 'context_vector' => $contextVector,
-                'hints' => ($hints ? implode(',', $hints) : null), 'project_id' => $projectId
-        ]);
+                'hints' => ($hints ? implode(',', $hints) : null), 'project_id' => $projectId,
+                'timeout' => ($timeout ? ($timeout * 1000) : null)
+        ], FALSE, $timeout);
     }
 
     /* - Low level utils -------------------------------------------------------------------------------------------- */
@@ -311,6 +319,15 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $curlResource
+     *
+     * @return int
+     */
+    protected function curl_get_error_number( $curlResource ){
+        return curl_errno( $curlResource );
+    }
+
+    /**
      * @param $curl
      */
     protected function close_curl($curl) {
@@ -322,9 +339,9 @@ class MMTServiceApi {
      *
      * @return \CURLFile|string
      */
-    protected function _setCulFileUpload( $file ){
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            return new \CURLFile( realpath( $file ) );
+    protected function _setCulFileUpload($file) {
+        if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
+            return new \CURLFile(realpath($file));
         } else {
             return '@' . realpath($file);
         }
@@ -335,10 +352,11 @@ class MMTServiceApi {
      * @param string $url
      * @param array $params
      * @param bool $multipart
+     * @param int $timeout
      * @return mixed
      * @throws MMTServiceApiException
      */
-    protected function send($method, $url, $params = null, $multipart = FALSE) {
+    protected function send($method, $url, $params = null, $multipart = FALSE, $timeout = null) {
         if ($params) {
             $params = array_filter($params, function ($value) {
                 return $value !== NULL;
@@ -360,7 +378,8 @@ class MMTServiceApi {
 
         if ($this->license)
             array_push($headers, "MMT-ApiKey: $this->license");
-
+        if ($this->client > 0)
+            array_push($headers, "MMT-ApiClient: $this->client");
         if ($this->pluginVersion)
             array_push($headers, "MMT-PluginVersion: $this->pluginVersion");
         if ($this->platform)
@@ -376,7 +395,7 @@ class MMTServiceApi {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
 
-        if( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ){
+        if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
@@ -384,7 +403,7 @@ class MMTServiceApi {
              *
              * @see MMTServiceApi::_setCulFileUpload()
              */
-            curl_setopt($curl, CURLOPT_SAFE_UPLOAD, true);
+            curl_setopt($curl, CURLOPT_SAFE_UPLOAD, TRUE);
         }
 
         if (count($headers) > 0)
@@ -395,11 +414,17 @@ class MMTServiceApi {
             curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
         }
 
+        if ($timeout !== null)
+            curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
+
         $result = $this->exec_curl($curl);
+        $curl_errno = $this->curl_get_error_number($curl);
         $this->close_curl($curl);
 
-        if ($result === FALSE)
-            throw new MMTServiceApiException("ConnectionException", 500, "Unable to contact upstream server");
+        if ($result === FALSE) {
+            $name = ($curl_errno == 28) ? "TimeoutException" : "ConnectionException";
+            throw new MMTServiceApiException($name, 500, "Unable to contact upstream server ($curl_errno)");
+        }
 
         return $this->parse($result);
     }
@@ -414,9 +439,10 @@ class MMTServiceApi {
         $json = json_decode($body, TRUE);
 
         if (json_last_error() != JSON_ERROR_NONE)
-            throw new MMTServiceApiException("ConnectionException", 500, "Unable to decode server response");
+            throw new MMTServiceApiException("ConnectionException", 500, "Unable to decode server response: '$body'");
 
-        if ($json["status"] != 200)
+        $status = $json["status"];
+        if (!(200 <= $status AND $status < 300))
             throw MMTServiceApiException::fromJSONResponse($json);
 
         return isset($json['data']) ? $json['data'] : NULL;

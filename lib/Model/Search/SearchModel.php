@@ -283,7 +283,7 @@ class SearchModel {
                             {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->target}' ), 
                             ''
                             ) ) 
-                        ) / LENGTH('{{$this->queryParams->target}}') 
+                        ) / LENGTH('{$this->queryParams->target}') 
 			) > 0
 			GROUP BY st.id_segment WITH ROLLUP
 		";

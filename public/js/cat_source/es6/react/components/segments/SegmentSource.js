@@ -70,7 +70,7 @@ class SegmentSource extends React.Component {
     }
 
     onCopyEvent(e) {
-        UI.handleSourceCopyEvent(e);
+        UI.handleCopyEvent(e);
     }
 
     onDragEvent(e) {

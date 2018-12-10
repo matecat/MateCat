@@ -24,12 +24,12 @@ class TranslationIssueModel
     /**
      * @var EntryStruct
      */
-    private $issue ;
+    protected $issue ;
 
     /**
      * @var \LQA\ChunkReviewStruct
      */
-    private $chunk_review ;
+    protected $chunk_review ;
 
 
     /**

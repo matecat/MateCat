@@ -7,7 +7,7 @@ class TMSService {
     /**
      * @var string The name of the uploaded TMX
      */
-    private $name;
+    protected $name;
 
     /**
      * @var string The key to be associated to the tmx
@@ -22,7 +22,7 @@ class TMSService {
     /**
      * @var Engines_MyMemory
      */
-    private $mymemory_engine;
+    protected $mymemory_engine;
 
     private $output_type;
 

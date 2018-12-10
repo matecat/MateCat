@@ -108,3 +108,22 @@ JOBS[pid_set_name]  = "ch_pid_jobs"
 JOBS[max_executors] = 1
 JOBS[redis_key]     = "jobs_list"
 JOBS[loggerName]    = "jobs.log"
+
+
+;;###############################
+;;##### Key Name tmx import #####
+;;###############################
+;ALIGNER_TMX_IMPORT[queue_name]   = "aligner_tmx_import"
+;ALIGNER_TMX_IMPORT[pid_set_name]  = "ch_pid_tmx_import"
+;ALIGNER_TMX_IMPORT[max_executors] = 1
+;ALIGNER_TMX_IMPORT[redis_key]     = "tmx_import_list"
+;ALIGNER_TMX_IMPORT[loggerName]    = "tmx_import.log"
+
+;;###############################
+;;#####      Align Job      #####
+;;###############################
+;ALIGNER_ALIGN_JOB[queue_name]   = "aligner_align_job"
+;ALIGNER_ALIGN_JOB[pid_set_name]  = "ch_pid_align_job"
+;ALIGNER_ALIGN_JOB[max_executors] = 1
+;ALIGNER_ALIGN_JOB[redis_key]     = "align_job_list"
+;ALIGNER_ALIGN_JOB[loggerName]    = "align_job.log"

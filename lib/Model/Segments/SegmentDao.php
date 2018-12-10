@@ -2,7 +2,7 @@
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments' ;
-    protected static $auto_increment_fields = ['id'];
+    protected static $auto_increment_field = ['id'];
 
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->con->getConnection();
@@ -133,6 +133,26 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
         return $stmt->fetch();
+    }
+
+    /**
+     * @param $id_list
+     *
+     * @return object
+     */
+    public function getContextAndSegmentByIDs( $id_list ){
+        $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
+        $stmt = $this->_getStatementForCache( $query );
+        /** @var $res Segments_SegmentStruct[] */
+        $res = $this->_fetchObject( $stmt,
+                new Segments_SegmentStruct(),
+                $id_list
+        );
+        $reverse_id_list = array_flip( $id_list );
+        foreach( $res as $element ){
+            $id_list[ $reverse_id_list[ $element->id ] ] = $element;
+        }
+        return (object)$id_list;
     }
 
     /**
@@ -313,7 +333,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.suggestion,
                 st.edit_distance,
                 st.locked,
-                st.match_type
+                st.match_type,
+                st.version_number
                 
                 FROM segments s
                 RIGHT JOIN segment_translations st ON st.id_segment = s.id

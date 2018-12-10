@@ -197,7 +197,7 @@ $.extend(UI, {
 
     },
     /**
-     * To transform text with the' ph' tags that have the attribute' equival-text' into text only, without html
+     * To transform text with the' ph' tags that have the attribute' equiv-text' into text only, without html
      */
     removePhTagsWithEquivTextIntoText: function ( tx ) {
         try {
@@ -362,7 +362,7 @@ $.extend(UI, {
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                         UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
                     }
-                    UI.removeHighlightCorrespondingTags();
+                    UI.removeHighlightCorrespondingTags(UI.editarea);
 
                     UI.numCharsUntilTagRight = null;
                     UI.numCharsUntilTagLeft = null;
@@ -434,8 +434,9 @@ $.extend(UI, {
         }
         $(el).addClass('highlight');
     },
-    removeHighlightCorrespondingTags: function () {
-        $(UI.editarea).find('.locked.highlight').removeClass('highlight');
+    removeHighlightCorrespondingTags: function (segment$) {
+        segment$.find('.locked.highlight').removeClass('highlight');
+        segment$.find('.locked.mismatch').removeClass('mismatch');
     },
 
     // TAG MISMATCH
@@ -470,6 +471,8 @@ $.extend(UI, {
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
+        } else {
+            $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         }
 	},	
 
@@ -536,6 +539,9 @@ $.extend(UI, {
             var textDecoded = UI.transformTextForLockTags(text);
             $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
+        if ( window.innerHeight - offset.top < $('.tag-autocomplete').height() + 100 ) {
+            offset.top = offset.top - $('.tag-autocomplete').height() - 30;
+        }
         $('.tag-autocomplete').css('top', offset.top + addition);
         $('.tag-autocomplete').css('left', offset.left);
         this.checkAutocompleteTags();
@@ -729,7 +735,7 @@ $.extend(UI, {
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        div = this.transformPlaceholdersHtml($div);
+        $div = this.transformPlaceholdersHtml($div);
         $div.find('span.space-marker').replaceWith(' ');
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
@@ -766,21 +772,26 @@ $.extend(UI, {
         return $elem;
     },
 
-    handleSourceCopyEvent: function ( e ) {
+    handleCopyEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = cloneTag.text();
-            e.clipboardData.setData('text/plain', text);
+            e.clipboardData.setData('text/plain', text.trim());
+            e.preventDefault();
+        } else if (elem.hasClass('locked')) {
+            var text = htmlEncode(elem.text());
+            e.clipboardData.setData('text/plain', text.trim());
+            e.clipboardData.setData('text/html', text.trim());
             e.preventDefault();
         }
     },
     handleDragEvent: function ( e ) {
         var elem = $(e.target);
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
-            var tag = elem.parent('span.locked:not(.inside-attribute)');
+            var tag = elem.closest('span.locked:not(.inside-attribute)');
             var cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             var text = htmlEncode(cloneTag.text());
@@ -798,7 +809,10 @@ $.extend(UI, {
      * removed the first time you press the delete key (ui.editarea-> 51 )
      */
     removeSelectedClassToTags: function (  ) {
-        UI.editarea.find('.locked.selected').removeClass('selected');
+        if (UI.editarea) {
+            UI.editarea.find('.locked.selected').removeClass('selected');
+            $('.editor .source .locked').removeClass('selected');
+        }
     }
 
 });

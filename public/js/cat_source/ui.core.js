@@ -237,20 +237,6 @@ UI = {
     maxNumSegmentsReached : function() {
         return $('section').length > config.maxNumSegments  ;
     },
-
-    checkIfFinished: function(closing) {
-       if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
-               this.body.addClass('justdone');
-       } else {
-               this.body.removeClass('justdone');
-       }
-    },
-
-    checkIfFinishedFirst: function() {
-       if ($('section').length == $('section.status-translated, section.status-approved').length) {
-           this.body.addClass('justdone');
-       }
-    },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
@@ -261,7 +247,6 @@ UI = {
                 segment: segment
             });
 
-            clearTimeout(this.liveConcordanceSearchReq);
 
             var saveBehaviour = true;
             if (operation != 'noSave') {
@@ -273,14 +258,9 @@ UI = {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton, segment);
-            this.removeGlossaryMarksFormSource();
+            this.removeGlossaryMarksFormSource(segment);
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
-
-
-            if (!this.opening) {
-                this.checkIfFinished(1);
-            }
 
             // close split segment
             $('.sid .actions .split').removeClass('cancel');
@@ -425,16 +405,16 @@ UI = {
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         if (this.currentSegmentTPEnabled) {
             nextUntranslated = "";
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+            currentButton = '<li ><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
         } else {
-            nextUntranslated = (sameButton || filtering)? '' : '<li><a id="segment-' + this.currentSegmentId +
+            nextUntranslated = (sameButton || filtering)? '' : '<li><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
                 this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+            currentButton = '<li><a draggable="false" id="segment-' + this.currentSegmentId +
                 '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
                 '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
@@ -1308,6 +1288,7 @@ UI = {
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
 		var t_formatted = s.TODO_FORMATTED;
+		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
@@ -1324,7 +1305,6 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-        this.checkIfFinished();
         this.done_percentage = this.progress_perc;
 
 		$('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
@@ -1333,8 +1313,11 @@ UI = {
 		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
 
 		$('#stat-progress').html(this.progress_perc);
-
-		$('#stat-todo strong').html(t_formatted);
+        if ( config.isReview ) {
+            $('#stat-todo strong').html(revise_todo_formatted);
+        } else {
+            $('#stat-todo strong').html(t_formatted);
+        }
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
@@ -1645,16 +1628,6 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-    segmentLexiQA: function (_segment) {
-        var segment = _segment;
-        //new API?
-        if (_segment.raw) {
-            segment = _segment.raw
-        }
-        var translation = $('.editarea', segment).text().replace(/\uFEFF/g, '');
-        var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, translation, id_segment, false, function () {});
-    },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -1697,8 +1670,10 @@ UI = {
 			success: function(d) {
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
+                    UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
+                    UI.removeHighlightCorrespondingTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
@@ -1808,9 +1783,11 @@ UI = {
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
-		var contextAfter = UI.getContextAfter(id_segment);
+        var idBefore = UI.getIdBefore(id_segment);
+        var contextAfter = UI.getContextAfter(id_segment);
+        var idAfter = UI.getIdAfter(id_segment);
 
-		this.lastTranslatedSegmentId = id_segment;
+        this.lastTranslatedSegmentId = id_segment;
 
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
@@ -1856,7 +1833,9 @@ UI = {
             version: segment.attr('data-version'),
             propagate: propagate,
             context_before: contextBefore,
-            context_after: contextAfter
+            id_before: idBefore,
+            context_after: contextAfter,
+            id_after: idAfter,
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -2166,7 +2145,7 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                var trans = $('.editarea', this ).text().replace(/\uFEFF/g,'');
+                var trans = UI.postProcessEditarea(segment, '.targetarea').replace(/\uFEFF/g,'');
                 LXQ.doLexiQA(this,trans,UI.getSegmentId(this),true,null);
             });
 
@@ -2278,7 +2257,11 @@ UI = {
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
-        var html = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]
+        var index = this.undoStack.length - 1 - this.undoStackPosition - 1 + 2;  //??
+        if ( index >= this.undoStack.length ) {
+            return false;
+        }
+        var html = this.undoStack[index];
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), html);
         setTimeout(function () {
             setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);

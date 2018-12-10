@@ -66,6 +66,12 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
+        }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
+            // to prevent the underline shortcut
+            e.preventDefault();
+        }).on('keydown.shortcuts', null, "ctrl+b", function(e) {
+            // to prevent the underline shortcut
+            e.preventDefault();
         });
 	},
 	unbindShortcuts: function() {
@@ -159,7 +165,7 @@ $.extend(UI, {
 
 		$(window).on('mousedown', function(e) {
 			if ($(e.target).hasClass("editarea")) {
-				return;
+				return true;
 			}
             //when the catoool is not loaded because of the job is archived,
             // saveSelection leads to a javascript error
@@ -258,6 +264,7 @@ $.extend(UI, {
                 UI.closeSegment(UI.currentSegment, 1);
             };
 
+            UI.removeSelectedClassToTags();
             if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
 
@@ -282,6 +289,7 @@ $.extend(UI, {
                     !UI.body.hasClass('search-open')) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
+                        UI.closeTagAutocompletePanel();
                     }
             }
 
@@ -318,9 +326,13 @@ $.extend(UI, {
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection( 'Click from Human Authorized' );
-		}).on('click', '#statistics .meter a', function(e) {
+		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
 			e.preventDefault();
-			UI.gotoNextUntranslatedSegment();
+			if ( config.isReview ) {
+                UI.openNextTranslated();
+            } else {
+                UI.gotoNextUntranslatedSegment();
+            }
 		}).on('click', 'mark.inGlossary', function ( e ) {
             var $segment = $( e.currentTarget ).closest("section");
 		    UI.openSegmentGlossaryTab($segment);
@@ -337,18 +349,22 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-        }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
+        }).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
+            '.editor .source .locked a,.editor .editarea .locked a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-            if($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-                setCursorPosition(this, 'end');
+			var elem = $(this).hasClass('locked') ? this : this.parentNode;
+            if($(elem).hasClass('selected')) {
+                $(elem).removeClass('selected');
+                setCursorPosition(elem, 'end');
             } else {
-                setCursorPosition(this);
-                selectText(this);
+                setCursorPosition(elem);
+                selectText(elem);
                 UI.removeSelectedClassToTags();
-                $(this).toggleClass('selected');
-				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
+                $(elem).addClass('selected');
+				if(!UI.body.hasClass('tagmode-default-extended')) {
+				    $('.editor .tagModeToggle').click();
+                }
             }
 
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
@@ -384,13 +400,6 @@ $.extend(UI, {
 			e.stopPropagation();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
 			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
-		});
-
-
-
-		$(".end-message-box a.close").on('click', function(e) {
-			e.preventDefault();
-			UI.body.removeClass('justdone');
 		});
 
 		$("#point2seg").bind('mousedown', function(e) {
@@ -440,7 +449,6 @@ $.extend(UI, {
 
         if (!this.segmentToScrollAtRender)
             UI.gotoSegment(this.startSegmentId);
-        this.checkIfFinishedFirst();
 
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;

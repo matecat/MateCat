@@ -25,8 +25,8 @@ class DqfProjectMapDao extends DataAccess_AbstractDao  {
     const PROJECT_TYPE_TRANSLATE = 'translate' ;
     const PROJECT_TYPE_REVISE    = 'revise' ;
 
-    protected static $auto_increment_fields = [ 'id' ];
-    protected static $primary_keys          = [ 'id' ];
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
 
     /**

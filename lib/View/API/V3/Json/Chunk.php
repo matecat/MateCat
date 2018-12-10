@@ -90,7 +90,7 @@ class Chunk extends \API\V2\Json\Chunk {
         if ( in_array( ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $reviseIssues     = [];
             $qualityReportDao = new ReviewImproved\Model\QualityReportDao();
-            $qa_data          = $qualityReportDao->getReviseIssuesByJob( $jStruct->id );
+            $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
             foreach ( $qa_data as $issue ) {
                 if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
                     $reviseIssues[ $issue->id_category ] = [
@@ -117,7 +117,7 @@ class Chunk extends \API\V2\Json\Chunk {
             }
 
             $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
-            $score = number_format( $chunkReviewModel->getScore(), 2, ",", "");
+            $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
 
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
             $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
@@ -202,10 +202,10 @@ class Chunk extends \API\V2\Json\Chunk {
                         'quality_overall'     => $quality_overall,
                         'errors_count'        => (int)$jStruct->getErrorsCount(),
                         'revise_issues'       => $reviseIssues,
-                        'score'               => $score,
+                        'score'               => floatval($score),
                         'categories'          => $categories,
-                        'total_issues_weight' => $total_issues_weight,
-                        'total_reviews_words_count' => $total_reviews_words_count,
+                        'total_issues_weight' => (int)$total_issues_weight,
+                        'total_reviews_words_count' => (int)$total_reviews_words_count,
                         'passfail'            => (isset($model)?json_encode( ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] ):'')
                 ]
 

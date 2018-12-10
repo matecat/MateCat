@@ -298,6 +298,7 @@ class SegmentsFilter extends React.Component {
 
     componentDidMount() {
         CatToolStore.addListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
+        CatToolStore.addListener(CatToolConstants.RELOAD_SEGMENT_FILTER, this.doSubmitFilter);
         this.initDropDown();
     }
 
@@ -307,6 +308,7 @@ class SegmentsFilter extends React.Component {
 
     componentWillUnmount() {
         CatToolStore.removeListener(CatToolConstants.SET_SEGMENT_FILTER, this.setFilter);
+        CatToolStore.removeListener(CatToolConstants.RELOAD_SEGMENT_FILTER, this.doSubmitFilter);
     }
 
     render () {

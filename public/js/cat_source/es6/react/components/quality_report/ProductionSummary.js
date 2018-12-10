@@ -7,8 +7,8 @@ class ProductionSummary extends React.Component {
         }
         let time = parseInt(this.props.jobInfo.get("total_time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
-        let minutes = Math.floor( time / 60);
-        let seconds = parseInt(time - minutes * 60);
+        let minutes = Math.floor( time % 3600 / 60);
+        let seconds = Math.floor(time % 3600 % 60);
         return str_pad_left(hours,'0',2)+':'+str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
     }
 
@@ -40,7 +40,7 @@ class ProductionSummary extends React.Component {
             '<a style="text-decoration: underline" href="https://www.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
-        let score = Math.round(parseFloat(this.props.jobInfo.get('quality_summary').get('score')));
+        let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
         let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit):0;
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;

@@ -899,6 +899,9 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 .d0 {
     border-bottom: 2px red dotted;
 }
+.o0 {
+  background-color: rgba(#209FAA, .75);
+}
 .m {
     background-color:#EA92B8;
 }

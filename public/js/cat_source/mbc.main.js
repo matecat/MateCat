@@ -405,15 +405,22 @@ if ( MBC.enabled() )
         };
 
         var openSegmentComment = function ( el ) {
+            if (_.isUndefined(MBC.teamUsers) ) {
+                return;
+            }
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
             el.find('.mbc-comment-icon-button').css("visibility", "hidden");
             popLastCommentHash();
             $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
             setTimeout(function(){
-                scrollSegment( el ).done( function() {
+                if ( el.hasClass("opened") ) {
                     renderSegmentBalloon( el );
-                });
+                } else {
+                    scrollSegment( el ).done( function() {
+                        renderSegmentBalloon( el );
+                    });
+                }
             });
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
@@ -711,24 +718,29 @@ if ( MBC.enabled() )
 
         var getTeamUsers = function (  ) {
             var teamId = config.id_team;
-            return $.ajax({
-                async: true,
-                type: "get",
-                // url : "/api/v2/teams/" + teamId + "/members"
-                url : "/api/app/teams/" + teamId + "/members/public"
-            }).done(function ( data ) {
-                var team = {
-                    uid: "team",
-                    first_name: "Team",
-                    last_name: ""
-                };
-                MBC.teamUsers = data;
-                MBC.teamUsers.unshift(team);
+            if ( teamId ) {
+                return $.ajax({
+                    async: true,
+                    type: "get",
+                    // url : "/api/v2/teams/" + teamId + "/members"
+                    url : "/api/app/teams/" + teamId + "/members/public"
+                }).done(function ( data ) {
+                    var team = {
+                        uid: "team",
+                        first_name: "Team",
+                        last_name: ""
+                    };
+                    MBC.teamUsers = data;
+                    MBC.teamUsers.unshift(team);
 
 
-            }).fail(function ( response ) {
+                }).fail(function ( response ) {
+                    MBC.teamUsers = [];
+                })
+            } else {
                 MBC.teamUsers = [];
-            })
+                return $.Deferred().resolve();
+            }
         };
 
         var checkOpenSegmentComment = function ( id_segment ) {
@@ -960,15 +972,16 @@ if ( MBC.enabled() )
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
 
-            getTeamUsers().then(refreshElements);
+            getTeamUsers().then( function() {
+                refreshElements()
+                // open a comment if was asked by hash
+                var lastAsked = popLastCommentHash();
+                if ( lastAsked ) {
+                    openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
+                }
+            });
             //New icon inserted in the header -> resize file name
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-
-            // open a comment if was asked by hash
-            var lastAsked = popLastCommentHash();
-            if ( lastAsked ) {
-                openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
-            }
         } );
 
         $( document ).on( 'sse:ack', function ( ev, message ) {

@@ -16,6 +16,8 @@ class SegmentFooterTabMessages extends React.Component {
             currentIndexPreview: 0,
             loadingImage: false
         };
+        //Parameter to exclude notes tha match this regexp, used by plugins to exclude some notes
+        this.excludeMatchingNotesRegExp;
     }
 
     getNotes() {
@@ -23,7 +25,10 @@ class SegmentFooterTabMessages extends React.Component {
         let self = this;
         if (this.props.notes) {
             this.props.notes.forEach(function (item, index) {
-                if (item.note && item.note !== "") {
+                if ( item.note && item.note !== "" ) {
+                    if ( self.excludeMatchingNotesRegExp && self.excludeMatchingNotesRegExp.test(item.note)  ) {
+                        return;
+                    }
                     let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gmi;
                     let note = item.note.replace(regExpUrl, function ( match, text ) {
                         return '<a href="'+ text +'" target="_blank">' + text + '</a>';
@@ -48,6 +53,25 @@ class SegmentFooterTabMessages extends React.Component {
                     let html = <div key={"note-json" + index} className="note" dangerouslySetInnerHTML={self.allowHTML(text)}/>;
                     notesHtml.push(html);
                 }
+            });
+        }
+        if (this.props.context_groups && this.props.context_groups.context_json) {
+            this.props.context_groups.context_json.forEach(( contextGroup ) =>{
+                let contextElems = [];
+                contextGroup.contexts.forEach(( context )=>{
+                    contextElems.push(
+                        <div className="context-item" key={contextGroup.id+context.attr["context-type"]}>
+                            {/*<span className="context-item-label">{context.attr["context-type"]}</span>*/}
+                            <span className="context-item-name">{context.content}</span>
+                        </div>
+                    );
+                });
+                notesHtml.push(
+                    <div className="context-group" key={contextGroup.id+contextGroup.attr.name}>
+                        <span className="context-group-name">{contextGroup.attr.name}: </span>
+                        {contextElems}
+                    </div>
+                );
             });
         }
         if (notesHtml.length === 0) {

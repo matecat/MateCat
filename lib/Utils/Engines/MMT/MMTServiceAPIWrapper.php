@@ -13,11 +13,22 @@ use Log;
 
 class MMTServiceAPIWrapper extends MMTServiceApi {
 
+    /**
+     * @var \MultiCurlHandler
+     */
+    protected  $curlHandler;
+
+    /**
+     * @var string
+     */
+    private  $resourceHash;
+
+
     protected function exec_curl( $curl ) {
 
-        $handler = new \MultiCurlHandler();
+        $handler = $this->curlHandler = new \MultiCurlHandler();
         $handler->verbose = true;
-        $resource = $handler->addResource( $curl );
+        $resource = $this->resourceHash = $handler->addResource( $curl );
         $handler->multiExec();
         $handler->multiCurlCloseAll();
         $rawContent = $handler->getSingleContent( $resource );
@@ -28,11 +39,15 @@ class MMTServiceAPIWrapper extends MMTServiceApi {
 
     public function close_curl( $curl ) {}
 
-    protected function send( $method, $url, $params = null, $multipart = false ) {
+    protected function send( $method, $url, $params = null, $multipart = FALSE, $timeout = null) {
         if ( !$multipart && $params ) {
             Log::doLog( "... Request Parameters ... " . var_export( http_build_query( $params ), true ) );
         }
-        return parent::send( $method, $url, $params, $multipart );
+        return parent::send( $method, $url, $params, $multipart, $timeout );
+    }
+
+    protected function curl_get_error_number( $curlResource ){
+        return $this->curlHandler->getError( $this->resourceHash )[ 'errno' ];
     }
 
 }

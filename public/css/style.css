@@ -971,13 +971,17 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     border: 1px solid;
     background: #b02429;
     border: 1px solid #848689;
-    color: #333;
+    color: #fff;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 18px;
     border-radius: 2px;
     border-radius: 2px;
     font-size: 18px;
+}
+
+.button-reject:hover {
+    color: #fff;
 }
 
 article .translated,
@@ -1183,11 +1187,6 @@ article .approved:active {
 
 .header-dropdown-menu {
     margin-right: 15px;
-}
-
-.justdone .header-menu .wrapper-dropdown-5 .dropdown {
-    left: -224px;
-    width: 256px;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
@@ -3495,21 +3494,6 @@ section.modified.editor .status {
     z-index: 100000;
 }
 
-.end-message-box {
-    height: 300px;
-    width: 800px;
-    margin: 0 auto;
-    position: fixed;
-    padding: 0 0 20px 0;
-    display: none;
-    top: 50%;
-    left: 50%;
-    margin: -200px 0 0 -400px;
-    z-index: 999999;
-    background: #fff;
-    box-shadow: 0px 0px 25px #000;
-    border-radius: 2px;
-}
 
 .sendbox {
     position: absolute;
@@ -3531,16 +3515,7 @@ section.modified.editor .status {
     font-size: 14px
 }
 
-.end-message-box .downloadtr-button {
-    width: 380px;
-    margin: 10px 0 0px 0;
-    font-size: 18px;
-    padding: 10px 0px !important;
-    float: left !important;
-    border: 1px solid #848689 !important;
-    color: #fff;
-    text-align: center
-}
+
 
 .end-message-col1 {
     float: left;
@@ -3647,6 +3622,16 @@ span.locked.tag-html-container-close {
     display: none !important;
 }
 
+.locked.inside-attribute {
+    background-color: unset !important;
+}
+
+
+
+.locked::selection, span.locked a::selection {
+    background-color: transparent;
+}
+
 .editarea .locked,
 .source .locked,
 .target .locked,
@@ -3679,15 +3664,27 @@ span.locked.tag-html-container-close {
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
+    transition: 0.3s ease;
 }
 
 .editarea .locked.mismatch,
 .source .locked.mismatch,
 .locked.mismatch-old,
-.editarea .locked.mismatch .locked,
-.source .locked.mismatch .locked,
+.editarea .locked.mismatch,
+.source .locked.mismatch,
 .locked.mismatch-old .locked {
-    color: red !important;
+    background-color: #fdeae2;
+    color: #e1595d;
+    border: 1px solid #e1565a;
+}
+
+.editor .editarea .locked.mismatch:hover,
+.editor .editarea .locked.mismatch:hover,
+.source .locked.mismatch:hover,
+.locked.mismatch-old
+{
+    background-color: #f9d7ca;
+    transition: 0.3s ease;
 }
 
 .source .locked a,
@@ -3698,12 +3695,34 @@ span.locked.tag-html-container-close {
     color: #767676
 }
 
-.editarea .locked.order-error,
-.editarea .locked.order-error .locked,
-.source .locked.order-error,
 .opened .targetarea .locked a,
 .opened .source .locked a {
     color: #e000ff !important;
+}
+
+.editor .editarea .locked.order-error,
+.editor .editarea .locked.order-error,
+.source .locked.order-error {
+    background-color: #fff4e3;
+    color: #ea862c;
+    border: 1px solid #ea862c;
+}
+
+
+.editor .editarea .locked.order-error:hover,
+.editor .editarea .locked.order-error:hover,
+.source .locked.order-error:hover
+{
+    background-color: #fde6c8;
+    transition: 0.3s ease;
+}
+
+.locked.selected,
+.locked .selected,
+.locked.order-error.selected,
+.editarea .locked.mismatch.selected,
+.source .locked.mismatch.selected {
+    background-color: #c6dcfa !important;
 }
 
 .editor .cc-search .input .locked {
@@ -3942,7 +3961,7 @@ section.mismatch li.tag-mismatch {
 }
 
 body.rtl-source section .source,
-body.rtl-target section .editarea,
+body.rtl-target section .targetarea,
 body.rtl-source .footer .sugg-source,
 body.rtl-target .footer .sugg-target {
     direction: rtl !important;
@@ -4077,6 +4096,8 @@ body.searchActive #filterSwitch .numbererror:empty {
     border: 1px solid #999;
     min-width: 100px;
     padding: 1px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .tag-autocomplete.empty {
@@ -4360,7 +4381,7 @@ section .toolbar .autofillTag {
 .sugg-source span.softReturn, /*to be tested*/
 .track-changes span.softReturn
 {
-    display: inline;
+    display: inline !important;
     margin-left: 6px;
     padding: 1px 2px 3px 40px;
     background-image: url(../img/soft-return1.png);
@@ -4369,6 +4390,8 @@ section .toolbar .autofillTag {
     background-position: center left;
     width: 20px;
     position: relative;
+    direction: ltr;
+    text-align: unset;
 }
 
 .editarea br.soft {

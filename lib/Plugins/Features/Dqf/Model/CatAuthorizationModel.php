@@ -48,13 +48,10 @@ class CatAuthorizationModel {
         $status = $this->getStatus( $user );
 
         if ( $status == self::STATUS_NOT_ASSIGNED ) {
-            $invalidCredentialsStatus = $this->dqfUserCredentialsInvalidStatus( $user );
-            if ( is_null( $invalidCredentialsStatus ) ) {
-                $insertDone = $this->setAuthorizedUser( $user ) ;
+            $insertDone = $this->setAuthorizedUser( $user ) ;
 
-                if ( $insertDone ) {
-                    return true;
-                }
+            if ( $insertDone ) {
+                return true;
             }
         }
         return false ;

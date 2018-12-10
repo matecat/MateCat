@@ -91,11 +91,27 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     public function delete() {
 
-        $model = new ReviewImproved\TranslationIssueModel(
-            $this->request->id_job,
-            $this->validator->getChunkReview()->password,
-            $this->validator->issue
-        );
+        $project = \Projects_ProjectDao::findByJobId($this->request->id_job);
+
+        $this->featureSet->loadForProject($project);
+        $codes = $this->featureSet->getCodes();
+
+        if(in_array(\Features::REVIEW_EXTENDED, $codes)){
+            $model = new \Features\ReviewExtended\TranslationIssueModel(
+                    $this->request->id_job,
+                    $this->validator->getChunkReview()->password,
+                    $this->validator->issue
+            );
+        }
+        else {
+            $model = new ReviewImproved\TranslationIssueModel(
+                    $this->request->id_job,
+                    $this->validator->getChunkReview()->password,
+                    $this->validator->issue
+            );
+        }
+
+
 
         $model->delete();
 

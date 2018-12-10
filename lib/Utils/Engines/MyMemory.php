@@ -172,7 +172,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
 
 
-        $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters );
+        $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
         $this->call( $function, $parameters, true );
 
         if ( isset( $segment_file_chr[ 1 ] ) ) {

@@ -128,21 +128,24 @@ $.extend(UI, {
                             "standard": "ctrl+1",
                             "mac": "ctrl+1",
                         }
-                    }, "copyContribution2": {
+                    },
+                    "copyContribution2": {
                         "label": "Copy second translation match in Target",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+2",
                             "mac": "ctrl+2",
                         }
-                    }, "copyContribution3": {
+                    },
+                    "copyContribution3": {
                         "label": "Copy third translation match in Target",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+3",
                             "mac": "ctrl+3",
                         }
-                    }, "splitSegment": {
+                    },
+                    "splitSegment": {
                         "label": "Split Segment",
                         "equivalent": "",
                         "keystrokes": {

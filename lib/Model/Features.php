@@ -78,7 +78,7 @@ class Features {
                     $manifest = @include_once( $fileInfo->getPathname() . DIRECTORY_SEPARATOR . 'manifest.php' );
                     if ( !empty( $manifest ) ) { //Autoload external plugins
 
-                        static::$_INSTANCE->PLUGIN_PATHS[] = $fileInfo->getPathname() . DIRECTORY_SEPARATOR . "lib";
+                        static::$_INSTANCE->PLUGIN_PATHS[ $manifest[ 'FEATURE_CODE' ] ] = $fileInfo->getPathname() . DIRECTORY_SEPARATOR . "lib";
                         static::$_INSTANCE->VALID_CODES[] = $manifest[ 'FEATURE_CODE' ];
                         //load class for autoloading
                         static::$_INSTANCE->PLUGIN_CLASSES[ $manifest[ 'FEATURE_CODE' ] ]    = $manifest[ 'PLUGIN_CLASS' ];
@@ -93,6 +93,19 @@ class Features {
 
         return static::$_INSTANCE;
     }
+
+    /**
+     * @param $code string
+     *
+     * @return mixed
+     */
+    public static function getPluginDirectoryName( $code ) {
+        $instance = static::getInstance();
+        $path = $instance->PLUGIN_PATHS[ $code ];
+        $pathExploded = explode(DIRECTORY_SEPARATOR, $path);
+        return $pathExploded[ count( $pathExploded ) - 2 ];
+    }
+
 
     /**
      * @param $code string

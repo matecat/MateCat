@@ -16,7 +16,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
     const TABLE       = "qa_archived_reports";
     const STRUCT_TYPE = "\\Features\\ReviewImproved\\Model\\ArchivedQualityReportStruct" ;
 
-    protected static $auto_increment_fields = array('id');
+    protected static $auto_increment_field = array('id');
 
     protected function _buildResult( $result_array ) {}
 
