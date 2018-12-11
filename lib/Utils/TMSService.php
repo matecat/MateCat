@@ -9,7 +9,7 @@ class TMSService {
     /**
      * @var FeatureSet
      */
-    private $featureSet;
+    protected $featureSet;
 
     /**
      * @var string The name of the uploaded TMX
