@@ -83,6 +83,11 @@ class AnalyzeDecorator {
         $this->template->split_enabled    = true;
         $this->template->enable_outsource = true;
 
+        if ( array_key_exists( explode( '-', $project_data->target )[0], CatUtils::$cjk ) ) {
+            $this->template->targetIsCJK = var_export( true, true ); //config.js -> editArea is a CJK lang?
+        } else {
+            $this->template->targetIsCJK = var_export( false, true );
+        }
     }
 
 }
