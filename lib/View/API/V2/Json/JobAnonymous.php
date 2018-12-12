@@ -34,14 +34,17 @@ class JobAnonymous extends Job {
     }
 
     /**
-     * @param $jStruct Chunks_ChunkStruct
+     * @param                         $jStruct Chunks_ChunkStruct
+     *
+     * @param \Projects_ProjectStruct $project
+     * @param \FeatureSet             $featureSet
      *
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $jStruct ) {
+    public function renderItem( Chunks_ChunkStruct $jStruct, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
 
-        $jobJson = parent::renderItem( $jStruct );
+        $jobJson = parent::renderItem( $jStruct, $project, $featureSet );
 
         unset( $jobJson[ 'translator' ] );
         unset( $jobJson[ 'owner' ] );
