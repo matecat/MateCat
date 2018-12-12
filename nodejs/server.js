@@ -129,7 +129,7 @@ var stompMessageReceived = function ( body ) {
         return candidate;
     } );
 
-    message.data.payload._type = 'comment';
+    message.data.payload._type = message._type;
 
     browserChannel.send( {
         data: message.data.payload

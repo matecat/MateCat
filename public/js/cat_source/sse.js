@@ -6,7 +6,7 @@ SSE = {
     getSource : function(what) {
         var source = '';
         switch(what) {
-            case 'comments':
+            case 'notifications':
                 source = '/channel/updates' + '?jid=' + config.id_job + '&pw=' + config.password ;
                 break;
 
@@ -16,7 +16,7 @@ SSE = {
 
         return new EventSource(SSE.baseURL + source );
     }
-}
+};
 
 SSE.Message = function(data) {
   this._type = data._type;
@@ -25,7 +25,25 @@ SSE.Message = function(data) {
   this.eventIdentifier = 'sse:' + this._type;
 
   this.isValid = function() {
-    var types = new Array('comment', 'ack');
+    var types = new Array('comment', 'ack', 'contribution');
     return ( types.indexOf( this._type ) != -1 ) ;
   }
-}
+};
+
+NOTIFICATIONS = {
+    start: function (  ) {
+        SSE.init();
+        var source = SSE.getSource( 'notifications' );
+
+        source.addEventListener( 'message', function ( e ) {
+            var message = new SSE.Message( JSON.parse( e.data ) );
+            if ( message.isValid() ) {
+                $( document ).trigger( message.eventIdentifier, message );
+            }
+        }, false );
+
+        $( document ).on( 'sse:ack', function ( ev, message ) {
+            config.id_client = message.data.clientId;
+        } );
+    }
+};
