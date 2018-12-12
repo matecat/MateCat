@@ -95,6 +95,13 @@ if ( QaCheckGlossary.enabled() )
         }
         container.find('.inside-attribute').remove();
         var newHTML = htmlEncode(container.text());
+
+        //Replace ph tags
+        var base64Tags=[];
+        newHTML = newHTML.replace( /&lt;ph.*?equiv-text="base64:(.*?)".*?\/&gt;/gi, function (match, text) {
+            base64Tags.push(match);
+            return "###" + text +"###";
+        });
         unusedMatches = unusedMatches.sort(function(a, b){
             return b.raw_segment.length - a.raw_segment.length;
         });
@@ -103,7 +110,7 @@ if ( QaCheckGlossary.enabled() )
             value = escapeRegExp( value );
             value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
             var re = new RegExp( sprintf( matchRegExp, value ), QaCheckGlossary.qaCheckRegExpFlags);
-            //Check if value match inside the span (Ex: ID, class, data, span)
+
             var check = re.test( '<span class="unusedGlossaryTerm">$1</span>' );
             if ( !check ){
                 newHTML = newHTML.replace(
@@ -116,12 +123,18 @@ if ( QaCheckGlossary.enabled() )
                 );
             }
         });
-        (function (cont, html, matches) {
-            setTimeout(function (  ) {
-                SegmentActions.replaceSourceText(UI.getSegmentId(cont), UI.getSegmentFileId(cont), UI.transformTextForLockTags(html));
-                bindEvents( cont, matches );
-            }, 200);
-        })(segment.el, newHTML, unusedMatches);
+        newHTML = newHTML.replace( /###(.*?)###/gi, function (match, text) {
+            var tag = base64Tags.shift();
+            return tag;
+        });
+        if ( newHTML.indexOf('unusedGlossaryTerm') > -1 ) {
+            (function (cont, html, matches) {
+                setTimeout(function (  ) {
+                    SegmentActions.replaceSourceText(UI.getSegmentId(cont), UI.getSegmentFileId(cont), UI.transformTextForLockTags(html));
+                    bindEvents( cont, matches );
+                }, 200);
+            })(segment.el, newHTML, unusedMatches);
+        }
 
 
     }

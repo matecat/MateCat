@@ -91,7 +91,8 @@ class setRevisionController extends ajaxController {
         }
 
         $job_data = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password_job );
-        $this->featureSet->loadForProject( $job_data->getProject() );
+        $project = $job_data->getProject();
+        $this->featureSet->loadForProject( $project );
 
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
 
@@ -146,7 +147,7 @@ class setRevisionController extends ajaxController {
          * Refresh error counters in the job table
          */
 
-        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $job_data );
+        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $job_data, $project, $this->featureSet );
 
         if ( in_array( Features\ReviewImproved::FEATURE_CODE, $this->featureSet->getCodes() ) || in_array( Features\ReviewExtended::FEATURE_CODE, $this->featureSet->getCodes() ) ) {
             $reviseIssues     = [];

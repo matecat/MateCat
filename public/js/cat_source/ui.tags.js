@@ -84,8 +84,8 @@ $.extend(UI, {
             }
         }
 
-        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
-            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
         _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -141,11 +141,11 @@ $.extend(UI, {
             .replace( /\&lt;\/div\>/gi, "</div>" )
             .replace( /\&lt;br\>/gi, "<br />" )
             .replace( /\&lt;br \/>/gi, "<br />" )
-            .replace( /\&lt;mark/gi, "<mark" )
+            .replace( /\&lt;mark /gi, "<mark " )
             .replace( /\&lt;\/mark/gi, "</mark" )
-            .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
+            .replace( /\&lt;ins /gi, "<ins " ) // For translation conflicts tab
             .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
-            .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
+            .replace( /\&lt;del /gi, "<del " ) // For translation conflicts tab
             .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
@@ -639,7 +639,8 @@ $.extend(UI, {
     removeAllTags: function (currentString) {
         if (currentString) {
             var regExp = this.getXliffRegExpression();
-            return currentString.replace(regExp, '');
+            currentString =  currentString.replace(regExp, '');
+            return UI.decodePlaceholdersToText(currentString);
         } else {
             return '';
         }
