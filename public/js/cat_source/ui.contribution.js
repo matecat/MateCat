@@ -7,6 +7,12 @@ if (config.translation_matches_enabled) {
     $('html').on('copySourceToTarget', 'section', function () {
         UI.setChosenSuggestion(0);
     });
+    $( document ).on( 'sse:contribution', function ( ev, message ) {
+        var $segment = UI.getSegmentById(message.data.id_segment);
+        if ( $segment.length > 0 ) {
+            UI.getContribution_success(message.data, $segment);
+        }
+    } );
 
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
@@ -156,53 +162,49 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-				if (d.errors.length)
-					UI.processErrors(d.errors, 'getContribution');
-				UI.getContribution_success(d, this);
-			},
-			complete: function() {
-				UI.getContribution_complete(current);
+				if (d.errors.length) {
+                    UI.processErrors(d.errors, 'getContribution');
+                    UI.renderContributionErrors(d.errors, this);
+                }
 			}
 		});
 	},
-	getContribution_complete: function(n) {
-		$(".loader", n).removeClass('loader_on');
-	},
-    getContribution_success: function(d, segment) {
-        this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-        this.processContributions(d, segment);
+    getContribution_success: function(data, segment) {
+        $(".loader", segment).removeClass('loader_on');
+        this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(data), 'contribution');
+        this.processContributions(data, segment);
         this.segmentQA(segment);
     },
-  	processContributions: function(d, segment) {
-		if(!d) return true;
-		this.renderContributions(d, segment);
+  	processContributions: function(data, segment) {
+		if(!data) return true;
+		this.renderContributions(data, segment);
 		this.saveInUndoStack();
 		this.blockButtons = false;  //Used for offline mode
 
         // TODO Move to SegmentFooter Component
-		if (d.data.matches && d.data.matches.length > 0) {
-			$('.submenu li.tab-switcher-tm a span', segment).text(' (' + d.data.matches.length + ')');
+		if (data.matches && data.matches.length > 0) {
+			$('.submenu li.tab-switcher-tm a span', segment).text(' (' + data.matches.length + ')');
 		}
-		this.renderContributionErrors(d.errors, segment);
+
     },
 
-    renderContributions: function(d, segment) {
-        if(!d) return true;
+    renderContributions: function(data, segment) {
+        if(!data) return true;
 
         var editarea = $('.editarea', segment);
         if (!$('.sub-editor.matches', segment).length) {
             SegmentActions.createFooter(UI.getSegmentId(segment));
         }
-        if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
+        if ( data.matches && data.matches.length) {
             var editareaLength = editarea.text().trim().length;
-            var translation = d.data.matches[0].translation;
+            var translation = data.matches[0].translation;
 
-            var match = d.data.matches[0].match;
+            var match = data.matches[0].match;
 
             var segment_id = segment.attr('id');
             $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
             $('.tab-switcher-tm .number', segment).text('');
-            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
+            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), data.matches, data.fieldTest);
 
             // UI.setDeleteSuggestion(segment);
             // UI.setContributionSourceDiff(segment);

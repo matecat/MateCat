@@ -391,7 +391,8 @@ class getContributionController extends ajaxController {
 
 //        $this->result[ 'data' ][ 'matches' ] = $matches;
         $this->payload = array(
-                'matches'   => $matches
+                'matches'        => $matches,
+                'id_segment'     => $this->id_segment,
         ) ;
 
         $message = json_encode( array(
