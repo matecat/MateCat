@@ -640,7 +640,8 @@ $.extend(UI, {
     removeAllTags: function (currentString) {
         if (currentString) {
             var regExp = this.getXliffRegExpression();
-            return currentString.replace(regExp, '');
+            currentString =  currentString.replace(regExp, '');
+            return UI.decodePlaceholdersToText(currentString);
         } else {
             return '';
         }
