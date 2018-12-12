@@ -248,6 +248,18 @@ class Upload {
 
     }
 
+    protected function upCountNameCallback( $matches ) {
+        $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
+        $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
+
+        return '_(' . $index . ')' . $ext;
+    }
+
+    protected function upCountName( $name ) {
+        return preg_replace_callback(
+                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ $this, 'upCountNameCallback' ], $name, 1
+        );
+    }
 
     /**
      *
@@ -265,6 +277,10 @@ class Upload {
         $string = preg_replace( '/[^#\pL0-9,\.\-\=_&()\'\"\+\x1A]/u', '', $string ); //strips odd chars and preserve preceding placeholder
         $string = preg_replace( '/' . chr(0x1A) . '/', '_', $string ); //strips whitespace and odd chars
         $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
+
+        while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) ) {
+            $string = $this->upCountName( $string );
+        }
 
         return $string;
 
