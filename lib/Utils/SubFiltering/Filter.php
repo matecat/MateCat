@@ -146,6 +146,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
+        $channel->addLast( new PlaceHoldCtrlCharsForView() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
         /** @var $channel Pipeline */
