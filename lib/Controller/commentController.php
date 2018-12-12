@@ -331,7 +331,7 @@ class commentController extends ajaxController {
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
-        $stomp->send( INIT::$SSE_COMMENTS_QUEUE_NAME,
+        $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
             $message,
             array( 'persistent' => 'true' )
         );

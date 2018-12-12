@@ -7,7 +7,7 @@ SSE = {
         var source = '';
         switch(what) {
             case 'comments':
-                source = '/channel/comments' + '?jid=' + config.id_job + '&pw=' + config.password ;
+                source = '/channel/updates' + '?jid=' + config.id_job + '&pw=' + config.password ;
                 break;
 
             default:

@@ -389,7 +389,34 @@ class getContributionController extends ajaxController {
             }
         }
 
-        $this->result[ 'data' ][ 'matches' ] = $matches;
+//        $this->result[ 'data' ][ 'matches' ] = $matches;
+        $this->payload = array(
+                'matches'   => $matches
+        ) ;
+
+        $message = json_encode( array(
+                '_type' => 'contribution',
+                'data' => array(
+                        'id_job'    => $this->__postInput['id_job'],
+                        'passwords'  => $this->__postInput['password'],
+                        'payload'   => $this->payload
+                )
+        ));
+
+        $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+        $stomp->connect();
+        $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
+                $message,
+                array( 'persistent' => 'true' )
+        );
+    }
+
+    protected function getProjectPasswords() {
+        $pws = array();
+        foreach($this->projectData() as $chunk) {
+            array_push( $pws, $chunk['jpassword'] );
+        }
+        return $pws;
     }
 
     protected function _getContexts(){

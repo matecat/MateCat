@@ -1,23 +1,25 @@
 var SseChannel = require( 'sse-channel' );
-var http       = require( 'http' );
-var os         = require( 'os' );
-var stompit    = require( 'stompit' );
-var url        = require( 'url' );
-var qs         = require( 'querystring' );
-var _          = require( 'lodash' );
-var winston    = require( 'winston' );
-var path       = require( 'path' );
-var ini        = require('node-ini');
+var http = require( 'http' );
+var os = require( 'os' );
+var stompit = require( 'stompit' );
+var url = require( 'url' );
+var qs = require( 'querystring' );
+var _ = require( 'lodash' );
+var winston = require( 'winston' );
+var path = require( 'path' );
+var ini = require( 'node-ini' );
 
-var config     = ini.parseSync( path.resolve(__dirname, 'config.ini') );
+var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
-winston.add( winston.transports.DailyRotateFile, { filename: path.resolve(__dirname, config.log.file) });
-winston.level = config.log.level ;
+// Init logger
+winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
+winston.level = config.log.level;
 
+// Connections Options for stompit
 var connectOptions = {
     'host': config.queue.host,
     'port': config.queue.port,
-    'connectHeaders':{
+    'connectHeaders': {
         'host': '/',
         'login': config.queue.login,
         'passcode': config.queue.passcode,
@@ -28,9 +30,10 @@ var connectOptions = {
 var subscribeHeaders = {
     'destination': config.queue.name,
     'ack': 'client-individual'
-  };
+};
 
-var browserChannel = new SseChannel({
+//SSE Channel Options
+var browserChannel = new SseChannel( {
     retryTimeout: 250,
     historySize: 300, // XXX
     pingInterval: 15000,
@@ -38,124 +41,139 @@ var browserChannel = new SseChannel({
     cors: {
         origins: ['*'] // Defaults to []
     }
-});
+} );
 
-var generateUid = function (separator) {
+/**
+ * Function used to create an unique id
+ * @param separator
+ * @returns {*}
+ */
+var generateUid = function ( separator ) {
     var delim = separator || "";
 
     function S4() {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        return (((1 + Math.random()) * 0x10000) | 0).toString( 16 ).substring( 1 );
     }
 
-    return (S4() + S4() + delim + S4() );
+    return (S4() + S4() + delim + S4());
 };
 
-var browserLoopIntervalTime = 2000;
+//Event triggered when a message is sent to the client
+browserChannel.on( 'message', function ( message ) {
+    // winston.debug('browserChannel message', message);
+} );
 
-browserChannel.on('message', function(message) {
-    // TODO: a message was sent to clients, nothing interesting to do here.
-    winston.debug('browserChannel message', message);
-});
+//Event triggered when a client disconnect
+browserChannel.on( 'disconnect', function ( context, res ) {
+    // winston.debug('browserChannel disconnect', res._clientId);
+} );
 
-browserChannel.on('disconnect', function(context, res) {
-    winston.debug('browserChannel disconnect', res._clientId);
-});
+//Event triggered when a client connect
+browserChannel.on( 'connect', function ( context, req, res ) {
+    // winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
 
-browserChannel.on('connect', function(context, req, res) {
-    winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
-
-    browserChannel.send({
-        data : {
-            _type : 'ack',
-            clientId : res._clientId
+    //Send a message to the client to communicate the clientId
+    browserChannel.send( {
+        data: {
+            _type: 'ack',
+            clientId: res._clientId
         }
-    }, [ res ]);
-});
+    }, [res] );
+} );
 
-http.createServer(function(req, res) {
-  // find job id from requested path
-  var parsedUrl = url.parse( req.url ) ;
-  var path = parsedUrl.path  ;
+/**
+ * We create an HTTP server listening the address in config.path
+ * and add new clients to the browserChannel
+ */
+http.createServer( function ( req, res ) {
+    // find job id from requested path
+    var parsedUrl = url.parse( req.url );
+    var path = parsedUrl.path;
 
-  if (path.indexOf(config.server.path) === 0 ) {
-    var query = qs.parse( parsedUrl.query ) ;
 
-    res._clientId = generateUid();
-    res._matecatJobId = query.jid ;
-    res._matecatPw = query.pw ;
+    if ( path.indexOf( config.server.path ) === 0 ) {
+        var query = qs.parse( parsedUrl.query );
 
-    browserChannel.addClient(req, res);
-  } else {
-    res.writeHead(404);
-    res.end();
-  }
+        res._clientId = generateUid();
+        res._matecatJobId = query.jid;
+        res._matecatPw = query.pw;
 
-}).listen(config.server.port, config.server.address, function() {
-  winston.debug('Listening on http://' + config.server.address + ':' + config.server.port + '/');
-});
-
-var stompMessageReceived = function( body ) {
-  var message = JSON.parse( body );
-
-  var dest = _.filter( browserChannel.connections, function( ele ) {
-    if ( typeof ele._clientId == 'undefined' ) {
-      return false;
+        browserChannel.addClient( req, res );
+    } else {
+        res.writeHead( 404 );
+        res.end();
     }
 
-    var candidate = (
-      ele._matecatJobId == message.data.id_job &&
-      message.data.passwords.indexOf( ele._matecatPw ) !== -1  &&
-      ele._clientId != message.data.id_client
-    );
+} ).listen( config.server.port, config.server.address, function () {
+    winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+} );
 
-    if (candidate) {
-      winston.debug('candidate found', ele._clientId) ;
-    }
+var stompMessageReceived = function ( body ) {
+    var message = JSON.parse( body );
 
-    return candidate ;
-  } );
-
-  message.data.payload._type = 'comment' ;
-
-  browserChannel.send( {
-    data: message.data.payload
-  }, dest );
-}
-
-var startStompConnection = function()   {
-  stompit.connect( connectOptions, function( error, client ) {
-
-    if (typeof client === 'undefined') {
-      setTimeout(startStompConnection, 10000);
-      winston.debug("** client error, restarting connection in 10 seconds", error);
-      return;
-    }
-
-    client.subscribe(subscribeHeaders, function(error, message) {
-      winston.debug('** event received in client subscription');
-
-      if ( error ) {
-        winston.debug('!! subscribe error ' + error.message);
-
-        client.disconnect();
-        startStompConnection();
-
-        return;
-      }
-
-      message.readString( 'utf-8', function(error, body) {
-
-        if ( error ) {
-          winston.debug('!! read message error ' + error.message);
-          return;
+    var dest = _.filter( browserChannel.connections, function ( ele ) {
+        if ( typeof ele._clientId == 'undefined' ) {
+            return false;
         }
-        else {
-          stompMessageReceived(body);
-          message.ack();
+
+        var candidate = (
+            ele._matecatJobId == message.data.id_job &&
+            message.data.passwords.indexOf( ele._matecatPw ) !== -1 &&
+            ele._clientId != message.data.id_client
+        );
+
+        if ( candidate ) {
+            winston.debug( 'candidate found', ele._clientId );
         }
-      } );
-    });
-  } );
-}
+
+        return candidate;
+    } );
+
+    message.data.payload._type = 'comment';
+
+    browserChannel.send( {
+        data: message.data.payload
+    }, dest );
+};
+
+var startStompConnection = function () {
+
+    /**
+     * Start connection with the amq queue
+     */
+    stompit.connect( connectOptions, function ( error, client ) {
+
+        if ( typeof client === 'undefined' ) {
+            setTimeout( startStompConnection, 10000 );
+            winston.debug( "** client error, restarting connection in 10 seconds", error );
+            return;
+        }
+
+        client.subscribe( subscribeHeaders, function ( error, message ) {
+            winston.debug( '** event received in client subscription' );
+
+            if ( error ) {
+                winston.debug( '!! subscribe error ' + error.message );
+
+                client.disconnect();
+                startStompConnection();
+
+                return;
+            }
+
+            message.readString( 'utf-8', function ( error, body ) {
+
+                if ( error ) {
+                    winston.debug( '!! read message error ' + error.message );
+                    return;
+                }
+                else {
+                    stompMessageReceived( body );
+                    message.ack();
+                }
+            } );
+        } );
+    } );
+};
 
 startStompConnection();
