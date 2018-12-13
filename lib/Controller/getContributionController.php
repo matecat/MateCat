@@ -47,6 +47,7 @@ class getContributionController extends ajaxController {
                 'context_after'  => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_before'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -66,6 +67,7 @@ class getContributionController extends ajaxController {
         $this->concordance_search = $this->__postInput[ 'is_concordance' ];
         $this->switch_languages   = $this->__postInput[ 'from_target' ];
         $this->password           = $this->__postInput[ 'password' ];
+        $this->id_client          = $this->__postInput[ 'id_client' ];
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
@@ -391,8 +393,8 @@ class getContributionController extends ajaxController {
 
 //        $this->result[ 'data' ][ 'matches' ] = $matches;
         $this->payload = array(
-                'matches'        => $matches,
                 'id_segment'     => $this->id_segment,
+                'matches'        => $matches,
         ) ;
 
         $message = json_encode( array(
@@ -400,7 +402,8 @@ class getContributionController extends ajaxController {
                 'data' => array(
                         'id_job'    => $this->__postInput['id_job'],
                         'passwords'  => $this->__postInput['password'],
-                        'payload'   => $this->payload
+                        'payload'   => $this->payload,
+                        'id_client' => $this->id_client,
                 )
         ));
 

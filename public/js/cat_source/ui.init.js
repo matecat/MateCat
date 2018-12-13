@@ -36,11 +36,11 @@ $.extend(UI, {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
+        NOTIFICATIONS.start();
     },
 	init: function() {
 
 		this.registerFooterTabs();
-        NOTIFICATIONS.start();
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 

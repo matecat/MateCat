@@ -156,6 +156,7 @@ $.extend(UI, {
                 id_before: idBefore,
                 context_after: contextAfter,
                 id_after: idAfter,
+                id_client: config.id_client
 			},
 			context: $('#segment-' + id),
 			error: function() {

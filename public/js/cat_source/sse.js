@@ -42,6 +42,10 @@ NOTIFICATIONS = {
             }
         }, false );
 
+        source.addEventListener( 'error', function ( e ) {
+            console.error("SSE: server disconnect")
+        }, false );
+
         $( document ).on( 'sse:ack', function ( ev, message ) {
             config.id_client = message.data.clientId;
         } );

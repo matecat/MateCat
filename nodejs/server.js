@@ -11,6 +11,9 @@ var ini = require( 'node-ini' );
 
 var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
+const COMMENTS_TYPE = 'comment';
+const CONTRIBUTIONS_TYPE = 'contribution';
+
 // Init logger
 winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
 winston.level = config.log.level;
@@ -65,7 +68,7 @@ browserChannel.on( 'message', function ( message ) {
 
 //Event triggered when a client disconnect
 browserChannel.on( 'disconnect', function ( context, res ) {
-    // winston.debug('browserChannel disconnect', res._clientId);
+    winston.debug('browserChannel disconnect', res._clientId);
 } );
 
 //Event triggered when a client connect
@@ -108,22 +111,40 @@ http.createServer( function ( req, res ) {
     winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
+var checkCandidate = function ( type, response, message ) {
+    var candidate = false;
+    switch ( type ) {
+        case COMMENTS_TYPE:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId !== message.data.id_client;
+            break;
+        case CONTRIBUTIONS_TYPE:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId === message.data.id_client;
+            break;
+        default:
+            candidate = false;
+    }
+    return candidate;
+};
+
 var stompMessageReceived = function ( body ) {
     var message = JSON.parse( body );
 
-    var dest = _.filter( browserChannel.connections, function ( ele ) {
-        if ( typeof ele._clientId == 'undefined' ) {
+    var dest = _.filter( browserChannel.connections, function ( serverResponse ) {
+        if ( typeof serverResponse._clientId === 'undefined' ) {
             return false;
         }
 
-        var candidate = (
-            ele._matecatJobId == message.data.id_job &&
-            message.data.passwords.indexOf( ele._matecatPw ) !== -1 &&
-            ele._clientId != message.data.id_client
-        );
+        var candidate = checkCandidate( message._type, serverResponse, message);
 
         if ( candidate ) {
-            winston.debug( 'candidate found', ele._clientId );
+            if ( message._type === CONTRIBUTIONS_TYPE) {
+                winston.debug( 'Contribution segment-id: ' + message.data.payload.id_segment );
+            }
+            winston.debug( 'candidate found', serverResponse._clientId );
         }
 
         return candidate;
