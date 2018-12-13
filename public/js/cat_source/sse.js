@@ -19,31 +19,43 @@ SSE = {
 };
 
 SSE.Message = function(data) {
-  this._type = data._type;
-  this.data = data;
+    this._type = data._type;
+    this.data = data;
+    this.types = new Array('comment', 'ack', 'contribution');
+    this.eventIdentifier = 'sse:' + this._type;
 
-  this.eventIdentifier = 'sse:' + this._type;
+    this.isValid = function() {
 
-  this.isValid = function() {
-    var types = new Array('comment', 'ack', 'contribution');
-    return ( types.indexOf( this._type ) != -1 ) ;
-  }
+        return ( this.types.indexOf( this._type ) !== -1 ) ;
+    }
 };
 
 NOTIFICATIONS = {
     start: function (  ) {
+        var self = this;
         SSE.init();
-        var source = SSE.getSource( 'notifications' );
+        this.source = SSE.getSource( 'notifications' );
+        this.addEvents();
 
-        source.addEventListener( 'message', function ( e ) {
+    },
+    restart: function (  ) {
+        this.source = SSE.getSource( 'notifications' );
+        this.addEvents();
+    },
+    addEvents: function (  ) {
+        var self = this;
+        this.source.addEventListener( 'message', function ( e ) {
             var message = new SSE.Message( JSON.parse( e.data ) );
             if ( message.isValid() ) {
                 $( document ).trigger( message.eventIdentifier, message );
             }
         }, false );
 
-        source.addEventListener( 'error', function ( e ) {
-            console.error("SSE: server disconnect")
+        this.source.addEventListener( 'error', function ( e ) {
+            console.error("SSE: server disconnect");
+            setTimeout(function (  ) {
+                self.restart();
+            }, 6000)
         }, false );
 
         $( document ).on( 'sse:ack', function ( ev, message ) {
