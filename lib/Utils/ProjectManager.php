@@ -222,6 +222,15 @@ class ProjectManager {
         $this->projectStructure[ 'project_name' ] = $newName;
     }
 
+    protected function _checkForUploadToken(){
+        if( !isset( $this->projectStructure[ 'uploadToken' ] ) || empty( $this->projectStructure[ 'uploadToken' ] ) ){
+            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                    "code"    => -7,
+                    "message" => "Invalid Upload Token."
+            ];
+        }
+    }
+
     /**
      * @param \Teams\TeamStruct $team
      */
@@ -329,6 +338,8 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
 
         $this->_sanitizeProjectName();
+        $this->_checkForUploadToken();
+
     }
 
     /**
@@ -363,6 +374,7 @@ class ProjectManager {
     }
 
     public function createProject() {
+
         $this->sanitizeProjectStructure();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
