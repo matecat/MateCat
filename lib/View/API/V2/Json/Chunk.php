@@ -18,10 +18,12 @@ class Chunk extends Job {
      * @throws \Exceptions\NotFoundError
      */
     public function renderOne( \Chunks_ChunkStruct $chunk ) {
+        $project = $chunk->getProject();
+        $featureSet = $project->getFeatures();
         return [
                 'job' => [
                         'id'     => (int)$chunk->id,
-                        'chunks' => [ $this->renderItem( $chunk ) ]
+                        'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
                 ]
         ];
     }

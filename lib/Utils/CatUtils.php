@@ -680,7 +680,7 @@ class CatUtils {
     public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
 
         $string = self::clean_raw_string_4_word_count( $string, $source_lang );
-        
+
         /**
          * Escape dash and underscore and replace them with Macro and Cedilla characters!
          *
@@ -885,15 +885,19 @@ class CatUtils {
      * Returns the string representing the overall quality for a job,
      * taking into account both old revision and new revision.
      *
-     * @param $job
+     * @param Jobs_JobStruct         $job
+     *
+     * @param Projects_ProjectStruct $project
+     * @param FeatureSet             $featureSet
+     *
      * @return string
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
-        $values = self::getQualityInfoFromJobStruct( $job );
+        $values = self::getQualityInfoFromJobStruct( $job, $project, $featureSet );
 
-        $result = null ;
-        $codes = $job->getProject()->getFeatures()->getCodes();
+        $result = null;
+        $codes  = $featureSet->getCodes();
 
         if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes) ) {
 
@@ -913,17 +917,17 @@ class CatUtils {
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param Jobs_JobStruct         $job
+     *
+     * @param Projects_ProjectStruct $project
+     * @param FeatureSet             $featureSet
      *
      * @return array|\LQA\ChunkReviewStruct|null
      *
      */
-    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job ){
+    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $result = null ;
-
-        $project = $job->getProject();
-        $featureSet = $project->getFeatures();
 
         if ( in_array( \Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( \Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;

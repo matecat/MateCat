@@ -11,6 +11,35 @@ class MetadataDao extends \DataAccess_AbstractDao {
 
     const _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
 
+    public function getAllByUidList( Array $UIDs ) {
+
+        if( empty( $UIDs ) ){
+            return [];
+        }
+
+        $stmt = $this->_getStatementForCache(
+                "SELECT * FROM user_metadata WHERE " .
+                " uid IN( " . str_repeat( '?,', count( $UIDs ) - 1 ) . '?' . " ) "
+        );
+
+        /**
+         * @var $rs MetadataStruct[]
+         */
+        $rs = $this->_fetchObject(
+                $stmt,
+                new MetadataStruct(),
+                $UIDs
+        );
+
+        $resultSet = [];
+        foreach( $rs as $metaDataRow ){
+            $resultSet[ $metaDataRow->uid ][] = $metaDataRow;
+        }
+
+        return $resultSet;
+
+    }
+
     public function getAllByUid( $uid ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(

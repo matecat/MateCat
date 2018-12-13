@@ -34,7 +34,7 @@ class Bootstrap {
         self::$_INI_VERSION = $mv['version'];
 
         $this->_setIncludePath();
-        spl_autoload_register( 'Bootstrap::loadClass' );
+        spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
         require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
@@ -362,17 +362,17 @@ class Bootstrap {
 
         INIT::obtain(); //load configurations
 
-        $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
-
-        if ( self::$CONFIG['ENV'] == 'production' ) {
-            if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
-                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
-            }
-        } else {
-            if( stripos( $fileSystem, 'nfs' ) !== false && self::$CONFIG['CHECK_FS'] ){
-                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
-            }
-        }
+//        $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
+//
+//        if ( self::$CONFIG['ENV'] == 'production' ) {
+//            if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
+//                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
+//            }
+//        } else {
+//            if( stripos( $fileSystem, 'nfs' ) !== false && self::$CONFIG['CHECK_FS'] ){
+//                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
+//            }
+//        }
 
         Features::setIncludePath();
 
