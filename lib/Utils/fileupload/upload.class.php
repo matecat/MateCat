@@ -286,6 +286,12 @@ class UploadHandler {
             return $this->delete();
         }
 
+        if( empty( $_COOKIE[ 'upload_session' ] ) || !preg_match( '|\{[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}\}|', $_COOKIE[ 'upload_session' ] ) ){
+            $info = [ new stdClass() ];
+            $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
+            $this->flush( $info );
+        }
+
         $upload = isset( $_FILES[ $this->options[ 'param_name' ] ] ) ? $_FILES[ $this->options[ 'param_name' ] ] : null;
 
         $info = [];
@@ -350,23 +356,27 @@ class UploadHandler {
         }
         //check for server misconfiguration
 
-        header( 'Vary: Accept' );
+        $this->flush( $info );
+
+    }
+
+    public function flush( $info ){
+
         $json     = json_encode( $info );
-        $redirect = isset( $_REQUEST[ 'redirect' ] ) ?
-                stripslashes( $_REQUEST[ 'redirect' ] ) : null;
+        $redirect = isset( $_REQUEST[ 'redirect' ] ) ? stripslashes( $_REQUEST[ 'redirect' ] ) : null;
+
+        header( 'Vary: Accept' );
+        header( 'Content-type: application/json' );
 
         if ( $redirect ) {
             header( 'Location: ' . sprintf( $redirect, rawurlencode( $json ) ) );
             return;
         }
 
-        if ( isset( $_SERVER[ 'HTTP_ACCEPT' ] ) && ( strpos( $_SERVER[ 'HTTP_ACCEPT' ], 'application/json' ) !== false ) ) {
-            header( 'Content-type: application/json' );
-        } else {
-            header( 'Content-type: text/plain' );
-        }
-
         echo $json;
+
+        die();
+
     }
 
     public function delete() {

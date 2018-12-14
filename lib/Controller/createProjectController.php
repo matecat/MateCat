@@ -354,15 +354,12 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
         $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
-        $projectManager->sanitizeProjectStructure();
-
-        /**
-         * @var ArrayObject $this ->projectStructure['result']['errors']
-         */
-        if ( $projectStructure[ 'result' ][ 'errors' ]->count() ) {
+        try {
+            $projectManager->sanitizeProjectStructure();
+        } catch ( Exception $e ){
             $this->result[ 'errors' ][] = [
-                    "code" => $projectStructure[ 'result' ][ 'errors' ][ 0 ][ 'code' ],
-                    "message" => $projectStructure[ 'result' ][ 'errors' ][ 0 ][ 'message' ]
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage()
             ];
             return -1;
         }
