@@ -166,7 +166,7 @@ class newProjectController extends viewController {
     private function setOrGetGuid() {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $this->guid = Utils::create_guid();
+            $this->guid = Utils::createToken();
             setcookie( "upload_session", $this->guid, time() + 86400, '/' );
         } else {
             $this->guid = $_COOKIE[ 'upload_session' ];

@@ -286,7 +286,7 @@ class UploadHandler {
             return $this->delete();
         }
 
-        if( empty( $_COOKIE[ 'upload_session' ] ) || !preg_match( '|\{[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}\}|', $_COOKIE[ 'upload_session' ] ) ){
+        if( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ){
             $info = [ new stdClass() ];
             $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
             $this->flush( $info );

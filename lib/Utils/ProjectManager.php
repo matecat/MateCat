@@ -227,8 +227,8 @@ class ProjectManager {
     /**
      * @throws Exception
      */
-    protected function _checkForUploadToken(){
-        if( !isset( $this->projectStructure[ 'uploadToken' ] ) || empty( $this->projectStructure[ 'uploadToken' ] ) ){
+    protected function _validateUploadToken(){
+        if( !isset( $this->projectStructure[ 'uploadToken' ] ) || !Utils::isTokenValid( $this->projectStructure[ 'uploadToken' ] ) ){
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -19,
                     "message" => "Invalid Upload Token."
@@ -345,7 +345,7 @@ class ProjectManager {
 
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
         $this->_sanitizeProjectName();
-        $this->_checkForUploadToken();
+        $this->_validateUploadToken();
 
     }
 
