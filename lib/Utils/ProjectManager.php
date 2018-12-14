@@ -225,7 +225,7 @@ class ProjectManager {
     protected function _checkForUploadToken(){
         if( !isset( $this->projectStructure[ 'uploadToken' ] ) || empty( $this->projectStructure[ 'uploadToken' ] ) ){
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -7,
+                    "code"    => -19,
                     "message" => "Invalid Upload Token."
             ];
         }
