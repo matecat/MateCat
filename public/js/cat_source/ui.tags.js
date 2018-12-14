@@ -166,6 +166,7 @@ $.extend(UI, {
      * @returns {*}
      */
     transformTagsWithHtmlAttribute: function (tx) {
+        var returnValue;
         try {
             var base64Array=[];
             var phIDs =[];
@@ -189,9 +190,12 @@ $.extend(UI, {
                 return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
             });
             // delete(base64Array);
-            return tx;
+            returnValue = tx;
         } catch (e) {
             console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
+            returnValue = "";
+        } finally {
+            return returnValue;
         }
 
 
