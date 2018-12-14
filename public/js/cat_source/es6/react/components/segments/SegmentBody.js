@@ -125,7 +125,6 @@ class SegmentBody extends React.Component {
         return (
             <div className="text segment-body-content" ref={(body)=>this.segmentBody=body}>
                 <div className="wrap">
-                    <span className="loader"/>
                     <div className="outersource">
                         <SegmentSource
                             segment={this.props.segment}

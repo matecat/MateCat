@@ -55,7 +55,7 @@ NOTIFICATIONS = {
             console.error("SSE: server disconnect");
             setTimeout(function (  ) {
                 self.restart();
-            }, 6000)
+            }, 5000)
         }, false );
 
         $( document ).on( 'sse:ack', function ( ev, message ) {

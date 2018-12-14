@@ -95,7 +95,6 @@ $.extend(UI, {
 
         if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
             SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
-            $(".loader", current).removeClass('loader_on');
             if (!next) {
                 this.blockButtons = false;
                 this.segmentQA(segment);
@@ -104,7 +103,6 @@ $.extend(UI, {
                 this.blockButtons = false;
             return $.Deferred().resolve();
 		}
-        $(".loader", current).addClass('loader_on');
 		if ((!current.length) && (next)) {
 			return $.Deferred().resolve();
 		}
@@ -127,10 +125,6 @@ $.extend(UI, {
 
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
-
-            if (!next) {
-                $(".loader", current).addClass('loader_on');
-            }
 
             // `next` and `untranslated next` are the same
             if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
@@ -171,7 +165,6 @@ $.extend(UI, {
 		});
 	},
     getContribution_success: function(data, segment) {
-        $(".loader", segment).removeClass('loader_on');
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(data), 'contribution');
         this.processContributions(data, segment);
         this.segmentQA(segment);
@@ -193,9 +186,9 @@ $.extend(UI, {
         if(!data) return true;
 
         var editarea = $('.editarea', segment);
-        if (!$('.sub-editor.matches', segment).length) {
-            SegmentActions.createFooter(UI.getSegmentId(segment));
-        }
+        // if (!$('.sub-editor.matches', segment).length) {
+        //     SegmentActions.createFooter(UI.getSegmentId(segment));
+        // }
         if ( data.matches && data.matches.length) {
             var editareaLength = editarea.text().trim().length;
             var translation = data.matches[0].translation;
