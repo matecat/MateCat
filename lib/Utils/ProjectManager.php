@@ -208,6 +208,7 @@ class ProjectManager {
      * so to perform the check only the first time on $projectStructure['project_name'].
      *
      * @return bool|mixed
+     * @throws Exception
      */
     protected function _sanitizeProjectName() {
         $newName = self::_sanitizeName( $this->projectStructure[ 'project_name' ] );
@@ -217,17 +218,22 @@ class ProjectManager {
                     "code"    => -5,
                     "message" => "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!"
             ];
+            throw new Exception( "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!" , -5 );
         }
 
         $this->projectStructure[ 'project_name' ] = $newName;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _checkForUploadToken(){
         if( !isset( $this->projectStructure[ 'uploadToken' ] ) || empty( $this->projectStructure[ 'uploadToken' ] ) ){
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -19,
                     "message" => "Invalid Upload Token."
             ];
+            throw new Exception( "Invalid Upload Token." , -19 );
         }
     }
 
@@ -333,10 +339,11 @@ class ProjectManager {
      * Perform sanitization of the projectStructure and assign errors.
      * Resets the errors array to avoid subsequent calls to pile up errors.
      *
+     * @throws Exception
      */
     public function sanitizeProjectStructure() {
-        $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
 
+        $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
         $this->_sanitizeProjectName();
         $this->_checkForUploadToken();
 
@@ -375,7 +382,11 @@ class ProjectManager {
 
     public function createProject() {
 
-        $this->sanitizeProjectStructure();
+        try {
+            $this->sanitizeProjectStructure();
+        } catch ( Exception $e ){
+            //Found Errors
+        }
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] );
