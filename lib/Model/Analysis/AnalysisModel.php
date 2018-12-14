@@ -95,7 +95,12 @@ class Analysis_AnalysisModel {
 
         $this->pid = $this->project->id;
 
-        foreach ( $this->project_data as $p_jdata ) {
+        /**
+         * @var $object__p_jdata ShapelessConcreteStruct
+         */
+        foreach ( $this->project_data as $object__p_jdata ) {
+
+            $p_jdata = $object__p_jdata->getArrayCopy();
 
             $p_jdata[ 'filename' ] = ZipArchiveExtended::getFileName( $p_jdata[ 'filename' ] );
 
