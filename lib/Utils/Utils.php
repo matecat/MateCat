@@ -382,7 +382,7 @@ class Utils {
 
     }
 
-    public static function create_guid( $namespace = '' ) {
+    public static function createToken( $namespace = '' ) {
 
         static $guid = '';
         $uid  = uniqid( "", true );
@@ -417,6 +417,18 @@ class Utils {
         \Log::doLog('created GUID', $guid ); 
 
         return $guid;
+    }
+
+    /**
+     * @param $token
+     *
+     * @return bool
+     */
+    public static function isTokenValid( $token = null ){
+        if( empty( $token ) || !preg_match( '|^\{[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}\}$|', $token ) ){
+            return false;
+        }
+        return true;
     }
 
     public static function filterLangDetectArray( $arr ) {
