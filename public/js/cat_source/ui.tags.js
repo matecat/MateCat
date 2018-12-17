@@ -84,8 +84,8 @@ $.extend(UI, {
             }
         }
 
-        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
-            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
         _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -640,7 +640,8 @@ $.extend(UI, {
     removeAllTags: function (currentString) {
         if (currentString) {
             var regExp = this.getXliffRegExpression();
-            return currentString.replace(regExp, '');
+            currentString =  currentString.replace(regExp, '');
+            return UI.decodePlaceholdersToText(currentString);
         } else {
             return '';
         }

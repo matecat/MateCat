@@ -18,11 +18,7 @@ use Features\ReviewExtended;
 use Features\ReviewImproved;
 use Langs_Languages;
 use Langs_LanguageDomains;
-use LQA\ChunkReviewDao;
 use ManageUtils;
-use Routes;
-use TmKeyManagement_ClientTmKeyStruct;
-use Users_UserStruct;
 use Utils;
 use WordCount_Struct;
 use FeatureSet;
@@ -37,24 +33,26 @@ class Chunk extends \API\V2\Json\Chunk {
      * @throws \Exceptions\NotFoundError
      */
     public function renderOne( \Chunks_ChunkStruct $chunk ) {
+        $project = $chunk->getProject();
+        $featureSet = $project->getFeatures();
         return [
                 'job' => [
                         'id'     => (int)$chunk->id,
-                        'chunks' => [ $this->renderItem( $chunk ) ]
+                        'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
                 ]
         ];
     }
 
     /**
-     * @param $jStruct Chunks_ChunkStruct
+     * @param                         $jStruct Chunks_ChunkStruct
+     *
+     * @param \Projects_ProjectStruct $project
+     * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws \Exception
-     * @throws \Exceptions\NotFoundError
      */
-    public function renderItem( Chunks_ChunkStruct $jStruct ) {
-
-        $featureSet = new FeatureSet();
+    public function renderItem( Chunks_ChunkStruct $jStruct, \Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $outsourceInfo = $jStruct->getOutsource();
         $tStruct       = $jStruct->getTranslator();
@@ -83,9 +81,7 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-        $featureSet->loadForProject( $jStruct->getJob()->getProject() );
-
-        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $jStruct );
+        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $jStruct, $project, $featureSet );
 
         if ( in_array( ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
             $reviseIssues     = [];
@@ -122,7 +118,6 @@ class Chunk extends \API\V2\Json\Chunk {
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
             $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
 
-            $project = $jStruct->getProject();
             $model = $project->getLqaModel() ;
             $categories = $model->getSerializedCategories();
 
@@ -211,9 +206,6 @@ class Chunk extends \API\V2\Json\Chunk {
 
         ];
 
-
-        $project = $jStruct->getProject();
-
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
@@ -222,7 +214,7 @@ class Chunk extends \API\V2\Json\Chunk {
         $formatted = new ProjectUrls( $projectData );
 
         /** @var $formatted ProjectUrls */
-        $formatted = $project->getFeatures()->filter( 'projectUrls', $formatted );
+        $formatted = $featureSet->filter( 'projectUrls', $formatted );
 
         $urlsObject       = $formatted->render( true );
         $result[ 'urls' ] = $urlsObject[ 'jobs' ][ $jStruct->id ][ 'chunks' ][ $jStruct->password ];

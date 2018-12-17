@@ -140,12 +140,21 @@ class MembershipDao extends \DataAccess_AbstractDao {
         );
 
         if ( $traverse ) {
-            foreach ( $members as $member ) {
-                $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $member->uid ) );
-                $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUid( $member->uid ) );
-            }
-        }
 
+            $membersUIDs = [];
+            foreach ( $members as $member ) {
+                $membersUIDs[] = $member->uid;
+            }
+
+            $users = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUids( $membersUIDs );
+            $metadata = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUidList( $membersUIDs );
+
+            foreach( $members as $member ){
+                $member->setUser( $users[ $member->uid ] );
+                $member->setUserMetadata( $metadata[ $member->uid ] );
+            }
+
+        }
 
         return $members;
     }

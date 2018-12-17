@@ -369,7 +369,7 @@ if ( MBC.enabled() )
         };
 
         var scrollSegment = function ( section ) {
-            if ($('article.mbc-commenting-opened').length > 0 ) {
+            if ($('article.mbc-commenting-opened').length > 0 && section.length > 0) {
 
                 var scrollAnimation = $( UI.scrollSelector );
                 var segment = section;

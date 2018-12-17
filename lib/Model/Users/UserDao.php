@@ -26,30 +26,45 @@ class Users_UserDao extends DataAccess_AbstractDao {
         WHERE jobs.id = :job_id
         LIMIT 1 ";
 
+    /**
+     * @param $uids_array
+     *
+     * @return Users_UserStruct[]
+     */
     public function getByUids( $uids_array ) {
-        $sanitized_array = array();
+
+        $sanitized_array = [];
+
         foreach ( $uids_array as $k => $v ) {
             if ( !is_numeric( $v ) ) {
-                array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
+                $sanitized_array[] = (int)$v[ 'uid' ];
             } else {
-                array_push( $sanitized_array, ( (int)$v ) );
+                $sanitized_array[] = (int)$v;
             }
         }
 
         if ( empty( $sanitized_array ) ) {
-            return array();
+            return [];
         }
 
         $query = "SELECT * FROM " . self::TABLE .
-                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1) . '?' . " ) ";
+                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1 ) . '?' . " ) ";
 
-        $stmt = $this->setCacheTTL( 60 * 10 )->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForCache( $query );
 
-        return $this->_fetchObject(
+        $__resultSet = $this->_fetchObject(
                 $stmt,
                 new Users_UserStruct(),
                 $sanitized_array
         );
+
+        $resultSet = [];
+        foreach( $__resultSet as $user ){
+            $resultSet[ $user->uid ] = $user;
+        }
+
+        return $resultSet;
+
     }
 
     /**

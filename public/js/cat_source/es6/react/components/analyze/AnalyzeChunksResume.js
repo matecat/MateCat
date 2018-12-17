@@ -330,9 +330,15 @@ class AnalyzeChunksResume extends React.Component {
                         <p/>
                     </div>
                     <div className="titles-compare">
+                        { !config.isCJK ? (
                         <div className="title-total-words">
                             <h5>Total word count</h5>
                         </div>
+                        ) : (
+                        <div className="title-total-words">
+                            <h5>Total character count</h5>
+                        </div>
+                            )}
                         <div className="title-standard-words">
                             <h5>Industry weighted
                                 <span data-tooltip="As counted by other CAT tools">

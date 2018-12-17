@@ -571,6 +571,14 @@ class NewController extends ajaxController {
         //set features override
         $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
+        try {
+            $this->projectManager->sanitizeProjectStructure();
+        } catch ( Exception $e ){
+            $this->api_output[ 'message' ] = $e->getMessage();
+            $this->api_output[ 'debug' ] = $e->getCode();
+            return -1;
+        }
+
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
@@ -581,7 +589,6 @@ class NewController extends ajaxController {
 
         $this->projectStructure = $projectStructure;
 
-        $this->projectManager->sanitizeProjectStructure();
 
         Queue::sendProject( $projectStructure );
 

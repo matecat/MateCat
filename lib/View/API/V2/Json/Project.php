@@ -69,15 +69,16 @@ class Project {
     }
 
     /**
-     * @param       $data Projects_ProjectStruct
+     * @param       $project Projects_ProjectStruct
      *
      * @return array
      * @throws \Exception
      * @throws \Exceptions\NotFoundError
      */
-    public function renderItem( Projects_ProjectStruct $data ) {
+    public function renderItem( Projects_ProjectStruct $project ) {
 
-        $jobs = $data->getJobs(60 * 10 ); //cached
+        $featureSet = $project->getFeatures();
+        $jobs = $project->getJobs(60 * 10 ); //cached
 
         $jobJSONs    = [];
         $jobStatuses = [];
@@ -100,28 +101,28 @@ class Project {
                 /**
                  * @var $jobJSON Job
                  */
-                $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ) );
+                $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
                 $jobStatuses[] = $job->status_owner;
             }
 
         }
 
         $projectOutputFields = [
-                'id'                   => (int)$data->id,
-                'password'             => $data->password,
-                'name'                 => $data->name,
-                'id_team'              => (int)$data->id_team,
-                'id_assignee'          => (int)$data->id_assignee,
-                'create_date'          => $data->create_date,
-                'fast_analysis_wc'     => (int)$data->fast_analysis_wc,
-                'standard_analysis_wc' => (int)$data->standard_analysis_wc,
-                'project_slug'         => Utils::friendly_slug( $data->name ),
+                'id'                   => (int)$project->id,
+                'password'             => $project->password,
+                'name'                 => $project->name,
+                'id_team'              => (int)$project->id_team,
+                'id_assignee'          => (int)$project->id_assignee,
+                'create_date'          => $project->create_date,
+                'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
+                'standard_analysis_wc' => (int)$project->standard_analysis_wc,
+                'project_slug'         => Utils::friendly_slug( $project->name ),
                 'jobs'                 => $jobJSONs,
-                'features'             => implode( ",", $data->getFeatures()->getCodes() ),
+                'features'             => implode( ",", $featureSet->getCodes() ),
                 'is_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
                 'is_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
-                'remote_file_service'  => $data->getRemoteFileServiceName(),
-                'due_date'             => Utils::api_timestamp( $data->due_date )
+                'remote_file_service'  => $project->getRemoteFileServiceName(),
+                'due_date'             => Utils::api_timestamp( $project->due_date )
         ];
 
         return $projectOutputFields;

@@ -309,8 +309,6 @@ class createProjectController extends ajaxController {
         \Log::doLog( '------------------------------' );
         \Log::doLog( $arFiles );
 
-        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
-
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
@@ -355,6 +353,18 @@ class createProjectController extends ajaxController {
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
         $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
+
+        try {
+            $projectManager->sanitizeProjectStructure();
+        } catch ( Exception $e ){
+            $this->result[ 'errors' ][] = [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage()
+            ];
+            return -1;
+        }
+
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
 
         Queue::sendProject( $projectStructure );
 

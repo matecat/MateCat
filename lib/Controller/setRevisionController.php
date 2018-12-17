@@ -99,12 +99,9 @@ class setRevisionController extends ajaxController {
             return;
         }
 
-        $job_data = getJobData( (int)$this->id_job, $this->password_job );
-        if ( empty( $job_data ) ) {
-            $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-        }
+        $job_data = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password_job );
+        $project = $job_data->getProject();
+        $this->featureSet->loadForProject( $project );
 
         //add check for job status archived.
         if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
@@ -112,11 +109,6 @@ class setRevisionController extends ajaxController {
         }
 
         $this->parseIDSegment();
-        $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
-        if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password_job, $this->id_segment ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -7, "message" => "wrong password" );
-        }
 
         $wStruct = new WordCount_Struct();
 
@@ -161,23 +153,9 @@ class setRevisionController extends ajaxController {
          * Refresh error counters in the job table
          */
 
+        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $job_data, $project, $this->featureSet );
 
-
-        /**
-         * Retrieve information about job errors
-         * ( Note: these information are fed by the revision process )
-         * @see setRevisionController
-         */
-
-        $featureSet = new FeatureSet();
-
-        $chunk = Chunks_ChunkDao::getByIdAndPassword($job_data['id'], $job_data['password']);
-
-        $featureSet->loadForProject( $chunk->getProject() );
-
-        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $chunk );
-
-        if ( in_array( Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
+        if ( in_array( Features\ReviewImproved::FEATURE_CODE, $this->featureSet->getCodes() ) || in_array( Features\ReviewExtended::FEATURE_CODE, $this->featureSet->getCodes() ) ) {
             $reviseIssues     = [];
             $qualityReportDao = new Features\ReviewImproved\Model\QualityReportDao();
             $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $chunk->id, $chunk->password );
