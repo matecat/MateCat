@@ -5,7 +5,7 @@ namespace Features ;
 use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
-use Contribution\ContributionStruct;
+use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
 use Features\ReviewImproved\ChunkReviewModel;
@@ -41,12 +41,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * XXX: not sure this was the best way to solve this problem.
      *
-     * @param ContributionStruct     $contributionStruct
+     * @param ContributionSetStruct  $contributionStruct
      * @param Projects_ProjectStruct $project
      *
-     * @return ContributionStruct
+     * @return ContributionSetStruct
      */
-    public function filterContributionStructOnSetTranslation( ContributionStruct $contributionStruct, Projects_ProjectStruct $project ) {
+    public function filterContributionStructOnSetTranslation( ContributionSetStruct $contributionStruct, Projects_ProjectStruct $project ) {
 
         if ( $contributionStruct->fromRevision ) {
             $contributionStruct->propagationRequest = true ;

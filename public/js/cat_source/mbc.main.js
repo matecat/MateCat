@@ -12,8 +12,6 @@ if ( MBC.enabled() )
     (function ( $, config, window, MBC, undefined ) {
 
         var originalScrollSegment = UI.scrollSegment;
-        SSE.init();
-
         MBC.const = {
             get commentAction() {
                 return 'comment';
@@ -123,15 +121,6 @@ if ( MBC.enabled() )
                 return {active: active, total: total};
             }
         };
-
-        var source = SSE.getSource( 'comments' );
-
-        source.addEventListener( 'message', function ( e ) {
-            var message = new SSE.Message( JSON.parse( e.data ) );
-            if ( message.isValid() ) {
-                $( document ).trigger( message.eventIdentifier, message );
-            }
-        }, false );
 
         var getUsername = function () {
             if ( customUserName ) return customUserName;
@@ -982,10 +971,6 @@ if ( MBC.enabled() )
             });
             //New icon inserted in the header -> resize file name
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-        } );
-
-        $( document ).on( 'sse:ack', function ( ev, message ) {
-            config.id_client = message.data.clientId;
         } );
 
         $( document ).on( 'sse:comment', function ( ev, message ) {

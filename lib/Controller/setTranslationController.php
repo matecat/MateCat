@@ -1,6 +1,6 @@
 <?php
 
-use \Contribution\ContributionStruct, \Contribution\Set;
+use \Contribution\ContributionSetStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 
@@ -873,7 +873,7 @@ class setTranslationController extends ajaxController {
          */
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
 
-        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;

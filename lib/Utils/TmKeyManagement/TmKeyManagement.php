@@ -100,7 +100,7 @@ class TmKeyManagement_TmKeyManagement {
          * The setContribution is async and the jobs metadata are cached.
          * Destroy the cache so the async processes can reload the new key data
          * @see \AsyncTasks\Workers\SetContributionWorker
-         * @see \Contribution\ContributionStruct
+         * @see \Contribution\ContributionSetStruct
          */
         $jobDao = new \Jobs_JobDao( Database::obtain() );
         $jobDao->destroyCache( new \Jobs_JobStruct( array( 'id' => $id_job, 'password' => $job_pass ) ) );

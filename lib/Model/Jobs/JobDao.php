@@ -22,10 +22,10 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * XXX: Be careful, used by the ContributionStruct
+     * XXX: Be careful, used by the ContributionSetStruct
      *
      * @see \AsyncTasks\Workers\SetContributionWorker
-     * @see \Contribution\ContributionStruct
+     * @see \Contribution\ContributionSetStruct
      *
      * @param Jobs_JobStruct $jobQuery
      *

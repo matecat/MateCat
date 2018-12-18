@@ -218,7 +218,12 @@ class SegmentFooterTabMatches extends React.Component {
             className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
             id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
             <div className="overflow">
-                {matches}
+                { !_.isUndefined(matches) && matches.length > 0 ? (
+                    matches
+                ): (
+                    <span className="loader loader_on"/>
+                )}
+
             </div>
             <div className="engine-errors"></div>
         </div>

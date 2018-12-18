@@ -22,10 +22,10 @@ use Projects_MetadataStruct;
 use TaskRunner\Commons\Params;
 
 /**
- * Class ContributionStruct
+ * Class ContributionSetStruct
  * @package Contribution
  */
-class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     protected $cached_results = array();
 

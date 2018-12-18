@@ -8,7 +8,7 @@
  *
  */
 
-use \Contribution\ContributionStruct, \Contribution\Set;
+use \Contribution\ContributionSetStruct, \Contribution\Set;
 use TaskRunner\Commons\ContextList;
 use \TaskRunner\Commons\QueueElement;
 
@@ -50,7 +50,7 @@ class SetContributionTest extends \AbstractTest {
 
     public function testSetContributionEnqueue(){
 
-        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
@@ -80,14 +80,14 @@ class SetContributionTest extends \AbstractTest {
         $FrameBody = new QueueElement( json_decode( $message->body, true ) );
         $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $FrameBody->classLoad );
 
-        $fromAMQ_ContributionStruct = new ContributionStruct( $FrameBody->params->toArray() );
+        $fromAMQ_ContributionStruct = new ContributionSetStruct( $FrameBody->params->toArray() );
         $this->assertEquals( $contributionStruct, $fromAMQ_ContributionStruct );
 
     }
 
     public function testSetContributionEnqueueException(){
 
-        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";

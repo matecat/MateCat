@@ -2,10 +2,45 @@
 	Component: ui.init
  */
 $.extend(UI, {
+    start: function () {
+
+        // TODO: the following variables used to be set in UI.init() which is called
+        // during rendering. Those have been moved here because of the init change
+        // of SegmentFilter, see below.
+        UI.firstLoad = true;
+        UI.body = $('body');
+        UI.checkSegmentsArray = {} ;
+        UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        UI.setShortcuts();
+        // If some icon is added on the top header menu, the file name is resized
+        APP.addDomObserver($('.header-menu')[0], function() {
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        });
+        setBrowserHistoryBehavior();
+        $("article").each(function() {
+            APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
+        });
+
+        var initialRenderPromise = UI.render();
+
+        initialRenderPromise.done(function() {
+            if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
+                SegmentFilter.openFilter();
+            }
+            UI.checkWarnings(true);
+        });
+
+        $('html').trigger('start');
+
+        if (LXQ.enabled()) {
+            $('#lexiqabox').removeAttr("style");
+            LXQ.initPopup();
+        }
+        NOTIFICATIONS.start();
+    },
 	init: function() {
 
 		this.registerFooterTabs();
-
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 
@@ -65,6 +100,10 @@ $.extend(UI, {
 
         UI.firstLoad = false;
 	},
+    restart: function () {
+        UI.unmountSegments();
+        this.start();
+    },
     checkQueryParams: function () {
         var action = APP.getParameterByName("action");
         if (action) {

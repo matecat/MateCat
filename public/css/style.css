@@ -1484,9 +1484,9 @@ section.editor .body > .text {
     width: 100%;
 }
 
-.submenu {
-    display: none;
-}
+/*.submenu {*/
+    /*display: none;*/
+/*}*/
 
 .popup .submenu {
     display: block;
@@ -1611,8 +1611,12 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor.matches .overflow {
-    min-height: 27px;
+    min-height: 65px;
 }
+.sub-editor.matches .overflow span.loader {
+    bottom: 20px;
+}
+
 
 .addtmx-tr .open-popup-addtm-tr {
     height: 13px;
@@ -5085,7 +5089,7 @@ section .footer .tab.open {
     display: none;
 }
 
-section.loaded .footer .tab.open {
+section .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;

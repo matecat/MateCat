@@ -9,7 +9,7 @@
 
 namespace AsyncTasks\Workers;
 
-use Contribution\ContributionStruct,
+use Contribution\ContributionSetStruct,
         Engine,
         TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
@@ -59,7 +59,7 @@ class SetContributionWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $contributionStruct = new ContributionStruct( $queueElement->params->toArray() );
+        $contributionStruct = new ContributionSetStruct( $queueElement->params->toArray() );
 
         $this->_checkDatabaseConnection();
 
@@ -68,13 +68,13 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param ContributionStruct $contributionStruct
+     * @param ContributionSetStruct $contributionStruct
      *
      * @throws ReQueueException
      * @throws \Exception
      * @throws \Exceptions\ValidationError
      */
-    protected function _execContribution( ContributionStruct $contributionStruct ){
+    protected function _execContribution( ContributionSetStruct $contributionStruct ){
 
         $jobStruct = $contributionStruct->getJobStruct();
 //        $userInfoList = $contributionStruct->getUserInfo();
@@ -121,12 +121,12 @@ class SetContributionWorker extends AbstractWorker {
      * !Important Refresh the engine ID for each queueElement received
      * to avoid set contributions on the wrong engine ID
      *
-     * @param ContributionStruct $contributionStruct
+     * @param ContributionSetStruct $contributionStruct
      *
      * @throws \Exception
      * @throws \Exceptions\ValidationError
      */
-    protected function _loadEngine( ContributionStruct $contributionStruct ){
+    protected function _loadEngine( ContributionSetStruct $contributionStruct ){
 
         $jobStruct = $contributionStruct->getJobStruct();
         if( empty( $this->_engine ) ){
@@ -136,13 +136,13 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array              $config
-     * @param ContributionStruct $contributionStruct
+     * @param array                 $config
+     * @param ContributionSetStruct $contributionStruct
      *
      * @throws ReQueueException
      * @throws \Exceptions\ValidationError
      */
-    protected function _set( Array $config, ContributionStruct $contributionStruct ){
+    protected function _set( Array $config, ContributionSetStruct $contributionStruct ){
 
         $config[ 'segment' ]        = $contributionStruct->segment;
         $config[ 'translation' ]    = $contributionStruct->translation;
@@ -161,7 +161,7 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
-    protected function _update( Array $config, ContributionStruct $contributionStruct ){
+    protected function _update( Array $config, ContributionSetStruct $contributionStruct ){
 
         // update the contribution for every key in the job belonging to the user
         $config[ 'segment' ]        = $contributionStruct->oldSegment;
@@ -180,7 +180,7 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
-    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;

@@ -6,8 +6,8 @@ SSE = {
     getSource : function(what) {
         var source = '';
         switch(what) {
-            case 'comments':
-                source = '/channel/comments' + '?jid=' + config.id_job + '&pw=' + config.password ;
+            case 'notifications':
+                source = '/channel/updates' + '?jid=' + config.id_job + '&pw=' + config.password ;
                 break;
 
             default:
@@ -16,16 +16,50 @@ SSE = {
 
         return new EventSource(SSE.baseURL + source );
     }
-}
+};
 
 SSE.Message = function(data) {
-  this._type = data._type;
-  this.data = data;
+    this._type = data._type;
+    this.data = data;
+    this.types = new Array('comment', 'ack', 'contribution');
+    this.eventIdentifier = 'sse:' + this._type;
 
-  this.eventIdentifier = 'sse:' + this._type;
+    this.isValid = function() {
 
-  this.isValid = function() {
-    var types = new Array('comment', 'ack');
-    return ( types.indexOf( this._type ) != -1 ) ;
-  }
-}
+        return ( this.types.indexOf( this._type ) !== -1 ) ;
+    }
+};
+
+NOTIFICATIONS = {
+    start: function (  ) {
+        var self = this;
+        SSE.init();
+        this.source = SSE.getSource( 'notifications' );
+        this.addEvents();
+
+    },
+    restart: function (  ) {
+        this.source = SSE.getSource( 'notifications' );
+        this.addEvents();
+    },
+    addEvents: function (  ) {
+        var self = this;
+        this.source.addEventListener( 'message', function ( e ) {
+            var message = new SSE.Message( JSON.parse( e.data ) );
+            if ( message.isValid() ) {
+                $( document ).trigger( message.eventIdentifier, message );
+            }
+        }, false );
+
+        this.source.addEventListener( 'error', function ( e ) {
+            console.error("SSE: server disconnect");
+            setTimeout(function (  ) {
+                self.restart();
+            }, 5000)
+        }, false );
+
+        $( document ).on( 'sse:ack', function ( ev, message ) {
+            config.id_client = message.data.clientId;
+        } );
+    }
+};
