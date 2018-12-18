@@ -50,7 +50,7 @@ class getContributionController extends ajaxController {
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
-        //$this->__postInput = filter_var_array( $_POST, $filterArgs );
+//        $this->__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
         $this->id_segment         = $this->__postInput[ 'id_segment' ];
         $this->id_before          = $this->__postInput[ 'id_before' ];
@@ -104,12 +104,13 @@ class getContributionController extends ajaxController {
         //check for Password correctness
         if ( empty( $this->jobData ) ) {
             $this->result[ 'errors' ][] = [ "code" => -10, "message" => "wrong password" ];
-
             return -1;
         }
 
         $this->readLoginInfo();
-        $this->_getContexts();
+        if( !$this->concordance_search ){
+            $this->_getContexts();
+        }
 
         $contributionRequest                    = new \Contribution\ContributionRequestStruct();
         $contributionRequest->user              = $this->user;
@@ -123,6 +124,7 @@ class getContributionController extends ajaxController {
         $contributionRequest->id_client         = $this->id_client;
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
+        $contributionRequest->resultNum         = $this->num_results;
 
         if ( self::isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;

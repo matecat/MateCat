@@ -412,18 +412,16 @@ class GetContributionWorker extends AbstractWorker {
             preg_replace result => #{be#{a}#utiful}#
 
          */
-        if ( !defined( '_sortByLenDesc' ) ) {
-            function _sortByLenDesc( $a, $b ) {
-                if ( strlen( $a ) == strlen( $b ) ) {
-                    return 0;
-                }
-
-                return ( strlen( $b ) < strlen( $a ) ) ? -1 : 1;
-            }
-        }
-        uksort( $regularExpressions, '_sortByLenDesc' );
+        uksort( $regularExpressions, [ 'self', '_sortByLenDesc' ] );
 
         return $regularExpressions;
+    }
+
+    private function _sortByLenDesc( $stringA, $stringB ){
+        if ( strlen( $stringA ) == strlen( $stringB ) ) {
+            return 0;
+        }
+        return ( strlen( $stringB ) < strlen( $stringA ) ) ? -1 : 1;
     }
 
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct ) {
