@@ -273,6 +273,7 @@ class GetContributionWorker extends AbstractWorker {
                 $match[ 'match' ] = 'MT';
 
                 $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
+                $QA->setFeatureSet( $featureSet );
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
