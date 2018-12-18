@@ -203,8 +203,13 @@ class GetContributionWorker extends AbstractWorker {
                 'matches'    => $content,
         ];
 
+        $type = 'contribution';
+        if( $contributionStruct->concordanceSearch ){
+            $type = 'concordance';
+        }
+
         $message = json_encode( [
-                '_type' => 'contribution',
+                '_type' => $type,
                 'data'  => [
                         'id_job'    => $contributionStruct->getJobStruct()->id,
                         'passwords' => $contributionStruct->getJobStruct()->password,
