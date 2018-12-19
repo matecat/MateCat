@@ -127,3 +127,12 @@ JOBS[loggerName]    = "jobs.log"
 ;ALIGNER_ALIGN_JOB[max_executors] = 1
 ;ALIGNER_ALIGN_JOB[redis_key]     = "align_job_list"
 ;ALIGNER_ALIGN_JOB[loggerName]    = "align_job.log"
+
+;;##############################
+;;##### Key Name setContribution #####
+;;##############################
+CONTRIBUTION_GET[queue_name]    = "get_contribution"
+CONTRIBUTION_GET[pid_set_name]  = "ch_pid_get_contribution"
+CONTRIBUTION_GET[max_executors] = 50
+CONTRIBUTION_GET[redis_key]     = "get_contribution_list"
+CONTRIBUTION_GET[loggerName]    = "get_contribution.log"

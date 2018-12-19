@@ -1,6 +1,6 @@
 <?php
 
-use \Contribution\ContributionStruct, \Contribution\Set;
+use \Contribution\ContributionSetStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
 
 class setTranslationController extends ajaxController {
@@ -856,7 +856,7 @@ class setTranslationController extends ajaxController {
         /**
          * Set the new contribution in queue
          */
-        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;

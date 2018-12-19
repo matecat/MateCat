@@ -9,7 +9,7 @@
 
 namespace AsyncTasks\Workers;
 
-use Contribution\ContributionStruct,
+use Contribution\ContributionSetStruct,
         Engine,
         TaskRunner\Exceptions\EndQueueException,
         Jobs_JobStruct;
@@ -22,11 +22,12 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     /**
      * @see SetContributionWorker::_loadEngine
-     * @param ContributionStruct $contributionStruct
+     *
+     * @param ContributionSetStruct $contributionStruct
      *
      * @throws EndQueueException
      */
-    protected function _loadEngine( ContributionStruct $contributionStruct ){
+    protected function _loadEngine( ContributionSetStruct $contributionStruct ){
 
         try {
             $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
@@ -36,7 +37,7 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
-    protected function _set( Array $config, ContributionStruct $contributionStruct ){
+    protected function _set( Array $config, ContributionSetStruct $contributionStruct ){
 
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
@@ -51,17 +52,17 @@ class SetContributionMTWorker extends SetContributionWorker {
     }
 
     /**
-     * @param array              $config
-     * @param ContributionStruct $contributionStruct
+     * @param array                 $config
+     * @param ContributionSetStruct $contributionStruct
      *
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _update( Array $config, ContributionStruct $contributionStruct ){
+    protected function _update( Array $config, ContributionSetStruct $contributionStruct ){
         $this->_set( $config, $contributionStruct );
     }
 
-    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         //find all the job's TMs with write grants and make a contribution to them
         $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );

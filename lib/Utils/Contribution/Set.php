@@ -24,11 +24,11 @@ use TaskRunner\Commons\ContextList;
 class Set {
 
     /**
-     * @param ContributionStruct $contribution
+     * @param ContributionSetStruct $contribution
      *
      * @throws \Exception
      */
-    public static function contribution( ContributionStruct $contribution ){
+    public static function contribution( ContributionSetStruct $contribution ){
 
         try{
             WorkerClient::enqueue( 'CONTRIBUTION', '\AsyncTasks\Workers\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
@@ -45,7 +45,7 @@ class Set {
 
     }
 
-    public static function contributionMT( ContributionStruct $contribution = null ){
+    public static function contributionMT( ContributionSetStruct $contribution = null ){
         try{
 
             if ( empty( $contribution ) ) return;

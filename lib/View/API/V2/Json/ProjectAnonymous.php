@@ -35,15 +35,15 @@ class ProjectAnonymous extends Project {
     }
 
     /**
-     * @param $data Projects_ProjectStruct
+     * @param $project Projects_ProjectStruct
      *
      * @return array
      * @throws \Exception
      * @throws \Exceptions\NotFoundError
      */
-    public function renderItem( Projects_ProjectStruct $data ) {
+    public function renderItem( Projects_ProjectStruct $project ) {
 
-        $projectOutputFields = parent::renderItem( $data );
+        $projectOutputFields = parent::renderItem( $project );
         unset( $projectOutputFields[ 'id_team' ] );
         unset( $projectOutputFields[ 'id_assignee' ] );
 

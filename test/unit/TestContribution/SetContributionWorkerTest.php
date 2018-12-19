@@ -1,6 +1,6 @@
 <?php
 
-use Contribution\ContributionStruct,
+use Contribution\ContributionSetStruct,
         Contribution\Set,
         TaskRunner\Commons\ContextList,
         TaskRunner\Commons\QueueElement;
@@ -26,7 +26,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
     }
 
     /**
-     * @var ContributionStruct
+     * @var ContributionSetStruct
      */
     protected $contributionStruct;
 
@@ -66,7 +66,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $curl->multiExec();
 
         //Queue submission
-        $this->contributionStruct = new ContributionStruct();
+        $this->contributionStruct = new ContributionSetStruct();
 
         $this->contributionStruct->fromRevision         = true;
         $this->contributionStruct->id_job               = 1999999;
@@ -149,9 +149,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->setEngine( $stubEngine );
 
         /**
-         * @var $queueElement Contribution\ContributionStruct
+         * @var $queueElement Contribution\ContributionSetStruct
          */
-        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -251,9 +251,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->setEngine( $stubEngine );
 
         /**
-         * @var $queueElement Contribution\ContributionStruct
+         * @var $queueElement Contribution\ContributionSetStruct
          */
-        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -317,9 +317,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
 
         /**
-         * @var $queueElement Contribution\ContributionStruct
+         * @var $queueElement Contribution\ContributionSetStruct
          */
-        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -408,9 +408,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->setEngine( $stubEngine );
 
         /**
-         * @var $queueElement Contribution\ContributionStruct
+         * @var $queueElement Contribution\ContributionSetStruct
          */
-        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
