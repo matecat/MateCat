@@ -200,7 +200,8 @@ API.SEGMENT = {
             id_job: config.job_id,
             num_results: UI.numMatchesResults,
             id_translator: config.id_translator,
-            password: config.password
+            password: config.password,
+            id_client: config.id_client
         };
         return $.ajax({
             async: true,
