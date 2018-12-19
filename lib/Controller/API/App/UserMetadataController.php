@@ -11,7 +11,7 @@ namespace API\App;
 
 use API\V2\KleinController;
 use Bootstrap;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use Users\MetadataDao;
 use Users\MetadataModel;
 use Users_UserDao;
@@ -21,7 +21,7 @@ class UserMetadataController extends AbstractStatefulKleinController {
     public function update() {
 
         if ( !$this->user ) {
-            throw new NotFoundError( 'user not found' );
+            throw new NotFoundException( 'user not found' );
         }
 
         $model = new MetadataModel( $this->user, $this->request->param( 'metadata' ) );

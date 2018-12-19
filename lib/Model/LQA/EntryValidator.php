@@ -2,7 +2,7 @@
 
 namespace LQA;
 
-use \Exceptions\NotFoundError ;
+use \Exceptions\NotFoundException ;
 
 class EntryValidator extends \DataAccess_AbstractValidator {
 
@@ -15,14 +15,14 @@ class EntryValidator extends \DataAccess_AbstractValidator {
     public $issue ;
 
     /**
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
 
     public function validate() {
         $dao = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->struct->id_segment );
 
-        if (!$this->segment) throw new NotFoundError('segment not found');
+        if (!$this->segment) throw new NotFoundException('segment not found');
 
         $this->job = \Jobs_JobDao::getById( $this->struct->id_job)[0];
         $this->project = \Projects_ProjectDao::findById($this->job->id_project);

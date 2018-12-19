@@ -89,7 +89,7 @@ class ProjectManager {
      * @param ArrayObject|null $projectStructure
      *
      * @throws Exception
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -248,12 +248,12 @@ class ProjectManager {
     /**
      * @param $id
      *
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      */
     public function setProjectIdAndLoadProject( $id ) {
         $this->project = Projects_ProjectDao::findById( $id, 60 * 60 );
         if ( $this->project == false ) {
-            throw new Exceptions_RecordNotFound( "Project was not found: id $id " );
+            throw new \Exceptions\NotFoundException( "Project was not found: id $id " );
         }
         $this->projectStructure[ 'id_project' ]  = $this->project->id;
         $this->projectStructure[ 'id_customer' ] = $this->project->id_customer;
@@ -2676,7 +2676,7 @@ class ProjectManager {
      * @param $firstTMXFileName
      *
      * @return bool
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -2805,7 +2805,7 @@ class ProjectManager {
      * @param $xliff_trans_unit
      *
      * @return bool|mixed
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException

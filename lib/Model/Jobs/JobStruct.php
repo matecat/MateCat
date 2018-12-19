@@ -1,7 +1,7 @@
 <?php
 
 use DataAccess\ArrayAccessTrait;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
@@ -115,7 +115,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     /**
      * @return ConfirmationStruct
-     * @throws NotFoundError
+     * @throws NotFoundException
      */
     public function getOutsource() {
 
@@ -131,7 +131,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
                 //Ok Do Nothing
                 break;
             default:
-                throw new NotFoundError( "Vendor id " . $this->_outsource->id_vendor . " not found." );
+                throw new NotFoundException( "Vendor id " . $this->_outsource->id_vendor . " not found." );
                 break;
         }
 

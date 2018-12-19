@@ -10,7 +10,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\KleinController;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 
 class TeamProjectValidator extends Base {
 
@@ -30,12 +30,12 @@ class TeamProjectValidator extends Base {
     }
 
     /**
-     * @throws NotFoundError
+     * @throws NotFoundException
      */
     public function _validate() {
 
         if ( empty( $this->project ) ) {
-            throw new NotFoundError( "Not Found", 404 );
+            throw new NotFoundException( "Not Found", 404 );
         }
 
     }

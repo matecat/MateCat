@@ -15,7 +15,7 @@ class Chunk extends Job {
      *
      * @return array
      * @throws \Exception
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public function renderOne( \Chunks_ChunkStruct $chunk ) {
         $project = $chunk->getProject();

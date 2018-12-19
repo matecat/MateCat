@@ -10,7 +10,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\KleinController;
-use Exceptions_RecordNotFound;
+use \Exceptions\NotFoundException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
@@ -47,8 +47,7 @@ class ProjectPasswordValidator extends Base {
 
     /**
      * @return bool|mixed
-     * @throws Exceptions_RecordNotFound
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public function _validate() {
 
@@ -58,7 +57,7 @@ class ProjectPasswordValidator extends Base {
         );
 
         if ( !$this->project ) {
-            throw new Exceptions_RecordNotFound();
+            throw new NotFoundException();
         }
 
         return true;

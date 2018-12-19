@@ -16,7 +16,7 @@ use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkStruct;
 use Database;
 use Exception;
-use Exceptions_RecordNotFound;
+use \Exceptions\NotFoundException;
 
 class CompletionEventController extends BaseKleinViewController {
 
@@ -72,7 +72,7 @@ class CompletionEventController extends BaseKleinViewController {
             $event = ( new Chunks_ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
 
             if ( !$event ) {
-                throw new Exceptions_RecordNotFound( "Event Not Found.", 404 );
+                throw new \Exceptions\NotFoundException( "Event Not Found.", 404 );
             }
 
             $Controller->setChunk( $Validator->getChunk() );
@@ -89,7 +89,7 @@ class CompletionEventController extends BaseKleinViewController {
     }
 
     /**
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -110,7 +110,7 @@ class CompletionEventController extends BaseKleinViewController {
     }
 
     /**
-     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */

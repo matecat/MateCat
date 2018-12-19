@@ -1,11 +1,10 @@
 <?php
 
-use API\V2\Exceptions\NotFoundException;
+use \Exceptions\NotFoundException;
 use API\V2\Json\Error;
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Exceptions\ValidationError;
-use Exceptions\NotFoundError;
 use Exceptions\ValidationError as Model_ValidationError;
 
 require_once './inc/Bootstrap.php';
@@ -46,19 +45,11 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
     } catch ( AuthorizationError $e ) {
         $klein->response()->code( 403 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-    } catch ( DomainException $e ){
+    } catch ( DomainException $e ) {
         $klein->response()->code( 403 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-    } catch ( Exceptions_RecordNotFound $e ) {
-        \Log::doLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
-        $klein->response()->code( 404 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( NotFoundException $e ) {
         \Log::doLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
-        $klein->response()->code( 404 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-    } catch ( NotFoundError $e ){
-        \Log::doLog( 'Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
         $klein->response()->code( 404 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( \PDOException $e ) {
