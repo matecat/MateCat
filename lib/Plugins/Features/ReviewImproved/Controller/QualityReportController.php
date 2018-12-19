@@ -10,24 +10,24 @@ namespace Features\ReviewImproved\Controller;
 
 use Exceptions\NotFoundException;
 use Features;
-use Features\ReviewImproved\Model\QualityReportModel ;
-use Features\ReviewImproved\Decorator\QualityReportDecorator ;
+use Features\ReviewImproved\Model\QualityReportModel;
+use Features\ReviewImproved\Decorator\QualityReportDecorator;
 
-class QualityReportController extends \BaseKleinViewController  {
+class QualityReportController extends \BaseKleinViewController {
 
     /**
      * @var \Jobs_JobStruct
      */
-    private $job ;
+    private $job;
 
     /**
      * @var \Chunks_ChunkStruct
      */
-    private $chunk ;
+    private $chunk;
     /**
      * @var QualityReportModel
      */
-    private $model ;
+    private $model;
 
     public function respond() {
 
@@ -35,7 +35,7 @@ class QualityReportController extends \BaseKleinViewController  {
 
         $this->setDefaultTemplateData();
 
-        $model = $this->getModel() ;
+        $model     = $this->getModel();
         $decorator = new QualityReportDecorator( $model );
 
         $decorator->setDownloadURI( $this->downloadURI() );
@@ -43,7 +43,7 @@ class QualityReportController extends \BaseKleinViewController  {
 
         $this->response->body( $this->view->execute() );
 
-        if ( $this->isDownload()  ) {
+        if ( $this->isDownload() ) {
             $this->response->header(
                     'Content-Disposition',
                     "attachment; filename={$decorator->getFilenameForDownload()}"
@@ -53,40 +53,41 @@ class QualityReportController extends \BaseKleinViewController  {
     }
 
     private function downloadURI() {
-        list($uri, $query) = explode('?', $this->request->uri());
-        return $uri  . '?download=1';
+        list( $uri, $query ) = explode( '?', $this->request->uri() );
+
+        return $uri . '?download=1';
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
      * @throws NotFoundException
      */
     private function getModel() {
         $this->model = new QualityReportModel( $this->findChunk() );
 
         if ( $this->request->version ) {
-            $this->model->setVersionNumber( $this->request->version);
+            $this->model->setVersionNumber( $this->request->version );
         }
-        return $this->model ;
+
+        return $this->model;
     }
 
     private function isDownload() {
-        $param = $this->request->paramsGet('download');
-        return isset( $param['download'] );
+        $param = $this->request->paramsGet( 'download' );
+
+        return isset( $param[ 'download' ] );
     }
 
     /**
      * @return \Chunks_ChunkStruct
-     * @throws \Exceptions\NotFoundException
      * @throws NotFoundException
      */
     private function findChunk() {
         $this->chunk = \Chunks_ChunkDao::getByIdAndPassword(
-                $this->request->param('id_job'),
-                $this->request->param('password')
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'password' )
         );
 
-        if (! $this->chunk ) {
+        if ( !$this->chunk ) {
             throw new NotFoundException();
         }
 
@@ -96,6 +97,6 @@ class QualityReportController extends \BaseKleinViewController  {
             throw new NotFoundException();
         }
 
-        return $this->chunk ;
+        return $this->chunk;
     }
 }
