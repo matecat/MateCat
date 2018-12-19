@@ -63,7 +63,7 @@ class GetContributionWorker extends AbstractWorker {
         $jobStruct = $contributionStruct->getJobStruct();
 
         $featureSet = new \FeatureSet();
-        $featureSet->loadForProject( $jobStruct->getProject() );
+        $featureSet->loadForProject( $contributionStruct->getProjectStruct() );
 
 
         $_config              = [];
