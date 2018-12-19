@@ -136,6 +136,9 @@ class getContributionController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _getContexts(){
 
         //Get contexts
@@ -149,9 +152,12 @@ class getContributionController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = $segmentsList->id_before->segment;
-        $this->text           = $segmentsList->id_segment->segment;
-        $this->context_after  = $segmentsList->id_after->segment;
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
+        $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+        $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+
 
     }
 
