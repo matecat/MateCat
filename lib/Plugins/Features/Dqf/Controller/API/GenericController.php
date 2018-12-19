@@ -9,12 +9,11 @@
 namespace Features\Dqf\Controller\API;
 
 use API\App\AbstractStatefulKleinController;
-use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkDao;
+use Exceptions\NotFoundException;
 use Features\Dqf\Model\CatAuthorizationModel;
 use Features\Dqf\Utils\UserMetadata;
 use LQA\ChunkReviewDao;
-use Users\MetadataDao;
 
 class GenericController extends AbstractStatefulKleinController {
 
@@ -32,7 +31,7 @@ class GenericController extends AbstractStatefulKleinController {
 
     public function revokeAssignment() {
         if ( !in_array($this->request->page, ['translate', 'revise'] ) ) {
-            throw new \Exceptions_RecordNotFound() ;
+            throw new NotFoundException() ;
         }
 
         $chunk = Chunks_ChunkDao::getByIdAndPassword($this->request->id_job, $this->request->password);

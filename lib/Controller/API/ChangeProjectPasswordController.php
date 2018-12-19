@@ -1,5 +1,5 @@
 <?php
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 
 /**
  * Created by PhpStorm.
@@ -42,7 +42,7 @@ class ChangeProjectPasswordController  extends ajaxController {
         $pDao = new Projects_ProjectDao();
         try {
             $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->id_project, $this->old_password );
-        } catch ( NotFoundError $e ) {
+        } catch ( NotFoundException $e ) {
             $this->api_output[ 'message' ] = 'Wrong id or pass';
             Log::doLog( "ChangeProjectPasswordController error: " . $this->api_output[ 'message' ] );
 

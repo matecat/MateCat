@@ -19,11 +19,6 @@ class getContributionController extends ajaxController {
     protected $id_before;
     protected $id_after;
 
-    /**
-     * @var Jobs_JobStruct
-     */
-    private $jobData;
-
     private $__postInput = array();
 
     public function __construct() {
@@ -98,14 +93,12 @@ class getContributionController extends ajaxController {
             return -1;
         }
 
+//        throw new \Exceptions\NotFoundException( "Record Not Found" );
         //get Job Info, we need only a row of jobs ( split )
-        $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
+        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
 
-        //check for Password correctness
-        if ( empty( $this->jobData ) ) {
-            $this->result[ 'errors' ][] = [ "code" => -10, "message" => "wrong password" ];
-            return -1;
-        }
+        $projectStruct = $jobStruct->getProject();
+        $this->featureSet->loadForProject( $projectStruct );
 
         $this->readLoginInfo();
         if( !$this->concordance_search ){
@@ -119,7 +112,8 @@ class getContributionController extends ajaxController {
                 'segment'        => $this->text,
                 'context_after'  => $this->context_after
         ];
-        $contributionRequest->jobStruct         = $this->jobData;
+        $contributionRequest->jobStruct         = $jobStruct;
+        $contributionRequest->projectStruct     = $projectStruct;
         $contributionRequest->segmentId         = $this->id_segment;
         $contributionRequest->id_client         = $this->id_client;
         $contributionRequest->concordanceSearch = $this->concordance_search;
@@ -133,6 +127,8 @@ class getContributionController extends ajaxController {
         }
 
         Request::contribution( $contributionRequest );
+
+        $this->result = [ "errors" => [], "data" => [ "message" => "OK" ] ];
 
     }
 

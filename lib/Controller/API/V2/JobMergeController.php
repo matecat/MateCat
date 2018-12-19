@@ -47,7 +47,7 @@ class JobMergeController extends KleinController {
         $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
 
         if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id ) {
-            throw new \Exceptions_RecordNotFound();
+            throw new \Exceptions\NotFoundException();
         }
     }
 

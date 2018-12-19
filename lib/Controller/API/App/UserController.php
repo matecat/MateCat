@@ -8,7 +8,7 @@ use API\V2\Json\User;
 
 use API\V2\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;

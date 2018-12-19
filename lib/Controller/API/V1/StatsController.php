@@ -19,8 +19,11 @@ class StatsController extends KleinController {
     }
 
     /**
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function stats() {
 

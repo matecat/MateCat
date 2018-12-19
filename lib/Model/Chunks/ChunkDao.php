@@ -7,7 +7,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param $password
      *
      * @return Chunks_ChunkStruct
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public static function getByIdAndPassword( $id, $password ) {
         $conn = Database::obtain()->getConnection();
@@ -28,7 +28,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         $fetched = $stmt->fetch();
 
         if ( $fetched == false ) {
-            throw new Exceptions\NotFoundError('Record not found');
+            throw new \Exceptions\NotFoundException('Record not found');
         } else {
             return $fetched;
         }

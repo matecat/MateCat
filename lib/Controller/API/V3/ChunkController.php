@@ -33,7 +33,7 @@ class ChunkController extends KleinController {
 
     /**
      * @throws \Exception
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public function show() {
 
