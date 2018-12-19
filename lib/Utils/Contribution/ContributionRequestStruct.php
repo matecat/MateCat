@@ -13,10 +13,13 @@ namespace Contribution;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
+use Projects_ProjectStruct;
 
 class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
 
     public $jobStruct;
+
+    public $projectStruct;
 
     public $contexts = [
             'context_before' => null,
@@ -69,6 +72,11 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     private $__jobStruct = null;
 
     /**
+     * @var \Projects_ProjectStruct
+     */
+    private $__projectStruct = null;
+
+    /**
      * @var \Users_UserStruct
      */
     private $__user = null;
@@ -91,6 +99,16 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
             $this->__jobStruct = new Chunks_ChunkStruct( (array)$this->jobStruct );
         }
         return $this->__jobStruct;
+    }
+
+    /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProjectStruct(){
+        if( $this->__projectStruct == null ){
+            $this->__projectStruct = new Projects_ProjectStruct( (array)$this->projectStruct );
+        }
+        return $this->__projectStruct;
     }
 
     /**
