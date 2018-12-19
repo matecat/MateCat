@@ -2,7 +2,7 @@
 	Component: ui.concordance
  */
 $( document ).on( 'sse:concordance', function ( ev, message ) {
-    console.log("CONCORDANCE");
+    SegmentActions.setConcordanceResult(message.data.id_segment, message.data);
 } );
 $.extend(UI, {
 	openConcordance: function(currentSelectedText,currentSearchInTarget) {

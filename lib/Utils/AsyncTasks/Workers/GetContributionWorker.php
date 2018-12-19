@@ -316,7 +316,7 @@ class GetContributionWorker extends AbstractWorker {
                 if( !$contributionStruct->fromTarget ){
                     list( $match[ 'segment' ], $match[ 'translation' ] ) = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
                 } else {
-                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatConcordanceValues( $match[ 'translation' ], $match[ 'segment' ], $regularExpressions );
+                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
                 }
 
             }

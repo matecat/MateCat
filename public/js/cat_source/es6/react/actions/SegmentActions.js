@@ -356,6 +356,14 @@ var SegmentActions = {
         });
     },
 
+    setConcordanceResult: function (sid, data) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CONCORDANCE_RESULT,
+            sid: sid,
+            data: data
+        });
+    },
+
     /************ Revise ***************/
     showSelection: function (sid, data) {
         AppDispatcher.dispatch({
