@@ -48,7 +48,6 @@ class ProjectPasswordValidator extends Base {
     /**
      * @return bool|mixed
      * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\NotFoundException
      */
     public function _validate() {
 
@@ -58,7 +57,7 @@ class ProjectPasswordValidator extends Base {
         );
 
         if ( !$this->project ) {
-            throw new \Exceptions\NotFoundException();
+            throw new NotFoundException();
         }
 
         return true;
