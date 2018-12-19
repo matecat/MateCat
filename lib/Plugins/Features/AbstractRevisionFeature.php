@@ -73,7 +73,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 $review_password, $id_job );
 
         if ( ! $chunk_review ) {
-            throw new \Exceptions_RecordNotFound('Review record was not found');
+            throw new \Exceptions\NotFoundException('Review record was not found');
         }
 
         return $chunk_review->password ;
@@ -87,7 +87,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $chunk_review = $chunk_reviews[0];
 
         if ( ! $chunk_review ) {
-            throw new \Exceptions_RecordNotFound('Review record was not found');
+            throw new \Exceptions\NotFoundException('Review record was not found');
         }
 
         return $chunk_review->review_password ;

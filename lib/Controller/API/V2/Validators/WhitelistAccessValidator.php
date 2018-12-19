@@ -12,7 +12,7 @@ namespace API\V2\Validators;
 
 use AbstractControllers\IController;
 use API\V2\KleinController;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use Utils;
 
 class WhitelistAccessValidator extends Base {
@@ -52,7 +52,7 @@ class WhitelistAccessValidator extends Base {
         ];
 
         if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
-            throw new NotFoundError( "Not Found.", 404 );
+            throw new NotFoundException( "Not Found.", 404 );
         }
 
     }

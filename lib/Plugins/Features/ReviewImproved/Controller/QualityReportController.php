@@ -8,6 +8,7 @@
 
 namespace Features\ReviewImproved\Controller;
 
+use Exceptions\NotFoundException;
 use Features;
 use Features\ReviewImproved\Model\QualityReportModel ;
 use Features\ReviewImproved\Decorator\QualityReportDecorator ;
@@ -57,8 +58,8 @@ class QualityReportController extends \BaseKleinViewController  {
     }
 
     /**
-     * @throws \Exceptions_RecordNotFound
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      */
     private function getModel() {
         $this->model = new QualityReportModel( $this->findChunk() );
@@ -76,8 +77,8 @@ class QualityReportController extends \BaseKleinViewController  {
 
     /**
      * @return \Chunks_ChunkStruct
-     * @throws \Exceptions_RecordNotFound
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      */
     private function findChunk() {
         $this->chunk = \Chunks_ChunkDao::getByIdAndPassword(
@@ -86,13 +87,13 @@ class QualityReportController extends \BaseKleinViewController  {
         );
 
         if (! $this->chunk ) {
-            throw new \Exceptions_RecordNotFound();
+            throw new NotFoundException();
         }
 
         $project = $this->chunk->getProject();
 
         if ( !$project->isFeatureEnabled( Features::REVIEW_IMPROVED ) && !$project->isFeatureEnabled( Features::REVIEW_EXTENDED ) ) {
-            throw new \Exceptions_RecordNotFound();
+            throw new NotFoundException();
         }
 
         return $this->chunk ;

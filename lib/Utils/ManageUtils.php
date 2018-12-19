@@ -1,7 +1,7 @@
 <?php
 
 use API\V2\Json\Project;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 
 class ManageUtils {
 
@@ -20,7 +20,7 @@ class ManageUtils {
      * @param bool                   $no_assignee
      *
      * @return array
-     * @throws NotFoundError
+     * @throws NotFoundException
      * @throws Exception
      */
     public static function queryProjects(

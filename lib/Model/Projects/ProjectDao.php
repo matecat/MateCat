@@ -234,7 +234,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param int $ttl
      *
      * @return Projects_ProjectStruct
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     static function findByIdAndPassword( $id, $password, $ttl = 0 ) {
 
@@ -244,7 +244,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
 
         if ( !$fetched ) {
-            throw new Exceptions\NotFoundError( "No project found." );
+            throw new Exceptions\NotFoundException( "No project found." );
         }
 
         return $fetched;
