@@ -226,6 +226,8 @@ class GetContributionWorker extends AbstractWorker {
                 [ 'persistent' => 'true' ]
         );
 
+        $this->_doLog( $message );
+
     }
 
 
