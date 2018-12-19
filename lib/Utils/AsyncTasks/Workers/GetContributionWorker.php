@@ -318,9 +318,9 @@ class GetContributionWorker extends AbstractWorker {
                 $regularExpressions = $this->tokenizeSourceSearch( $contributionStruct->getContexts()->segment );
 
                 if( !$contributionStruct->fromTarget ){
-                    list( $match[ 'segment' ], $match[ 'translation' ] ) = $this->_formatContributionValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
+                    list( $match[ 'segment' ], $match[ 'translation' ] ) = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
                 } else {
-                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatContributionValues( $match[ 'translation' ], $match[ 'segment' ], $regularExpressions );
+                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatConcordanceValues( $match[ 'translation' ], $match[ 'segment' ], $regularExpressions );
                 }
 
             }
@@ -329,7 +329,7 @@ class GetContributionWorker extends AbstractWorker {
 
     }
 
-    private function _formatContributionValues( $_source, $_target, $regularExpressions ){
+    private function _formatConcordanceValues( $_source, $_target, $regularExpressions ){
 
         $_source = strip_tags( html_entity_decode( $_source ) );
         $_source = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $_source );
