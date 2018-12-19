@@ -923,7 +923,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .buttons .approved.disabled,
 .buttons .next-unapproved.disabled ,
 .buttons .next-untranslated.disabled ,
-.buttons .translated.disabled {
+.buttons .translated.disabled,
+.buttons .guesstags.disabled{
     pointer-events: none;
     color: #666 !important;
     border-color: #666;
