@@ -1,5 +1,5 @@
 <?php
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use \API\V2\Json\Error;
@@ -130,7 +130,7 @@ class getProjectsController extends ajaxController {
 
         try {
             $team = $this->filterTeam();
-        } catch( NotFoundError $e ){
+        } catch( NotFoundException $e ){
             $this->result = ( new Error( [ $e ] ) )->render();
             return;
         }
@@ -217,7 +217,7 @@ class getProjectsController extends ajaxController {
         $dao = new MembershipDao() ;
         $team = $dao->findTeamByIdAndUser($this->id_team, $this->user ) ;
         if ( !$team ) {
-            throw  new NotFoundError( 'Team not found in user memberships', 404 ) ;
+            throw  new NotFoundException( 'Team not found in user memberships', 404 ) ;
         }
         else {
             return $team ;

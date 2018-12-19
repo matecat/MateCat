@@ -28,7 +28,7 @@ class Bootstrap {
         self::$CONFIG       = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
-        register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
+        register_shutdown_function( [ 'Bootstrap', 'fatalErrorHandler' ] );
 
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];

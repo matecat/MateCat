@@ -1,7 +1,7 @@
 <?php
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use Exceptions\NotFoundError;
+use Exceptions\NotFoundException;
 use TmKeyManagement\UserKeysModel;
 
 
@@ -138,7 +138,7 @@ class catController extends viewController {
             // function and not-found handled via exception.
             $this->findJobByIdAndPassword();
             $this->featureSet->run('handleProjectType', $this);
-        } catch( NotFoundError $e ){
+        } catch( NotFoundException $e ){
             $this->job_not_found = true;
             return;
         }
