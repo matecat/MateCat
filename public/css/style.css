@@ -3120,29 +3120,50 @@ body.rtl-target .editor .editarea span {
 
 .error-img {
     background: #c5351c url(../img/warning.png) no-repeat center;
-    background-size: 12px;
-    width: 14px;
-    height: 14px;
+    background-size: 17px;
+    width: 22px;
+    height: 22px;
     margin: 0;
     border-radius: 5px;
-    margin-left: -20px;
-    top: 2px;
+    margin-left: -28px;
+    top: -4px;
     position: relative;
     float: left;
 }
 
 .warning-img {
-    background: #FF9900 url(../img/warning.png) no-repeat center;
-    background-size: 12px;
-    width: 14px;
-    height: 14px;
+    background: #FF9900 url(../../img/warning.png) no-repeat center;
+    background-size: 17px;
+    width: 22px;
+    height: 22px;
     margin: 0;
     border-radius: 5px;
-    margin-left: -20px;
-    top: 2px;
+    margin-left: -28px;
+    top: -4px;
     position: relative;
     float: left;
 }
+
+.engine-errors {
+    position: absolute;
+    top: 13px;
+    width: 100%;
+}
+
+.engine-error-item.graysmall:hover {
+    background-color: #fff;
+    border-top: unset;
+}
+
+.engine-error-item.graysmall:hover span {
+    color: unset !important;
+}
+
+.engine-error-item.graysmall {
+    border-top: unset;
+    cursor: default;
+}
+
 
 .ice-locked-label {
     font-size: 11px;
