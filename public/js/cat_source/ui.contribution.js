@@ -189,7 +189,7 @@ $.extend(UI, {
         // if (!$('.sub-editor.matches', segment).length) {
         //     SegmentActions.createFooter(UI.getSegmentId(segment));
         // }
-        if ( data.matches && data.matches.length) {
+        if ( data.matches && data.matches.length > 0) {
             var editareaLength = editarea.text().trim().length;
             var translation = data.matches[0].translation;
 
@@ -249,25 +249,38 @@ $.extend(UI, {
         }
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
+    showContributionError: function() {
+        $('.tab-switcher-tm .number', segment).text('');
+        if((config.mt_enabled)&&(!config.id_translator)) {
+            $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>Oops we got an Error. Please, contact <a' +
+                ' href="mailto:support@matecat.com">support@matecat.com</a>.</li></ul>');
+        }
+    },
     autoCopySuggestionEnabled: function () {
         return true;
     },
     renderContributionErrors: function(errors, segment) {
         $('.tab.sub-editor.matches .engine-errors', segment).empty();
         $('.tab.sub-editor.matches .engine-errors', segment).hide();
+        var percentClass = "";
+        var messageClass = "";
+        var imgClass = "";
+        var  messageTypeText = '';
         $.each(errors, function(){
-            var percentClass = "";
-            var messageClass = "";
-            var imgClass = "";
-            var  messageTypeText = '';
-            if(this.code == '-2001') {
+            if(this.code === -2001) {
                 console.log('ERROR -2001');
                 percentClass = "per-red";
                 messageClass = 'error';
                 imgClass = 'error-img';
                 messageTypeText = 'Error: ';
             }
-            else if (this.code == '-2002') {
+            else if (this.code === -2002) {
+                console.log('WARNING -2002');
+                percentClass = "per-orange";
+                messageClass = 'warning';
+                imgClass = 'warning-img';
+                messageTypeText = 'Warning: ';
+            } else if (this.code === -1000) {
                 console.log('WARNING -2002');
                 percentClass = "per-orange";
                 messageClass = 'warning';
@@ -281,7 +294,6 @@ $.extend(UI, {
             var percentText = this.created_by_type;
             var suggestion_info = '';
             var cb = this.created_by;
-
         $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
                 '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
                 '</span></li></ul>');
@@ -312,11 +324,6 @@ $.extend(UI, {
 	setDeleteSuggestion_success: function(d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setDeleteSuggestion');
-
-		// $(".editor .matches .graysmall").each(function(index) {
-		// 	$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
-		// 	$(this).attr('data-item', index + 1);
-		// });
 	},
 	setChosenSuggestion: function(w, segment) {
         var currentSegment = (segment)? segment : UI.currentSegment;

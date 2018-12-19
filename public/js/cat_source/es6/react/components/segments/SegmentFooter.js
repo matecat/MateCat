@@ -79,7 +79,7 @@ class SegmentFooter extends React.Component {
         };
 
         this.state = {
-            tabs: {}
+            tabs: this.tabs
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);

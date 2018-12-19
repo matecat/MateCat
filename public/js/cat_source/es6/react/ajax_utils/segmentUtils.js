@@ -200,13 +200,51 @@ API.SEGMENT = {
             id_job: config.job_id,
             num_results: UI.numMatchesResults,
             id_translator: config.id_translator,
-            password: config.password
+            password: config.password,
+            id_client: config.id_client
         };
         return $.ajax({
             async: true,
             data: data,
             type: "post",
             url : "/?action=getContribution"
+        });
+    },
+
+    /**
+     * Return a list of contribution from a id_segment
+     * @param id_segment
+     * @param target
+     * @return Contributions - Promise
+     */
+    getContributions: function (id_segment, target) {
+        var contextBefore = UI.getContextBefore(id_segment);
+        var idBefore = UI.getIdBefore(id_segment);
+        var contextAfter = UI.getContextAfter(id_segment);
+        var idAfter = UI.getIdAfter(id_segment);
+        // check if this function is ok for al cases
+        let txt = UI.prepareTextToSend(target);
+        let data = {
+            action: 'getContribution',
+            password: config.password,
+            is_concordance: 0,
+            id_segment: id_segment,
+            text: txt,
+            id_job: config.id_job,
+            num_results: UI.numContributionMatchesResults,
+            id_translator: config.id_translator,
+            context_before: contextBefore,
+            id_before: idBefore,
+            context_after: contextAfter,
+            id_after: idAfter,
+            id_client: config.id_client
+        };
+
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url: "/?action=getContribution"
         });
     }
 

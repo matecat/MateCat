@@ -15,7 +15,7 @@
             if (!_.isUndefined(chosen_suggestion)) {
                 var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
                 if (storedContributions) {
-                    currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion - 1];
+                    currentContribution = JSON.parse(storedContributions).matches[chosen_suggestion - 1];
 
                 }
             }

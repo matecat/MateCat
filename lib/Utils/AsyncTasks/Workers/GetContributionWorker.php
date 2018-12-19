@@ -317,15 +317,28 @@ class GetContributionWorker extends AbstractWorker {
 
                 $regularExpressions = $this->tokenizeSourceSearch( $contributionStruct->getContexts()->segment );
 
-                $match[ 'segment' ] = strip_tags( html_entity_decode( $match[ 'segment' ] ) );
-                $match[ 'segment' ] = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $match[ 'segment' ] );
+                if( !$contributionStruct->fromTarget ){
+                    list( $match[ 'segment' ], $match[ 'translation' ] ) = $this->_formatContributionValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
+                } else {
+                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatContributionValues( $match[ 'translation' ], $match[ 'segment' ], $regularExpressions );
+                }
 
-                //Do something with &$match, tokenize strings and send to client
-                $match[ 'segment' ]     = preg_replace( array_keys( $regularExpressions ), array_values( $regularExpressions ), $match[ 'segment' ] );
-                $match[ 'translation' ] = strip_tags( html_entity_decode( $match[ 'translation' ] ) );
             }
 
         }
+
+    }
+
+    private function _formatContributionValues( $_source, $_target, $regularExpressions ){
+
+        $_source = strip_tags( html_entity_decode( $_source ) );
+        $_source = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $_source );
+
+        //Do something with &$match, tokenize strings and send to client
+        $_source     = preg_replace( array_keys( $regularExpressions ), array_values( $regularExpressions ), $_source );
+        $_target = strip_tags( html_entity_decode( $_target ) );
+
+        return [ $_source, $_target ];
 
     }
 

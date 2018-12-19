@@ -1,6 +1,9 @@
 /*
 	Component: ui.concordance
  */
+$( document ).on( 'sse:concordance', function ( ev, message ) {
+    console.log("CONCORDANCE");
+} );
 $.extend(UI, {
 	openConcordance: function(currentSelectedText,currentSearchInTarget) {
 		SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'concordances');
