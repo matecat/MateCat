@@ -73,7 +73,7 @@ class Project {
      *
      * @return array
      * @throws \Exception
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public function renderItem( Projects_ProjectStruct $project ) {
 
@@ -132,7 +132,7 @@ class Project {
     /**
      * @return array
      * @throws \Exception
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     public function render() {
         $out = [];

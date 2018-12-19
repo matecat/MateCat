@@ -52,7 +52,7 @@ class ChunkPasswordValidator extends Base {
 
     /**
      * @return mixed|void
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     protected function _validate() {
         try {
@@ -60,7 +60,7 @@ class ChunkPasswordValidator extends Base {
                     $this->id_job,
                     $this->password
             );
-        } catch ( \Exceptions\NotFoundError $e ) {
+        } catch ( \Exceptions\NotFoundException $e ) {
             $review_chunk = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
                     $this->password,
                     $this->id_job
@@ -69,7 +69,7 @@ class ChunkPasswordValidator extends Base {
                 $this->chunk = $review_chunk->getChunk();
                 $this->chunk->setIsReview( true );
             } else {
-                throw new \Exceptions\NotFoundError( 'Record not found' );
+                throw new \Exceptions\NotFoundException( 'Record not found' );
             }
         }
     }

@@ -3,7 +3,7 @@
 namespace API\V2\Validators;
 
 use Database;
-use Exceptions\NotFoundError ;
+use Exceptions\NotFoundException ;
 use Segments_SegmentDao;
 use Translations_SegmentTranslationDao;
 
@@ -28,7 +28,7 @@ class SegmentTranslation extends Base {
 
     /**
      * @return mixed|void
-     * @throws NotFoundError
+     * @throws NotFoundException
      */
     protected function _validate() {
         $this->ensureSegmentExists();
@@ -37,7 +37,7 @@ class SegmentTranslation extends Base {
 
     /**
      *
-     * @throws NotFoundError
+     * @throws NotFoundException
      */
 
     private function ensureTranslationExists() {
@@ -45,7 +45,7 @@ class SegmentTranslation extends Base {
             findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
 
         if ( !$this->translation ) {
-            throw new NotFoundError('translation not found');
+            throw new NotFoundException('translation not found');
         }
     }
 
@@ -58,7 +58,7 @@ class SegmentTranslation extends Base {
             $this->request->id_segment
         );
 
-        if (!$this->segment) throw new NotFoundError('segment not found');
+        if (!$this->segment) throw new NotFoundException('segment not found');
     }
 
 }
