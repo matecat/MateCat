@@ -85,6 +85,10 @@ class getContributionController extends ajaxController {
             $this->result[ 'errors' ][] = [ "code" => -3, "message" => "missing id_job" ];
         }
 
+        if( empty( $this->id_client ) ){
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => "missing id_client" ];
+        }
+
         if ( empty( $this->num_results ) ) {
             $this->num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
