@@ -289,7 +289,9 @@ class SegmentFooter extends React.Component {
     isTabLoading(tab) {
         switch(tab.code) {
             case 'tm':
-                return _.isUndefined(this.props.segment.contributions);
+                return _.isUndefined(this.props.segment.contributions) ||
+                    (_.isUndefined(this.props.segment.contributions.matches) &&
+                    this.props.segment.contributions.errors.length === 0);
             default:
                 return false;
         }

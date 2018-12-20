@@ -499,8 +499,8 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
-            SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches,action.errors);
-            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.fieldTest);
+            SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);

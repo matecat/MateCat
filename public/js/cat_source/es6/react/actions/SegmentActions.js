@@ -251,13 +251,13 @@ var SegmentActions = {
             sid: sid
         });
     },
-    setSegmentContributions: function (sid, fid, contributions, fieldTest) {
+    setSegmentContributions: function (sid, fid, contributions, errors) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CONTRIBUTIONS,
             sid: sid,
             fid: fid,
             matches: contributions,
-            fieldTest: fieldTest
+            errors: errors
         });
     },
     chooseContribution: function (sid, index) {

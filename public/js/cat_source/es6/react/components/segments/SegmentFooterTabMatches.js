@@ -18,9 +18,9 @@ class SegmentFooterTabMatches extends React.Component {
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
     }
 
-    setContributions(sid, fid, matches, fieldTest){
+    setContributions(sid, fid, matches){
         if ( this.props.id_segment == sid ) {
-            var matchesProcessed = this.processContributions(matches, fieldTest);
+            var matchesProcessed = this.processContributions(matches);
             if (this._isMounted) {
                 this.setState({
                     matches: matchesProcessed
@@ -29,7 +29,7 @@ class SegmentFooterTabMatches extends React.Component {
         }
     }
 
-    processContributions(matches, fieldTest) {
+    processContributions(matches) {
         var self = this;
         var matchesProcessed = [];
         // SegmentActions.createFooter(this.props.id_segment);
@@ -57,15 +57,8 @@ class SegmentFooterTabMatches extends React.Component {
                 item.suggestion_info = '';
             }
 
-
-            if (typeof fieldTest == 'undefined') {
-                item.percentClass = UI.getPercentuageClass(this.match);
-                item.percentText = this.match;
-            } else {
-                item.quality = parseInt(this.quality);
-                item.percentClass = (this.quality > 98)? 'per-green' : (this.quality == 98)? 'per-red' : 'per-gray';
-                item.percentText = 'MT';
-            }
+            item.percentClass = UI.getPercentuageClass(this.match);
+            item.percentText = this.match;
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag

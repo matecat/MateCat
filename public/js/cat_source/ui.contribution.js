@@ -153,6 +153,7 @@ $.extend(UI, {
 			context: $('#segment-' + id),
 			error: function() {
 				UI.failedConnection(0, 'getContribution');
+				UI.showContributionError(this);
 			},
 			success: function(d) {
 				if (d.errors.length) {
@@ -201,7 +202,7 @@ $.extend(UI, {
             var segment_id = segment.attr('id');
             $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
             // $('.tab-switcher-tm .number', segment).text('');
-            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.fieldTest);
+            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, []);
 
             if (editareaLength === 0) {
 
@@ -243,15 +244,20 @@ $.extend(UI, {
             } else {
                 $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
+            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
         }
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
-    showContributionError: function() {
+    showContributionError: function(segment) {
         $('.tab-switcher-tm .number', segment).text('');
         if((config.mt_enabled)&&(!config.id_translator)) {
-            $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>Oops we got an Error. Please, contact <a' +
-                ' href="mailto:support@matecat.com">support@matecat.com</a>.</li></ul>');
+            $('.sub-editor.matches .engine-errors', segment).html('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                '<div class="warning-img"></div><span class="engine-error-message warning">' +
+                'Oops we got an Error. Please, contact <a' +
+                ' href="mailto:support@matecat.com">support@matecat.com</a>.</span></li></ul>');
         }
+        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], [{}]);
+
     },
     autoCopySuggestionEnabled: function () {
         return true;
@@ -283,6 +289,14 @@ $.extend(UI, {
                 messageClass = 'warning';
                 imgClass = 'warning-img';
                 messageTypeText = 'Warning: ';
+            } else if (this.code === -4) {
+                console.log('WARNING -4');
+                percentClass = "per-orange";
+                messageClass = 'warning';
+                imgClass = 'warning-img';
+                messageTypeText = 'Warning: ';
+                this.message = 'Oops we got an Error. Please, contact <a' +
+                ' href="mailto:support@matecat.com">support@matecat.com</a>.'
             }
             else {
                 return;
@@ -295,6 +309,7 @@ $.extend(UI, {
                 '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
                 '</span></li></ul>');
         });
+        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], errors);
     },
 	setDeleteSuggestion: function(source, target) {
 
