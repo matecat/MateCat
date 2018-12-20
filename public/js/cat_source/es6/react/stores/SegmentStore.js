@@ -377,6 +377,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
+    setContributionsToCache: function (sid, fid, contributions,errors) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], {
+            matches: contributions,
+            errors: errors
+        });
+    },
+
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -491,7 +499,8 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
-            SegmentStore.emitChange(action.actionType, action.sid, action.matches, action.fieldTest);
+            SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);
