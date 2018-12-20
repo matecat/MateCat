@@ -79,7 +79,7 @@ class SegmentFooter extends React.Component {
         };
 
         this.state = {
-            tabs: this.tabs
+            tabs: {}
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);
@@ -286,6 +286,24 @@ class SegmentFooter extends React.Component {
         }
     }
 
+    isTabLoading(tab) {
+        switch(tab.code) {
+            case 'tm':
+                return _.isUndefined(this.props.segment.contributions);
+            default:
+                return false;
+        }
+    }
+
+    getTabIndex(tab) {
+        switch(tab.code) {
+            case 'tm':
+                return this.props.segment.contributions.matches.length;
+            default:
+                return tab.index;
+        }
+    }
+
     render() {
         let labels = [];
         let containers = [];
@@ -296,17 +314,27 @@ class SegmentFooter extends React.Component {
             if ( tab.enabled) {
                 let hidden_class = (tab.visible) ? '' : 'hide';
                 let active_class = (tab.open && !hideMatches) ? 'active' : '';
+                let isLoading = this.isTabLoading(tab);
+                let tabIndex = (!isLoading) ? this.getTabIndex(tab) : null;
+                let loadingClass = (isLoading) ? "loading-tab" : "";
                 let label = <li
                     key={ tab.code }
                     ref={(elem)=> this[tab.code] = elem}
-                    className={ hidden_class + " " + active_class + " tab-switcher tab-switcher-" + tab.code }
+                    className={ hidden_class + " " + active_class + " tab-switcher tab-switcher-" + tab.code + " " + loadingClass}
                     id={"segment-" + this.props.sid + tab.code}
                     data-tab-class={ tab.tab_class }
                     data-code={ tab.code }
                     onClick={ self.tabClick.bind(this, key, false) }>
-                    <a tabIndex="-1" >{ tab.label }
-                        <span className="number">{(tab.index) ? ' (' + tab.index + ')' : ''}</span>
-                    </a>
+                    {!isLoading ? (
+                        <a tabIndex="-1" >{ tab.label }
+                            <span className="number">{(tabIndex) ? ' (' + tabIndex + ')' : ''}</span>
+                        </a>
+                    ) : (
+                        <a tabIndex="-1" >{ tab.label }
+                            <span className="loader loader_on"/>
+                        </a>
+                    ) }
+
                 </li>;
                 labels.push(label);
                 let container = self.getTabContainer(tab, active_class);

@@ -22,8 +22,6 @@ $.extend(UI, {
 		var percentageClass = this.getPercentuageClass(match);
 		if ($.trim(translation) !== '') {
 
-			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
-
 			if (decode) {
 				translation = htmlDecode(translation);
 			}
@@ -176,9 +174,9 @@ $.extend(UI, {
 		this.blockButtons = false;  //Used for offline mode
 
         // TODO Move to SegmentFooter Component
-		if (data.matches && data.matches.length > 0) {
-			$('.submenu li.tab-switcher-tm a span', segment).text(' (' + data.matches.length + ')');
-		}
+		// if (data.matches && data.matches.length > 0) {
+		// 	$('.submenu li.tab-switcher-tm a span', segment).text(' (' + data.matches.length + ')');
+		// }
 
     },
 
@@ -186,9 +184,14 @@ $.extend(UI, {
         if(!data) return true;
 
         var editarea = $('.editarea', segment);
-        // if (!$('.sub-editor.matches', segment).length) {
-        //     SegmentActions.createFooter(UI.getSegmentId(segment));
-        // }
+        /**
+         * Creation of the footer for the segments following the current one
+           for which the contribution has been requested
+         */
+
+        if (!$('.sub-editor.matches', segment).length) {
+            SegmentActions.createFooter(UI.getSegmentId(segment));
+        }
         if ( data.matches && data.matches.length > 0) {
             var editareaLength = editarea.text().trim().length;
             var translation = data.matches[0].translation;
@@ -197,15 +200,9 @@ $.extend(UI, {
 
             var segment_id = segment.attr('id');
             $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
-            $('.tab-switcher-tm .number', segment).text('');
-            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), data.matches, data.fieldTest);
+            // $('.tab-switcher-tm .number', segment).text('');
+            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.fieldTest);
 
-            // UI.setDeleteSuggestion(segment);
-            // UI.setContributionSourceDiff(segment);
-            //If Tag Projection is enable I take out the tags from the contributions
-            // if (!UI.enableTagProjection) {
-            //     UI.markSuggestionTags(segment);
-            // }
             if (editareaLength === 0) {
 
                 UI.setChosenSuggestion(1, segment);
