@@ -1566,6 +1566,17 @@ body.noGlossary .tab-switcher-gl {
     text-shadow: none;
 }
 
+.tab-switcher.loading-tab a {
+    color: #929292;
+    padding-right: 36px;
+}
+
+.loading-tab .loader.loader_on {
+    left: unset;
+    right: 12px;
+    top: 6px;
+}
+
 .notification {
     background: #f5f5f5 url(../img/point.gif) 0 0 repeat-x;
     -moz-border-radius: 2px;
