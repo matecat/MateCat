@@ -1519,7 +1519,12 @@ UI = {
 	startWarning: function() {
 		clearTimeout(UI.startWarningTimeout);
 		UI.startWarningTimeout = setTimeout(function() {
-			UI.checkWarnings(false);
+            // If the tab is not active avoid to make the warnings call
+            if (document.visibilityState === "hidden") {
+                UI.startWarning();
+            } else {
+                UI.checkWarnings(false);
+            }
 		}, config.warningPollingInterval);
 	},
 
