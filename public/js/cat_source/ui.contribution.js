@@ -124,15 +124,21 @@ $.extend(UI, {
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 
-            // `next` and `untranslated next` are the same
-            if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
-                return $.Deferred().resolve();
-            }
+        // `next` and `untranslated next` are the same
+        if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
+            return $.Deferred().resolve();
+        }
 
-            var contextBefore = UI.getContextBefore(id);
-            var idBefore = UI.getIdBefore(id);
-            var contextAfter = UI.getContextAfter(id);
-            var idAfter = UI.getIdAfter(id);
+        var contextBefore = UI.getContextBefore(id);
+        var idBefore = UI.getIdBefore(id);
+        var contextAfter = UI.getContextAfter(id);
+        var idAfter = UI.getIdAfter(id);
+
+        if ( _.isUndefined(config.id_client) ) {
+            setTimeout(() => {
+                UI.getContribution(segment, next);
+            }, 3000);
+        }
 
 		return APP.doRequest({
 			data: {
@@ -202,7 +208,7 @@ $.extend(UI, {
             var match = data.matches[0].match;
 
             var segment_id = segment.attr('id');
-            $('.sub-editor.matches .overflow .graysmall .message', segment).remove();
+            $('.sub-editor.matches .overflow .graysmall .message, .tab.sub-editor.matches .engine-error-item', segment).remove();
             // $('.tab-switcher-tm .number', segment).text('');
             SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, []);
 
