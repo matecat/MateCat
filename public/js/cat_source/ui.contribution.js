@@ -138,7 +138,8 @@ $.extend(UI, {
             setTimeout(() => {
                 UI.getContribution(segment, next);
             }, 3000);
-            return;
+            console.log("SSE: ID_CLIENT not found");
+            return $.Deferred().resolve();
         }
 
 		return APP.doRequest({
