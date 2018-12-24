@@ -548,8 +548,12 @@ class UploadHandler {
     protected function _isValidFileName( $fileUp ) {
 
         if (
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '..' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '../' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/../' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/..' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E%2F' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E%2F' ) !== false ||
+                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E' ) !== false ||
                 strpos( $fileUp->name, '.' ) === 0 ||
                 strpos( $fileUp->name, '%2E' ) === 0
         ) {
