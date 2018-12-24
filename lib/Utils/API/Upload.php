@@ -289,10 +289,14 @@ class Upload {
     protected function _isValidFileName( $string ) {
 
         if (
-                strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '..' ) !== false ||
-                strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2E%2E' ) !== false ||
-                strpos( $string, '.' ) === 0 ||
-                strpos( $string, '%2E' ) === 0
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '../' ) !== false ||
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '/../' ) !== false ||
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '/..' ) !== false ||
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2E%2E%2F' ) !== false ||
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2F%2E%2E%2F' ) !== false ||
+            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2F%2E%2E' ) !== false ||
+            strpos( $string, '.' ) === 0 ||
+            strpos( $string, '%2E' ) === 0
         ) {
             //Directory Traversal! or Linux hidden file uploaded
             return false;
