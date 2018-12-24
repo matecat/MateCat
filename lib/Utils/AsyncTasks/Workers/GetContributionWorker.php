@@ -71,7 +71,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'source' ]  = $jobStruct->source;
         $_config[ 'target' ]  = $jobStruct->target;
 
-        $_config[ 'email' ] = \INIT::$MYMEMORY_TM_API_KEY;
+        $_config[ 'email' ] = \INIT::$MYMEMORY_API_KEY;
 
         $_config[ 'context_before' ] = $contributionStruct->getContexts()->context_before;
         $_config[ 'context_after' ]  = $contributionStruct->getContexts()->context_after;

@@ -28,14 +28,6 @@ class SegmentFooterTabConcordance extends React.Component {
         this.searchSubmit = this.searchSubmit.bind(this);
     }
 
-    componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance);
-    }
-
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance.bind(this));
-    }
-
     allowHTML(string) {
         return {__html: string};
     }
@@ -175,11 +167,13 @@ class SegmentFooterTabConcordance extends React.Component {
     }
 
     componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance.bind(this));
         SegmentStore.addListener(SegmentConstants.CONCORDANCE_RESULT, this.renderConcordances.bind(this));
 
     }
 
     componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance);
         SegmentStore.removeListener(SegmentConstants.CONCORDANCE_RESULT, this.renderConcordances.bind(this));
     }
 

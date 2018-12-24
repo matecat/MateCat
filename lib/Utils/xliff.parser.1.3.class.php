@@ -430,7 +430,7 @@ class Xliff_Parser {
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
         } catch( UnexpectedValueException $e ){
             //Found Empty Source Tag
-            Log::doLog( $e->getMessage() );
+//            Log::doLog( $e->getMessage() );
         }
     }
 
@@ -447,7 +447,7 @@ class Xliff_Parser {
             $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'attr' ] = $tagArray[ 'attr' ];
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
-            Log::doLog( $e->getMessage() );
+//            Log::doLog( $e->getMessage() );
         }
     }
 
@@ -468,7 +468,7 @@ class Xliff_Parser {
 
                 } catch( UnexpectedValueException $e ){
                     //Found Empty Target Tag
-                    Log::doLog( $e->getMessage() );
+//                    Log::doLog( $e->getMessage() );
                 }
 
                 $targetArray = $this->_getTagContent( 'target', $tag[ 'content' ], 'root' );
@@ -480,7 +480,7 @@ class Xliff_Parser {
 
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
-            Log::doLog( $e->getMessage() );
+//            Log::doLog( $e->getMessage() );
         }
     }
 
@@ -501,7 +501,7 @@ class Xliff_Parser {
 
                 } catch( UnexpectedValueException $e ){
                     //Found Empty Target Tag
-                    Log::doLog( $e->getMessage() );
+//                    Log::doLog( $e->getMessage() );
                 }
 
                 $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'context-group' ][] = $context_group;
@@ -510,7 +510,7 @@ class Xliff_Parser {
 
         } catch( UnexpectedValueException $e ){
             //Found Empty Target Tag
-            Log::doLog( $e->getMessage() );
+//            Log::doLog( $e->getMessage() );
         }
     }
 
