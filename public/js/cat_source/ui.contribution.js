@@ -138,6 +138,7 @@ $.extend(UI, {
             setTimeout(() => {
                 UI.getContribution(segment, next);
             }, 3000);
+            return;
         }
 
 		return APP.doRequest({
