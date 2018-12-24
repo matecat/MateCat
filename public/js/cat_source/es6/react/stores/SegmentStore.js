@@ -167,7 +167,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getSegmentIndex(sid, fid) {
         return this._segments[fid].findIndex(function (segment, index) {
-            return parseInt(segment.get('sid')) === parseInt(sid);
+            if (sid.indexOf("-") === -1) {
+                return parseInt(segment.get('sid')) === parseInt(sid);
+            } else {
+                return segment.get('sid') === sid;
+            }
         });
 
     },
