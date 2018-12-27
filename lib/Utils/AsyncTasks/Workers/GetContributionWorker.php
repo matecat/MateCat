@@ -15,7 +15,6 @@ use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Database;
 use PDOException;
-use Exception;
 use TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException,
@@ -125,16 +124,11 @@ class GetContributionWorker extends AbstractWorker {
          *
          */
         if ( isset( $_TMS ) ) {
-            //Todo : temp fix
-            try {
+
                 $tmEngine = $contributionStruct->getTMEngine( $featureSet );
                 $config = array_merge( $tmEngine->getConfigStruct(), $_config );
 
                 $tms_match = $tmEngine->get( $config )->get_matches_as_array();
-            } catch (Exception $exception) {
-                $this->_doLog( "Error get tms match: ".$exception );
-            }
-
 
         }
 
