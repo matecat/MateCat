@@ -125,10 +125,13 @@ class GetContributionWorker extends AbstractWorker {
          */
         if ( isset( $_TMS ) ) {
 
-                $tmEngine = $contributionStruct->getTMEngine( $featureSet );
-                $config = array_merge( $tmEngine->getConfigStruct(), $_config );
+            $tmEngine = $contributionStruct->getTMEngine( $featureSet );
+            $config = array_merge( $tmEngine->getConfigStruct(), $_config );
 
-                $tms_match = $tmEngine->get( $config )->get_matches_as_array();
+            $temp_matches = $tmEngine->get( $config );
+            if ( !empty( $temp_matches )) {
+                $tms_match = $temp_matches->get_matches_as_array();
+            }
 
         }
 
