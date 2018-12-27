@@ -49,8 +49,6 @@ class EnginesModel_MTHUBStruct extends EnginesModel_EngineStruct {
             'languages_url' => 'api/describelanguages'
     );
 
-
-
     /**
      * @var int
      */
