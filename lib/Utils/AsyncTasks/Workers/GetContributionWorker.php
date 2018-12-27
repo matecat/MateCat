@@ -15,7 +15,7 @@ use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Database;
 use PDOException;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Exception;
 use TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException,
