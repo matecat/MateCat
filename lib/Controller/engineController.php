@@ -255,12 +255,12 @@ class engineController extends ajaxController {
 
                 break;
                 
-            case strtolower( Constants_Engines::IADAATPA ):
+            case strtolower( Constants_Engines::MTHUB ):
 
                 /**
-                 * Create a record of type IADAATPA
+                 * Create a record of type MTHUB
                  */
-                $newEngineStruct = EnginesModel_IADAATPAStruct::getStruct();
+                $newEngineStruct = EnginesModel_MTHUBStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
                 $newEngineStruct->uid                                 = $this->user->uid;

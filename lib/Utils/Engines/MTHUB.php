@@ -9,7 +9,7 @@
  *
  */
 
-class Engines_IADAATPA extends Engines_AbstractEngine {
+class Engines_MTHUB extends Engines_AbstractEngine {
 
     protected $_config = array(
             'segment'     => null,
@@ -17,12 +17,33 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
             'target'      => null,
             'key'     => null,
     );
+    
+    private $availableLanguage= array();
 
     public function __construct($engineRecord) {
         parent::__construct($engineRecord);
         if ( $this->engineRecord->type != "MT" ) {
             throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
+    }
+
+
+    protected function _setAvailableLanguage() {
+    
+        if (  $this->client_secret != '' && $this->client_secret != null ) {
+          $replace = array("languages_url"=> $this->others["languages_url"]."/".$this->client_secret);
+          $this->others = array_replace($this->others,$replace);
+        }
+        
+        $this->_setAdditionalCurlParams( array(
+                        CURLOPT_HEADER     => false,
+                        CURLOPT_RETURNTRANSFER => true
+                )
+        );
+        $this->call( "languages_url", array(), false);
+
+        $this->availableLanguage = array_values($this->result);
+
     }
 
     /**
@@ -35,10 +56,8 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
         
         if( $lang == 'cav-ES' ) return "ca-valencia"; //Catalan, Valencian
         if( $lang == 'nn-NO' or $lang == 'nb-NO' ) return "no"; //Norwegian
-        
-        $complete_code= array("ar-SA", "hy-AM", "az-AZ", "be-BY", "ca-ES", "zh-CN", "zh-TW", "de-DE", "en-CA", "en-GB", "en-US", "et-EE", "fr-CA", "fr-FR", "ka-GE", "ga-IE", "gl-ES", "he-IL", "it-IT", "ja-JP", "kk-KZ", "ko-KR", "lv-LV", "lt-LT", "nl-NL", "pl-PL", "pt-BR", "ru-RU", "es-MX", "es-ES", "tk-TM", "tr-TR", "uk-UA", "uz-UZ");
 
-        if( !in_array( $lang, $complete_code ) ){       
+        if( !in_array( $lang, $this->availableLanguage ) ){       
           $separate_pos=strpos($lang,"-");
           $lang=substr($lang,0,$separate_pos);
         }
@@ -51,25 +70,47 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
      *
      * @return array
      */
-    protected function _decode( $rawValue ){        
-        
+    protected function _decode( $rawValue ){
         $all_args =  func_get_args();
         
         $original="";
-        if( is_string( $rawValue ) ) {            
+        if( is_string( $rawValue ) ) {
+            
             $all_args[0] = json_decode( $all_args[0] , true );
             $decoded = json_decode( $rawValue, true );
+            if ( $all_args[ 2 ] == "languages_url" ) {
+              if ( !isset( $decoded[ "success" ] ) && !isset( $decoded[ "error" ] ) ) {
+                    error_log("Error en languages -1");
+                    $decoded = array(
+                            "error" => array( "message" => "Connection Failed. Please contact MT-HUB support", "code" => -1 )
+                    );
 
-            $original=$decoded["data"]["segments"][0]["segment"];
-
-            $decoded = array(
+                } elseif( isset( $decoded["error"] ) ) {
+                    $decoded = array(
+                            "error" => array( "message" => $decoded["error"]["message"], "code" => $decoded["error"]["code"] )
+                    );
+                } else {                    
+                    $langs = array();
+                    foreach($decoded["data"]["languages"] as $lang)
+                    {
+                      array_push($langs,$lang["code"]);
+                    }
+                    
+                    return $langs; //All right
+                }
+            }
+            else
+            {
+              $original=$decoded["data"]["segments"][0]["segment"];
+  
+              $decoded = array(
                 'data' => array(
                     "translations" => array(
                         array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded["data"]["segments"][0]["translation"] ) )
                         )
                     )
                 );
-            
+            }
         } else {
             $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
             if ( isset( $resp[ "error" ][ "code" ] ) && isset( $resp[ "error" ][ "message" ] ) ) {
@@ -96,12 +137,14 @@ class Engines_IADAATPA extends Engines_AbstractEngine {
         );
 
         $mt_res = $mt_match_res->get_as_array();
-
+        
         return $mt_res;
 
     }
 
     public function get( $_config ) {
+    
+        $this->_setAvailableLanguage();
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
