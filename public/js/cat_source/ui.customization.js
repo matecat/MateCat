@@ -82,7 +82,7 @@ $.extend(UI, {
                         }
                     },
                     "redoInSegment": {
-                        "label": "Undo in segment",
+                        "label": "Redo in segment",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+y",
