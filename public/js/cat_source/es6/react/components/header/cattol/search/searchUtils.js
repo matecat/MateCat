@@ -671,8 +671,10 @@ let SearchUtils = {
             let self = this;
             segmentsWithMarkers = (type === "prev" ) ? segmentsWithMarkers.toArray().reverse() : segmentsWithMarkers ;
             $.each(segmentsWithMarkers, function() {
-                if ( (type === "prev" &&  UI.getSegmentId($(this)) < UI.getSegmentId($currentSegment)) ||
-                     (type !== "prev" && UI.getSegmentId($(this)) > UI.getSegmentId($currentSegment) )
+                var indexCurrent = self.searchResultsSegments.indexOf( '' + UI.getSegmentId($currentSegment) );
+                var index = self.searchResultsSegments.indexOf( '' + UI.getSegmentId($(this)) );
+                if ( (type === "prev" &&  ( UI.getSegmentId($(this)) < UI.getSegmentId($currentSegment) || (indexCurrent === 0 &&  index === self.searchResultsSegments.length - 1)) ) ||
+                     (type !== "prev" && (UI.getSegmentId($(this)) > UI.getSegmentId($currentSegment) || (indexCurrent === self.searchResultsSegments.length - 1 &&  index === 0)) )
                     ){
                     found = true;
                     UI.scrollSegment($(this));
