@@ -579,10 +579,12 @@ $.extend(UI, {
 
         //get target tags from the segment
         var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
-        //Remove inside-attribute for ph with equiv-text tags
-        targetClone.find('.locked.inside-attribute').remove();
         //Remove from the target the tags with mismatch
         targetClone.find('.locked.mismatch').remove();
+        var newhtml = targetClone.html();
+        //Remove inside-attribute for ph with equiv-text tags
+        targetClone.find('.locked.inside-attribute').remove();
+
         var targetTags = targetClone.html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
@@ -608,7 +610,7 @@ $.extend(UI, {
         var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
         var brEnd = $('br.end', UI.currentSegment ).detach();
 
-        var newhtml = targetClone.html();
+
         //add tags into the target segment
         for(var i = 0; i < missingTags.length; i++){
             if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
