@@ -535,8 +535,8 @@ $.extend(UI, {
                 return p;
             }, []);
         };
-        UI.sourceTags = arrayUnique(UI.sourceTags);
-        $.each(UI.sourceTags, function(index, text) {
+        var sourceTagsUnique = arrayUnique(UI.sourceTags);
+        $.each(sourceTagsUnique, function(index, text) {
             var textDecoded = UI.transformTextForLockTags(text);
             $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
@@ -567,7 +567,7 @@ $.extend(UI, {
     },
 
     /**
-     *
+     * Add at the end of the target the missing tags
      */
     autoFillTagsInTarget: function (  ) {
         //get source tags from the segment
@@ -628,6 +628,59 @@ $.extend(UI, {
         setTimeout(function (  ) {
             UI.segmentQA(UI.currentSegment);
         }, 100);
+    },
+
+    /**
+     * Auto fill the next tags in the target area based on the source tags
+     */
+    autoFillNextTagInTarget: function() {
+        //get source tags from the segment
+        var sourceClone = $( '.source', UI.currentSegment ).clone();
+        //Remove inside-attribute for ph with equiv-text tags
+        sourceClone.find('.locked.inside-attribute').remove();
+        var sourceTags = sourceClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+        sourceTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+        });
+        if ( sourceTags.length === 0 ) {
+            return false;
+        }
+        saveSelection();
+        var targetTags = [];
+        //get target tags from the segment
+        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+        targetClone.find('br.end').remove();
+        targetClone.find('.locked.inside-attribute').remove();
+        targetTags = targetClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        if(targetTags == null ) {
+            targetTags = [];
+        } else {
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
+        }
+
+        var nextTag = _.find( sourceTags, function ( elem, index ) {
+            return  targetTags.indexOf(elem) === -1;
+        });
+
+        if ( _.isUndefined(nextTag) ) {
+            return;
+        }
+
+        var nodeToInsert = $(UI.transformTextForLockTags(nextTag));
+        insertNodeAtCursor(nodeToInsert[0]);
+        newHtml = UI.editarea.html();
+
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
+        //lock tags and run again getWarnings
+        setTimeout(function (  ) {
+            restoreSelection();
+            UI.segmentQA(UI.currentSegment);
+        });
     },
     /**
      * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>z)
