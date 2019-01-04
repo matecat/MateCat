@@ -208,7 +208,7 @@ $.extend(UI, {
         if (!$('.sub-editor.matches', segment).length) {
             SegmentActions.createFooter(UI.getSegmentId(segment));
         }
-        if ( data.matches && data.matches.length > 0) {
+        if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
             var editareaLength = editarea.text().trim().length;
             var translation = data.matches[0].translation;
 

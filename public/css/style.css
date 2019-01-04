@@ -3708,16 +3708,7 @@ span.locked.tag-html-container-close {
     transition: 0.3s ease;
 }
 
-.editarea .locked.mismatch,
-.source .locked.mismatch,
-.locked.mismatch-old,
-.editarea .locked.mismatch,
-.source .locked.mismatch,
-.locked.mismatch-old .locked {
-    background-color: #fdeae2;
-    color: #e1595d;
-    border: 1px solid #e1565a;
-}
+
 
 .editor .editarea .locked.mismatch:hover,
 .editor .editarea .locked.mismatch:hover,
@@ -3754,6 +3745,16 @@ span.added .locked {
     border: 1px solid #ea862c;
 }
 
+.editor .editarea .locked.mismatch,
+.source .locked.mismatch,
+.locked.mismatch-old,
+.editor .editarea .locked.mismatch,
+.source .locked.mismatch,
+.locked.mismatch-old .locked {
+    background-color: #fdeae2;
+    color: #e1595d;
+    border: 1px solid #e1565a;
+}
 
 .editor .editarea .locked.order-error:hover,
 .editor .editarea .locked.order-error:hover,

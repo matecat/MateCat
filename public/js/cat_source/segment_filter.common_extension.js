@@ -23,7 +23,7 @@ if ( SegmentFilter.enabled() )
     var gotoNextSegment = function() {
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
-        var nextFiltered = list[ index + 1 ];
+        var nextFiltered = ( index !== list.length - 1 ) ? list[ index + 1 ] : list[0];
         var maxReached = UI.maxNumSegmentsReached() ;
 
         if ( !nextFiltered ) {
@@ -34,8 +34,10 @@ if ( SegmentFilter.enabled() )
             UI.unmountSegments() ;
         }
 
-        if ( UI.Segment.findEl( nextFiltered ).length ) {
+        if ( UI.Segment.findEl( nextFiltered ).length && index !== list.length - 1) {
             original_gotoNextSegment.apply(undefined, arguments);
+        } if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
+            original_gotoPreviousSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
         }
@@ -44,7 +46,7 @@ if ( SegmentFilter.enabled() )
     var gotoPreviousSegment = function() {
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
-        var nextFiltered = list[ index - 1 ];
+        var nextFiltered = (index !== 0 ) ? list[ index - 1 ] : list[list.length - 1 ];
         var maxReached = UI.maxNumSegmentsReached() ;
 
         if ( !nextFiltered ) {
@@ -55,8 +57,10 @@ if ( SegmentFilter.enabled() )
             UI.unmountSegments() ;
         }
 
-        if ( UI.Segment.findEl( nextFiltered ).length ) {
+        if ( UI.Segment.findEl( nextFiltered ).length && index !== 0 ) {
             original_gotoPreviousSegment.apply(undefined, arguments);
+        } else if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
+            original_gotoNextSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
         }

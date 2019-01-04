@@ -441,6 +441,7 @@ $.extend(UI, {
     removeHighlightCorrespondingTags: function (segment$) {
         segment$.find('.locked.highlight').removeClass('highlight');
         segment$.find('.locked.mismatch').removeClass('mismatch');
+        segment$.find('.locked.order-error').removeClass('order-error');
     },
 
     // TAG MISMATCH
@@ -464,14 +465,14 @@ $.extend(UI, {
                 }).last().addClass('temp');
             });
         }
-
+        // ??
         $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
         $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
         $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
 
         $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
-            $( '#segment-' + d.id_segment + ' .editarea .locked' ).filter( function () {
+            $( '#segment-' + d.id_segment + ' .editarea .locked:not(.mismatch)' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
@@ -537,8 +538,8 @@ $.extend(UI, {
                 return p;
             }, []);
         };
-        UI.sourceTags = arrayUnique(UI.sourceTags);
-        $.each(UI.sourceTags, function(index, text) {
+        var sourceTagsUnique = arrayUnique(UI.sourceTags);
+        $.each(sourceTagsUnique, function(index, text) {
             var textDecoded = UI.transformTextForLockTags(text);
             $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
         });
@@ -558,27 +559,35 @@ $.extend(UI, {
         var regExp = this.getXliffRegExpression();
         var sourceTags = $( '.source', segment ).html()
             .match( regExp );
-
+        if ( $(sourceTags).length === 0 ) {
+            return false;
+        }
         var targetTags = $( '.targetarea', segment ).html()
             .match( regExp );
 
-        return $(sourceTags).length > $(targetTags).length ;
+        return $(sourceTags).length > $(targetTags).length || !_.isEqual(sourceTags.sort(), targetTags.sort());
 
     },
 
     /**
-     *
+     * Add at the end of the target the missing tags
      */
     autoFillTagsInTarget: function (  ) {
         //get source tags from the segment
         var sourceClone = $( '.source', UI.currentSegment ).clone();
+        //Remove inside-attribute for ph with equiv-text tags
         sourceClone.find('.locked.inside-attribute').remove();
         var sourceTags = sourceClone.html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
         //get target tags from the segment
         var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+        //Remove from the target the tags with mismatch
+        targetClone.find('.locked.mismatch').remove();
+        var newhtml = targetClone.html();
+        //Remove inside-attribute for ph with equiv-text tags
         targetClone.find('.locked.inside-attribute').remove();
+
         var targetTags = targetClone.html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
@@ -604,7 +613,7 @@ $.extend(UI, {
         var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
         var brEnd = $('br.end', UI.currentSegment ).detach();
 
-        var newhtml = UI.editarea.html();
+
         //add tags into the target segment
         for(var i = 0; i < missingTags.length; i++){
             if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
@@ -619,7 +628,62 @@ $.extend(UI, {
         // .append(brEnd);
 
         //lock tags and run again getWarnings
-        UI.segmentQA(UI.currentSegment);
+        setTimeout(function (  ) {
+            UI.segmentQA(UI.currentSegment);
+        }, 100);
+    },
+
+    /**
+     * Auto fill the next tags in the target area based on the source tags
+     */
+    autoFillNextTagInTarget: function() {
+        //get source tags from the segment
+        var sourceClone = $( '.source', UI.currentSegment ).clone();
+        //Remove inside-attribute for ph with equiv-text tags
+        sourceClone.find('.locked.inside-attribute').remove();
+        var sourceTags = sourceClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+        sourceTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+        });
+        if ( sourceTags.length === 0 ) {
+            return false;
+        }
+        saveSelection();
+        var targetTags = [];
+        //get target tags from the segment
+        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+        targetClone.find('br.end').remove();
+        targetClone.find('.locked.inside-attribute').remove();
+        targetTags = targetClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        if(targetTags == null ) {
+            targetTags = [];
+        } else {
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
+        }
+
+        var nextTag = _.find( sourceTags, function ( elem, index ) {
+            return  targetTags.indexOf(elem) === -1;
+        });
+
+        if ( _.isUndefined(nextTag) ) {
+            return;
+        }
+
+        var nodeToInsert = $(UI.transformTextForLockTags(nextTag));
+        insertNodeAtCursor(nodeToInsert[0]);
+        newHtml = UI.editarea.html();
+
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
+        //lock tags and run again getWarnings
+        setTimeout(function (  ) {
+            restoreSelection();
+            UI.segmentQA(UI.currentSegment);
+        });
     },
     /**
      * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>z)
@@ -695,7 +759,9 @@ $.extend(UI, {
         setTimeout(function () {
             restoreSelection();
         });
-        UI.segmentQA(UI.currentSegment);
+        setTimeout(function (  ) {
+            UI.segmentQA(UI.currentSegment);
+        }, 100);
     },
     /**
      *

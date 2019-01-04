@@ -151,7 +151,7 @@ UI = {
 
     autopropagateConfirmNeeded: function () {
         var segment = UI.currentSegment;
-        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim() && !config.isReview) { //segment not modified
             return false;
         }
 

@@ -82,7 +82,7 @@ $.extend(UI, {
                         }
                     },
                     "redoInSegment": {
-                        "label": "Undo in segment",
+                        "label": "Redo in segment",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+y",
@@ -151,6 +151,14 @@ $.extend(UI, {
                         "keystrokes": {
                             "standard": "ctrl+s",
                             "mac": "ctrl+s",
+                        }
+                    },
+                    "addNextTag": {
+                        "label": "Tag autosuggest",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "alt+t",
+                            "mac": "alt+t",
                         }
                     }
                 }
