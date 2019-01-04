@@ -96,7 +96,7 @@ $.extend( UI, {
                     // detect if selection ph is inside a monad tag
                     if($('.monad .rangySelectionBoundary', UI.editarea).length) {
                         $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
-                        // move selboundary after the
+                        // move selboundary after the monad
                     }
                     restoreSelection();
                     var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;

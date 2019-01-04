@@ -152,6 +152,14 @@ $.extend(UI, {
                             "standard": "ctrl+s",
                             "mac": "ctrl+s",
                         }
+                    },
+                    "addNextTag": {
+                        "label": "Tag autosuggest",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "alt+t",
+                            "mac": "alt+t",
+                        }
                     }
                 }
             },

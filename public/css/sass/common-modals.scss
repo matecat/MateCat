@@ -1434,6 +1434,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             &.s:after {
                                 content: "S";
                             }
+                            &.t:after {
+                                content: "T";
+                            }
                             &.up:after {
                                 content: "Arrow up";
                             }
