@@ -637,6 +637,7 @@ $.extend(UI, {
      * Auto fill the next tags in the target area based on the source tags
      */
     autoFillNextTagInTarget: function() {
+        window.clearTimeout( UI.autofillTagsTimeout );
         //get source tags from the segment
         var sourceClone = $( '.source', UI.currentSegment ).clone();
         //Remove inside-attribute for ph with equiv-text tags
@@ -667,7 +668,12 @@ $.extend(UI, {
         }
 
         var nextTag = _.find( sourceTags, function ( elem, index ) {
-            return  targetTags.indexOf(elem) === -1;
+            //Special case for tag without id like g close tag
+            if ( elem === "&lt;/g&gt;" ) {
+                return  targetTags.indexOf(elem) === -1 || _.filter(sourceTags.slice(0,index+1), (i)=>{return i===elem;}).length > _.filter(targetTags, (i)=>{return i===elem;}).length
+            } else {
+                return  targetTags.indexOf(elem) === -1;
+            }
         });
 
         if ( _.isUndefined(nextTag) ) {
@@ -680,7 +686,7 @@ $.extend(UI, {
 
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
         //lock tags and run again getWarnings
-        setTimeout(function (  ) {
+        UI.autofillTagsTimeout = setTimeout(function (  ) {
             restoreSelection();
             UI.segmentQA(UI.currentSegment);
         });

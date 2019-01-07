@@ -237,7 +237,7 @@ class GetContributionWorker extends AbstractWorker {
     protected function _extractAvailableKeysForUser( ContributionRequestStruct $contributionStruct ){
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $contributionStruct->getJobStruct()->tm_keys, 'w', 'tm', $contributionStruct->user->uid, $contributionStruct->userRole  );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->user->uid, $contributionStruct->userRole  );
 
         $keyList = [];
         if ( !empty( $tm_keys ) ) {
