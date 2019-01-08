@@ -266,7 +266,9 @@ class ConversionHandler {
                 return null;
             }
 
-            return array_map( "Upload::fixFileName", $za->treeList );
+            return array_map( function( $fileName ) use( $uploadFile ) {
+                return $uploadFile->fixFileName( $fileName, false );
+            }, $za->treeList );
 
         } catch ( Exception $e ) {
 
