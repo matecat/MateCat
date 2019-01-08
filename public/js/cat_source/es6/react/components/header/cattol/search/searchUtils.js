@@ -78,8 +78,8 @@ let SearchUtils = {
                 this.whereToFind = ".source";
             }
         }
-		let source = (p.source) ? p.source : '';
-		let target = (p.target) ? p.target : '';
+		let source = (p.source) ? htmlEncode(p.source) : '';
+		let target = (p.target) ? htmlEncode(p.target) : '';
 		let replace = (p.replace) ? p.replace : '';
 
 		this.clearSearchMarkers();
@@ -232,8 +232,8 @@ let SearchUtils = {
         this.searchParams['exact-match'] = params.exactMatch;
 
         let p = this.searchParams;
-        let source = (p.source) ? p.source : '';
-        let target = (p.target) ? p.target : '';
+        let source = (p.source) ? htmlEncode(p.source) : '';
+        let target = (p.target) ? htmlEncode(p.target) : '';
         let replace = (p.replace) ? p.replace : '';
         let dd = new Date();
 
