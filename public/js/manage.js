@@ -27,10 +27,7 @@ UI = {
         var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
-        ReactDOM.render(React.createElement(Header ,{
-            user: APP.USER.STORE,
-            showFilterProjects: true
-        }), headerMountPoint);
+
 
 
 
@@ -65,6 +62,12 @@ UI = {
         });
 
         API.TEAM.getAllTeams().done(function (data) {
+
+            ReactDOM.render(React.createElement(Header ,{
+                user: APP.USER.STORE,
+                showFilterProjects: true
+            }), headerMountPoint);
+
             self.teams = data.teams;
             TeamsActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
