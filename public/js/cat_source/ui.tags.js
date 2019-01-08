@@ -637,7 +637,6 @@ $.extend(UI, {
      * Auto fill the next tags in the target area based on the source tags
      */
     autoFillNextTagInTarget: function() {
-        window.clearTimeout( UI.autofillTagsTimeout );
         //get source tags from the segment
         var sourceClone = $( '.source', UI.currentSegment ).clone();
         //Remove inside-attribute for ph with equiv-text tags
@@ -686,7 +685,7 @@ $.extend(UI, {
 
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
         //lock tags and run again getWarnings
-        UI.autofillTagsTimeout = setTimeout(function (  ) {
+        setTimeout(function (  ) {
             restoreSelection();
             UI.segmentQA(UI.currentSegment);
         });
