@@ -270,7 +270,7 @@ class Upload {
      * @return string
      * @throws Exception
      */
-    public function fixFileName( $stringName ) {
+    public function fixFileName( $stringName, $upCount = true ) {
 
         //Fix Bug: Zip files, file names with contiguous whitespaces ( replaced with only one _ and not found inside the zip on download )
         $string = preg_replace( '/\p{Zs}/u', chr(0x1A), $stringName ); // substitute whitespaces
@@ -278,7 +278,7 @@ class Upload {
         $string = preg_replace( '/' . chr(0x1A) . '/', '_', $string ); //strips whitespace and odd chars
         $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
 
-        while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) ) {
+        while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = $this->upCountName( $string );
         }
 
