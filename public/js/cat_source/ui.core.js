@@ -818,7 +818,7 @@ UI = {
 				if (SearchUtils.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
 				} else {
-					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
+					$('#segment-' + options.segmentToScroll + ' .targetarea mark.searchMarker').first().addClass('currSearchItem');
 				}
 			}
 		}

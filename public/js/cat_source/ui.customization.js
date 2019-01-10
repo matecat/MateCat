@@ -153,14 +153,14 @@ $.extend(UI, {
                             "mac": "ctrl+s",
                         }
                     },
-                    "addNextTag": {
-                        "label": "Tag autosuggest",
-                        "equivalent": "",
-                        "keystrokes": {
-                            "standard": "alt+t",
-                            "mac": "alt+t",
-                        }
-                    }
+                    // "addNextTag": {
+                    //     "label": "Tag autosuggest",
+                    //     "equivalent": "",
+                    //     "keystrokes": {
+                    //         "standard": "alt+t",
+                    //         "mac": "alt+t",
+                    //     }
+                    // }
                 }
             },
         };
