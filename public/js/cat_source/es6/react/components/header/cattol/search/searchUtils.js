@@ -462,7 +462,7 @@ let SearchUtils = {
      * @param testRegex
      */
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-        let searchMarker = (this.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
+        let searchMarker = (this.searchMode === 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 		    let segId = UI.getSegmentId( $(this) );
             if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
@@ -483,6 +483,10 @@ let SearchUtils = {
                         return spanArray.shift();
                     });
                     $(this).html(tt);
+                    //Temp fix for tags with equiv text
+                    $(this).find('.tag-html-container-open').each(function (  ) {
+                        $(this).text($(this).text());
+                    });
                 }
             }
 		});
@@ -572,43 +576,21 @@ let SearchUtils = {
                 }
 
             }
-        } else if (this.searchMode == 'source&target') {
-            let m = $(".targetarea mark.currSearchItem");
-
-            if ($(m)[jQueryFnForNext]('mark.searchMarker').length) { // there are other subsequent results in the segment
-
-                $(m).removeClass('currSearchItem');
-                $(m)[jQueryFnForNext]('mark.searchMarker').first().addClass('currSearchItem');
-                if (unmark)
-                    $(m).replaceWith($(m).text());
-                UI.goingToNext = false;
-            } else { // jump to results in subsequents segments
-
-                let seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
-                if (seg.length) {
-                    this.gotoSearchResultAfter({
-                        el: $(seg).attr('id').split('-')[1],
-                        unmark: unmark
-                    }, type);
-                } else {
-                    setTimeout(function() {
-                        SearchUtils.gotoNextResultItem(false, type);
-                    }, 500);
-                }
-            }
-
         } else {
-            let m = $("mark.currSearchItem");
-
-            if ($(m)[jQueryFnForNext]('mark.searchMarker').length) { // there are other subsequent results in the segment
-
-                $(m).removeClass('currSearchItem');
-                $(m)[jQueryFnForNext]('mark.searchMarker').first().addClass('currSearchItem');
+            let current = "mark.currSearchItem";
+            let currentSegmentFind = $(current).closest("div");
+            let marksArray = currentSegmentFind.find("mark").toArray();
+            let currentMarkIndex = marksArray.indexOf($(current)[0]);
+            let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
+            if ( marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
+                $(current).removeClass('currSearchItem');
+                $(marksArray[nextIndex]).addClass('currSearchItem');
                 if (unmark)
-                    $(m).replaceWith($(m).text());
+                    $(current).replaceWith($(current).text());
                 UI.goingToNext = false;
             } else { // jump to results in subsequents segments
-                let seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+
+                let seg = (current.length) ? $(current).parents('section') : $('mark.searchMarker').first().parents('section');
                 if (seg.length) {
                     this.gotoSearchResultAfter({
                         el: $(seg).attr('id').split('-')[1],
@@ -620,6 +602,7 @@ let SearchUtils = {
                     }, 500);
                 }
             }
+
         }
     },
     /**
@@ -685,7 +668,11 @@ let SearchUtils = {
 
                     let mark = $("mark.currSearchItem");
                     $(mark).removeClass('currSearchItem');
-                    $(this).find('mark.searchMarker').first().addClass('currSearchItem');
+                    if (type === "prev") {
+                        $(this).find('mark.searchMarker').last().addClass('currSearchItem');
+                    } else {
+                        $(this).find('mark.searchMarker').first().addClass('currSearchItem');
+                    }
                     if (unmark) {
                         $(mark).replaceWith($(mark).text());
                     }
