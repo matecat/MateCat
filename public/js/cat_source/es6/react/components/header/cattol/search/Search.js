@@ -238,11 +238,11 @@ class Search extends React.Component {
             if (this.state.search.exactMatch)
                 query.push(' exactly');
             if (this.state.search.searchSource)
-                query.push(<span className="query"><span className="param">{this.state.search.searchSource}</span>in source </span>);
+                query.push(<span key="source" className="query"><span className="param">{this.state.search.searchSource}</span>in source </span>);
             if (this.state.search.searchTarget)
-                query.push(<span className="query"><span className="param">{this.state.search.searchTarget}</span>in target </span>);
+                query.push(<span key="target" className="query"><span className="param">{this.state.search.searchTarget}</span>in target </span>);
             if (this.state.search.selectStatus !== 'all') {
-                let statusLabel = <span> and status <span className="param">{this.state.search.selectStatus}</span></span>;
+                let statusLabel = <span key="status"> and status <span className="param">{this.state.search.selectStatus}</span></span>;
                 query.push(statusLabel);
             }
             let caseLabel = ' (' + ((this.state.search.matchCase) ? 'case sensitive' : 'case insensitive') + ')';
@@ -253,21 +253,21 @@ class Search extends React.Component {
                 let total = this.state.segments.length ? this.state.segments.length : 0;
                 let label = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
-                    <span className="numbers">Found <span className="segments">{this.state.segments.length}</span> {label}</span>
+                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.segments.length}</span> {label}</span>
                 ) : (
-                    <span className="numbers">No segments found</span>
+                    <span key="numbers" className="numbers">No segments found</span>
                     )
             } else {
                 let total = this.state.total ? parseInt(this.state.total) : 0;
                 let label = (total === 1) ? 'result' : 'results';
                 let label2 = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
-                    <span className="numbers">Found
+                    <span key="numbers" className="numbers">Found
                         <span className="results">{' '+this.state.total}</span>{' '}<span>{label}</span>  in
                         <span className="segments">{' '+this.state.segments.length}</span> {' '}<span>{label2}</span>
                     </span>
                 ) : (
-                    <span className="numbers">No segments found</span>
+                    <span key="numbers" className="numbers">No segments found</span>
                 )
             }
             html = <div className="search-display">
