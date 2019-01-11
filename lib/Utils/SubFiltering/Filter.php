@@ -15,6 +15,8 @@ use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use SubFiltering\Filters\EncodeToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 use SubFiltering\Filters\LtGtEncode;
+use SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use SubFiltering\Filters\UnicodeToEntities;
 use SubFiltering\Filters\HtmlToEntities;
 use SubFiltering\Filters\HtmlToPh;
@@ -106,13 +108,14 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer0ToLayer2( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new UnicodeToEntities() );
@@ -137,9 +140,9 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer1ToLayer2( $segment ) {
 
@@ -163,9 +166,9 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline();
@@ -190,14 +193,15 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer2ToLayer0( $segment ) {
 
         $channel = new Pipeline();
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
+        $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new HtmlToEntities() );
@@ -220,13 +224,14 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer0ToLayer1( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
@@ -248,13 +253,14 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer1ToLayer0( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
@@ -278,9 +284,9 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromRawXliffToLayer0( $segment ) {
 
@@ -303,9 +309,9 @@ class Filter {
      * @return mixed
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
-     * @throws \Exceptions_RecordNotFound
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     public function fromLayer0ToRawXliff( $segment ) {
 
