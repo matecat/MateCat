@@ -60,7 +60,7 @@ section.reviewImproved.opened {
     }
 
     .errorTaggingArea::selection {
-        background-color: #FFFF00;
+        background-color: #FFEB3B;
     }
 }
 
@@ -69,18 +69,18 @@ span.review-issue-label:hover {
 }
 
 .review-version-wrapper .muted-text-box::selection {
-    background-color: #FFFF00;
+    background-color: #FFEB3B;
 }
 
 section.reviewImproved.opened.reverted {
     .errorTaggingArea::selection {
-        background-color: #FFFF00;
+        background-color: #FFEB3B;
     }
 }
 
 section.opened {
     .issuesHighlightArea::selection {
-        background-color: #FFFF00;
+        background-color: #FFEB3B;
     }
 }
 
