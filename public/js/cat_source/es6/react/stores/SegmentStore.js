@@ -167,7 +167,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getSegmentIndex(sid, fid) {
         return this._segments[fid].findIndex(function (segment, index) {
-            if (sid.indexOf("-") === -1) {
+            if (sid.toString().indexOf("-") === -1) {
                 return parseInt(segment.get('sid')) === parseInt(sid);
             } else {
                 return segment.get('sid') === sid;
