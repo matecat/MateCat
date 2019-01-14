@@ -396,10 +396,11 @@ var SegmentActions = {
         });
     },
 
-    showIssuesMessage: function ( sid ) {
+    showIssuesMessage: function ( sid, type ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_ISSUE_MESSAGE,
             sid: sid,
+            data: type
         });
     },
 

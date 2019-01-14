@@ -6,13 +6,16 @@ class ReviewExtendedPanel extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.addIssueToApproveMessageType = 1;
+		this.addIssueToSelectedTextMessageType = 2;
 		this.state = {
 			versionNumber: this.props.segment.versions[0].version_number,
 			diffPatch: null,
 			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
 			issueInCreation: false,
-            showAddIssueMessage: false
+            showAddIssueMessage: false,
+            showAddIssueToSelectedTextMessage: false
 		};
 	}
 
@@ -37,12 +40,23 @@ class ReviewExtendedPanel extends React.Component {
 		})
 	}
 
-    showIssuesMessage() {
-		if (this.props.issueRequiredOnSegmentChange) {
-            this.setState({
-                showAddIssueMessage: true
-            });
-            SegmentActions.openIssuesPanel({ sid: sid }, false);
+    showIssuesMessage(sid, type) {
+		switch ( type ) {
+			case this.addIssueToApproveMessageType:
+                if (this.props.issueRequiredOnSegmentChange) {
+                    this.setState({
+                        showAddIssueMessage: true
+                    });
+                    setTimeout(()=>{
+                        SegmentActions.openIssuesPanel({ sid: sid }, false);
+                    });
+                }
+                break;
+			case this.addIssueToSelectedTextMessageType:
+                this.setState({
+                    showAddIssueToSelectedTextMessage: true
+                });
+				break;
         }
     }
 
@@ -53,7 +67,8 @@ class ReviewExtendedPanel extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		this.setState({
 			versionNumber: nextProps.segment.versions[0].version_number,
-            showAddIssueMessage: false
+            showAddIssueMessage: false,
+            showAddIssueToSelectedTextMessage: false
 		});
 	}
 
@@ -82,7 +97,13 @@ class ReviewExtendedPanel extends React.Component {
 			/>
             {this.state.showAddIssueMessage ? (
 				<div className="re-warning-not-added-issue">
-					<p>In order to Approve the segment you need to add an Issue from the Error list</p>
+					<p>In order to Approve the segment you need to add an Issue from the Error list.</p>
+				</div>
+            ) : (null)}
+
+            {this.state.showAddIssueToSelectedTextMessage ? (
+				<div className="re-warning-selected-text-issue">
+					<p>Select an issue from the list below to associate it to the selected text.</p>
 				</div>
             ) : (null)}
 

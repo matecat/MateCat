@@ -78,7 +78,8 @@ if (true)
 
         /**
          * Mark the glossary matches in the source
-         * @param d
+         * @param segmentToMark
+         * @param matchesObj
          */
         markGlossaryItemsInSource: function (segmentToMark, matchesObj ) {
 
@@ -102,7 +103,7 @@ if (true)
             } );
 
             var matchesToRemove = findInclusiveMatches( matches ) ;
-            var matches = matches.sort(function(a, b){
+            matches = matches.sort(function(a, b){
                 return b.length - a.length;
             });
             $.each( matches, function ( index, k ) {
@@ -115,7 +116,12 @@ if (true)
                         .replace( /\(/gi, '\\(' )
                         .replace( /\)/gi, '\\)' );
 
-                var re = new RegExp( '\\b'+ glossaryTerm_escaped.trim() + '\\b', "gi" );
+                var re = new RegExp( '\b'+ glossaryTerm_escaped.trim() + '\b', "gi" );
+
+                //If source languace is Cyrillic
+                if ( cleanString.match(/[\w\u0430-\u044f]+/ig) ) {
+                    re = new RegExp( glossaryTerm_escaped.trim(), "gi" );
+                }
                 var regexInTags = new RegExp( "<[^>]*?("+glossaryTerm_escaped.trim()+")[^>]*?>" , "gi" );
 
                 var glossaryTerm_marked = cleanString.replace( re, '<mark>' + glossaryTerm_noPlaceholders + '</mark>' );

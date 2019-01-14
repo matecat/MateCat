@@ -73,7 +73,10 @@ class SegmentTarget extends React.Component {
             event.preventDefault();
             event.stopPropagation();
             selection = getSelectionData( selection, container ) ;
-            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid,  selection : selection }, true)
+            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid,  selection : selection }, true);
+            setTimeout(()=> {
+                SegmentActions.showIssuesMessage(this.props.segment.sid, 2);
+            });
         } else {
             this.props.removeSelection();
             UI.editAreaClick(event.currentTarget);
