@@ -3,6 +3,7 @@
 
  */
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 class TagsMenu extends React.Component {
 
@@ -10,6 +11,12 @@ class TagsMenu extends React.Component {
         super(props);
         this.state = {};
         this.menuHeight = 300;
+        this.state = {
+            selectedItem: 0,
+            tags : TagsMenu.arrayUnique(this.props.sourceTags)
+        };
+        this.handleKeydownFunction = this.handleKeydownFunction.bind(this);
+        this.handleResizeEvent = this.handleResizeEvent.bind(this);
     }
 
     static arrayUnique(a) {
@@ -55,13 +62,15 @@ class TagsMenu extends React.Component {
 
     getItemsMenuHtml() {
         let menuItems = [];
-        let tags = TagsMenu.arrayUnique(this.props.sourceTags);
-        _.each(tags, ( item, index ) => {
+
+        _.each(this.state.tags, ( item, index ) => {
             let textDecoded = UI.transformTextForLockTags(item);
-            menuItems.push(<a className="item" key={index} data-original="item"
+            let classSelected = ( this.state.selectedItem === index ) ? "active" : "";
+            menuItems.push(<a className={"item " + classSelected} key={index} data-original="item"
                               dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
                               onClick={this.selectTag.bind(this, textDecoded)}
-                              onKeyPress={this._handleKeyPressItem.bind(this, index, textDecoded)}/>
+                              ref={(elem)=>{this["item" + index]=elem;}}
+                              />
             );
         });
         return menuItems;
@@ -74,9 +83,9 @@ class TagsMenu extends React.Component {
     }
 
     chooseTagAutocompleteOption(tag) {
-        if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+        // if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
             setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-        }
+        // }
         saveSelection();
 
         // Todo: refactor this part
@@ -118,17 +127,82 @@ class TagsMenu extends React.Component {
         return { __html: string };
     }
 
-    _handleKeyPressItem(index, tag) {
-        if ( e.key === 'Enter' ) {
-            selectTag(tag)
+    handleKeydownFunction( event) {
+        if ( event.key === 'Enter' ) {
+            event.preventDefault();
+            let tag = this.state.tags[this.state.selectedItem];
+            if ( !_.isUndefined(tag) ) {
+                tag = UI.transformTextForLockTags(tag);
+                this.selectTag(tag)
+            }
+        } else if ( event.key ===  'Escape' ) {
+            event.preventDefault();
+            //Close menu
+            SegmentActions.closeTagsMenu();
+            $('.tag-autocomplete-endcursor').remove();
+        } else if ( event.key ===  'ArrowUp' ) {
+            event.preventDefault();
+            this.setState({
+                selectedItem: this.getNextIdx("prev")
+            });
+        } else if ( event.key ===  'ArrowDown' ) {
+            event.preventDefault();
+            this.setState({
+                selectedItem: this.getNextIdx("next")
+            });
         }
     }
 
+    handleResizeEvent( event ) {
+        this.forceUpdate()
+    }
+
+    getNextIdx(direction) {
+        let idx = this.state.selectedItem;
+        let length = this.state.tags.length;
+        switch (direction) {
+            case 'next': return (idx + 1) % length;
+            case 'prev': return (idx === 0) && length - 1 || idx - 1;
+            default:     return idx;
+        }
+    }
+
+
     componentDidMount() {
+        document.addEventListener("keydown", this.handleKeydownFunction);
+        window.addEventListener("resize", this.handleResizeEvent);
+        $("#outer").on("scroll", this.handleResizeEvent);
         this.openTagAutocompletePanel();
+        UI.tagMenuOpen = true;
     }
 
     componentWillUnmount() {
+        document.removeEventListener( "keydown", this.handleKeydownFunction );
+        window.removeEventListener( "resize", this.handleResizeEvent );
+        $("#outer").off("scroll", this.handleResizeEvent);
+        UI.tagMenuOpen = false;
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        // only scroll into view if the active item changed last render
+        if (this.state.selectedItem !== prevState.selectedItem) {
+            this.ensureActiveItemVisible();
+        }
+    }
+
+    ensureActiveItemVisible() {
+        var itemComponent = this['item'+this.state.selectedItem];
+        if (itemComponent) {
+            var domNode = ReactDOM.findDOMNode(itemComponent);
+            this.scrollElementIntoViewIfNeeded(domNode);
+        }
+    }
+
+    scrollElementIntoViewIfNeeded(domNode) {
+        var containerDomNode = ReactDOM.findDOMNode( this.menu );
+        $(containerDomNode).animate({
+            scrollTop: $(domNode)[0].offsetTop
+        }, 150);
     }
 
     render() {
@@ -143,7 +217,8 @@ class TagsMenu extends React.Component {
         };
 
         let tags = this.getItemsMenuHtml();
-        return <div className="tags-auto-complete-menu" style={style}>
+        return <div className="tags-auto-complete-menu" style={style}
+                    ref={(menu)=>{this.menu=menu;}}>
                 <div className="ui vertical menu">
                     {tags}
                 </div>

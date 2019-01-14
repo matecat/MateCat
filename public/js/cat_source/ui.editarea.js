@@ -120,16 +120,6 @@ $.extend( UI, {
             }
         }
 
-        if (code == 8) { // backspace
-            if($('.tag-autocomplete').length) {
-                UI.closeTagAutocompletePanel();
-                setTimeout(function() {
-                    // UI.openTagAutocompletePanel();
-                    var added = UI.getPartialTagAutocomplete();
-                    if(added === '') UI.closeTagAutocompletePanel();
-                }, 10);
-            }
-        }
         if (code == 9) { // tab
             if(!UI.hiddenTextEnabled) return;
 
@@ -165,11 +155,8 @@ $.extend( UI, {
         }
 
         if (code == 38) { // top arrow
-            if($('.tag-autocomplete').length) {
-                if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
-                    $('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
-                    return false;
-                }
+            if(UI.tagMenuOpen) {
+                return false
             }
             selection = window.getSelection();
             range = selection.getRangeAt(0);
@@ -210,8 +197,7 @@ $.extend( UI, {
         }
 
         if (code == 40) { // down arrow
-            if($('.tag-autocomplete').length) {
-                $('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
+            if( UI.tagMenuOpen ) {
                 return false;
             }
             selection = window.getSelection();
@@ -243,9 +229,7 @@ $.extend( UI, {
         }
 
         if (code == 13) { // return
-            if($('.tag-autocomplete').length) {
-                e.preventDefault();
-                $('.tag-autocomplete li.current').click();
+            if( UI.tagMenuOpen ) {
                 return false;
             } else {
                 UI.handleReturn(e);
@@ -298,17 +282,10 @@ $.extend( UI, {
             UI.saveInUndoStack();
             UI.checkTagProximity();
         }, 100);
-
-
-        // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
     },
     keyPressEditAreaEventHandler: function (e, sid) {
-        // if (e.ctrlKey || e.shiftKey){
-        //     return;
-        // }
         if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
-            if($('.tag-autocomplete').length) {
+            if(UI.tagMenuOpen) {
                 e.preventDefault();
                 return false;
             }
@@ -316,23 +293,23 @@ $.extend( UI, {
             // UI.openTagAutocompletePanel();
         }
         if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
-            if($('.tag-autocomplete').length) {
+            if( UI.tagMenuOpen ) {
                 e.preventDefault();
                 return false;
             }
         }
-        setTimeout(function() {
-            if($('.tag-autocomplete').length) {
-                tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
-                UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
-
-                if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-                    var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>');
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
-                }
-                UI.checkAutocompleteTags();
-            }
-        }, 50);
+        // setTimeout(function() {
+        //     if( UI.tagMenuOpen ) {
+        //         tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+        //         UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+        //
+        //         if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
+        //             var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>');
+        //             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
+        //         }
+        //         UI.checkAutocompleteTags();
+        //     }
+        // }, 50);
     },
     inputEditAreaEventHandler: function (e) {
         SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');

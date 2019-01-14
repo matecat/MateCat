@@ -42,7 +42,8 @@ header .wrapper {
     padding: 5px 0px;
 }
 
-.text .item,
+.text .source.item,
+.text .target.item,
 .white li {
     width: 45.5%;
     table-layout: fixed;
@@ -3795,7 +3796,9 @@ span.added .locked {
         margin-right: 22px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 46% !important;
     }
 
@@ -3837,7 +3840,9 @@ span.added .locked {
         margin-right: 16px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 45.3% !important
     }
 
@@ -3948,7 +3953,9 @@ span.added .locked {
         width: 200px !important
     }
 
-    .text .item, .white li, .track-changes {
+    .text .source.item,
+    .text .target.item,
+    .white li, .track-changes {
         width: 44% !important
     }
 

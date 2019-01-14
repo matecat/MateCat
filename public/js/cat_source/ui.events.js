@@ -66,12 +66,10 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        })
-        //     .on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
-        //     e.preventDefault();
-        //     UI.autoFillNextTagInTarget()
-        // })
-            .on('keydown.shortcuts', null, "ctrl+u", function(e) {
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+        }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
             // to prevent the underline shortcut
             e.preventDefault();
         }).on('keydown.shortcuts', null, "ctrl+b", function(e) {
@@ -287,7 +285,8 @@ $.extend(UI, {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') &&
 					!UI.body.hasClass("side-popup" ) &&
-                    !UI.body.hasClass('search-open')) {
+                    !UI.body.hasClass('search-open') &&
+                    !UI.tagMenuOpen ) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                         UI.closeTagAutocompletePanel();
