@@ -96,20 +96,6 @@ class SegmentTranslationModel {
 
     }
 
-    protected function checkTranslationIssuesExist() {
-        $translation = $this->model->getTranslation();
-
-        $entries = \LQA\EntryDao::findAllByTranslationVersion(
-                $translation->id_segment,
-                $translation->id_job,
-                $translation->version_number
-        );
-
-        if ( count( $entries ) == 0 ) {
-            $this->checkReviewedStateTransition();
-        }
-    }
-
     /**
      * @return \LQA\ChunkReviewStruct
      */
