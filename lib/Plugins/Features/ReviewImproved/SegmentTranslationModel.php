@@ -77,13 +77,6 @@ class SegmentTranslationModel {
          */
 
         $this->checkReviewedStateTransition();
-
-        // if ( $version_model->triggersNewVersion() ) {
-        //     $this->checkReviewedStateTransition();
-        // } else {
-        //     $this->checkTranslationIssuesExist();
-        // }
-
     }
 
     /**
