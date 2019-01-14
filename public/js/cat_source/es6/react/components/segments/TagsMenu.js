@@ -59,16 +59,73 @@ class TagsMenu extends React.Component {
         _.each(tags, ( item, index ) => {
             let textDecoded = UI.transformTextForLockTags(item);
             menuItems.push(<a className="item" key={index} data-original="item"
-                              dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }/>);
+                              dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
+                              onClick={this.selectTag.bind(this, textDecoded)}
+                              onKeyPress={this._handleKeyPressItem.bind(this, index, textDecoded)}/>
+            );
         });
         return menuItems;
+    }
+
+    openTagAutocompletePanel() {
+        var endCursor = document.createElement("span");
+        endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+        insertNodeAtCursor(endCursor);
+    }
+
+    chooseTagAutocompleteOption(tag) {
+        if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
+        }
+        saveSelection();
+
+        // Todo: refactor this part
+        var editareaClone = UI.editarea.clone();
+        editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+        editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+        editareaClone.html(editareaClone.html().replace(/(<span class="tag-autocomplete-endcursor"\>.+<\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
+        var ph = "";
+        if($('.rangySelectionBoundary', editareaClone).length) { // click, not keypress
+            ph = $('.rangySelectionBoundary', editareaClone)[0].outerHTML;
+        }
+
+        $('.rangySelectionBoundary', editareaClone).remove();
+        $('.tag-autocomplete-endcursor', editareaClone).after(ph);
+        $('.tag-autocomplete-endcursor', editareaClone).before(tag.trim()); //Trim to remove space at the end
+        $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
+
+        //Close menu
+        SegmentActions.closeTagsMenu();
+        $('.tag-autocomplete-endcursor').remove();
+
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        setTimeout(function () {
+            restoreSelection();
+        });
+        UI.segmentQA(UI.currentSegment);
+    }
+
+    selectTag(tag) {
+        this.chooseTagAutocompleteOption(tag);
     }
 
     allowHTML(string) {
         return { __html: string };
     }
 
+    _handleKeyPressItem(index, tag) {
+        if ( e.key === 'Enter' ) {
+            selectTag(tag)
+        }
+    }
+
     componentDidMount() {
+        this.openTagAutocompletePanel();
     }
 
     componentWillUnmount() {

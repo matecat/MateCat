@@ -508,16 +508,18 @@ $.extend(UI, {
 			UI.preCloseTagAutocomplete = false;
 		}
 	},
+    //TODO remove ??
 	closeTagAutocompletePanel: function() {
         SegmentActions.closeTagsMenu();
-		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
-		UI.preCloseTagAutocomplete = false;
+		$('.tag-autocomplete-endcursor').remove();
+		UI.preCloseTagAutocomplete = false; //TODO ???
 	},
 	getPartialTagAutocomplete: function() {
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
 		return added;
 	},
+    //TODO Remove
 	openTagAutocompletePanel: function() {
         var self = this;
         if(!UI.sourceTags.length) return false;
@@ -552,10 +554,11 @@ $.extend(UI, {
         this.checkAutocompleteTags();
 	},
     /**
+     * TODO REMOVE
      * Call from UI. events when clicking on a menu item to add tags
-     * @param tag: the jquery object of the chosen tag
+     * @param tag:the chosen tag
      */
-    chooseTagAutocompleteOption: function ($tag) {
+    chooseTagAutocompleteOption: function (tag) {
         if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
             setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
         }
@@ -577,10 +580,8 @@ $.extend(UI, {
         }
 
         $('.rangySelectionBoundary', editareaClone).remove();
-        $('.rangySelectionBoundary', $tag).remove();
-        $('br.end', $tag).remove();
         $('.tag-autocomplete-endcursor', editareaClone).after(ph);
-        $('.tag-autocomplete-endcursor', editareaClone).before($tag.html().trim()); //Trim to remove space at the end
+        $('.tag-autocomplete-endcursor', editareaClone).before(tag.trim()); //Trim to remove space at the end
         $('.tag-autocomplete, .tag-autocomplete-endcursor', editareaClone).remove();
         UI.closeTagAutocompletePanel();
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());

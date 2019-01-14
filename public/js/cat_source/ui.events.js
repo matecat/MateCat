@@ -162,10 +162,6 @@ $.extend(UI, {
 			UI.addWord(UI.selectedMisspelledElement.text());
 		}).on('click', '.reloadPage', function() {
 			location.reload(true);
-		}).on('click', '.tag-autocomplete li', function(e) {
-			e.preventDefault();
-			UI.chooseTagAutocompleteOption($(this));
-
 		});
 
 		$(window).on('mousedown', function(e) {
