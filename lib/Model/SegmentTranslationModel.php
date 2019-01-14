@@ -16,6 +16,8 @@ class SegmentTranslationModel extends AbstractModelSubject {
      */
     private $job;
 
+    private $propagated_ids;
+
     public function __construct(Translations_SegmentTranslationStruct $translation) {
         $this->translation = $translation;
         $this->job = $translation->getJob();
@@ -32,6 +34,18 @@ class SegmentTranslationModel extends AbstractModelSubject {
      */
     public function setOldTranslation( Translations_SegmentTranslationStruct $translation ) {
         $this->old_translation = $translation ;
+    }
+
+    public function setPropagatedIds( $propagated_ids ) {
+        $this->propagated_ids = $propagated_ids ;
+    }
+
+    public function getPropagatedIds() {
+        return $this->propagated_ids ;
+    }
+
+    public function didPropagate() {
+        return !empty( $this->propagated_ids ) ;
     }
 
     /**

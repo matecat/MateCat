@@ -272,11 +272,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function setTranslationCommitted($params) {
         $new_translation = $params['translation'];
         $old_translation = $params['old_translation'];
+        $propagated_ids = $params['propagated_ids'] ;
 
-        $new_translation_struct =  new Translations_SegmentTranslationStruct( $new_translation );
+        $new_translation_struct = new Translations_SegmentTranslationStruct( $new_translation );
         $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
 
         $translation_model = new SegmentTranslationModel( $new_translation_struct );
+        $translation_model->setPropagatedIds( $propagated_ids );
         $translation_model->setOldTranslation( $old_translation_struct );
 
         $this->attachObserver( $translation_model );

@@ -8,7 +8,6 @@
 
 namespace Features\ReviewImproved;
 
-use Features\TranslationVersions\SegmentTranslationModel as VersionModel;
 use LQA\ChunkReviewStruct;
 use LQA\ChunkReviewDao;
 
@@ -27,11 +26,6 @@ class SegmentTranslationModel {
      * @var ChunkReviewStruct
      */
     protected $chunk_review;
-
-    /**
-     * @var bool
-     */
-    protected $did_change_reviewed_words_count = false;
 
     public function __construct( \SegmentTranslationModel $model ) {
 
@@ -85,20 +79,27 @@ class SegmentTranslationModel {
      */
     public function getChunkReview() {
         return $this->chunk_review;
-
     }
 
     protected function addCount() {
         $segment = $this->model->getSegmentStruct();
         $model   = new ChunkReviewModel( $this->chunk_review );
-        $model->addWordsCount( $segment->raw_word_count );
-
+        $model->addWordsCount( $this->getWordCountWithPropagation( $segment->raw_word_count ) );
     }
 
     protected function subtractCount() {
         $segment = $this->model->getSegmentStruct();
         $model   = new ChunkReviewModel( $this->chunk_review );
-        $model->subtractWordsCount( $segment->raw_word_count );
+        $model->subtractWordsCount( $this->getWordCountWithPropagation( $segment->raw_word_count ) );
+    }
+
+    protected function getWordCountWithPropagation( $count ) {
+        if ( $this->model->didPropagate() ) {
+            return $count + ( $count * count( $this->model->getPropagatedIds() ) ) ;
+        }
+        else {
+            return $count ;
+        }
     }
 
 }
