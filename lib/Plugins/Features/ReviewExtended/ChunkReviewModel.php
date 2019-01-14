@@ -9,10 +9,10 @@
 
 namespace Features\ReviewExtended;
 
-
+use Features\AbstractChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 
-class ChunkReviewModel extends \Features\ReviewImproved\ChunkReviewModel
+class ChunkReviewModel extends AbstractChunkReviewModel
 {
 
     /**
