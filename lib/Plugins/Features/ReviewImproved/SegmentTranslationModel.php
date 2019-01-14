@@ -61,9 +61,6 @@ class SegmentTranslationModel {
      */
 
     public function addOrSubtractCachedReviewedWordsCount() {
-
-        $version_model = new VersionModel( $this->model );
-
         /**
          * If this model triggers a new version, then we can jump to
          * the check for reviewed state transition directly, because translation
@@ -76,24 +73,11 @@ class SegmentTranslationModel {
          *
          */
 
-        $this->checkReviewedStateTransition();
-    }
-
-    /**
-     * @return bool
-     */
-    public function didChangeReviewedWordsCount() {
-        return $this->did_change_reviewed_words_count;
-    }
-
-
-    protected function checkReviewedStateTransition() {
         if ( $this->model->entersReviewedState() ) {
             $this->addCount();
         } elseif ( $this->model->exitsReviewedState() ) {
             $this->subtractCount();
         }
-
     }
 
     /**
