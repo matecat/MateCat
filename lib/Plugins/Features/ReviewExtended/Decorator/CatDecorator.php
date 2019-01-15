@@ -8,9 +8,9 @@
 
 namespace Features\ReviewExtended\Decorator ;
 
-use Features\ReviewImproved;
+use Features\AbstractCatDecorator;
 
-class CatDecorator extends ReviewImproved\Decorator\CatDecorator {
+class CatDecorator extends AbstractCatDecorator {
 
     public function decorate() {
         parent::decorate();
