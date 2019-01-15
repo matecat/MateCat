@@ -131,7 +131,6 @@ class TranslationIssueModel {
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
         $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
-
     }
 
 }
